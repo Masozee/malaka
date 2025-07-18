@@ -1,0 +1,113 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: malaka-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: malaka
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: TanahAbang1971
+      POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./internal/pkg/database/migrations:/docker-entrypoint-initdb.d/migrations
+      - ./scripts/init-db.sh:/docker-entrypoint-initdb.d/init-db.sh
+    networks:
+      - malaka-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d malaka"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: malaka-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+      - ./config/redis.conf:/usr/local/etc/redis/redis.conf
+    command: redis-server /usr/local/etc/redis/redis.conf
+    networks:
+      - malaka-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # MALAKA ERP Application
+  malaka-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: malaka-app
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      - DB_DRIVER=postgres
+      - DB_SOURCE=postgres://postgres:TanahAbang1971@postgres:5432/malaka?sslmode=disable
+      - REDIS_URL=redis://redis:6379
+      - SERVER_ADDRESS=0.0.0.0:8080
+      - GIN_MODE=release
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - malaka-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Adminer for Database Management (Optional)
+  adminer:
+    image: adminer:latest
+    container_name: malaka-adminer
+    restart: unless-stopped
+    ports:
+      - "8081:8080"
+    depends_on:
+      - postgres
+    networks:
+      - malaka-network
+    environment:
+      ADMINER_DEFAULT_SERVER: postgres
+
+  # Redis Commander for Redis Management (Optional)
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: malaka-redis-commander
+    restart: unless-stopped
+    ports:
+      - "8082:8081"
+    environment:
+      REDIS_HOSTS: "local:redis:6379"
+      HTTP_USER: admin
+      HTTP_PASSWORD: TanahAbang1971
+    depends_on:
+      - redis
+    networks:
+      - malaka-network
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  malaka-network:
+    driver: bridge

@@ -1,0 +1,22 @@
+-- Indonesian Purchase Orders Seed Data
+INSERT INTO purchase_orders (id, supplier_id, order_date, status, total_amount, created_at, updated_at) VALUES
+('po001', 'supp001', '2024-01-10', 'pending', 4500000, NOW(), NOW()),
+('po002', 'supp002', '2024-01-11', 'pending', 3200000, NOW(), NOW()),
+('po003', 'supp003', '2024-01-12', 'pending', 5800000, NOW(), NOW()),
+('po004', 'supp004', '2024-01-13', 'pending', 3850000, NOW(), NOW()),
+('po005', 'supp005', '2024-01-14', 'pending', 1750000, NOW(), NOW()),
+('po006', 'supp006', '2024-01-15', 'pending', 3950000, NOW(), NOW()),
+('po007', 'supp007', '2024-01-16', 'pending', 1650000, NOW(), NOW()),
+('po008', 'supp008', '2024-01-17', 'pending', 2850000, NOW(), NOW()),
+('po009', 'supp009', '2024-01-18', 'pending', 3250000, NOW(), NOW()),
+('po010', 'supp010', '2024-01-19', 'pending', 2950000, NOW(), NOW()),
+('po011', 'supp011', '2024-01-20', 'pending', 5350000, NOW(), NOW()),
+('po012', 'supp012', '2024-01-21', 'pending', 4850000, NOW(), NOW()),
+('po013', 'supp013', '2024-01-22', 'pending', 7250000, NOW(), NOW()),
+('po014', 'supp014', '2024-01-23', 'pending', 3850000, NOW(), NOW()),
+('po015', 'supp015', '2024-01-24', 'pending', 2250000, NOW(), NOW()),
+('po016', 'supp001', '2024-01-25', 'approved', 9300000, NOW(), NOW()),
+('po017', 'supp002', '2024-01-26', 'approved', 6700000, NOW(), NOW()),
+('po018', 'supp003', '2024-01-27', 'approved', 11900000, NOW(), NOW()),
+('po019', 'supp004', '2024-01-28', 'approved', 8500000, NOW(), NOW()),
+('po020', 'supp005', '2024-01-29', 'approved', 3700000, NOW(), NOW());

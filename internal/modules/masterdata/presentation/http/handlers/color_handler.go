@@ -1,0 +1,102 @@
+package handlers
+
+import (
+	"github.com/gin-gonic/gin"
+
+	"malaka/internal/modules/masterdata/domain/entities"
+	"malaka/internal/modules/masterdata/domain/services"
+	"malaka/internal/modules/masterdata/presentation/http/dto"
+	"malaka/internal/shared/response"
+)
+
+// ColorHandler handles HTTP requests for color operations.
+type ColorHandler struct {
+	service *services.ColorService
+}
+
+// NewColorHandler creates a new ColorHandler.
+func NewColorHandler(service *services.ColorService) *ColorHandler {
+	return &ColorHandler{service: service}
+}
+
+// CreateColor handles the creation of a new color.
+func (h *ColorHandler) CreateColor(c *gin.Context) {
+	var req dto.CreateColorRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.BadRequest(c, err.Error(), nil)
+		return
+	}
+
+	color := &entities.Color{
+		Name: req.Name,
+		Hex:  req.Hex,
+	}
+
+	if err := h.service.CreateColor(c.Request.Context(), color); err != nil {
+		response.InternalServerError(c, err.Error(), nil)
+		return
+	}
+
+	response.OK(c, "Color created successfully", color)
+}
+
+// GetColorByID handles retrieving a color by its ID.
+func (h *ColorHandler) GetColorByID(c *gin.Context) {
+	id := c.Param("id")
+	color, err := h.service.GetColorByID(c.Request.Context(), id)
+	if err != nil {
+		response.InternalServerError(c, err.Error(), nil)
+		return
+	}
+	if color == nil {
+		response.NotFound(c, "Color not found", nil)
+		return
+	}
+
+	response.OK(c, "Color retrieved successfully", color)
+}
+
+// GetAllColors handles retrieving all colors.
+func (h *ColorHandler) GetAllColors(c *gin.Context) {
+	colors, err := h.service.GetAllColors(c.Request.Context())
+	if err != nil {
+		response.InternalServerError(c, err.Error(), nil)
+		return
+	}
+
+	response.OK(c, "Colors retrieved successfully", colors)
+}
+
+// UpdateColor handles updating an existing color.
+func (h *ColorHandler) UpdateColor(c *gin.Context) {
+	id := c.Param("id")
+	var req dto.UpdateColorRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.BadRequest(c, err.Error(), nil)
+		return
+	}
+
+	color := &entities.Color{
+		Name: req.Name,
+		Hex:  req.Hex,
+	}
+	color.ID = id // Set the ID from the URL parameter
+
+	if err := h.service.UpdateColor(c.Request.Context(), color); err != nil {
+		response.InternalServerError(c, err.Error(), nil)
+		return
+	}
+
+	response.OK(c, "Color updated successfully", color)
+}
+
+// DeleteColor handles deleting a color by its ID.
+func (h *ColorHandler) DeleteColor(c *gin.Context) {
+	id := c.Param("id")
+	if err := h.service.DeleteColor(c.Request.Context(), id); err != nil {
+		response.InternalServerError(c, err.Error(), nil)
+		return
+	}
+
+	response.OK(c, "Color deleted successfully", nil)
+}

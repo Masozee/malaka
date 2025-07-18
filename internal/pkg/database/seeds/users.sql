@@ -1,0 +1,22 @@
+-- Indonesian Users Seed Data
+INSERT INTO users (id, username, password, email, company_id, created_at, updated_at) VALUES
+('user001', 'admin_sepatu', '$2a$14$92K/7vYh1.ZQpQXGzNdaK.hSAUqOZxQnTYJzaOgT1kgNYGYdNzuOq', 'admin@sepatunusantara.co.id', 'comp001', NOW(), NOW()),
+('user002', 'manager_produksi', '$2a$14$92K/7vYh1.ZQpQXGzNdaK.hSAUqOZxQnTYJzaOgT1kgNYGYdNzuOq', 'produksi@sepatunusantara.co.id', 'comp001', NOW(), NOW()),
+('user003', 'staff_gudang', '$2a$14$92K/7vYh1.ZQpQXGzNdaK.hSAUqOZxQnTYJzaOgT1kgNYGYdNzuOq', 'gudang@sepatunusantara.co.id', 'comp001', NOW(), NOW()),
+('user004', 'supervisor_penjualan', '$2a$14$92K/7vYh1.ZQpQXGzNdaK.hSAUqOZxQnTYJzaOgT1kgNYGYdNzuOq', 'penjualan@dagangsepatu.co.id', 'comp002', NOW(), NOW()),
+('user005', 'kasir_toko', '$2a$14$92K/7vYh1.ZQpQXGzNdaK.hSAUqOZxQnTYJzaOgT1kgNYGYdNzuOq', 'kasir@dagangsepatu.co.id', 'comp002', NOW(), NOW()),
+('user006', 'owner_perdagangan', '$2a$14$92K/7vYh1.ZQpQXGzNdaK.hSAUqOZxQnTYJzaOgT1kgNYGYdNzuOq', 'owner@perdagangmaju.co.id', 'comp003', NOW(), NOW()),
+('user007', 'hrd_industri', '$2a$14$92K/7vYh1.ZQpQXGzNdaK.hSAUqOZxQnTYJzaOgT1kgNYGYdNzuOq', 'hrd@industrikulit.co.id', 'comp004', NOW(), NOW()),
+('user008', 'qc_berkah', '$2a$14$92K/7vYh1.ZQpQXGzNdaK.hSAUqOZxQnTYJzaOgT1kgNYGYdNzuOq', 'qc@sepatuberkah.co.id', 'comp005', NOW(), NOW()),
+('user009', 'ketua_koperasi', '$2a$14$92K/7vYh1.ZQpQXGzNdaK.hSAUqOZxQnTYJzaOgT1kgNYGYdNzuOq', 'ketua@koperasipengrajin.co.id', 'comp006', NOW(), NOW()),
+('user010', 'export_manager', '$2a$14$92K/7vYh1.ZQpQXGzNdaK.hSAUqOZxQnTYJzaOgT1kgNYGYdNzuOq', 'export@footwearnusantara.co.id', 'comp007', NOW(), NOW()),
+('user011', 'pengrajin_bali', '$2a$14$92K/7vYh1.ZQpQXGzNdaK.hSAUqOZxQnTYJzaOgT1kgNYGYdNzuOq', 'pengrajin@sepatutradisional.co.id', 'comp008', NOW(), NOW()),
+('user012', 'teknisi_medan', '$2a$14$92K/7vYh1.ZQpQXGzNdaK.hSAUqOZxQnTYJzaOgT1kgNYGYdNzuOq', 'teknisi@manufakturmodern.co.id', 'comp009', NOW(), NOW()),
+('user013', 'buyer_jakarta', '$2a$14$92K/7vYh1.ZQpQXGzNdaK.hSAUqOZxQnTYJzaOgT1kgNYGYdNzuOq', 'buyer@eksporsepatu.co.id', 'comp010', NOW(), NOW()),
+('user014', 'desainer_malang', '$2a$14$92K/7vYh1.ZQpQXGzNdaK.hSAUqOZxQnTYJzaOgT1kgNYGYdNzuOq', 'desain@kerajinankulit.co.id', 'comp011', NOW(), NOW()),
+('user015', 'sales_makassar', '$2a$14$92K/7vYh1.ZQpQXGzNdaK.hSAUqOZxQnTYJzaOgT1kgNYGYdNzuOq', 'sales@sepatucasual.co.id', 'comp012', NOW(), NOW()),
+('user016', 'distribusi_palembang', '$2a$14$92K/7vYh1.ZQpQXGzNdaK.hSAUqOZxQnTYJzaOgT1kgNYGYdNzuOq', 'distribusi@distribusinasional.co.id', 'comp013', NOW(), NOW()),
+('user017', 'bendahara_koperasi', '$2a$14$92K/7vYh1.ZQpQXGzNdaK.hSAUqOZxQnTYJzaOgT1kgNYGYdNzuOq', 'bendahara@sepaturakyat.co.id', 'comp014', NOW(), NOW()),
+('user018', 'crafts_yogya', '$2a$14$92K/7vYh1.ZQpQXGzNdaK.hSAUqOZxQnTYJzaOgT1kgNYGYdNzuOq', 'crafts@sepatuhandmade.co.id', 'comp015', NOW(), NOW()),
+('user019', 'finance_jakarta', '$2a$14$92K/7vYh1.ZQpQXGzNdaK.hSAUqOZxQnTYJzaOgT1kgNYGYdNzuOq', 'finance@sepatunusantara.co.id', 'comp001', NOW(), NOW()),
+('user020', 'logistics_surabaya', '$2a$14$92K/7vYh1.ZQpQXGzNdaK.hSAUqOZxQnTYJzaOgT1kgNYGYdNzuOq', 'logistics@perdagangmaju.co.id', 'comp003', NOW(), NOW());

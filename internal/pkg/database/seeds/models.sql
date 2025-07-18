@@ -1,0 +1,22 @@
+-- Indonesian Shoe Models Seed Data
+INSERT INTO models (id, name, created_at, updated_at) VALUES
+('model001', 'Oxford Classic', NOW(), NOW()),
+('model002', 'Loafer Executive', NOW(), NOW()),
+('model003', 'Boots Explorer', NOW(), NOW()),
+('model004', 'Sneakers Urban', NOW(), NOW()),
+('model005', 'Sandal Comfort', NOW(), NOW()),
+('model006', 'Pantofel Formal', NOW(), NOW()),
+('model007', 'Casual Walker', NOW(), NOW()),
+('model008', 'Safety Worker', NOW(), NOW()),
+('model009', 'High Heels Elegant', NOW(), NOW()),
+('model010', 'Flat Shoes Simple', NOW(), NOW()),
+('model011', 'Running Sport', NOW(), NOW()),
+('model012', 'Hiking Mountain', NOW(), NOW()),
+('model013', 'Slip-On Easy', NOW(), NOW()),
+('model014', 'Ankle Boots Modern', NOW(), NOW()),
+('model015', 'Dress Shoes Premium', NOW(), NOW()),
+('model016', 'Canvas Casual', NOW(), NOW()),
+('model017', 'Moccasin Comfort', NOW(), NOW()),
+('model018', 'Platform Trendy', NOW(), NOW()),
+('model019', 'Wedges Stylish', NOW(), NOW()),
+('model020', 'Brogue Traditional', NOW(), NOW());

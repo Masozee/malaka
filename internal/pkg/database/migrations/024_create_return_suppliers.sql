@@ -1,0 +1,12 @@
+-- +goose Up
+CREATE TABLE return_suppliers (
+    id VARCHAR(255) PRIMARY KEY,
+    supplier_id VARCHAR(255) NOT NULL REFERENCES suppliers(id) ON DELETE CASCADE,
+    return_date TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    reason TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- +goose Down
+DROP TABLE return_suppliers;

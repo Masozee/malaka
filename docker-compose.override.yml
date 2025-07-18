@@ -1,0 +1,41 @@
+# Docker Compose override for development
+# This file is automatically loaded by docker-compose for development
+version: '3.8'
+
+services:
+  # Development overrides for PostgreSQL
+  postgres:
+    environment:
+      LOAD_SEED_DATA: "true"
+    volumes:
+      - ./internal/pkg/database/seeds:/docker-entrypoint-initdb.d/seeds
+    ports:
+      - "5432:5432"  # Expose PostgreSQL port for direct access
+
+  # Development overrides for Redis
+  redis:
+    ports:
+      - "6379:6379"  # Expose Redis port for direct access
+
+  # Development overrides for MALAKA App
+  malaka-app:
+    environment:
+      - GIN_MODE=debug
+      - DB_DRIVER=postgres
+      - DB_SOURCE=postgres://postgres:TanahAbang1971@postgres:5432/malaka?sslmode=disable
+      - REDIS_URL=redis://redis:6379
+      - SERVER_ADDRESS=0.0.0.0:8080
+      - LOG_LEVEL=debug
+    volumes:
+      - ./internal/pkg/database/seeds:/app/seeds:ro
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: builder  # Use builder stage for development with debugging tools
+
+  # Enable management tools in development
+  adminer:
+    profiles: ["dev"]
+    
+  redis-commander:
+    profiles: ["dev"]

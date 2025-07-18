@@ -1,0 +1,1369 @@
+openapi: 3.0.0
+info:
+  title: Malaka ERP Masterdata API
+  version: 1.0.0
+paths:
+  /masterdata/companies:
+    post:
+      summary: Create a new company
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCompanyRequest'
+      responses:
+        '200':
+          description: Company created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Company'
+  /masterdata/companies/{id}:
+    get:
+      summary: Get company by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Company retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Company'
+    put:
+      summary: Update company by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCompanyRequest'
+      responses:
+        '200':
+          description: Company updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Company'
+    delete:
+      summary: Delete company by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Company deleted successfully
+  /masterdata/users:
+    post:
+      summary: Create a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserRequest'
+      responses:
+        '200':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+  /masterdata/users/{id}:
+    get:
+      summary: Get user by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: User retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+    put:
+      summary: Update user by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserRequest'
+      responses:
+        '200':
+          description: User updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+    delete:
+      summary: Delete user by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: User deleted successfully
+  /masterdata/users/login:
+    post:
+      summary: User login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+  /masterdata/classifications:
+    post:
+      summary: Create a new classification
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateClassificationRequest'
+      responses:
+        '200':
+          description: Classification created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Classification'
+  /masterdata/classifications/{id}:
+    get:
+      summary: Get classification by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Classification retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Classification'
+    put:
+      summary: Update classification by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateClassificationRequest'
+      responses:
+        '200':
+          description: Classification updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Classification'
+    delete:
+      summary: Delete classification by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Classification deleted successfully
+  /masterdata/colors:
+    post:
+      summary: Create a new color
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateColorRequest'
+      responses:
+        '200':
+          description: Color created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Color'
+  /masterdata/colors/{id}:
+    get:
+      summary: Get color by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Color retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Color'
+    put:
+      summary: Update color by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateColorRequest'
+      responses:
+        '200':
+          description: Color updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Color'
+    delete:
+      summary: Delete color by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Color deleted successfully
+  /masterdata/articles:
+    post:
+      summary: Create a new article
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateArticleRequest'
+      responses:
+        '200':
+          description: Article created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Article'
+  /masterdata/articles/{id}:
+    get:
+      summary: Get article by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Article retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Article'
+    put:
+      summary: Update article by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateArticleRequest'
+      responses:
+        '200':
+          description: Article updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Article'
+    delete:
+      summary: Delete article by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Article deleted successfully
+  /masterdata/models:
+    post:
+      summary: Create a new model
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateModelRequest'
+      responses:
+        '200':
+          description: Model created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Model'
+  /masterdata/models/{id}:
+    get:
+      summary: Get model by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Model retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Model'
+    put:
+      summary: Update model by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateModelRequest'
+      responses:
+        '200':
+          description: Model updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Model'
+    delete:
+      summary: Delete model by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Model deleted successfully
+  /masterdata/sizes:
+    post:
+      summary: Create a new size
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSizeRequest'
+      responses:
+        '200':
+          description: Size created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Size'
+  /masterdata/sizes/{id}:
+    get:
+      summary: Get size by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Size retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Size'
+    put:
+      summary: Update size by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateSizeRequest'
+      responses:
+        '200':
+          description: Size updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Size'
+    delete:
+      summary: Delete size by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Size deleted successfully
+  /masterdata/barcodes:
+    post:
+      summary: Create a new barcode
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBarcodeRequest'
+      responses:
+        '200':
+          description: Barcode created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Barcode'
+  /masterdata/barcodes/{id}:
+    get:
+      summary: Get barcode by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Barcode retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Barcode'
+    put:
+      summary: Update barcode by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateBarcodeRequest'
+      responses:
+        '200':
+          description: Barcode updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Barcode'
+    delete:
+      summary: Delete barcode by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Barcode deleted successfully
+  /masterdata/prices:
+    post:
+      summary: Create a new price
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePriceRequest'
+      responses:
+        '200':
+          description: Price created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Price'
+  /masterdata/prices/{id}:
+    get:
+      summary: Get price by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Price retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Price'
+    put:
+      summary: Update price by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePriceRequest'
+      responses:
+        '200':
+          description: Price updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Price'
+    delete:
+      summary: Delete price by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Price deleted successfully
+  /masterdata/suppliers:
+    post:
+      summary: Create a new supplier
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSupplierRequest'
+      responses:
+        '200':
+          description: Supplier created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Supplier'
+  /masterdata/suppliers/{id}:
+    get:
+      summary: Get supplier by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Supplier retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Supplier'
+    put:
+      summary: Update supplier by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateSupplierRequest'
+      responses:
+        '200':
+          description: Supplier updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Supplier'
+    delete:
+      summary: Delete supplier by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Supplier deleted successfully
+  /masterdata/customers:
+    post:
+      summary: Create a new customer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCustomerRequest'
+      responses:
+        '200':
+          description: Customer created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Customer'
+  /masterdata/customers/{id}:
+    get:
+      summary: Get customer by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Customer retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Customer'
+    put:
+      summary: Update customer by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCustomerRequest'
+      responses:
+        '200':
+          description: Customer updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Customer'
+    delete:
+      summary: Delete customer by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Customer deleted successfully
+  /masterdata/warehouses:
+    post:
+      summary: Create a new warehouse
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateWarehouseRequest'
+      responses:
+        '200':
+          description: Warehouse created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Warehouse'
+  /masterdata/warehouses/{id}:
+    get:
+      summary: Get warehouse by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Warehouse retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Warehouse'
+    put:
+      summary: Update warehouse by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateWarehouseRequest'
+      responses:
+        '200':
+          description: Warehouse updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Warehouse'
+    delete:
+      summary: Delete warehouse by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Warehouse deleted successfully
+  /masterdata/gallery-images:
+    post:
+      summary: Create a new gallery image
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateGalleryImageRequest'
+      responses:
+        '200':
+          description: Gallery image created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GalleryImage'
+  /masterdata/gallery-images/{id}:
+    get:
+      summary: Get gallery image by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Gallery image retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GalleryImage'
+    put:
+      summary: Update gallery image by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateGalleryImageRequest'
+      responses:
+        '200':
+          description: Gallery image updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GalleryImage'
+    delete:
+      summary: Delete gallery image by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Gallery image deleted successfully
+  /masterdata/gallery-images/article/{article_id}:
+    get:
+      summary: Get gallery images by article ID
+      parameters:
+        - in: path
+          name: article_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Gallery images retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GalleryImage'
+
+components:
+  schemas:
+    BaseModel:
+      type: object
+      properties:
+        id:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    Company:
+      allOf:
+        - $ref: '#/components/schemas/BaseModel'
+        - type: object
+          properties:
+            name:
+              type: string
+            address:
+              type: string
+    CreateCompanyRequest:
+      type: object
+      required:
+        - name
+        - address
+      properties:
+        name:
+          type: string
+        address:
+          type: string
+    UpdateCompanyRequest:
+      type: object
+      required:
+        - name
+        - address
+      properties:
+        name:
+          type: string
+        address:
+          type: string
+    User:
+      allOf:
+        - $ref: '#/components/schemas/BaseModel'
+        - type: object
+          properties:
+            username:
+              type: string
+            email:
+              type: string
+            company_id:
+              type: string
+    CreateUserRequest:
+      type: object
+      required:
+        - username
+        - password
+        - email
+        - company_id
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+          format: password
+        email:
+          type: string
+          format: email
+        company_id:
+          type: string
+    UpdateUserRequest:
+      type: object
+      required:
+        - username
+        - password
+        - email
+        - company_id
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+          format: password
+        email:
+          type: string
+          format: email
+        company_id:
+          type: string
+    LoginRequest:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+          format: password
+    Classification:
+      allOf:
+        - $ref: '#/components/schemas/BaseModel'
+        - type: object
+          properties:
+            name:
+              type: string
+    CreateClassificationRequest:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+    UpdateClassificationRequest:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+    Color:
+      allOf:
+        - $ref: '#/components/schemas/BaseModel'
+        - type: object
+          properties:
+            name:
+              type: string
+            hex:
+              type: string
+    CreateColorRequest:
+      type: object
+      required:
+        - name
+        - hex
+      properties:
+        name:
+          type: string
+        hex:
+          type: string
+    UpdateColorRequest:
+      type: object
+      required:
+        - name
+        - hex
+      properties:
+        name:
+          type: string
+        hex:
+          type: string
+    Article:
+      allOf:
+        - $ref: '#/components/schemas/BaseModel'
+        - type: object
+          properties:
+            name:
+              type: string
+            description:
+              type: string
+            classification_id:
+              type: string
+            color_id:
+              type: string
+            model_id:
+              type: string
+            size_id:
+              type: string
+            supplier_id:
+              type: string
+            barcode:
+              type: string
+            price:
+              type: number
+              format: float
+    CreateArticleRequest:
+      type: object
+      required:
+        - name
+        - classification_id
+        - color_id
+        - model_id
+        - size_id
+        - supplier_id
+        - price
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        classification_id:
+          type: string
+        color_id:
+          type: string
+        model_id:
+          type: string
+        size_id:
+          type: string
+        supplier_id:
+          type: string
+        barcode:
+          type: string
+        price:
+          type: number
+          format: float
+    UpdateArticleRequest:
+      type: object
+      required:
+        - name
+        - classification_id
+        - color_id
+        - model_id
+        - size_id
+        - supplier_id
+        - price
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        classification_id:
+          type: string
+        color_id:
+          type: string
+        model_id:
+          type: string
+        size_id:
+          type: string
+        supplier_id:
+          type: string
+        barcode:
+          type: string
+        price:
+          type: number
+          format: float
+    Model:
+      allOf:
+        - $ref: '#/components/schemas/BaseModel'
+        - type: object
+          properties:
+            name:
+              type: string
+    CreateModelRequest:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+    UpdateModelRequest:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+    Size:
+      allOf:
+        - $ref: '#/components/schemas/BaseModel'
+        - type: object
+          properties:
+            name:
+              type: string
+    CreateSizeRequest:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+    UpdateSizeRequest:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+    Barcode:
+      allOf:
+        - $ref: '#/components/schemas/BaseModel'
+        - type: object
+          properties:
+            article_id:
+              type: string
+            code:
+              type: string
+    CreateBarcodeRequest:
+      type: object
+      required:
+        - article_id
+        - code
+      properties:
+        article_id:
+          type: string
+        code:
+          type: string
+    UpdateBarcodeRequest:
+      type: object
+      required:
+        - article_id
+        - code
+      properties:
+        article_id:
+          type: string
+        code:
+          type: string
+    Price:
+      allOf:
+        - $ref: '#/components/schemas/BaseModel'
+        - type: object
+          properties:
+            article_id:
+              type: string
+            amount:
+              type: number
+              format: float
+            currency:
+              type: string
+            effective_date:
+              type: string
+              format: date-time
+    CreatePriceRequest:
+      type: object
+      required:
+        - article_id
+        - amount
+        - currency
+        - effective_date
+      properties:
+        article_id:
+          type: string
+        amount:
+          type: number
+          format: float
+        currency:
+          type: string
+        effective_date:
+          type: string
+          format: date-time
+    UpdatePriceRequest:
+      type: object
+      required:
+        - article_id
+        - amount
+        - currency
+        - effective_date
+      properties:
+        article_id:
+          type: string
+        amount:
+          type: number
+          format: float
+        currency:
+          type: string
+        effective_date:
+          type: string
+          format: date-time
+    Supplier:
+      allOf:
+        - $ref: '#/components/schemas/BaseModel'
+        - type: object
+          properties:
+            name:
+              type: string
+            address:
+              type: string
+            contact:
+              type: string
+    CreateSupplierRequest:
+      type: object
+      required:
+        - name
+        - address
+        - contact
+      properties:
+        name:
+          type: string
+        address:
+          type: string
+        contact:
+          type: string
+    UpdateSupplierRequest:
+      type: object
+      required:
+        - name
+        - address
+        - contact
+      properties:
+        name:
+          type: string
+        address:
+          type: string
+        contact:
+          type: string
+    Customer:
+      allOf:
+        - $ref: '#/components/schemas/BaseModel'
+        - type: object
+          properties:
+            name:
+              type: string
+            address:
+              type: string
+            contact:
+              type: string
+    CreateCustomerRequest:
+      type: object
+      required:
+        - name
+        - address
+        - contact
+      properties:
+        name:
+          type: string
+        address:
+          type: string
+        contact:
+          type: string
+    UpdateCustomerRequest:
+      type: object
+      required:
+        - name
+        - address
+        - contact
+      properties:
+        name:
+          type: string
+        address:
+          type: string
+        contact:
+          type: string
+    Warehouse:
+      allOf:
+        - $ref: '#/components/schemas/BaseModel'
+        - type: object
+          properties:
+            name:
+              type: string
+            address:
+              type: string
+    CreateWarehouseRequest:
+      type: object
+      required:
+        - name
+        - address
+      properties:
+        name:
+          type: string
+        address:
+          type: string
+    UpdateWarehouseRequest:
+      type: object
+      required:
+        - name
+        - address
+      properties:
+        name:
+          type: string
+        address:
+          type: string
+    GalleryImage:
+      allOf:
+        - $ref: '#/components/schemas/BaseModel'
+        - type: object
+          properties:
+            article_id:
+              type: string
+            url:
+              type: string
+            is_primary:
+              type: boolean
+    CreateGalleryImageRequest:
+      type: object
+      required:
+        - article_id
+        - url
+      properties:
+        article_id:
+          type: string
+        url:
+          type: string
+        is_primary:
+          type: boolean
+    UpdateGalleryImageRequest:
+      type: object
+      required:
+        - article_id
+        - url
+      properties:
+        article_id:
+          type: string
+        url:
+          type: string
+        is_primary:
+          type: boolean

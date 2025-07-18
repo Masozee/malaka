@@ -1,0 +1,22 @@
+-- Indonesian Draft Orders Seed Data
+INSERT INTO draft_orders (id, supplier_id, order_date, total_amount, status, created_at, updated_at) VALUES
+('draft001', 'supp001', '2024-01-15', 1350000, 'pending', NOW(), NOW()),
+('draft002', 'supp002', '2024-01-16', 640000, 'pending', NOW(), NOW()),
+('draft003', 'supp003', '2024-01-17', 1160000, 'pending', NOW(), NOW()),
+('draft004', 'supp004', '2024-01-18', 770000, 'pending', NOW(), NOW()),
+('draft005', 'supp005', '2024-01-19', 350000, 'pending', NOW(), NOW()),
+('draft006', 'supp006', '2024-01-20', 1250000, 'pending', NOW(), NOW()),
+('draft007', 'supp007', '2024-01-21', 970000, 'pending', NOW(), NOW()),
+('draft008', 'supp008', '2024-01-22', 550000, 'pending', NOW(), NOW()),
+('draft009', 'supp009', '2024-01-23', 370000, 'pending', NOW(), NOW()),
+('draft010', 'supp010', '2024-01-24', 430000, 'pending', NOW(), NOW()),
+('draft011', 'supp011', '2024-01-25', 790000, 'pending', NOW(), NOW()),
+('draft012', 'supp012', '2024-01-26', 330000, 'pending', NOW(), NOW()),
+('draft013', 'supp013', '2024-01-27', 570000, 'pending', NOW(), NOW()),
+('draft014', 'supp014', '2024-01-28', 650000, 'pending', NOW(), NOW()),
+('draft015', 'supp015', '2024-01-29', 590000, 'pending', NOW(), NOW()),
+('draft016', 'supp001', '2024-01-30', 1070000, 'approved', NOW(), NOW()),
+('draft017', 'supp002', '2024-01-31', 970000, 'approved', NOW(), NOW()),
+('draft018', 'supp003', '2024-02-01', 1450000, 'approved', NOW(), NOW()),
+('draft019', 'supp004', '2024-02-02', 770000, 'approved', NOW(), NOW()),
+('draft020', 'supp005', '2024-02-03', 450000, 'approved', NOW(), NOW());

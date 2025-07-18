@@ -1,0 +1,22 @@
+-- Indonesian Shoe Colors Seed Data
+INSERT INTO colors (id, name, hex, created_at, updated_at) VALUES
+('color001', 'Hitam', '#000000', NOW(), NOW()),
+('color002', 'Coklat', '#8B4513', NOW(), NOW()),
+('color003', 'Putih', '#FFFFFF', NOW(), NOW()),
+('color004', 'Abu-abu', '#808080', NOW(), NOW()),
+('color005', 'Coklat Tua', '#654321', NOW(), NOW()),
+('color006', 'Krem', '#F5F5DC', NOW(), NOW()),
+('color007', 'Merah Marun', '#800000', NOW(), NOW()),
+('color008', 'Biru Dongker', '#191970', NOW(), NOW()),
+('color009', 'Hijau Tua', '#006400', NOW(), NOW()),
+('color010', 'Coklat Muda', '#D2691E', NOW(), NOW()),
+('color011', 'Krem Muda', '#FFF8DC', NOW(), NOW()),
+('color012', 'Merah Bata', '#B22222', NOW(), NOW()),
+('color013', 'Biru Tua', '#000080', NOW(), NOW()),
+('color014', 'Hitam Mengkilap', '#1C1C1C', NOW(), NOW()),
+('color015', 'Coklat Kayu', '#A0522D', NOW(), NOW()),
+('color016', 'Putih Gading', '#FFFDD0', NOW(), NOW()),
+('color017', 'Abu-abu Gelap', '#2F4F4F', NOW(), NOW()),
+('color018', 'Coklat Moka', '#3C2414', NOW(), NOW()),
+('color019', 'Krem Vanilla', '#F3E5AB', NOW(), NOW()),
+('color020', 'Hitam Doff', '#36454F', NOW(), NOW());

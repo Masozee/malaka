@@ -1,0 +1,22 @@
+-- Indonesian Customers Seed Data
+INSERT INTO customers (id, name, address, contact, created_at, updated_at) VALUES
+('cust001', 'Budi Santoso', 'Jl. Kebon Jeruk No. 12, Jakarta Barat 11530', '081234567890', NOW(), NOW()),
+('cust002', 'Siti Aminah', 'Jl. Mangga Dua No. 34, Jakarta Utara 14430', '082345678901', NOW(), NOW()),
+('cust003', 'Ahmad Hidayat', 'Jl. Pemuda No. 56, Semarang 50132', '083456789012', NOW(), NOW()),
+('cust004', 'Dewi Ratnasari', 'Jl. Diponegoro No. 78, Yogyakarta 55223', '084567890123', NOW(), NOW()),
+('cust005', 'Rudi Hartono', 'Jl. Pahlawan No. 90, Surabaya 60174', '085678901234', NOW(), NOW()),
+('cust006', 'Maya Sari', 'Jl. Ahmad Yani No. 123, Bandung 40135', '086789012345', NOW(), NOW()),
+('cust007', 'Andi Prasetyo', 'Jl. Sudirman No. 234, Jakarta Pusat 10220', '087890123456', NOW(), NOW()),
+('cust008', 'Rina Wulandari', 'Jl. Gatot Subroto No. 345, Jakarta Selatan 12950', '088901234567', NOW(), NOW()),
+('cust009', 'Dedi Kurniawan', 'Jl. Veteran No. 456, Malang 65145', '089012345678', NOW(), NOW()),
+('cust010', 'Fitri Handayani', 'Jl. Kartini No. 567, Solo 57147', '081123456789', NOW(), NOW()),
+('cust011', 'Hadi Wijaya', 'Jl. Imam Bonjol No. 678, Medan 20154', '082234567890', NOW(), NOW()),
+('cust012', 'Wulan Sari', 'Jl. Hayam Wuruk No. 789, Denpasar 80235', '083345678901', NOW(), NOW()),
+('cust013', 'Rizky Pratama', 'Jl. MT Haryono No. 890, Makassar 90231', '084456789012', NOW(), NOW()),
+('cust014', 'Indra Lesmana', 'Jl. Thamrin No. 901, Palembang 30126', '085567890123', NOW(), NOW()),
+('cust015', 'Sari Dewi', 'Jl. Malioboro No. 102, Yogyakarta 55271', '086678901234', NOW(), NOW()),
+('cust016', 'Budi Raharjo', 'Jl. Gajah Mada No. 203, Cirebon 45122', '087789012345', NOW(), NOW()),
+('cust017', 'Lina Marlina', 'Jl. Dipati Ukur No. 304, Bandung 40132', '088890123456', NOW(), NOW()),
+('cust018', 'Agus Setiawan', 'Jl. Raya Bogor No. 405, Jakarta Timur 13750', '089901234567', NOW(), NOW()),
+('cust019', 'Yuni Astuti', 'Jl. Cilandak No. 506, Jakarta Selatan 12560', '081012345678', NOW(), NOW()),
+('cust020', 'Joko Susilo', 'Jl. Kebon Sirih No. 607, Jakarta Pusat 10340', '082123456789', NOW(), NOW());
