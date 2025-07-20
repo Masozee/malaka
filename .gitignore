@@ -93,3 +93,40 @@ docker-compose.override.yml
 # Process files
 *.pid
 *.sock
+
+# Monitoring and observability
+/monitoring/grafana/data/
+/monitoring/prometheus/data/
+/monitoring/loki/data/
+/monitoring/alertmanager/data/
+
+# Database backups and dumps
+*.sql.gz
+*.sql.bz2
+backup-*.sql
+database_dump_*.sql
+
+# Docker volumes and persistent data
+/data/
+/volumes/
+/storage/
+
+# Grafana dashboards exported JSON (keep source dashboards)
+/monitoring/grafana/dashboards/exported/
+
+# Certificate files
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+
+# Terraform (if used for infrastructure)
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
+
+# Kubernetes (if used)
+*.kubeconfig
+kube-config-*
