@@ -33,6 +33,11 @@ go.work
 app.env
 test.env
 
+# Documentation and sensitive files
+backend/docs/
+**/GEMINI.md
+**/CLAUDE.md
+
 # IDE settings
 .idea/
 .vscode/
