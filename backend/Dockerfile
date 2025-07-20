@@ -16,8 +16,8 @@ RUN go mod download
 # Copy source code
 COPY . .
 
-# Verify source files exist
-RUN ls -la cmd/server/
+# Debug: Show what was actually copied
+RUN echo "=== Docker build context contents ===" && ls -la && echo "=== End of context ==="
 
 # Build the application - using explicit main.go path
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -ldflags '-w -s' -o malaka cmd/server/main.go
