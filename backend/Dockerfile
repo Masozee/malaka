@@ -16,17 +16,11 @@ RUN go mod download
 # Copy source code
 COPY . .
 
-# Build the application with multiple fallback approaches
-RUN if [ -f "./cmd/server/main.go" ]; then \
-        echo "Building with main.go approach..." && \
-        CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -ldflags '-w -s' -o malaka ./cmd/server/main.go; \
-    elif [ -d "./cmd/server" ]; then \
-        echo "Building with package directory approach..." && \
-        CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -ldflags '-w -s' -o malaka ./cmd/server; \
-    else \
-        echo "Error: Cannot find cmd/server directory or main.go file" && \
-        ls -la cmd/ && exit 1; \
-    fi
+# Verify source files exist
+RUN ls -la cmd/server/
+
+# Build the application - using explicit main.go path
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -ldflags '-w -s' -o malaka cmd/server/main.go
 
 # Final stage
 FROM alpine:latest
