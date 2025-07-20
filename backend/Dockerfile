@@ -1,63 +1,22 @@
-# Build stage - using Debian instead of Alpine for better compatibility
-FROM golang:1.24-bullseye AS builder
+# Simple Dockerfile - exactly what works on macOS
+FROM golang:1.24-alpine AS builder
 
-# Install build dependencies
-RUN apt-get update && apt-get install -y \
-    git \
-    ca-certificates \
-    tzdata \
-    && rm -rf /var/lib/apt/lists/*
-
-# Set working directory
 WORKDIR /app
 
-# Copy go mod files
+# Copy go mod files first
 COPY go.mod go.sum ./
-
-# Download dependencies
 RUN go mod download
 
-# Copy source code
+# Copy all source code
 COPY . .
 
-# Build the application
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -ldflags '-w -s' -o malaka ./cmd/server/main.go
+# Build with the exact same command that works locally
+RUN go build -o malaka ./cmd/server/main.go
 
-# Final stage
+# Final stage  
 FROM alpine:latest
-
-# Install runtime dependencies
-RUN apk --no-cache add ca-certificates curl tzdata
-
-# Set timezone
-ENV TZ=Asia/Jakarta
-RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
-
-# Create non-root user
-RUN addgroup -g 1001 -S malaka && \
-    adduser -S -D -H -u 1001 -h /app -s /sbin/nologin -G malaka -g malaka malaka
-
-# Set working directory
-WORKDIR /app
-
-# Copy binary from builder stage
+RUN apk --no-cache add ca-certificates
+WORKDIR /root/
 COPY --from=builder /app/malaka .
-
-# Copy configuration files
 COPY --from=builder /app/app.env .
-
-# Change ownership
-RUN chown -R malaka:malaka /app
-
-# Switch to non-root user
-USER malaka
-
-# Expose port
-EXPOSE 8080
-
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-  CMD curl -f http://localhost:8080/health || exit 1
-
-# Command to run
 CMD ["./malaka"]
