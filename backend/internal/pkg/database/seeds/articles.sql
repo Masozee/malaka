@@ -1,0 +1,41 @@
+-- Indonesian Shoe Articles Seed Data with valid foreign key references
+INSERT INTO articles (name, description, classification_id, color_id, model_id, size_id, supplier_id, barcode, price) VALUES
+('Sepatu Pantofel Kulit Hitam', 'Sepatu formal kulit asli untuk pria warna hitam', 
+ (SELECT id FROM classifications WHERE name = 'Sepatu Formal' LIMIT 1),
+ (SELECT id FROM colors WHERE name = 'Hitam' LIMIT 1),
+ (SELECT id FROM models WHERE name = 'Oxford Classic' LIMIT 1),
+ (SELECT id FROM sizes WHERE name = '42' LIMIT 1),
+ (SELECT id FROM suppliers LIMIT 1),
+ '8991234567890', 450000),
+
+('Sepatu Sneakers Casual Putih', 'Sepatu olahraga nyaman untuk sehari-hari',
+ (SELECT id FROM classifications WHERE name = 'Sepatu Casual' LIMIT 1),
+ (SELECT id FROM colors WHERE name = 'Putih' LIMIT 1),
+ (SELECT id FROM models WHERE name = 'Sneakers Urban' LIMIT 1),
+ (SELECT id FROM sizes WHERE name = '41' LIMIT 1),
+ (SELECT id FROM suppliers LIMIT 1 OFFSET 1),
+ '8991234567891', 320000),
+
+('Sepatu Boots Kerja Safety', 'Sepatu boots tahan lama untuk pekerja',
+ (SELECT id FROM classifications WHERE name = 'Sepatu Safety' LIMIT 1),
+ (SELECT id FROM colors WHERE name = 'Coklat' LIMIT 1),
+ (SELECT id FROM models WHERE name = 'Boots Explorer' LIMIT 1),
+ (SELECT id FROM sizes WHERE name = '43' LIMIT 1),
+ (SELECT id FROM suppliers LIMIT 1 OFFSET 2),
+ '8991234567892', 580000),
+
+('Sepatu Wanita Hak Tinggi', 'Sepatu hak tinggi elegan untuk wanita',
+ (SELECT id FROM classifications WHERE name = 'Sepatu Wanita' LIMIT 1),
+ (SELECT id FROM colors WHERE name = 'Hitam' LIMIT 1),
+ (SELECT id FROM models WHERE name = 'Oxford Classic' LIMIT 1),
+ (SELECT id FROM sizes WHERE name = '37' LIMIT 1),
+ (SELECT id FROM suppliers LIMIT 1 OFFSET 3),
+ '8991234567893', 385000),
+
+('Sepatu Sandal Pria', 'Sandal kulit casual untuk pria',
+ (SELECT id FROM classifications WHERE name = 'Sepatu Sandal' LIMIT 1),
+ (SELECT id FROM colors WHERE name = 'Coklat' LIMIT 1),
+ (SELECT id FROM models WHERE name = 'Sandal Comfort' LIMIT 1),
+ (SELECT id FROM sizes WHERE name = '40' LIMIT 1),
+ (SELECT id FROM suppliers LIMIT 1 OFFSET 4),
+ '8991234567894', 175000);

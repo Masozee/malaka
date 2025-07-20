@@ -1,0 +1,22 @@
+-- Indonesian Users Seed Data
+INSERT INTO users (username, password, email, company_id) VALUES
+('admin_sepatu', '$2a$14$92K/7vYh1.ZQpQXGzNdaK.hSAUqOZxQnTYJzaOgT1kgNYGYdNzuOq', 'admin@sepatunusantara.co.id', 'comp001'),
+('manager_produksi', '$2a$14$92K/7vYh1.ZQpQXGzNdaK.hSAUqOZxQnTYJzaOgT1kgNYGYdNzuOq', 'produksi@sepatunusantara.co.id', 'comp001'),
+('staff_gudang', '$2a$14$92K/7vYh1.ZQpQXGzNdaK.hSAUqOZxQnTYJzaOgT1kgNYGYdNzuOq', 'gudang@sepatunusantara.co.id', 'comp001'),
+('supervisor_penjualan', '$2a$14$92K/7vYh1.ZQpQXGzNdaK.hSAUqOZxQnTYJzaOgT1kgNYGYdNzuOq', 'penjualan@dagangsepatu.co.id', 'comp002'),
+('kasir_toko', '$2a$14$92K/7vYh1.ZQpQXGzNdaK.hSAUqOZxQnTYJzaOgT1kgNYGYdNzuOq', 'kasir@dagangsepatu.co.id', 'comp002'),
+('owner_perdagangan', '$2a$14$92K/7vYh1.ZQpQXGzNdaK.hSAUqOZxQnTYJzaOgT1kgNYGYdNzuOq', 'owner@perdagangmaju.co.id', 'comp003'),
+('hrd_industri', '$2a$14$92K/7vYh1.ZQpQXGzNdaK.hSAUqOZxQnTYJzaOgT1kgNYGYdNzuOq', 'hrd@industrikulit.co.id', 'comp004'),
+('qc_berkah', '$2a$14$92K/7vYh1.ZQpQXGzNdaK.hSAUqOZxQnTYJzaOgT1kgNYGYdNzuOq', 'qc@sepatuberkah.co.id', 'comp005'),
+('ketua_koperasi', '$2a$14$92K/7vYh1.ZQpQXGzNdaK.hSAUqOZxQnTYJzaOgT1kgNYGYdNzuOq', 'ketua@koperasipengrajin.co.id', 'comp006'),
+('export_manager', '$2a$14$92K/7vYh1.ZQpQXGzNdaK.hSAUqOZxQnTYJzaOgT1kgNYGYdNzuOq', 'export@footwearnusantara.co.id', 'comp007'),
+('pengrajin_bali', '$2a$14$92K/7vYh1.ZQpQXGzNdaK.hSAUqOZxQnTYJzaOgT1kgNYGYdNzuOq', 'pengrajin@sepatutradisional.co.id', 'comp008'),
+('teknisi_medan', '$2a$14$92K/7vYh1.ZQpQXGzNdaK.hSAUqOZxQnTYJzaOgT1kgNYGYdNzuOq', 'teknisi@manufakturmodern.co.id', 'comp009'),
+('buyer_jakarta', '$2a$14$92K/7vYh1.ZQpQXGzNdaK.hSAUqOZxQnTYJzaOgT1kgNYGYdNzuOq', 'buyer@eksporsepatu.co.id', 'comp010'),
+('desainer_malang', '$2a$14$92K/7vYh1.ZQpQXGzNdaK.hSAUqOZxQnTYJzaOgT1kgNYGYdNzuOq', 'desain@kerajinankulit.co.id', 'comp011'),
+('sales_makassar', '$2a$14$92K/7vYh1.ZQpQXGzNdaK.hSAUqOZxQnTYJzaOgT1kgNYGYdNzuOq', 'sales@sepatucasual.co.id', 'comp012'),
+('distribusi_palembang', '$2a$14$92K/7vYh1.ZQpQXGzNdaK.hSAUqOZxQnTYJzaOgT1kgNYGYdNzuOq', 'distribusi@distribusinasional.co.id', 'comp013'),
+('bendahara_koperasi', '$2a$14$92K/7vYh1.ZQpQXGzNdaK.hSAUqOZxQnTYJzaOgT1kgNYGYdNzuOq', 'bendahara@sepaturakyat.co.id', 'comp014'),
+('crafts_yogya', '$2a$14$92K/7vYh1.ZQpQXGzNdaK.hSAUqOZxQnTYJzaOgT1kgNYGYdNzuOq', 'crafts@sepatuhandmade.co.id', 'comp015'),
+('finance_jakarta', '$2a$14$92K/7vYh1.ZQpQXGzNdaK.hSAUqOZxQnTYJzaOgT1kgNYGYdNzuOq', 'finance@sepatunusantara.co.id', 'comp001'),
+('logistics_surabaya', '$2a$14$92K/7vYh1.ZQpQXGzNdaK.hSAUqOZxQnTYJzaOgT1kgNYGYdNzuOq', 'logistics@perdagangmaju.co.id', 'comp003');

@@ -1,0 +1,12 @@
+-- Expenditure Requests seed data
+INSERT INTO expenditure_requests (request_number, requestor_id, department, request_date, required_date, purpose, total_amount, approved_amount, status, priority) VALUES
+('ER20250701001', (SELECT id FROM users WHERE email = 'manager@malaka.co.id' LIMIT 1), 'Penjualan', '2025-07-01', '2025-07-05', 'Biaya promosi dan iklan toko Jakarta', 5000000.00, 4500000.00, 'APPROVED', 'HIGH'),
+('ER20250702001', (SELECT id FROM users WHERE email = 'supervisor@malaka.co.id' LIMIT 1), 'Operasional', '2025-07-02', '2025-07-08', 'Perbaikan AC dan perawatan rutin', 3500000.00, 3500000.00, 'APPROVED', 'NORMAL'),
+('ER20250703001', (SELECT id FROM users WHERE email = 'staff@malaka.co.id' LIMIT 1), 'Logistik', '2025-07-03', '2025-07-10', 'Biaya pengiriman barang ke Surabaya', 2200000.00, 0.00, 'PENDING', 'NORMAL'),
+('ER20250704001', (SELECT id FROM users WHERE email = 'manager@malaka.co.id' LIMIT 1), 'IT', '2025-07-04', '2025-07-12', 'Upgrade sistem POS dan pelatihan', 8500000.00, 0.00, 'PENDING', 'HIGH'),
+('ER20250705001', (SELECT id FROM users WHERE email = 'cashier@malaka.co.id' LIMIT 1), 'Keuangan', '2025-07-05', '2025-07-07', 'Biaya administrasi bank dan materai', 750000.00, 750000.00, 'APPROVED', 'LOW'),
+('ER20250706001', (SELECT id FROM users WHERE email = 'supervisor@malaka.co.id' LIMIT 1), 'SDM', '2025-07-06', '2025-07-15', 'Pelatihan karyawan dan seminar', 4200000.00, 3800000.00, 'APPROVED', 'NORMAL'),
+('ER20250707001', (SELECT id FROM users WHERE email = 'staff@malaka.co.id' LIMIT 1), 'Produksi', '2025-07-07', '2025-07-20', 'Pembelian alat produksi dan mesin', 12000000.00, 0.00, 'PENDING', 'HIGH'),
+('ER20250708001', (SELECT id FROM users WHERE email = 'manager@malaka.co.id' LIMIT 1), 'Pemasaran', '2025-07-08', '2025-07-14', 'Event launching produk baru', 6500000.00, 0.00, 'PENDING', 'HIGH'),
+('ER20250709001', (SELECT id FROM users WHERE email = 'cashier@malaka.co.id' LIMIT 1), 'Operasional', '2025-07-09', '2025-07-11', 'Pembelian supplies kantor', 1500000.00, 1500000.00, 'APPROVED', 'LOW'),
+('ER20250710001', (SELECT id FROM users WHERE email = 'supervisor@malaka.co.id' LIMIT 1), 'Keamanan', '2025-07-10', '2025-07-25', 'Upgrade sistem keamanan CCTV', 9800000.00, 0.00, 'PENDING', 'NORMAL');

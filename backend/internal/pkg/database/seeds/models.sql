@@ -1,0 +1,22 @@
+-- Indonesian Shoe Models Seed Data
+INSERT INTO models (name) VALUES
+('Oxford Classic'),
+('Loafer Executive'),
+('Boots Explorer'),
+('Sneakers Urban'),
+('Sandal Comfort'),
+('Pantofel Formal'),
+('Casual Walker'),
+('Safety Worker'),
+('High Heels Elegant'),
+('Flat Shoes Simple'),
+('Running Sport'),
+('Hiking Mountain'),
+('Slip-On Easy'),
+('Ankle Boots Modern'),
+('Dress Shoes Premium'),
+('Canvas Casual'),
+('Moccasin Comfort'),
+('Platform Trendy'),
+('Wedges Stylish'),
+('Brogue Traditional');

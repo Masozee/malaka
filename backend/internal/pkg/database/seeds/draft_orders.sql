@@ -1,0 +1,22 @@
+-- Indonesian Draft Orders Seed Data
+INSERT INTO draft_orders (supplier_id, order_date, total_amount, status) VALUES
+('supp001', '2024-01-15', 1350000, 'pending'),
+('supp002', '2024-01-16', 640000, 'pending'),
+('supp003', '2024-01-17', 1160000, 'pending'),
+('supp004', '2024-01-18', 770000, 'pending'),
+('supp005', '2024-01-19', 350000, 'pending'),
+('supp006', '2024-01-20', 1250000, 'pending'),
+('supp007', '2024-01-21', 970000, 'pending'),
+('supp008', '2024-01-22', 550000, 'pending'),
+('supp009', '2024-01-23', 370000, 'pending'),
+('supp010', '2024-01-24', 430000, 'pending'),
+('supp011', '2024-01-25', 790000, 'pending'),
+('supp012', '2024-01-26', 330000, 'pending'),
+('supp013', '2024-01-27', 570000, 'pending'),
+('supp014', '2024-01-28', 650000, 'pending'),
+('supp015', '2024-01-29', 590000, 'pending'),
+('supp001', '2024-01-30', 1070000, 'approved'),
+('supp002', '2024-01-31', 970000, 'approved'),
+('supp003', '2024-02-01', 1450000, 'approved'),
+('supp004', '2024-02-02', 770000, 'approved'),
+('supp005', '2024-02-03', 450000, 'approved');

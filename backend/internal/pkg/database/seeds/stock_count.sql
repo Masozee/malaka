@@ -1,0 +1,12 @@
+-- Stock Count Integration seed data
+INSERT INTO stock_count (count_number, store_code, warehouse_code, count_date, count_type, article_code, barcode, size_code, color_code, system_qty, physical_qty, variance_qty, unit_cost, variance_value, reason_code, remarks, counted_by, verified_by, sync_status) VALUES
+('SC20250718001', 'JKT001', 'WH001', '2025-07-18', 'FULL', 'SEP001', '8901234567890', '40', 'BLK', 25, 23, -2, 450000.00, -900000.00, 'SHRINK', 'Kemungkinan pencurian', 'Budi Santoso', 'Ahmad Hidayat', 'SYNCED'),
+('SC20250718002', 'JKT001', 'WH001', '2025-07-18', 'FULL', 'SEP002', '8901234567891', '42', 'BRN', 30, 32, 2, 320000.00, 640000.00, 'FOUND', 'Ditemukan di gudang lama', 'Sari Dewi', 'Ahmad Hidayat', 'SYNCED'),
+('SC20250718003', 'SBY001', 'WH002', '2025-07-18', 'PARTIAL', 'SAN001', '8901234567892', '38', 'RED', 15, 14, -1, 280000.00, -280000.00, 'DAMAGE', 'Rusak display', 'Dewi Lestari', 'Rudi Hartono', 'SYNCED'),
+('SC20250718004', 'YGY001', 'WH003', '2025-07-18', 'FULL', 'SEP003', '8901234567893', '41', 'WHT', 20, 20, 0, 580000.00, 0.00, 'MATCH', 'Sesuai sistem', 'Indra Kusuma', 'Eka Pratama', 'SYNCED'),
+('SC20250718005', 'BDG001', 'WH004', '2025-07-18', 'PARTIAL', 'SAN002', '8901234567894', '36', 'BLU', 12, 10, -2, 250000.00, -500000.00, 'SHRINK', 'Hilang tidak diketahui', 'Maya Sari', 'Doni Setiawan', 'PENDING'),
+('SC20250718006', 'SMG001', 'WH005', '2025-07-18', 'FULL', 'SEP004', '8901234567895', '39', 'GRN', 18, 19, 1, 420000.00, 420000.00, 'FOUND', 'Ditemukan di rak cadangan', 'Andi Wijaya', 'Siti Nurhaliza', 'SYNCED'),
+('SC20250718007', 'MDN001', 'WH006', '2025-07-18', 'PARTIAL', 'SAN003', '8901234567896', '37', 'YEL', 8, 7, -1, 190000.00, -190000.00, 'DAMAGE', 'Cacat produksi', 'Rizky Pratama', 'Lina Marlina', 'SYNCED'),
+('SC20250718008', 'MKS001', 'WH007', '2025-07-18', 'FULL', 'SEP005', '8901234567897', '43', 'BLK', 22, 24, 2, 650000.00, 1300000.00, 'FOUND', 'Salah input sebelumnya', 'Farid Rahman', 'Novi Anggraini', 'PENDING'),
+('SC20250718009', 'JKT001', 'WH001', '2025-07-18', 'PARTIAL', 'SAN004', '8901234567898', '35', 'PNK', 10, 9, -1, 220000.00, -220000.00, 'SHRINK', 'Rusak kemasan', 'Budi Santoso', 'Ahmad Hidayat', 'SYNCED'),
+('SC20250718010', 'SBY001', 'WH002', '2025-07-18', 'FULL', 'SEP006', '8901234567899', '44', 'GRY', 16, 16, 0, 480000.00, 0.00, 'MATCH', 'Sesuai fisik', 'Dewi Lestari', 'Rudi Hartono', 'SYNCED');

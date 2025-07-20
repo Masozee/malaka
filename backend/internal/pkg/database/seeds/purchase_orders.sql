@@ -1,0 +1,22 @@
+-- Indonesian Purchase Orders Seed Data
+INSERT INTO purchase_orders (supplier_id, order_date, status, total_amount) VALUES
+('supp001', '2024-01-10', 'pending', 4500000),
+('supp002', '2024-01-11', 'pending', 3200000),
+('supp003', '2024-01-12', 'pending', 5800000),
+('supp004', '2024-01-13', 'pending', 3850000),
+('supp005', '2024-01-14', 'pending', 1750000),
+('supp006', '2024-01-15', 'pending', 3950000),
+('supp007', '2024-01-16', 'pending', 1650000),
+('supp008', '2024-01-17', 'pending', 2850000),
+('supp009', '2024-01-18', 'pending', 3250000),
+('supp010', '2024-01-19', 'pending', 2950000),
+('supp011', '2024-01-20', 'pending', 5350000),
+('supp012', '2024-01-21', 'pending', 4850000),
+('supp013', '2024-01-22', 'pending', 7250000),
+('supp014', '2024-01-23', 'pending', 3850000),
+('supp015', '2024-01-24', 'pending', 2250000),
+('supp001', '2024-01-25', 'approved', 9300000),
+('supp002', '2024-01-26', 'approved', 6700000),
+('supp003', '2024-01-27', 'approved', 11900000),
+('supp004', '2024-01-28', 'approved', 8500000),
+('supp005', '2024-01-29', 'approved', 3700000);

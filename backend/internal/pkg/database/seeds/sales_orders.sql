@@ -1,0 +1,22 @@
+-- Indonesian Sales Orders Seed Data
+INSERT INTO sales_orders (customer_id, order_date, total_amount, status) VALUES
+('cust001', '2024-01-15', 1350000, 'pending'),
+('cust002', '2024-01-16', 640000, 'pending'),
+('cust003', '2024-01-17', 1160000, 'pending'),
+('cust004', '2024-01-18', 770000, 'pending'),
+('cust005', '2024-01-19', 350000, 'pending'),
+('cust006', '2024-01-20', 1250000, 'confirmed'),
+('cust007', '2024-01-21', 970000, 'confirmed'),
+('cust008', '2024-01-22', 550000, 'confirmed'),
+('cust009', '2024-01-23', 370000, 'shipped'),
+('cust010', '2024-01-24', 430000, 'shipped'),
+('cust011', '2024-01-25', 790000, 'delivered'),
+('cust012', '2024-01-26', 330000, 'delivered'),
+('cust013', '2024-01-27', 570000, 'delivered'),
+('cust014', '2024-01-28', 650000, 'pending'),
+('cust015', '2024-01-29', 590000, 'pending'),
+('cust016', '2024-01-30', 1070000, 'confirmed'),
+('cust017', '2024-01-31', 970000, 'confirmed'),
+('cust018', '2024-02-01', 1450000, 'shipped'),
+('cust019', '2024-02-02', 770000, 'shipped'),
+('cust020', '2024-02-03', 450000, 'delivered');

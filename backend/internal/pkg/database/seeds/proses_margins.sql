@@ -1,0 +1,22 @@
+-- Indonesian Proses Margins Seed Data
+INSERT INTO proses_margins (sales_order_id, cost_of_goods, selling_price, margin_amount, margin_percentage, calculated_at, notes) VALUES
+(gen_random_uuid(), 'sale001', 1000000, 1350000, 350000, 25.93, '2024-01-15 10:00:00+07', 'Margin untuk pesanan sepatu formal'),
+(gen_random_uuid(), 'sale002', 480000, 640000, 160000, 25.00, '2024-01-16 11:00:00+07', 'Margin untuk pesanan sepatu casual'),
+(gen_random_uuid(), 'sale003', 870000, 1160000, 290000, 25.00, '2024-01-17 12:00:00+07', 'Margin untuk pesanan sepatu olahraga'),
+(gen_random_uuid(), 'sale004', 577500, 770000, 192500, 25.00, '2024-01-18 13:00:00+07', 'Margin untuk pesanan sepatu hak tinggi'),
+(gen_random_uuid(), 'sale005', 262500, 350000, 87500, 25.00, '2024-01-19 14:00:00+07', 'Margin untuk pesanan sandal pria'),
+(gen_random_uuid(), 'sale006', 937500, 1250000, 312500, 25.00, '2024-01-20 15:00:00+07', 'Margin untuk pesanan sepatu oxford'),
+(gen_random_uuid(), 'sale007', 727500, 970000, 242500, 25.00, '2024-01-21 16:00:00+07', 'Margin untuk pesanan sepatu loafer'),
+(gen_random_uuid(), 'sale008', 412500, 550000, 137500, 25.00, '2024-01-22 17:00:00+07', 'Margin untuk pesanan sepatu running'),
+(gen_random_uuid(), 'sale009', 277500, 370000, 92500, 25.00, '2024-01-23 10:00:00+07', 'Margin untuk pesanan flat shoes'),
+(gen_random_uuid(), 'sale010', 322500, 430000, 107500, 25.00, '2024-01-24 11:00:00+07', 'Margin untuk pesanan slip-on'),
+(gen_random_uuid(), 'sale011', 592500, 790000, 197500, 25.00, '2024-01-25 12:00:00+07', 'Margin untuk pesanan ankle boots'),
+(gen_random_uuid(), 'sale012', 247500, 330000, 82500, 25.00, '2024-01-26 13:00:00+07', 'Margin untuk pesanan canvas casual'),
+(gen_random_uuid(), 'sale013', 427500, 570000, 142500, 25.00, '2024-01-27 14:00:00+07', 'Margin untuk pesanan moccasin'),
+(gen_random_uuid(), 'sale014', 487500, 650000, 162500, 25.00, '2024-01-28 15:00:00+07', 'Margin untuk pesanan platform trendy'),
+(gen_random_uuid(), 'sale015', 442500, 590000, 147500, 25.00, '2024-01-29 16:00:00+07', 'Margin untuk pesanan wedges stylish'),
+(gen_random_uuid(), 'sale016', 802500, 1070000, 267500, 25.00, '2024-01-30 17:00:00+07', 'Margin untuk pesanan brogue traditional'),
+(gen_random_uuid(), 'sale017', 727500, 970000, 242500, 25.00, '2024-01-31 10:00:00+07', 'Margin untuk pesanan hiking mountain'),
+(gen_random_uuid(), 'sale018', 1087500, 1450000, 362500, 25.00, '2024-02-01 11:00:00+07', 'Margin untuk pesanan dress premium'),
+(gen_random_uuid(), 'sale019', 577500, 770000, 192500, 25.00, '2024-02-02 12:00:00+07', 'Margin untuk pesanan safety worker'),
+(gen_random_uuid(), 'sale020', 337500, 450000, 112500, 25.00, '2024-02-03 13:00:00+07', 'Margin untuk pesanan casual walker');

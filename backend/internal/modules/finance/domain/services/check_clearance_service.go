@@ -1,0 +1,90 @@
+package services
+
+import (
+	"context"
+	"time"
+
+	"malaka/internal/modules/finance/domain/entities"
+	"malaka/internal/modules/finance/domain/repositories"
+)
+
+type CheckClearanceService interface {
+	CreateCheckClearance(ctx context.Context, check *entities.CheckClearance) error
+	GetCheckClearanceByID(ctx context.Context, id string) (*entities.CheckClearance, error)
+	GetAllCheckClearances(ctx context.Context) ([]*entities.CheckClearance, error)
+	UpdateCheckClearance(ctx context.Context, check *entities.CheckClearance) error
+	DeleteCheckClearance(ctx context.Context, id string) error
+	GetCheckClearancesByStatus(ctx context.Context, status string) ([]*entities.CheckClearance, error)
+	GetIncomingChecks(ctx context.Context) ([]*entities.CheckClearance, error)
+	GetOutgoingChecks(ctx context.Context) ([]*entities.CheckClearance, error)
+	ClearCheck(ctx context.Context, id string, clearanceDate time.Time) error
+	BounceCheck(ctx context.Context, id string) error
+}
+
+type checkClearanceService struct {
+	repo repositories.CheckClearanceRepository
+}
+
+func NewCheckClearanceService(repo repositories.CheckClearanceRepository) CheckClearanceService {
+	return &checkClearanceService{
+		repo: repo,
+	}
+}
+
+func (s *checkClearanceService) CreateCheckClearance(ctx context.Context, check *entities.CheckClearance) error {
+	if check.Status == "" {
+		check.Status = "issued"
+	}
+	return s.repo.Create(ctx, check)
+}
+
+func (s *checkClearanceService) GetCheckClearanceByID(ctx context.Context, id string) (*entities.CheckClearance, error) {
+	return s.repo.GetByID(ctx, id)
+}
+
+func (s *checkClearanceService) GetAllCheckClearances(ctx context.Context) ([]*entities.CheckClearance, error) {
+	return s.repo.GetAll(ctx)
+}
+
+func (s *checkClearanceService) UpdateCheckClearance(ctx context.Context, check *entities.CheckClearance) error {
+	return s.repo.Update(ctx, check)
+}
+
+func (s *checkClearanceService) DeleteCheckClearance(ctx context.Context, id string) error {
+	return s.repo.Delete(ctx, id)
+}
+
+func (s *checkClearanceService) GetCheckClearancesByStatus(ctx context.Context, status string) ([]*entities.CheckClearance, error) {
+	return s.repo.GetByStatus(ctx, status)
+}
+
+func (s *checkClearanceService) GetIncomingChecks(ctx context.Context) ([]*entities.CheckClearance, error) {
+	return s.repo.GetIncomingChecks(ctx)
+}
+
+func (s *checkClearanceService) GetOutgoingChecks(ctx context.Context) ([]*entities.CheckClearance, error) {
+	return s.repo.GetOutgoingChecks(ctx)
+}
+
+func (s *checkClearanceService) ClearCheck(ctx context.Context, id string, clearanceDate time.Time) error {
+	check, err := s.repo.GetByID(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	check.Status = "cleared"
+	check.ClearanceDate = clearanceDate
+
+	return s.repo.Update(ctx, check)
+}
+
+func (s *checkClearanceService) BounceCheck(ctx context.Context, id string) error {
+	check, err := s.repo.GetByID(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	check.Status = "bounced"
+
+	return s.repo.Update(ctx, check)
+}

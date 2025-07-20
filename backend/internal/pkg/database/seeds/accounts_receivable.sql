@@ -1,0 +1,37 @@
+-- Accounts Receivable - Indonesian Customer Outstanding Balances
+-- Outstanding receivables from customers and clients
+
+INSERT INTO accounts_receivable (customer_name, customer_code, invoice_number, invoice_date, due_date, original_amount, outstanding_amount, paid_amount, currency, description, status, payment_terms, contact_person, phone, email, created_by) VALUES
+-- Retail customers
+('Toko Sepatu Merdeka Jakarta', 'CUST001', 'SO-20250115-001', '2025-01-15', '2025-02-14', 47250000.00, 47250000.00, 0.00, 'IDR', 'Penjualan sepatu formal dan kasual untuk stok toko', 'OUTSTANDING', 'Net 30', 'Pak Suryanto', '021-3456-7890', 'suryanto@tokosepatumerdeka.co.id', 'sales_jakarta', '2025-01-15 09:30:00', '2025-01-15 09:30:00'),
+('CV Perdagangan Sepatu Bandung', 'CUST002', 'SO-20250116-002', '2025-01-16', '2025-02-15', 29400000.00, 14700000.00, 14700000.00, 'IDR', 'Pengiriman sepatu safety dan boots untuk proyek konstruksi', 'PARTIAL', 'Net 30', 'Ibu Ratna Sari', '022-2345-6789', 'ratna@perdagangansepatu.co.id', 'sales_bandung', '2025-01-16 11:00:00', '2025-01-20 16:45:00'),
+('PT Retail Nusantara', 'CUST003', 'SO-20250117-003', '2025-01-17', '2025-02-16', 75600000.00, 75600000.00, 0.00, 'IDR', 'Pesanan khusus sepatu dengan desain custom untuk chain store', 'OUTSTANDING', 'Net 30', 'Pak Joko Widodo', '021-5678-9012', 'joko@retailnusantara.com', 'sales_jakarta', '2025-01-17 14:15:00', '2025-01-17 14:15:00'),
+('Toko Sepatu Malioboro', 'CUST004', 'SO-20250118-004', '2025-01-18', '2025-02-17', 33600000.00, 33600000.00, 0.00, 'IDR', 'Restocking sepatu tradisional dan modern untuk wisatawan', 'OVERDUE', 'Net 30', 'Ibu Sri Mulyani', '0274-1234-567', 'sri@tokosepatumalioboro.co.id', 'sales_yogya', '2025-01-18 10:45:00', '2025-01-18 10:45:00'),
+
+-- Wholesale customers
+('PT Distributor Sepatu Indonesia', 'CUST005', 'SO-20250119-005', '2025-01-19', '2025-02-18', 120000000.00, 72000000.00, 48000000.00, 'IDR', 'Penjualan grosir untuk distributor wilayah Jabodetabek', 'PARTIAL', 'Net 30', 'Pak Bambang Pamungkas', '021-7890-1234', 'bambang@distributorsepatu.co.id', 'sales_wholesale', '2025-01-19 13:20:00', '2025-01-25 09:30:00'),
+('CV Grosir Sepatu Surabaya', 'CUST006', 'SO-20250120-006', '2025-01-20', '2025-02-19', 85400000.00, 85400000.00, 0.00, 'IDR', 'Pengiriman sepatu untuk wilayah Jawa Timur', 'OUTSTANDING', 'Net 30', 'Ibu Kartika Sari', '031-4567-8901', 'kartika@grosirsepatu.co.id', 'sales_surabaya', '2025-01-20 15:30:00', '2025-01-20 15:30:00'),
+('PT Sepatu Modern Medan', 'CUST007', 'SO-20250121-007', '2025-01-21', '2025-02-20', 65250000.00, 32625000.00, 32625000.00, 'IDR', 'Penjualan sepatu branded untuk market Sumatera Utara', 'PARTIAL', 'Net 30', 'Pak Ahmad Dahlan', '061-2345-6789', 'ahmad@sepatumodern.co.id', 'sales_medan', '2025-01-21 08:45:00', '2025-01-28 14:20:00'),
+
+-- Corporate customers
+('PT Konstruksi Bangunan Megah', 'CORP001', 'SO-20250122-008', '2025-01-22', '2025-02-21', 95000000.00, 95000000.00, 0.00, 'IDR', 'Pengadaan sepatu safety untuk seluruh karyawan proyek', 'OUTSTANDING', 'Net 30', 'Pak Edi Susanto', '021-3456-7891', 'edi@konstruksimegah.co.id', 'sales_corporate', '2025-01-22 12:00:00', '2025-01-22 12:00:00'),
+('PT Pertambangan Nusantara', 'CORP002', 'SO-20250123-009', '2025-01-23', '2025-02-22', 72800000.00, 72800000.00, 0.00, 'IDR', 'Sepatu kerja khusus untuk industri pertambangan', 'OUTSTANDING', 'Net 30', 'Ibu Indira Safitri', '0541-567-8901', 'indira@pertambangannusantara.co.id', 'sales_corporate', '2025-01-23 16:30:00', '2025-01-23 16:30:00'),
+('PT Keamanan Terpadu', 'CORP003', 'SO-20250124-010', '2025-01-24', '2025-02-23', 48500000.00, 24250000.00, 24250000.00, 'IDR', 'Sepatu dinas untuk petugas keamanan dan security', 'PARTIAL', 'Net 30', 'Pak Rizky Pratama', '021-6789-0123', 'rizky@keamananterpadu.co.id', 'sales_corporate', '2025-01-24 11:15:00', '2025-02-01 10:30:00'),
+
+-- Export customers
+('Malaysia Shoe Trading Sdn Bhd', 'EXP001', 'EX-20250125-011', '2025-01-25', '2025-03-26', 80750000.00, 80750000.00, 0.00, 'IDR', 'Export sepatu kulit handmade untuk pasar Malaysia', 'OUTSTANDING', 'LC 60 days', 'Mr. Lim Wei Ming', '+60-3-2141-8888', 'lim@malaysiashoe.com.my', 'export_sales', '2025-01-25 09:45:00', '2025-01-25 09:45:00'),
+('Singapore Footwear Pte Ltd', 'EXP002', 'EX-20250126-012', '2025-01-26', '2025-03-27', 114000000.00, 79800000.00, 34200000.00, 'IDR', 'Bulk order sepatu olahraga untuk distributor regional', 'PARTIAL', 'LC 60 days', 'Ms. Tan Li Hua', '+65-6789-0123', 'tan@singaporefootwear.com.sg', 'export_sales', '2025-01-26 14:20:00', '2025-02-05 11:10:00'),
+('Thailand Leather Goods Co Ltd', 'EXP003', 'EX-20250127-013', '2025-01-27', '2025-03-28', 67500000.00, 67500000.00, 0.00, 'IDR', 'Export sepatu kulit premium untuk market Thailand', 'OUTSTANDING', 'LC 60 days', 'Mr. Somchai Jaidee', '+66-2-234-5678', 'somchai@thailandleather.co.th', 'export_sales', '2025-01-27 16:00:00', '2025-01-27 16:00:00'),
+
+-- Government customers
+('Dinas Pendidikan DKI Jakarta', 'GOV001', 'SO-20250128-014', '2025-01-28', '2025-03-29', 55000000.00, 55000000.00, 0.00, 'IDR', 'Pengadaan sepatu seragam untuk guru dan staff sekolah', 'OUTSTANDING', 'Net 60', 'Pak Bambang Setiawan', '021-7890-1234', 'bambang@disdik.jakarta.go.id', 'sales_government', '2025-01-28 10:30:00', '2025-01-28 10:30:00'),
+('Polda Metro Jaya', 'GOV002', 'SO-20250129-015', '2025-01-29', '2025-03-30', 89000000.00, 89000000.00, 0.00, 'IDR', 'Sepatu dinas untuk anggota Polri wilayah Jakarta', 'OUTSTANDING', 'Net 60', 'Kombes Pol Agung Wibowo', '021-7218-012', 'agung@polda.metro.jaya.go.id', 'sales_government', '2025-01-29 15:15:00', '2025-01-29 15:15:00'),
+
+-- Online marketplace customers
+('Tokopedia Marketplace', 'ONLN001', 'MP-20250130-016', '2025-01-30', '2025-02-28', 25800000.00, 25800000.00, 0.00, 'IDR', 'Penjualan melalui platform Tokopedia bulan Januari', 'OUTSTANDING', 'Net 28', 'Payment System', '021-5081-8888', 'merchant@tokopedia.com', 'sales_online', '2025-01-30 12:45:00', '2025-01-30 12:45:00'),
+('Shopee Indonesia', 'ONLN002', 'MP-20250131-017', '2025-01-31', '2025-02-28', 18500000.00, 9250000.00, 9250000.00, 'IDR', 'Penjualan melalui platform Shopee bulan Januari', 'PARTIAL', 'Net 28', 'Seller Support', '021-5081-1234', 'seller@shopee.co.id', 'sales_online', '2025-01-31 14:00:00', '2025-02-07 16:30:00'),
+
+-- Problem customers (overdue)
+('Toko Sepatu Bermasalah', 'PROB001', 'SO-20241215-018', '2024-12-15', '2025-01-14', 42000000.00, 42000000.00, 0.00, 'IDR', 'Penjualan yang sudah jatuh tempo dan belum dibayar', 'OVERDUE', 'Net 30', 'Pak Hendra Terlambat', '022-345-6789', 'hendra@tokobermasalah.co.id', 'sales_bandung', '2024-12-15 10:00:00', '2024-12-15 10:00:00'),
+('CV Pembayaran Macet', 'PROB002', 'SO-20241220-019', '2024-12-20', '2025-01-19', 35500000.00, 35500000.00, 0.00, 'IDR', 'Customer dengan riwayat pembayaran bermasalah', 'OVERDUE', 'Net 30', 'Ibu Retno Macet', '031-456-7890', 'retno@pembayaranmacet.co.id', 'sales_surabaya', '2024-12-20 16:30:00', '2024-12-20 16:30:00'),
+('PT Bayar Nanti Terus', 'PROB003', 'SO-20250201-020', '2025-02-01', '2025-03-03', 28000000.00, 28000000.00, 0.00, 'IDR', 'Customer yang sering menunda pembayaran', 'OUTSTANDING', 'Net 30', 'Pak Anton Penunda', '024-567-8901', 'anton@bayarnanti.co.id', 'sales_semarang', '2025-02-01 08:30:00', '2025-02-01 08:30:00');

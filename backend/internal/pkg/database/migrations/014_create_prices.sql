@@ -1,0 +1,13 @@
+-- +goose Up
+CREATE TABLE prices (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    article_id UUID NOT NULL REFERENCES articles(id) ON DELETE CASCADE,
+    amount NUMERIC(10, 2) NOT NULL,
+    currency VARCHAR(3) NOT NULL DEFAULT 'IDR',
+    effective_date TIMESTAMP WITH TIME ZONE NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- +goose Down
+DROP TABLE prices;

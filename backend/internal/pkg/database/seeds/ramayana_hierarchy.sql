@@ -1,0 +1,20 @@
+-- Ramayana Hierarchy Integration seed data
+INSERT INTO ramayana_hierarchy (hierarchy_code, hierarchy_name, hierarchy_level, parent_code, region_code, area_code, store_code, department_code, category_code, subcategory_code, is_active, sync_status) VALUES
+('REG001', 'Region Jakarta', 1, NULL, 'REG001', NULL, NULL, NULL, NULL, NULL, true, 'SYNCED'),
+('REG002', 'Region Surabaya', 1, NULL, 'REG002', NULL, NULL, NULL, NULL, NULL, true, 'SYNCED'),
+('REG003', 'Region Bandung', 1, NULL, 'REG003', NULL, NULL, NULL, NULL, NULL, true, 'SYNCED'),
+('AREA001', 'Area Jakarta Pusat', 2, 'REG001', 'REG001', 'AREA001', NULL, NULL, NULL, NULL, true, 'SYNCED'),
+('AREA002', 'Area Jakarta Selatan', 2, 'REG001', 'REG001', 'AREA002', NULL, NULL, NULL, NULL, true, 'SYNCED'),
+('AREA003', 'Area Surabaya Pusat', 2, 'REG002', 'REG002', 'AREA003', NULL, NULL, NULL, NULL, true, 'SYNCED'),
+('STORE001', 'Toko Plaza Indonesia', 3, 'AREA001', 'REG001', 'AREA001', 'STORE001', NULL, NULL, NULL, true, 'SYNCED'),
+('STORE002', 'Toko Pondok Indah Mall', 3, 'AREA002', 'REG001', 'AREA002', 'STORE002', NULL, NULL, NULL, true, 'SYNCED'),
+('STORE003', 'Toko Tunjungan Plaza', 3, 'AREA003', 'REG002', 'AREA003', 'STORE003', NULL, NULL, NULL, true, 'SYNCED'),
+('DEPT001', 'Sepatu Pria', 4, 'STORE001', 'REG001', 'AREA001', 'STORE001', 'DEPT001', NULL, NULL, true, 'SYNCED'),
+('DEPT002', 'Sepatu Wanita', 4, 'STORE001', 'REG001', 'AREA001', 'STORE001', 'DEPT002', NULL, NULL, true, 'SYNCED'),
+('DEPT003', 'Sandal dan Selop', 4, 'STORE001', 'REG001', 'AREA001', 'STORE001', 'DEPT003', NULL, NULL, true, 'SYNCED'),
+('CAT001', 'Sepatu Formal', 5, 'DEPT001', 'REG001', 'AREA001', 'STORE001', 'DEPT001', 'CAT001', NULL, true, 'SYNCED'),
+('CAT002', 'Sepatu Casual', 5, 'DEPT001', 'REG001', 'AREA001', 'STORE001', 'DEPT001', 'CAT002', NULL, true, 'SYNCED'),
+('CAT003', 'Sepatu Olahraga', 5, 'DEPT001', 'REG001', 'AREA001', 'STORE001', 'DEPT001', 'CAT003', NULL, true, 'SYNCED'),
+('SUBCAT001', 'Pantofel Kulit', 6, 'CAT001', 'REG001', 'AREA001', 'STORE001', 'DEPT001', 'CAT001', 'SUBCAT001', true, 'SYNCED'),
+('SUBCAT002', 'Sneakers Canvas', 6, 'CAT002', 'REG001', 'AREA001', 'STORE001', 'DEPT001', 'CAT002', 'SUBCAT002', true, 'SYNCED'),
+('SUBCAT003', 'Running Shoes', 6, 'CAT003', 'REG001', 'AREA001', 'STORE001', 'DEPT001', 'CAT003', 'SUBCAT003', true, 'SYNCED');

@@ -1,0 +1,12 @@
+-- Purchase Vouchers seed data
+INSERT INTO purchase_vouchers (voucher_number, supplier_id, voucher_date, due_date, total_amount, paid_amount, remaining_amount, discount_amount, tax_amount, description, status) VALUES
+('PV20250701001', (SELECT id FROM suppliers WHERE name = 'PT Sepatu Indonesia' LIMIT 1), '2025-07-01', '2025-07-31', 25000000.00, 15000000.00, 10000000.00, 500000.00, 2500000.00, 'Pembelian sepatu kulit formal', 'PARTIAL'),
+('PV20250702001', (SELECT id FROM suppliers WHERE name = 'CV Sandal Nusantara' LIMIT 1), '2025-07-02', '2025-08-01', 18000000.00, 18000000.00, 0.00, 300000.00, 1800000.00, 'Pembelian sandal casual', 'PAID'),
+('PV20250703001', (SELECT id FROM suppliers WHERE name = 'UD Kulit Jaya' LIMIT 1), '2025-07-03', '2025-08-02', 32000000.00, 0.00, 32000000.00, 800000.00, 3200000.00, 'Pembelian bahan baku kulit', 'PENDING'),
+('PV20250704001', (SELECT id FROM suppliers WHERE name = 'PT Sepatu Indonesia' LIMIT 1), '2025-07-04', '2025-08-03', 22000000.00, 11000000.00, 11000000.00, 400000.00, 2200000.00, 'Pembelian sepatu olahraga', 'PARTIAL'),
+('PV20250705001', (SELECT id FROM suppliers WHERE name = 'CV Sandal Nusantara' LIMIT 1), '2025-07-05', '2025-08-04', 28000000.00, 28000000.00, 0.00, 600000.00, 2800000.00, 'Pembelian sandal kulit', 'PAID'),
+('PV20250706001', (SELECT id FROM suppliers WHERE name = 'UD Kulit Jaya' LIMIT 1), '2025-07-06', '2025-08-05', 15000000.00, 7500000.00, 7500000.00, 250000.00, 1500000.00, 'Pembelian aksesoris sepatu', 'PARTIAL'),
+('PV20250707001', (SELECT id FROM suppliers WHERE name = 'PT Sepatu Indonesia' LIMIT 1), '2025-07-07', '2025-08-06', 35000000.00, 0.00, 35000000.00, 700000.00, 3500000.00, 'Pembelian sepatu formal premium', 'PENDING'),
+('PV20250708001', (SELECT id FROM suppliers WHERE name = 'CV Sandal Nusantara' LIMIT 1), '2025-07-08', '2025-08-07', 20000000.00, 20000000.00, 0.00, 400000.00, 2000000.00, 'Pembelian sandal anak-anak', 'PAID'),
+('PV20250709001', (SELECT id FROM suppliers WHERE name = 'UD Kulit Jaya' LIMIT 1), '2025-07-09', '2025-08-08', 26000000.00, 13000000.00, 13000000.00, 520000.00, 2600000.00, 'Pembelian sol sepatu', 'PARTIAL'),
+('PV20250710001', (SELECT id FROM suppliers WHERE name = 'PT Sepatu Indonesia' LIMIT 1), '2025-07-10', '2025-08-09', 42000000.00, 0.00, 42000000.00, 840000.00, 4200000.00, 'Pembelian sepatu boots safety', 'PENDING');
