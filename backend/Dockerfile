@@ -1,8 +1,12 @@
-# Build stage
-FROM golang:1.24-alpine AS builder
+# Build stage - using Debian instead of Alpine for better compatibility
+FROM golang:1.24-bullseye AS builder
 
 # Install build dependencies
-RUN apk add --no-cache git ca-certificates tzdata
+RUN apt-get update && apt-get install -y \
+    git \
+    ca-certificates \
+    tzdata \
+    && rm -rf /var/lib/apt/lists/*
 
 # Set working directory
 WORKDIR /app
@@ -16,11 +20,8 @@ RUN go mod download
 # Copy source code
 COPY . .
 
-# Debug: Show what was actually copied
-RUN echo "=== Docker build context contents ===" && ls -la && echo "=== End of context ==="
-
-# Build the application - build the package directory
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -ldflags '-w -s' -o malaka ./cmd/server
+# Build the application
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -ldflags '-w -s' -o malaka ./cmd/server/main.go
 
 # Final stage
 FROM alpine:latest
