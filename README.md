@@ -1,20 +1,3 @@
-# Malaka ERP System
-
-Malaka ERP is a comprehensive Enterprise Resource Planning system designed to manage various business operations. It is built with a focus on clean architecture, scalability, and maintainability. This project includes both a Go-based backend and a Next.js frontend, integrated with a robust monitoring stack.
-
-## Project Structure
-
--   **`backend/`**: Contains the Go-based ERP system.
--   **`frontend/`**: Contains the Next.js frontend application.
--   **`monitoring/`**: Includes configurations for Prometheus, Grafana, Loki, and various exporters for system monitoring.
--   **`nginx/`**: Nginx configurations for reverse proxying.
--   **`pgbouncer/`**: PgBouncer configurations for database connection pooling.
--   **`backup/`**: Database backup scripts and configurations.
-
-## Module Implementation Status
-
-This section provides a detailed overview of the implemented modules and their current status.
-
 # MALAKA ERP SYSTEM - MODULE IMPLEMENTATION CHECKLIST
 
 **Based on:** `docs/module.md`  
@@ -269,6 +252,7 @@ Result: Core double-entry bookkeeping operational
   - `POST /finance/expenditure-requests/:id/disburse`
 - [x] **6. PENGELUARAN KAS/BANK** - Complete CRUD operations
   - `GET/POST/PUT/DELETE /finance/cash-disbursements`
+
 - [x] **7. PENERIMAAN KAS/BANK** - Complete CRUD operations
   - `GET/POST/PUT/DELETE /finance/cash-receipts`
 - [x] **8. TRANSFER ANTAR KAS/BANK** - Complete CRUD operations
@@ -522,8 +506,11 @@ curl -X POST http://localhost:8080/api/accounting/general-ledger/account/1234567
 curl -X GET http://localhost:8080/api/accounting/journal-entries/
 curl -X POST http://localhost:8080/api/accounting/journal-entries/12345678-1234-1234-1234-123456789012/post
 curl -X POST http://localhost:8080/api/accounting/journal-entries/12345678-1234-1234-1234-123456789012/reverse
+curl -X POST http://localhost:8080/api/accounting/journal-entries/12345678-1234-1234-1234-123456789012/lines
 curl -X GET http://localhost:8080/api/accounting/journal-entries/status?status=POSTED
 curl -X GET http://localhost:8080/api/accounting/journal-entries/date-range?start_date=2025-01-01&end_date=2025-12-31
+curl -X GET http://localhost:8080/api/accounting/journal-entries/company/:company_id
+curl -X GET http://localhost:8080/api/accounting/journal-entries/company/:company_id/unposted
 curl -X GET http://localhost:8080/api/accounting/journal-entries/register?company_id=COMP001&start_date=2025-01-01&end_date=2025-12-31
 
 # Authentication
