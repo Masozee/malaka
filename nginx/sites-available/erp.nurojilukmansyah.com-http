@@ -1,0 +1,159 @@
+# Malaka ERP - erp.nurojilukmansyah.com (HTTP only for testing)
+# Use this configuration for initial setup before SSL certificates are ready
+
+# Rate limiting zones
+limit_req_zone $binary_remote_addr zone=api_limit:10m rate=10r/s;
+limit_req_zone $binary_remote_addr zone=auth_limit:10m rate=5r/s;
+
+# Upstream backend servers
+upstream malaka_backend {
+    server 127.0.0.1:8080;
+    keepalive 32;
+    keepalive_requests 100;
+    keepalive_timeout 60s;
+}
+
+# Main HTTP server block
+server {
+    listen 80;
+    listen [::]:80;
+    server_name erp.nurojilukmansyah.com www.erp.nurojilukmansyah.com;
+    
+    # Security headers
+    add_header X-Frame-Options DENY always;
+    add_header X-Content-Type-Options nosniff always;
+    add_header X-XSS-Protection "1; mode=block" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    
+    # Logging
+    access_log /var/log/nginx/erp.nurojilukmansyah.com.access.log;
+    error_log /var/log/nginx/erp.nurojilukmansyah.com.error.log;
+    
+    # Root directory
+    root /var/www/erp.nurojilukmansyah.com;
+    index index.html index.htm;
+    
+    # Gzip compression
+    gzip on;
+    gzip_vary on;
+    gzip_min_length 1024;
+    gzip_types
+        text/plain
+        text/css
+        text/xml
+        text/javascript
+        application/javascript
+        application/xml+rss
+        application/json;
+    
+    # Client settings
+    client_max_body_size 50M;
+    client_body_timeout 60s;
+    client_header_timeout 60s;
+    
+    # Proxy settings
+    proxy_connect_timeout 60s;
+    proxy_send_timeout 60s;
+    proxy_read_timeout 60s;
+    proxy_buffer_size 4k;
+    proxy_buffers 8 4k;
+    proxy_busy_buffers_size 8k;
+    
+    # Backend application routes
+    location ~ ^/(masterdata|inventory|sales|finance|shipping|health|metrics|api)/ {
+        limit_req zone=api_limit burst=20 nodelay;
+        
+        proxy_pass http://malaka_backend;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Host $host;
+        proxy_set_header X-Forwarded-Port $server_port;
+        proxy_cache_bypass $http_upgrade;
+        
+        # CORS headers for API
+        add_header Access-Control-Allow-Origin "*" always;
+        add_header Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS" always;
+        add_header Access-Control-Allow-Headers "Authorization, Content-Type, X-Requested-With" always;
+        
+        # Handle preflight requests
+        if ($request_method = 'OPTIONS') {
+            add_header Access-Control-Allow-Origin "*";
+            add_header Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS";
+            add_header Access-Control-Allow-Headers "Authorization, Content-Type, X-Requested-With";
+            add_header Access-Control-Max-Age 1728000;
+            add_header Content-Type "text/plain charset=UTF-8";
+            add_header Content-Length 0;
+            return 204;
+        }
+    }
+    
+    # Authentication endpoints with stricter rate limiting
+    location ~ ^/(login|register|auth|oauth)/ {
+        limit_req zone=auth_limit burst=10 nodelay;
+        
+        proxy_pass http://malaka_backend;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Host $host;
+        proxy_set_header X-Forwarded-Port $server_port;
+    }
+    
+    # Health check endpoint
+    location = /health {
+        proxy_pass http://malaka_backend;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+    
+    # Metrics endpoint (restricted)
+    location = /metrics {
+        proxy_pass http://malaka_backend;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        
+        # Restrict access
+        allow 127.0.0.1;
+        allow ::1;
+        deny all;
+    }
+    
+    # Static files
+    location / {
+        try_files $uri $uri/ =404;
+        
+        # Cache static assets
+        location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ {
+            expires 1y;
+            add_header Cache-Control "public, immutable";
+        }
+    }
+    
+    # Deny access to sensitive files
+    location ~ /\. {
+        deny all;
+    }
+    
+    # Block common exploit attempts
+    location ~* /(wp-admin|wp-login|xmlrpc|admin|phpmyadmin) {
+        deny all;
+        return 444;
+    }
+    
+    # Custom error pages
+    error_page 404 /404.html;
+    error_page 500 502 503 504 /50x.html;
+}
