@@ -17,8 +17,12 @@ import (
 var testDB *sql.DB
 
 func TestMain(m *testing.M) {
-	// Database connection string from GEMINI.md
-	dbConnStr := "postgres://postgres:TanahAbang1971@localhost:5432/malaka?sslmode=disable"
+	// Database connection string from environment variable
+	dbConnStr := os.Getenv("TEST_DB_SOURCE")
+	if dbConnStr == "" {
+		log.Println("TEST_DB_SOURCE environment variable not set. Skipping database tests.")
+		os.Exit(0) // Exit with 0 to indicate success, as tests are skipped intentionally
+	}
 
 	var err error
 	testDB, err = sql.Open("postgres", dbConnStr)

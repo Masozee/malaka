@@ -4,37 +4,28 @@ set -e
 # Database initialization script for MALAKA ERP
 echo "Starting database initialization..."
 
-# Set PostgreSQL environment variables
+# Set PostgreSQL environment variables for container initialization
 export PGUSER="postgres"
 export PGDATABASE="malaka"
 
-# Wait for PostgreSQL to be ready
-echo "Waiting for PostgreSQL to be ready..."
-until pg_isready -h localhost -p 5432 -U postgres; do
-  echo "PostgreSQL is not ready yet. Waiting..."
-  sleep 2
-done
-
+# In Docker entrypoint, PostgreSQL is already running and ready
 echo "PostgreSQL is ready! Starting database setup..."
 
 # Create database if it doesn't exist
 echo "Creating database if it doesn't exist..."
-psql -h localhost -U postgres -tc "SELECT 1 FROM pg_database WHERE datname = 'malaka'" | grep -q 1 || psql -h localhost -U postgres -c "CREATE DATABASE malaka;"
-
-# Connect to the malaka database
-echo "Connecting to malaka database..."
-export PGDATABASE="malaka"
+psql -U postgres -tc "SELECT 1 FROM pg_database WHERE datname = 'malaka'" | grep -q 1 || psql -U postgres -c "CREATE DATABASE malaka;"
 
 # Create UUID extension if it doesn't exist
 echo "Creating UUID extension..."
-psql -h localhost -U postgres -d malaka -c "CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";"
+psql -U postgres -d malaka -c "CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";"
 
-# Run migrations in order
+# Run migrations in order (only the UP parts)
 echo "Running database migrations..."
 for migration_file in /docker-entrypoint-initdb.d/migrations/*.sql; do
     if [ -f "$migration_file" ]; then
         echo "Running migration: $(basename "$migration_file")"
-        psql -h localhost -U postgres -d malaka -f "$migration_file"
+        # Extract only the UP section (from start to "-- +goose Down")
+        sed '/-- +goose Down/,$d' "$migration_file" | psql -U postgres -d malaka
     fi
 done
 
@@ -48,7 +39,7 @@ if [ "$LOAD_SEED_DATA" = "true" ]; then
         for seed_file in "$SEED_DIR"/*.sql; do
             if [ -f "$seed_file" ]; then
                 echo "Loading seed data: $(basename "$seed_file")"
-                psql -h localhost -U postgres -d malaka -f "$seed_file" || {
+                psql -U postgres -d malaka -f "$seed_file" || {
                     echo "Warning: Failed to load seed data from $(basename "$seed_file")"
                 }
             fi
@@ -62,7 +53,7 @@ fi
 
 # Create indexes for better performance
 echo "Creating additional indexes..."
-psql -h localhost -U postgres -d malaka << EOF
+psql -U postgres -d malaka << EOF
 -- Performance indexes for common queries
 CREATE INDEX IF NOT EXISTS idx_articles_code ON articles(code);
 CREATE INDEX IF NOT EXISTS idx_articles_name ON articles(name);
@@ -86,12 +77,12 @@ EOF
 
 # Verify database setup
 echo "Verifying database setup..."
-TABLE_COUNT=$(psql -h localhost -U postgres -d malaka -t -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public' AND table_type = 'BASE TABLE';")
+TABLE_COUNT=$(psql -U postgres -d malaka -t -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public' AND table_type = 'BASE TABLE';")
 echo "Database setup complete! Created $TABLE_COUNT tables."
 
 # Show database summary
 echo "Database summary:"
-psql -h localhost -U postgres -d malaka -c "
+psql -U postgres -d malaka -c "
 SELECT 
     schemaname,
     tablename,

@@ -1,5 +1,5 @@
 # Go
-#
+
 # Binaries for programs and plugins
 *.exe
 *.exe~
@@ -7,11 +7,17 @@
 *.so
 *.dylib
 
-# Test binary, built with `go test -c`
+# Test binaries
 *.test
+server.test
+malaka.test
 
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
+
+# Go build outputs
+server
+malaka
 
 # Dependency directories
 vendor/
@@ -42,11 +48,43 @@ Thumbs.db
 
 # Log files
 *.log
+server.log
+malaka.log
 
 # Docker
 .dockerignore
 docker-compose.override.yml
 
-# Binaries
+# Binaries (already covered by above, but explicit for clarity)
 /bin/
 /server
+
+# Go profiling data
+*.prof
+*.trace
+*.pprof
+*.heap
+*.cpu
+*.mem
+*.block
+*.mutex
+*.goroutine
+*.threadcreate
+*.profile
+*.dump
+
+# Temporary files
+*.tmp
+*.bak
+*.old
+*.new
+*.orig
+*.rej
+*.patch
+*.diff
+*.swp
+*.swo
+
+# Process files
+*.pid
+*.sock

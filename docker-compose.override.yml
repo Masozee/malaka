@@ -8,7 +8,7 @@ services:
     environment:
       LOAD_SEED_DATA: "true"
     volumes:
-      - ./internal/pkg/database/seeds:/docker-entrypoint-initdb.d/seeds
+      - ./backend/internal/pkg/database/seeds:/docker-entrypoint-initdb.d/seeds
     ports:
       - "5432:5432"  # Expose PostgreSQL port for direct access
 
@@ -18,7 +18,7 @@ services:
       - "6379:6379"  # Expose Redis port for direct access
 
   # Development overrides for MALAKA App
-  malaka-app:
+  malaka-backend:
     environment:
       - GIN_MODE=debug
       - DB_DRIVER=postgres
@@ -27,11 +27,15 @@ services:
       - SERVER_ADDRESS=0.0.0.0:8080
       - LOG_LEVEL=debug
     volumes:
-      - ./internal/pkg/database/seeds:/app/seeds:ro
+      - ./backend/internal/pkg/database/seeds:/app/seeds:ro
     build:
-      context: .
+      context: ./backend
       dockerfile: Dockerfile
-      target: builder  # Use builder stage for development with debugging tools
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 
   # Enable management tools in development
   adminer:

@@ -1,0 +1,56 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+rule_files:
+  - "alert_rules.yml"
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          - alertmanager:9093
+
+scrape_configs:
+  # Malaka Backend Application
+  - job_name: 'malaka-backend'
+    static_configs:
+      - targets: ['malaka-backend:8080']
+    metrics_path: '/metrics'
+    scrape_interval: 10s
+
+  # PostgreSQL Database
+  - job_name: 'postgres'
+    static_configs:
+      - targets: ['postgres-exporter:9187']
+    scrape_interval: 15s
+
+  # Redis Cache
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis-exporter:9121']
+    scrape_interval: 15s
+
+  # PgBouncer Connection Pooler
+  - job_name: 'pgbouncer'
+    static_configs:
+      - targets: ['pgbouncer-exporter:9127']
+    scrape_interval: 15s
+
+  # Docker Container Metrics
+  - job_name: 'cadvisor'
+    static_configs:
+      - targets: ['cadvisor:8080']
+    scrape_interval: 20s
+
+  # Node/System Metrics
+  - job_name: 'node'
+    static_configs:
+      - targets: ['node-exporter:9100']
+    scrape_interval: 15s
+
+  # Prometheus Self-Monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+    scrape_interval: 30s

@@ -25,10 +25,10 @@ run:
 	./bin/malaka
 
 migrate_up:
-	$(GOOSE) -dir "./internal/pkg/database/migrations" postgres "host=localhost port=5432 user=postgres password=TanahAbang1971 dbname=malaka sslmode=disable" up
+	$(GOOSE) -dir "./internal/pkg/database/migrations" postgres "host=localhost port=5432 user=postgres password=$(DB_PASSWORD) dbname=malaka sslmode=disable" up
 
 migrate_down:
-	$(GOOSE) -dir "./internal/pkg/database/migrations" postgres "host=localhost port=5432 user=postgres password=TanahAbang1971 dbname=malaka sslmode=disable" down
+	$(GOOSE) -dir "./internal/pkg/database/migrations" postgres "host=localhost port=5432 user=postgres password=$(DB_PASSWORD) dbname=malaka sslmode=disable" down
 
 # Docker commands
 docker-up:

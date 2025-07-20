@@ -1,0 +1,230 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "Malaka ERP - System Overview",
+    "tags": ["malaka", "erp", "overview"],
+    "style": "dark",
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "System Health",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "up{job=\"malaka-backend\"}",
+            "legendFormat": "Backend",
+            "refId": "A"
+          },
+          {
+            "expr": "up{job=\"postgres\"}",
+            "legendFormat": "Database",
+            "refId": "B"
+          },
+          {
+            "expr": "up{job=\"redis\"}",
+            "legendFormat": "Cache",
+            "refId": "C"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 0
+        },
+        "options": {
+          "colorMode": "background",
+          "orientation": "horizontal",
+          "reduceOptions": {
+            "calcs": ["lastNotNull"],
+            "fields": "",
+            "values": false
+          },
+          "textMode": "auto"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "mappings": [
+              {
+                "options": {
+                  "0": {
+                    "color": "red",
+                    "index": 0,
+                    "text": "DOWN"
+                  },
+                  "1": {
+                    "color": "green",
+                    "index": 1,
+                    "text": "UP"
+                  }
+                },
+                "type": "value"
+              }
+            ],
+            "thresholds": {
+              "steps": [
+                {
+                  "color": "red",
+                  "value": null
+                },
+                {
+                  "color": "green",
+                  "value": 1
+                }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 2,
+        "title": "HTTP Request Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(http_requests_total{job=\"malaka-backend\"}[5m])",
+            "legendFormat": "{{method}} {{handler}}",
+            "refId": "A"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 0
+        },
+        "yAxes": [
+          {
+            "label": "requests/sec",
+            "show": true
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Response Time",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job=\"malaka-backend\"}[5m]))",
+            "legendFormat": "95th percentile",
+            "refId": "A"
+          },
+          {
+            "expr": "histogram_quantile(0.50, rate(http_request_duration_seconds_bucket{job=\"malaka-backend\"}[5m]))",
+            "legendFormat": "50th percentile",
+            "refId": "B"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 8
+        },
+        "yAxes": [
+          {
+            "label": "seconds",
+            "show": true
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "Database Connections",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "pg_stat_database_numbackends{datname=\"malaka\"}",
+            "legendFormat": "Active Connections",
+            "refId": "A"
+          },
+          {
+            "expr": "pg_settings_max_connections",
+            "legendFormat": "Max Connections",
+            "refId": "B"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 8
+        },
+        "yAxes": [
+          {
+            "label": "connections",
+            "show": true
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "title": "Memory Usage",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "container_memory_usage_bytes{name=~\"malaka-.*\"} / 1024 / 1024",
+            "legendFormat": "{{name}}",
+            "refId": "A"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 16
+        },
+        "yAxes": [
+          {
+            "label": "MB",
+            "show": true
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "title": "CPU Usage",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(container_cpu_usage_seconds_total{name=~\"malaka-.*\"}[5m]) * 100",
+            "legendFormat": "{{name}}",
+            "refId": "A"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 16
+        },
+        "yAxes": [
+          {
+            "label": "percent",
+            "show": true
+          }
+        ]
+      }
+    ],
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "timepicker": {},
+    "templating": {
+      "list": []
+    },
+    "annotations": {
+      "list": []
+    },
+    "refresh": "5s",
+    "schemaVersion": 27,
+    "version": 0,
+    "links": []
+  }
+}

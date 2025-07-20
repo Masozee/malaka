@@ -13,11 +13,16 @@ bin/
 build/
 dist/
 *.log
+server.log
+malaka.log
 
 # Test files
 *_test.go
 test/
 coverage.out
+*.test
+server.test
+malaka.test
 
 # IDE files
 .vscode/
@@ -53,6 +58,13 @@ Makefile
 *.temp
 tmp/
 temp/
+*.bak
+*.old
+*.new
+*.orig
+*.rej
+*.patch
+*.diff
 
 # Node.js (if any)
 node_modules/
@@ -93,3 +105,21 @@ coverage.xml
 *.njsproj
 *.sln
 *.sw?
+
+# Go profiling data
+*.prof
+*.trace
+*.pprof
+*.heap
+*.cpu
+*.mem
+*.block
+*.mutex
+*.goroutine
+*.threadcreate
+*.profile
+*.dump
+
+# Process files
+*.pid
+*.sock

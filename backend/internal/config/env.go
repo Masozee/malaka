@@ -7,7 +7,7 @@ import (
 // LoadConfig reads configuration from file or environment variables.
 func LoadConfig(path string) (config Config, err error) {
 	viper.AddConfigPath(path)
-	viper.SetConfigName("app")
+	viper.SetConfigName(".env")
 	viper.SetConfigType("env")
 
 	viper.AutomaticEnv()
