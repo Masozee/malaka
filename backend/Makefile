@@ -11,7 +11,7 @@ DOCKER_COMPOSE=docker-compose
 all: build
 
 build:
-	$(GOBUILD) -o bin/malaka cmd/server/main.go
+	$(GOBUILD) -o bin/malaka ./cmd/server
 
 clean:
 	$(GOCLEAN)
@@ -21,7 +21,7 @@ test:
 	$(GOTEST) ./...
 
 run:
-	$(GOBUILD) -o bin/malaka cmd/server/main.go
+	$(GOBUILD) -o bin/malaka ./cmd/server
 	./bin/malaka
 
 migrate_up:
