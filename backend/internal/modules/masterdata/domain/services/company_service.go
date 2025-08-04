@@ -3,10 +3,11 @@ package services
 import (
 	"context"
 	"errors"
+	"time"
 
+	"github.com/google/uuid"
 	"malaka/internal/modules/masterdata/domain/entities"
 	"malaka/internal/modules/masterdata/domain/repositories"
-	"malaka/internal/shared/utils"
 )
 
 // CompanyService provides business logic for company operations.
@@ -22,8 +23,14 @@ func NewCompanyService(repo repositories.CompanyRepository) *CompanyService {
 // CreateCompany creates a new company.
 func (s *CompanyService) CreateCompany(ctx context.Context, company *entities.Company) error {
 	if company.ID == "" {
-		company.ID = utils.RandomString(10) // Generate a random ID if not provided
+		company.ID = uuid.New().String() // Generate a UUID if not provided
 	}
+	
+	// Set timestamps
+	now := time.Now()
+	company.CreatedAt = now
+	company.UpdatedAt = now
+	
 	return s.repo.Create(ctx, company)
 }
 
@@ -47,6 +54,10 @@ func (s *CompanyService) UpdateCompany(ctx context.Context, company *entities.Co
 	if existingCompany == nil {
 		return errors.New("company not found")
 	}
+	
+	// Set updated timestamp
+	company.UpdatedAt = time.Now()
+	
 	return s.repo.Update(ctx, company)
 }
 

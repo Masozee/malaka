@@ -12,7 +12,9 @@ type CreateDivisionRequest struct {
 	Name        string     `json:"name" binding:"required"`
 	Description string     `json:"description"`
 	ParentID    *uuid.UUID `json:"parent_id"`
-	IsActive    bool       `json:"is_active"`
+	Level       int        `json:"level" binding:"required,min=0"`
+	SortOrder   int        `json:"sort_order" binding:"required,min=0"`
+	Status      string     `json:"status" binding:"required,oneof=active inactive"`
 }
 
 // UpdateDivisionRequest represents the request body for updating an existing division.
@@ -21,7 +23,9 @@ type UpdateDivisionRequest struct {
 	Name        string     `json:"name"`
 	Description string     `json:"description"`
 	ParentID    *uuid.UUID `json:"parent_id"`
-	IsActive    bool       `json:"is_active"`
+	Level       int        `json:"level" binding:"omitempty,min=0"`
+	SortOrder   int        `json:"sort_order" binding:"omitempty,min=0"`
+	Status      string     `json:"status" binding:"omitempty,oneof=active inactive"`
 }
 
 // DivisionResponse represents the response body for division operations.
@@ -32,7 +36,8 @@ type DivisionResponse struct {
 	Description string     `json:"description"`
 	ParentID    *uuid.UUID `json:"parent_id"`
 	Level       int        `json:"level"`
-	IsActive    bool       `json:"is_active"`
+	SortOrder   int        `json:"sort_order"`
+	Status      string     `json:"status"`
 	CreatedAt   time.Time  `json:"created_at"`
 	UpdatedAt   time.Time  `json:"updated_at"`
 }

@@ -6,7 +6,6 @@ import (
 
 	"malaka/internal/modules/masterdata/domain/entities"
 	"malaka/internal/modules/masterdata/domain/repositories"
-	"malaka/internal/shared/utils"
 )
 
 // ModelService provides business logic for model operations.
@@ -21,9 +20,8 @@ func NewModelService(repo repositories.ModelRepository) *ModelService {
 
 // CreateModel creates a new model.
 func (s *ModelService) CreateModel(ctx context.Context, model *entities.Model) error {
-	if model.ID == "" {
-		model.ID = utils.RandomString(10) // Generate a random ID if not provided
-	}
+	// Let the database generate the UUID (gen_random_uuid())
+	model.ID = ""
 	return s.repo.Create(ctx, model)
 }
 

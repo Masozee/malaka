@@ -64,14 +64,25 @@ func (r *journalEntryRepositoryImpl) GetByID(ctx context.Context, id uuid.UUID) 
 			   company_id, created_by, created_at, updated_at
 		FROM journal_entries WHERE id = $1`
 	
+	var postedBy, reversedBy sql.NullString
+	var reference, sourceModule, sourceID sql.NullString
+	
 	err := r.db.QueryRowContext(ctx, query, id).Scan(
 		&entry.ID, &entry.EntryNumber, &entry.EntryDate, &entry.Description,
-		&entry.Reference, &entry.Status, &entry.TotalDebit, &entry.TotalCredit,
+		&reference, &entry.Status, &entry.TotalDebit, &entry.TotalCredit,
 		&entry.CurrencyCode, &entry.ExchangeRate, &entry.BaseTotalDebit,
-		&entry.BaseTotalCredit, &entry.SourceModule, &entry.SourceID,
-		&entry.PostedBy, &entry.PostedAt, &entry.ReversedBy, &entry.ReversedAt,
+		&entry.BaseTotalCredit, &sourceModule, &sourceID,
+		&postedBy, &entry.PostedAt, &reversedBy, &entry.ReversedAt,
 		&entry.CompanyID, &entry.CreatedBy, &entry.CreatedAt, &entry.UpdatedAt,
 	)
+	
+	if err == nil {
+		entry.Reference = reference.String
+		entry.SourceModule = sourceModule.String
+		entry.SourceID = sourceID.String
+		entry.PostedBy = postedBy.String
+		entry.ReversedBy = reversedBy.String
+	}
 	
 	if err != nil {
 		return nil, err
@@ -559,17 +570,26 @@ func (r *journalEntryRepositoryImpl) queryEntries(ctx context.Context, query str
 	var entries []*entities.JournalEntry
 	for rows.Next() {
 		entry := &entities.JournalEntry{}
+		var postedBy, reversedBy sql.NullString
+		var reference, sourceModule, sourceID sql.NullString
+		
 		err := rows.Scan(
 			&entry.ID, &entry.EntryNumber, &entry.EntryDate, &entry.Description,
-			&entry.Reference, &entry.Status, &entry.TotalDebit, &entry.TotalCredit,
+			&reference, &entry.Status, &entry.TotalDebit, &entry.TotalCredit,
 			&entry.CurrencyCode, &entry.ExchangeRate, &entry.BaseTotalDebit,
-			&entry.BaseTotalCredit, &entry.SourceModule, &entry.SourceID,
-			&entry.PostedBy, &entry.PostedAt, &entry.ReversedBy, &entry.ReversedAt,
+			&entry.BaseTotalCredit, &sourceModule, &sourceID,
+			&postedBy, &entry.PostedAt, &reversedBy, &entry.ReversedAt,
 			&entry.CompanyID, &entry.CreatedBy, &entry.CreatedAt, &entry.UpdatedAt,
 		)
 		if err != nil {
 			return nil, err
 		}
+		
+		entry.Reference = reference.String
+		entry.SourceModule = sourceModule.String
+		entry.SourceID = sourceID.String
+		entry.PostedBy = postedBy.String
+		entry.ReversedBy = reversedBy.String
 		
 		// Load lines for each entry
 		lines, err := r.GetLinesByEntryID(ctx, entry.ID)

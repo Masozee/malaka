@@ -20,18 +20,20 @@ func NewUserRepositoryImpl(db *sqlx.DB) *UserRepositoryImpl {
 
 // Create creates a new user in the database.
 func (r *UserRepositoryImpl) Create(ctx context.Context, user *entities.User) error {
-	query := `INSERT INTO users (id, username, password, email, company_id, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7)`
-	_, err := r.db.ExecContext(ctx, query, user.ID, user.Username, user.Password, user.Email, user.CompanyID, user.CreatedAt, user.UpdatedAt)
+	query := `INSERT INTO users (username, password, email, full_name, phone, company_id, role, status, created_at, updated_at) 
+			  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) 
+			  RETURNING id, created_at, updated_at`
+	err := r.db.QueryRowContext(ctx, query, user.Username, user.Password, user.Email, user.FullName, user.Phone, user.CompanyID, user.Role, user.Status, user.CreatedAt, user.UpdatedAt).Scan(&user.ID, &user.CreatedAt, &user.UpdatedAt)
 	return err
 }
 
 // GetByID retrieves a user by its ID from the database.
 func (r *UserRepositoryImpl) GetByID(ctx context.Context, id string) (*entities.User, error) {
-	query := `SELECT id, username, password, email, company_id, created_at, updated_at FROM users WHERE id = $1`
+	query := `SELECT id, username, password, email, full_name, phone, company_id, role, status, last_login, created_at, updated_at FROM users WHERE id = $1`
 	row := r.db.QueryRowContext(ctx, query, id)
 
 	user := &entities.User{}
-	err := row.Scan(&user.ID, &user.Username, &user.Password, &user.Email, &user.CompanyID, &user.CreatedAt, &user.UpdatedAt)
+	err := row.Scan(&user.ID, &user.Username, &user.Password, &user.Email, &user.FullName, &user.Phone, &user.CompanyID, &user.Role, &user.Status, &user.LastLogin, &user.CreatedAt, &user.UpdatedAt)
 	if err == sql.ErrNoRows {
 		return nil, nil // User not found
 	}
@@ -40,8 +42,8 @@ func (r *UserRepositoryImpl) GetByID(ctx context.Context, id string) (*entities.
 
 // Update updates an existing user in the database.
 func (r *UserRepositoryImpl) Update(ctx context.Context, user *entities.User) error {
-	query := `UPDATE users SET username = $1, password = $2, email = $3, company_id = $4, updated_at = $5 WHERE id = $6`
-	_, err := r.db.ExecContext(ctx, query, user.Username, user.Password, user.Email, user.CompanyID, user.UpdatedAt, user.ID)
+	query := `UPDATE users SET username = $1, password = $2, email = $3, full_name = $4, phone = $5, company_id = $6, role = $7, status = $8, updated_at = $9 WHERE id = $10`
+	_, err := r.db.ExecContext(ctx, query, user.Username, user.Password, user.Email, user.FullName, user.Phone, user.CompanyID, user.Role, user.Status, user.UpdatedAt, user.ID)
 	return err
 }
 
@@ -54,7 +56,7 @@ func (r *UserRepositoryImpl) Delete(ctx context.Context, id string) error {
 
 // GetAll retrieves all users from the database.
 func (r *UserRepositoryImpl) GetAll(ctx context.Context) ([]*entities.User, error) {
-	query := `SELECT id, username, password, email, company_id, created_at, updated_at FROM users ORDER BY created_at DESC`
+	query := `SELECT id, username, password, email, full_name, phone, company_id, role, status, last_login, created_at, updated_at FROM users ORDER BY created_at DESC`
 	rows, err := r.db.QueryContext(ctx, query)
 	if err != nil {
 		return nil, err
@@ -64,7 +66,7 @@ func (r *UserRepositoryImpl) GetAll(ctx context.Context) ([]*entities.User, erro
 	var users []*entities.User
 	for rows.Next() {
 		user := &entities.User{}
-		err := rows.Scan(&user.ID, &user.Username, &user.Password, &user.Email, &user.CompanyID, &user.CreatedAt, &user.UpdatedAt)
+		err := rows.Scan(&user.ID, &user.Username, &user.Password, &user.Email, &user.FullName, &user.Phone, &user.CompanyID, &user.Role, &user.Status, &user.LastLogin, &user.CreatedAt, &user.UpdatedAt)
 		if err != nil {
 			return nil, err
 		}
@@ -75,11 +77,11 @@ func (r *UserRepositoryImpl) GetAll(ctx context.Context) ([]*entities.User, erro
 
 // GetByUsername retrieves a user by its username from the database.
 func (r *UserRepositoryImpl) GetByUsername(ctx context.Context, username string) (*entities.User, error) {
-	query := `SELECT id, username, password, email, company_id, created_at, updated_at FROM users WHERE username = $1`
+	query := `SELECT id, username, password, email, full_name, phone, company_id, role, status, last_login, created_at, updated_at FROM users WHERE username = $1`
 	row := r.db.QueryRowContext(ctx, query, username)
 
 	user := &entities.User{}
-	err := row.Scan(&user.ID, &user.Username, &user.Password, &user.Email, &user.CompanyID, &user.CreatedAt, &user.UpdatedAt)
+	err := row.Scan(&user.ID, &user.Username, &user.Password, &user.Email, &user.FullName, &user.Phone, &user.CompanyID, &user.Role, &user.Status, &user.LastLogin, &user.CreatedAt, &user.UpdatedAt)
 	if err == sql.ErrNoRows {
 		return nil, nil // User not found
 	}

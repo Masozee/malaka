@@ -14,7 +14,7 @@ import (
 	"github.com/stretchr/testify/mock"
 	"gorm.io/gorm"
 
-	"malaka/internal/modules/shipping/domain"
+	shipping_domain "malaka/internal/modules/shipping/domain"
 	"malaka/internal/modules/shipping/domain/dtos"
 	"malaka/internal/modules/shipping/presentation/http/handlers"
 	"malaka/internal/shared/response"
@@ -56,7 +56,7 @@ func (m *MockShipmentService) DeleteShipment(ctx context.Context, id uuid.UUID) 
 	return args.Error(0)
 }
 
-func setupRouter() *gin.Engine {
+func setupShipmentRouter() *gin.Engine {
 	gin.SetMode(gin.TestMode)
 	r := gin.Default()
 	return r
@@ -65,7 +65,7 @@ func setupRouter() *gin.Engine {
 func TestShipmentHandler_CreateShipment(t *testing.T) {
 	mockService := new(MockShipmentService)
 	handler := handlers.NewShipmentHandler(mockService)
-	router := setupRouter()
+	router := setupShipmentRouter()
 	router.POST("/shipping/shipments", handler.CreateShipment)
 
 	t.Run("Success", func(t *testing.T) {
@@ -97,7 +97,7 @@ func TestShipmentHandler_CreateShipment(t *testing.T) {
 func TestShipmentHandler_GetShipmentByID(t *testing.T) {
 	mockService := new(MockShipmentService)
 	handler := handlers.NewShipmentHandler(mockService)
-	router := setupRouter()
+	router := setupShipmentRouter()
 	router.GET("/shipping/shipments/:id", handler.GetShipmentByID)
 
 	t.Run("Success", func(t *testing.T) {
@@ -132,7 +132,7 @@ func TestShipmentHandler_GetShipmentByID(t *testing.T) {
 func TestShipmentHandler_GetAllShipments(t *testing.T) {
 	mockService := new(MockShipmentService)
 	handler := handlers.NewShipmentHandler(mockService)
-	router := setupRouter()
+	router := setupShipmentRouter()
 	router.GET("/shipping/shipments", handler.GetAllShipments)
 
 	t.Run("Success", func(t *testing.T) {
@@ -158,7 +158,7 @@ func TestShipmentHandler_GetAllShipments(t *testing.T) {
 func TestShipmentHandler_UpdateShipment(t *testing.T) {
 	mockService := new(MockShipmentService)
 	handler := handlers.NewShipmentHandler(mockService)
-	router := setupRouter()
+	router := setupShipmentRouter()
 	router.PUT("/shipping/shipments/:id", handler.UpdateShipment)
 
 	shipmentID := uuid.New()
@@ -197,7 +197,7 @@ func TestShipmentHandler_UpdateShipment(t *testing.T) {
 func TestShipmentHandler_DeleteShipment(t *testing.T) {
 	mockService := new(MockShipmentService)
 	handler := handlers.NewShipmentHandler(mockService)
-	router := setupRouter()
+	router := setupShipmentRouter()
 	router.DELETE("/shipping/shipments/:id", handler.DeleteShipment)
 
 	shipmentID := uuid.New()

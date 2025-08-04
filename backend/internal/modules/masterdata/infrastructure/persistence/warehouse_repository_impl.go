@@ -3,6 +3,7 @@ package persistence
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 
 	"github.com/jmoiron/sqlx"
 	"malaka/internal/modules/masterdata/domain/entities"
@@ -20,34 +21,101 @@ func NewWarehouseRepositoryImpl(db *sqlx.DB) *WarehouseRepositoryImpl {
 
 // Create creates a new warehouse in the database.
 func (r *WarehouseRepositoryImpl) Create(ctx context.Context, warehouse *entities.Warehouse) error {
-	query := `INSERT INTO warehouses (id, name, address, created_at, updated_at) VALUES ($1, $2, $3, $4, $5)`
-	_, err := r.db.ExecContext(ctx, query, warehouse.ID, warehouse.Name, warehouse.Address, warehouse.CreatedAt, warehouse.UpdatedAt)
+	zonesJSON, _ := json.Marshal(warehouse.Zones)
+	operatingHoursJSON, _ := json.Marshal(warehouse.OperatingHours)
+	facilitiesJSON, _ := json.Marshal(warehouse.Facilities)
+	coordinatesJSON, _ := json.Marshal(warehouse.Coordinates)
+
+	query := `INSERT INTO warehouses (
+		id, code, name, address, city, phone, manager, email, 
+		type, capacity, current_stock, status,
+		zones, operating_hours, facilities, coordinates, 
+		created_at, updated_at
+	) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)`
+	
+	_, err := r.db.ExecContext(ctx, query,
+		warehouse.ID, warehouse.Code, warehouse.Name, warehouse.Address,
+		warehouse.City, warehouse.Phone, warehouse.Manager, warehouse.Email,
+		warehouse.Type, warehouse.Capacity, warehouse.CurrentStock, warehouse.Status,
+		zonesJSON, operatingHoursJSON, facilitiesJSON, coordinatesJSON,
+		warehouse.CreatedAt, warehouse.UpdatedAt)
 	return err
 }
 
 // GetByID retrieves a warehouse by its ID from the database.
 func (r *WarehouseRepositoryImpl) GetByID(ctx context.Context, id string) (*entities.Warehouse, error) {
-	query := `SELECT id, name, address, created_at, updated_at FROM warehouses WHERE id = $1`
+	query := `SELECT id, code, name, address, city, phone, manager, email, 
+		type, capacity, current_stock, status,
+		zones, operating_hours, facilities, coordinates,
+		created_at, updated_at 
+		FROM warehouses WHERE id = $1`
 	row := r.db.QueryRowContext(ctx, query, id)
 
 	warehouse := &entities.Warehouse{}
-	err := row.Scan(&warehouse.ID, &warehouse.Name, &warehouse.Address, &warehouse.CreatedAt, &warehouse.UpdatedAt)
+	var zonesJSON, operatingHoursJSON, facilitiesJSON, coordinatesJSON []byte
+	
+	err := row.Scan(
+		&warehouse.ID, &warehouse.Code, &warehouse.Name, &warehouse.Address,
+		&warehouse.City, &warehouse.Phone, &warehouse.Manager, &warehouse.Email,
+		&warehouse.Type, &warehouse.Capacity, &warehouse.CurrentStock, &warehouse.Status,
+		&zonesJSON, &operatingHoursJSON, &facilitiesJSON, &coordinatesJSON,
+		&warehouse.CreatedAt, &warehouse.UpdatedAt)
+	
 	if err == sql.ErrNoRows {
 		return nil, nil // Warehouse not found
 	}
-	return warehouse, err
+	if err != nil {
+		return nil, err
+	}
+
+	// Parse JSON fields
+	if len(zonesJSON) > 0 {
+		json.Unmarshal(zonesJSON, &warehouse.Zones)
+	}
+	if len(operatingHoursJSON) > 0 {
+		json.Unmarshal(operatingHoursJSON, &warehouse.OperatingHours)
+	}
+	if len(facilitiesJSON) > 0 {
+		json.Unmarshal(facilitiesJSON, &warehouse.Facilities)
+	}
+	if len(coordinatesJSON) > 0 {
+		json.Unmarshal(coordinatesJSON, &warehouse.Coordinates)
+	}
+
+	return warehouse, nil
 }
 
 // Update updates an existing warehouse in the database.
 func (r *WarehouseRepositoryImpl) Update(ctx context.Context, warehouse *entities.Warehouse) error {
-	query := `UPDATE warehouses SET name = $1, address = $2, updated_at = $3 WHERE id = $4`
-	_, err := r.db.ExecContext(ctx, query, warehouse.Name, warehouse.Address, warehouse.UpdatedAt, warehouse.ID)
+	zonesJSON, _ := json.Marshal(warehouse.Zones)
+	operatingHoursJSON, _ := json.Marshal(warehouse.OperatingHours)
+	facilitiesJSON, _ := json.Marshal(warehouse.Facilities)
+	coordinatesJSON, _ := json.Marshal(warehouse.Coordinates)
+
+	query := `UPDATE warehouses SET 
+		code = $1, name = $2, address = $3, city = $4, phone = $5, 
+		manager = $6, email = $7, type = $8, capacity = $9, 
+		current_stock = $10, status = $11,
+		zones = $12, operating_hours = $13, facilities = $14, coordinates = $15,
+		updated_at = $16 
+		WHERE id = $17`
+	
+	_, err := r.db.ExecContext(ctx, query,
+		warehouse.Code, warehouse.Name, warehouse.Address, warehouse.City,
+		warehouse.Phone, warehouse.Manager, warehouse.Email, warehouse.Type,
+		warehouse.Capacity, warehouse.CurrentStock, warehouse.Status,
+		zonesJSON, operatingHoursJSON, facilitiesJSON, coordinatesJSON,
+		warehouse.UpdatedAt, warehouse.ID)
 	return err
 }
 
 // GetAll retrieves all warehouses from the database.
 func (r *WarehouseRepositoryImpl) GetAll(ctx context.Context) ([]*entities.Warehouse, error) {
-	query := `SELECT id, name, address, created_at, updated_at FROM warehouses ORDER BY created_at DESC`
+	query := `SELECT id, code, name, address, city, phone, manager, email, 
+		type, capacity, current_stock, status,
+		zones, operating_hours, facilities, coordinates,
+		created_at, updated_at 
+		FROM warehouses ORDER BY created_at DESC`
 	rows, err := r.db.QueryContext(ctx, query)
 	if err != nil {
 		return nil, err
@@ -57,10 +125,32 @@ func (r *WarehouseRepositoryImpl) GetAll(ctx context.Context) ([]*entities.Wareh
 	var warehouses []*entities.Warehouse
 	for rows.Next() {
 		warehouse := &entities.Warehouse{}
-		err := rows.Scan(&warehouse.ID, &warehouse.Name, &warehouse.Address, &warehouse.CreatedAt, &warehouse.UpdatedAt)
+		var zonesJSON, operatingHoursJSON, facilitiesJSON, coordinatesJSON []byte
+		
+		err := rows.Scan(
+			&warehouse.ID, &warehouse.Code, &warehouse.Name, &warehouse.Address,
+			&warehouse.City, &warehouse.Phone, &warehouse.Manager, &warehouse.Email,
+			&warehouse.Type, &warehouse.Capacity, &warehouse.CurrentStock, &warehouse.Status,
+			&zonesJSON, &operatingHoursJSON, &facilitiesJSON, &coordinatesJSON,
+			&warehouse.CreatedAt, &warehouse.UpdatedAt)
 		if err != nil {
 			return nil, err
 		}
+
+		// Parse JSON fields
+		if len(zonesJSON) > 0 {
+			json.Unmarshal(zonesJSON, &warehouse.Zones)
+		}
+		if len(operatingHoursJSON) > 0 {
+			json.Unmarshal(operatingHoursJSON, &warehouse.OperatingHours)
+		}
+		if len(facilitiesJSON) > 0 {
+			json.Unmarshal(facilitiesJSON, &warehouse.Facilities)
+		}
+		if len(coordinatesJSON) > 0 {
+			json.Unmarshal(coordinatesJSON, &warehouse.Coordinates)
+		}
+
 		warehouses = append(warehouses, warehouse)
 	}
 	return warehouses, rows.Err()

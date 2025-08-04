@@ -76,3 +76,13 @@ func (s *StockService) GetStockBalance(ctx context.Context, articleID, warehouse
 func (s *StockService) GetStockMovements(ctx context.Context) ([]*entities.StockMovement, error) {
 	return s.stockMovementRepo.GetAll(ctx)
 }
+
+// GetAllStockBalances retrieves all stock balances from the database.
+func (s *StockService) GetAllStockBalances(ctx context.Context) ([]*entities.StockBalance, error) {
+	return s.stockBalanceRepo.GetAll(ctx)
+}
+
+// GetStockControlData retrieves all stock balances with article and warehouse details for stock control page.
+func (s *StockService) GetStockControlData(ctx context.Context) ([]*repositories.StockControlItem, error) {
+	return s.stockBalanceRepo.GetAllWithDetails(ctx)
+}

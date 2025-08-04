@@ -2,7 +2,6 @@ package persistence_test
 
 import (
 	"context"
-	"database/sql"
 	"regexp"
 	"testing"
 	"time"
@@ -13,6 +12,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"malaka/internal/modules/inventory/domain/entities"
 	"malaka/internal/modules/inventory/infrastructure/persistence"
+	"malaka/internal/shared/types"
 )
 
 func TestDraftOrderRepository(t *testing.T) {
@@ -25,13 +25,15 @@ func TestDraftOrderRepository(t *testing.T) {
 
 	t.Run("Create", func(t *testing.T) {
 		draftOrder := &entities.DraftOrder{
-			ID:          uuid.New().String(),
+			BaseModel: types.BaseModel{
+				ID:        uuid.New().String(),
+				CreatedAt: time.Now(),
+				UpdatedAt: time.Now(),
+			},
 			SupplierID:  uuid.New().String(),
 			OrderDate:   time.Now(),
 			Status:      "draft",
 			TotalAmount: 100.50,
-			CreatedAt:   time.Now(),
-			UpdatedAt:   time.Now(),
 		}
 
 		mock.ExpectExec("INSERT INTO draft_orders").
@@ -45,13 +47,15 @@ func TestDraftOrderRepository(t *testing.T) {
 	t.Run("GetByID", func(t *testing.T) {
 		id := uuid.New()
 		expectedDraftOrder := &entities.DraftOrder{
-			ID:          id.String(),
+			BaseModel: types.BaseModel{
+				ID:        id.String(),
+				CreatedAt: time.Now(),
+				UpdatedAt: time.Now(),
+			},
 			SupplierID:  uuid.New().String(),
 			OrderDate:   time.Now(),
 			Status:      "draft",
 			TotalAmount: 100.50,
-			CreatedAt:   time.Now(),
-			UpdatedAt:   time.Now(),
 		}
 
 		rows := sqlmock.NewRows([]string{"id", "supplier_id", "order_date", "status", "total_amount", "created_at", "updated_at"}).

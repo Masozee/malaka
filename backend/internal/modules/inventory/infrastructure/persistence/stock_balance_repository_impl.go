@@ -6,6 +6,7 @@ import (
 
 	"github.com/jmoiron/sqlx"
 	"malaka/internal/modules/inventory/domain/entities"
+	"malaka/internal/modules/inventory/domain/repositories"
 )
 
 // StockBalanceRepositoryImpl implements repositories.StockBalanceRepository.
@@ -84,4 +85,73 @@ func (r *StockBalanceRepositoryImpl) GetByArticleAndWarehouse(ctx context.Contex
 		return nil, nil // Stock balance not found
 	}
 	return sb, err
+}
+
+
+// GetAllWithDetails retrieves all stock balances with article and warehouse details.
+func (r *StockBalanceRepositoryImpl) GetAllWithDetails(ctx context.Context) ([]*repositories.StockControlItem, error) {
+	query := `
+		SELECT 
+			sb.id as stock_balance_id,
+			sb.article_id,
+			sb.warehouse_id,
+			sb.quantity,
+			sb.created_at as stock_created_at,
+			sb.updated_at as stock_updated_at,
+			-- Article details
+			a.name as article_name,
+			a.barcode as article_code,
+			a.description as article_description,
+			a.barcode as article_barcode,
+			a.price as article_price,
+			COALESCE(c.name, 'General') as article_category,
+			-- Warehouse details
+			w.name as warehouse_name,
+			w.code as warehouse_code,
+			w.address as warehouse_address,
+			w.city as warehouse_city,
+			w.type as warehouse_type,
+			w.status as warehouse_status
+		FROM stock_balances sb
+		INNER JOIN articles a ON sb.article_id = a.id
+		INNER JOIN warehouses w ON sb.warehouse_id = w.id
+		LEFT JOIN classifications c ON a.classification_id = c.id
+		ORDER BY sb.created_at DESC
+	`
+	
+	rows, err := r.db.QueryContext(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var items []*repositories.StockControlItem
+	for rows.Next() {
+		item := &repositories.StockControlItem{}
+		err := rows.Scan(
+			&item.StockBalanceID,
+			&item.ArticleID,
+			&item.WarehouseID,
+			&item.Quantity,
+			&item.StockCreatedAt,
+			&item.StockUpdatedAt,
+			&item.ArticleName,
+			&item.ArticleCode,
+			&item.ArticleDescription,
+			&item.ArticleBarcode,
+			&item.ArticlePrice,
+			&item.ArticleCategory,
+			&item.WarehouseName,
+			&item.WarehouseCode,
+			&item.WarehouseAddress,
+			&item.WarehouseCity,
+			&item.WarehouseType,
+			&item.WarehouseStatus,
+		)
+		if err != nil {
+			return nil, err
+		}
+		items = append(items, item)
+	}
+	return items, rows.Err()
 }

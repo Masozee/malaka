@@ -12,6 +12,7 @@ type DivisionRepository interface {
 	Create(ctx context.Context, division *entities.Division) error
 	GetByID(ctx context.Context, id uuid.UUID) (*entities.Division, error)
 	GetAll(ctx context.Context) ([]*entities.Division, error)
+	GetAllWithPagination(ctx context.Context, limit, offset int, search, status, sortOrder string) ([]*entities.Division, int, error)
 	GetByCode(ctx context.Context, code string) (*entities.Division, error)
 	GetByParentID(ctx context.Context, parentID uuid.UUID) ([]*entities.Division, error)
 	GetRootDivisions(ctx context.Context) ([]*entities.Division, error)

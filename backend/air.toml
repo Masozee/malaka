@@ -1,0 +1,24 @@
+root = "."
+tmp_dir = "tmp"
+
+[build]
+  cmd = "CGO_ENABLED=1 go build -o ./tmp/malaka ./cmd/server/main.go"
+  bin = "./tmp/malaka"
+  full_bin = "APP_ENV=development ./tmp/malaka"
+  include_ext = ["go", "tpl", "tmpl", "html"]
+  exclude_dir = ["tmp", "vendor", "node_modules"]
+  delay = 1000 # ms
+  log = "air_errors.log"
+
+[run]
+  cmds = ["./tmp/malaka"]
+  # You might need to adjust this based on your backend's actual port
+  # and if it needs to wait for other services.
+  # For now, assuming it starts directly.
+  # If your backend needs to wait for DB, Redis, etc., you might add a wait-for-it script here.
+  # For example: "wait-for-it db:5432 -- ./tmp/malaka"
+  # But for development, direct start is usually fine.
+  # If you encounter issues, consider adding a wait-for-it script.
+
+[misc]
+  clean_on_exit = true

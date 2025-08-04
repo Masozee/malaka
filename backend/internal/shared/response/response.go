@@ -66,3 +66,21 @@ func InternalServerError(c *gin.Context, message string, data interface{}) {
 		Data:    data,
 	})
 }
+
+// Unauthorized sends a 401 Unauthorized response.
+func Unauthorized(c *gin.Context, message string, data interface{}) {
+	c.JSON(http.StatusUnauthorized, Response{
+		Success: false,
+		Message: message,
+		Data:    data,
+	})
+}
+
+// Forbidden sends a 403 Forbidden response.
+func Forbidden(c *gin.Context, message string, data interface{}) {
+	c.JSON(http.StatusForbidden, Response{
+		Success: false,
+		Message: message,
+		Data:    data,
+	})
+}

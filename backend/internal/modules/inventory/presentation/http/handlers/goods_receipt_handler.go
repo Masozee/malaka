@@ -45,7 +45,7 @@ func (h *GoodsReceiptHandler) CreateGoodsReceipt(c *gin.Context) {
 // GetGoodsReceiptByID handles retrieving a goods receipt by its ID.
 func (h *GoodsReceiptHandler) GetGoodsReceiptByID(c *gin.Context) {
 	id := c.Param("id")
-	gr, err := h.service.GetGoodsReceiptByID(c.Request.Context(), id)
+	gr, err := h.service.GetGoodsReceiptByIDWithDetails(c.Request.Context(), id)
 	if err != nil {
 		response.InternalServerError(c, "Failed to get goods receipt", err.Error())
 		return
@@ -60,7 +60,7 @@ func (h *GoodsReceiptHandler) GetGoodsReceiptByID(c *gin.Context) {
 
 // GetAllGoodsReceipts handles retrieving all goods receipts.
 func (h *GoodsReceiptHandler) GetAllGoodsReceipts(c *gin.Context) {
-	grs, err := h.service.GetAllGoodsReceipts(c.Request.Context())
+	grs, err := h.service.GetAllGoodsReceiptsWithDetails(c.Request.Context())
 	if err != nil {
 		response.InternalServerError(c, "Failed to get all goods receipts", err.Error())
 		return

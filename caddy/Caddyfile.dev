@@ -1,0 +1,96 @@
+# Caddy development configuration for Malaka ERP
+{
+    # Global options
+    debug
+    local_certs
+    admin 0.0.0.0:2019
+    log {
+        output stdout
+        format console
+        level DEBUG
+    }
+}
+
+# Main application server
+localhost {
+    # Enable automatic HTTPS (will use local certificates in dev)
+    tls internal
+    
+    # Enable access logging
+    log {
+        output stdout
+        format console
+    }
+    
+    # API routes - proxy to Go backend
+    handle /api/* {
+        # Remove /api prefix before forwarding
+        uri strip_prefix /api
+        reverse_proxy malaka-backend:8080 {
+            # Health check
+            health_uri /health
+            health_interval 30s
+            health_timeout 10s
+            
+            # Headers for proper forwarding
+            header_up Host {http.request.host}
+            header_up X-Real-IP {http.request.remote.host}
+            header_up X-Forwarded-For {http.request.remote.host}
+            header_up X-Forwarded-Proto {http.request.scheme}
+        }
+    }
+    
+    # Frontend routes - proxy to Next.js
+    handle {
+        reverse_proxy malaka-frontend:3000 {
+            # Health check
+            health_uri /
+            health_interval 30s
+            health_timeout 10s
+            
+            # WebSocket support for Next.js hot reload
+            header_up Connection {>Connection}
+            header_up Upgrade {>Upgrade}
+            header_up Host {http.request.host}
+            header_up X-Real-IP {http.request.remote.host}
+            header_up X-Forwarded-For {http.request.remote.host}
+            header_up X-Forwarded-Proto {http.request.scheme}
+        }
+    }
+    
+    # Enable compression
+    encode gzip
+    
+    # Security headers
+    header {
+        # Remove server info
+        -Server
+        
+        # Security headers
+        X-Content-Type-Options nosniff
+        X-Frame-Options DENY
+        X-XSS-Protection "1; mode=block"
+        Referrer-Policy strict-origin-when-cross-origin
+    }
+}
+
+# Optional: Separate API endpoint (if you want api.localhost)
+api.localhost {
+    tls internal
+    
+    reverse_proxy malaka-backend:8080 {
+        health_uri /health
+        health_interval 30s
+        health_timeout 10s
+    }
+    
+    encode gzip
+    
+    header {
+        -Server
+        X-Content-Type-Options nosniff
+        X-Frame-Options DENY
+        X-XSS-Protection "1; mode=block"
+        Referrer-Policy strict-origin-when-cross-origin
+    }
+}

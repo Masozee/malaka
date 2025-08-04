@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -9,6 +10,7 @@ import (
 	"malaka/internal/modules/masterdata/domain/services"
 	"malaka/internal/modules/masterdata/presentation/http/dto"
 	"malaka/internal/shared/response"
+	"malaka/internal/shared/types"
 )
 
 // DepstoreHandler handles HTTP requests for department store operations.
@@ -30,12 +32,15 @@ func (h *DepstoreHandler) CreateDepstore(c *gin.Context) {
 	}
 
 	depstore := &entities.Depstore{
-		Name:         req.Name,
-		Code:         req.Code,
-		Address:      req.Address,
-		Contact:      req.Contact,
-		PaymentTerms: req.PaymentTerms,
-		IsActive:     req.IsActive,
+		Code:            req.Code,
+		Name:            req.Name,
+		Address:         req.Address,
+		City:            req.City,
+		Phone:           req.Phone,
+		ContactPerson:   req.ContactPerson,
+		CommissionRate:  req.CommissionRate,
+		PaymentTerms:    req.PaymentTerms,
+		Status:          req.Status,
 	}
 
 	if err := h.service.CreateDepstore(c.Request.Context(), depstore); err != nil {
@@ -44,15 +49,18 @@ func (h *DepstoreHandler) CreateDepstore(c *gin.Context) {
 	}
 
 	resp := dto.DepstoreResponse{
-		ID:           depstore.ID,
-		Name:         depstore.Name,
-		Code:         depstore.Code,
-		Address:      depstore.Address,
-		Contact:      depstore.Contact,
-		PaymentTerms: depstore.PaymentTerms,
-		IsActive:     depstore.IsActive,
-		CreatedAt:    depstore.CreatedAt,
-		UpdatedAt:    depstore.UpdatedAt,
+		ID:              depstore.ID,
+		Code:            depstore.Code,
+		Name:            depstore.Name,
+		Address:         depstore.Address,
+		City:            depstore.City,
+		Phone:           depstore.Phone,
+		ContactPerson:   depstore.ContactPerson,
+		CommissionRate:  depstore.CommissionRate,
+		PaymentTerms:    depstore.PaymentTerms,
+		Status:          depstore.Status,
+		CreatedAt:       depstore.CreatedAt,
+		UpdatedAt:       depstore.UpdatedAt,
 	}
 
 	response.Created(c, "Department store created successfully", resp)
@@ -73,44 +81,83 @@ func (h *DepstoreHandler) GetDepstoreByID(c *gin.Context) {
 	}
 
 	resp := dto.DepstoreResponse{
-		ID:           depstore.ID,
-		Name:         depstore.Name,
-		Code:         depstore.Code,
-		Address:      depstore.Address,
-		Contact:      depstore.Contact,
-		PaymentTerms: depstore.PaymentTerms,
-		IsActive:     depstore.IsActive,
-		CreatedAt:    depstore.CreatedAt,
-		UpdatedAt:    depstore.UpdatedAt,
+		ID:              depstore.ID,
+		Code:            depstore.Code,
+		Name:            depstore.Name,
+		Address:         depstore.Address,
+		City:            depstore.City,
+		Phone:           depstore.Phone,
+		ContactPerson:   depstore.ContactPerson,
+		CommissionRate:  depstore.CommissionRate,
+		PaymentTerms:    depstore.PaymentTerms,
+		Status:          depstore.Status,
+		CreatedAt:       depstore.CreatedAt,
+		UpdatedAt:       depstore.UpdatedAt,
 	}
 
 	response.OK(c, "Department store retrieved successfully", resp)
 }
 
-// GetAllDepstores handles retrieving all department stores.
+// GetAllDepstores handles retrieving all department stores with pagination support.
 func (h *DepstoreHandler) GetAllDepstores(c *gin.Context) {
-	depstores, err := h.service.GetAllDepstores(c.Request.Context())
+	// Parse pagination parameters
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "10"))
+	search := c.Query("search")
+	status := c.Query("status")
+	
+	// Ensure valid values
+	if page < 1 {
+		page = 1
+	}
+	if limit < 1 || limit > 100 {
+		limit = 10
+	}
+	
+	// Calculate offset
+	offset := (page - 1) * limit
+	
+	// Get depstores with pagination
+	depstores, total, err := h.service.GetAllDepstoresWithPagination(c.Request.Context(), limit, offset, search, status)
 	if err != nil {
 		response.InternalServerError(c, err.Error(), nil)
 		return
 	}
-
+	
+	// Convert to response DTOs
 	var responses []dto.DepstoreResponse
 	for _, depstore := range depstores {
 		responses = append(responses, dto.DepstoreResponse{
-			ID:           depstore.ID,
-			Name:         depstore.Name,
-			Code:         depstore.Code,
-			Address:      depstore.Address,
-			Contact:      depstore.Contact,
-			PaymentTerms: depstore.PaymentTerms,
-			IsActive:     depstore.IsActive,
-			CreatedAt:    depstore.CreatedAt,
-			UpdatedAt:    depstore.UpdatedAt,
+			ID:              depstore.ID,
+			Code:            depstore.Code,
+			Name:            depstore.Name,
+			Address:         depstore.Address,
+			City:            depstore.City,
+			Phone:           depstore.Phone,
+			ContactPerson:   depstore.ContactPerson,
+			CommissionRate:  depstore.CommissionRate,
+			PaymentTerms:    depstore.PaymentTerms,
+			Status:          depstore.Status,
+			CreatedAt:       depstore.CreatedAt,
+			UpdatedAt:       depstore.UpdatedAt,
 		})
 	}
+	
+	// Calculate total pages
+	totalPages := (total + limit - 1) / limit
+	
+	// Create paginated response
+	paginatedResponse := map[string]interface{}{
+		"data": responses,
+		"pagination": types.Pagination{
+			Page:       page,
+			Limit:      limit,
+			TotalRows:  total,
+			TotalPages: totalPages,
+		},
+	}
 
-	response.OK(c, "Department stores retrieved successfully", responses)
+	response.OK(c, "Department stores retrieved successfully", paginatedResponse)
 }
 
 // GetDepstoreByCode handles retrieving a department store by code.
@@ -123,15 +170,18 @@ func (h *DepstoreHandler) GetDepstoreByCode(c *gin.Context) {
 	}
 
 	resp := dto.DepstoreResponse{
-		ID:           depstore.ID,
-		Name:         depstore.Name,
-		Code:         depstore.Code,
-		Address:      depstore.Address,
-		Contact:      depstore.Contact,
-		PaymentTerms: depstore.PaymentTerms,
-		IsActive:     depstore.IsActive,
-		CreatedAt:    depstore.CreatedAt,
-		UpdatedAt:    depstore.UpdatedAt,
+		ID:              depstore.ID,
+		Code:            depstore.Code,
+		Name:            depstore.Name,
+		Address:         depstore.Address,
+		City:            depstore.City,
+		Phone:           depstore.Phone,
+		ContactPerson:   depstore.ContactPerson,
+		CommissionRate:  depstore.CommissionRate,
+		PaymentTerms:    depstore.PaymentTerms,
+		Status:          depstore.Status,
+		CreatedAt:       depstore.CreatedAt,
+		UpdatedAt:       depstore.UpdatedAt,
 	}
 
 	response.OK(c, "Department store retrieved successfully", resp)
@@ -159,22 +209,33 @@ func (h *DepstoreHandler) UpdateDepstore(c *gin.Context) {
 	}
 
 	// Update fields if provided
-	if req.Name != "" {
-		depstore.Name = req.Name
-	}
 	if req.Code != "" {
 		depstore.Code = req.Code
+	}
+	if req.Name != "" {
+		depstore.Name = req.Name
 	}
 	if req.Address != "" {
 		depstore.Address = req.Address
 	}
-	if req.Contact != "" {
-		depstore.Contact = req.Contact
+	if req.City != "" {
+		depstore.City = req.City
 	}
-	if req.PaymentTerms > 0 {
+	if req.Phone != "" {
+		depstore.Phone = req.Phone
+	}
+	if req.ContactPerson != "" {
+		depstore.ContactPerson = req.ContactPerson
+	}
+	if req.CommissionRate != 0 { // Assuming 0 is not a valid commission rate to update
+		depstore.CommissionRate = req.CommissionRate
+	}
+	if req.PaymentTerms != "" {
 		depstore.PaymentTerms = req.PaymentTerms
 	}
-	depstore.IsActive = req.IsActive
+	if req.Status != "" {
+		depstore.Status = req.Status
+	}
 
 	if err := h.service.UpdateDepstore(c.Request.Context(), depstore); err != nil {
 		response.InternalServerError(c, err.Error(), nil)
@@ -182,15 +243,18 @@ func (h *DepstoreHandler) UpdateDepstore(c *gin.Context) {
 	}
 
 	resp := dto.DepstoreResponse{
-		ID:           depstore.ID,
-		Name:         depstore.Name,
-		Code:         depstore.Code,
-		Address:      depstore.Address,
-		Contact:      depstore.Contact,
-		PaymentTerms: depstore.PaymentTerms,
-		IsActive:     depstore.IsActive,
-		CreatedAt:    depstore.CreatedAt,
-		UpdatedAt:    depstore.UpdatedAt,
+		ID:              depstore.ID,
+		Code:            depstore.Code,
+		Name:            depstore.Name,
+		Address:         depstore.Address,
+		City:            depstore.City,
+		Phone:           depstore.Phone,
+		ContactPerson:   depstore.ContactPerson,
+		CommissionRate:  depstore.CommissionRate,
+		PaymentTerms:    depstore.PaymentTerms,
+		Status:          depstore.Status,
+		CreatedAt:       depstore.CreatedAt,
+		UpdatedAt:       depstore.UpdatedAt,
 	}
 
 	response.OK(c, "Department store updated successfully", resp)

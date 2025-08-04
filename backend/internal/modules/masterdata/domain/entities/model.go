@@ -7,5 +7,9 @@ import (
 // Model represents a model entity.
 type Model struct {
 	types.BaseModel
-	Name string `json:"name"`
+	Code        string  `json:"code"`
+	Name        string  `json:"name"`
+	Description *string `json:"description,omitempty"`
+	ArticleID   *string `json:"article_id,omitempty"`
+	Status      string  `json:"status"`
 }

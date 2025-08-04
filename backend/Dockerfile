@@ -1,22 +1,24 @@
-# Simple Dockerfile - exactly what works on macOS
-FROM golang:1.24-alpine AS builder
+# Development Dockerfile with Go and Air for hot-reloading
+FROM golang:1.24-alpine
 
 WORKDIR /app
 
-# Copy go mod files first
+# Install necessary packages including SQLite and build dependencies
+RUN apk add --no-cache git ca-certificates tzdata sqlite sqlite-dev gcc musl-dev
+
+# Install Air for hot-reloading
+RUN go install github.com/air-verse/air@latest
+RUN go install github.com/pressly/goose/v3/cmd/goose@latest
+
+# Copy go mod files first for better caching
 COPY go.mod go.sum ./
 RUN go mod download
 
 # Copy all source code
 COPY . .
 
-# Build with the exact same command that works locally
-RUN go build -o malaka ./cmd/server/main.go
+# Expose port
+EXPOSE 8080
 
-# Final stage  
-FROM alpine:latest
-RUN apk --no-cache add ca-certificates
-WORKDIR /root/
-COPY --from=builder /app/malaka .
-COPY --from=builder /app/app.env .
-CMD ["./malaka"]
+# Default command (can be overridden by docker-compose)
+CMD ["air", "-c", "air.toml"]

@@ -28,8 +28,21 @@ func (h *WarehouseHandler) CreateWarehouse(c *gin.Context) {
 	}
 
 	warehouse := &entities.Warehouse{
-		Name:    req.Name,
-		Address: req.Address,
+		Code:           req.Code,
+		Name:           req.Name,
+		Address:        req.Address,
+		City:           req.City,
+		Phone:          req.Phone,
+		Manager:        req.Manager,
+		Email:          req.Email,
+		Type:           entities.WarehouseType(req.Type),
+		Capacity:       req.Capacity,
+		CurrentStock:   req.CurrentStock,
+		Status:         entities.WarehouseStatus(req.Status),
+		Zones:          req.Zones,
+		OperatingHours: req.OperatingHours,
+		Facilities:     req.Facilities,
+		Coordinates:    req.Coordinates,
 	}
 
 	if err := h.service.CreateWarehouse(c.Request.Context(), warehouse); err != nil {
@@ -77,8 +90,21 @@ func (h *WarehouseHandler) UpdateWarehouse(c *gin.Context) {
 	}
 
 	warehouse := &entities.Warehouse{
-		Name:    req.Name,
-		Address: req.Address,
+		Code:           req.Code,
+		Name:           req.Name,
+		Address:        req.Address,
+		City:           req.City,
+		Phone:          req.Phone,
+		Manager:        req.Manager,
+		Email:          req.Email,
+		Type:           entities.WarehouseType(req.Type),
+		Capacity:       req.Capacity,
+		CurrentStock:   req.CurrentStock,
+		Status:         entities.WarehouseStatus(req.Status),
+		Zones:          req.Zones,
+		OperatingHours: req.OperatingHours,
+		Facilities:     req.Facilities,
+		Coordinates:    req.Coordinates,
 	}
 	warehouse.ID = id // Set the ID from the URL parameter
 

@@ -13,11 +13,11 @@ func TestCreateAirwaybillRequest(t *testing.T) {
 	shipmentID := uuid.New()
 	req := dtos.CreateAirwaybillRequest{
 		ShipmentID:       shipmentID,
-		AirwaybillNumber: "AWB123",
+		AWBNumber: "AWB123",
 	}
 
 	assert.Equal(t, shipmentID, req.ShipmentID)
-	assert.Equal(t, "AWB123", req.AirwaybillNumber)
+	assert.Equal(t, "AWB123", req.AWBNumber)
 }
 
 func TestUpdateAirwaybillRequest(t *testing.T) {
@@ -26,10 +26,10 @@ func TestUpdateAirwaybillRequest(t *testing.T) {
 	req := dtos.UpdateAirwaybillRequest{
 		ID:               id,
 		ShipmentID:       shipmentID,
-		AirwaybillNumber: "AWB456",
+		AWBNumber: "AWB456",
 	}
 
 	assert.Equal(t, id, req.ID)
 	assert.Equal(t, shipmentID, req.ShipmentID)
-	assert.Equal(t, "AWB456", req.AirwaybillNumber)
+	assert.Equal(t, "AWB456", req.AWBNumber)
 }

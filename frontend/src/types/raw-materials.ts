@@ -1,0 +1,93 @@
+export interface RawMaterial {
+  id: string;
+  materialCode: string;
+  materialName: string;
+  description?: string;
+  category: RawMaterialCategory;
+  unit: string;
+  currentStock: number;
+  minStock: number;
+  maxStock: number;
+  unitCost: number;
+  totalValue: number;
+  supplier: string;
+  supplierCode?: string;
+  leadTime: number;
+  status: RawMaterialStatus;
+  location: string;
+  batchNumber?: string;
+  expiryDate?: string;
+  lastUpdated: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type RawMaterialCategory = 
+  | 'leather'
+  | 'fabric'
+  | 'sole'
+  | 'thread'
+  | 'adhesive'
+  | 'hardware'
+  | 'packaging'
+  | 'chemical'
+  | 'other';
+
+export type RawMaterialStatus = 
+  | 'in_stock'
+  | 'low_stock'
+  | 'out_of_stock'
+  | 'on_order'
+  | 'expired'
+  | 'quality_hold';
+
+export interface RawMaterialFilters {
+  search?: string;
+  category?: RawMaterialCategory | 'all';
+  status?: RawMaterialStatus | 'all';
+  supplier?: string;
+  location?: string;
+  page?: number;
+  limit?: number;
+}
+
+export interface RawMaterialFormData {
+  materialCode: string;
+  materialName: string;
+  description?: string;
+  category: RawMaterialCategory;
+  unit: string;
+  minStock: number;
+  maxStock: number;
+  unitCost: number;
+  supplier: string;
+  supplierCode?: string;
+  leadTime: number;
+  location: string;
+  batchNumber?: string;
+  expiryDate?: string;
+}
+
+export interface RawMaterialMovement {
+  id: string;
+  materialId: string;
+  movementType: 'receipt' | 'issue' | 'transfer' | 'adjustment';
+  quantity: number;
+  unitCost?: number;
+  totalCost?: number;
+  fromLocation?: string;
+  toLocation?: string;
+  referenceNumber?: string;
+  notes?: string;
+  createdBy: string;
+  createdAt: string;
+}
+
+export interface RawMaterialStock {
+  materialId: string;
+  location: string;
+  quantity: number;
+  reservedQuantity: number;
+  availableQuantity: number;
+  lastMovement: string;
+}

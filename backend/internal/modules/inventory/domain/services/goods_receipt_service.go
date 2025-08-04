@@ -62,3 +62,13 @@ func (s *GoodsReceiptService) DeleteGoodsReceipt(ctx context.Context, id string)
 	}
 	return s.repo.Delete(ctx, id)
 }
+
+// GetAllGoodsReceiptsWithDetails retrieves all goods receipts with complete related information
+func (s *GoodsReceiptService) GetAllGoodsReceiptsWithDetails(ctx context.Context) ([]map[string]interface{}, error) {
+	return s.repo.GetAllWithDetails(ctx)
+}
+
+// GetGoodsReceiptByIDWithDetails retrieves a goods receipt by ID with complete related information
+func (s *GoodsReceiptService) GetGoodsReceiptByIDWithDetails(ctx context.Context, id string) (map[string]interface{}, error) {
+	return s.repo.GetByIDWithDetails(ctx, id)
+}

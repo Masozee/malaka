@@ -20,18 +20,18 @@ func NewCompanyRepositoryImpl(db *sqlx.DB) *CompanyRepositoryImpl {
 
 // Create creates a new company in the database.
 func (r *CompanyRepositoryImpl) Create(ctx context.Context, company *entities.Company) error {
-	query := `INSERT INTO companies (id, name, address, created_at, updated_at) VALUES ($1, $2, $3, $4, $5)`
-	_, err := r.db.ExecContext(ctx, query, company.ID, company.Name, company.Address, company.CreatedAt, company.UpdatedAt)
+	query := `INSERT INTO companies (id, name, email, phone, address, status, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`
+	_, err := r.db.ExecContext(ctx, query, company.ID, company.Name, company.Email, company.Phone, company.Address, company.Status, company.CreatedAt, company.UpdatedAt)
 	return err
 }
 
 // GetByID retrieves a company by its ID from the database.
 func (r *CompanyRepositoryImpl) GetByID(ctx context.Context, id string) (*entities.Company, error) {
-	query := `SELECT id, name, address, created_at, updated_at FROM companies WHERE id = $1`
+	query := `SELECT id, name, COALESCE(email, '') as email, COALESCE(phone, '') as phone, COALESCE(address, '') as address, COALESCE(status, 'active') as status, created_at, updated_at FROM companies WHERE id = $1`
 	row := r.db.QueryRowContext(ctx, query, id)
 
 	company := &entities.Company{}
-	err := row.Scan(&company.ID, &company.Name, &company.Address, &company.CreatedAt, &company.UpdatedAt)
+	err := row.Scan(&company.ID, &company.Name, &company.Email, &company.Phone, &company.Address, &company.Status, &company.CreatedAt, &company.UpdatedAt)
 	if err == sql.ErrNoRows {
 		return nil, nil // Company not found
 	}
@@ -40,7 +40,7 @@ func (r *CompanyRepositoryImpl) GetByID(ctx context.Context, id string) (*entiti
 
 // GetAll retrieves all companies from the database.
 func (r *CompanyRepositoryImpl) GetAll(ctx context.Context) ([]*entities.Company, error) {
-	query := `SELECT id, name, address, created_at, updated_at FROM companies ORDER BY created_at DESC`
+	query := `SELECT id, name, COALESCE(email, '') as email, COALESCE(phone, '') as phone, COALESCE(address, '') as address, COALESCE(status, 'active') as status, created_at, updated_at FROM companies ORDER BY created_at DESC`
 	rows, err := r.db.QueryContext(ctx, query)
 	if err != nil {
 		return nil, err
@@ -50,7 +50,7 @@ func (r *CompanyRepositoryImpl) GetAll(ctx context.Context) ([]*entities.Company
 	var companies []*entities.Company
 	for rows.Next() {
 		company := &entities.Company{}
-		err := rows.Scan(&company.ID, &company.Name, &company.Address, &company.CreatedAt, &company.UpdatedAt)
+		err := rows.Scan(&company.ID, &company.Name, &company.Email, &company.Phone, &company.Address, &company.Status, &company.CreatedAt, &company.UpdatedAt)
 		if err != nil {
 			return nil, err
 		}
@@ -61,8 +61,8 @@ func (r *CompanyRepositoryImpl) GetAll(ctx context.Context) ([]*entities.Company
 
 // Update updates an existing company in the database.
 func (r *CompanyRepositoryImpl) Update(ctx context.Context, company *entities.Company) error {
-	query := `UPDATE companies SET name = $1, address = $2, updated_at = $3 WHERE id = $4`
-	_, err := r.db.ExecContext(ctx, query, company.Name, company.Address, company.UpdatedAt, company.ID)
+	query := `UPDATE companies SET name = $1, email = $2, phone = $3, address = $4, status = $5, updated_at = $6 WHERE id = $7`
+	_, err := r.db.ExecContext(ctx, query, company.Name, company.Email, company.Phone, company.Address, company.Status, company.UpdatedAt, company.ID)
 	return err
 }
 

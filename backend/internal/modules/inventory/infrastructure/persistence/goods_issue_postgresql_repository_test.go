@@ -3,7 +3,6 @@ package persistence_test
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"regexp"
 	"testing"
 	"time"
@@ -12,7 +11,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"malaka/internal/modules/inventory/domain/entities"
-	"malaka/internal/modules/inventory/infrastructure/persistence"
+	persistence "malaka/internal/modules/inventory/infrastructure/persistence"
 )
 
 func TestGoodsIssuePostgreSQLRepository_Save(t *testing.T) {
@@ -20,7 +19,7 @@ func TestGoodsIssuePostgreSQLRepository_Save(t *testing.T) {
 	assert.NoError(t, err)
 	defer db.Close()
 
-	repo := NewGoodsIssuePostgreSQLRepository(db)
+	repo := persistence.NewGoodsIssuePostgreSQLRepository(db)
 	ctx := context.Background()
 
 	giID := uuid.New()
@@ -51,7 +50,7 @@ func TestGoodsIssuePostgreSQLRepository_FindByID(t *testing.T) {
 	assert.NoError(t, err)
 	defer db.Close()
 
-	repo := NewGoodsIssuePostgreSQLRepository(db)
+	repo := persistence.NewGoodsIssuePostgreSQLRepository(db)
 	ctx := context.Background()
 
 	giID := uuid.New()
@@ -85,7 +84,7 @@ func TestGoodsIssuePostgreSQLRepository_FindByID_NotFound(t *testing.T) {
 	assert.NoError(t, err)
 	defer db.Close()
 
-	repo := NewGoodsIssuePostgreSQLRepository(db)
+	repo := persistence.NewGoodsIssuePostgreSQLRepository(db)
 	ctx := context.Background()
 
 	giID := uuid.New()
@@ -105,7 +104,7 @@ func TestGoodsIssuePostgreSQLRepository_FindAll(t *testing.T) {
 	assert.NoError(t, err)
 	defer db.Close()
 
-	repo := NewGoodsIssuePostgreSQLRepository(db)
+	repo := persistence.NewGoodsIssuePostgreSQLRepository(db)
 	ctx := context.Background()
 
 	giID1 := uuid.New()
@@ -149,7 +148,7 @@ func TestGoodsIssuePostgreSQLRepository_Delete(t *testing.T) {
 	assert.NoError(t, err)
 	defer db.Close()
 
-	repo := NewGoodsIssuePostgreSQLRepository(db)
+	repo := persistence.NewGoodsIssuePostgreSQLRepository(db)
 	ctx := context.Background()
 
 	giID := uuid.New()
@@ -174,7 +173,7 @@ func TestGoodsIssuePostgreSQLRepository_Delete_NotFound(t *testing.T) {
 	assert.NoError(t, err)
 	defer db.Close()
 
-	repo := NewGoodsIssuePostgreSQLRepository(db)
+	repo := persistence.NewGoodsIssuePostgreSQLRepository(db)
 	ctx := context.Background()
 
 	giID := uuid.New()

@@ -6,52 +6,76 @@ import (
 )
 
 // RegisterAccountingRoutes registers all accounting-related routes
-func RegisterAccountingRoutes(router *gin.RouterGroup, glHandler *handlers.GeneralLedgerHandler, jeHandler *handlers.JournalEntryHandler) {
+func RegisterAccountingRoutes(router *gin.RouterGroup, glHandler *handlers.GeneralLedgerHandler, jeHandler *handlers.JournalEntryHandler, budgetHandler interface{}, costCenterHandler interface{}, trialBalanceHandler interface{}, autoJournalHandler *handlers.AutoJournalHandler, exchangeRateHandler *handlers.ExchangeRateHandler) {
 	accounting := router.Group("/accounting")
 	{
-		// General Ledger routes
-		gl := accounting.Group("/general-ledger")
-		{
-			gl.POST("/", glHandler.CreateGeneralLedgerEntry)
-			gl.GET("/", glHandler.GetAllGeneralLedgerEntries)
-			gl.GET("/:id", glHandler.GetGeneralLedgerEntryByID)
-			gl.PUT("/:id", glHandler.UpdateGeneralLedgerEntry)
-			gl.DELETE("/:id", glHandler.DeleteGeneralLedgerEntry)
-			
-			// Account-specific operations
-			gl.GET("/account/:account_id", glHandler.GetGeneralLedgerEntriesByAccount)
-			gl.GET("/account/:account_id/balance", glHandler.GetAccountBalance)
-			gl.GET("/account/:account_id/report", glHandler.GetLedgerReport)
-			gl.POST("/account/:account_id/recalculate", glHandler.RecalculateAccountBalances)
-			
-			// Company-specific operations
-			gl.GET("/company/:company_id", glHandler.GetGeneralLedgerEntriesByCompany)
+		// Exchange rates routes
+		if exchangeRateHandler != nil {
+			RegisterExchangeRateRoutes(accounting, exchangeRateHandler)
+		}
+		// General Ledger routes (temporarily simplified for debugging)
+		if glHandler != nil {
+			gl := accounting.Group("/general-ledger")
+			{
+				gl.GET("/trial-balance", glHandler.GetTrialBalance)
+				gl.GET("/", glHandler.GetAllGeneralLedgerEntries)
+				gl.GET("/:id", glHandler.GetGeneralLedgerEntryByID)
+			}
 		}
 
-		// Journal Entry routes
-		je := accounting.Group("/journal-entries")
-		{
-			je.POST("/", jeHandler.CreateJournalEntry)
-			je.GET("/", jeHandler.GetAllJournalEntries)
-			je.GET("/:id", jeHandler.GetJournalEntryByID)
-			je.PUT("/:id", jeHandler.UpdateJournalEntry)
-			je.DELETE("/:id", jeHandler.DeleteJournalEntry)
-			
-			// Status operations
-			je.POST("/:id/post", jeHandler.PostJournalEntry)
-			je.POST("/:id/reverse", jeHandler.ReverseJournalEntry)
-			
-			// Line operations
-			je.POST("/:id/lines", jeHandler.AddLineToJournalEntry)
-			
-			// Query operations
-			je.GET("/status", jeHandler.GetJournalEntriesByStatus)
-			je.GET("/date-range", jeHandler.GetJournalEntriesByDateRange)
-			je.GET("/company/:company_id", jeHandler.GetJournalEntriesByCompany)
-			je.GET("/company/:company_id/unposted", jeHandler.GetUnpostedEntries)
-			
-			// Reporting
-			je.GET("/register", jeHandler.GetJournalRegister)
+		// Journal Entry routes (simplified for debugging)
+		if jeHandler != nil {
+			je := accounting.Group("/journal-entries")
+			{
+				je.GET("/", jeHandler.GetAllJournalEntries)
+				je.GET("/:id", jeHandler.GetJournalEntryByID)
+			}
 		}
+
+		// Auto Journal routes
+		if autoJournalHandler != nil {
+			RegisterAutoJournalRoutes(accounting, autoJournalHandler)
+		}
+
+		// Budget routes (disabled - handler not available)
+		// if budgetHandler != nil {
+		//	 RegisterBudgetRoutes(accounting, budgetHandler)
+		// }
+
+		// Cost Center routes
+		if costCenterHandler != nil {
+			RegisterCostCenterRoutes(accounting, costCenterHandler.(*handlers.CostCenterHandler))
+		}
+
+		// Trial Balance routes - dedicated endpoints for frontend compatibility
+		RegisterTrialBalanceRoutes(accounting, glHandler)
+	}
+}
+
+// RegisterAutoJournalRoutes registers auto journal routes
+func RegisterAutoJournalRoutes(router *gin.RouterGroup, handler *handlers.AutoJournalHandler) {
+	autoJournal := router.Group("/auto-journal")
+	{
+		// Transaction creation endpoints
+		autoJournal.POST("/sales", handler.CreateFromSales)
+		autoJournal.POST("/purchase", handler.CreateFromPurchase)
+		autoJournal.POST("/inventory", handler.CreateFromInventory)
+		autoJournal.POST("/payroll", handler.CreateFromPayroll)
+		autoJournal.POST("/cash-bank", handler.CreateFromCashBank)
+		
+		// Account mapping configuration
+		autoJournal.POST("/mapping", handler.SetAccountMapping)
+		autoJournal.GET("/mapping/:sourceModule/:transactionType", handler.GetAccountMapping)
+	}
+}
+
+// RegisterTrialBalanceRoutes registers trial balance routes
+func RegisterTrialBalanceRoutes(router *gin.RouterGroup, handler *handlers.GeneralLedgerHandler) {
+	trialBalance := router.Group("/trial-balance")
+	{
+		trialBalance.GET("/period", handler.GetTrialBalance)
+		trialBalance.POST("/generate", handler.GetTrialBalance)
+		trialBalance.GET("/latest", handler.GetTrialBalance)
+		trialBalance.GET("/export", handler.GetTrialBalance)
 	}
 }

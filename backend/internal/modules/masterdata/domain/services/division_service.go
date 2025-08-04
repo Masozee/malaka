@@ -49,6 +49,11 @@ func (s *DivisionService) GetAllDivisions(ctx context.Context) ([]*entities.Divi
 	return s.repo.GetAll(ctx)
 }
 
+// GetAllDivisionsWithPagination retrieves divisions with pagination and filtering.
+func (s *DivisionService) GetAllDivisionsWithPagination(ctx context.Context, limit, offset int, search, status, sortOrder string) ([]*entities.Division, int, error) {
+	return s.repo.GetAllWithPagination(ctx, limit, offset, search, status, sortOrder)
+}
+
 // GetDivisionByCode retrieves a division by its code.
 func (s *DivisionService) GetDivisionByCode(ctx context.Context, code string) (*entities.Division, error) {
 	return s.repo.GetByCode(ctx, code)

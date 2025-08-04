@@ -4,35 +4,24 @@
 package generated
 
 import (
+	"bytes"
+	"compress/gzip"
+	"context"
+	"encoding/base64"
+	"encoding/json"
+	"fmt"
+	"io"
+	"net/http"
+	"net/url"
+	"path"
+	"strings"
 	"time"
 
+	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/labstack/echo/v4"
+	"github.com/oapi-codegen/runtime"
 	openapi_types "github.com/oapi-codegen/runtime/types"
 )
-
-// Article defines model for Article.
-type Article struct {
-	Barcode          *string    `json:"barcode,omitempty"`
-	ClassificationId *string    `json:"classification_id,omitempty"`
-	ColorId          *string    `json:"color_id,omitempty"`
-	CreatedAt        *time.Time `json:"created_at,omitempty"`
-	Description      *string    `json:"description,omitempty"`
-	Id               *string    `json:"id,omitempty"`
-	ModelId          *string    `json:"model_id,omitempty"`
-	Name             *string    `json:"name,omitempty"`
-	Price            *float32   `json:"price,omitempty"`
-	SizeId           *string    `json:"size_id,omitempty"`
-	SupplierId       *string    `json:"supplier_id,omitempty"`
-	UpdatedAt        *time.Time `json:"updated_at,omitempty"`
-}
-
-// Barcode defines model for Barcode.
-type Barcode struct {
-	ArticleId *string    `json:"article_id,omitempty"`
-	Code      *string    `json:"code,omitempty"`
-	CreatedAt *time.Time `json:"created_at,omitempty"`
-	Id        *string    `json:"id,omitempty"`
-	UpdatedAt *time.Time `json:"updated_at,omitempty"`
-}
 
 // BaseModel defines model for BaseModel.
 type BaseModel struct {
@@ -41,139 +30,13 @@ type BaseModel struct {
 	UpdatedAt *time.Time `json:"updated_at,omitempty"`
 }
 
-// Classification defines model for Classification.
-type Classification struct {
-	CreatedAt *time.Time `json:"created_at,omitempty"`
-	Id        *string    `json:"id,omitempty"`
-	Name      *string    `json:"name,omitempty"`
-	UpdatedAt *time.Time `json:"updated_at,omitempty"`
-}
-
-// Color defines model for Color.
-type Color struct {
-	CreatedAt *time.Time `json:"created_at,omitempty"`
-	Hex       *string    `json:"hex,omitempty"`
-	Id        *string    `json:"id,omitempty"`
-	Name      *string    `json:"name,omitempty"`
-	UpdatedAt *time.Time `json:"updated_at,omitempty"`
-}
-
-// Company defines model for Company.
-type Company struct {
-	Address   *string    `json:"address,omitempty"`
-	CreatedAt *time.Time `json:"created_at,omitempty"`
-	Id        *string    `json:"id,omitempty"`
-	Name      *string    `json:"name,omitempty"`
-	UpdatedAt *time.Time `json:"updated_at,omitempty"`
-}
-
-// CreateArticleRequest defines model for CreateArticleRequest.
-type CreateArticleRequest struct {
-	Barcode          *string `json:"barcode,omitempty"`
-	ClassificationId string  `json:"classification_id"`
-	ColorId          string  `json:"color_id"`
-	Description      *string `json:"description,omitempty"`
-	ModelId          string  `json:"model_id"`
-	Name             string  `json:"name"`
-	Price            float32 `json:"price"`
-	SizeId           string  `json:"size_id"`
-	SupplierId       string  `json:"supplier_id"`
-}
-
-// CreateBarcodeRequest defines model for CreateBarcodeRequest.
-type CreateBarcodeRequest struct {
-	ArticleId string `json:"article_id"`
-	Code      string `json:"code"`
-}
-
-// CreateClassificationRequest defines model for CreateClassificationRequest.
-type CreateClassificationRequest struct {
-	Name string `json:"name"`
-}
-
-// CreateColorRequest defines model for CreateColorRequest.
-type CreateColorRequest struct {
-	Hex  string `json:"hex"`
-	Name string `json:"name"`
-}
-
-// CreateCompanyRequest defines model for CreateCompanyRequest.
-type CreateCompanyRequest struct {
-	Address string `json:"address"`
-	Name    string `json:"name"`
-}
-
-// CreateCustomerRequest defines model for CreateCustomerRequest.
-type CreateCustomerRequest struct {
-	Address string `json:"address"`
-	Contact string `json:"contact"`
-	Name    string `json:"name"`
-}
-
-// CreateGalleryImageRequest defines model for CreateGalleryImageRequest.
-type CreateGalleryImageRequest struct {
-	ArticleId string `json:"article_id"`
-	IsPrimary *bool  `json:"is_primary,omitempty"`
-	Url       string `json:"url"`
-}
-
-// CreateModelRequest defines model for CreateModelRequest.
-type CreateModelRequest struct {
-	Name string `json:"name"`
-}
-
-// CreatePriceRequest defines model for CreatePriceRequest.
-type CreatePriceRequest struct {
-	Amount        float32   `json:"amount"`
-	ArticleId     string    `json:"article_id"`
-	Currency      string    `json:"currency"`
-	EffectiveDate time.Time `json:"effective_date"`
-}
-
-// CreateSizeRequest defines model for CreateSizeRequest.
-type CreateSizeRequest struct {
-	Name string `json:"name"`
-}
-
-// CreateSupplierRequest defines model for CreateSupplierRequest.
-type CreateSupplierRequest struct {
-	Address string `json:"address"`
-	Contact string `json:"contact"`
-	Name    string `json:"name"`
-}
-
 // CreateUserRequest defines model for CreateUserRequest.
 type CreateUserRequest struct {
 	CompanyId string              `json:"company_id"`
 	Email     openapi_types.Email `json:"email"`
 	Password  string              `json:"password"`
+	Role      string              `json:"role"`
 	Username  string              `json:"username"`
-}
-
-// CreateWarehouseRequest defines model for CreateWarehouseRequest.
-type CreateWarehouseRequest struct {
-	Address string `json:"address"`
-	Name    string `json:"name"`
-}
-
-// Customer defines model for Customer.
-type Customer struct {
-	Address   *string    `json:"address,omitempty"`
-	Contact   *string    `json:"contact,omitempty"`
-	CreatedAt *time.Time `json:"created_at,omitempty"`
-	Id        *string    `json:"id,omitempty"`
-	Name      *string    `json:"name,omitempty"`
-	UpdatedAt *time.Time `json:"updated_at,omitempty"`
-}
-
-// GalleryImage defines model for GalleryImage.
-type GalleryImage struct {
-	ArticleId *string    `json:"article_id,omitempty"`
-	CreatedAt *time.Time `json:"created_at,omitempty"`
-	Id        *string    `json:"id,omitempty"`
-	IsPrimary *bool      `json:"is_primary,omitempty"`
-	UpdatedAt *time.Time `json:"updated_at,omitempty"`
-	Url       *string    `json:"url,omitempty"`
 }
 
 // LoginRequest defines model for LoginRequest.
@@ -182,130 +45,13 @@ type LoginRequest struct {
 	Username string `json:"username"`
 }
 
-// Model defines model for Model.
-type Model struct {
-	CreatedAt *time.Time `json:"created_at,omitempty"`
-	Id        *string    `json:"id,omitempty"`
-	Name      *string    `json:"name,omitempty"`
-	UpdatedAt *time.Time `json:"updated_at,omitempty"`
-}
-
-// Price defines model for Price.
-type Price struct {
-	Amount        *float32   `json:"amount,omitempty"`
-	ArticleId     *string    `json:"article_id,omitempty"`
-	CreatedAt     *time.Time `json:"created_at,omitempty"`
-	Currency      *string    `json:"currency,omitempty"`
-	EffectiveDate *time.Time `json:"effective_date,omitempty"`
-	Id            *string    `json:"id,omitempty"`
-	UpdatedAt     *time.Time `json:"updated_at,omitempty"`
-}
-
-// Size defines model for Size.
-type Size struct {
-	CreatedAt *time.Time `json:"created_at,omitempty"`
-	Id        *string    `json:"id,omitempty"`
-	Name      *string    `json:"name,omitempty"`
-	UpdatedAt *time.Time `json:"updated_at,omitempty"`
-}
-
-// Supplier defines model for Supplier.
-type Supplier struct {
-	Address   *string    `json:"address,omitempty"`
-	Contact   *string    `json:"contact,omitempty"`
-	CreatedAt *time.Time `json:"created_at,omitempty"`
-	Id        *string    `json:"id,omitempty"`
-	Name      *string    `json:"name,omitempty"`
-	UpdatedAt *time.Time `json:"updated_at,omitempty"`
-}
-
-// UpdateArticleRequest defines model for UpdateArticleRequest.
-type UpdateArticleRequest struct {
-	Barcode          *string `json:"barcode,omitempty"`
-	ClassificationId string  `json:"classification_id"`
-	ColorId          string  `json:"color_id"`
-	Description      *string `json:"description,omitempty"`
-	ModelId          string  `json:"model_id"`
-	Name             string  `json:"name"`
-	Price            float32 `json:"price"`
-	SizeId           string  `json:"size_id"`
-	SupplierId       string  `json:"supplier_id"`
-}
-
-// UpdateBarcodeRequest defines model for UpdateBarcodeRequest.
-type UpdateBarcodeRequest struct {
-	ArticleId string `json:"article_id"`
-	Code      string `json:"code"`
-}
-
-// UpdateClassificationRequest defines model for UpdateClassificationRequest.
-type UpdateClassificationRequest struct {
-	Name string `json:"name"`
-}
-
-// UpdateColorRequest defines model for UpdateColorRequest.
-type UpdateColorRequest struct {
-	Hex  string `json:"hex"`
-	Name string `json:"name"`
-}
-
-// UpdateCompanyRequest defines model for UpdateCompanyRequest.
-type UpdateCompanyRequest struct {
-	Address string `json:"address"`
-	Name    string `json:"name"`
-}
-
-// UpdateCustomerRequest defines model for UpdateCustomerRequest.
-type UpdateCustomerRequest struct {
-	Address string `json:"address"`
-	Contact string `json:"contact"`
-	Name    string `json:"name"`
-}
-
-// UpdateGalleryImageRequest defines model for UpdateGalleryImageRequest.
-type UpdateGalleryImageRequest struct {
-	ArticleId string `json:"article_id"`
-	IsPrimary *bool  `json:"is_primary,omitempty"`
-	Url       string `json:"url"`
-}
-
-// UpdateModelRequest defines model for UpdateModelRequest.
-type UpdateModelRequest struct {
-	Name string `json:"name"`
-}
-
-// UpdatePriceRequest defines model for UpdatePriceRequest.
-type UpdatePriceRequest struct {
-	Amount        float32   `json:"amount"`
-	ArticleId     string    `json:"article_id"`
-	Currency      string    `json:"currency"`
-	EffectiveDate time.Time `json:"effective_date"`
-}
-
-// UpdateSizeRequest defines model for UpdateSizeRequest.
-type UpdateSizeRequest struct {
-	Name string `json:"name"`
-}
-
-// UpdateSupplierRequest defines model for UpdateSupplierRequest.
-type UpdateSupplierRequest struct {
-	Address string `json:"address"`
-	Contact string `json:"contact"`
-	Name    string `json:"name"`
-}
-
 // UpdateUserRequest defines model for UpdateUserRequest.
 type UpdateUserRequest struct {
 	CompanyId string              `json:"company_id"`
 	Email     openapi_types.Email `json:"email"`
 	Password  string              `json:"password"`
+	Role      string              `json:"role"`
 	Username  string              `json:"username"`
-}
-
-// UpdateWarehouseRequest defines model for UpdateWarehouseRequest.
-type UpdateWarehouseRequest struct {
-	Address string `json:"address"`
-	Name    string `json:"name"`
 }
 
 // User defines model for User.
@@ -314,84 +60,10 @@ type User struct {
 	CreatedAt *time.Time `json:"created_at,omitempty"`
 	Email     *string    `json:"email,omitempty"`
 	Id        *string    `json:"id,omitempty"`
+	Role      *string    `json:"role,omitempty"`
 	UpdatedAt *time.Time `json:"updated_at,omitempty"`
 	Username  *string    `json:"username,omitempty"`
 }
-
-// Warehouse defines model for Warehouse.
-type Warehouse struct {
-	Address   *string    `json:"address,omitempty"`
-	CreatedAt *time.Time `json:"created_at,omitempty"`
-	Id        *string    `json:"id,omitempty"`
-	Name      *string    `json:"name,omitempty"`
-	UpdatedAt *time.Time `json:"updated_at,omitempty"`
-}
-
-// PostMasterdataArticlesJSONRequestBody defines body for PostMasterdataArticles for application/json ContentType.
-type PostMasterdataArticlesJSONRequestBody = CreateArticleRequest
-
-// PutMasterdataArticlesIdJSONRequestBody defines body for PutMasterdataArticlesId for application/json ContentType.
-type PutMasterdataArticlesIdJSONRequestBody = UpdateArticleRequest
-
-// PostMasterdataBarcodesJSONRequestBody defines body for PostMasterdataBarcodes for application/json ContentType.
-type PostMasterdataBarcodesJSONRequestBody = CreateBarcodeRequest
-
-// PutMasterdataBarcodesIdJSONRequestBody defines body for PutMasterdataBarcodesId for application/json ContentType.
-type PutMasterdataBarcodesIdJSONRequestBody = UpdateBarcodeRequest
-
-// PostMasterdataClassificationsJSONRequestBody defines body for PostMasterdataClassifications for application/json ContentType.
-type PostMasterdataClassificationsJSONRequestBody = CreateClassificationRequest
-
-// PutMasterdataClassificationsIdJSONRequestBody defines body for PutMasterdataClassificationsId for application/json ContentType.
-type PutMasterdataClassificationsIdJSONRequestBody = UpdateClassificationRequest
-
-// PostMasterdataColorsJSONRequestBody defines body for PostMasterdataColors for application/json ContentType.
-type PostMasterdataColorsJSONRequestBody = CreateColorRequest
-
-// PutMasterdataColorsIdJSONRequestBody defines body for PutMasterdataColorsId for application/json ContentType.
-type PutMasterdataColorsIdJSONRequestBody = UpdateColorRequest
-
-// PostMasterdataCompaniesJSONRequestBody defines body for PostMasterdataCompanies for application/json ContentType.
-type PostMasterdataCompaniesJSONRequestBody = CreateCompanyRequest
-
-// PutMasterdataCompaniesIdJSONRequestBody defines body for PutMasterdataCompaniesId for application/json ContentType.
-type PutMasterdataCompaniesIdJSONRequestBody = UpdateCompanyRequest
-
-// PostMasterdataCustomersJSONRequestBody defines body for PostMasterdataCustomers for application/json ContentType.
-type PostMasterdataCustomersJSONRequestBody = CreateCustomerRequest
-
-// PutMasterdataCustomersIdJSONRequestBody defines body for PutMasterdataCustomersId for application/json ContentType.
-type PutMasterdataCustomersIdJSONRequestBody = UpdateCustomerRequest
-
-// PostMasterdataGalleryImagesJSONRequestBody defines body for PostMasterdataGalleryImages for application/json ContentType.
-type PostMasterdataGalleryImagesJSONRequestBody = CreateGalleryImageRequest
-
-// PutMasterdataGalleryImagesIdJSONRequestBody defines body for PutMasterdataGalleryImagesId for application/json ContentType.
-type PutMasterdataGalleryImagesIdJSONRequestBody = UpdateGalleryImageRequest
-
-// PostMasterdataModelsJSONRequestBody defines body for PostMasterdataModels for application/json ContentType.
-type PostMasterdataModelsJSONRequestBody = CreateModelRequest
-
-// PutMasterdataModelsIdJSONRequestBody defines body for PutMasterdataModelsId for application/json ContentType.
-type PutMasterdataModelsIdJSONRequestBody = UpdateModelRequest
-
-// PostMasterdataPricesJSONRequestBody defines body for PostMasterdataPrices for application/json ContentType.
-type PostMasterdataPricesJSONRequestBody = CreatePriceRequest
-
-// PutMasterdataPricesIdJSONRequestBody defines body for PutMasterdataPricesId for application/json ContentType.
-type PutMasterdataPricesIdJSONRequestBody = UpdatePriceRequest
-
-// PostMasterdataSizesJSONRequestBody defines body for PostMasterdataSizes for application/json ContentType.
-type PostMasterdataSizesJSONRequestBody = CreateSizeRequest
-
-// PutMasterdataSizesIdJSONRequestBody defines body for PutMasterdataSizesId for application/json ContentType.
-type PutMasterdataSizesIdJSONRequestBody = UpdateSizeRequest
-
-// PostMasterdataSuppliersJSONRequestBody defines body for PostMasterdataSuppliers for application/json ContentType.
-type PostMasterdataSuppliersJSONRequestBody = CreateSupplierRequest
-
-// PutMasterdataSuppliersIdJSONRequestBody defines body for PutMasterdataSuppliersId for application/json ContentType.
-type PutMasterdataSuppliersIdJSONRequestBody = UpdateSupplierRequest
 
 // PostMasterdataUsersJSONRequestBody defines body for PostMasterdataUsers for application/json ContentType.
 type PostMasterdataUsersJSONRequestBody = CreateUserRequest
@@ -402,8 +74,969 @@ type PostMasterdataUsersLoginJSONRequestBody = LoginRequest
 // PutMasterdataUsersIdJSONRequestBody defines body for PutMasterdataUsersId for application/json ContentType.
 type PutMasterdataUsersIdJSONRequestBody = UpdateUserRequest
 
-// PostMasterdataWarehousesJSONRequestBody defines body for PostMasterdataWarehouses for application/json ContentType.
-type PostMasterdataWarehousesJSONRequestBody = CreateWarehouseRequest
+// RequestEditorFn  is the function signature for the RequestEditor callback function
+type RequestEditorFn func(ctx context.Context, req *http.Request) error
 
-// PutMasterdataWarehousesIdJSONRequestBody defines body for PutMasterdataWarehousesId for application/json ContentType.
-type PutMasterdataWarehousesIdJSONRequestBody = UpdateWarehouseRequest
+// Doer performs HTTP requests.
+//
+// The standard http.Client implements this interface.
+type HttpRequestDoer interface {
+	Do(req *http.Request) (*http.Response, error)
+}
+
+// Client which conforms to the OpenAPI3 specification for this service.
+type Client struct {
+	// The endpoint of the server conforming to this interface, with scheme,
+	// https://api.deepmap.com for example. This can contain a path relative
+	// to the server, such as https://api.deepmap.com/dev-test, and all the
+	// paths in the swagger spec will be appended to the server.
+	Server string
+
+	// Doer for performing requests, typically a *http.Client with any
+	// customized settings, such as certificate chains.
+	Client HttpRequestDoer
+
+	// A list of callbacks for modifying requests which are generated before sending over
+	// the network.
+	RequestEditors []RequestEditorFn
+}
+
+// ClientOption allows setting custom parameters during construction
+type ClientOption func(*Client) error
+
+// Creates a new Client, with reasonable defaults
+func NewClient(server string, opts ...ClientOption) (*Client, error) {
+	// create a client with sane default values
+	client := Client{
+		Server: server,
+	}
+	// mutate client and add all optional params
+	for _, o := range opts {
+		if err := o(&client); err != nil {
+			return nil, err
+		}
+	}
+	// ensure the server URL always has a trailing slash
+	if !strings.HasSuffix(client.Server, "/") {
+		client.Server += "/"
+	}
+	// create httpClient, if not already present
+	if client.Client == nil {
+		client.Client = &http.Client{}
+	}
+	return &client, nil
+}
+
+// WithHTTPClient allows overriding the default Doer, which is
+// automatically created using http.Client. This is useful for tests.
+func WithHTTPClient(doer HttpRequestDoer) ClientOption {
+	return func(c *Client) error {
+		c.Client = doer
+		return nil
+	}
+}
+
+// WithRequestEditorFn allows setting up a callback function, which will be
+// called right before sending the request. This can be used to mutate the request.
+func WithRequestEditorFn(fn RequestEditorFn) ClientOption {
+	return func(c *Client) error {
+		c.RequestEditors = append(c.RequestEditors, fn)
+		return nil
+	}
+}
+
+// The interface specification for the client above.
+type ClientInterface interface {
+	// PostMasterdataUsersWithBody request with any body
+	PostMasterdataUsersWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	PostMasterdataUsers(ctx context.Context, body PostMasterdataUsersJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// PostMasterdataUsersLoginWithBody request with any body
+	PostMasterdataUsersLoginWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	PostMasterdataUsersLogin(ctx context.Context, body PostMasterdataUsersLoginJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DeleteMasterdataUsersId request
+	DeleteMasterdataUsersId(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetMasterdataUsersId request
+	GetMasterdataUsersId(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// PutMasterdataUsersIdWithBody request with any body
+	PutMasterdataUsersIdWithBody(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	PutMasterdataUsersId(ctx context.Context, id string, body PutMasterdataUsersIdJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+}
+
+func (c *Client) PostMasterdataUsersWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostMasterdataUsersRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostMasterdataUsers(ctx context.Context, body PostMasterdataUsersJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostMasterdataUsersRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostMasterdataUsersLoginWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostMasterdataUsersLoginRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostMasterdataUsersLogin(ctx context.Context, body PostMasterdataUsersLoginJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostMasterdataUsersLoginRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DeleteMasterdataUsersId(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDeleteMasterdataUsersIdRequest(c.Server, id)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetMasterdataUsersId(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetMasterdataUsersIdRequest(c.Server, id)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PutMasterdataUsersIdWithBody(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPutMasterdataUsersIdRequestWithBody(c.Server, id, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PutMasterdataUsersId(ctx context.Context, id string, body PutMasterdataUsersIdJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPutMasterdataUsersIdRequest(c.Server, id, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// NewPostMasterdataUsersRequest calls the generic PostMasterdataUsers builder with application/json body
+func NewPostMasterdataUsersRequest(server string, body PostMasterdataUsersJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewPostMasterdataUsersRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewPostMasterdataUsersRequestWithBody generates requests for PostMasterdataUsers with any type of body
+func NewPostMasterdataUsersRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/masterdata/users")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewPostMasterdataUsersLoginRequest calls the generic PostMasterdataUsersLogin builder with application/json body
+func NewPostMasterdataUsersLoginRequest(server string, body PostMasterdataUsersLoginJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewPostMasterdataUsersLoginRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewPostMasterdataUsersLoginRequestWithBody generates requests for PostMasterdataUsersLogin with any type of body
+func NewPostMasterdataUsersLoginRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/masterdata/users/login")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewDeleteMasterdataUsersIdRequest generates requests for DeleteMasterdataUsersId
+func NewDeleteMasterdataUsersIdRequest(server string, id string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/masterdata/users/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("DELETE", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGetMasterdataUsersIdRequest generates requests for GetMasterdataUsersId
+func NewGetMasterdataUsersIdRequest(server string, id string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/masterdata/users/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewPutMasterdataUsersIdRequest calls the generic PutMasterdataUsersId builder with application/json body
+func NewPutMasterdataUsersIdRequest(server string, id string, body PutMasterdataUsersIdJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewPutMasterdataUsersIdRequestWithBody(server, id, "application/json", bodyReader)
+}
+
+// NewPutMasterdataUsersIdRequestWithBody generates requests for PutMasterdataUsersId with any type of body
+func NewPutMasterdataUsersIdRequestWithBody(server string, id string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/masterdata/users/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("PUT", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+func (c *Client) applyEditors(ctx context.Context, req *http.Request, additionalEditors []RequestEditorFn) error {
+	for _, r := range c.RequestEditors {
+		if err := r(ctx, req); err != nil {
+			return err
+		}
+	}
+	for _, r := range additionalEditors {
+		if err := r(ctx, req); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// ClientWithResponses builds on ClientInterface to offer response payloads
+type ClientWithResponses struct {
+	ClientInterface
+}
+
+// NewClientWithResponses creates a new ClientWithResponses, which wraps
+// Client with return type handling
+func NewClientWithResponses(server string, opts ...ClientOption) (*ClientWithResponses, error) {
+	client, err := NewClient(server, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &ClientWithResponses{client}, nil
+}
+
+// WithBaseURL overrides the baseURL.
+func WithBaseURL(baseURL string) ClientOption {
+	return func(c *Client) error {
+		newBaseURL, err := url.Parse(baseURL)
+		if err != nil {
+			return err
+		}
+		c.Server = newBaseURL.String()
+		return nil
+	}
+}
+
+// ClientWithResponsesInterface is the interface specification for the client with responses above.
+type ClientWithResponsesInterface interface {
+	// PostMasterdataUsersWithBodyWithResponse request with any body
+	PostMasterdataUsersWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostMasterdataUsersResponse, error)
+
+	PostMasterdataUsersWithResponse(ctx context.Context, body PostMasterdataUsersJSONRequestBody, reqEditors ...RequestEditorFn) (*PostMasterdataUsersResponse, error)
+
+	// PostMasterdataUsersLoginWithBodyWithResponse request with any body
+	PostMasterdataUsersLoginWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostMasterdataUsersLoginResponse, error)
+
+	PostMasterdataUsersLoginWithResponse(ctx context.Context, body PostMasterdataUsersLoginJSONRequestBody, reqEditors ...RequestEditorFn) (*PostMasterdataUsersLoginResponse, error)
+
+	// DeleteMasterdataUsersIdWithResponse request
+	DeleteMasterdataUsersIdWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*DeleteMasterdataUsersIdResponse, error)
+
+	// GetMasterdataUsersIdWithResponse request
+	GetMasterdataUsersIdWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*GetMasterdataUsersIdResponse, error)
+
+	// PutMasterdataUsersIdWithBodyWithResponse request with any body
+	PutMasterdataUsersIdWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PutMasterdataUsersIdResponse, error)
+
+	PutMasterdataUsersIdWithResponse(ctx context.Context, id string, body PutMasterdataUsersIdJSONRequestBody, reqEditors ...RequestEditorFn) (*PutMasterdataUsersIdResponse, error)
+}
+
+type PostMasterdataUsersResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *User
+}
+
+// Status returns HTTPResponse.Status
+func (r PostMasterdataUsersResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PostMasterdataUsersResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type PostMasterdataUsersLoginResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *struct {
+		Token *string `json:"token,omitempty"`
+	}
+}
+
+// Status returns HTTPResponse.Status
+func (r PostMasterdataUsersLoginResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PostMasterdataUsersLoginResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type DeleteMasterdataUsersIdResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+}
+
+// Status returns HTTPResponse.Status
+func (r DeleteMasterdataUsersIdResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DeleteMasterdataUsersIdResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetMasterdataUsersIdResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *User
+}
+
+// Status returns HTTPResponse.Status
+func (r GetMasterdataUsersIdResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetMasterdataUsersIdResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type PutMasterdataUsersIdResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *User
+}
+
+// Status returns HTTPResponse.Status
+func (r PutMasterdataUsersIdResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PutMasterdataUsersIdResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// PostMasterdataUsersWithBodyWithResponse request with arbitrary body returning *PostMasterdataUsersResponse
+func (c *ClientWithResponses) PostMasterdataUsersWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostMasterdataUsersResponse, error) {
+	rsp, err := c.PostMasterdataUsersWithBody(ctx, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostMasterdataUsersResponse(rsp)
+}
+
+func (c *ClientWithResponses) PostMasterdataUsersWithResponse(ctx context.Context, body PostMasterdataUsersJSONRequestBody, reqEditors ...RequestEditorFn) (*PostMasterdataUsersResponse, error) {
+	rsp, err := c.PostMasterdataUsers(ctx, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostMasterdataUsersResponse(rsp)
+}
+
+// PostMasterdataUsersLoginWithBodyWithResponse request with arbitrary body returning *PostMasterdataUsersLoginResponse
+func (c *ClientWithResponses) PostMasterdataUsersLoginWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostMasterdataUsersLoginResponse, error) {
+	rsp, err := c.PostMasterdataUsersLoginWithBody(ctx, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostMasterdataUsersLoginResponse(rsp)
+}
+
+func (c *ClientWithResponses) PostMasterdataUsersLoginWithResponse(ctx context.Context, body PostMasterdataUsersLoginJSONRequestBody, reqEditors ...RequestEditorFn) (*PostMasterdataUsersLoginResponse, error) {
+	rsp, err := c.PostMasterdataUsersLogin(ctx, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostMasterdataUsersLoginResponse(rsp)
+}
+
+// DeleteMasterdataUsersIdWithResponse request returning *DeleteMasterdataUsersIdResponse
+func (c *ClientWithResponses) DeleteMasterdataUsersIdWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*DeleteMasterdataUsersIdResponse, error) {
+	rsp, err := c.DeleteMasterdataUsersId(ctx, id, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDeleteMasterdataUsersIdResponse(rsp)
+}
+
+// GetMasterdataUsersIdWithResponse request returning *GetMasterdataUsersIdResponse
+func (c *ClientWithResponses) GetMasterdataUsersIdWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*GetMasterdataUsersIdResponse, error) {
+	rsp, err := c.GetMasterdataUsersId(ctx, id, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetMasterdataUsersIdResponse(rsp)
+}
+
+// PutMasterdataUsersIdWithBodyWithResponse request with arbitrary body returning *PutMasterdataUsersIdResponse
+func (c *ClientWithResponses) PutMasterdataUsersIdWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PutMasterdataUsersIdResponse, error) {
+	rsp, err := c.PutMasterdataUsersIdWithBody(ctx, id, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePutMasterdataUsersIdResponse(rsp)
+}
+
+func (c *ClientWithResponses) PutMasterdataUsersIdWithResponse(ctx context.Context, id string, body PutMasterdataUsersIdJSONRequestBody, reqEditors ...RequestEditorFn) (*PutMasterdataUsersIdResponse, error) {
+	rsp, err := c.PutMasterdataUsersId(ctx, id, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePutMasterdataUsersIdResponse(rsp)
+}
+
+// ParsePostMasterdataUsersResponse parses an HTTP response from a PostMasterdataUsersWithResponse call
+func ParsePostMasterdataUsersResponse(rsp *http.Response) (*PostMasterdataUsersResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PostMasterdataUsersResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest User
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParsePostMasterdataUsersLoginResponse parses an HTTP response from a PostMasterdataUsersLoginWithResponse call
+func ParsePostMasterdataUsersLoginResponse(rsp *http.Response) (*PostMasterdataUsersLoginResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PostMasterdataUsersLoginResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest struct {
+			Token *string `json:"token,omitempty"`
+		}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDeleteMasterdataUsersIdResponse parses an HTTP response from a DeleteMasterdataUsersIdWithResponse call
+func ParseDeleteMasterdataUsersIdResponse(rsp *http.Response) (*DeleteMasterdataUsersIdResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DeleteMasterdataUsersIdResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	return response, nil
+}
+
+// ParseGetMasterdataUsersIdResponse parses an HTTP response from a GetMasterdataUsersIdWithResponse call
+func ParseGetMasterdataUsersIdResponse(rsp *http.Response) (*GetMasterdataUsersIdResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetMasterdataUsersIdResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest User
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParsePutMasterdataUsersIdResponse parses an HTTP response from a PutMasterdataUsersIdWithResponse call
+func ParsePutMasterdataUsersIdResponse(rsp *http.Response) (*PutMasterdataUsersIdResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PutMasterdataUsersIdResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest User
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ServerInterface represents all server handlers.
+type ServerInterface interface {
+	// Create a new user
+	// (POST /masterdata/users)
+	PostMasterdataUsers(ctx echo.Context) error
+	// User login
+	// (POST /masterdata/users/login)
+	PostMasterdataUsersLogin(ctx echo.Context) error
+	// Delete user by ID
+	// (DELETE /masterdata/users/{id})
+	DeleteMasterdataUsersId(ctx echo.Context, id string) error
+	// Get user by ID
+	// (GET /masterdata/users/{id})
+	GetMasterdataUsersId(ctx echo.Context, id string) error
+	// Update user by ID
+	// (PUT /masterdata/users/{id})
+	PutMasterdataUsersId(ctx echo.Context, id string) error
+}
+
+// ServerInterfaceWrapper converts echo contexts to parameters.
+type ServerInterfaceWrapper struct {
+	Handler ServerInterface
+}
+
+// PostMasterdataUsers converts echo context to params.
+func (w *ServerInterfaceWrapper) PostMasterdataUsers(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.PostMasterdataUsers(ctx)
+	return err
+}
+
+// PostMasterdataUsersLogin converts echo context to params.
+func (w *ServerInterfaceWrapper) PostMasterdataUsersLogin(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.PostMasterdataUsersLogin(ctx)
+	return err
+}
+
+// DeleteMasterdataUsersId converts echo context to params.
+func (w *ServerInterfaceWrapper) DeleteMasterdataUsersId(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "id" -------------
+	var id string
+
+	err = runtime.BindStyledParameterWithLocation("simple", false, "id", runtime.ParamLocationPath, ctx.Param("id"), &id)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter id: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.DeleteMasterdataUsersId(ctx, id)
+	return err
+}
+
+// GetMasterdataUsersId converts echo context to params.
+func (w *ServerInterfaceWrapper) GetMasterdataUsersId(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "id" -------------
+	var id string
+
+	err = runtime.BindStyledParameterWithLocation("simple", false, "id", runtime.ParamLocationPath, ctx.Param("id"), &id)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter id: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.GetMasterdataUsersId(ctx, id)
+	return err
+}
+
+// PutMasterdataUsersId converts echo context to params.
+func (w *ServerInterfaceWrapper) PutMasterdataUsersId(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "id" -------------
+	var id string
+
+	err = runtime.BindStyledParameterWithLocation("simple", false, "id", runtime.ParamLocationPath, ctx.Param("id"), &id)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter id: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshaled arguments
+	err = w.Handler.PutMasterdataUsersId(ctx, id)
+	return err
+}
+
+// This is a simple interface which specifies echo.Route addition functions which
+// are present on both echo.Echo and echo.Group, since we want to allow using
+// either of them for path registration
+type EchoRouter interface {
+	CONNECT(path string, h echo.HandlerFunc, m ...echo.MiddlewareFunc) *echo.Route
+	DELETE(path string, h echo.HandlerFunc, m ...echo.MiddlewareFunc) *echo.Route
+	GET(path string, h echo.HandlerFunc, m ...echo.MiddlewareFunc) *echo.Route
+	HEAD(path string, h echo.HandlerFunc, m ...echo.MiddlewareFunc) *echo.Route
+	OPTIONS(path string, h echo.HandlerFunc, m ...echo.MiddlewareFunc) *echo.Route
+	PATCH(path string, h echo.HandlerFunc, m ...echo.MiddlewareFunc) *echo.Route
+	POST(path string, h echo.HandlerFunc, m ...echo.MiddlewareFunc) *echo.Route
+	PUT(path string, h echo.HandlerFunc, m ...echo.MiddlewareFunc) *echo.Route
+	TRACE(path string, h echo.HandlerFunc, m ...echo.MiddlewareFunc) *echo.Route
+}
+
+// RegisterHandlers adds each server route to the EchoRouter.
+func RegisterHandlers(router EchoRouter, si ServerInterface) {
+	RegisterHandlersWithBaseURL(router, si, "")
+}
+
+// Registers handlers, and prepends BaseURL to the paths, so that the paths
+// can be served under a prefix.
+func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL string) {
+
+	wrapper := ServerInterfaceWrapper{
+		Handler: si,
+	}
+
+	router.POST(baseURL+"/masterdata/users", wrapper.PostMasterdataUsers)
+	router.POST(baseURL+"/masterdata/users/login", wrapper.PostMasterdataUsersLogin)
+	router.DELETE(baseURL+"/masterdata/users/:id", wrapper.DeleteMasterdataUsersId)
+	router.GET(baseURL+"/masterdata/users/:id", wrapper.GetMasterdataUsersId)
+	router.PUT(baseURL+"/masterdata/users/:id", wrapper.PutMasterdataUsersId)
+
+}
+
+// Base64 encoded, gzipped, json marshaled Swagger object
+var swaggerSpec = []string{
+
+	"H4sIAAAAAAAC/+xWT2/bPgz9KgZ/v6NXZ9vNt3UdigArVhTIKQgK1WJStdafSnQLI/B3HySlSRyrwbIl",
+	"2w672TQlPr7HR3gJlZZGK1TkoFyCq+5RsvB4zhxeaY61fzFWG7QkMHyqLDJCfsvIv821lf4JOCN8R0Ii",
+	"5ECtQSjBkRVqAV0OgvvcQbgx/MCrunVE3z1gRf6WzwHQxKG9wacGHSUwa2mYam/fwIGSiboHIUYSnRjm",
+	"3Iu2vJe9DiYOWF1junmHVjGZ+uiP4VMjLHIop5vMfLvSK8St3lbVZgmSvuqFUG/yc3BXvwY+BXASZuGf",
+	"intV9PT4Sqyuv82hnC7hf4tzKOG/YmPlYuXjYmPiLv9ZLo/FxE4rs84HhZrrkC7IXwpXrGaPLPtyc519",
+	"uh5DDs9ondAKSnh/Njob+TLaoGJGQAkfQ8izSfehp0IyR2g5I1Z4NHG0dRwl3zwjodWYQwnX2tHVOnsS",
+	"kqNc6Ohc8zZypAhVOM2MqUUVzhcPziN6XZf+aZ8Iw+3U9SeDbIMh4IxWLqrzYTQ6GoAwM6EmR1dZYSgy",
+	"6uPZaplnrqkqdG7e1HUb9HKNlMy2UK7Wa8YyhS9ZEy/Lh1wXtd8wBzEedtKJaO/tuxMw3ncT6UdUPzT4",
+	"Qx0C0i0BdugPMkVu07wvBe98aY41Eg6JvwjxHerHPBjHMokUjDJdglcvmAlyiEaGuI16xOVbJOx2O0uT",
+	"mpi7CHbv3EXcYeKyuzYbX3j3LzAxWpdIf7K907vUIlmBz/v5ukTaIcs0KR82v5Gs4/t6+JvwN63T1Q/t",
+	"PpliAz2luq77HgAA///Vi8aSiwsAAA==",
+}
+
+// GetSwagger returns the content of the embedded swagger specification file
+// or error if failed to decode
+func decodeSpec() ([]byte, error) {
+	zipped, err := base64.StdEncoding.DecodeString(strings.Join(swaggerSpec, ""))
+	if err != nil {
+		return nil, fmt.Errorf("error base64 decoding spec: %w", err)
+	}
+	zr, err := gzip.NewReader(bytes.NewReader(zipped))
+	if err != nil {
+		return nil, fmt.Errorf("error decompressing spec: %w", err)
+	}
+	var buf bytes.Buffer
+	_, err = buf.ReadFrom(zr)
+	if err != nil {
+		return nil, fmt.Errorf("error decompressing spec: %w", err)
+	}
+
+	return buf.Bytes(), nil
+}
+
+var rawSpec = decodeSpecCached()
+
+// a naive cached of a decoded swagger spec
+func decodeSpecCached() func() ([]byte, error) {
+	data, err := decodeSpec()
+	return func() ([]byte, error) {
+		return data, err
+	}
+}
+
+// Constructs a synthetic filesystem for resolving external references when loading openapi specifications.
+func PathToRawSpec(pathToFile string) map[string]func() ([]byte, error) {
+	res := make(map[string]func() ([]byte, error))
+	if len(pathToFile) > 0 {
+		res[pathToFile] = rawSpec
+	}
+
+	return res
+}
+
+// GetSwagger returns the Swagger specification corresponding to the generated code
+// in this file. The external references of Swagger specification are resolved.
+// The logic of resolving external references is tightly connected to "import-mapping" feature.
+// Externally referenced files must be embedded in the corresponding golang packages.
+// Urls can be supported but this task was out of the scope.
+func GetSwagger() (swagger *openapi3.T, err error) {
+	resolvePath := PathToRawSpec("")
+
+	loader := openapi3.NewLoader()
+	loader.IsExternalRefsAllowed = true
+	loader.ReadFromURIFunc = func(loader *openapi3.Loader, url *url.URL) ([]byte, error) {
+		pathToFile := url.String()
+		pathToFile = path.Clean(pathToFile)
+		getSpec, ok := resolvePath[pathToFile]
+		if !ok {
+			err1 := fmt.Errorf("path not found: %s", pathToFile)
+			return nil, err1
+		}
+		return getSpec()
+	}
+	var specData []byte
+	specData, err = rawSpec()
+	if err != nil {
+		return
+	}
+	swagger, err = loader.LoadFromData(specData)
+	if err != nil {
+		return
+	}
+	return
+}

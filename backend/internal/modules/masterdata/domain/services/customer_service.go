@@ -37,6 +37,11 @@ func (s *CustomerService) GetAllCustomers(ctx context.Context) ([]*entities.Cust
 	return s.repo.GetAll(ctx)
 }
 
+// GetAllCustomersWithPagination retrieves customers with pagination and filtering.
+func (s *CustomerService) GetAllCustomersWithPagination(ctx context.Context, limit, offset int, search, status string) ([]*entities.Customer, int, error) {
+	return s.repo.GetAllWithPagination(ctx, limit, offset, search, status)
+}
+
 // UpdateCustomer updates an existing customer.
 func (s *CustomerService) UpdateCustomer(ctx context.Context, customer *entities.Customer) error {
 	// Ensure the customer exists before updating

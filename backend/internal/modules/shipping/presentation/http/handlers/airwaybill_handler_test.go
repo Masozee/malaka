@@ -14,7 +14,7 @@ import (
 	"github.com/stretchr/testify/mock"
 	"gorm.io/gorm"
 
-	"malaka/internal/modules/shipping/domain"
+	shipping_domain "malaka/internal/modules/shipping/domain"
 	"malaka/internal/modules/shipping/domain/dtos"
 	"malaka/internal/modules/shipping/presentation/http/handlers"
 	"malaka/internal/shared/response"
@@ -30,20 +30,20 @@ func (m *MockAirwaybillService) CreateAirwaybill(ctx context.Context, req *dtos.
 	return args.Error(0)
 }
 
-func (m *MockAirwaybillService) GetAirwaybillByID(ctx context.Context, id uuid.UUID) (*domain.Airwaybill, error) {
+func (m *MockAirwaybillService) GetAirwaybillByID(ctx context.Context, id uuid.UUID) (*shipping_domain.Airwaybill, error) {
 	args := m.Called(ctx, id)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
-	return args.Get(0).(*domain.Airwaybill), args.Error(1)
+	return args.Get(0).(*shipping_domain.Airwaybill), args.Error(1)
 }
 
-func (m *MockAirwaybillService) GetAllAirwaybills(ctx context.Context) ([]domain.Airwaybill, error) {
+func (m *MockAirwaybillService) GetAllAirwaybills(ctx context.Context) ([]shipping_domain.Airwaybill, error) {
 	args := m.Called(ctx)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
-	return args.Get(0).([]domain.Airwaybill), args.Error(1)
+	return args.Get(0).([]shipping_domain.Airwaybill), args.Error(1)
 }
 
 func (m *MockAirwaybillService) UpdateAirwaybill(ctx context.Context, req *dtos.UpdateAirwaybillRequest) error {
@@ -56,7 +56,7 @@ func (m *MockAirwaybillService) DeleteAirwaybill(ctx context.Context, id uuid.UU
 	return args.Error(0)
 }
 
-func setupRouter() *gin.Engine {
+func setupAirwaybillRouter() *gin.Engine {
 	gin.SetMode(gin.TestMode)
 	r := gin.Default()
 	return r
@@ -65,7 +65,7 @@ func setupRouter() *gin.Engine {
 func TestAirwaybillHandler_CreateAirwaybill(t *testing.T) {
 	mockService := new(MockAirwaybillService)
 	handler := handlers.NewAirwaybillHandler(mockService)
-	router := setupRouter()
+	router := setupAirwaybillRouter()
 	router.POST("/shipping/airwaybills", handler.CreateAirwaybill)
 
 	t.Run("Success", func(t *testing.T) {
@@ -97,12 +97,12 @@ func TestAirwaybillHandler_CreateAirwaybill(t *testing.T) {
 func TestAirwaybillHandler_GetAirwaybillByID(t *testing.T) {
 	mockService := new(MockAirwaybillService)
 	handler := handlers.NewAirwaybillHandler(mockService)
-	router := setupRouter()
+	router := setupAirwaybillRouter()
 	router.GET("/shipping/airwaybills/:id", handler.GetAirwaybillByID)
 
 	t.Run("Success", func(t *testing.T) {
 		airwaybillID := uuid.New()
-		airwaybill := &domain.Airwaybill{ID: airwaybillID, AirwaybillNumber: "AWB123"}
+		airwaybill := &shipping_domain.Airwaybill{ID: airwaybillID, AirwaybillNumber: "AWB123"}
 		mockService.On("GetAirwaybillByID", mock.Anything, airwaybillID).Return(airwaybill, nil).Once()
 
 		req, _ := http.NewRequest(http.MethodGet, "/shipping/airwaybills/"+airwaybillID.String(), nil)
@@ -132,7 +132,7 @@ func TestAirwaybillHandler_GetAirwaybillByID(t *testing.T) {
 func TestAirwaybillHandler_GetAllAirwaybills(t *testing.T) {
 	mockService := new(MockAirwaybillService)
 	handler := handlers.NewAirwaybillHandler(mockService)
-	router := setupRouter()
+	router := setupAirwaybillRouter()
 	router.GET("/shipping/airwaybills", handler.GetAllAirwaybills)
 
 	t.Run("Success", func(t *testing.T) {
@@ -158,7 +158,7 @@ func TestAirwaybillHandler_GetAllAirwaybills(t *testing.T) {
 func TestAirwaybillHandler_UpdateAirwaybill(t *testing.T) {
 	mockService := new(MockAirwaybillService)
 	handler := handlers.NewAirwaybillHandler(mockService)
-	router := setupRouter()
+	router := setupAirwaybillRouter()
 	router.PUT("/shipping/airwaybills/:id", handler.UpdateAirwaybill)
 
 	airwaybillID := uuid.New()
@@ -197,7 +197,7 @@ func TestAirwaybillHandler_UpdateAirwaybill(t *testing.T) {
 func TestAirwaybillHandler_DeleteAirwaybill(t *testing.T) {
 	mockService := new(MockAirwaybillService)
 	handler := handlers.NewAirwaybillHandler(mockService)
-	router := setupRouter()
+	router := setupAirwaybillRouter()
 	router.DELETE("/shipping/airwaybills/:id", handler.DeleteAirwaybill)
 
 	airwaybillID := uuid.New()

@@ -13,7 +13,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
-	"malaka/internal/modules/shipping/domain"
+	shipping_domain "malaka/internal/modules/shipping/domain"
 	"malaka/internal/modules/shipping/domain/dtos"
 	"malaka/internal/modules/shipping/presentation/http/handlers"
 	"malaka/internal/shared/response"
@@ -29,20 +29,20 @@ func (m *MockManifestService) CreateManifest(ctx context.Context, req *dtos.Crea
 	return args.Error(0)
 }
 
-func (m *MockManifestService) GetManifestByID(ctx context.Context, id uuid.UUID) (*domain.Manifest, error) {
+func (m *MockManifestService) GetManifestByID(ctx context.Context, id uuid.UUID) (*shipping_shipping_domain.Manifest, error) {
 	args := m.Called(ctx, id)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
-	return args.Get(0).(*domain.Manifest), args.Error(1)
+	return args.Get(0).(*shipping_shipping_domain.Manifest), args.Error(1)
 }
 
-func (m *MockManifestService) GetAllManifests(ctx context.Context) ([]domain.Manifest, error) {
+func (m *MockManifestService) GetAllManifests(ctx context.Context) ([]shipping_shipping_domain.Manifest, error) {
 	args := m.Called(ctx)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
-	return args.Get(0).([]domain.Manifest), args.Error(1)
+	return args.Get(0).([]shipping_shipping_domain.Manifest), args.Error(1)
 }
 
 func (m *MockManifestService) UpdateManifest(ctx context.Context, req *dtos.UpdateManifestRequest) error {
@@ -58,7 +58,7 @@ func (m *MockManifestService) DeleteManifest(ctx context.Context, id uuid.UUID) 
 func TestManifestHandler_CreateManifest(t *testing.T) {
 	mockService := new(MockManifestService)
 	handler := handlers.NewManifestHandler(mockService)
-	router := setupRouter()
+	router := setupManifestRouter()
 	router.POST("/shipping/manifests", handler.CreateManifest)
 
 	t.Run("Success", func(t *testing.T) {
@@ -90,12 +90,12 @@ func TestManifestHandler_CreateManifest(t *testing.T) {
 func TestManifestHandler_GetManifestByID(t *testing.T) {
 	mockService := new(MockManifestService)
 	handler := handlers.NewManifestHandler(mockService)
-	router := setupRouter()
+	router := setupManifestRouter()
 	router.GET("/shipping/manifests/:id", handler.GetManifestByID)
 
 	t.Run("Success", func(t *testing.T) {
 		manifestID := uuid.New()
-		manifest := &domain.Manifest{ID: manifestID, ManifestNumber: "MAN123"}
+		manifest := &shipping_shipping_domain.Manifest{ID: manifestID, ManifestNumber: "MAN123"}
 		mockService.On("GetManifestByID", mock.Anything, manifestID).Return(manifest, nil).Once()
 
 		req, _ := http.NewRequest(http.MethodGet, "/shipping/manifests/"+manifestID.String(), nil)
@@ -125,11 +125,11 @@ func TestManifestHandler_GetManifestByID(t *testing.T) {
 func TestManifestHandler_GetAllManifests(t *testing.T) {
 	mockService := new(MockManifestService)
 	handler := handlers.NewManifestHandler(mockService)
-	router := setupRouter()
+	router := setupManifestRouter()
 	router.GET("/shipping/manifests", handler.GetAllManifests)
 
 	t.Run("Success", func(t *testing.T) {
-		manifests := []domain.Manifest{
+				manifests := []shipping_shipping_domain.Manifest{
 			{ID: uuid.New(), ManifestNumber: "MAN123"},
 			{ID: uuid.New(), ManifestNumber: "MAN456"},
 		}
@@ -151,7 +151,7 @@ func TestManifestHandler_GetAllManifests(t *testing.T) {
 func TestManifestHandler_UpdateManifest(t *testing.T) {
 	mockService := new(MockManifestService)
 	handler := handlers.NewManifestHandler(mockService)
-	router := setupRouter()
+	router := setupManifestRouter()
 	router.PUT("/shipping/manifests/:id", handler.UpdateManifest)
 
 	manifestID := uuid.New()
@@ -190,7 +190,7 @@ func TestManifestHandler_UpdateManifest(t *testing.T) {
 func TestManifestHandler_DeleteManifest(t *testing.T) {
 	mockService := new(MockManifestService)
 	handler := handlers.NewManifestHandler(mockService)
-	router := setupRouter()
+	router := setupManifestRouter()
 	router.DELETE("/shipping/manifests/:id", handler.DeleteManifest)
 
 	manifestID := uuid.New()

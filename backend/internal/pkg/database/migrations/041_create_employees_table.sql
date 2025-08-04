@@ -1,0 +1,16 @@
+-- +goose Up
+CREATE TABLE IF NOT EXISTS employees (
+    id VARCHAR(255) PRIMARY KEY,
+    first_name VARCHAR(255) NOT NULL,
+    last_name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    phone VARCHAR(255),
+    hire_date DATE NOT NULL,
+    position VARCHAR(255) NOT NULL,
+    salary NUMERIC(10, 2) NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- +goose Down
+DROP TABLE IF EXISTS employees;

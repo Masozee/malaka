@@ -3,7 +3,9 @@ package services
 import (
 	"context"
 	"errors"
+	"time"
 
+	"github.com/dgrijalva/jwt-go"
 	"malaka/internal/modules/masterdata/domain/entities"
 	"malaka/internal/modules/masterdata/domain/repositories"
 	"malaka/internal/shared/utils"
@@ -11,12 +13,13 @@ import (
 
 // UserService provides business logic for user operations.
 type UserService struct {
-	repo repositories.UserRepository
+	repo      repositories.UserRepository
+	jwtSecret string
 }
 
 // NewUserService creates a new UserService.
-func NewUserService(repo repositories.UserRepository) *UserService {
-	return &UserService{repo: repo}
+func NewUserService(repo repositories.UserRepository, jwtSecret string) *UserService {
+	return &UserService{repo: repo, jwtSecret: jwtSecret}
 }
 
 // CreateUser creates a new user.
@@ -28,9 +31,11 @@ func (s *UserService) CreateUser(ctx context.Context, user *entities.User) error
 	}
 	user.Password = hashedPassword
 
-	if user.ID == "" {
-		user.ID = utils.RandomString(10) // Generate a random ID if not provided
-	}
+	// Set timestamps
+	now := time.Now()
+	user.CreatedAt = now
+	user.UpdatedAt = now
+	
 	return s.repo.Create(ctx, user)
 }
 
@@ -70,19 +75,33 @@ func (s *UserService) DeleteUser(ctx context.Context, id string) error {
 	return s.repo.Delete(ctx, id)
 }
 
-// AuthenticateUser authenticates a user by username and password.
-func (s *UserService) AuthenticateUser(ctx context.Context, username, password string) (*entities.User, error) {
+// AuthenticateUser authenticates a user by username and password and returns a JWT token.
+func (s *UserService) AuthenticateUser(ctx context.Context, username, password string) (string, error) {
 	user, err := s.repo.GetByUsername(ctx, username)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 	if user == nil {
-		return nil, errors.New("invalid credentials")
+		return "", errors.New("invalid credentials")
 	}
 
 	if !utils.CheckPasswordHash(password, user.Password) {
-		return nil, errors.New("invalid credentials")
+		return "", errors.New("invalid credentials")
 	}
 
-	return user, nil
+	// Create token
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"sub":  user.ID,
+		"role": user.Role,
+		"exp":  time.Now().Add(time.Hour * 72).Unix(),
+	})
+
+	// Generate encoded token and send it as response.
+	t, err := token.SignedString([]byte(s.jwtSecret))
+	if err != nil {
+		return "", err
+	}
+
+	return t, nil
 }
+

@@ -1,0 +1,654 @@
+# Backend Module Feature Checklist (Detailed API Paths)
+
+This checklist outlines the features described in `MODULE_REAL.md` along with detailed API endpoints, including HTTP methods and specific actions. This serves as a comprehensive reference for implemented features and their access points.
+
+- [*] indicates that the feature has core Go files (entity, service, handler, routes) present.
+- [ ] indicates that the feature does not have core Go files present.
+
+## A. MASTER DATA
+- [*] **1. MASTER ARTIKEL (SEPATU)**
+  - `GET /api/v1/masterdata/articles` - Get all articles
+  - `GET /api/v1/masterdata/articles/:id` - Get article by ID
+  - `POST /api/v1/masterdata/articles` - Create new article
+  - `PUT /api/v1/masterdata/articles/:id` - Update article by ID
+  - `DELETE /api/v1/masterdata/articles/:id` - Delete article by ID
+  - `GET /api/v1/masterdata/articles/search` - Search articles by criteria
+- [*] **2. KLASIFIKASI**
+  - `GET /api/v1/masterdata/classifications` - Get all classifications
+  - `GET /api/v1/masterdata/classifications/:id` - Get classification by ID
+  - `POST /api/v1/masterdata/classifications` - Create new classification
+  - `PUT /api/v1/masterdata/classifications/:id` - Update classification by ID
+  - `DELETE /api/v1/masterdata/classifications/:id` - Delete classification by ID
+- [*] **3. WARNA**
+  - `GET /api/v1/masterdata/colors` - Get all colors
+  - `GET /api/v1/masterdata/colors/:id` - Get color by ID
+  - `POST /api/v1/masterdata/colors` - Create new color
+  - `PUT /api/v1/masterdata/colors/:id` - Update color by ID
+  - `DELETE /api/v1/masterdata/colors/:id` - Delete color by ID
+- [*] **4. MODEL SEPATU**
+  - `GET /api/v1/masterdata/models` - Get all models
+  - `GET /api/v1/masterdata/models/:id` - Get model by ID
+  - `POST /api/v1/masterdata/models` - Create new model
+  - `PUT /api/v1/masterdata/models/:id` - Update model by ID
+  - `DELETE /api/v1/masterdata/models/:id` - Delete model by ID
+- [*] **5. SIZE**
+  - `GET /api/v1/masterdata/sizes` - Get all sizes
+  - `GET /api/v1/masterdata/sizes/:id` - Get size by ID
+  - `POST /api/v1/masterdata/sizes` - Create new size
+  - `PUT /api/v1/masterdata/sizes/:id` - Update size by ID
+  - `DELETE /api/v1/masterdata/sizes/:id` - Delete size by ID
+- [*] **6. BARCODE**
+  - `GET /api/v1/masterdata/barcodes` - Get all barcodes
+  - `GET /api/v1/masterdata/barcodes/:id` - Get barcode by ID
+  - `POST /api/v1/masterdata/barcodes` - Create new barcode
+  - `PUT /api/v1/masterdata/barcodes/:id` - Update barcode by ID
+  - `DELETE /api/v1/masterdata/barcodes/:id` - Delete barcode by ID
+- [*] **7. PRICE MAINTENANCE**
+  - `GET /api/v1/masterdata/prices` - Get all prices
+  - `GET /api/v1/masterdata/prices/:id` - Get price by ID
+  - `POST /api/v1/masterdata/prices` - Create new price
+  - `PUT /api/v1/masterdata/prices/:id` - Update price by ID
+  - `DELETE /api/v1/masterdata/prices/:id` - Delete price by ID
+  - `GET /api/v1/masterdata/prices/article/:article_id` - Get prices for a specific article
+- [*] **8. GALLERY IMAGE**
+  - `GET /api/v1/masterdata/gallery-images` - Get all gallery images
+  - `GET /api/v1/masterdata/gallery-images/:id` - Get gallery image by ID
+  - `POST /api/v1/masterdata/gallery-images` - Upload new gallery image
+  - `PUT /api/v1/masterdata/gallery-images/:id` - Update gallery image by ID
+  - `DELETE /api/v1/masterdata/gallery-images/:id` - Delete gallery image by ID
+  - `GET /api/v1/masterdata/gallery-images/article/:article_id` - Get images for a specific article
+- [*] **9. SUPPLIER**
+  - `GET /api/v1/masterdata/suppliers` - Get all suppliers
+  - `GET /api/v1/masterdata/suppliers/:id` - Get supplier by ID
+  - `POST /api/v1/masterdata/suppliers` - Create new supplier
+  - `PUT /api/v1/masterdata/suppliers/:id` - Update supplier by ID
+  - `DELETE /api/v1/masterdata/suppliers/:id` - Delete supplier by ID
+- [*] **10. EKSPEDISI/KURIR**
+  - `GET /api/v1/masterdata/couriers` - Get all couriers
+  - `GET /api/v1/masterdata/couriers/:id` - Get courier by ID
+  - `POST /api/v1/masterdata/couriers` - Create new courier
+  - `PUT /api/v1/masterdata/couriers/:id` - Update courier by ID
+  - `DELETE /api/v1/masterdata/couriers/:id` - Delete courier by ID
+- [*] **11. TARIF EKSPEDISI**
+  - `GET /api/v1/masterdata/courier-rates` - Get all courier rates
+  - `GET /api/v1/masterdata/courier-rates/:id` - Get courier rate by ID
+  - `POST /api/v1/masterdata/courier-rates` - Create new courier rate
+  - `PUT /api/v1/masterdata/courier-rates/:id` - Update courier rate by ID
+  - `DELETE /api/v1/masterdata/courier-rates/:id` - Delete courier rate by ID
+  - `GET /api/v1/masterdata/courier-rates/calculate` - Calculate shipping cost
+- [*] **12. DEPSTORE**
+  - `GET /api/v1/masterdata/depstores` - Get all department stores
+  - `GET /api/v1/masterdata/depstores/:id` - Get department store by ID
+  - `POST /api/v1/masterdata/depstores` - Create new department store
+  - `PUT /api/v1/masterdata/depstores/:id` - Update department store by ID
+  - `DELETE /api/v1/masterdata/depstores/:id` - Delete department store by ID
+- [*] **13. CUSTOMER**
+  - `GET /api/v1/masterdata/customers` - Get all customers
+  - `GET /api/v1/masterdata/customers/:id` - Get customer by ID
+  - `POST /api/v1/masterdata/customers` - Create new customer
+  - `PUT /api/v1/masterdata/customers/:id` - Update customer by ID
+  - `DELETE /api/v1/masterdata/customers/:id` - Delete customer by ID
+- [*] **14. WAREHOUSE**
+  - `GET /api/v1/masterdata/warehouses` - Get all warehouses
+  - `GET /api/v1/masterdata/warehouses/:id` - Get warehouse by ID
+  - `POST /api/v1/masterdata/warehouses` - Create new warehouse
+  - `PUT /api/v1/masterdata/warehouses/:id` - Update warehouse by ID
+  - `DELETE /api/v1/masterdata/warehouses/:id` - Delete warehouse by ID
+- [*] **15. DIVISI/GRUP**
+  - `GET /api/v1/masterdata/divisions` - Get all divisions
+  - `GET /api/v1/masterdata/divisions/:id` - Get division by ID
+  - `POST /api/v1/masterdata/divisions` - Create new division
+  - `PUT /api/v1/masterdata/divisions/:id` - Update division by ID
+  - `DELETE /api/v1/masterdata/divisions/:id` - Delete division by ID
+- [*] **16. COMPANY SETUP**
+  - `GET /api/v1/masterdata/companies` - Get all companies
+  - `GET /api/v1/masterdata/companies/:id` - Get company by ID
+  - `POST /api/v1/masterdata/companies` - Create new company
+  - `PUT /api/v1/masterdata/companies/:id` - Update company by ID
+  - `DELETE /api/v1/masterdata/companies/:id` - Delete company by ID
+
+## B. INVENTORY CONTROL
+- [*] **1. DRAFT ORDER**
+  - `GET /api/v1/inventory/draft-orders` - Get all draft orders
+  - `GET /api/v1/inventory/draft-orders/:id` - Get draft order by ID
+  - `POST /api/v1/inventory/draft-orders` - Create new draft order
+  - `PUT /api/v1/inventory/draft-orders/:id` - Update draft order by ID
+  - `DELETE /api/v1/inventory/draft-orders/:id` - Delete draft order by ID
+  - `POST /api/v1/inventory/draft-orders/:id/submit` - Submit draft order for approval
+- [*] **2. PURCHASE ORDER**
+  - `GET /api/v1/inventory/purchase-orders` - Get all purchase orders
+  - `GET /api/v1/inventory/purchase-orders/:id` - Get purchase order by ID
+  - `POST /api/v1/inventory/purchase-orders` - Create new purchase order
+  - `PUT /api/v1/inventory/purchase-orders/:id` - Update purchase order by ID
+  - `DELETE /api/v1/inventory/purchase-orders/:id` - Delete purchase order by ID
+  - `POST /api/v1/inventory/purchase-orders/:id/approve` - Approve purchase order
+  - `POST /api/v1/inventory/purchase-orders/:id/receive` - Mark purchase order as received
+- [*] **3. RECEIVING GOODS / PEMBELIAN BARANG**
+  - `GET /api/v1/inventory/goods-receipts` - Get all goods receipts
+  - `GET /api/v1/inventory/goods-receipts/:id` - Get goods receipt by ID
+  - `POST /api/v1/inventory/goods-receipts` - Create new goods receipt
+  - `PUT /api/v1/inventory/goods-receipts/:id` - Update goods receipt by ID
+  - `DELETE /api/v1/inventory/goods-receipts/:id` - Delete goods receipt by ID
+  - `POST /api/v1/inventory/goods-receipts/:id/confirm` - Confirm goods receipt
+- [*] **4. RETURN SUPPLIER**
+  - `GET /api/v1/inventory/return-suppliers` - Get all supplier returns
+  - `GET /api/v1/inventory/return-suppliers/:id` - Get supplier return by ID
+  - `POST /api/v1/inventory/return-suppliers` - Create new supplier return
+  - `PUT /api/v1/inventory/return-suppliers/:id` - Update supplier return by ID
+  - `DELETE /api/v1/inventory/return-suppliers/:id` - Delete supplier return by ID
+- [*] **5. BARCODE GENERATOR / PRINTING**
+  - `POST /api/v1/inventory/barcode-printing/generate` - Generate barcodes
+  - `GET /api/v1/inventory/barcode-printing/print-queue` - Get print queue status
+  - `POST /api/v1/inventory/barcode-printing/print` - Send barcodes to printer
+- [*] **6. PENGIRIMAN BARANG / TRANSFER STOK**
+  - `GET /api/v1/inventory/transfer-orders` - Get all transfer orders
+  - `GET /api/v1/inventory/transfer-orders/:id` - Get transfer order by ID
+  - `POST /api/v1/inventory/transfer-orders` - Create new transfer order
+  - `PUT /api/v1/inventory/transfer-orders/:id` - Update transfer order by ID
+  - `DELETE /api/v1/inventory/transfer-orders/:id` - Delete transfer order by ID
+  - `POST /api/v1/inventory/transfer-orders/:id/complete` - Mark transfer order as complete
+- [*] **7. PENGELUARAN BARANG**
+  - `GET /api/v1/inventory/goods-issues` - Get all goods issues
+  - `GET /api/v1/inventory/goods-issues/:id` - Get goods issue by ID
+  - `POST /api/v1/inventory/goods-issues` - Create new goods issue
+  - `PUT /api/v1/inventory/goods-issues/:id` - Update goods issue by ID
+  - `DELETE /api/v1/inventory/goods-issues/:id` - Delete goods issue by ID
+  - `POST /api/v1/inventory/goods-issues/:id/confirm` - Confirm goods issue
+- [*] **8. KOREKSI STOK**
+  - `GET /api/v1/inventory/stock-adjustments` - Get all stock adjustments
+  - `GET /api/v1/inventory/stock-adjustments/:id` - Get stock adjustment by ID
+  - `POST /api/v1/inventory/stock-adjustments` - Create new stock adjustment
+  - `PUT /api/v1/inventory/stock-adjustments/:id` - Update stock adjustment by ID
+  - `DELETE /api/v1/inventory/stock-adjustments/:id` - Delete stock adjustment by ID
+- [*] **9. STOK OPNAME**
+  - `GET /api/v1/inventory/stock-opnames` - Get all stock opnames
+  - `GET /api/v1/inventory/stock-opnames/:id` - Get stock opname by ID
+  - `POST /api/v1/inventory/stock-opnames` - Create new stock opname
+  - `PUT /api/v1/inventory/stock-opnames/:id` - Update stock opname by ID
+  - `DELETE /api/v1/inventory/stock-opnames/:id` - Delete stock opname by ID
+  - `POST /api/v1/inventory/stock-opnames/:id/finalize` - Finalize stock opname
+- [ ] **10. LIKUIDASI**
+  - `GET /api/v1/inventory/liquidations` - Get all liquidations
+  - `GET /api/v1/inventory/liquidations/:id` - Get liquidation by ID
+  - `POST /api/v1/inventory/liquidations` - Create new liquidation record
+  - `PUT /api/v1/inventory/liquidations/:id` - Update liquidation record by ID
+  - `DELETE /api/v1/inventory/liquidations/:id` - Delete liquidation record by ID
+- [ ] **11. GIFT MAINTENANCE**
+  - `GET /api/v1/inventory/gift-maintenance` - Get all gift maintenance records
+  - `GET /api/v1/inventory/gift-maintenance/:id` - Get gift maintenance record by ID
+  - `POST /api/v1/inventory/gift-maintenance` - Create new gift maintenance record
+  - `PUT /api/v1/inventory/gift-maintenance/:id` - Update gift maintenance record by ID
+  - `DELETE /api/v1/inventory/gift-maintenance/:id` - Delete gift maintenance record by ID
+- [ ] **12. CLOSING STOK**
+  - API Path: `/api/v1/inventory/stock-closing`
+- [ ] **13. CLOSING STORE**
+  - API Path: `/api/v1/inventory/store-closing`
+
+## C. SHIPPING
+- [*] **1. SHIPMENT**
+  - `GET /api/v1/shipping/shipments` - Get all shipments
+  - `GET /api/v1/shipping/shipments/:id` - Get shipment by ID
+  - `POST /api/v1/shipping/shipments` - Create new shipment
+  - `PUT /api/v1/shipping/shipments/:id` - Update shipment by ID
+  - `DELETE /api/v1/shipping/shipments/:id` - Delete shipment by ID
+  - `POST /api/v1/shipping/shipments/:id/track` - Get shipment tracking information
+- [*] **2. AIRWAYBILL GENERATOR/PRINTING**
+  - `POST /api/v1/shipping/airwaybills/generate` - Generate new airwaybill
+  - `GET /api/v1/shipping/airwaybills/:id` - Get airwaybill details
+  - `POST /api/v1/shipping/airwaybills/:id/print` - Print airwaybill
+- [*] **3. OUTBOUND SCANNING**
+  - `POST /api/v1/shipping/outbound-scans` - Record new outbound scan
+  - `GET /api/v1/shipping/outbound-scans/:id` - Get outbound scan details
+  - `GET /api/v1/shipping/outbound-scans/shipment/:shipment_id` - Get outbound scans for a shipment
+- [*] **4. MANIFEST**
+  - `GET /api/v1/shipping/manifests` - Get all manifests
+  - `GET /api/v1/shipping/manifests/:id` - Get manifest by ID
+  - `POST /api/v1/shipping/manifests` - Create new manifest
+  - `PUT /api/v1/shipping/manifests/:id` - Update manifest by ID
+  - `DELETE /api/v1/shipping/manifests/:id` - Delete manifest by ID
+  - `POST /api/v1/shipping/manifests/:id/close` - Close manifest
+- [*] **5. INVOICE EKSPEDISI**
+  - `GET /api/v1/shipping/invoices` - Get all shipping invoices
+  - `GET /api/v1/shipping/invoices/:id` - Get shipping invoice by ID
+  - `POST /api/v1/shipping/invoices` - Create new shipping invoice
+  - `PUT /api/v1/shipping/invoices/:id` - Update shipping invoice by ID
+  - `DELETE /api/v1/shipping/invoices/:id` - Delete shipping invoice by ID
+  - `POST /api/v1/shipping/invoices/:id/pay` - Record payment for shipping invoice
+
+## D. SALES
+- [*] **1. SALES ONLINE**
+  - `GET /api/v1/sales/online-sales` - Get all online sales
+  - `GET /api/v1/sales/online-sales/:id` - Get online sale by ID
+  - `POST /api/v1/sales/online-sales` - Create new online sale
+  - `PUT /api/v1/sales/online-sales/:id` - Update online sale by ID
+  - `DELETE /api/v1/sales/online-sales/:id` - Delete online sale by ID
+  - `POST /api/v1/sales/online-sales/import` - Import data from marketplace
+  - `POST /api/v1/sales/online-sales/:id/scan-packing` - Record scan packing
+  - `GET /api/v1/sales/online-sales/:id/ar` - Get accounts receivable for online sale
+- [*] **2. SALES PUTUS**
+  - `GET /api/v1/sales/direct-sales` - Get all direct sales
+  - `GET /api/v1/sales/direct-sales/:id` - Get direct sale by ID
+  - `POST /api/v1/sales/direct-sales` - Create new direct sale
+  - `PUT /api/v1/sales/direct-sales/:id` - Update direct sale by ID
+  - `DELETE /api/v1/sales/direct-sales/:id` - Delete direct sale by ID
+  - `GET /api/v1/sales/direct-sales/:id/invoice` - Generate invoice for direct sale
+  - `GET /api/v1/sales/direct-sales/:id/ar` - Get accounts receivable for direct sale
+- [*] **3. POINT OF SALES**
+  - `GET /api/v1/sales/pos` - Get all POS transactions
+  - `GET /api/v1/sales/pos/:id` - Get POS transaction by ID
+  - `POST /api/v1/sales/pos` - Create new POS transaction
+  - `PUT /api/v1/sales/pos/:id` - Update POS transaction by ID
+  - `DELETE /api/v1/sales/pos/:id` - Delete POS transaction by ID
+  - `POST /api/v1/sales/pos/:id/print-receipt` - Print receipt for POS transaction
+  - `POST /api/v1/sales/pos/:id/payment` - Record payment for POS transaction
+  - `GET /api/v1/sales/pos/:id/ar` - Get accounts receivable for POS transaction
+- [*] **4. SALES CONSINMENT**
+  - `GET /api/v1/sales/consignment-sales` - Get all consignment sales
+  - `GET /api/v1/sales/consignment-sales/:id` - Get consignment sale by ID
+  - `POST /api/v1/sales/consignment-sales` - Create new consignment sale
+  - `PUT /api/v1/sales/consignment-sales/:id` - Update consignment sale by ID
+  - `DELETE /api/v1/sales/consignment-sales/:id` - Delete consignment sale by ID
+  - `POST /api/v1/sales/consignment-sales/:id/spg-input` - SPG input for consignment sale
+- [*] **5. RETURN CUSTOMER**
+  - `GET /api/v1/sales/customer-returns` - Get all customer returns
+  - `GET /api/v1/sales/customer-returns/:id` - Get customer return by ID
+  - `POST /api/v1/sales/customer-returns` - Create new customer return
+  - `PUT /api/v1/sales/customer-returns/:id` - Update customer return by ID
+  - `DELETE /api/v1/sales/customer-returns/:id` - Delete customer return by ID
+- [*] **6. SALES ORDER**
+  - `GET /api/v1/sales/sales-orders` - Get all sales orders
+  - `GET /api/v1/sales/sales-orders/:id` - Get sales order by ID
+  - `POST /api/v1/sales/sales-orders` - Create new sales order
+  - `PUT /api/v1/sales/sales-orders/:id` - Update sales order by ID
+  - `DELETE /api/v1/sales/sales-orders/:id` - Delete sales order by ID
+- [*] **7. SALES TARGET**
+  - `GET /api/v1/sales/sales-targets` - Get all sales targets
+  - `GET /api/v1/sales/sales-targets/:id` - Get sales target by ID
+  - `POST /api/v1/sales/sales-targets` - Create new sales target
+  - `PUT /api/v1/sales/sales-targets/:id` - Update sales target by ID
+  - `DELETE /api/v1/sales/sales-targets/:id` - Delete sales target by ID
+- [*] **8. SALES KOMPETITOR**
+  - `GET /api/v1/sales/competitors` - Get all sales competitors
+  - `GET /api/v1/sales/competitors/:id` - Get sales competitor by ID
+  - `POST /api/v1/sales/competitors` - Create new sales competitor record
+  - `PUT /api/v1/sales/competitors/:id` - Update sales competitor record by ID
+  - `DELETE /api/v1/sales/competitors/:id` - Delete sales competitor record by ID
+- [*] **9. PROMO / EVENT**
+  - `GET /api/v1/sales/promotions` - Get all promotions
+  - `GET /api/v1/sales/promotions/:id` - Get promotion by ID
+  - `POST /api/v1/sales/promotions` - Create new promotion
+  - `PUT /api/v1/sales/promotions/:id` - Update promotion by ID
+  - `DELETE /api/v1/sales/promotions/:id` - Delete promotion by ID
+- [*] **10. PROSES MARGIN**
+  - `GET /api/v1/sales/process-margins` - Get all process margins
+  - `GET /api/v1/sales/process-margins/:id` - Get process margin by ID
+  - `POST /api/v1/sales/process-margins` - Create new process margin record
+  - `PUT /api/v1/sales/process-margins/:id` - Update process margin record by ID
+  - `DELETE /api/v1/sales/process-margins/:id` - Delete process margin record by ID
+- [*] **11. SALES REKONSILIASI**
+  - `GET /api/v1/sales/reconciliations` - Get all sales reconciliations
+  - `GET /api/v1/sales/reconciliations/:id` - Get sales reconciliation by ID
+  - `POST /api/v1/sales/reconciliations` - Create new sales reconciliation record
+  - `PUT /api/v1/sales/reconciliations/:id` - Update sales reconciliation record by ID
+  - `DELETE /api/v1/sales/reconciliations/:id` - Delete sales reconciliation record by ID
+
+## E. FINANCE
+- [*] **1. MASTER KAS/BANK**
+  - `GET /api/v1/finance/cash-banks` - Get all cash/bank accounts
+  - `GET /api/v1/finance/cash-banks/:id` - Get cash/bank account by ID
+  - `POST /api/v1/finance/cash-banks` - Create new cash/bank account
+  - `PUT /api/v1/finance/cash-banks/:id` - Update cash/bank account by ID
+  - `DELETE /api/v1/finance/cash-banks/:id` - Delete cash/bank account by ID
+- [*] **2. SALDO AWAL KAS**
+  - `GET /api/v1/finance/cash-opening-balances` - Get all cash opening balances
+  - `GET /api/v1/finance/cash-opening-balances/:id` - Get cash opening balance by ID
+  - `POST /api/v1/finance/cash-opening-balances` - Create new cash opening balance
+  - `PUT /api/v1/finance/cash-opening-balances/:id` - Update cash opening balance by ID
+  - `DELETE /api/v1/finance/cash-opening-balances/:id` - Delete cash opening balance by ID
+- [*] **3. KONTRABON**
+  - `GET /api/v1/finance/kontrabons` - Get all kontrabons
+  - `GET /api/v1/finance/kontrabons/:id` - Get kontrabon by ID
+  - `POST /api/v1/finance/kontrabons` - Create new kontrabon
+  - `PUT /api/v1/finance/kontrabons/:id` - Update kontrabon by ID
+  - `DELETE /api/v1/finance/kontrabons/:id` - Delete kontrabon by ID
+- [*] **4. BILLING INVOICE**
+  - `GET /api/v1/finance/billing-invoices` - Get all billing invoices
+  - `GET /api/v1/finance/billing-invoices/:id` - Get billing invoice by ID
+  - `POST /api/v1/finance/billing-invoices` - Create new billing invoice
+  - `PUT /api/v1/finance/billing-invoices/:id` - Update billing invoice by ID
+  - `DELETE /api/v1/finance/billing-invoices/:id` - Delete billing invoice by ID
+  - `POST /api/v1/finance/billing-invoices/:id/pay` - Record payment for billing invoice
+- [*] **5. PENGAJUAN PENGELUARAN KAS/BANK**
+  - `GET /api/v1/finance/expenditure-requests` - Get all expenditure requests
+  - `GET /api/v1/finance/expenditure-requests/:id` - Get expenditure request by ID
+  - `POST /api/v1/finance/expenditure-requests` - Create new expenditure request
+  - `PUT /api/v1/finance/expenditure-requests/:id` - Update expenditure request by ID
+  - `DELETE /api/v1/finance/expenditure-requests/:id` - Delete expenditure request by ID
+  - `POST /api/v1/finance/expenditure-requests/:id/approve` - Approve expenditure request
+  - `POST /api/v1/finance/expenditure-requests/:id/reject` - Reject expenditure request
+- [*] **6. PENGELUARAN KAS/BANK**
+  - `GET /api/v1/finance/cash-disbursements` - Get all cash disbursements
+  - `GET /api/v1/finance/cash-disbursements/:id` - Get cash disbursement by ID
+  - `POST /api/v1/finance/cash-disbursements` - Create new cash disbursement
+  - `PUT /api/v1/finance/cash-disbursements/:id` - Update cash disbursement by ID
+  - `DELETE /api/v1/finance/cash-disbursements/:id` - Delete cash disbursement by ID
+- [*] **7. PENERIMAAN KAS/BANK**
+  - `GET /api/v1/finance/cash-receipts` - Get all cash receipts
+  - `GET /api/v1/finance/cash-receipts/:id` - Get cash receipt by ID
+  - `POST /api/v1/finance/cash-receipts` - Create new cash receipt
+  - `PUT /api/v1/finance/cash-receipts/:id` - Update cash receipt by ID
+  - `DELETE /api/v1/finance/cash-receipts/:id` - Delete cash receipt by ID
+- [*] **8. TRANSFER ANTAR KAS/BANK**
+  - `GET /api/v1/finance/bank-transfers` - Get all bank transfers
+  - `GET /api/v1/finance/bank-transfers/:id` - Get bank transfer by ID
+  - `POST /api/v1/finance/bank-transfers` - Create new bank transfer
+  - `PUT /api/v1/finance/bank-transfers/:id` - Update bank transfer by ID
+  - `DELETE /api/v1/finance/bank-transfers/:id` - Delete bank transfer by ID
+- [*] **9. PENCAIRAN GIRO/CHEQUE**
+  - `GET /api/v1/finance/check-clearances` - Get all check clearances
+  - `GET /api/v1/finance/check-clearances/:id` - Get check clearance by ID
+  - `POST /api/v1/finance/check-clearances` - Create new check clearance record
+  - `PUT /api/v1/finance/check-clearances/:id` - Update check clearance record by ID
+  - `DELETE /api/v1/finance/check-clearances/:id` - Delete check clearance record by ID
+  - `POST /api/v1/finance/check-clearances/:id/clear` - Mark check as cleared
+- [*] **10. NOTA AR**
+  - `GET /api/v1/finance/accounts-receivable-notes` - Get all AR notes
+  - `GET /api/v1/finance/accounts-receivable-notes/:id` - Get AR note by ID
+  - `POST /api/v1/finance/accounts-receivable-notes` - Create new AR note
+  - `PUT /api/v1/finance/accounts-receivable-notes/:id` - Update AR note by ID
+  - `DELETE /api/v1/finance/accounts-receivable-notes/:id` - Delete AR note by ID
+- [*] **11. NOTA AP**
+  - `GET /api/v1/finance/accounts-payable-notes` - Get all AP notes
+  - `GET /api/v1/finance/accounts-payable-notes/:id` - Get AP note by ID
+  - `POST /api/v1/finance/accounts-payable-notes` - Create new AP note
+  - `PUT /api/v1/finance/accounts-payable-notes/:id` - Update AP note by ID
+  - `DELETE /api/v1/finance/accounts-payable-notes/:id` - Delete AP note by ID
+- [*] **12. CLOSING BULANAN**
+  - `GET /api/v1/finance/monthly-closings` - Get all monthly closings
+  - `GET /api/v1/finance/monthly-closings/:id` - Get monthly closing by ID
+  - `POST /api/v1/finance/monthly-closings` - Create new monthly closing record
+  - `PUT /api/v1/finance/monthly-closings/:id` - Update monthly closing record by ID
+  - `DELETE /api/v1/finance/monthly-closings/:id` - Delete monthly closing record by ID
+  - `POST /api/v1/finance/monthly-closings/:id/finalize` - Finalize monthly closing
+- [*] **13. BUKU KAS/BANK**
+  - `GET /api/v1/finance/cash-books` - Get all cash books
+  - `GET /api/v1/finance/cash-books/:id` - Get cash book by ID
+  - `POST /api/v1/finance/cash-books` - Create new cash book
+  - `PUT /api/v1/finance/cash-books/:id` - Update cash book by ID
+  - `DELETE /api/v1/finance/cash-books/:id` - Delete cash book by ID
+  - `GET /api/v1/finance/cash-books/:id/transactions` - Get transactions for a cash book
+- [ ] **14. GIRO MASUK/KELUAR**
+  - `GET /api/v1/finance/giro-transactions` - Get all giro transactions
+  - `GET /api/v1/finance/giro-transactions/:id` - Get giro transaction by ID
+  - `POST /api/v1/finance/giro-transactions` - Create new giro transaction
+  - `PUT /api/v1/finance/giro-transactions/:id` - Update giro transaction by ID
+  - `DELETE /api/v1/finance/giro-transactions/:id` - Delete giro transaction by ID
+  - `POST /api/v1/finance/giro-transactions/:id/clear` - Clear giro transaction
+
+## F. ACCOUNTING
+- [*] **1. CHART OF ACCOUNT**
+  - `GET /api/v1/accounting/chart-of-accounts` - Get all chart of accounts
+  - `GET /api/v1/accounting/chart-of-accounts/:id` - Get chart of account by ID
+  - `POST /api/v1/accounting/chart-of-accounts` - Create new chart of account
+  - `PUT /api/v1/accounting/chart-of-accounts/:id` - Update chart of account by ID
+  - `DELETE /api/v1/accounting/chart-of-accounts/:id` - Delete chart of account by ID
+- [*] **2. CURRENCY SETTING**
+  - `GET /api/v1/accounting/currency-settings` - Get all currency settings
+  - `GET /api/v1/accounting/currency-settings/:id` - Get currency setting by ID
+  - `POST /api/v1/accounting/currency-settings` - Create new currency setting
+  - `PUT /api/v1/accounting/currency-settings/:id` - Update currency setting by ID
+  - `DELETE /api/v1/accounting/currency-settings/:id` - Delete currency setting by ID
+  - `POST /api/v1/accounting/currency-settings/:id/set-base` - Set as base currency
+- [ ] **3. PPN SETTING**
+  - `GET /api/v1/accounting/ppn-settings` - Get all PPN settings
+  - `GET /api/v1/accounting/ppn-settings/:id` - Get PPN setting by ID
+  - `POST /api/v1/accounting/ppn-settings` - Create new PPN setting
+  - `PUT /api/v1/accounting/ppn-settings/:id` - Update PPN setting by ID
+  - `DELETE /api/v1/accounting/ppn-settings/:id` - Delete PPN setting by ID
+- [*] **4. ENTRI JOURNAL**
+  - `GET /api/v1/accounting/journal-entries` - Get all journal entries
+  - `GET /api/v1/accounting/journal-entries/:id` - Get journal entry by ID
+  - `POST /api/v1/accounting/journal-entries` - Create new journal entry
+  - `PUT /api/v1/accounting/journal-entries/:id` - Update journal entry by ID
+  - `DELETE /api/v1/accounting/journal-entries/:id` - Delete journal entry by ID
+  - `POST /api/v1/accounting/journal-entries/:id/post` - Post entry
+  - `POST /api/v1/accounting/journal-entries/:id/reverse` - Reverse entry
+  - `POST /api/v1/accounting/journal-entries/:id/lines` - Add line items
+  - `GET /api/v1/accounting/journal-entries/status` - Filter by status
+  - `GET /api/v1/accounting/journal-entries/date-range` - Date range filter
+  - `GET /api/v1/accounting/journal-entries/company/:company_id` - Company entries
+  - `GET /api/v1/accounting/journal-entries/company/:company_id/unposted` - Unposted entries
+  - `GET /api/v1/accounting/journal-entries/register` - Journal register report
+- [ ] **5. BEGINNING BALANCE**
+  - `GET /api/v1/accounting/beginning-balances` - Get all beginning balances
+  - `GET /api/v1/accounting/beginning-balances/:id` - Get beginning balance by ID
+  - `POST /api/v1/accounting/beginning-balances` - Create new beginning balance
+  - `PUT /api/v1/accounting/beginning-balances/:id` - Update beginning balance by ID
+  - `DELETE /api/v1/accounting/beginning-balances/:id` - Delete beginning balance by ID
+- [ ] **6. POSTING CASH/BANK TO GL**
+  - `POST /api/v1/accounting/cash-bank-postings` - Post cash/bank transactions to GL
+  - `GET /api/v1/accounting/cash-bank-postings/status` - Get status of cash/bank postings
+- [*] **7. AKTIVA / BIAYA DI MUKA**
+  - `GET /api/v1/accounting/assets-prepayments` - Get all assets/prepayments
+  - `GET /api/v1/accounting/assets-prepayments/:id` - Get asset/prepayment by ID
+  - `POST /api/v1/accounting/assets-prepayments` - Create new asset/prepayment record
+  - `PUT /api/v1/accounting/assets-prepayments/:id` - Update asset/prepayment record by ID
+  - `DELETE /api/v1/accounting/assets-prepayments/:id` - Delete asset by ID
+- [*] **8. GENERAL LEDGER**
+  - `GET /api/v1/accounting/general-ledger` - Get general ledger entries
+  - `GET /api/v1/accounting/general-ledger/account/:account_id` - Get general ledger entries by account
+  - `GET /api/v1/accounting/general-ledger/date-range` - Get general ledger entries by date range
+- [*] **9. TRIAL BALANCE**
+  - `GET /api/v1/accounting/trial-balances` - Get trial balance report
+  - `GET /api/v1/accounting/trial-balances/period` - Get trial balance for a specific period
+- [ ] **10. INCOME STATEMENT**
+  - `GET /api/v1/accounting/income-statements` - Get income statement report
+  - `GET /api/v1/accounting/income-statements/period` - Get income statement for a specific period
+- [ ] **11. BALANCE SHEET**
+  - `GET /api/v1/accounting/balance-sheets` - Get balance sheet report
+  - `GET /api/v1/accounting/balance-sheets/date` - Get balance sheet for a specific date
+- [*] **12. COST CENTER**
+  - `GET /api/v1/accounting/cost-centers` - Get all cost centers
+  - `GET /api/v1/accounting/cost-centers/:id` - Get cost center by ID
+  - `POST /api/v1/accounting/cost-centers` - Create new cost center
+  - `PUT /api/v1/accounting/cost-centers/:id` - Update cost center by ID
+  - `DELETE /api/v1/accounting/cost-centers/:id` - Delete cost center by ID
+- [*] **13. AKTIVA**
+  - `GET /api/v1/accounting/assets` - Get all assets
+  - `GET /api/v1/accounting/assets/:id` - Get asset by ID
+  - `POST /api/v1/accounting/assets` - Create new asset
+  - `PUT /api/v1/accounting/assets/:id` - Update asset by ID
+  - `DELETE /api/v1/accounting/assets/:id` - Delete asset by ID
+- [ ] **14. INCOME STATEMENT BY STORE BY CATEGORY**
+  - `GET /api/v1/accounting/income-statement-by-store-category` - Get income statement by store and category
+  - `GET /api/v1/accounting/income-statement-by-store-category/store/:store_id` - Filter by store
+  - `GET /api/v1/accounting/income-statement-by-store-category/category/:category_id` - Filter by category
+- [ ] **15. ACCOUNT BREAK BY CATEGORY**
+  - `GET /api/v1/accounting/account-break-by-category` - Get account breakdown by category
+  - `GET /api/v1/accounting/account-break-by-category/:category_id` - Filter by category
+- [ ] **16. AUTO JOURNAL FROM OPERATION**
+  - `POST /api/v1/accounting/auto-journal-operations` - Trigger auto journal from operations
+  - `GET /api/v1/accounting/auto-journal-operations/status` - Get status of auto journal operations
+
+## G. PAYROLL
+- [*] **1. MASTER KARYAWAN**
+  - `GET /api/v1/payroll/employees` - Get all employees
+  - `GET /api/v1/payroll/employees/:id` - Get employee by ID
+  - `POST /api/v1/payroll/employees` - Create new employee record
+  - `PUT /api/v1/payroll/employees/:id` - Update employee record by ID
+  - `DELETE /api/v1/payroll/employees/:id` - Delete employee record by ID
+- [ ] **2. MASTER SPB/SPG**
+  - `GET /api/v1/payroll/spb-spg-masters` - Get all SPB/SPG masters
+  - `GET /api/v1/payroll/spb-spg-masters/:id` - Get SPB/SPG master by ID
+  - `POST /api/v1/payroll/spb-spg-masters` - Create new SPB/SPG master record
+  - `PUT /api/v1/payroll/spb-spg-masters/:id` - Update SPB/SPG master record by ID
+  - `DELETE /api/v1/payroll/spb-spg-masters/:id` - Delete SPB/SPG master record by ID
+- [*] **3. MASTER TOKO SPG**
+  - `GET /api/v1/payroll/spg-stores` - Get all SPG stores
+  - `GET /api/v1/payroll/spg-stores/:id` - Get SPG store by ID
+  - `POST /api/v1/payroll/spg-stores` - Create new SPG store record
+  - `PUT /api/v1/payroll/spg-stores/:id` - Update SPG store record by ID
+  - `DELETE /api/v1/payroll/spg-stores/:id` - Delete SPG store record by ID
+- [ ] **4. PERHITUNGAN ABSEN**
+  - `GET /api/v1/payroll/attendance-calculations` - Get all attendance calculations
+  - `GET /api/v1/payroll/attendance-calculations/:id` - Get attendance calculation by ID
+  - `POST /api/v1/payroll/attendance-calculations` - Trigger new attendance calculation
+  - `GET /api/v1/payroll/attendance-calculations/employee/:employee_id` - Get attendance for a specific employee
+- [ ] **5. PERHITUNGAN GAJI**
+  - `GET /api/v1/payroll/salary-calculations` - Get all salary calculations
+  - `GET /api/v1/payroll/salary-calculations/:id` - Get salary calculation by ID
+  - `POST /api/v1/payroll/salary-calculations` - Trigger new salary calculation
+  - `GET /api/v1/payroll/salary-calculations/employee/:employee_id` - Get salary for a specific employee
+- [ ] **6. PROSES VERIFIKASI DAN APPROVAL GAJI**
+  - `GET /api/v1/payroll/salary-approvals` - Get all salary approvals
+  - `GET /api/v1/payroll/salary-approvals/:id` - Get salary approval by ID
+  - `POST /api/v1/payroll/salary-approvals/:id/approve` - Approve salary calculation
+  - `POST /api/v1/payroll/salary-approvals/:id/reject` - Reject salary calculation
+- [ ] **7. POTONGAN KARYAWAN**
+  - `GET /api/v1/payroll/employee-deductions` - Get all employee deductions
+  - `GET /api/v1/payroll/employee-deductions/:id` - Get employee deduction by ID
+  - `POST /api/v1/payroll/employee-deductions` - Create new employee deduction
+  - `PUT /api/v1/payroll/employee-deductions/:id` - Update employee deduction by ID
+  - `DELETE /api/v1/payroll/employee-deductions/:id` - Delete employee deduction by ID
+- [ ] **8. PINJAMAN KARYAWAN**
+  - `GET /api/v1/payroll/employee-loans` - Get all employee loans
+  - `GET /api/v1/payroll/employee-loans/:id` - Get employee loan by ID
+  - `POST /api/v1/payroll/employee-loans` - Create new employee loan record
+  - `PUT /api/v1/payroll/employee-loans/:id` - Update employee loan record by ID
+  - `DELETE /api/v1/payroll/employee-loans/:id` - Delete employee loan record by ID
+- [ ] **9. PENJUALAN KARYAWAN**
+  - `GET /api/v1/payroll/employee-sales` - Get all employee sales records
+  - `GET /api/v1/payroll/employee-sales/:id` - Get employee sales record by ID
+  - `POST /api/v1/payroll/employee-sales` - Create new employee sales record
+  - `PUT /api/v1/payroll/employee-sales/:id` - Update employee sales record by ID
+  - `DELETE /api/v1/payroll/employee-sales/:id` - Delete employee sales record by ID
+- [ ] **10. POSTING GAJI**
+  - `POST /api/v1/payroll/salary-postings` - Post salaries to accounting ledger
+  - `GET /api/v1/payroll/salary-postings/status` - Get status of salary postings
+- [ ] **11. REIMBURST / KLAIM BIAYA**
+  - `GET /api/v1/payroll/reimbursements` - Get all reimbursements
+  - `GET /api/v1/payroll/reimbursements/:id` - Get reimbursement by ID
+  - `POST /api/v1/payroll/reimbursements` - Create new reimbursement request
+  - `PUT /api/v1/payroll/reimbursements/:id` - Update reimbursement request by ID
+  - `DELETE /api/v1/payroll/reimbursements/:id` - Delete reimbursement request by ID
+  - `POST /api/v1/payroll/reimbursements/:id/approve` - Approve reimbursement request
+- [ ] **12. NOTA PIUTANG**
+  - `GET /api/v1/payroll/receivable-notes` - Get all receivable notes
+  - `GET /api/v1/payroll/receivable-notes/:id` - Get receivable note by ID
+  - `POST /api/v1/payroll/receivable-notes` - Create new receivable note
+  - `PUT /api/v1/payroll/receivable-notes/:id` - Update receivable note by ID
+  - `DELETE /api/v1/payroll/receivable-notes/:id` - Delete receivable note by ID
+
+## H. ATTENDANCE
+- [*] **1. MESIN BIOMETRIK**
+  - `GET /api/v1/attendance/biometric-machines` - Get all biometric machines
+  - `GET /api/v1/attendance/biometric-machines/:id` - Get biometric machine by ID
+  - `POST /api/v1/attendance/biometric-machines` - Register new biometric machine
+  - `PUT /api/v1/attendance/biometric-machines/:id` - Update biometric machine details
+  - `DELETE /api/v1/attendance/biometric-machines/:id` - Delete biometric machine record
+- [ ] **2. ABSENSI BIOMETRIK (UNTUK HEADOFFICE)**
+  - `GET /api/v1/attendance/biometric-attendances` - Get all biometric attendance records
+  - `GET /api/v1/attendance/biometric-attendances/:id` - Get biometric attendance record by ID
+  - `POST /api/v1/attendance/biometric-attendances` - Record new biometric attendance
+  - `GET /api/v1/attendance/biometric-attendances/employee/:employee_id` - Get attendance for a specific employee
+  - `GET /api/v1/attendance/biometric-attendances/date/:date` - Get attendance for a specific date
+- [ ] **3. ABSENSI GPS DARI HP (UNTUK SPG)**
+  - `GET /api/v1/attendance/gps-attendances` - Get all GPS attendance records
+  - `GET /api/v1/attendance/gps-attendances/:id` - Get GPS attendance record by ID
+  - `POST /api/v1/attendance/gps-attendances` - Record new GPS attendance
+  - `GET /api/v1/attendance/gps-attendances/spg/:spg_id` - Get GPS attendance for a specific SPG
+  - `GET /api/v1/attendance/gps-attendances/date/:date` - Get GPS attendance for a specific date
+- [*] **4. KARTU ABSEN OTOMATIS**
+  - `GET /api/v1/attendance/automatic-cards` - Get all automatic attendance cards
+  - `GET /api/v1/attendance/automatic-cards/:id` - Get automatic attendance card by ID
+  - `POST /api/v1/attendance/automatic-cards` - Issue new automatic attendance card
+  - `PUT /api/v1/attendance/automatic-cards/:id` - Update automatic attendance card details
+  - `DELETE /api/v1/attendance/automatic-cards/:id` - Revoke automatic attendance card
+- [*] **5. ABSENSI HARIAN/TRACKING**
+  - `GET /api/v1/attendance/daily-tracking` - Get daily attendance tracking records
+  - `GET /api/v1/attendance/daily-tracking/employee/:employee_id` - Get daily tracking for a specific employee
+  - `GET /api/v1/attendance/daily-tracking/date/:date` - Get daily tracking for a specific date
+
+## I. MATERIAL
+- [*] **1. MASTER GUDANG**
+  - `GET /api/v1/material/warehouses` - Get all material warehouses
+  - `GET /api/v1/material/warehouses/:id` - Get material warehouse by ID
+  - `POST /api/v1/material/warehouses` - Create new material warehouse
+  - `PUT /api/v1/material/warehouses/:id` - Update material warehouse by ID
+  - `DELETE /api/v1/material/warehouses/:id` - Delete material warehouse by ID
+- [*] **2. MASTER MATERIAL**
+  - `GET /api/v1/material/materials` - Get all materials
+  - `GET /api/v1/material/materials/:id` - Get material by ID
+  - `POST /api/v1/material/materials` - Create new material
+  - `PUT /api/v1/material/materials/:id` - Update material by ID
+  - `DELETE /api/v1/material/materials/:id` - Delete material by ID
+- [*] **3. PO MATERIAL**
+  - `GET /api/v1/material/purchase-orders` - Get all material purchase orders
+  - `GET /api/v1/material/purchase-orders/:id` - Get material purchase order by ID
+  - `POST /api/v1/material/purchase-orders` - Create new material purchase order
+  - `PUT /api/v1/material/purchase-orders/:id` - Update material purchase order by ID
+  - `DELETE /api/v1/material/purchase-orders/:id` - Delete material purchase order by ID
+- [*] **4. RECEIVING MATERIAL**
+  - `GET /api/v1/material/receiving` - Get all material receiving records
+  - `GET /api/v1/material/receiving/:id` - Get material receiving record by ID
+  - `POST /api/v1/material/receiving` - Create new material receiving record
+  - `PUT /api/v1/material/receiving/:id` - Update material receiving record by ID
+  - `DELETE /api/v1/material/receiving/:id` - Delete material receiving record by ID
+- [*] **5. TRANSFER STOK**
+  - `GET /api/v1/material/stock-transfers` - Get all material stock transfers
+  - `GET /api/v1/material/stock-transfers/:id` - Get material stock transfer by ID
+  - `POST /api/v1/material/stock-transfers` - Create new material stock transfer
+  - `PUT /api/v1/material/stock-transfers/:id` - Update material stock transfer by ID
+  - `DELETE /api/v1/material/stock-transfers/:id` - Delete material stock transfer by ID
+- [ ] **6. PENJUALAN MATERIAL**
+  - `GET /api/v1/material/sales` - Get all material sales
+  - `GET /api/v1/material/sales/:id` - Get material sale by ID
+  - `POST /api/v1/material/sales` - Create new material sale
+  - `PUT /api/v1/material/sales/:id` - Update material sale by ID
+  - `DELETE /api/v1/material/sales/:id` - Delete material sale by ID
+- [*] **7. KOREKSI STOK**
+  - `GET /api/v1/material/stock-corrections` - Get all material stock corrections
+  - `GET /api/v1/material/stock-corrections/:id` - Get material stock correction by ID
+  - `POST /api/v1/material/stock-corrections` - Create new material stock correction
+  - `PUT /api/v1/material/stock-corrections/:id` - Update material stock correction by ID
+  - `DELETE /api/v1/material/stock-corrections/:id` - Delete material stock correction by ID
+- [ ] **8. HUTANG TALANGAN**
+  - `GET /api/v1/material/debt-advances` - Get all material debt advances
+  - `GET /api/v1/material/debt-advances/:id` - Get material debt advance by ID
+  - `POST /api/v1/material/debt-advances` - Create new material debt advance record
+  - `PUT /api/v1/material/debt-advances/:id` - Update material debt advance record by ID
+  - `DELETE /api/v1/material/debt-advances/:id` - Delete material debt advance record by ID
+- [ ] **9. POSTING HUTANG/PIUTANG**
+  - `POST /api/v1/material/debt-receivable-postings` - Post material debt/receivable to GL
+  - `GET /api/v1/material/debt-receivable-postings/status` - Get status of material debt/receivable postings
+- [ ] **10. CLOSING MATERIAL**
+  - `POST /api/v1/material/material-closing` - Perform material closing
+  - `GET /api/v1/material/material-closing/status` - Get status of material closing
+
+## J. INTEGRASI / API
+- [*] **1. APLIKASI RAMAYANA (HIERARKI)**
+  - `GET /api/v1/integrations/ramayana-hierarchy` - Get Ramayana hierarchy data
+  - `POST /api/v1/integrations/ramayana-hierarchy/sync` - Sync Ramayana hierarchy data
+- [*] **2. APLIKASI MATAHARI (MCP)**
+  - `GET /api/v1/integrations/matahari-mcp` - Get Matahari MCP data
+  - `POST /api/v1/integrations/matahari-mcp/sync` - Sync Matahari MCP data
+- [ ] **3. APLIKASI YOGYA (YOBON)**
+  - `GET /api/v1/integrations/yogya-yobon` - Get Yogya YOBON data
+  - `POST /api/v1/integrations/yogya-yobon/sync` - Sync Yogya YOBON data
+- [ ] **4. APLIKASI STAR (RAMBLA)**
+  - `GET /api/v1/integrations/star-rambla` - Get Star RAMBLA data
+  - `POST /api/v1/integrations/star-rambla/sync` - Sync Star RAMBLA data
+- [*] **5. STOCK COUNT / STOK TAKE**
+  - `GET /api/v1/integrations/stock-count` - Get stock count data
+  - `POST /api/v1/integrations/stock-count/sync` - Sync stock count data
+
+## K. REPORT DAN ANALISA
+- [*] **1. SETIAP MODUL A – J TERDAPAT REPORT STATIC**
+  - `GET /api/v1/reports/static` - Get all static reports
+  - `GET /api/v1/reports/static/:id` - Get static report by ID
+  - `POST /api/v1/reports/static/:id/generate` - Generate static report
+  - `GET /api/v1/reports/static/:id/download` - Download static report
+- [*] **2. UNTUK ANALISA MENGGUNAKAN DYNAMIC REPORT / OLAP = ONLINE ANALYTICAL PROCESSING**
+  - `POST /api/v1/reports/dynamic-olap/query` - Execute dynamic OLAP query
+  - `GET /api/v1/reports/dynamic-olap/dimensions` - Get available OLAP dimensions
+  - `GET /api/v1/reports/dynamic-olap/measures` - Get available OLAP measures

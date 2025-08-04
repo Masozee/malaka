@@ -80,6 +80,32 @@ go test -race ./...
 go test ./internal/modules/masterdata/domain/entities -run TestArticle
 ```
 
+### Hot Reload Development with Air
+For fast development with automatic reloading, the project uses Air:
+
+```bash
+# Development with hot reload (recommended)
+# This uses Docker Compose with Air for automatic backend reloading
+docker-compose up --build
+
+# Or using the development script
+./dev.sh
+
+# The air.toml configuration file controls the hot reload behavior:
+# - Watches Go files for changes
+# - Automatically rebuilds and restarts the server
+# - Excludes vendor and test files
+# - Uses PostgreSQL and Redis from Docker Compose
+```
+
+**Air Configuration** (`air.toml`):
+- **Root**: `.` (project root)
+- **Tmp Dir**: `tmp` (for temporary build files)
+- **Build Command**: `go build -o ./tmp/main ./cmd/server/main.go`
+- **Watch Patterns**: `**/*.go`, `**/*.yaml`, `**/*.yml`
+- **Exclude Patterns**: `vendor/**`, `**/*_test.go`, `tmp/**`
+- **Reload Delay**: 1000ms to prevent multiple rebuilds
+
 ## Architecture Overview
 
 ### Clean Architecture Structure
@@ -132,13 +158,47 @@ SERVER_ADDRESS=0.0.0.0:8080
 
 ## API Structure
 
-The REST API follows modular organization:
-- Base URL: `http://localhost:8080`
-- Master Data: `/masterdata/*` (companies, users, articles, customers, etc.)
-- Inventory: `/inventory/*` (purchase orders, stock movements, transfers)
-- Shipping: `/shipping/*` (couriers, shipments, airwaybills, manifests, invoices, outbound scans)
-- Sales: `/sales/*` (orders, invoices, POS transactions)
-- Finance: `/finance/*` (cash/bank management, payments, invoicing, accounts payable/receivable)
+The REST API follows modular organization with consistent versioning:
+- Base URL: `http://localhost:8080`  
+- API Version: All endpoints use `/api/v1` prefix for consistency
+- Master Data: `/api/v1/masterdata/*` (companies, users, articles, customers, etc.)
+- Inventory: `/api/v1/inventory/*` (purchase orders, stock movements, transfers)
+- Shipping: `/api/v1/shipping/*` (couriers, shipments, airwaybills, manifests, invoices, outbound scans)
+- Sales: `/api/v1/sales/*` (orders, invoices, POS transactions)
+- Finance: `/api/v1/finance/*` (cash/bank management, payments, invoicing, accounts payable/receivable)
+- Calendar: `/api/v1/calendar/*` (events, attendees, scheduling)
+- HR: `/api/v1/hr/*` (employees, payroll, attendance)
+- Accounting: `/api/v1/accounting/*` (general ledger, journal entries, trial balance)
+
+### API Versioning Strategy
+
+**IMPORTANT**: All new routes should be registered under `/api/v1` prefix for consistency:
+
+```go
+// ✅ CORRECT: Register routes with /api/v1 prefix
+func (server *Server) setupRouter() {
+    router := gin.Default()
+    
+    // Create API v1 group
+    apiV1 := router.Group("/api/v1")
+    
+    // Register module routes under v1
+    masterdata := apiV1.Group("/masterdata")
+    inventory := apiV1.Group("/inventory") 
+    shipping := apiV1.Group("/shipping")
+    // ... other modules
+}
+
+// ❌ INCORRECT: Direct registration without versioning
+func (server *Server) setupRouter() {
+    router := gin.Default()
+    
+    // This creates inconsistent API structure
+    masterdata := router.Group("/masterdata") // Missing /api/v1
+}
+```
+
+**Current State**: The codebase has inconsistent API paths. Some modules use `/api` prefix (calendar), while others use direct paths. All new implementations should use `/api/v1` for consistency.
 
 ## Implementation Status
 

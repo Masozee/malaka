@@ -7,7 +7,7 @@ import (
 )
 
 // RegisterFinanceRoutes registers the finance routes.
-func RegisterFinanceRoutes(router *gin.Engine, cashBankHandler *handlers.CashBankHandler, paymentHandler *handlers.PaymentHandler, invoiceHandler *handlers.InvoiceHandler, accountsPayableHandler *handlers.AccountsPayableHandler, accountsReceivableHandler *handlers.AccountsReceivableHandler, cashDisbursementHandler *handlers.CashDisbursementHandler, cashReceiptHandler *handlers.CashReceiptHandler, bankTransferHandler *handlers.BankTransferHandler, cashOpeningBalanceHandler *handlers.CashOpeningBalanceHandler, purchaseVoucherHandler *handlers.PurchaseVoucherHandler, expenditureRequestHandler *handlers.ExpenditureRequestHandler, checkClearanceHandler *handlers.CheckClearanceHandler, monthlyClosingHandler *handlers.MonthlyClosingHandler, cashBookHandler *handlers.CashBookHandler) {
+func RegisterFinanceRoutes(router *gin.RouterGroup, cashBankHandler *handlers.CashBankHandler, paymentHandler *handlers.PaymentHandler, invoiceHandler *handlers.InvoiceHandler, accountsPayableHandler *handlers.AccountsPayableHandler, accountsReceivableHandler *handlers.AccountsReceivableHandler, cashDisbursementHandler *handlers.CashDisbursementHandler, cashReceiptHandler *handlers.CashReceiptHandler, bankTransferHandler *handlers.BankTransferHandler, cashOpeningBalanceHandler *handlers.CashOpeningBalanceHandler, purchaseVoucherHandler *handlers.PurchaseVoucherHandler, expenditureRequestHandler *handlers.ExpenditureRequestHandler, checkClearanceHandler *handlers.CheckClearanceHandler, monthlyClosingHandler *handlers.MonthlyClosingHandler, cashBookHandler *handlers.CashBookHandler) {
 	finance := router.Group("/finance")
 	{
 		// Cash/Bank routes

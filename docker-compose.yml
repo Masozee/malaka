@@ -1,20 +1,18 @@
-version: '3.8'
-
 services:
   # PostgreSQL Database
   postgres:
     image: postgres:15-alpine
-    container_name: malaka-postgres
+    container_name: malaka-postgres-dev
     restart: unless-stopped
     environment:
-      POSTGRES_DB: malaka
-      POSTGRES_USER: postgres
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_HOST_AUTH_METHOD: trust
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data_dev:/var/lib/postgresql/data
       - ./backend/internal/pkg/database/migrations:/docker-entrypoint-initdb.d/migrations
       - ./scripts/init-db.sh:/docker-entrypoint-initdb.d/init-db.sh
     networks:
@@ -28,12 +26,12 @@ services:
   # Redis Cache
   redis:
     image: redis:7-alpine
-    container_name: malaka-redis
+    container_name: malaka-redis-dev
     restart: unless-stopped
     ports:
       - "6379:6379"
     volumes:
-      - redis_data:/data
+      - redis_data_dev:/data
       - ./config/redis.conf:/usr/local/etc/redis/redis.conf
     command: redis-server /usr/local/etc/redis/redis.conf
     networks:
@@ -44,19 +42,48 @@ services:
       timeout: 5s
       retries: 5
 
-  # MALAKA ERP Application
+  # MinIO Object Storage with Encryption
+  minio:
+    image: minio/minio:latest
+    container_name: malaka-minio-dev
+    restart: unless-stopped
+    ports:
+      - "9000:9000" # MinIO API
+      - "9001:9001" # MinIO Console
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      MINIO_REGION_NAME: ${MINIO_REGION_NAME}
+      # Console configuration
+      MINIO_BROWSER_REDIRECT_URL: http://localhost:9001
+      # Prometheus metrics
+      MINIO_PROMETHEUS_AUTH_TYPE: public
+    volumes:
+      - minio_data_dev:/data
+      - minio_config_dev:/root/.minio
+    command: server /data --console-address ":9001"
+    networks:
+      - malaka-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+      start_period: 30s
+
+  # PgBouncer
   pgbouncer:
     image: pgbouncer/pgbouncer:latest
-    container_name: malaka-pgbouncer
+    container_name: malaka-pgbouncer-dev
     restart: unless-stopped
     ports:
       - "6432:6432"
     environment:
-      DATABASES_HOST: postgres
-      DATABASES_PORT: 5432
-      DATABASES_USER: postgres
+      DATABASES_HOST: ${DB_HOST}
+      DATABASES_PORT: ${DB_PORT}
+      DATABASES_USER: ${DB_USER}
       DATABASES_PASSWORD: ${DB_PASSWORD}
-      DATABASES_DBNAME: malaka
+      DATABASES_DBNAME: ${DB_NAME}
       POOL_MODE: session
       LISTEN_PORT: 6432
       AUTH_TYPE: trust
@@ -74,20 +101,30 @@ services:
       retries: 3
       start_period: 15s
 
+  # Backend Service with Hot Reload (using Air)
   malaka-backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: malaka-backend
+    container_name: malaka-backend-dev
     restart: unless-stopped
     ports:
-      - "8080:8080"
+      - "8084:8080" # Expose backend on 8084 (external:internal)
     environment:
-      - DB_DRIVER=postgres
-      - DB_SOURCE=postgres://postgres:${DB_PASSWORD}@pgbouncer:6432/malaka?sslmode=disable
-      - REDIS_URL=redis://redis:6379
-      - SERVER_ADDRESS=0.0.0.0:8080
-      - GIN_MODE=release
+      - DB_DRIVER=${DB_DRIVER}
+      - DB_SOURCE=${DB_SOURCE}
+      - REDIS_URL=${REDIS_URL}
+      - SERVER_ADDRESS=${SERVER_ADDRESS}
+      - GIN_MODE=${GIN_MODE}
+      - JWT_SECRET=${JWT_SECRET}
+      - ENCRYPTION_KEY=${ENCRYPTION_KEY}
+      # MinIO Configuration
+      - MINIO_ENDPOINT=${MINIO_ENDPOINT}
+      - MINIO_ACCESS_KEY=${MINIO_ROOT_USER}
+      - MINIO_SECRET_KEY=${MINIO_ROOT_PASSWORD}
+      - MINIO_USE_SSL=${MINIO_USE_SSL}
+      - MINIO_REGION=${MINIO_REGION_NAME}
+      - MINIO_BUCKET_PREFIX=${MINIO_BUCKET_PREFIX}
     depends_on:
       postgres:
         condition: service_healthy
@@ -95,49 +132,71 @@ services:
         condition: service_healthy
       pgbouncer:
         condition: service_healthy
+      minio:
+        condition: service_healthy
     networks:
       - malaka-network
+    volumes:
+      - ./backend:/app # Mount source code for hot reload
+    # Use 'air' for hot reloading
+    command: air -c /app/air.toml
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      test: ["CMD", "nc", "-z", "localhost", "8080"]
       interval: 30s
       timeout: 10s
       retries: 3
 
+  # Frontend Service with Hot Reload
+  malaka-frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: malaka-frontend-dev
+    restart: unless-stopped
+    # No direct port mapping here, Nginx will proxy to it
+    environment:
+      - NODE_ENV=${NODE_ENV}
+      - NEXT_TELEMETRY_DISABLED=${NEXT_TELEMETRY_DISABLED}
+      - NEXT_PUBLIC_API_URL=http://malaka-backend:8080
+      - NEXT_PUBLIC_APP_NAME=${NEXT_PUBLIC_APP_NAME}
+      - NEXT_PUBLIC_APP_VERSION=${NEXT_PUBLIC_APP_VERSION}
+      - NEXT_PUBLIC_WEATHER_API_KEY=${NEXT_PUBLIC_WEATHER_API_KEY}
+      - NEXT_PUBLIC_WEATHER_API_URL=${NEXT_PUBLIC_WEATHER_API_URL}
+      - WATCHPACK_POLLING=${WATCHPACK_POLLING}
+      - CHOKIDAR_USEPOLLING=${CHOKIDAR_USEPOLLING}
+    depends_on:
+      - malaka-backend
+    networks:
+      - malaka-network
+    volumes:
+      - ./frontend:/app # Mount source code for hot reload
+      - /app/node_modules # Exclude node_modules to avoid conflicts
+      - /app/.next # Exclude .next build cache
+    stdin_open: true
+    tty: true
+
+  # Nginx Reverse Proxy
   nginx:
     image: nginx:stable-alpine
-    container_name: malaka-nginx
+    container_name: malaka-nginx-dev
     restart: unless-stopped
     ports:
-      - "80:80"
-      - "443:443" # For HTTPS, if you plan to add SSL later
+      - "80:80" # Frontend accessible on localhost
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./nginx/conf.d:/etc/nginx/conf.d:ro # For additional server blocks
+      - ./nginx/nginx.dev.conf:/etc/nginx/nginx.conf:ro # Use development Nginx config
     depends_on:
       - malaka-frontend
       - malaka-backend
     networks:
       - malaka-network
 
-  malaka-frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    container_name: malaka-frontend
-    restart: unless-stopped
-    # No direct port mapping here, Nginx will proxy to it
-    depends_on:
-      - malaka-backend
-    networks:
-      - malaka-network
-
-  # Adminer for Database Management (Optional)
+  # Adminer for Database Management
   adminer:
     image: adminer:latest
-    container_name: malaka-adminer
+    container_name: malaka-adminer-dev
     restart: unless-stopped
     ports:
-      - "8081:8080"
+      - "8085:8080" # Adminer on 8085
     depends_on:
       - postgres
     networks:
@@ -145,15 +204,16 @@ services:
     environment:
       ADMINER_DEFAULT_SERVER: postgres
 
-  # Redis Commander for Redis Management (Optional)
+  # Redis Commander
   redis-commander:
     image: rediscommander/redis-commander:latest
-    container_name: malaka-redis-commander
+    platform: linux/amd64
+    container_name: malaka-redis-commander-dev
     restart: unless-stopped
     ports:
-      - "8082:8081"
+      - "8086:8081" # Redis Commander on 8086
     environment:
-      REDIS_HOSTS: "local:redis:6379"
+      REDIS_HOSTS: "local:${REDIS_HOST}:${REDIS_PORT}"
       HTTP_USER: admin
       HTTP_PASSWORD: ${REDIS_COMMANDER_PASSWORD}
     depends_on:
@@ -164,14 +224,14 @@ services:
   # Monitoring Stack
   prometheus:
     image: prom/prometheus:latest
-    container_name: malaka-prometheus
+    container_name: malaka-prometheus-dev
     restart: unless-stopped
     ports:
       - "9090:9090"
     volumes:
       - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - ./monitoring/alert_rules.yml:/etc/prometheus/alert_rules.yml:ro
-      - prometheus_data:/prometheus
+      - prometheus_data_dev:/prometheus
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.path=/prometheus'
@@ -185,16 +245,16 @@ services:
 
   grafana:
     image: grafana/grafana:latest
-    container_name: malaka-grafana
+    container_name: malaka-grafana-dev
     restart: unless-stopped
     ports:
       - "3001:3000"
     volumes:
-      - grafana_data:/var/lib/grafana
+      - grafana_data_dev:/var/lib/grafana
       - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
       - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources:ro
     environment:
-      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_USER=${GF_SECURITY_ADMIN_USER}
       - GF_SECURITY_ADMIN_PASSWORD=${GF_SECURITY_ADMIN_PASSWORD}
       - GF_USERS_ALLOW_SIGN_UP=false
       - GF_INSTALL_PLUGINS=grafana-piechart-panel,grafana-worldmap-panel
@@ -205,23 +265,23 @@ services:
 
   alertmanager:
     image: prom/alertmanager:latest
-    container_name: malaka-alertmanager
+    container_name: malaka-alertmanager-dev
     restart: unless-stopped
     ports:
       - "9093:9093"
     volumes:
       - ./monitoring/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
-      - alertmanager_data:/alertmanager
+      - alertmanager_data_dev:/alertmanager
     networks:
       - malaka-network
 
-  # Database Monitoring
+  # Database Monitoring Exporters
   postgres-exporter:
     image: prometheuscommunity/postgres-exporter:latest
-    container_name: malaka-postgres-exporter
+    container_name: malaka-postgres-exporter-dev
     restart: unless-stopped
     environment:
-      DATA_SOURCE_NAME: "postgresql://postgres:${DB_PASSWORD}@postgres:5432/malaka?sslmode=disable"
+      DATA_SOURCE_NAME: "postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}?sslmode=${DB_SSLMODE}"
     ports:
       - "9187:9187"
     networks:
@@ -231,10 +291,10 @@ services:
 
   redis-exporter:
     image: oliver006/redis_exporter:latest
-    container_name: malaka-redis-exporter
+    container_name: malaka-redis-exporter-dev
     restart: unless-stopped
     environment:
-      REDIS_ADDR: "redis://redis:6379"
+      REDIS_ADDR: "${REDIS_URL}"
     ports:
       - "9121:9121"
     networks:
@@ -244,14 +304,10 @@ services:
 
   pgbouncer-exporter:
     image: prometheuscommunity/pgbouncer-exporter:latest
-    container_name: malaka-pgbouncer-exporter
+    container_name: malaka-pgbouncer-exporter-dev
     restart: unless-stopped
     environment:
-      PGBOUNCER_EXPORTER_HOST: pgbouncer
-      PGBOUNCER_EXPORTER_PORT: 6432
-      PGBOUNCER_EXPORTER_DATABASE: pgbouncer
-      PGBOUNCER_EXPORTER_USERNAME: postgres
-      PGBOUNCER_EXPORTER_PASSWORD: ${DB_PASSWORD}
+      PGBOUNCER_EXPORTER_CONNECTION_STRING: "postgresql://${DB_USER}:${DB_PASSWORD}@pgbouncer:${PGBOUNCER_PORT}/pgbouncer?sslmode=${DB_SSLMODE}"
     ports:
       - "9127:9127"
     networks:
@@ -259,56 +315,23 @@ services:
     depends_on:
       - pgbouncer
 
-  # System Monitoring
-  node-exporter:
-    image: prom/node-exporter:latest
-    container_name: malaka-node-exporter
-    restart: unless-stopped
-    command:
-      - '--path.rootfs=/host'
-    pid: host
-    volumes:
-      - '/:/host:ro,rslave'
-    ports:
-      - "9100:9100"
-    networks:
-      - malaka-network
-
-  cadvisor:
-    image: gcr.io/cadvisor/cadvisor:latest
-    container_name: malaka-cadvisor
-    restart: unless-stopped
-    privileged: true
-    devices:
-      - /dev/kmsg:/dev/kmsg
-    volumes:
-      - /:/rootfs:ro
-      - /var/run:/var/run:ro
-      - /sys:/sys:ro
-      - /var/lib/docker:/var/lib/docker:ro
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-    ports:
-      - "8081:8080"
-    networks:
-      - malaka-network
-
   # Log Aggregation
   loki:
     image: grafana/loki:latest
-    container_name: malaka-loki
+    container_name: malaka-loki-dev
     restart: unless-stopped
     ports:
       - "3100:3100"
     volumes:
       - ./monitoring/loki-config.yml:/etc/loki/local-config.yaml:ro
-      - loki_data:/loki
+      - loki_data_dev:/loki
     command: -config.file=/etc/loki/local-config.yaml
     networks:
       - malaka-network
 
   promtail:
     image: grafana/promtail:latest
-    container_name: malaka-promtail
+    container_name: malaka-promtail-dev
     restart: unless-stopped
     volumes:
       - ./monitoring/promtail-config.yml:/etc/promtail/config.yml:ro
@@ -325,16 +348,16 @@ services:
     build:
       context: ./backup
       dockerfile: Dockerfile
-    container_name: malaka-db-backup
+    container_name: malaka-db-backup-dev
     restart: unless-stopped
     volumes:
-      - db_backups:/backups
+      - db_backups_dev:/backups
     environment:
-      PGHOST: postgres
-      PGPORT: 5432
-      PGUSER: postgres
+      PGHOST: ${DB_HOST}
+      PGPORT: ${DB_PORT}
+      PGUSER: ${DB_USER}
       PGPASSWORD: ${DB_PASSWORD}
-      PGDATABASE: malaka
+      PGDATABASE: ${DB_NAME}
     depends_on:
       postgres:
         condition: service_healthy
@@ -342,19 +365,23 @@ services:
       - malaka-network
 
 volumes:
-  postgres_data:
+  postgres_data_dev:
     driver: local
-  redis_data:
+  redis_data_dev:
     driver: local
-  prometheus_data:
+  minio_data_dev:
     driver: local
-  grafana_data:
+  minio_config_dev:
     driver: local
-  alertmanager_data:
+  prometheus_data_dev:
     driver: local
-  loki_data:
+  grafana_data_dev:
     driver: local
-  db_backups:
+  alertmanager_data_dev:
+    driver: local
+  loki_data_dev:
+    driver: local
+  db_backups_dev:
     driver: local
 
 networks:

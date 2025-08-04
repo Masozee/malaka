@@ -20,18 +20,18 @@ func NewModelRepositoryImpl(db *sqlx.DB) *ModelRepositoryImpl {
 
 // Create creates a new model in the database.
 func (r *ModelRepositoryImpl) Create(ctx context.Context, model *entities.Model) error {
-	query := `INSERT INTO models (id, name, created_at, updated_at) VALUES ($1, $2, $3, $4)`
-	_, err := r.db.ExecContext(ctx, query, model.ID, model.Name, model.CreatedAt, model.UpdatedAt)
+	query := `INSERT INTO models (code, name, description, article_id, status, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id`
+	err := r.db.QueryRowContext(ctx, query, model.Code, model.Name, model.Description, model.ArticleID, model.Status, model.CreatedAt, model.UpdatedAt).Scan(&model.ID)
 	return err
 }
 
 // GetByID retrieves a model by its ID from the database.
 func (r *ModelRepositoryImpl) GetByID(ctx context.Context, id string) (*entities.Model, error) {
-	query := `SELECT id, name, created_at, updated_at FROM models WHERE id = $1`
+	query := `SELECT id, code, name, description, article_id, status, created_at, updated_at FROM models WHERE id = $1`
 	row := r.db.QueryRowContext(ctx, query, id)
 
 	model := &entities.Model{}
-	err := row.Scan(&model.ID, &model.Name, &model.CreatedAt, &model.UpdatedAt)
+	err := row.Scan(&model.ID, &model.Code, &model.Name, &model.Description, &model.ArticleID, &model.Status, &model.CreatedAt, &model.UpdatedAt)
 	if err == sql.ErrNoRows {
 		return nil, nil // Model not found
 	}
@@ -40,14 +40,14 @@ func (r *ModelRepositoryImpl) GetByID(ctx context.Context, id string) (*entities
 
 // Update updates an existing model in the database.
 func (r *ModelRepositoryImpl) Update(ctx context.Context, model *entities.Model) error {
-	query := `UPDATE models SET name = $1, updated_at = $2 WHERE id = $3`
-	_, err := r.db.ExecContext(ctx, query, model.Name, model.UpdatedAt, model.ID)
+	query := `UPDATE models SET code = $1, name = $2, description = $3, article_id = $4, status = $5, updated_at = $6 WHERE id = $7`
+	_, err := r.db.ExecContext(ctx, query, model.Code, model.Name, model.Description, model.ArticleID, model.Status, model.UpdatedAt, model.ID)
 	return err
 }
 
 // GetAll retrieves all models from the database.
 func (r *ModelRepositoryImpl) GetAll(ctx context.Context) ([]*entities.Model, error) {
-	query := `SELECT id, name, created_at, updated_at FROM models ORDER BY created_at DESC`
+	query := `SELECT id, code, name, description, article_id, status, created_at, updated_at FROM models ORDER BY created_at DESC`
 	rows, err := r.db.QueryContext(ctx, query)
 	if err != nil {
 		return nil, err
@@ -57,7 +57,7 @@ func (r *ModelRepositoryImpl) GetAll(ctx context.Context) ([]*entities.Model, er
 	var models []*entities.Model
 	for rows.Next() {
 		model := &entities.Model{}
-		err := rows.Scan(&model.ID, &model.Name, &model.CreatedAt, &model.UpdatedAt)
+		err := rows.Scan(&model.ID, &model.Code, &model.Name, &model.Description, &model.ArticleID, &model.Status, &model.CreatedAt, &model.UpdatedAt)
 		if err != nil {
 			return nil, err
 		}

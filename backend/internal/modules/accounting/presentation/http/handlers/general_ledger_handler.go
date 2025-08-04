@@ -344,3 +344,57 @@ func (h *GeneralLedgerHandler) GetGeneralLedgerEntriesByCompany(c *gin.Context) 
 	resp := dto.FromGeneralLedgerEntities(entries)
 	response.Success(c, http.StatusOK, "General ledger entries retrieved successfully", resp)
 }
+
+// PostJournalToLedger handles posting a journal entry to the general ledger
+func (h *GeneralLedgerHandler) PostJournalToLedger(c *gin.Context) {
+	journalEntryIDStr := c.Param("journal_entry_id")
+	if journalEntryIDStr == "" {
+		response.Error(c, http.StatusBadRequest, "Journal entry ID parameter is required", nil)
+		return
+	}
+
+	journalEntryID, err := uuid.Parse(journalEntryIDStr)
+	if err != nil {
+		response.Error(c, http.StatusBadRequest, "Invalid journal entry ID format", err)
+		return
+	}
+
+	if err := h.service.PostJournalToLedger(c.Request.Context(), journalEntryID); err != nil {
+		response.Error(c, http.StatusInternalServerError, "Failed to post journal entry to general ledger", err)
+		return
+	}
+
+	response.Success(c, http.StatusOK, "Journal entry posted to general ledger successfully", nil)
+}
+
+// GetTrialBalance handles getting trial balance data
+func (h *GeneralLedgerHandler) GetTrialBalance(c *gin.Context) {
+	companyID := c.Query("company_id")
+	if companyID == "" {
+		response.Error(c, http.StatusBadRequest, "Company ID query parameter is required", nil)
+		return
+	}
+
+	// Get as_of_date from query parameter, default to now
+	asOfDateStr := c.Query("as_of_date")
+	var asOfDate time.Time
+	var err error
+	if asOfDateStr != "" {
+		asOfDate, err = time.Parse("2006-01-02", asOfDateStr)
+		if err != nil {
+			response.Error(c, http.StatusBadRequest, "Invalid as_of_date format (use YYYY-MM-DD)", err)
+			return
+		}
+	} else {
+		asOfDate = time.Now()
+	}
+
+	entries, err := h.service.GetTrialBalanceData(c.Request.Context(), companyID, asOfDate)
+	if err != nil {
+		response.Error(c, http.StatusInternalServerError, "Failed to retrieve trial balance data", err)
+		return
+	}
+
+	resp := dto.FromGeneralLedgerEntities(entries)
+	response.Success(c, http.StatusOK, "Trial balance data retrieved successfully", resp)
+}

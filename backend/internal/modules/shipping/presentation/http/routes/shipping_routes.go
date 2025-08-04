@@ -5,7 +5,7 @@ import (
 	"malaka/internal/modules/shipping/presentation/http/handlers"
 )
 
-func RegisterShippingRoutes(router *gin.Engine, courierHandler *handlers.CourierHandler, shipmentHandler *handlers.ShipmentHandler, airwaybillHandler *handlers.AirwaybillHandler, manifestHandler *handlers.ManifestHandler, shippingInvoiceHandler *handlers.ShippingInvoiceHandler) {
+func RegisterShippingRoutes(router *gin.RouterGroup, courierHandler *handlers.CourierHandler, shipmentHandler *handlers.ShipmentHandler, airwaybillHandler *handlers.AirwaybillHandler, manifestHandler *handlers.ManifestHandler, shippingInvoiceHandler *handlers.ShippingInvoiceHandler) {
 	shippingGroup := router.Group("/shipping")
 	{
 		courierGroup := shippingGroup.Group("/couriers")

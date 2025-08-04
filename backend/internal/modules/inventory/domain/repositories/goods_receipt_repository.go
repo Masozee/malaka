@@ -13,4 +13,8 @@ type GoodsReceiptRepository interface {
 	GetAll(ctx context.Context) ([]*entities.GoodsReceipt, error)
 	Update(ctx context.Context, gr *entities.GoodsReceipt) error
 	Delete(ctx context.Context, id string) error
+	
+	// Enhanced methods with related data
+	GetAllWithDetails(ctx context.Context) ([]map[string]interface{}, error)
+	GetByIDWithDetails(ctx context.Context, id string) (map[string]interface{}, error)
 }

@@ -6,10 +6,9 @@ import (
 
 // Error sends a JSON error response.
 func Error(c *gin.Context, code int, message string, data interface{}) {
-	c.JSON(code, gin.H{
-		"status":  "error",
-		"description": message,
-		"error":   message,
-		"data":    data,
+	c.JSON(code, Response{
+		Success: false,
+		Message: message,
+		Data:    data,
 	})
 }

@@ -1,0 +1,149 @@
+# Caddy production configuration for Malaka ERP
+{
+    # Global options
+    email admin@yourdomain.com
+    admin 0.0.0.0:2019
+    log {
+        output file /var/log/caddy/access.log {
+            roll_size 100mb
+            roll_keep 10
+            roll_keep_for 2160h
+        }
+        format json
+        level INFO
+    }
+}
+
+# Production domain (replace with your actual domain)
+your-domain.com {
+    # Automatic HTTPS with Let's Encrypt
+    tls {
+        protocols tls1.2 tls1.3
+    }
+    
+    # Enable access logging
+    log {
+        output file /var/log/caddy/access.log {
+            roll_size 100mb
+            roll_keep 10
+        }
+        format json
+    }
+    
+    # API routes - proxy to Go backend
+    handle /api/* {
+        uri strip_prefix /api
+        reverse_proxy malaka-backend:8080 {
+            # Load balancing (if you have multiple backend instances)
+            lb_policy round_robin
+            
+            # Health check
+            health_uri /health
+            health_interval 30s
+            health_timeout 10s
+            health_status 200
+            
+            # Headers
+            header_up Host {http.request.host}
+            header_up X-Real-IP {http.request.remote.host}
+            header_up X-Forwarded-For {http.request.remote.host}
+            header_up X-Forwarded-Proto {http.request.scheme}
+            
+            # Timeouts
+            transport http {
+                dial_timeout 5s
+                response_header_timeout 10s
+            }
+        }
+    }
+    
+    # Frontend routes - proxy to Next.js
+    handle {
+        reverse_proxy malaka-frontend:3000 {
+            # Health check
+            health_uri /
+            health_interval 30s
+            health_timeout 10s
+            health_status 200
+            
+            # Headers
+            header_up Host {http.request.host}
+            header_up X-Real-IP {http.request.remote.host}
+            header_up X-Forwarded-For {http.request.remote.host}
+            header_up X-Forwarded-Proto {http.request.scheme}
+            
+            # Timeouts
+            transport http {
+                dial_timeout 5s
+                response_header_timeout 10s
+            }
+        }
+    }
+    
+    # Enable compression
+    encode {
+        gzip 6
+        minimum_length 1024
+    }
+    
+    # Security headers
+    header {
+        # Remove server info
+        -Server
+        
+        # Security headers
+        X-Content-Type-Options nosniff
+        X-Frame-Options DENY
+        X-XSS-Protection "1; mode=block"
+        Referrer-Policy strict-origin-when-cross-origin
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' ws: wss:;"
+    }
+    
+    # Rate limiting
+    rate_limit {
+        zone dynamic {
+            key {remote_host}
+            events 100
+            window 1m
+        }
+    }
+}
+
+# Redirect www to non-www (optional)
+www.your-domain.com {
+    redir https://your-domain.com{uri} permanent
+}
+
+# API subdomain (optional)
+api.your-domain.com {
+    tls {
+        protocols tls1.2 tls1.3
+    }
+    
+    reverse_proxy malaka-backend:8080 {
+        health_uri /health
+        health_interval 30s
+        health_timeout 10s
+    }
+    
+    encode gzip
+    
+    header {
+        -Server
+        X-Content-Type-Options nosniff
+        X-Frame-Options DENY
+        X-XSS-Protection "1; mode=block"
+        Referrer-Policy strict-origin-when-cross-origin
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+    }
+    
+    # API rate limiting
+    rate_limit {
+        zone api {
+            key {remote_host}
+            events 1000
+            window 1m
+        }
+    }
+}

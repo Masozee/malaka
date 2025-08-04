@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -9,6 +10,7 @@ import (
 	"malaka/internal/modules/masterdata/domain/services"
 	"malaka/internal/modules/masterdata/presentation/http/dto"
 	"malaka/internal/shared/response"
+	"malaka/internal/shared/types"
 )
 
 // DivisionHandler handles HTTP requests for division operations.
@@ -34,7 +36,9 @@ func (h *DivisionHandler) CreateDivision(c *gin.Context) {
 		Name:        req.Name,
 		Description: req.Description,
 		ParentID:    req.ParentID,
-		IsActive:    req.IsActive,
+		Level:       req.Level,
+		SortOrder:   req.SortOrder,
+		Status:      req.Status,
 	}
 
 	if err := h.service.CreateDivision(c.Request.Context(), division); err != nil {
@@ -49,7 +53,8 @@ func (h *DivisionHandler) CreateDivision(c *gin.Context) {
 		Description: division.Description,
 		ParentID:    division.ParentID,
 		Level:       division.Level,
-		IsActive:    division.IsActive,
+		SortOrder:   division.SortOrder,
+		Status:      division.Status,
 		CreatedAt:   division.CreatedAt,
 		UpdatedAt:   division.UpdatedAt,
 	}
@@ -78,7 +83,8 @@ func (h *DivisionHandler) GetDivisionByID(c *gin.Context) {
 		Description: division.Description,
 		ParentID:    division.ParentID,
 		Level:       division.Level,
-		IsActive:    division.IsActive,
+		SortOrder:   division.SortOrder,
+		Status:      division.Status,
 		CreatedAt:   division.CreatedAt,
 		UpdatedAt:   division.UpdatedAt,
 	}
@@ -86,14 +92,34 @@ func (h *DivisionHandler) GetDivisionByID(c *gin.Context) {
 	response.OK(c, "Division retrieved successfully", resp)
 }
 
-// GetAllDivisions handles retrieving all divisions.
+// GetAllDivisions handles retrieving all divisions with pagination support.
 func (h *DivisionHandler) GetAllDivisions(c *gin.Context) {
-	divisions, err := h.service.GetAllDivisions(c.Request.Context())
+	// Parse pagination parameters
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "10"))
+	search := c.Query("search")
+	status := c.Query("status")
+	sortOrder := c.DefaultQuery("sortOrder", "asc")
+	
+	// Ensure valid values
+	if page < 1 {
+		page = 1
+	}
+	if limit < 1 || limit > 100 {
+		limit = 10
+	}
+	
+	// Calculate offset
+	offset := (page - 1) * limit
+	
+	// Get divisions with pagination
+	divisions, total, err := h.service.GetAllDivisionsWithPagination(c.Request.Context(), limit, offset, search, status, sortOrder)
 	if err != nil {
 		response.InternalServerError(c, err.Error(), nil)
 		return
 	}
-
+	
+	// Convert to response DTOs
 	var responses []dto.DivisionResponse
 	for _, division := range divisions {
 		responses = append(responses, dto.DivisionResponse{
@@ -103,13 +129,28 @@ func (h *DivisionHandler) GetAllDivisions(c *gin.Context) {
 			Description: division.Description,
 			ParentID:    division.ParentID,
 			Level:       division.Level,
-			IsActive:    division.IsActive,
+			SortOrder:   division.SortOrder,
+			Status:      division.Status,
 			CreatedAt:   division.CreatedAt,
 			UpdatedAt:   division.UpdatedAt,
 		})
 	}
+	
+	// Calculate total pages
+	totalPages := (total + limit - 1) / limit
+	
+	// Create paginated response
+	paginatedResponse := map[string]interface{}{
+		"data": responses,
+		"pagination": types.Pagination{
+			Page:       page,
+			Limit:      limit,
+			TotalRows:  total,
+			TotalPages: totalPages,
+		},
+	}
 
-	response.OK(c, "Divisions retrieved successfully", responses)
+	response.OK(c, "Divisions retrieved successfully", paginatedResponse)
 }
 
 // GetDivisionByCode handles retrieving a division by code.
@@ -128,7 +169,8 @@ func (h *DivisionHandler) GetDivisionByCode(c *gin.Context) {
 		Description: division.Description,
 		ParentID:    division.ParentID,
 		Level:       division.Level,
-		IsActive:    division.IsActive,
+		SortOrder:   division.SortOrder,
+		Status:      division.Status,
 		CreatedAt:   division.CreatedAt,
 		UpdatedAt:   division.UpdatedAt,
 	}
@@ -159,7 +201,7 @@ func (h *DivisionHandler) GetDivisionsByParentID(c *gin.Context) {
 			Description: division.Description,
 			ParentID:    division.ParentID,
 			Level:       division.Level,
-			IsActive:    division.IsActive,
+			Status:      division.Status,
 			CreatedAt:   division.CreatedAt,
 			UpdatedAt:   division.UpdatedAt,
 		})
@@ -185,7 +227,7 @@ func (h *DivisionHandler) GetRootDivisions(c *gin.Context) {
 			Description: division.Description,
 			ParentID:    division.ParentID,
 			Level:       division.Level,
-			IsActive:    division.IsActive,
+			Status:      division.Status,
 			CreatedAt:   division.CreatedAt,
 			UpdatedAt:   division.UpdatedAt,
 		})
@@ -225,10 +267,18 @@ func (h *DivisionHandler) UpdateDivision(c *gin.Context) {
 	if req.Description != "" {
 		division.Description = req.Description
 	}
-	if req.ParentID != nil {
+		if req.ParentID != nil {
 		division.ParentID = req.ParentID
 	}
-	division.IsActive = req.IsActive
+	if req.Level != 0 {
+		division.Level = req.Level
+	}
+	if req.SortOrder != 0 {
+		division.SortOrder = req.SortOrder
+	}
+	if req.Status != "" {
+		division.Status = req.Status
+	}
 
 	if err := h.service.UpdateDivision(c.Request.Context(), division); err != nil {
 		response.InternalServerError(c, err.Error(), nil)
@@ -242,7 +292,8 @@ func (h *DivisionHandler) UpdateDivision(c *gin.Context) {
 		Description: division.Description,
 		ParentID:    division.ParentID,
 		Level:       division.Level,
-		IsActive:    division.IsActive,
+		SortOrder:   division.SortOrder,
+		Status:      division.Status,
 		CreatedAt:   division.CreatedAt,
 		UpdatedAt:   division.UpdatedAt,
 	}

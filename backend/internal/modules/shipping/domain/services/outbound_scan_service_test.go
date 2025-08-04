@@ -11,8 +11,7 @@ import (
 	"malaka/internal/modules/shipping/domain/dtos"
 	"malaka/internal/modules/shipping/domain/entities"
 	"malaka/internal/modules/shipping/domain/services"
-	"malaka/internal/modules/shipping/infrastructure/persistence"
-)
+	)
 
 type MockOutboundScanRepository struct {
 	mock.Mock

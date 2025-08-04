@@ -188,12 +188,8 @@ func (s *generalLedgerService) ValidateEntry(ctx context.Context, entry *entitie
 
 // PostJournalToLedger posts a journal entry to the general ledger
 func (s *generalLedgerService) PostJournalToLedger(ctx context.Context, journalEntryID uuid.UUID) error {
-	// This would typically involve:
-	// 1. Retrieving the journal entry
-	// 2. Validating it's in the correct status
-	// 3. Creating general ledger entries
-	// 4. Updating account balances
-	
-	// For now, return a placeholder implementation
-	return &entities.ValidationError{Message: "posting to ledger not yet implemented"}
+	// TODO: This would require access to journal entry repository
+	// For now, return a placeholder implementation that can be completed
+	// once journal entry repository is accessible from this service
+	return &entities.ValidationError{Message: "posting to ledger requires journal entry repository integration"}
 }

@@ -42,7 +42,7 @@ func TestOutboundScanRepository_CreateOutboundScan(t *testing.T) {
 	}
 
 	mock.ExpectBegin()
-	mock.ExpectExec(regexp.QuoteMeta("INSERT INTO `outbound_scans` (`id`,`shipment_id`,`scan_type`,`scanned_at`,`scanned_by`) VALUES (?,?,?,?,?)")).
+	mock.ExpectExec(regexp.QuoteMeta("INSERT INTO \"outbound_scans\" (\"id\",\"shipment_id\",\"scan_type\",\"scanned_at\",\"scanned_by\") VALUES ($1,$2,$3,$4,$5)")).
 		WithArgs(outboundScan.ID, outboundScan.ShipmentID, outboundScan.ScanType, outboundScan.ScannedAt, outboundScan.ScannedBy).
 		WillReturnResult(sqlmock.NewResult(1, 1))
 	mock.ExpectCommit()
@@ -59,7 +59,7 @@ func TestOutboundScanRepository_GetOutboundScanByID(t *testing.T) {
 	id := uuid.New()
 		expectedScan := &entities.OutboundScan{ID: id, ShipmentID: uuid.New(), ScanType: "TEST", ScannedAt: time.Now(), ScannedBy: uuid.New()}
 
-	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `outbound_scans` WHERE id = ? ORDER BY `outbound_scans`.`id` LIMIT 1")).
+	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM \"outbound_scans\" WHERE id = $1 ORDER BY \"outbound_scans\".\"id\" LIMIT $2")).
 		WithArgs(id).WillReturnRows(sqlmock.NewRows([]string{"id", "shipment_id", "scan_type", "scanned_at", "scanned_by"}).AddRow(expectedScan.ID, expectedScan.ShipmentID, expectedScan.ScanType, expectedScan.ScannedAt, expectedScan.ScannedBy))
 
 	outboundScan, err := repo.GetOutboundScanByID(context.Background(), id)

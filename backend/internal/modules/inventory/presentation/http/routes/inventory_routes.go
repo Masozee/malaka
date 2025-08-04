@@ -7,7 +7,7 @@ import (
 )
 
 // RegisterInventoryRoutes registers the inventory routes.
-func RegisterInventoryRoutes(router *gin.Engine, poHandler *handlers.PurchaseOrderHandler, grHandler *handlers.GoodsReceiptHandler, stockHandler *handlers.StockHandler, transferHandler *handlers.TransferHandler, draftOrderHandler *handlers.DraftOrderHandler, stockAdjustmentHandler *handlers.StockAdjustmentHandler, stockOpnameHandler *handlers.StockOpnameHandler, returnSupplierHandler *handlers.ReturnSupplierHandler, simpleGoodsIssueHandler *handlers.SimpleGoodsIssueHandler) {
+func RegisterInventoryRoutes(router *gin.RouterGroup, poHandler *handlers.PurchaseOrderHandler, grHandler *handlers.GoodsReceiptHandler, stockHandler *handlers.StockHandler, transferHandler *handlers.TransferHandler, draftOrderHandler *handlers.DraftOrderHandler, stockAdjustmentHandler *handlers.StockAdjustmentHandler, stockOpnameHandler *handlers.StockOpnameHandler, returnSupplierHandler *handlers.ReturnSupplierHandler, simpleGoodsIssueHandler *handlers.SimpleGoodsIssueHandler, rfqHandler *handlers.RFQHandler) {
 	inventory := router.Group("/inventory")
 	{
 		// Purchase Order routes
@@ -36,6 +36,7 @@ func RegisterInventoryRoutes(router *gin.Engine, poHandler *handlers.PurchaseOrd
 			stock.POST("/movements", stockHandler.RecordStockMovement)
 			stock.GET("/movements", stockHandler.GetStockMovements)
 			stock.GET("/balance", stockHandler.GetStockBalance)
+			stock.GET("/control", stockHandler.GetStockControl)
 		}
 
 		// Transfer routes
@@ -96,6 +97,25 @@ func RegisterInventoryRoutes(router *gin.Engine, poHandler *handlers.PurchaseOrd
 			goodsIssue.GET("/:id", simpleGoodsIssueHandler.GetGoodsIssueByID)
 			goodsIssue.PUT("/:id", simpleGoodsIssueHandler.UpdateGoodsIssue)
 			goodsIssue.DELETE("/:id", simpleGoodsIssueHandler.DeleteGoodsIssue)
+		}
+
+		// RFQ (Request for Quotation) routes
+		rfq := inventory.Group("/rfqs")
+		{
+			rfq.POST("/", rfqHandler.CreateRFQ)
+			rfq.GET("/", rfqHandler.GetAllRFQs)
+			rfq.GET("/stats", rfqHandler.GetRFQStats)
+			rfq.GET("/:id", rfqHandler.GetRFQ)
+			rfq.PUT("/:id", rfqHandler.UpdateRFQ)
+			rfq.DELETE("/:id", rfqHandler.DeleteRFQ)
+			
+			// RFQ state management
+			rfq.POST("/:id/publish", rfqHandler.PublishRFQ)
+			rfq.POST("/:id/close", rfqHandler.CloseRFQ)
+			
+			// RFQ items and suppliers
+			rfq.POST("/:id/items", rfqHandler.AddRFQItem)
+			rfq.POST("/:id/suppliers", rfqHandler.InviteSupplier)
 		}
 	}
 }

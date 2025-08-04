@@ -7,13 +7,13 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-//go:embed masterdata.yaml
+//go:embed index.yaml
 var content embed.FS
 
 // ServeDocs serves the OpenAPI documentation as YAML.
 func ServeDocs() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		contentBytes, err := content.ReadFile("masterdata.yaml")
+		contentBytes, err := content.ReadFile("index.yaml")
 		if err != nil {
 			c.AbortWithError(http.StatusInternalServerError, err)
 			return

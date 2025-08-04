@@ -1,12 +1,15 @@
 package handlers
 
 import (
+	"time"
+
 	"github.com/gin-gonic/gin"
 
 	"malaka/internal/modules/masterdata/domain/entities"
 	"malaka/internal/modules/masterdata/domain/services"
 	"malaka/internal/modules/masterdata/presentation/http/dto"
 	"malaka/internal/shared/response"
+	"malaka/internal/shared/types"
 )
 
 // ModelHandler handles HTTP requests for model operations.
@@ -27,8 +30,17 @@ func (h *ModelHandler) CreateModel(c *gin.Context) {
 		return
 	}
 
+	now := time.Now()
 	model := &entities.Model{
-		Name: req.Name,
+		Code:        req.Code,
+		Name:        req.Name,
+		Description: req.Description,
+		ArticleID:   req.ArticleID,
+		Status:      req.Status,
+		BaseModel: types.BaseModel{
+			CreatedAt: now,
+			UpdatedAt: now,
+		},
 	}
 
 	if err := h.service.CreateModel(c.Request.Context(), model); err != nil {
@@ -76,7 +88,14 @@ func (h *ModelHandler) UpdateModel(c *gin.Context) {
 	}
 
 	model := &entities.Model{
-		Name: req.Name,
+		Code:        req.Code,
+		Name:        req.Name,
+		Description: req.Description,
+		ArticleID:   req.ArticleID,
+		Status:      req.Status,
+		BaseModel: types.BaseModel{
+			UpdatedAt: time.Now(),
+		},
 	}
 	model.ID = id // Set the ID from the URL parameter
 

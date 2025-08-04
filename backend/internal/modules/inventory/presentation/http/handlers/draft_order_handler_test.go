@@ -16,6 +16,7 @@ import (
 	"malaka/internal/modules/inventory/domain/entities"
 	"malaka/internal/modules/inventory/presentation/http/dto"
 	"malaka/internal/modules/inventory/presentation/http/handlers"
+	"malaka/internal/shared/types"
 )
 
 // MockDraftOrderService is a mock implementation of DraftOrderService.
@@ -84,7 +85,7 @@ func TestDraftOrderHandler(t *testing.T) {
 
 	t.Run("GetDraftOrderByID - Success", func(t *testing.T) {
 		id := uuid.New()
-		expectedDraftOrder := &entities.DraftOrder{ID: id.String(), SupplierID: uuid.New().String()}
+		expectedDraftOrder := &entities.DraftOrder{types.BaseModel{ID: id.String()}, SupplierID: uuid.New().String()}
 		mockService.On("GetDraftOrderByID", mock.Anything, id.String()).Return(expectedDraftOrder, nil).Once()
 
 		w := httptest.NewRecorder()
@@ -104,7 +105,7 @@ func TestDraftOrderHandler(t *testing.T) {
 		}
 		j, _ := json.Marshal(reqBody)
 
-		existingDraftOrder := &entities.DraftOrder{ID: id}
+		existingDraftOrder := &entities.DraftOrder{BaseModel: types.BaseModel{ID: id.String()}}
 		mockService.On("GetDraftOrderByID", mock.Anything, id.String()).Return(existingDraftOrder, nil).Once()
 		mockService.On("UpdateDraftOrder", mock.Anything, mock.AnythingOfType("*entities.DraftOrder")).Return(nil).Once()
 
@@ -120,7 +121,7 @@ func TestDraftOrderHandler(t *testing.T) {
 
 	t.Run("DeleteDraftOrder - Success", func(t *testing.T) {
 		id := uuid.New()
-		existingDraftOrder := &entities.DraftOrder{ID: id}
+		existingDraftOrder := &entities.DraftOrder{BaseModel: types.BaseModel{ID: id.String()}}
 		mockService.On("GetDraftOrderByID", mock.Anything, id.String()).Return(existingDraftOrder, nil).Once()
 		mockService.On("DeleteDraftOrder", mock.Anything, id.String()).Return(nil).Once()
 
@@ -135,8 +136,8 @@ func TestDraftOrderHandler(t *testing.T) {
 
 	t.Run("GetAllDraftOrders - Success", func(t *testing.T) {
 		expectedDraftOrders := []*entities.DraftOrder{
-			{ID: uuid.New().String(), SupplierID: uuid.New().String()},
-			{ID: uuid.New().String(), SupplierID: uuid.New().String()},
+			{BaseModel: types.BaseModel{ID: uuid.New().String()}, SupplierID: uuid.New().String()},
+			{BaseModel: types.BaseModel{ID: uuid.New().String()}, SupplierID: uuid.New().String()},
 		}
 		mockService.On("GetAllDraftOrders", mock.Anything).Return(expectedDraftOrders, nil).Once()
 

@@ -15,13 +15,21 @@ func Middleware(secret string) gin.HandlerFunc {
 			return
 		}
 
-		claims, err := ParseJWT(authHeader, secret)
+		// Extract token from "Bearer <token>" format
+		const bearerPrefix = "Bearer "
+		if len(authHeader) < len(bearerPrefix) || authHeader[:len(bearerPrefix)] != bearerPrefix {
+			c.AbortWithStatus(http.StatusUnauthorized)
+			return
+		}
+		
+		token := authHeader[len(bearerPrefix):]
+		claims, err := ParseJWT(token, secret)
 		if err != nil {
 			c.AbortWithStatus(http.StatusUnauthorized)
 			return
 		}
 
-		c.Set("userID", claims.UserID)
+		c.Set("user_id", claims.Subject)
 		c.Next()
 	}
 }

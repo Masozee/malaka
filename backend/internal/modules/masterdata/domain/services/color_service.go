@@ -6,7 +6,6 @@ import (
 
 	"malaka/internal/modules/masterdata/domain/entities"
 	"malaka/internal/modules/masterdata/domain/repositories"
-	"malaka/internal/shared/utils"
 )
 
 // ColorService provides business logic for color operations.
@@ -21,9 +20,8 @@ func NewColorService(repo repositories.ColorRepository) *ColorService {
 
 // CreateColor creates a new color.
 func (s *ColorService) CreateColor(ctx context.Context, color *entities.Color) error {
-	if color.ID == "" {
-		color.ID = utils.RandomString(10) // Generate a random ID if not provided
-	}
+	// Let the database generate the UUID (gen_random_uuid())
+	color.ID = ""
 	return s.repo.Create(ctx, color)
 }
 

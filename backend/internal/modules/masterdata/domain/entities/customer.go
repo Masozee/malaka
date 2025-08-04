@@ -7,7 +7,10 @@ import (
 // Customer represents a customer entity.
 type Customer struct {
 	types.BaseModel
-	Name    string `json:"name"`
-	Address string `json:"address"`
-	Contact string `json:"contact"`
+	Name        string `json:"name"`
+	ContactPerson string `json:"contact_person"`
+	Email       string `json:"email"`
+	Phone       string `json:"phone"`
+	CompanyID   string `json:"company_id"`
+	Status      string `json:"status"`
 }

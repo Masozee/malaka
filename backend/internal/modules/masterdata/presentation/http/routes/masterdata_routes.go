@@ -25,10 +25,10 @@ func RegisterMasterdataRoutes(router *gin.Engine, companyHandler *handlers.Compa
 		{
 			user.POST("/", userHandler.CreateUser)
 			user.GET("/", userHandler.GetAllUsers)
+			user.POST("/login", userHandler.Login)
 			user.GET("/:id", userHandler.GetUserByID)
 			user.PUT("/:id", userHandler.UpdateUser)
 			user.DELETE("/:id", userHandler.DeleteUser)
-			user.POST("/login", userHandler.Login)
 		}
 
 		// Classification routes
@@ -59,6 +59,8 @@ func RegisterMasterdataRoutes(router *gin.Engine, companyHandler *handlers.Compa
 			article.GET("/:id", articleHandler.GetArticleByID)
 			article.PUT("/:id", articleHandler.UpdateArticle)
 			article.DELETE("/:id", articleHandler.DeleteArticle)
+			article.POST("/:id/images", articleHandler.UploadArticleImage)
+			article.DELETE("/:id/images", articleHandler.DeleteArticleImage)
 		}
 
 		// Model routes

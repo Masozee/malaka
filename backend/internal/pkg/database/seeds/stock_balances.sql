@@ -1,32 +1,37 @@
--- Indonesian Stock Balances Seed Data
-INSERT INTO stock_balances (article_id, warehouse_id, quantity) VALUES
-('art001', 'wh001', 46),
-('art002', 'wh002', 37),
-('art003', 'wh003', 31),
-('art004', 'wh004', 18),
-('art005', 'wh005', 58),
-('art006', 'wh001', 18),
-('art007', 'wh002', 33),
-('art008', 'wh003', 43),
-('art009', 'wh004', 53),
-('art010', 'wh005', 38),
-('art011', 'wh006', 25),
-('art012', 'wh007', 30),
-('art013', 'wh008', 35),
-('art014', 'wh009', 40),
-('art015', 'wh010', 45),
-('art016', 'wh011', 15),
-('art017', 'wh012', 20),
-('art018', 'wh013', 10),
-('art019', 'wh014', 25),
-('art020', 'wh015', 50),
-('art021', 'wh001', 20),
-('art022', 'wh002', 15),
-('art023', 'wh003', 12),
-('art024', 'wh004', 18),
-('art025', 'wh005', 22),
-('art001', 'wh002', 25),
-('art002', 'wh003', 30),
-('art003', 'wh004', 20),
-('art004', 'wh005', 15),
-('art005', 'wh006', 40);
+-- Stock Balance Seed Data
+-- This creates stock balance entries linking articles to warehouses with quantities
+
+INSERT INTO stock_balances (article_id, warehouse_id, quantity, created_at, updated_at) VALUES 
+-- Articles from Main Warehouse Jakarta (Gudang Pusat Jakarta)
+((SELECT id FROM articles WHERE barcode = 'NKE000001' LIMIT 1), (SELECT id FROM warehouses WHERE code = 'WH-JKT-001' LIMIT 1), 150, NOW(), NOW()),
+((SELECT id FROM articles WHERE barcode = 'NKE000002' LIMIT 1), (SELECT id FROM warehouses WHERE code = 'WH-JKT-001' LIMIT 1), 89, NOW(), NOW()),
+((SELECT id FROM articles WHERE barcode = 'NKE000005' LIMIT 1), (SELECT id FROM warehouses WHERE code = 'WH-JKT-001' LIMIT 1), 234, NOW(), NOW()),
+((SELECT id FROM articles WHERE barcode = 'NKE000006' LIMIT 1), (SELECT id FROM warehouses WHERE code = 'WH-JKT-001' LIMIT 1), 67, NOW(), NOW()),
+((SELECT id FROM articles WHERE barcode = 'CAS001001' LIMIT 1), (SELECT id FROM warehouses WHERE code = 'WH-JKT-001' LIMIT 1), 312, NOW(), NOW()),
+
+-- Articles from Bandung Distribution Center
+((SELECT id FROM articles WHERE barcode = 'NKE000001' LIMIT 1), (SELECT id FROM warehouses WHERE code = 'WH-BDG-001' LIMIT 1), 78, NOW(), NOW()),
+((SELECT id FROM articles WHERE barcode = 'NKE000002' LIMIT 1), (SELECT id FROM warehouses WHERE code = 'WH-BDG-001' LIMIT 1), 145, NOW(), NOW()),
+((SELECT id FROM articles WHERE barcode = 'CAS001002' LIMIT 1), (SELECT id FROM warehouses WHERE code = 'WH-BDG-001' LIMIT 1), 89, NOW(), NOW()),
+((SELECT id FROM articles WHERE barcode = 'BFM002002' LIMIT 1), (SELECT id FROM warehouses WHERE code = 'WH-BDG-001' LIMIT 1), 178, NOW(), NOW()),
+
+-- Articles from Surabaya Hub
+((SELECT id FROM articles WHERE barcode = 'NKE000001' LIMIT 1), (SELECT id FROM warehouses WHERE code = 'WH-SBY-001' LIMIT 1), 98, NOW(), NOW()),
+((SELECT id FROM articles WHERE barcode = 'NKE000005' LIMIT 1), (SELECT id FROM warehouses WHERE code = 'WH-SBY-001' LIMIT 1), 156, NOW(), NOW()),
+((SELECT id FROM articles WHERE barcode = 'BFM002003' LIMIT 1), (SELECT id FROM warehouses WHERE code = 'WH-SBY-001' LIMIT 1), 123, NOW(), NOW()),
+((SELECT id FROM articles WHERE barcode = 'CAS001003' LIMIT 1), (SELECT id FROM warehouses WHERE code = 'WH-SBY-001' LIMIT 1), 67, NOW(), NOW()),
+
+-- Articles from Medan Regional Warehouse
+((SELECT id FROM articles WHERE barcode = 'NKE000002' LIMIT 1), (SELECT id FROM warehouses WHERE code = 'WH-MDN-001' LIMIT 1), 234, NOW(), NOW()),
+((SELECT id FROM articles WHERE barcode = 'NKE000006' LIMIT 1), (SELECT id FROM warehouses WHERE code = 'WH-MDN-001' LIMIT 1), 89, NOW(), NOW()),
+((SELECT id FROM articles WHERE barcode = 'CAS001004' LIMIT 1), (SELECT id FROM warehouses WHERE code = 'WH-MDN-001' LIMIT 1), 156, NOW(), NOW()),
+
+-- Articles from Semarang Transit
+((SELECT id FROM articles WHERE barcode = 'CAS001001' LIMIT 1), (SELECT id FROM warehouses WHERE code = 'WH-SMG-001' LIMIT 1), 78, NOW(), NOW()),
+((SELECT id FROM articles WHERE barcode = 'CAS001002' LIMIT 1), (SELECT id FROM warehouses WHERE code = 'WH-SMG-001' LIMIT 1), 134, NOW(), NOW()),
+((SELECT id FROM articles WHERE barcode = 'BFM002002' LIMIT 1), (SELECT id FROM warehouses WHERE code = 'WH-SMG-001' LIMIT 1), 67, NOW(), NOW()),
+
+-- Low stock and out of stock scenarios from Denpasar Warehouse
+((SELECT id FROM articles WHERE barcode = 'BFM002003' LIMIT 1), (SELECT id FROM warehouses WHERE code = 'WH-DPS-001' LIMIT 1), 5, NOW(), NOW()), -- Low stock
+((SELECT id FROM articles WHERE barcode = 'CAS001003' LIMIT 1), (SELECT id FROM warehouses WHERE code = 'WH-DPS-001' LIMIT 1), 0, NOW(), NOW()), -- Out of stock
+((SELECT id FROM articles WHERE barcode = 'CAS001004' LIMIT 1), (SELECT id FROM warehouses WHERE code = 'WH-DPS-001' LIMIT 1), 2, NOW(), NOW()); -- Low stock

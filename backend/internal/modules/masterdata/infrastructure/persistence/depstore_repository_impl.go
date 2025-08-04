@@ -2,6 +2,7 @@ package persistence
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
@@ -20,18 +21,19 @@ func NewDepstoreRepository(db *sqlx.DB) *DepstoreRepositoryImpl {
 
 // Create creates a new department store in the database.
 func (r *DepstoreRepositoryImpl) Create(ctx context.Context, depstore *entities.Depstore) error {
-	query := `INSERT INTO depstores (id, name, code, address, contact, payment_terms, is_active, created_at, updated_at) 
-			  VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), NOW())`
+	query := `INSERT INTO depstores (id, code, name, address, city, phone, contact_person, commission_rate, payment_terms, status, created_at, updated_at) 
+			  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW(), NOW())`
 	_, err := r.db.ExecContext(ctx, query, 
-		depstore.ID, depstore.Name, depstore.Code, depstore.Address, 
-		depstore.Contact, depstore.PaymentTerms, depstore.IsActive)
+		depstore.ID, depstore.Code, depstore.Name, depstore.Address, depstore.City, 
+		depstore.Phone, depstore.ContactPerson, depstore.CommissionRate, 
+		depstore.PaymentTerms, depstore.Status)
 	return err
 }
 
 // GetByID retrieves a department store by its ID from the database.
 func (r *DepstoreRepositoryImpl) GetByID(ctx context.Context, id uuid.UUID) (*entities.Depstore, error) {
 	depstore := &entities.Depstore{}
-	query := `SELECT id, name, code, address, contact, payment_terms, is_active, created_at, updated_at 
+	query := `SELECT id, code, name, address, city, phone, contact_person, commission_rate, payment_terms, status, created_at, updated_at 
 			  FROM depstores WHERE id = $1`
 	err := r.db.GetContext(ctx, depstore, query, id)
 	if err != nil {
@@ -43,16 +45,65 @@ func (r *DepstoreRepositoryImpl) GetByID(ctx context.Context, id uuid.UUID) (*en
 // GetAll retrieves all department stores from the database.
 func (r *DepstoreRepositoryImpl) GetAll(ctx context.Context) ([]*entities.Depstore, error) {
 	var depstores []*entities.Depstore
-	query := `SELECT id, name, code, address, contact, payment_terms, is_active, created_at, updated_at 
+	query := `SELECT id, code, name, address, city, phone, contact_person, commission_rate, payment_terms, status, created_at, updated_at 
 			  FROM depstores ORDER BY name`
 	err := r.db.SelectContext(ctx, &depstores, query)
 	return depstores, err
 }
 
+// GetAllWithPagination retrieves department stores with pagination and filtering.
+func (r *DepstoreRepositoryImpl) GetAllWithPagination(ctx context.Context, limit, offset int, search, status string) ([]*entities.Depstore, int, error) {
+	// Build WHERE clause for filtering
+	whereClause := "WHERE 1=1"
+	args := []interface{}{}
+	
+	if search != "" {
+		whereClause += " AND (code ILIKE $1 OR name ILIKE $1 OR address ILIKE $1 OR city ILIKE $1 OR contact_person ILIKE $1)"
+		args = append(args, "%"+search+"%")
+	}
+	
+	if status != "" && status != "all" {
+		if len(args) == 0 {
+			whereClause += " AND status = $1"
+		} else {
+			whereClause += " AND status = $2"
+		}
+		args = append(args, status)
+	}
+	
+	// Get total count
+	countQuery := "SELECT COUNT(*) FROM depstores " + whereClause
+	var total int
+	err := r.db.QueryRowContext(ctx, countQuery, args...).Scan(&total)
+	if err != nil {
+		return nil, 0, err
+	}
+	
+	// Get paginated data
+	limitIndex := len(args) + 1
+	offsetIndex := len(args) + 2
+	
+	query := fmt.Sprintf(`SELECT id, code, name, address, city, phone, contact_person, commission_rate, payment_terms, status, created_at, updated_at 
+			  FROM depstores %s 
+			  ORDER BY name 
+			  LIMIT $%d OFFSET $%d`, whereClause, limitIndex, offsetIndex)
+	
+	// Add limit and offset to args
+	paginationArgs := append(args, limit, offset)
+	
+	var depstores []*entities.Depstore
+	err = r.db.SelectContext(ctx, &depstores, query, paginationArgs...)
+	if err != nil {
+		return nil, 0, err
+	}
+	
+	return depstores, total, nil
+}
+
 // GetByCode retrieves a department store by its code from the database.
 func (r *DepstoreRepositoryImpl) GetByCode(ctx context.Context, code string) (*entities.Depstore, error) {
 	depstore := &entities.Depstore{}
-	query := `SELECT id, name, code, address, contact, payment_terms, is_active, created_at, updated_at 
+	query := `SELECT id, code, name, address, city, phone, contact_person, commission_rate, payment_terms, status, created_at, updated_at 
 			  FROM depstores WHERE code = $1`
 	err := r.db.GetContext(ctx, depstore, query, code)
 	if err != nil {
@@ -64,12 +115,14 @@ func (r *DepstoreRepositoryImpl) GetByCode(ctx context.Context, code string) (*e
 // Update updates an existing department store in the database.
 func (r *DepstoreRepositoryImpl) Update(ctx context.Context, depstore *entities.Depstore) error {
 	query := `UPDATE depstores 
-			  SET name = $1, code = $2, address = $3, contact = $4, payment_terms = $5, 
-				  is_active = $6, updated_at = NOW() 
-			  WHERE id = $7`
+			  SET code = $1, name = $2, address = $3, city = $4, phone = $5, 
+				  contact_person = $6, commission_rate = $7, payment_terms = $8, 
+				  status = $9, updated_at = NOW() 
+			  WHERE id = $10`
 	_, err := r.db.ExecContext(ctx, query, 
-		depstore.Name, depstore.Code, depstore.Address, depstore.Contact, 
-		depstore.PaymentTerms, depstore.IsActive, depstore.ID)
+		depstore.Code, depstore.Name, depstore.Address, depstore.City, depstore.Phone, 
+		depstore.ContactPerson, depstore.CommissionRate, depstore.PaymentTerms, 
+		depstore.Status, depstore.ID)
 	return err
 }
 

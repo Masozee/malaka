@@ -2,12 +2,18 @@ package dto
 
 // CreateColorRequest represents the request body for creating a new color.
 type CreateColorRequest struct {
-	Name string `json:"name" binding:"required"`
-	Hex  string `json:"hex" binding:"required"`
+	Code        string `json:"code" binding:"required"`
+	Name        string `json:"name" binding:"required"`
+	HexCode     string `json:"hex_code" binding:"required"`
+	Description string `json:"description"`
+	Status      string `json:"status"`
 }
 
 // UpdateColorRequest represents the request body for updating an existing color.
 type UpdateColorRequest struct {
-	Name string `json:"name" binding:"required"`
-	Hex  string `json:"hex" binding:"required"`
+	Code        string `json:"code" binding:"required"`
+	Name        string `json:"name" binding:"required"`
+	HexCode     string `json:"hex_code" binding:"required"`
+	Description string `json:"description"`
+	Status      string `json:"status"`
 }

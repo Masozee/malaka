@@ -14,7 +14,8 @@ type Division struct {
 	Description string    `db:"description" json:"description"`
 	ParentID    *uuid.UUID `db:"parent_id" json:"parent_id"`
 	Level       int       `db:"level" json:"level"`
-	IsActive    bool      `db:"is_active" json:"is_active"`
+	SortOrder   int       `db:"sort_order" json:"sort_order"`
+	Status      string    `db:"status" json:"status"`
 	CreatedAt   time.Time `db:"created_at" json:"created_at"`
 	UpdatedAt   time.Time `db:"updated_at" json:"updated_at"`
 }

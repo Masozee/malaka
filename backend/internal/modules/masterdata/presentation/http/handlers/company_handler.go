@@ -29,7 +29,15 @@ func (h *CompanyHandler) CreateCompany(c *gin.Context) {
 
 	company := &entities.Company{
 		Name:    req.Name,
+		Email:   req.Email,
+		Phone:   req.Phone,
 		Address: req.Address,
+		Status:  req.Status,
+	}
+
+	// Set default status if not provided
+	if company.Status == "" {
+		company.Status = "active"
 	}
 
 	if err := h.service.CreateCompany(c.Request.Context(), company); err != nil {
@@ -78,9 +86,17 @@ func (h *CompanyHandler) UpdateCompany(c *gin.Context) {
 
 	company := &entities.Company{
 		Name:    req.Name,
+		Email:   req.Email,
+		Phone:   req.Phone,
 		Address: req.Address,
+		Status:  req.Status,
 	}
 	company.ID = id // Set the ID from the URL parameter
+
+	// Set default status if not provided
+	if company.Status == "" {
+		company.Status = "active"
+	}
 
 	if err := h.service.UpdateCompany(c.Request.Context(), company); err != nil {
 		response.InternalServerError(c, err.Error(), nil)

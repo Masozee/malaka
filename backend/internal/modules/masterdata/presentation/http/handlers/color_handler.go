@@ -1,12 +1,15 @@
 package handlers
 
 import (
+	"time"
+
 	"github.com/gin-gonic/gin"
 
 	"malaka/internal/modules/masterdata/domain/entities"
 	"malaka/internal/modules/masterdata/domain/services"
 	"malaka/internal/modules/masterdata/presentation/http/dto"
 	"malaka/internal/shared/response"
+	"malaka/internal/shared/types"
 )
 
 // ColorHandler handles HTTP requests for color operations.
@@ -27,9 +30,17 @@ func (h *ColorHandler) CreateColor(c *gin.Context) {
 		return
 	}
 
+	now := time.Now()
 	color := &entities.Color{
-		Name: req.Name,
-		Hex:  req.Hex,
+		Code:        req.Code,
+		Name:        req.Name,
+		HexCode:     req.HexCode,
+		Description: req.Description,
+		Status:      req.Status,
+		BaseModel: types.BaseModel{
+			CreatedAt: now,
+			UpdatedAt: now,
+		},
 	}
 
 	if err := h.service.CreateColor(c.Request.Context(), color); err != nil {
@@ -77,8 +88,14 @@ func (h *ColorHandler) UpdateColor(c *gin.Context) {
 	}
 
 	color := &entities.Color{
-		Name: req.Name,
-		Hex:  req.Hex,
+		Code:        req.Code,
+		Name:        req.Name,
+		HexCode:     req.HexCode,
+		Description: req.Description,
+		Status:      req.Status,
+		BaseModel: types.BaseModel{
+			UpdatedAt: time.Now(),
+		},
 	}
 	color.ID = id // Set the ID from the URL parameter
 

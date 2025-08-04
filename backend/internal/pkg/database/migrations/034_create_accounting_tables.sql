@@ -220,7 +220,74 @@ CREATE TABLE ppn_settings (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- Budgets
+CREATE TABLE budgets (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    budget_code VARCHAR(50) UNIQUE NOT NULL,
+    budget_name VARCHAR(255) NOT NULL,
+    budget_type VARCHAR(20) NOT NULL CHECK (budget_type IN ('OPERATIONAL', 'CAPITAL', 'CASH_FLOW')),
+    status VARCHAR(20) DEFAULT 'DRAFT' CHECK (status IN ('DRAFT', 'ACTIVE', 'CLOSED', 'REVISED')),
+    fiscal_year INTEGER NOT NULL,
+    period_start DATE NOT NULL,
+    period_end DATE NOT NULL,
+    total_budget DECIMAL(15,2) DEFAULT 0,
+    total_actual DECIMAL(15,2) DEFAULT 0,
+    total_variance DECIMAL(15,2) DEFAULT 0,
+    currency_code VARCHAR(3) NOT NULL,
+    description TEXT,
+    company_id VARCHAR(255) NOT NULL,
+    approved_by VARCHAR(255),
+    approved_at TIMESTAMP WITH TIME ZONE,
+    created_by VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Budget Lines
+CREATE TABLE budget_lines (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    budget_id UUID NOT NULL REFERENCES budgets(id) ON DELETE CASCADE,
+    account_id UUID NOT NULL REFERENCES chart_of_accounts(id),
+    line_number INTEGER NOT NULL,
+    description TEXT,
+    budgeted_amount DECIMAL(15,2) DEFAULT 0,
+    actual_amount DECIMAL(15,2) DEFAULT 0,
+    variance_amount DECIMAL(15,2) DEFAULT 0,
+    variance_percent DECIMAL(10,2) DEFAULT 0,
+    q1_budget DECIMAL(15,2) DEFAULT 0,
+    q2_budget DECIMAL(15,2) DEFAULT 0,
+    q3_budget DECIMAL(15,2) DEFAULT 0,
+    q4_budget DECIMAL(15,2) DEFAULT 0,
+    q1_actual DECIMAL(15,2) DEFAULT 0,
+    q2_actual DECIMAL(15,2) DEFAULT 0,
+    q3_actual DECIMAL(15,2) DEFAULT 0,
+    q4_actual DECIMAL(15,2) DEFAULT 0,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    UNIQUE(budget_id, line_number)
+);
+
+-- Cost Center Allocations
+CREATE TABLE cost_center_allocations (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    cost_center_id UUID NOT NULL REFERENCES cost_centers(id) ON DELETE CASCADE,
+    source_cost_center_id UUID NOT NULL REFERENCES cost_centers(id) ON DELETE CASCADE,
+    allocation_basis VARCHAR(20) NOT NULL CHECK (allocation_basis IN ('PERCENTAGE', 'AMOUNT', 'UNITS')),
+    allocation_value DECIMAL(15,2) NOT NULL,
+    allocated_amount DECIMAL(15,2) DEFAULT 0,
+    period_start DATE NOT NULL,
+    period_end DATE NOT NULL,
+    description TEXT,
+    is_active BOOLEAN DEFAULT true,
+    created_by VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
 -- +goose Down
+DROP TABLE IF EXISTS cost_center_allocations;
+DROP TABLE IF EXISTS budget_lines;
+DROP TABLE IF EXISTS budgets;
 DROP TABLE IF EXISTS ppn_settings;
 DROP TABLE IF EXISTS currency_settings;
 DROP TABLE IF EXISTS posting_cash_bank_to_gl;
