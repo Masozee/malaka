@@ -134,5 +134,6 @@ kube-config-*
 # Documentation and scripts
 docs/
 *.md
+!README.md
 *.sh
 *.env
