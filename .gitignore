@@ -130,3 +130,9 @@ database_dump_*.sql
 # Kubernetes (if used)
 *.kubeconfig
 kube-config-*
+
+# Documentation and scripts
+docs/
+*.md
+*.sh
+*.env
