@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { TwoLevelLayout } from '@/components/ui/two-level-layout'
 import { Header } from '@/components/ui/header'
-import { AdvancedDataTable } from '@/components/ui/advanced-data-table'
+import { AdvancedDataTable, AdvancedColumn } from '@/components/ui/advanced-data-table'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -36,12 +36,20 @@ import Link from 'next/link'
 import { stockAdjustmentService, StockAdjustment as StockAdjustmentAPI, InventoryFilters } from '@/services/inventory'
 
 // Extended interface for display purposes
-interface StockAdjustmentDisplay extends StockAdjustmentAPI {
+interface StockAdjustmentDisplay {
+  id: string
   adjustment_number?: string
+  adjustmentNumber?: string
   adjustment_type?: 'increase' | 'decrease' | 'correction' | 'damage' | 'theft' | 'expired' | 'found'
+  adjustment_date?: string
+  adjustmentDate?: string
   location?: string
   location_code?: string
+  reason?: string
   reference_document?: string
+  status?: 'draft' | 'pending' | 'approved' | 'completed' | 'rejected'
+  total_items?: number
+  totalItems?: number
   total_quantity_adjusted?: number
   total_value_impact?: number
   approved_by?: string
@@ -49,6 +57,15 @@ interface StockAdjustmentDisplay extends StockAdjustmentAPI {
   updated_by?: string
   created_at?: string
   updated_at?: string
+  items?: Array<{
+    id: string
+    productCode: string
+    productName: string
+    currentStock: number
+    adjustedStock: number
+    difference: number
+    reason: string
+  }>
 }
 
 // Mock data removed - now using real API data from backend
@@ -298,17 +315,25 @@ export default function StockAdjustmentsPage() {
       console.log('Stock adjustment data response:', response)
       // Transform data to include display fields
       const transformedData: StockAdjustmentDisplay[] = response.data.map(item => ({
-        ...item,
+        id: item.id,
+        adjustmentNumber: item.adjustmentNumber,
         adjustment_number: item.adjustmentNumber || 'ADJ-001',
         adjustment_type: 'correction' as const,
+        adjustmentDate: item.adjustmentDate,
+        adjustment_date: item.adjustmentDate,
+        reason: item.reason,
+        status: item.status,
+        totalItems: item.totalItems,
+        items: item.items,
         location: 'Main Warehouse',
         location_code: 'WH-001',
-        reference_document: item.reference_document || '',
+        reference_document: '',
+        total_items: item.totalItems || 0,
         total_quantity_adjusted: item.totalItems || 0,
         total_value_impact: (item.totalItems || 0) * 50000,
-        approved_by: item.approved_by || '',
-        created_by: item.created_by || 'System',
-        updated_by: item.updated_by || 'System',
+        approved_by: '',
+        created_by: 'System',
+        updated_by: 'System',
         created_at: item.adjustmentDate || new Date().toISOString(),
         updated_at: item.adjustmentDate || new Date().toISOString()
       }))
@@ -368,7 +393,7 @@ export default function StockAdjustmentsPage() {
   // Summary statistics
   const summaryStats = {
     totalAdjustments: adjustmentData.length,
-    pendingAdjustments: adjustmentData.filter(a => ['draft', 'pending'].includes(a.status)).length,
+    pendingAdjustments: adjustmentData.filter(a => a.status && ['draft', 'pending'].includes(a.status)).length,
     approvedAdjustments: adjustmentData.filter(a => a.status === 'approved').length,
     completedAdjustments: adjustmentData.filter(a => a.status === 'completed').length,
     totalValueImpact: adjustmentData.reduce((sum, a) => sum + (a.total_value_impact || 0), 0),
@@ -406,12 +431,12 @@ export default function StockAdjustmentsPage() {
     return 'text-gray-600'
   }
 
-  const columns = [
+  const columns: AdvancedColumn<StockAdjustmentDisplay>[] = [
     {
       key: 'adjustment_number',
       title: 'Adjustment Number',
-      render: (adjustment: StockAdjustment) => (
-        <Link 
+      render: (_value: unknown, adjustment: StockAdjustmentDisplay) => (
+        <Link
           href={`/inventory/adjustments/${adjustment.id}`}
           className="font-medium text-blue-600 hover:text-blue-800"
         >
@@ -422,8 +447,8 @@ export default function StockAdjustmentsPage() {
     {
       key: 'adjustment_type',
       title: 'Type',
-      render: (adjustment: StockAdjustment) => {
-        const { variant, label, icon: Icon } = getTypeBadge(adjustment.adjustment_type)
+      render: (_value: unknown, adjustment: StockAdjustmentDisplay) => {
+        const { variant, label, icon: Icon } = getTypeBadge(adjustment.adjustment_type || 'correction')
         return (
           <div className="flex items-center space-x-2">
             <Icon className="h-4 w-4" />
@@ -435,7 +460,7 @@ export default function StockAdjustmentsPage() {
     {
       key: 'location',
       title: 'Location',
-      render: (adjustment: StockAdjustment) => (
+      render: (_value: unknown, adjustment: StockAdjustmentDisplay) => (
         <div>
           <div className="font-medium">{adjustment.location}</div>
           <div className="text-sm text-muted-foreground">{adjustment.location_code}</div>
@@ -445,7 +470,7 @@ export default function StockAdjustmentsPage() {
     {
       key: 'adjustment_date',
       title: 'Date',
-      render: (adjustment: StockAdjustment) => (
+      render: (_value: unknown, adjustment: StockAdjustmentDisplay) => (
         <div className="flex items-center space-x-2">
           <Calendar className="h-4 w-4 text-muted-foreground" />
           <span className="text-sm">{formatDate(adjustment.adjustment_date)}</span>
@@ -455,11 +480,11 @@ export default function StockAdjustmentsPage() {
     {
       key: 'total_items',
       title: 'Items',
-      render: (adjustment: StockAdjustment) => (
+      render: (_value: unknown, adjustment: StockAdjustmentDisplay) => (
         <div className="text-center">
           <div className="font-medium">{adjustment.total_items}</div>
           <div className="text-sm text-muted-foreground">
-            {adjustment.total_quantity_adjusted > 0 ? '+' : ''}{adjustment.total_quantity_adjusted} qty
+            {(adjustment.total_quantity_adjusted || 0) > 0 ? '+' : ''}{adjustment.total_quantity_adjusted || 0} qty
           </div>
         </div>
       )
@@ -467,16 +492,16 @@ export default function StockAdjustmentsPage() {
     {
       key: 'total_value_impact',
       title: 'Value Impact',
-      render: (adjustment: StockAdjustment) => (
-        <span className={`font-medium ${getValueImpactColor(adjustment.total_value_impact)}`}>
-          {formatCurrency(adjustment.total_value_impact)}
+      render: (_value: unknown, adjustment: StockAdjustmentDisplay) => (
+        <span className={`font-medium ${getValueImpactColor(adjustment.total_value_impact || 0)}`}>
+          {formatCurrency(adjustment.total_value_impact || 0)}
         </span>
       )
     },
     {
       key: 'created_by',
       title: 'Created By',
-      render: (adjustment: StockAdjustment) => (
+      render: (_value: unknown, adjustment: StockAdjustmentDisplay) => (
         <div className="flex items-center space-x-2">
           <User className="h-4 w-4 text-muted-foreground" />
           <span className="text-sm">{adjustment.created_by}</span>
@@ -486,8 +511,8 @@ export default function StockAdjustmentsPage() {
     {
       key: 'status',
       title: 'Status',
-      render: (adjustment: StockAdjustment) => {
-        const { variant, label, icon: Icon } = getStatusBadge(adjustment.status)
+      render: (_value: unknown, adjustment: StockAdjustmentDisplay) => {
+        const { variant, label, icon: Icon } = getStatusBadge(adjustment.status || 'pending')
         return (
           <div className="flex items-center space-x-2">
             <Icon className="h-4 w-4" />
@@ -497,9 +522,9 @@ export default function StockAdjustmentsPage() {
       }
     },
     {
-      key: 'actions',
+      key: 'id',
       title: 'Actions',
-      render: (adjustment: StockAdjustment) => (
+      render: (_value: unknown, adjustment: StockAdjustmentDisplay) => (
         <div className="flex items-center space-x-2">
           <Button variant="ghost" size="sm" asChild>
             <Link href={`/inventory/adjustments/${adjustment.id}`}>
@@ -730,11 +755,11 @@ export default function StockAdjustmentsPage() {
         ) : activeView === 'cards' ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {sortedAdjustments.map((adjustment) => {
-              const { variant: typeVariant, label: typeLabel, icon: TypeIcon } = getTypeBadge(adjustment.adjustment_type)
-              const { variant: statusVariant, label: statusLabel, icon: StatusIcon } = getStatusBadge(adjustment.status)
+              const { variant: typeVariant, label: typeLabel, icon: TypeIcon } = getTypeBadge(adjustment.adjustment_type || 'correction')
+              const { variant: statusVariant, label: statusLabel, icon: StatusIcon } = getStatusBadge(adjustment.status || 'pending')
               
               return (
-                <Card key={adjustment.id} className="p-6 hover:shadow-md transition-shadow">
+                <Card key={adjustment.id} className="p-6 hover: transition-shadow">
                   <div className="flex justify-between items-start mb-4">
                     <div className="flex items-center space-x-2">
                       <Settings className="h-5 w-5 text-blue-600" />
@@ -783,13 +808,13 @@ export default function StockAdjustmentsPage() {
                       <div className="flex justify-between mt-1">
                         <span className="text-sm text-muted-foreground">Quantity:</span>
                         <span className="text-sm font-medium">
-                          {adjustment.total_quantity_adjusted > 0 ? '+' : ''}{adjustment.total_quantity_adjusted}
+                          {(adjustment.total_quantity_adjusted || 0) > 0 ? '+' : ''}{adjustment.total_quantity_adjusted || 0}
                         </span>
                       </div>
                       <div className="flex justify-between mt-1">
                         <span className="text-sm text-muted-foreground">Value Impact:</span>
-                        <span className={`text-sm font-semibold ${getValueImpactColor(adjustment.total_value_impact)}`}>
-                          {mounted ? `${(adjustment.total_value_impact / 1000000).toFixed(1)}M` : ''}
+                        <span className={`text-sm font-semibold ${getValueImpactColor(adjustment.total_value_impact || 0)}`}>
+                          {mounted ? `${((adjustment.total_value_impact || 0) / 1000000).toFixed(1)}M` : ''}
                         </span>
                       </div>
                     </div>
@@ -849,13 +874,10 @@ export default function StockAdjustmentsPage() {
             <AdvancedDataTable
               data={sortedAdjustments}
               columns={columns}
-              searchable={false}
-              filterable={false}
               pagination={{
+                current: 1,
                 pageSize: 15,
-                currentPage: 1,
-                totalPages: Math.ceil(sortedAdjustments.length / 15),
-                totalItems: sortedAdjustments.length,
+                total: sortedAdjustments.length,
                 onChange: () => {}
               }}
             />

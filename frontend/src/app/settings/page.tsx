@@ -1274,11 +1274,12 @@ export default function SettingsPage() {
               onClick={() => setActiveTab(tab.id)}
               className={`
                 flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-all
-                ${activeTab === tab.id 
-                  ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm' 
+                ${activeTab === tab.id
+                  ? 'text-black'
                   : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
                 }
               `}
+              style={activeTab === tab.id ? { backgroundColor: '#cfff04' } : {}}
             >
               {tab.icon}
               <span className="hidden sm:inline">{tab.label}</span>

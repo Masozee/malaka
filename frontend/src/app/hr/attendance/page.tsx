@@ -721,7 +721,6 @@ export default function AttendancePage() {
             data={paginatedData}
             columns={columns}
             searchPlaceholder="Search employees, departments, or locations..."
-            showFilters={false}
             pagination={{
               current: currentPage,
               pageSize: pageSize,

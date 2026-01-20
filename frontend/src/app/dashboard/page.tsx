@@ -25,44 +25,57 @@ export default function DashboardPage() {
               title="Master Data"
               icon={<Database size={48} />}
               description="Manage core business data: products, customers, suppliers, and more."
-              className="hover:shadow-lg transition-shadow cursor-pointer"
             />
           </Link>
-          <Tile
-            title="Sales"
-            icon={<ShoppingCart size={48} />}
-            description="Manage orders, customers, and sales analytics."
-          />
-          <Tile
-            title="Inventory"
-            icon={<Package size={48} />}
-            description="Track stock levels, manage products, and suppliers."
-          />
-          <Tile
-            title="Production"
-            icon={<Factory size={48} />}
-            description="Manage manufacturing processes, work orders, and quality control."
-          />
-          <Tile
-            title="Accounting"
-            icon={<Calculator size={48} />}
-            description="Handle financial transactions, ledgers, and accounting reports."
-          />
-          <Tile
-            title="HR Management"
-            icon={<Users size={48} />}
-            description="Handle employee data, payroll, and recruitment."
-          />
-          <Tile
-            title="Reporting"
-            icon={<BarChart size={48} />}
-            description="Generate insightful reports and analyze business performance."
-          />
-          <Tile
-            title="Settings"
-            icon={<Settings size={48} />}
-            description="Configure system settings and user permissions."
-          />
+          <Link href="/sales">
+            <Tile
+              title="Sales"
+              icon={<ShoppingCart size={48} />}
+              description="Manage orders, customers, and sales analytics."
+            />
+          </Link>
+          <Link href="/inventory">
+            <Tile
+              title="Inventory"
+              icon={<Package size={48} />}
+              description="Track stock levels, manage products, and suppliers."
+            />
+          </Link>
+          <Link href="/production">
+            <Tile
+              title="Production"
+              icon={<Factory size={48} />}
+              description="Manage manufacturing processes, work orders, and quality control."
+            />
+          </Link>
+          <Link href="/accounting">
+            <Tile
+              title="Accounting"
+              icon={<Calculator size={48} />}
+              description="Handle financial transactions, ledgers, and accounting reports."
+            />
+          </Link>
+          <Link href="/hr">
+            <Tile
+              title="HR Management"
+              icon={<Users size={48} />}
+              description="Handle employee data, payroll, and recruitment."
+            />
+          </Link>
+          <Link href="/reports">
+            <Tile
+              title="Reporting"
+              icon={<BarChart size={48} />}
+              description="Generate insightful reports and analyze business performance."
+            />
+          </Link>
+          <Link href="/settings">
+            <Tile
+              title="Settings"
+              icon={<Settings size={48} />}
+              description="Configure system settings and user permissions."
+            />
+          </Link>
         </div>
       </div>
     </TwoLevelLayout>

@@ -79,7 +79,7 @@ export function KPICard({
   const currency = 'currency' in metric ? salesKPI.currency : undefined
 
   return (
-    <Card className="hover:shadow-md transition-shadow min-w-0">
+    <Card className="hover: transition-shadow min-w-0">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-3 pt-3">
         <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400 truncate">
           {metric.name}

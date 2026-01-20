@@ -394,18 +394,21 @@ export default function POSPage() {
       title: 'Actions',
       render: (value: unknown, transaction: POSTransaction) => (
         <div className="flex items-center space-x-2">
-          <Button variant="ghost" size="sm" asChild>
+          <Button variant="ghost" size="sm" asChild aria-label="View transaction details">
             <Link href={`/sales/pos/${transaction.id}`}>
               <Eye className="h-4 w-4" />
+              <span className="sr-only">View {transaction.transaction_number}</span>
             </Link>
           </Button>
-          <Button variant="ghost" size="sm">
+          <Button variant="ghost" size="sm" aria-label="Print receipt">
             <Receipt className="h-4 w-4" />
+            <span className="sr-only">Print receipt for {transaction.transaction_number}</span>
           </Button>
           {transaction.status === 'pending' && (
-            <Button variant="ghost" size="sm" asChild>
+            <Button variant="ghost" size="sm" asChild aria-label="Edit transaction">
               <Link href={`/sales/pos/${transaction.id}/edit`}>
                 <Edit className="h-4 w-4" />
+                <span className="sr-only">Edit {transaction.transaction_number}</span>
               </Link>
             </Button>
           )}
@@ -440,51 +443,54 @@ export default function POSPage() {
         {/* Summary Statistics */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card className="p-4">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
+                <ShoppingCart className="h-5 w-5 text-foreground" aria-hidden="true" />
+              </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Today&apos;s Sales</p>
-                <p className="text-2xl font-bold mt-1">{summaryStats.todayTransactions}</p>
-                <p className="text-sm text-blue-600 mt-1">Transactions</p>
+                <p className="text-2xl font-bold">{summaryStats.todayTransactions}</p>
               </div>
-              <ShoppingCart className="h-8 w-8 text-blue-600" />
             </div>
           </Card>
 
           <Card className="p-4">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
+                <DollarSign className="h-5 w-5 text-foreground" aria-hidden="true" />
+              </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Total Revenue</p>
-                <p className="text-2xl font-bold mt-1">
+                <p className="text-2xl font-bold">
                   {mounted ? `Rp ${(summaryStats.totalSales / 1000000).toFixed(1)}M` : ''}
                 </p>
-                <p className="text-sm text-green-600 mt-1">Sales value</p>
               </div>
-              <DollarSign className="h-8 w-8 text-green-600" />
             </div>
           </Card>
 
           <Card className="p-4">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
+                <CheckCircle className="h-5 w-5 text-foreground" aria-hidden="true" />
+              </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Completed</p>
-                <p className="text-2xl font-bold mt-1 text-green-600">{summaryStats.completedTransactions}</p>
-                <p className="text-sm text-green-600 mt-1">Transactions</p>
+                <p className="text-2xl font-bold">{summaryStats.completedTransactions}</p>
               </div>
-              <CheckCircle className="h-8 w-8 text-green-600" />
             </div>
           </Card>
 
           <Card className="p-4">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
+                <Clock className="h-5 w-5 text-foreground" aria-hidden="true" />
+              </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Pending</p>
-                <p className="text-2xl font-bold mt-1 text-orange-600">{summaryStats.pendingTransactions}</p>
-                <p className="text-sm text-orange-600 mt-1">Need attention</p>
+                <p className="text-2xl font-bold">{summaryStats.pendingTransactions}</p>
               </div>
-              <Clock className="h-8 w-8 text-orange-600" />
             </div>
           </Card>
-
         </div>
 
         {/* Search and Filters */}

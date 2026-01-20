@@ -705,7 +705,7 @@ export default function CouriersPage() {
               const { variant: statusVariant, label: statusLabel, icon: StatusIcon } = getStatusBadge(courier.is_active)
               
               return (
-                <Card key={courier.id} className="p-6 hover:shadow-md transition-shadow">
+                <Card key={courier.id} className="p-6 hover: transition-shadow">
                   <div className="flex justify-between items-start mb-4">
                     <div className="flex items-center space-x-2">
                       {courier.is_preferred && <Star className="h-4 w-4 text-yellow-400 fill-current" />}

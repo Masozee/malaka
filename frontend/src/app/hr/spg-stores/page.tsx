@@ -5,7 +5,7 @@ import { TwoLevelLayout } from '@/components/ui/two-level-layout'
 import { Header } from '@/components/ui/header'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { AdvancedDataTable } from '@/components/ui/advanced-data-table'
+import { AdvancedDataTable, AdvancedColumn } from '@/components/ui/advanced-data-table'
 import { Badge } from '@/components/ui/badge'
 import { 
   Store,
@@ -272,35 +272,35 @@ export default function SPGStoresPage() {
   const avgPerformance = mockSPGData.reduce((sum, spg) => sum + spg.performance, 0) / totalSPG
   const achievementRate = (totalSales / totalTargets) * 100
 
-  const columns = [
+  const columns: AdvancedColumn<SPGAssignment>[] = [
     {
-      accessorKey: 'spgName',
-      header: 'SPG Name',
-      cell: ({ row }: any) => (
+      key: 'spgName',
+      title: 'SPG Name',
+      render: (_value: unknown, record: SPGAssignment) => (
         <div>
-          <div className="font-medium">{row.getValue('spgName')}</div>
-          <div className="text-sm text-gray-500">{row.original.spgId}</div>
+          <div className="font-medium">{record.spgName}</div>
+          <div className="text-sm text-gray-500">{record.spgId}</div>
         </div>
       )
     },
     {
-      accessorKey: 'storeName',
-      header: 'Store',
-      cell: ({ row }: any) => (
+      key: 'storeName',
+      title: 'Store',
+      render: (_value: unknown, record: SPGAssignment) => (
         <div>
-          <div className="font-medium text-sm">{row.getValue('storeName')}</div>
+          <div className="font-medium text-sm">{record.storeName}</div>
           <div className="text-xs text-gray-500 flex items-center">
             <MapPin className="h-3 w-3 mr-1" />
-            {row.original.storeLocation}
+            {record.storeLocation}
           </div>
         </div>
       )
     },
     {
-      accessorKey: 'storeType',
-      header: 'Store Type',
-      cell: ({ row }: any) => {
-        const type = row.getValue('storeType') as keyof typeof storeTypeColors
+      key: 'storeType',
+      title: 'Store Type',
+      render: (_value: unknown, record: SPGAssignment) => {
+        const type = record.storeType as keyof typeof storeTypeColors
         return (
           <Badge className={storeTypeColors[type]}>
             {type.charAt(0).toUpperCase() + type.slice(1)}
@@ -309,10 +309,10 @@ export default function SPGStoresPage() {
       }
     },
     {
-      accessorKey: 'assignment',
-      header: 'Assignment',
-      cell: ({ row }: any) => {
-        const assignment = row.getValue('assignment') as keyof typeof assignmentColors
+      key: 'assignment',
+      title: 'Assignment',
+      render: (_value: unknown, record: SPGAssignment) => {
+        const assignment = record.assignment as keyof typeof assignmentColors
         return (
           <Badge className={assignmentColors[assignment]}>
             {assignment.charAt(0).toUpperCase() + assignment.slice(1)}
@@ -321,14 +321,14 @@ export default function SPGStoresPage() {
       }
     },
     {
-      accessorKey: 'monthlySales',
-      header: 'Monthly Sales',
-      cell: ({ row }: any) => {
-        const sales = row.getValue('monthlySales') as number
-        const target = row.original.targetSales
+      key: 'monthlySales',
+      title: 'Monthly Sales',
+      render: (_value: unknown, record: SPGAssignment) => {
+        const sales = record.monthlySales
+        const target = record.targetSales
         const achievement = (sales / target) * 100
         const color = achievement >= 100 ? 'text-green-600' : achievement >= 90 ? 'text-yellow-600' : 'text-red-600'
-        
+
         return (
           <div className="text-sm">
             <div className={`font-medium ${color}`}>
@@ -340,10 +340,10 @@ export default function SPGStoresPage() {
       }
     },
     {
-      accessorKey: 'performance',
-      header: 'Performance',
-      cell: ({ row }: any) => {
-        const performance = row.getValue('performance') as number
+      key: 'performance',
+      title: 'Performance',
+      render: (_value: unknown, record: SPGAssignment) => {
+        const performance = record.performance
         const color = performance >= 100 ? 'text-green-600' : performance >= 90 ? 'text-yellow-600' : 'text-red-600'
         return (
           <div className={`font-bold ${color} flex items-center`}>
@@ -354,19 +354,19 @@ export default function SPGStoresPage() {
       }
     },
     {
-      accessorKey: 'commission',
-      header: 'Commission',
-      cell: ({ row }: any) => (
+      key: 'commission',
+      title: 'Commission',
+      render: (_value: unknown, record: SPGAssignment) => (
         <div className="text-sm font-medium">
-          {mounted ? row.getValue('commission').toLocaleString('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }) : ''}
+          {mounted ? record.commission.toLocaleString('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }) : ''}
         </div>
       )
     },
     {
-      accessorKey: 'status',
-      header: 'Status',
-      cell: ({ row }: any) => {
-        const status = row.getValue('status') as keyof typeof statusColors
+      key: 'status',
+      title: 'Status',
+      render: (_value: unknown, record: SPGAssignment) => {
+        const status = record.status as keyof typeof statusColors
         return (
           <Badge className={statusColors[status]}>
             {status.replace('-', ' ').charAt(0).toUpperCase() + status.replace('-', ' ').slice(1)}
@@ -375,10 +375,10 @@ export default function SPGStoresPage() {
       }
     },
     {
-      accessorKey: 'contractType',
-      header: 'Contract',
-      cell: ({ row }: any) => {
-        const contract = row.getValue('contractType') as keyof typeof contractColors
+      key: 'contractType',
+      title: 'Contract',
+      render: (_value: unknown, record: SPGAssignment) => {
+        const contract = record.contractType as keyof typeof contractColors
         return (
           <Badge className={contractColors[contract]}>
             {contract.replace('-', ' ').charAt(0).toUpperCase() + contract.replace('-', ' ').slice(1)}
@@ -646,7 +646,6 @@ export default function SPGStoresPage() {
               data={mockSPGData}
               columns={columns}
               searchPlaceholder="Search SPG names, stores, or locations..."
-              showFilters={true}
             />
           </Card>
         )}

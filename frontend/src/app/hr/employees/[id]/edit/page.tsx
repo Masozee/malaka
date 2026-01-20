@@ -436,7 +436,7 @@ export default function EditEmployeePage() {
                     <Input
                       id="supervisor_id"
                       value={formData.supervisor_id || ''}
-                      onChange={(e) => handleInputChange('supervisor_id', e.target.value || null)}
+                      onChange={(e) => handleInputChange('supervisor_id', e.target.value || '')}
                     />
                   </div>
                 </div>

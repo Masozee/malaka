@@ -209,7 +209,7 @@ export default function AccountingPage() {
               {accountingModules.map((module) => {
                 const Icon = module.icon
                 return (
-                  <Card key={module.title} className="p-6 hover:shadow-lg transition-shadow duration-200">
+                  <Card key={module.title} className="p-6 hover: transition-shadow duration-200">
                     <div className="flex items-start justify-between mb-4">
                       <div className={`h-12 w-12 rounded-lg flex items-center justify-center ${module.color}`}>
                         <Icon className="h-6 w-6" />

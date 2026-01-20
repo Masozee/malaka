@@ -104,6 +104,58 @@ func (s *MinIOService) UploadWithMetadata(ctx context.Context, file *multipart.F
 	return result, nil
 }
 
+// UploadBytesWithMetadata uploads raw bytes and caches metadata in Redis.
+func (s *MinIOService) UploadBytesWithMetadata(ctx context.Context, data []byte, filename, contentType string) (*UploadResult, error) {
+	// Upload bytes to MinIO
+	objectKey, err := s.storage.UploadBytes(ctx, data, filename, contentType)
+	if err != nil {
+		return nil, fmt.Errorf("failed to upload bytes: %w", err)
+	}
+
+	// Get object info for metadata
+	objectInfo, err := s.storage.GetObjectInfo(ctx, objectKey)
+	if err != nil {
+		s.logger.Warn("Failed to get object info after upload", 
+			zap.String("object_key", objectKey), 
+			zap.Error(err))
+		// Continue without caching if we can't get info
+	} else {
+		// Cache metadata in Redis
+		metadata := &ObjectMetadata{
+			Key:          objectKey,
+			Size:         objectInfo.Size,
+			LastModified: objectInfo.LastModified,
+			ContentType:  objectInfo.ContentType,
+			ETag:         objectInfo.ETag,
+			UserMetadata: objectInfo.UserMetadata,
+			CachedAt:     time.Now(),
+		}
+
+		if err := s.cacheMetadata(ctx, objectKey, metadata); err != nil {
+			s.logger.Warn("Failed to cache object metadata", 
+				zap.String("object_key", objectKey), 
+				zap.Error(err))
+		}
+	}
+
+	// Generate result
+	result := &UploadResult{
+		ObjectKey: objectKey,
+		Size:      int64(len(data)),
+		URL:       fmt.Sprintf("/api/v1/storage/download/%s", objectKey),
+		Metadata: map[string]string{
+			"original_name": filename,
+			"content_type":  contentType,
+		},
+	}
+
+	s.logger.Info("Bytes uploaded and cached successfully", 
+		zap.String("object_key", objectKey),
+		zap.Int64("size", result.Size))
+
+	return result, nil
+}
+
 // GetObjectMetadata retrieves object metadata from cache or MinIO.
 func (s *MinIOService) GetObjectMetadata(ctx context.Context, objectKey string) (*ObjectMetadata, error) {
 	// Try to get from cache first

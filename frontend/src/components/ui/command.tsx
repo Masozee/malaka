@@ -137,7 +137,7 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="overflow-hidden p-0 shadow-lg max-w-[750px] max-h-[80vh]">
+      <DialogContent className="overflow-hidden p-0  max-w-[750px] max-h-[80vh]">
         <DialogHeader className="px-6 pb-0 pt-6">
           <DialogTitle className="text-lg font-semibold text-foreground">
             Quick Navigation
@@ -145,12 +145,13 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
         </DialogHeader>
         
         <div className="flex items-center border-b px-4 pb-4">
-          <Search className="mr-3 h-5 w-5 shrink-0 opacity-50" />
+          <Search className="mr-3 h-5 w-5 shrink-0 opacity-50" aria-hidden="true" />
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search for pages, features, modules..."
-            className="flex h-12 w-full rounded-md bg-transparent py-3 text-sm outline-none border-0 shadow-none focus-visible:ring-0 placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex h-12 w-full rounded-md bg-transparent py-3 text-sm outline-none border-0 focus-visible:ring-0 placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
+            aria-label="Search for pages"
           />
           <kbd className="pointer-events-none ml-auto hidden h-6 select-none items-center gap-1 rounded border bg-muted px-2 font-mono text-[11px] font-medium opacity-100 sm:flex">
             <span className="text-xs">⌘</span>K
@@ -176,7 +177,7 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
                       onClick={() => handleSelect(item.href)}
                       className="relative flex w-full cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
                     >
-                      <Icon className="mr-2 h-4 w-4" />
+                      <Icon className="mr-2 h-4 w-4" aria-hidden="true" />
                       <span>{item.label}</span>
                     </button>
                   )

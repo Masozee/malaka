@@ -69,7 +69,7 @@ export function SalesDistributionChart({
     if (active && payload && payload.length) {
       const data = payload[0].payload
       return (
-        <div className="bg-white dark:bg-gray-800 p-3 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg">
+        <div className="bg-white dark:bg-gray-800 p-3 border border-gray-200 dark:border-gray-700 rounded-lg ">
           <p className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">
             {data.name}
           </p>
@@ -145,7 +145,11 @@ export function SalesDistributionChart({
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div style={{ width: '100%', height }}>
+        <div
+          style={{ width: '100%', height }}
+          role="img"
+          aria-label={`${title} pie chart showing sales distribution across ${data.length} categories`}
+        >
           <ResponsiveContainer>
             <PieChart>
               <Pie

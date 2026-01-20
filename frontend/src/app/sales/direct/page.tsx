@@ -1,6 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { salesService, type DirectSale } from '@/services/sales'
+import { useToast } from '@/components/ui/toast'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -30,31 +32,21 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 
-// Direct Sales types
-interface DirectSale {
-  id: string
+// Extended DirectSale interface for UI
+interface ExtendedDirectSale extends DirectSale {
   sale_number: string
   sale_date: string
   sales_person: string
-  customer_name?: string
-  customer_phone?: string
-  customer_address?: string
   visit_type: 'showroom' | 'home_visit' | 'office_visit' | 'exhibition'
   location: string
   items: DirectSaleItem[]
   subtotal: number
   tax_amount: number
   discount_amount: number
-  total_amount: number
-  payment_method: 'cash' | 'card' | 'transfer' | 'installment'
-  payment_status: 'pending' | 'paid' | 'partial' | 'failed'
   delivery_method: 'pickup' | 'delivery' | 'shipping'
   delivery_status?: 'pending' | 'delivered' | 'cancelled'
   commission_rate: number
   commission_amount: number
-  notes?: string
-  created_at: string
-  updated_at: string
 }
 
 interface DirectSaleItem {
@@ -320,10 +312,56 @@ export default function DirectSalesPage() {
   const [paymentStatusFilter, setPaymentStatusFilter] = useState<string>('all')
   const [visitTypeFilter, setVisitTypeFilter] = useState<string>('all')
   const [salesPersonFilter, setSalesPersonFilter] = useState<string>('all')
+  const [directSales, setDirectSales] = useState<ExtendedDirectSale[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const { addToast } = useToast()
 
   useEffect(() => {
     setMounted(true)
+    loadDirectSales()
   }, [])
+
+  const loadDirectSales = async () => {
+    try {
+      setLoading(true)
+      setError(null)
+      const sales = await salesService.getDirectSales()
+      
+      // Transform API data to match UI expectations
+      const transformedSales: ExtendedDirectSale[] = sales.map(sale => ({
+        ...sale,
+        sale_number: `DS-${sale.id}`,
+        sale_date: sale.transaction_date,
+        sales_person: sale.sales_person || 'Sales Staff',
+        visit_type: (sale.visit_type || 'showroom') as 'showroom' | 'home_visit' | 'office_visit' | 'exhibition',
+        location: sale.location || 'Store',
+        items: sale.items || [],
+        subtotal: sale.subtotal || sale.total_amount,
+        tax_amount: sale.tax_amount || 0,
+        discount_amount: sale.discount_amount || 0,
+        delivery_method: (sale.delivery_method || 'pickup') as 'pickup' | 'delivery' | 'shipping',
+        delivery_status: sale.delivery_status,
+        commission_rate: sale.commission_rate || 0,
+        commission_amount: sale.commission_amount || 0,
+        payment_status: (sale.payment_status || 'pending') as 'pending' | 'paid' | 'partial' | 'failed'
+      }))
+      
+      setDirectSales(transformedSales)
+    } catch (error) {
+      console.error('Error loading direct sales:', error)
+      setError('Failed to load direct sales data')
+      addToast({
+        type: 'error',
+        title: 'Error',
+        description: 'Failed to load direct sales data. Using sample data for demonstration.'
+      })
+      // Fall back to mock data if API fails
+      setDirectSales(mockDirectSales as ExtendedDirectSale[])
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const formatCurrency = (amount?: number): string => {
     if (!mounted || typeof amount !== 'number' || isNaN(amount)) return ''
@@ -346,7 +384,7 @@ export default function DirectSalesPage() {
   ]
 
   // Filter sales
-  const filteredSales = mockDirectSales.filter(sale => {
+  const filteredSales = directSales.filter(sale => {
     if (searchTerm && !sale.sale_number.toLowerCase().includes(searchTerm.toLowerCase()) && 
         !sale.customer_name?.toLowerCase().includes(searchTerm.toLowerCase()) &&
         !sale.sales_person.toLowerCase().includes(searchTerm.toLowerCase())) return false
@@ -357,15 +395,16 @@ export default function DirectSalesPage() {
   })
 
   // Summary statistics
+  const today = new Date().toISOString().split('T')[0]
   const summaryStats = {
-    totalSales: mockDirectSales.length,
-    todaySales: mockDirectSales.filter(s => s.sale_date === '2024-07-25').length,
-    totalRevenue: mockDirectSales.filter(s => s.payment_status === 'paid').reduce((sum, s) => sum + s.total_amount, 0),
-    pendingSales: mockDirectSales.filter(s => s.payment_status === 'pending').length,
-    totalCommission: mockDirectSales.filter(s => s.payment_status === 'paid').reduce((sum, s) => sum + s.commission_amount, 0),
-    averageSale: mockDirectSales.length > 0 ? 
-      mockDirectSales.filter(s => s.payment_status === 'paid').reduce((sum, s) => sum + s.total_amount, 0) / 
-      mockDirectSales.filter(s => s.payment_status === 'paid').length : 0
+    totalSales: directSales.length,
+    todaySales: directSales.filter(s => s.sale_date.startsWith(today)).length,
+    totalRevenue: directSales.filter(s => s.payment_status === 'paid').reduce((sum, s) => sum + s.total_amount, 0),
+    pendingSales: directSales.filter(s => s.payment_status === 'pending').length,
+    totalCommission: directSales.filter(s => s.payment_status === 'paid').reduce((sum, s) => sum + s.commission_amount, 0),
+    averageSale: directSales.length > 0 ? 
+      directSales.filter(s => s.payment_status === 'paid').reduce((sum, s) => sum + s.total_amount, 0) / 
+      directSales.filter(s => s.payment_status === 'paid').length : 0
   }
 
   const getPaymentStatusBadge = (status: string) => {
@@ -399,7 +438,7 @@ export default function DirectSalesPage() {
   }
 
   // Get unique sales persons for filter
-  const salesPersons = Array.from(new Set(mockDirectSales.map(sale => sale.sales_person)))
+  const salesPersons = Array.from(new Set(directSales.map(sale => sale.sales_person)))
 
   const columns = [
     {
@@ -526,7 +565,7 @@ export default function DirectSalesPage() {
 
   return (
     <TwoLevelLayout>
-      <div className="flex-1 space-y-6">
+      <div className="flex-1 flex flex-col overflow-hidden">
         <Header 
           title="Direct Sales"
           description="Manage direct sales and field sales activities"
@@ -547,255 +586,525 @@ export default function DirectSalesPage() {
           }
         />
 
-        {/* Summary Statistics */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6">
-          <Card className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Today&apos;s Sales</p>
-                <p className="text-2xl font-bold mt-1">{summaryStats.todaySales}</p>
-                <p className="text-sm text-blue-600 mt-1">Direct sales</p>
+        {/* Main Content Area */}
+        <div className="flex-1 overflow-auto p-6 space-y-6">
+          {/* Summary Statistics */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-2">
+            <Card className="p-4 lg:p-6 hover: transition-all duration-200 border-0  bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950 dark:to-blue-900">
+              <div className="flex items-center space-x-4">
+                <div className="p-3 bg-blue-500 text-white rounded-xl ">
+                  <Store className="h-5 w-5 lg:h-6 lg:w-6" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs lg:text-sm font-medium text-blue-700 dark:text-blue-300 uppercase tracking-wide">Today&apos;s Sales</p>
+                  <p className="text-2xl lg:text-3xl font-bold mt-1 text-blue-900 dark:text-blue-100">{summaryStats.todaySales}</p>
+                  <p className="text-xs lg:text-sm text-blue-600 dark:text-blue-400 mt-1">Direct transactions</p>
+                </div>
               </div>
-              <Store className="h-8 w-8 text-blue-600" />
-            </div>
-          </Card>
+            </Card>
 
-          <Card className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Total Revenue</p>
-                <p className="text-2xl font-bold mt-1">
-                  {mounted ? `Rp ${(summaryStats.totalRevenue / 1000000).toFixed(1)}M` : ''}
-                </p>
-                <p className="text-sm text-green-600 mt-1">Direct revenue</p>
+            <Card className="p-4 lg:p-6 hover: transition-all duration-200 border-0  bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950 dark:to-green-900">
+              <div className="flex items-center space-x-4">
+                <div className="p-3 bg-green-500 text-white rounded-xl ">
+                  <DollarSign className="h-5 w-5 lg:h-6 lg:w-6" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs lg:text-sm font-medium text-green-700 dark:text-green-300 uppercase tracking-wide">Total Revenue</p>
+                  <p className="text-2xl lg:text-3xl font-bold mt-1 text-green-900 dark:text-green-100">
+                    {mounted ? `Rp ${(summaryStats.totalRevenue / 1000000).toFixed(1)}M` : ''}
+                  </p>
+                  <p className="text-xs lg:text-sm text-green-600 dark:text-green-400 mt-1">Direct revenue</p>
+                </div>
               </div>
-              <DollarSign className="h-8 w-8 text-green-600" />
-            </div>
-          </Card>
+            </Card>
 
-          <Card className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Pending</p>
-                <p className="text-2xl font-bold mt-1 text-orange-600">{summaryStats.pendingSales}</p>
-                <p className="text-sm text-orange-600 mt-1">Need follow-up</p>
+            <Card className="p-4 lg:p-6 hover: transition-all duration-200 border-0  bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-950 dark:to-orange-900">
+              <div className="flex items-center space-x-4">
+                <div className="p-3 bg-orange-500 text-white rounded-xl ">
+                  <Clock className="h-5 w-5 lg:h-6 lg:w-6" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs lg:text-sm font-medium text-orange-700 dark:text-orange-300 uppercase tracking-wide">Pending</p>
+                  <p className="text-2xl lg:text-3xl font-bold mt-1 text-orange-900 dark:text-orange-100">{summaryStats.pendingSales}</p>
+                  <p className="text-xs lg:text-sm text-orange-600 dark:text-orange-400 mt-1">Need follow-up</p>
+                </div>
               </div>
-              <Clock className="h-8 w-8 text-orange-600" />
-            </div>
-          </Card>
+            </Card>
 
-          <Card className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Commission</p>
-                <p className="text-2xl font-bold mt-1 text-purple-600">
-                  {mounted ? `Rp ${(summaryStats.totalCommission / 1000).toFixed(0)}K` : ''}
-                </p>
-                <p className="text-sm text-purple-600 mt-1">Total earned</p>
+            <Card className="p-4 lg:p-6 hover: transition-all duration-200 border-0  bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-950 dark:to-purple-900">
+              <div className="flex items-center space-x-4">
+                <div className="p-3 bg-purple-500 text-white rounded-xl ">
+                  <User className="h-5 w-5 lg:h-6 lg:w-6" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs lg:text-sm font-medium text-purple-700 dark:text-purple-300 uppercase tracking-wide">Commission</p>
+                  <p className="text-2xl lg:text-3xl font-bold mt-1 text-purple-900 dark:text-purple-100">
+                    {mounted ? `Rp ${(summaryStats.totalCommission / 1000).toFixed(0)}K` : ''}
+                  </p>
+                  <p className="text-xs lg:text-sm text-purple-600 dark:text-purple-400 mt-1">Total earned</p>
+                </div>
               </div>
-              <User className="h-8 w-8 text-purple-600" />
-            </div>
-          </Card>
+            </Card>
 
-          <Card className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Average Sale</p>
-                <p className="text-2xl font-bold mt-1">
-                  {mounted ? `Rp ${(summaryStats.averageSale / 1000).toFixed(0)}K` : ''}
-                </p>
-                <p className="text-sm text-gray-600 mt-1">Per transaction</p>
+            <Card className="p-4 lg:p-6 hover: transition-all duration-200 border-0  bg-gradient-to-br from-teal-50 to-teal-100 dark:from-teal-950 dark:to-teal-900">
+              <div className="flex items-center space-x-4">
+                <div className="p-3 bg-teal-500 text-white rounded-xl ">
+                  <Package className="h-5 w-5 lg:h-6 lg:w-6" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs lg:text-sm font-medium text-teal-700 dark:text-teal-300 uppercase tracking-wide">Average Sale</p>
+                  <p className="text-2xl lg:text-3xl font-bold mt-1 text-teal-900 dark:text-teal-100">
+                    {mounted ? `Rp ${(summaryStats.averageSale / 1000).toFixed(0)}K` : ''}
+                  </p>
+                  <p className="text-xs lg:text-sm text-teal-600 dark:text-teal-400 mt-1">Per transaction</p>
+                </div>
               </div>
-              <Package className="h-8 w-8 text-gray-600" />
-            </div>
-          </Card>
+            </Card>
 
-          <Card className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Total Sales</p>
-                <p className="text-2xl font-bold mt-1">{summaryStats.totalSales}</p>
-                <p className="text-sm text-gray-600 mt-1">All time</p>
+            <Card className="p-4 lg:p-6 hover: transition-all duration-200 border-0  bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
+              <div className="flex items-center space-x-4">
+                <div className="p-3 bg-slate-600 text-white rounded-xl ">
+                  <CheckCircle className="h-5 w-5 lg:h-6 lg:w-6" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs lg:text-sm font-medium text-slate-700 dark:text-slate-300 uppercase tracking-wide">Total Sales</p>
+                  <p className="text-2xl lg:text-3xl font-bold mt-1 text-slate-900 dark:text-slate-100">{summaryStats.totalSales}</p>
+                  <p className="text-xs lg:text-sm text-slate-600 dark:text-slate-400 mt-1">All time</p>
+                </div>
               </div>
-              <CheckCircle className="h-8 w-8 text-gray-600" />
-            </div>
-          </Card>
-        </div>
+            </Card>
+          </div>
 
-        {/* Filters */}
-        <Card className="p-6">
-          <div className="flex items-center space-x-4">
-            <Filter className="h-5 w-5 text-muted-foreground" />
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 flex-1">
-              <div className="space-y-2">
-                <Label htmlFor="search">Search</Label>
+          {/* Filters and Controls */}
+          <div className="space-y-6">
+            {/* Search and Actions Bar */}
+            <div className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center">
+              <div className="flex-1">
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                   <Input
-                    id="search"
-                    placeholder="Search sales..."
+                    placeholder="Search sales, customers, or sales persons..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-9"
+                    className="pl-12 pr-4 py-3 text-base border-2 focus:border-blue-500 rounded-lg "
                   />
                 </div>
               </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="paymentStatus">Payment Status</Label>
-                <Select value={paymentStatusFilter} onValueChange={setPaymentStatusFilter}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="All payments" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All payments</SelectItem>
-                    <SelectItem value="pending">Pending</SelectItem>
-                    <SelectItem value="paid">Paid</SelectItem>
-                    <SelectItem value="partial">Partial</SelectItem>
-                    <SelectItem value="failed">Failed</SelectItem>
-                  </SelectContent>
-                </Select>
+              <div className="flex items-center gap-3">
+                <Button variant="outline" size="default" className="flex-shrink-0  hover: transition-all">
+                  <Filter className="h-4 w-4 mr-2" />
+                  Advanced Filters
+                </Button>
+                <Button variant="outline" size="default" className="flex-shrink-0  hover: transition-all">
+                  <Download className="h-4 w-4 mr-2" />
+                  Export
+                </Button>
               </div>
+            </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="visitType">Visit Type</Label>
-                <Select value={visitTypeFilter} onValueChange={setVisitTypeFilter}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="All types" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All types</SelectItem>
-                    <SelectItem value="showroom">Showroom</SelectItem>
-                    <SelectItem value="home_visit">Home Visit</SelectItem>
-                    <SelectItem value="office_visit">Office Visit</SelectItem>
-                    <SelectItem value="exhibition">Exhibition</SelectItem>
-                  </SelectContent>
-                </Select>
+            {/* Filter Controls */}
+            <Card className="p-6  border-0 bg-gradient-to-r from-slate-50 via-white to-slate-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Filter Options</h3>
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={() => {
+                      setPaymentStatusFilter('all')
+                      setVisitTypeFilter('all')
+                      setSalesPersonFilter('all')
+                      setSearchTerm('')
+                    }}
+                    className="text-muted-foreground hover:text-gray-900"
+                  >
+                    Clear All
+                  </Button>
+                </div>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  <div className="space-y-3">
+                    <Label htmlFor="paymentStatus" className="text-sm font-medium text-gray-700 dark:text-gray-300">Payment Status</Label>
+                    <Select value={paymentStatusFilter} onValueChange={setPaymentStatusFilter}>
+                      <SelectTrigger className="border-2 focus:border-blue-500 ">
+                        <SelectValue placeholder="All payments" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All payments</SelectItem>
+                        <SelectItem value="pending">Pending</SelectItem>
+                        <SelectItem value="paid">Paid</SelectItem>
+                        <SelectItem value="partial">Partial</SelectItem>
+                        <SelectItem value="failed">Failed</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-3">
+                    <Label htmlFor="visitType" className="text-sm font-medium text-gray-700 dark:text-gray-300">Visit Type</Label>
+                    <Select value={visitTypeFilter} onValueChange={setVisitTypeFilter}>
+                      <SelectTrigger className="border-2 focus:border-blue-500 ">
+                        <SelectValue placeholder="All types" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All types</SelectItem>
+                        <SelectItem value="showroom">Showroom</SelectItem>
+                        <SelectItem value="home_visit">Home Visit</SelectItem>
+                        <SelectItem value="office_visit">Office Visit</SelectItem>
+                        <SelectItem value="exhibition">Exhibition</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-3">
+                    <Label htmlFor="salesPerson" className="text-sm font-medium text-gray-700 dark:text-gray-300">Sales Person</Label>
+                    <Select value={salesPersonFilter} onValueChange={setSalesPersonFilter}>
+                      <SelectTrigger className="border-2 focus:border-blue-500 ">
+                        <SelectValue placeholder="All sales persons" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All sales persons</SelectItem>
+                        {salesPersons.map(person => (
+                          <SelectItem key={person} value={person}>{person}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-3">
+                    <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">Quick Filters</Label>
+                    <div className="flex flex-wrap gap-2">
+                      <Button 
+                        variant={paymentStatusFilter === 'pending' ? 'default' : 'outline'} 
+                        size="sm"
+                        onClick={() => setPaymentStatusFilter(paymentStatusFilter === 'pending' ? 'all' : 'pending')}
+                        className=" hover: transition-all"
+                      >
+                        <Clock className="h-3 w-3 mr-1" />
+                        Pending
+                      </Button>
+                      <Button 
+                        variant={paymentStatusFilter === 'paid' ? 'default' : 'outline'} 
+                        size="sm"
+                        onClick={() => setPaymentStatusFilter(paymentStatusFilter === 'paid' ? 'all' : 'paid')}
+                        className=" hover: transition-all"
+                      >
+                        <CheckCircle className="h-3 w-3 mr-1" />
+                        Paid
+                      </Button>
+                    </div>
+                  </div>
+                </div>
               </div>
+            </Card>
 
-              <div className="space-y-2">
-                <Label htmlFor="salesPerson">Sales Person</Label>
-                <Select value={salesPersonFilter} onValueChange={setSalesPersonFilter}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="All sales persons" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All sales persons</SelectItem>
-                    {salesPersons.map(person => (
-                      <SelectItem key={person} value={person}>{person}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+            {/* View Toggle and Results Summary */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex items-center space-x-1 bg-muted p-1.5 rounded-xl ">
+                <Button
+                  variant={activeView === 'cards' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setActiveView('cards')}
+                  className="px-4 py-2 rounded-lg transition-all "
+                >
+                  <Package className="h-4 w-4 mr-2" />
+                  Cards
+                </Button>
+                <Button
+                  variant={activeView === 'table' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setActiveView('table')}
+                  className="px-4 py-2 rounded-lg transition-all "
+                >
+                  <Eye className="h-4 w-4 mr-2" />
+                  Table
+                </Button>
+              </div>
+              <div className="flex items-center gap-6 text-sm">
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <span className="font-medium">Showing {filteredSales.length} of {directSales.length} sales</span>
+                  {filteredSales.length !== directSales.length && (
+                    <Badge variant="secondary" className="text-xs">Filtered</Badge>
+                  )}
+                </div>
               </div>
             </div>
           </div>
-        </Card>
-
-        {/* View Toggle */}
-        <div className="flex justify-between items-center">
-          <div className="flex space-x-1 bg-muted p-1 rounded-lg">
-            <Button
-              variant={activeView === 'cards' ? 'default' : 'ghost'}
-              size="sm"
-              onClick={() => setActiveView('cards')}
-            >
-              Cards
-            </Button>
-            <Button
-              variant={activeView === 'table' ? 'default' : 'ghost'}
-              size="sm"
-              onClick={() => setActiveView('table')}
-            >
-              Table
-            </Button>
-          </div>
-        </div>
 
         {/* Content */}
-        {activeView === 'cards' ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {loading ? (
+          <Card className="p-12 text-center border-0  bg-gradient-to-br from-blue-50 via-white to-blue-50 dark:from-blue-950 dark:via-slate-900 dark:to-blue-950">
+            <div className="flex flex-col items-center justify-center space-y-4">
+              <div className="relative">
+                <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-200 border-t-blue-600"></div>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <Store className="h-5 w-5 text-blue-600" />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <p className="font-semibold text-lg text-gray-900 dark:text-gray-100">Loading Direct Sales</p>
+                <p className="text-sm text-muted-foreground">Fetching the latest sales data...</p>
+              </div>
+            </div>
+          </Card>
+        ) : error && directSales.length === 0 ? (
+          <Card className="p-12 text-center border-0  bg-gradient-to-br from-red-50 via-white to-red-50 dark:from-red-950 dark:via-slate-900 dark:to-red-950">
+            <div className="flex flex-col items-center justify-center space-y-4">
+              <div className="p-4 bg-red-100 dark:bg-red-900/30 rounded-full">
+                <AlertCircle className="h-12 w-12 text-red-600 dark:text-red-400" />
+              </div>
+              <div className="space-y-2">
+                <p className="font-semibold text-xl text-red-900 dark:text-red-100">Failed to Load Sales Data</p>
+                <p className="text-red-700 dark:text-red-300 max-w-md">{error}</p>
+                <p className="text-sm text-muted-foreground">Please check your connection and try again.</p>
+              </div>
+              <div className="flex space-x-3">
+                <Button 
+                  onClick={loadDirectSales} 
+                  variant="outline" 
+                  className=" hover: transition-all"
+                >
+                  <Calendar className="h-4 w-4 mr-2" />
+                  Retry Loading
+                </Button>
+                <Button 
+                  asChild 
+                  className=" hover: transition-all"
+                >
+                  <Link href="/sales/direct/new">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create New Sale
+                  </Link>
+                </Button>
+              </div>
+            </div>
+          </Card>
+        ) : directSales.length === 0 ? (
+          <Card className="p-12 text-center border-0  bg-gradient-to-br from-slate-50 via-white to-slate-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
+            <div className="flex flex-col items-center justify-center space-y-6">
+              <div className="p-6 bg-slate-100 dark:bg-slate-800 rounded-full">
+                <Store className="h-16 w-16 text-slate-600 dark:text-slate-400" />
+              </div>
+              <div className="space-y-3">
+                <p className="font-bold text-2xl text-gray-900 dark:text-gray-100">No Direct Sales Yet</p>
+                <p className="text-muted-foreground max-w-md">
+                  Start by creating your first direct sale. Track field sales, home visits, and showroom transactions all in one place.
+                </p>
+              </div>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <Button 
+                  asChild 
+                  size="lg"
+                  className=" hover: transition-all"
+                >
+                  <Link href="/sales/direct/new">
+                    <Plus className="h-5 w-5 mr-2" />
+                    Create Your First Sale
+                  </Link>
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="lg"
+                  className=" hover: transition-all"
+                  asChild
+                >
+                  <Link href="/sales">
+                    <Eye className="h-5 w-5 mr-2" />
+                    View All Sales
+                  </Link>
+                </Button>
+              </div>
+            </div>
+          </Card>
+        ) : activeView === 'cards' ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {filteredSales.map((sale) => {
               const { variant: paymentVariant, label: paymentLabel } = getPaymentStatusBadge(sale.payment_status)
               const { variant: visitVariant, label: visitLabel } = getVisitTypeBadge(sale.visit_type)
               const deliveryBadge = getDeliveryStatusBadge(sale.delivery_status)
               
               return (
-                <Card key={sale.id} className="p-6 hover:shadow-md transition-shadow">
-                  <div className="flex justify-between items-start mb-4">
-                    <div>
-                      <Link 
-                        href={`/sales/direct/${sale.id}`}
-                        className="font-semibold text-blue-600 hover:text-blue-800"
-                      >
-                        {sale.sale_number}
-                      </Link>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        {formatDate(sale.sale_date)}
-                      </p>
+                <Card 
+                  key={sale.id} 
+                  className="group relative overflow-hidden hover: transition-all duration-300 border-0  bg-gradient-to-br from-white via-white to-slate-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900"
+                >
+                  {/* Header Section */}
+                  <div className="p-6 pb-4">
+                    <div className="flex justify-between items-start mb-4">
+                      <div className="flex-1 min-w-0">
+                        <Link 
+                          href={`/sales/direct/${sale.id}`}
+                          className="text-lg font-bold text-blue-600 hover:text-blue-700 transition-colors line-clamp-1 group-hover:underline"
+                        >
+                          {sale.sale_number}
+                        </Link>
+                        <div className="flex items-center space-x-2 mt-2">
+                          <Calendar className="h-4 w-4 text-muted-foreground" />
+                          <p className="text-sm text-muted-foreground">
+                            {formatDate(sale.sale_date)}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex flex-col items-end space-y-2">
+                        <Badge 
+                          variant={paymentVariant}
+                          className=""
+                        >
+                          {paymentLabel}
+                        </Badge>
+                        <Badge 
+                          variant={visitVariant}
+                          className="text-xs "
+                        >
+                          {visitLabel}
+                        </Badge>
+                      </div>
                     </div>
-                    <div className="flex flex-col items-end space-y-1">
-                      <Badge variant={paymentVariant}>{paymentLabel}</Badge>
-                      <Badge variant={visitVariant}>{visitLabel}</Badge>
+
+                    {/* Main Info Grid */}
+                    <div className="space-y-4">
+                      {/* Customer & Sales Person */}
+                      <div className="grid grid-cols-1 gap-3">
+                        <div className="flex items-center space-x-3">
+                          <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                            <User className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs text-muted-foreground uppercase tracking-wide">Sales Person</p>
+                            <p className="font-medium text-sm truncate">{sale.sales_person}</p>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center space-x-3">
+                          <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
+                            <Phone className="h-4 w-4 text-green-600 dark:text-green-400" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs text-muted-foreground uppercase tracking-wide">Customer</p>
+                            <p className="font-medium text-sm truncate">{sale.customer_name || 'Walk-in Customer'}</p>
+                            {sale.customer_phone && (
+                              <p className="text-xs text-muted-foreground">{sale.customer_phone}</p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Location & Items */}
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="flex items-center space-x-2">
+                          <MapPin className="h-4 w-4 text-orange-600" />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs text-muted-foreground">Location</p>
+                            <p className="text-sm font-medium truncate">{sale.location}</p>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center space-x-2">
+                          <Package className="h-4 w-4 text-purple-600" />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs text-muted-foreground">Items</p>
+                            <p className="text-sm font-medium">{sale.items.length} items</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {deliveryBadge && (
+                        <div className="flex items-center justify-between bg-slate-100 dark:bg-slate-800 rounded-lg p-3">
+                          <div className="flex items-center space-x-2">
+                            <Package className="h-4 w-4 text-muted-foreground" />
+                            <span className="text-sm text-muted-foreground">Delivery Status</span>
+                          </div>
+                          <Badge variant={deliveryBadge.variant} className="">{deliveryBadge.label}</Badge>
+                        </div>
+                      )}
                     </div>
                   </div>
 
-                  <div className="space-y-3">
-                    <div className="flex justify-between">
-                      <span className="text-sm text-muted-foreground">Sales Person:</span>
-                      <span className="text-sm font-medium">{sale.sales_person}</span>
-                    </div>
-                    
-                    <div className="flex justify-between">
-                      <span className="text-sm text-muted-foreground">Customer:</span>
-                      <span className="text-sm font-medium">{sale.customer_name || 'Walk-in'}</span>
-                    </div>
-
-                    <div className="flex justify-between">
-                      <span className="text-sm text-muted-foreground">Location:</span>
-                      <span className="text-sm font-medium">{sale.location}</span>
-                    </div>
-
-                    <div className="flex justify-between">
-                      <span className="text-sm text-muted-foreground">Items:</span>
-                      <span className="text-sm font-medium">{sale.items.length} items</span>
-                    </div>
-
-                    {deliveryBadge && (
-                      <div className="flex justify-between">
-                        <span className="text-sm text-muted-foreground">Delivery:</span>
-                        <Badge variant={deliveryBadge.variant}>{deliveryBadge.label}</Badge>
-                      </div>
-                    )}
-
-                    <div className="border-t pt-3">
+                  {/* Financial Summary */}
+                  <div className="bg-gradient-to-r from-slate-50 via-white to-slate-50 dark:from-slate-800 dark:via-slate-700 dark:to-slate-800 p-6 pt-4 mt-auto">
+                    <div className="space-y-3">
                       <div className="flex justify-between items-center">
-                        <span className="text-lg font-semibold">Total</span>
-                        <span className="text-lg font-bold text-green-600">
+                        <div className="flex items-center space-x-2">
+                          <DollarSign className="h-5 w-5 text-green-600" />
+                          <span className="font-semibold text-gray-700 dark:text-gray-300">Total Amount</span>
+                        </div>
+                        <span className="text-xl font-bold text-green-600">
                           {formatCurrency(sale.total_amount)}
                         </span>
                       </div>
-                      <div className="flex justify-between items-center mt-1">
-                        <span className="text-sm text-muted-foreground">Commission</span>
-                        <span className="text-sm font-medium text-purple-600">
-                          {formatCurrency(sale.commission_amount)} ({sale.commission_rate}%)
+                      
+                      <div className="flex justify-between items-center text-sm">
+                        <span className="text-muted-foreground">Commission ({sale.commission_rate}%)</span>
+                        <span className="font-semibold text-purple-600">
+                          {formatCurrency(sale.commission_amount)}
+                        </span>
+                      </div>
+                      
+                      <div className="flex justify-between items-center text-sm border-t pt-2">
+                        <span className="text-muted-foreground">Payment</span>
+                        <span className={`font-medium ${sale.payment_method === 'cash' ? 'text-green-600' : 
+                          sale.payment_method === 'card' ? 'text-blue-600' : 
+                          sale.payment_method === 'transfer' ? 'text-purple-600' : 'text-orange-600'}`}>
+                          {sale.payment_method?.toUpperCase()}
                         </span>
                       </div>
                     </div>
+                  </div>
 
-                    {sale.customer_address && (
-                      <div className="bg-muted p-2 rounded text-sm">
-                        <div className="flex items-start space-x-2">
-                          <MapPin className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
-                          <span className="text-xs">{sale.customer_address}</span>
+                  {/* Customer Address */}
+                  {sale.customer_address && (
+                    <div className="px-6 pb-4">
+                      <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
+                        <div className="flex items-start space-x-3">
+                          <MapPin className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                          <div>
+                            <p className="text-xs text-blue-700 dark:text-blue-400 font-medium">Delivery Address</p>
+                            <p className="text-xs text-blue-600 dark:text-blue-300 mt-1 leading-relaxed">
+                              {sale.customer_address}
+                            </p>
+                          </div>
                         </div>
                       </div>
-                    )}
+                    </div>
+                  )}
 
-                    {sale.notes && (
-                      <div className="bg-blue-50 p-2 rounded text-sm">
-                        {sale.notes}
+                  {/* Notes */}
+                  {sale.notes && (
+                    <div className="px-6 pb-6">
+                      <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-3">
+                        <p className="text-xs text-amber-700 dark:text-amber-400 font-medium mb-1">Notes</p>
+                        <p className="text-xs text-amber-600 dark:text-amber-300 leading-relaxed">
+                          {sale.notes}
+                        </p>
                       </div>
-                    )}
+                    </div>
+                  )}
+
+                  {/* Action Buttons */}
+                  <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                    <div className="flex space-x-1">
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="h-8 w-8 p-0 bg-white/80 hover:bg-white "
+                        asChild
+                      >
+                        <Link href={`/sales/direct/${sale.id}`}>
+                          <Eye className="h-4 w-4" />
+                        </Link>
+                      </Button>
+                      {sale.payment_status === 'pending' && (
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="h-8 w-8 p-0 bg-white/80 hover:bg-white "
+                          asChild
+                        >
+                          <Link href={`/sales/direct/${sale.id}/edit`}>
+                            <Edit className="h-4 w-4" />
+                          </Link>
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 </Card>
               )
@@ -825,21 +1134,55 @@ export default function DirectSalesPage() {
 
         {/* Pending Sales Alert */}
         {summaryStats.pendingSales > 0 && (
-          <Card className="p-6 border-orange-200 bg-orange-50">
-            <div className="flex items-center space-x-3">
-              <Clock className="h-6 w-6 text-orange-600" />
-              <div className="flex-1">
-                <h3 className="text-lg font-semibold text-orange-800">Pending Sales</h3>
-                <p className="text-orange-700 mt-1">
-                  {summaryStats.pendingSales} direct sales are pending payment and need follow-up.
-                </p>
+          <Card className="border-0  bg-gradient-to-r from-orange-50 via-orange-100 to-yellow-50 dark:from-orange-950 dark:via-orange-900 dark:to-yellow-950">
+            <div className="p-6">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                <div className="flex items-center space-x-4 flex-1">
+                  <div className="p-3 bg-orange-500 text-white rounded-xl ">
+                    <Clock className="h-6 w-6" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-2 mb-1">
+                      <h3 className="text-lg font-bold text-orange-900 dark:text-orange-100">Pending Sales Alert</h3>
+                      <Badge variant="secondary" className="bg-orange-200 text-orange-800 border-orange-300">
+                        {summaryStats.pendingSales} pending
+                      </Badge>
+                    </div>
+                    <p className="text-orange-800 dark:text-orange-200">
+                      {summaryStats.pendingSales} direct sale{summaryStats.pendingSales > 1 ? 's' : ''} require{summaryStats.pendingSales === 1 ? 's' : ''} payment follow-up. 
+                      Don&apos;t let potential revenue slip away.
+                    </p>
+                    <div className="flex items-center space-x-4 mt-2 text-sm text-orange-700 dark:text-orange-300">
+                      <div className="flex items-center space-x-1">
+                        <DollarSign className="h-4 w-4" />
+                        <span>Potential Revenue: {formatCurrency(
+                          directSales.filter(s => s.payment_status === 'pending').reduce((sum, s) => sum + s.total_amount, 0)
+                        )}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex space-x-3">
+                  <Button 
+                    variant="outline" 
+                    className="border-orange-400 text-orange-700 hover:bg-orange-200 dark:text-orange-300 dark:hover:bg-orange-900/50  hover: transition-all"
+                    onClick={() => setPaymentStatusFilter('pending')}
+                  >
+                    <Eye className="h-4 w-4 mr-2" />
+                    View Pending
+                  </Button>
+                  <Button 
+                    className="bg-orange-600 hover:bg-orange-700  hover: transition-all"
+                  >
+                    <Phone className="h-4 w-4 mr-2" />
+                    Follow Up
+                  </Button>
+                </div>
               </div>
-              <Button variant="outline" className="border-orange-300 text-orange-700 hover:bg-orange-100">
-                Follow Up
-              </Button>
             </div>
           </Card>
         )}
+          </div>
       </div>
     </TwoLevelLayout>
   )

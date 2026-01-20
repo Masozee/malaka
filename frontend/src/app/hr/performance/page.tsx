@@ -529,7 +529,6 @@ export default function PerformancePage() {
             data={filteredData}
             columns={columns}
             searchPlaceholder="Search employees, positions, or reviewers..."
-            showFilters={false}
           />
         )}
       </div>

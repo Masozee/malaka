@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { TwoLevelLayout } from '@/components/ui/two-level-layout'
 import { Header } from '@/components/ui/header'
-import { AdvancedDataTable } from '@/components/ui/advanced-data-table'
+import { AdvancedDataTable, AdvancedColumn } from '@/components/ui/advanced-data-table'
 import { DollarSign, Users, Clock, TrendingUp, Calculator, FileText, Settings } from 'lucide-react'
 import type { PayrollPeriod } from '@/types/hr'
 import { HRService } from '@/services/hr'
@@ -114,44 +114,44 @@ export default function PayrollDashboard() {
     return statusConfig[status] || { variant: 'secondary' as const, label: status }
   }
 
-  const periodColumns = [
-    { 
-      key: 'period' as keyof PayrollPeriod, 
-      title: 'Period', 
-      render: (period: PayrollPeriod) => formatPeriod(period?.month, period?.year, mounted)
+  const periodColumns: AdvancedColumn<PayrollPeriod>[] = [
+    {
+      key: 'month',
+      title: 'Period',
+      render: (_value: unknown, period: PayrollPeriod) => formatPeriod(period?.month, period?.year, mounted)
     },
-    { 
-      key: 'status' as keyof PayrollPeriod, 
+    {
+      key: 'status',
       title: 'Status',
-      render: (period: PayrollPeriod) => {
-        if (!period?.status) return ''
+      render: (_value: unknown, period: PayrollPeriod) => {
+        if (!period?.status) return null
         const { variant, label } = getStatusBadge(period.status)
         return <Badge variant={variant}>{label}</Badge>
       }
     },
-    { 
-      key: 'totalEmployees' as keyof PayrollPeriod, 
+    {
+      key: 'totalEmployees',
       title: 'Employees',
-      render: (period: PayrollPeriod) => (period.totalEmployees ?? 0).toString()
+      render: (_value: unknown, period: PayrollPeriod) => (period.totalEmployees ?? 0).toString()
     },
-    { 
-      key: 'totalGrossPay' as keyof PayrollPeriod, 
+    {
+      key: 'totalGrossPay',
       title: 'Gross Pay',
-      render: (period: PayrollPeriod) => formatCurrency(period?.totalGrossPay, mounted)
+      render: (_value: unknown, period: PayrollPeriod) => formatCurrency(period?.totalGrossPay, mounted)
     },
-    { 
-      key: 'totalNetPay' as keyof PayrollPeriod, 
+    {
+      key: 'totalNetPay',
       title: 'Net Pay',
-      render: (period: PayrollPeriod) => (
+      render: (_value: unknown, period: PayrollPeriod) => (
         <div className="font-semibold text-green-600">
           {formatCurrency(period?.totalNetPay, mounted)}
         </div>
       )
     },
-    { 
-      key: 'processedAt' as keyof PayrollPeriod, 
+    {
+      key: 'processedAt',
       title: 'Processed',
-      render: (period: PayrollPeriod) => 
+      render: (_value: unknown, period: PayrollPeriod) =>
         formatDate(period?.processedAt, mounted) || '-'
     }
   ]
@@ -249,7 +249,7 @@ export default function PayrollDashboard() {
           <h2 className="text-xl font-semibold mb-4">Quick Actions</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {quickActions.map((action, index) => (
-              <Card key={index} className="p-4 hover:shadow-lg transition-shadow cursor-pointer">
+              <Card key={index} className="p-4 hover: transition-shadow cursor-pointer">
                 <div className="flex items-start space-x-4">
                   <div className={`p-3 rounded-lg bg-${action.color}-100`}>
                     <action.icon className={`h-6 w-6 text-${action.color}-600`} />
@@ -270,13 +270,10 @@ export default function PayrollDashboard() {
           <AdvancedDataTable
             data={payrollPeriods}
             columns={periodColumns}
-            searchable={false}
-            filterable={false}
             pagination={{
+              current: 1,
               pageSize: 10,
-              currentPage: 1,
-              totalPages: 1,
-              totalItems: payrollPeriods.length,
+              total: payrollPeriods.length,
               onChange: () => {}
             }}
           />

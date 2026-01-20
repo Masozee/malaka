@@ -453,7 +453,7 @@ export default function ProductBarcodesPage() {
               const { variant: primaryVariant, label: primaryLabel, icon: PrimaryIcon } = getPrimaryBadge(barcode.is_primary || false)
               
               return (
-                <Card key={barcode.id} className="p-6 hover:shadow-md transition-shadow">
+                <Card key={barcode.id} className="p-6 hover: transition-shadow">
                   <div className="flex justify-between items-start mb-4">
                     <div className="flex items-center space-x-2">
                       <Barcode className="h-5 w-5 text-blue-600" />

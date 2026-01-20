@@ -1,0 +1,195 @@
+groups:
+  - name: malaka_erp_alerts
+    rules:
+      # Backend Service Alerts
+      - alert: MalakaBackendDown
+        expr: up{job="malaka-backend"} == 0
+        for: 30s
+        labels:
+          severity: critical
+          service: backend
+        annotations:
+          summary: "Malaka Backend Service is Down"
+          description: "The Malaka ERP backend service has been down for more than 30 seconds."
+
+      - alert: MalakaHighResponseTime
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="malaka-backend"}[5m])) > 0.5
+        for: 5m
+        labels:
+          severity: warning
+          service: backend
+        annotations:
+          summary: "High Response Time Detected"
+          description: "95th percentile response time is {{ $value }}s for more than 5 minutes."
+
+      - alert: MalakaHighErrorRate
+        expr: (sum(rate(http_requests_total{job="malaka-backend",status=~"5.."}[5m])) / sum(rate(http_requests_total{job="malaka-backend"}[5m]))) * 100 > 5
+        for: 2m
+        labels:
+          severity: critical
+          service: backend
+        annotations:
+          summary: "High Error Rate Detected"
+          description: "Error rate is {{ $value }}% for more than 2 minutes."
+
+      - alert: MalakaTooManyRequests
+        expr: sum(rate(http_requests_total{job="malaka-backend"}[5m])) > 100
+        for: 5m
+        labels:
+          severity: warning
+          service: backend
+        annotations:
+          summary: "High Request Rate"
+          description: "Request rate is {{ $value }} requests/sec for more than 5 minutes."
+
+      # Database Alerts
+      - alert: MalakaPostgreSQLDown
+        expr: up{job="postgres"} == 0
+        for: 30s
+        labels:
+          severity: critical
+          service: database
+        annotations:
+          summary: "PostgreSQL Database is Down"
+          description: "The PostgreSQL database has been down for more than 30 seconds."
+
+      - alert: MalakaHighConnectionPoolUtilization
+        expr: (db_connections_active / (db_connections_active + db_connections_idle)) * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+          service: database
+        annotations:
+          summary: "High Database Connection Pool Utilization"
+          description: "Connection pool utilization is {{ $value }}% for more than 5 minutes."
+
+      - alert: MalakaPotentialN1Queries
+        expr: increase(db_queries_total[1m]) > 1000
+        for: 2m
+        labels:
+          severity: warning
+          service: database
+        annotations:
+          summary: "Potential N+1 Query Pattern Detected"
+          description: "High query volume detected: {{ $value }} queries/minute. This might indicate N+1 query patterns."
+
+      # Redis Cache Alerts
+      - alert: MalakaRedisDown
+        expr: up{job="redis"} == 0
+        for: 30s
+        labels:
+          severity: critical
+          service: cache
+        annotations:
+          summary: "Redis Cache is Down"
+          description: "The Redis cache service has been down for more than 30 seconds."
+
+      - alert: MalakaLowCacheHitRate
+        expr: (rate(cache_hits_total[5m]) / (rate(cache_hits_total[5m]) + rate(cache_misses_total[5m]))) * 100 < 80
+        for: 10m
+        labels:
+          severity: warning
+          service: cache
+        annotations:
+          summary: "Low Cache Hit Rate"
+          description: "Cache hit rate is {{ $value }}% for more than 10 minutes."
+
+      # System Resource Alerts
+      - alert: MalakaHighMemoryUsage
+        expr: (container_memory_usage_bytes{name=~"malaka-.*"} / container_spec_memory_limit_bytes{name=~"malaka-.*"}) * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+          service: system
+        annotations:
+          summary: "High Memory Usage"
+          description: "Memory usage is {{ $value }}% for container {{ $labels.name }}."
+
+      - alert: MalakaHighCPUUsage
+        expr: rate(container_cpu_usage_seconds_total{name=~"malaka-.*"}[5m]) * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+          service: system
+        annotations:
+          summary: "High CPU Usage"
+          description: "CPU usage is {{ $value }}% for container {{ $labels.name }}."
+
+      # Business Logic Alerts
+      - alert: MalakaSuspiciousOrderVolume
+        expr: increase(orders_total[1h]) > 1000
+        for: 0m
+        labels:
+          severity: info
+          service: business
+        annotations:
+          summary: "High Order Volume"
+          description: "{{ $value }} orders created in the last hour. This might be normal during peak hours."
+
+      - alert: MalakaNoOrdersCreated
+        expr: increase(orders_total[2h]) == 0
+        for: 0m
+        labels:
+          severity: warning
+          service: business
+        annotations:
+          summary: "No Orders Created"
+          description: "No orders have been created in the last 2 hours. This might indicate a system issue."
+
+      # Performance Degradation Alerts
+      - alert: MalakaPerformanceDegradation
+        expr: |
+          (
+            histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="malaka-backend"}[5m])) > 
+            histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="malaka-backend"}[1h] offset 1d)) * 2
+          )
+        for: 10m
+        labels:
+          severity: warning
+          service: performance
+        annotations:
+          summary: "Performance Degradation Detected"
+          description: "Current response time is significantly higher than the same time yesterday."
+
+      # Storage Alerts
+      - alert: MalakaDiskSpaceRunningLow
+        expr: (1 - (node_filesystem_avail_bytes / node_filesystem_size_bytes)) * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+          service: storage
+        annotations:
+          summary: "Disk Space Running Low"
+          description: "Disk usage is {{ $value }}% on {{ $labels.device }} for {{ $labels.instance }}."
+
+      # MinIO Object Storage Alerts
+      - alert: MalakaMinIODown
+        expr: up{job="minio"} == 0
+        for: 30s
+        labels:
+          severity: warning
+          service: storage
+        annotations:
+          summary: "MinIO Object Storage is Down"
+          description: "MinIO object storage service has been down for more than 30 seconds."
+
+  - name: malaka_business_metrics
+    rules:
+      # Business Metrics Recording Rules
+      - record: malaka:orders_per_hour
+        expr: rate(orders_total[1h])
+
+      - record: malaka:revenue_per_hour  
+        expr: rate(revenue_total[1h])
+
+      - record: malaka:average_response_time
+        expr: histogram_quantile(0.50, rate(http_request_duration_seconds_bucket{job="malaka-backend"}[5m]))
+
+      - record: malaka:cache_hit_rate_percent
+        expr: (rate(cache_hits_total[5m]) / (rate(cache_hits_total[5m]) + rate(cache_misses_total[5m]))) * 100
+
+      - record: malaka:error_rate_percent
+        expr: (sum(rate(http_requests_total{job="malaka-backend",status=~"5.."}[5m])) / sum(rate(http_requests_total{job="malaka-backend"}[5m]))) * 100
+
+      - record: malaka:database_connection_utilization_percent
+        expr: (db_connections_active / (db_connections_active + db_connections_idle)) * 100

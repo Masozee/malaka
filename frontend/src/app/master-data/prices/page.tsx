@@ -759,7 +759,7 @@ export default function ProductPricesPage() {
               const { variant: defaultVariant, label: defaultLabel, icon: DefaultIcon } = getDefaultBadge(price.is_default)
               
               return (
-                <Card key={price.id} className="p-6 hover:shadow-md transition-shadow">
+                <Card key={price.id} className="p-6 hover: transition-shadow">
                   <div className="flex justify-between items-start mb-4">
                     <div className="flex items-center space-x-2">
                       <DollarSign className="h-5 w-5 text-green-600" />

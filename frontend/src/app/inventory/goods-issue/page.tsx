@@ -411,7 +411,7 @@ export default function GoodsIssuePage() {
 
         {/* Quick Actions */}
         <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+          <Card className="hover: transition-shadow cursor-pointer">
             <CardContent className="p-6 text-center">
               <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/20 rounded-lg flex items-center justify-center mx-auto mb-4">
                 <Plus className="w-6 h-6 text-blue-600 dark:text-blue-400" />
@@ -421,7 +421,7 @@ export default function GoodsIssuePage() {
             </CardContent>
           </Card>
 
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+          <Card className="hover: transition-shadow cursor-pointer">
             <CardContent className="p-6 text-center">
               <div className="w-12 h-12 bg-yellow-100 dark:bg-yellow-900/20 rounded-lg flex items-center justify-center mx-auto mb-4">
                 <Clock className="w-6 h-6 text-yellow-600 dark:text-yellow-400" />
@@ -431,7 +431,7 @@ export default function GoodsIssuePage() {
             </CardContent>
           </Card>
 
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+          <Card className="hover: transition-shadow cursor-pointer">
             <CardContent className="p-6 text-center">
               <div className="w-12 h-12 bg-green-100 dark:bg-green-900/20 rounded-lg flex items-center justify-center mx-auto mb-4">
                 <Truck className="w-6 h-6 text-green-600 dark:text-green-400" />

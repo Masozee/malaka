@@ -1,7 +1,6 @@
 "use client"
 
 import * as React from "react"
-import { X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 
@@ -19,7 +18,7 @@ interface ModalFormProps {
 
 const sizeClasses = {
   sm: "max-w-md",
-  md: "max-w-lg", 
+  md: "max-w-lg",
   lg: "max-w-2xl",
   xl: "max-w-4xl"
 }
@@ -39,17 +38,7 @@ export function ModalForm({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className={`${sizeClasses[size]} max-h-[90vh] overflow-y-auto`}>
         <DialogHeader>
-          <div className="flex items-center justify-between">
-            <DialogTitle className="text-lg font-semibold">{title}</DialogTitle>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => onOpenChange(false)}
-              className="h-8 w-8 p-0"
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
+          <DialogTitle className="text-lg font-semibold">{title}</DialogTitle>
         </DialogHeader>
         
         <form onSubmit={onSubmit} className="space-y-6">

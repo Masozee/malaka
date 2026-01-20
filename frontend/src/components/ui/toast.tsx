@@ -137,6 +137,8 @@ function ToastItem({ toast, onRemove }: ToastItemProps) {
 
   return (
     <div
+      role="alert"
+      aria-live="polite"
       className={`
         ${typeStyles.bg}
         border rounded-lg p-4 shadow-lg backdrop-blur-sm
@@ -145,7 +147,7 @@ function ToastItem({ toast, onRemove }: ToastItemProps) {
       `}
     >
       <div className="flex items-start space-x-3">
-        <Icon className={`h-5 w-5 mt-0.5 flex-shrink-0 ${typeStyles.iconColor}`} />
+        <Icon className={`h-5 w-5 mt-0.5 flex-shrink-0 ${typeStyles.iconColor}`} aria-hidden="true" />
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
             {toast.title}
@@ -161,8 +163,9 @@ function ToastItem({ toast, onRemove }: ToastItemProps) {
           size="icon"
           onClick={handleRemove}
           className="h-6 w-6 p-0 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+          aria-label="Dismiss notification"
         >
-          <X className="h-4 w-4" />
+          <X className="h-4 w-4" aria-hidden="true" />
         </Button>
       </div>
     </div>

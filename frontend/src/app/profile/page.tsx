@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { TwoLevelLayout } from '@/components/ui/two-level-layout'
 import { Header } from '@/components/ui/header'
+import { useAuth } from '@/contexts/auth-context'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -430,9 +431,24 @@ const mockUserProfile: UserProfile = {
 }
 
 export default function ProfilePage() {
+  const { user } = useAuth()
   const [mounted, setMounted] = useState(false)
   const [activeTab, setActiveTab] = useState('overview')
   const [profile, setProfile] = useState<UserProfile>(mockUserProfile)
+
+  // Update profile with real user data when available
+  useEffect(() => {
+    if (user) {
+      setProfile(prev => ({
+        ...prev,
+        fullName: user.username || prev.fullName,
+        firstName: user.username?.split(' ')[0] || prev.firstName,
+        lastName: user.username?.split(' ').slice(1).join(' ') || prev.lastName,
+        email: user.email || prev.email,
+        id: user.id || prev.id
+      }))
+    }
+  }, [user])
 
   useEffect(() => {
     setMounted(true)
@@ -609,6 +625,284 @@ export default function ProfilePage() {
     </div>
   )
 
+  const EmploymentTab = () => (
+    <div className="space-y-6">
+      <Card className="p-6">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-lg font-semibold text-gray-900">Employment Information</h3>
+          <Button size="sm" variant="outline">
+            <FileText className="h-4 w-4 mr-2" />
+            View Contract
+          </Button>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Employee ID</label>
+            <p className="text-sm text-gray-900 font-mono">{profile.employeeId}</p>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Position</label>
+            <p className="text-sm text-gray-900">{profile.position}</p>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Department</label>
+            <p className="text-sm text-gray-900">{profile.department}</p>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Division</label>
+            <p className="text-sm text-gray-900">{profile.division}</p>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Direct Manager</label>
+            <p className="text-sm text-gray-900">{profile.manager}</p>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Employment Type</label>
+            <Badge className="bg-blue-100 text-blue-800 capitalize">
+              {profile.employmentType.replace('-', ' ')}
+            </Badge>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Employment Status</label>
+            <Badge className={`capitalize ${
+              profile.employmentStatus === 'active' ? 'bg-green-100 text-green-800' :
+              profile.employmentStatus === 'probation' ? 'bg-yellow-100 text-yellow-800' :
+              'bg-red-100 text-red-800'
+            }`}>
+              {profile.employmentStatus}
+            </Badge>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Hire Date</label>
+            <p className="text-sm text-gray-900">
+              {mounted ? new Date(profile.hireDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : ''}
+            </p>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Work Location</label>
+            <p className="text-sm text-gray-900">{profile.workLocation}</p>
+          </div>
+          
+          <div className="md:col-span-2">
+            <label className="block text-sm font-medium text-gray-700 mb-1">Work Schedule</label>
+            <p className="text-sm text-gray-900">{profile.workSchedule}</p>
+          </div>
+        </div>
+      </Card>
+
+      <Card className="p-6">
+        <h3 className="text-lg font-semibold text-gray-900 mb-6">Compensation Details</h3>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Base Salary</label>
+            <p className="text-lg font-bold text-gray-900">
+              {profile.salary.currency} {profile.salary.base.toLocaleString()}
+            </p>
+            <p className="text-xs text-gray-500 capitalize">{profile.salary.payFrequency}</p>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Last Review</label>
+            <p className="text-sm text-gray-900">
+              {mounted ? new Date(profile.salary.lastReview).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : ''}
+            </p>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Next Review</label>
+            <p className="text-sm text-gray-900">
+              {mounted ? new Date(profile.salary.nextReview).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : ''}
+            </p>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Years of Service</label>
+            <p className="text-lg font-bold text-gray-900">
+              {mounted ? Math.floor((new Date().getTime() - new Date(profile.hireDate).getTime()) / (365.25 * 24 * 60 * 60 * 1000)) : 0} years
+            </p>
+          </div>
+        </div>
+      </Card>
+
+      <Card className="p-6">
+        <h3 className="text-lg font-semibold text-gray-900 mb-6">Organizational Chart</h3>
+        
+        <div className="flex items-center justify-center p-8 bg-gray-50 rounded-lg">
+          <div className="text-center space-y-4">
+            <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto">
+              <Building2 className="h-6 w-6 text-blue-600" />
+            </div>
+            <div>
+              <p className="font-medium text-gray-900">{profile.manager}</p>
+              <p className="text-sm text-gray-500">Direct Manager</p>
+            </div>
+            <div className="w-px h-8 bg-gray-300 mx-auto"></div>
+            <div>
+              <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto">
+                <User className="h-6 w-6 text-green-600" />
+              </div>
+              <p className="font-medium text-gray-900 mt-2">{profile.fullName}</p>
+              <p className="text-sm text-gray-500">{profile.position}</p>
+            </div>
+          </div>
+        </div>
+      </Card>
+    </div>
+  )
+
+  const AttendanceTab = () => (
+    <div className="space-y-6">
+      <Card className="p-6">
+        <h3 className="text-lg font-semibold text-gray-900 mb-6">Attendance Summary</h3>
+        
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <div className="text-center">
+            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+              <Clock className="h-8 w-8 text-green-600" />
+            </div>
+            <p className="text-2xl font-bold text-gray-900">{profile.attendance.attendanceRate}%</p>
+            <p className="text-sm text-gray-500">Attendance Rate</p>
+          </div>
+          
+          <div className="text-center">
+            <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
+              <Calendar className="h-8 w-8 text-blue-600" />
+            </div>
+            <p className="text-2xl font-bold text-gray-900">{profile.attendance.presentDays}</p>
+            <p className="text-sm text-gray-500">Present Days</p>
+          </div>
+          
+          <div className="text-center">
+            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-3">
+              <Clock className="h-8 w-8 text-red-600" />
+            </div>
+            <p className="text-2xl font-bold text-gray-900">{profile.attendance.absentDays}</p>
+            <p className="text-sm text-gray-500">Absent Days</p>
+          </div>
+          
+          <div className="text-center">
+            <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-3">
+              <TrendingUp className="h-8 w-8 text-orange-600" />
+            </div>
+            <p className="text-2xl font-bold text-gray-900">{profile.attendance.overtimeHours}h</p>
+            <p className="text-sm text-gray-500">Overtime Hours</p>
+          </div>
+        </div>
+      </Card>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card className="p-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-6">Leave Balance</h3>
+          
+          <div className="space-y-4">
+            <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+              <div>
+                <p className="font-medium text-blue-900">Annual Leave</p>
+                <p className="text-sm text-blue-600">{profile.leaveBalance.annual} days remaining</p>
+              </div>
+              <div className="text-right">
+                <p className="text-2xl font-bold text-blue-900">{profile.leaveBalance.annual}</p>
+                <p className="text-xs text-blue-600">days</p>
+              </div>
+            </div>
+            
+            <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+              <div>
+                <p className="font-medium text-green-900">Sick Leave</p>
+                <p className="text-sm text-green-600">{profile.leaveBalance.sick} days remaining</p>
+              </div>
+              <div className="text-right">
+                <p className="text-2xl font-bold text-green-900">{profile.leaveBalance.sick}</p>
+                <p className="text-xs text-green-600">days</p>
+              </div>
+            </div>
+            
+            <div className="flex items-center justify-between p-3 bg-purple-50 rounded-lg">
+              <div>
+                <p className="font-medium text-purple-900">Personal Leave</p>
+                <p className="text-sm text-purple-600">{profile.leaveBalance.personal} days remaining</p>
+              </div>
+              <div className="text-right">
+                <p className="text-2xl font-bold text-purple-900">{profile.leaveBalance.personal}</p>
+                <p className="text-xs text-purple-600">days</p>
+              </div>
+            </div>
+            
+            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              <div>
+                <p className="font-medium text-gray-900">Total Used</p>
+                <p className="text-sm text-gray-600">This year</p>
+              </div>
+              <div className="text-right">
+                <p className="text-2xl font-bold text-gray-900">{profile.leaveBalance.totalUsed}</p>
+                <p className="text-xs text-gray-600">days</p>
+              </div>
+            </div>
+          </div>
+          
+          <Button className="w-full mt-4">
+            <Calendar className="h-4 w-4 mr-2" />
+            Request Leave
+          </Button>
+        </Card>
+
+        <Card className="p-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-6">Attendance Details</h3>
+          
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-gray-600">Total Working Days</span>
+              <span className="font-medium">{profile.attendance.totalWorkingDays}</span>
+            </div>
+            
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-gray-600">Present Days</span>
+              <span className="font-medium text-green-600">{profile.attendance.presentDays}</span>
+            </div>
+            
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-gray-600">Absent Days</span>
+              <span className="font-medium text-red-600">{profile.attendance.absentDays}</span>
+            </div>
+            
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-gray-600">Late Days</span>
+              <span className="font-medium text-orange-600">{profile.attendance.lateDays}</span>
+            </div>
+            
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-gray-600">Overtime Hours</span>
+              <span className="font-medium text-blue-600">{profile.attendance.overtimeHours}h</span>
+            </div>
+            
+            <div className="border-t pt-4 mt-4">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-gray-900">Attendance Rate</span>
+                <span className="text-lg font-bold text-green-600">{profile.attendance.attendanceRate}%</span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
+                <div 
+                  className="bg-green-600 h-2 rounded-full" 
+                  style={{ width: `${profile.attendance.attendanceRate}%` }}
+                ></div>
+              </div>
+            </div>
+          </div>
+        </Card>
+      </div>
+    </div>
+  )
+
   const PersonalInfoTab = () => (
     <div className="space-y-6">
       <Card className="p-6">
@@ -731,13 +1025,13 @@ export default function ProfilePage() {
       case 'personal':
         return <PersonalInfoTab />
       case 'employment':
-        return <div className="p-8 text-center text-gray-500">Employment tab content would be here</div>
+        return <EmploymentTab />
       case 'education':
         return <div className="p-8 text-center text-gray-500">Education & Skills tab content would be here</div>
       case 'performance':
         return <div className="p-8 text-center text-gray-500">Performance tab content would be here</div>
       case 'attendance':
-        return <div className="p-8 text-center text-gray-500">Attendance & Leave tab content would be here</div>
+        return <AttendanceTab />
       case 'benefits':
         return <div className="p-8 text-center text-gray-500">Benefits tab content would be here</div>
       case 'preferences':
@@ -782,7 +1076,7 @@ export default function ProfilePage() {
                 className={`
                   flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-all
                   ${activeTab === tab.id 
-                    ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm' 
+                    ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 ' 
                     : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
                   }
                 `}

@@ -65,6 +65,11 @@ func (s *PosTransactionService) CreatePosTransaction(ctx context.Context, pt *en
 	return nil
 }
 
+// GetAllPosTransactions retrieves all POS transactions.
+func (s *PosTransactionService) GetAllPosTransactions(ctx context.Context) ([]*entities.PosTransaction, error) {
+	return s.repo.GetAll(ctx)
+}
+
 
 // GetPosTransactionByID retrieves a POS transaction by its ID.
 func (s *PosTransactionService) GetPosTransactionByID(ctx context.Context, id string) (*entities.PosTransaction, error) {

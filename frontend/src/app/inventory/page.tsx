@@ -162,12 +162,12 @@ export default function InventoryPage() {
               const Icon = module.icon;
               return (
                 <Link key={module.title} href={module.href}>
-                  <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">
+                  <Card className="hover:shadow-md transition-shadow cursor-pointer h-full">
                     <CardHeader>
                       <div className="flex items-center justify-between">
                         <CardTitle className="text-lg">{module.title}</CardTitle>
                         <div className={`p-2 rounded-lg ${module.color}`}>
-                          <Icon className="w-5 h-5" />
+                          <Icon className="w-5 h-5" aria-hidden="true" />
                         </div>
                       </div>
                     </CardHeader>

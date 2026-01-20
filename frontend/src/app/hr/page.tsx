@@ -82,88 +82,90 @@ export default function HRPage() {
 
   return (
     <TwoLevelLayout>
-      <div className="flex-1 space-y-6">
+      <div className="flex-1 flex flex-col overflow-hidden">
         <Header 
           title="HR Management"
           breadcrumbs={breadcrumbs}
         />
 
-        {/* Overview Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="bg-white p-6 rounded-lg border">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Total Employees</p>
-                <p className="text-3xl font-bold text-gray-900">156</p>
+        {/* Main Content Area */}
+        <div className="flex-1 overflow-auto p-6 space-y-6">
+          {/* Overview Stats */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <Card className="p-4">
+              <div className="flex items-center space-x-3">
+                <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
+                  <Users className="h-5 w-5 text-foreground" aria-hidden="true" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Total Employees</p>
+                  <p className="text-2xl font-bold">156</p>
+                </div>
               </div>
-              <div className="h-12 w-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                <Users className="h-6 w-6 text-blue-600" />
+            </Card>
+
+            <Card className="p-4">
+              <div className="flex items-center space-x-3">
+                <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
+                  <Clock className="h-5 w-5 text-foreground" aria-hidden="true" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Present Today</p>
+                  <p className="text-2xl font-bold">142</p>
+                </div>
               </div>
-            </div>
+            </Card>
+
+            <Card className="p-4">
+              <div className="flex items-center space-x-3">
+                <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
+                  <Calendar className="h-5 w-5 text-foreground" aria-hidden="true" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">On Leave</p>
+                  <p className="text-2xl font-bold">8</p>
+                </div>
+              </div>
+            </Card>
+
+            <Card className="p-4">
+              <div className="flex items-center space-x-3">
+                <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
+                  <Award className="h-5 w-5 text-foreground" aria-hidden="true" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">New Hires (This Month)</p>
+                  <p className="text-2xl font-bold">4</p>
+                </div>
+              </div>
+            </Card>
           </div>
 
-          <div className="bg-white p-6 rounded-lg border">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Present Today</p>
-                <p className="text-3xl font-bold text-green-600">142</p>
-              </div>
-              <div className="h-12 w-12 bg-green-100 rounded-lg flex items-center justify-center">
-                <Clock className="h-6 w-6 text-green-600" />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white p-6 rounded-lg border">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">On Leave</p>
-                <p className="text-3xl font-bold text-yellow-600">8</p>
-              </div>
-              <div className="h-12 w-12 bg-yellow-100 rounded-lg flex items-center justify-center">
-                <Calendar className="h-6 w-6 text-yellow-600" />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white p-6 rounded-lg border">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">New Hires (This Month)</p>
-                <p className="text-3xl font-bold text-purple-600">4</p>
-              </div>
-              <div className="h-12 w-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                <Award className="h-6 w-6 text-purple-600" />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* HR Modules */}
-        <div>
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">HR Modules</h2>
+          {/* HR Modules */}
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">HR Modules</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {hrModules.map((module) => {
               const Icon = module.icon
               return (
-                <Card key={module.title} className="p-6 hover:shadow-lg transition-shadow duration-200">
+                <Card key={module.title} className="p-6 hover:shadow-md transition-shadow duration-200">
                   <div className="flex items-start justify-between mb-4">
                     <div className={`h-12 w-12 rounded-lg flex items-center justify-center ${module.color}`}>
-                      <Icon className="h-6 w-6" />
+                      <Icon className="h-6 w-6" aria-hidden="true" />
                     </div>
                     <Link href={module.href}>
-                      <Button variant="ghost" size="sm">
+                      <Button variant="ghost" size="sm" aria-label={`Go to ${module.title}`}>
                         <ArrowRight className="h-4 w-4" />
                       </Button>
                     </Link>
                   </div>
-                  
+
                   <div className="space-y-2">
                     <h3 className="font-semibold text-gray-900">{module.title}</h3>
                     <p className="text-sm text-gray-600">{module.description}</p>
                     <p className="text-xs text-gray-500">{module.stats}</p>
                   </div>
-                  
+
                   <div className="mt-4">
                     <Link href={module.href}>
                       <Button variant="outline" size="sm" className="w-full">
@@ -175,11 +177,11 @@ export default function HRPage() {
               )
             })}
           </div>
-        </div>
+          </div>
 
-        {/* Quick Actions */}
-        <div>
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
+          {/* Quick Actions */}
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Card className="p-4">
               <div className="flex items-center space-x-3">
@@ -225,6 +227,7 @@ export default function HRPage() {
                 </Link>
               </div>
             </Card>
+          </div>
           </div>
         </div>
       </div>

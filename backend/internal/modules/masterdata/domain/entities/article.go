@@ -15,6 +15,7 @@ type Article struct {
 	SizeID          string   `json:"size_id" gorm:"column:size_id"`
 	SupplierID      string   `json:"supplier_id" gorm:"column:supplier_id"`
 	Barcode         string   `json:"barcode" gorm:"column:barcode"`
+	BarcodeURL      string   `json:"barcode_url" gorm:"column:barcode_url"`
 	Price           float64  `json:"price" gorm:"column:price"`
 	ImageURL        string   `json:"image_url" gorm:"column:image_url"`
 	ImageURLs       []string `json:"image_urls" gorm:"column:image_urls;type:text[]"`

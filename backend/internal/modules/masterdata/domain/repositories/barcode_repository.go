@@ -13,4 +13,5 @@ type BarcodeRepository interface {
 	GetAll(ctx context.Context) ([]*entities.Barcode, error)
 	Update(ctx context.Context, barcode *entities.Barcode) error
 	Delete(ctx context.Context, id string) error
+	GetByArticleID(ctx context.Context, articleID string) ([]*entities.Barcode, error)
 }

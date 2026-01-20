@@ -1,15 +1,15 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { TwoLevelLayout } from '@/components/ui/two-level-layout'
 import { Header } from '@/components/ui/header'
-import { DataTable, Column } from '@/components/ui/data-table'
+import { TanStackDataTable, TanStackColumn } from '@/components/ui/tanstack-data-table'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
-import { 
+import {
   Layers,
   Plus,
   Eye,
@@ -20,12 +20,15 @@ import {
   CheckCircle,
   AlertCircle,
   Search,
-  BarChart3
+  Archive,
+  Grid3X3,
+  List,
+  Loader2
 } from 'lucide-react'
 import Link from 'next/link'
-import { modelService } from '@/services/masterdata'
 import { Model } from '@/types/masterdata'
 import { ModelForm } from '@/components/forms/model-form'
+import { useModels } from '@/hooks/queries'
 
 // Extended Model interface for frontend display
 interface ProductModel extends Model {
@@ -40,36 +43,26 @@ interface ProductModel extends Model {
 
 export default function ProductModelsPage() {
   const [mounted, setMounted] = useState(false)
-  const [models, setModels] = useState<ProductModel[]>([])
-  const [loading, setLoading] = useState(true)
   const [activeView, setActiveView] = useState<'cards' | 'table'>('table')
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [sortByFilter, setSortByFilter] = useState<string>('name')
   const [showModelForm, setShowModelForm] = useState(false)
   const [selectedModel, setSelectedModel] = useState<Model | null>(null)
+  const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(10)
+
+  // Use TanStack Query for data fetching
+  const { data, isLoading, isFetching } = useModels({
+    page,
+    limit: pageSize,
+    search: searchTerm || undefined,
+  })
+
+  const models: ProductModel[] = data?.data || []
 
   useEffect(() => {
     setMounted(true)
-  }, [])
-
-  // Fetch models from API
-  const fetchModels = async () => {
-    try {
-      setLoading(true)
-      const response = await modelService.getAll()
-      console.log('Models response:', response)
-      setModels(response.data)
-    } catch (error) {
-      console.error('Error fetching models:', error)
-      setModels([])
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  useEffect(() => {
-    fetchModels()
   }, [])
 
   const handleCreateModel = () => {
@@ -83,16 +76,7 @@ export default function ProductModelsPage() {
   }
 
   const handleModelFormSuccess = () => {
-    fetchModels() // Refresh the list
-  }
-
-  const handleSearch = (value: string) => {
-    setSearchTerm(value)
-  }
-
-  const formatCurrency = (amount?: number): string => {
-    if (!mounted || typeof amount !== 'number' || isNaN(amount)) return ''
-    return `Rp ${amount.toLocaleString('id-ID')}`
+    // TanStack Query will auto-refetch when cache is invalidated
   }
 
   const formatDate = (dateString?: string): string => {
@@ -105,41 +89,45 @@ export default function ProductModelsPage() {
     { label: 'Models', href: '/products/models' }
   ]
 
-  // Filter models
-  const filteredModels = models.filter(model => {
-    if (searchTerm && !model?.name?.toLowerCase().includes(searchTerm.toLowerCase()) && 
-        !model?.code?.toLowerCase().includes(searchTerm.toLowerCase()) &&
-        !model?.description?.toLowerCase().includes(searchTerm.toLowerCase())) return false
-    if (statusFilter !== 'all') {
-      if (statusFilter === 'active' && model?.status !== 'active') return false
-      if (statusFilter === 'inactive' && model?.status !== 'active') return false
-    }
-    return true
-  })
+  // Filter and sort models
+  const filteredModels = useMemo(() => {
+    let result = [...models]
 
-  // Sort models
-  const sortedModels = [...filteredModels].sort((a, b) => {
-    switch (sortByFilter) {
-      case 'name':
-        return (a?.name || '').localeCompare(b?.name || '')
-      case 'code':
-        return (a?.code || '').localeCompare(b?.code || '')
-      case 'products':
-        return (b?.product_count || 0) - (a?.product_count || 0)
-      case 'stock':
-        return (b?.total_stock || 0) - (a?.total_stock || 0)
-      default:
-        return 0
+    // Apply status filter
+    if (statusFilter !== 'all') {
+      result = result.filter(model => {
+        if (statusFilter === 'active') return model?.status === 'active'
+        if (statusFilter === 'inactive') return model?.status !== 'active'
+        return true
+      })
     }
-  })
+
+    // Sort models
+    result.sort((a, b) => {
+      switch (sortByFilter) {
+        case 'name':
+          return (a?.name || '').localeCompare(b?.name || '')
+        case 'code':
+          return (a?.code || '').localeCompare(b?.code || '')
+        case 'products':
+          return (b?.product_count || 0) - (a?.product_count || 0)
+        case 'stock':
+          return (b?.total_stock || 0) - (a?.total_stock || 0)
+        default:
+          return 0
+      }
+    })
+
+    return result
+  }, [models, statusFilter, sortByFilter])
 
   // Summary statistics
-  const summaryStats = {
+  const summaryStats = useMemo(() => ({
     totalModels: models.length,
     activeModels: models.filter(m => m?.status === 'active').length,
     totalProducts: models.reduce((sum, m) => sum + (m?.product_count || 0), 0),
     totalStock: models.reduce((sum, m) => sum + (m?.total_stock || 0), 0),
-  }
+  }), [models])
 
   const getStatusBadge = (status: string) => {
     return status === 'active'
@@ -147,53 +135,58 @@ export default function ProductModelsPage() {
       : { variant: 'destructive' as const, label: 'Inactive', icon: AlertCircle }
   }
 
-  const columns: Column<ProductModel>[] = [
+  const columns: TanStackColumn<ProductModel>[] = [
     {
-      key: 'code',
-      title: 'Code',
-      render: (value: unknown, model: ProductModel) => (
-        <Link 
-          href={`/products/models/${model?.id}`}
+      id: 'code',
+      accessorKey: 'code',
+      header: 'Code',
+      cell: ({ row }) => (
+        <Link
+          href={`/products/models/${row.original?.id}`}
           className="font-medium text-blue-600 hover:text-blue-800"
         >
-          {model?.code}
+          {row.original?.code}
         </Link>
       )
     },
     {
-      key: 'name',
-      title: 'Name',
-      render: (value: unknown, model: ProductModel) => (
+      id: 'name',
+      accessorKey: 'name',
+      header: 'Name',
+      cell: ({ row }) => (
         <div>
-          <div className="font-medium">{model?.name}</div>
-          <div className="text-sm text-muted-foreground">{model?.description || '-'}</div>
+          <div className="font-medium">{row.original?.name}</div>
+          <div className="text-sm text-muted-foreground">{row.original?.description || '-'}</div>
         </div>
       )
     },
     {
-      key: 'product_count',
-      title: 'Products',
-      render: (value: unknown, model: ProductModel) => (
+      id: 'product_count',
+      accessorKey: 'product_count',
+      header: 'Products',
+      cell: ({ row }) => (
         <div className="flex items-center space-x-2">
           <Package className="h-4 w-4 text-muted-foreground" />
-          <span className="font-medium">{model?.product_count || 0}</span>
+          <span className="font-medium">{row.original?.product_count || 0}</span>
         </div>
       )
     },
     {
-      key: 'total_stock',
-      title: 'Stock',
-      render: (value: unknown, model: ProductModel) => (
+      id: 'total_stock',
+      accessorKey: 'total_stock',
+      header: 'Stock',
+      cell: ({ row }) => (
         <div className="text-right font-medium">
-          {model?.total_stock || 0}
+          {row.original?.total_stock || 0}
         </div>
       )
     },
     {
-      key: 'status',
-      title: 'Status',
-      render: (value: unknown, model: ProductModel) => {
-        const { variant, label, icon: Icon } = getStatusBadge(model?.status || 'inactive')
+      id: 'status',
+      accessorKey: 'status',
+      header: 'Status',
+      cell: ({ row }) => {
+        const { variant, label, icon: Icon } = getStatusBadge(row.original?.status || 'inactive')
         return (
           <div className="flex items-center space-x-2">
             <Icon className="h-4 w-4" />
@@ -203,26 +196,28 @@ export default function ProductModelsPage() {
       }
     },
     {
-      key: 'updated_at',
-      title: 'Last Updated',
-      render: (value: unknown, model: ProductModel) => (
+      id: 'updated_at',
+      accessorKey: 'updated_at',
+      header: 'Last Updated',
+      cell: ({ row }) => (
         <div className="flex items-center space-x-2">
           <Calendar className="h-4 w-4 text-muted-foreground" />
-          <span className="text-sm">{formatDate(model?.updated_at)}</span>
+          <span className="text-sm">{formatDate(row.original?.updated_at)}</span>
         </div>
       )
     },
     {
-      key: 'actions',
-      title: 'Actions',
-      render: (value: unknown, model: ProductModel) => (
+      id: 'actions',
+      header: 'Actions',
+      enableSorting: false,
+      cell: ({ row }) => (
         <div className="flex items-center space-x-2">
           <Button variant="ghost" size="sm" asChild>
-            <Link href={`/products/models/${model?.id}`}>
+            <Link href={`/products/models/${row.original?.id}`}>
               <Eye className="h-4 w-4" />
             </Link>
           </Button>
-          <Button variant="ghost" size="sm" onClick={() => handleEditModel(model)}>
+          <Button variant="ghost" size="sm" onClick={() => handleEditModel(row.original)}>
             <Edit className="h-4 w-4" />
           </Button>
         </div>
@@ -232,12 +227,15 @@ export default function ProductModelsPage() {
 
   return (
     <TwoLevelLayout>
-      <Header 
+      <Header
         title="Product Models"
         description="Manage product models and variations"
         breadcrumbs={breadcrumbs}
         actions={
           <div className="flex items-center space-x-3">
+            {isFetching && !isLoading && (
+              <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+            )}
             <Button variant="outline" size="sm">
               <Download className="h-4 w-4 mr-2" />
               Export
@@ -249,109 +247,110 @@ export default function ProductModelsPage() {
           </div>
         }
       />
-      
+
       <div className="flex-1 p-6 space-y-6">
 
         {/* Summary Statistics */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card className="p-4">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
+                <Layers className="h-5 w-5 text-foreground" />
+              </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Total Models</p>
-                <p className="text-2xl font-bold mt-1">{summaryStats.totalModels}</p>
-                <p className="text-sm text-blue-600 mt-1">All models</p>
+                <p className="text-2xl font-bold">{summaryStats.totalModels}</p>
               </div>
-              <Layers className="h-8 w-8 text-blue-600" />
             </div>
           </Card>
 
           <Card className="p-4">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
+                <CheckCircle className="h-5 w-5 text-foreground" />
+              </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Active</p>
-                <p className="text-2xl font-bold mt-1 text-green-600">{summaryStats.activeModels}</p>
-                <p className="text-sm text-green-600 mt-1">In use</p>
+                <p className="text-2xl font-bold">{summaryStats.activeModels}</p>
               </div>
-              <CheckCircle className="h-8 w-8 text-green-600" />
             </div>
           </Card>
 
           <Card className="p-4">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
+                <Package className="h-5 w-5 text-foreground" />
+              </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Products</p>
-                <p className="text-2xl font-bold mt-1">{summaryStats.totalProducts}</p>
-                <p className="text-sm text-purple-600 mt-1">Total items</p>
+                <p className="text-2xl font-bold">{summaryStats.totalProducts}</p>
               </div>
-              <Package className="h-8 w-8 text-purple-600" />
             </div>
           </Card>
 
           <Card className="p-4">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
+                <Archive className="h-5 w-5 text-foreground" />
+              </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Stock</p>
-                <p className="text-2xl font-bold mt-1">{summaryStats.totalStock}</p>
-                <p className="text-sm text-green-600 mt-1">Units available</p>
+                <p className="text-2xl font-bold">{summaryStats.totalStock}</p>
               </div>
-              <BarChart3 className="h-8 w-8 text-green-600" />
             </div>
           </Card>
         </div>
 
-        {/* Search and Filters */}
-        <div className="flex items-center justify-between gap-4">
-          {/* Search on the left */}
-          <div className="flex-1 max-w-md">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search models..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-9"
-              />
+        {/* Filters and View Toggle */}
+        <div className="space-y-4">
+          {/* Search and Filter Bar */}
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex-1">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                <Input
+                  placeholder="Search models..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-32">
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="inactive">Inactive</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select value={sortByFilter} onValueChange={setSortByFilter}>
+                <SelectTrigger className="w-40">
+                  <SelectValue placeholder="Sort by" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="name">Name</SelectItem>
+                  <SelectItem value="code">Code</SelectItem>
+                  <SelectItem value="products">Product Count</SelectItem>
+                  <SelectItem value="stock">Stock Level</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
-          
-          {/* Filters on the right */}
-          <div className="flex items-center gap-2">
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-32">
-                <CheckCircle className="h-4 w-4 mr-2" />
-                <SelectValue placeholder="Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All statuses</SelectItem>
-                <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="inactive">Inactive</SelectItem>
-              </SelectContent>
-            </Select>
-            
-            <Select value={sortByFilter} onValueChange={setSortByFilter}>
-              <SelectTrigger className="w-44">
-                <BarChart3 className="h-4 w-4 mr-2" />
-                <SelectValue placeholder="Sort by" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="name">Name</SelectItem>
-                <SelectItem value="code">Code</SelectItem>
-                <SelectItem value="products">Product Count</SelectItem>
-                <SelectItem value="stock">Stock Level</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
 
-        {/* View Toggle and Stats */}
-        <div className="flex justify-between items-center">
-          <div className="flex items-center gap-4">
+          {/* View Toggle */}
+          <div className="flex items-center justify-between">
             <div className="flex space-x-1 bg-muted p-1 rounded-lg">
               <Button
                 variant={activeView === 'cards' ? 'default' : 'ghost'}
                 size="sm"
                 onClick={() => setActiveView('cards')}
               >
+                <Grid3X3 className="h-4 w-4 mr-2" />
                 Cards
               </Button>
               <Button
@@ -359,18 +358,18 @@ export default function ProductModelsPage() {
                 size="sm"
                 onClick={() => setActiveView('table')}
               >
+                <List className="h-4 w-4 mr-2" />
                 Table
               </Button>
             </div>
-          </div>
-          
-          <div className="text-sm text-muted-foreground">
-            {sortedModels.length} of {models.length} models
+            <div className="flex items-center gap-4 text-sm text-muted-foreground">
+              <span>Showing {filteredModels.length} items</span>
+            </div>
           </div>
         </div>
 
         {/* Content */}
-        {loading ? (
+        {isLoading ? (
           <div className="flex justify-center items-center py-12">
             <div className="text-center">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
@@ -379,14 +378,14 @@ export default function ProductModelsPage() {
           </div>
         ) : activeView === 'cards' ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {sortedModels.map((model) => {
+            {filteredModels.map((model) => {
               const { variant: statusVariant, label: statusLabel, icon: StatusIcon } = getStatusBadge(model?.status || 'inactive')
-              
+
               return (
-                <Card key={model?.id} className="p-4 hover:shadow-md transition-shadow">
+                <Card key={model?.id} className="p-4 hover: transition-shadow">
                   <div className="flex justify-between items-start mb-4">
                     <div>
-                      <Link 
+                      <Link
                         href={`/products/models/${model?.id}`}
                         className="font-semibold text-blue-600 hover:text-blue-800"
                       >
@@ -408,7 +407,7 @@ export default function ProductModelsPage() {
                     <p className="text-sm text-muted-foreground">
                       {model?.description || '-'}
                     </p>
-                    
+
                     <div className="flex justify-between">
                       <span className="text-sm text-muted-foreground">Products:</span>
                       <span className="text-sm font-medium">{model?.product_count || 0} items</span>
@@ -435,15 +434,18 @@ export default function ProductModelsPage() {
             })}
           </div>
         ) : (
-          <DataTable
-            data={sortedModels}
+          <TanStackDataTable
+            data={filteredModels}
             columns={columns}
-            loading={loading}
-            pagination={{
-              current: 1,
-              pageSize: 10,
-              total: sortedModels.length,
-              onChange: () => {}
+            loading={isLoading}
+            serverSidePagination={{
+              pageIndex: page - 1,
+              pageSize,
+              pageCount: Math.ceil((data?.total || 0) / pageSize),
+              onPaginationChange: (pageIndex, newPageSize) => {
+                setPage(pageIndex + 1)
+                setPageSize(newPageSize)
+              }
             }}
           />
         )}

@@ -39,7 +39,7 @@ export function EmployeeCard({ employee }: EmployeeCardProps) {
     .slice(0, 2)
 
   return (
-    <Card className="p-6 hover:shadow-lg transition-shadow duration-200">
+    <Card className="p-6 hover: transition-shadow duration-200">
       <div className="flex items-start space-x-4">
         <Avatar className="h-16 w-16">
           <AvatarFallback className="text-lg font-semibold">

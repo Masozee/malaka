@@ -3,7 +3,7 @@
 import * as React from "react"
 import { TwoLevelLayout } from "@/components/ui/two-level-layout"
 import { Header } from "@/components/ui/header"
-import { DataTable, Column } from "@/components/ui/data-table"
+import { TanStackDataTable, TanStackColumn } from "@/components/ui/tanstack-data-table"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -11,149 +11,157 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card } from "@/components/ui/card"
 import { ColorForm } from "@/components/forms/color-form"
 import { useToast, toast } from "@/components/ui/toast"
-import { colorService } from "@/services/masterdata"
-import { Color, MasterDataFilters } from "@/types/masterdata"
-import { Search, Palette, BarChart3, CheckCircle, AlertCircle } from "lucide-react"
+import { useColors, useDeleteColor } from "@/hooks/queries"
+import { Color } from "@/types/masterdata"
+import { Search, Palette, BarChart3, CheckCircle } from "lucide-react"
 
 export default function ColorsPage() {
   const [mounted, setMounted] = React.useState(false)
-  const [colors, setColors] = React.useState<Color[]>([])
-  const [loading, setLoading] = React.useState(true)
-  const [pagination, setPagination] = React.useState({
-    current: 1,
-    pageSize: 10,
-    total: 0
-  })
   const [formOpen, setFormOpen] = React.useState(false)
   const [selectedColor, setSelectedColor] = React.useState<Color | null>(null)
   const [searchTerm, setSearchTerm] = React.useState('')
   const [statusFilter, setStatusFilter] = React.useState<string>('all')
-  const [sortBy, setSortBy] = React.useState<string>('name')
+  const [page, setPage] = React.useState(1)
+  const [pageSize] = React.useState(10)
   const { addToast } = useToast()
 
   React.useEffect(() => {
     setMounted(true)
   }, [])
 
-  const columns: Column<Color>[] = [
-    {
-      key: 'code',
-      title: 'Color Code',
-      sortable: true,
-      width: '120px'
-    },
-    {
-      key: 'name',
-      title: 'Color Name',
-      sortable: true,
-    },
-    {
-      key: 'hex_code',
-      title: 'Color Preview',
-      render: (hexCode: unknown, color: Color) => {
-        const hexStr = hexCode as string
-        const isValidHex = hexStr && /^#[0-9A-F]{6}$/i.test(hexStr)
-        
-        return (
-          <div className="flex items-center space-x-3">
-            <div className="relative">
-              <div 
-                className="w-8 h-8 rounded-lg border-2 border-gray-200 shadow-sm flex-shrink-0 transition-transform hover:scale-110"
-                style={{ 
-                  backgroundColor: isValidHex ? hexStr : '#f3f4f6',
-                  borderColor: isValidHex ? hexStr : '#d1d5db'
-                }}
-                title={`${color.name} - ${hexStr || 'No hex code'}`}
-              />
-              {!isValidHex && (
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
-                </div>
-              )}
-            </div>
-            <div className="flex flex-col">
-              <span className="text-sm font-medium text-gray-900">
-                {hexStr || 'N/A'}
-              </span>
-              {isValidHex && (
-                <span className="text-xs text-gray-500">
-                  RGB: {(() => {
-                    const r = parseInt(hexStr.slice(1, 3), 16)
-                    const g = parseInt(hexStr.slice(3, 5), 16)
-                    const b = parseInt(hexStr.slice(5, 7), 16)
-                    return `${r}, ${g}, ${b}`
-                  })()}
-                </span>
-              )}
-            </div>
-          </div>
-        )
+  // TanStack Query for fetching colors
+  const {
+    data: colorsData,
+    isLoading,
+    isFetching,
+  } = useColors({
+    page,
+    limit: pageSize,
+    search: searchTerm || undefined,
+  })
+
+  // TanStack Mutation for deleting colors
+  const deleteColorMutation = useDeleteColor()
+
+  // Extract data from query response
+  const colors = colorsData?.data || []
+  const total = colorsData?.total || 0
+
+  // TanStack Table columns
+  const columns: TanStackColumn<Color>[] = React.useMemo(
+    () => [
+      {
+        id: 'code',
+        header: 'Color Code',
+        accessorKey: 'code',
+        enableSorting: true,
+        size: 120,
       },
-      width: '200px'
-    },
-    {
-      key: 'description',
-      title: 'Description',
-      render: (description: unknown) => (description as string) || '-',
-      width: '200px'
-    },
-    {
-      key: 'status',
-      title: 'Status',
-      render: (status: unknown) => {
-        const statusStr = status as string
-        return (
-          <Badge variant={statusStr === 'active' ? 'default' : 'secondary'}>
-            {statusStr}
-          </Badge>
-        )
-      }
-    },
-    {
-      key: 'created_at',
-      title: 'Created At',
-      render: (date: unknown) => mounted ? new Date(date as string).toLocaleDateString('id-ID') : '',
-      width: '120px'
+      {
+        id: 'name',
+        header: 'Color Name',
+        accessorKey: 'name',
+        enableSorting: true,
+      },
+      {
+        id: 'hex_code',
+        header: 'Color Preview',
+        accessorKey: 'hex_code',
+        cell: ({ getValue, row }) => {
+          const hexCode = getValue() as string
+          const color = row.original
+          const isValidHex = hexCode && /^#[0-9A-F]{6}$/i.test(hexCode)
+
+          return (
+            <div className="flex items-center space-x-3">
+              <div className="relative">
+                <div
+                  className="w-8 h-8 rounded-lg border-2 border-gray-200 flex-shrink-0 transition-transform hover:scale-110"
+                  style={{
+                    backgroundColor: isValidHex ? hexCode : '#f3f4f6',
+                    borderColor: isValidHex ? hexCode : '#d1d5db',
+                  }}
+                  title={`${color.name} - ${hexCode || 'No hex code'}`}
+                />
+                {!isValidHex && (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
+                  </div>
+                )}
+              </div>
+              <div className="flex flex-col">
+                <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                  {hexCode || 'N/A'}
+                </span>
+                {isValidHex && (
+                  <span className="text-xs text-gray-500">
+                    RGB:{' '}
+                    {(() => {
+                      const r = parseInt(hexCode.slice(1, 3), 16)
+                      const g = parseInt(hexCode.slice(3, 5), 16)
+                      const b = parseInt(hexCode.slice(5, 7), 16)
+                      return `${r}, ${g}, ${b}`
+                    })()}
+                  </span>
+                )}
+              </div>
+            </div>
+          )
+        },
+        size: 200,
+      },
+      {
+        id: 'description',
+        header: 'Description',
+        accessorKey: 'description',
+        cell: ({ getValue }) => (getValue() as string) || '-',
+        size: 200,
+      },
+      {
+        id: 'status',
+        header: 'Status',
+        accessorKey: 'status',
+        cell: ({ getValue }) => {
+          const status = getValue() as string
+          return (
+            <Badge variant={status === 'active' ? 'default' : 'secondary'}>
+              {status}
+            </Badge>
+          )
+        },
+      },
+      {
+        id: 'created_at',
+        header: 'Created At',
+        accessorKey: 'created_at',
+        cell: ({ getValue }) =>
+          mounted ? new Date(getValue() as string).toLocaleDateString('id-ID') : '',
+        size: 120,
+      },
+    ],
+    [mounted]
+  )
+
+  // Filter colors by status locally
+  const filteredColors = React.useMemo(() => {
+    if (statusFilter === 'all') return colors
+    return colors.filter((color) => color.status === statusFilter)
+  }, [colors, statusFilter])
+
+  // Summary statistics
+  const summaryStats = React.useMemo(() => {
+    return {
+      totalColors: colors.length,
+      activeColors: colors.filter((c) => c.status === 'active').length,
+      withHexCode: colors.filter((c) => c.hex_code).length,
+      recentlyAdded: colors.filter((c) => {
+        const createdDate = new Date(c.created_at)
+        const weekAgo = new Date()
+        weekAgo.setDate(weekAgo.getDate() - 7)
+        return createdDate > weekAgo
+      }).length,
     }
-  ]
-
-  const fetchColors = React.useCallback(async (filters?: MasterDataFilters) => {
-    try {
-      setLoading(true)
-      const response = await colorService.getAll(filters)
-      setColors(response.data)
-      setPagination(prev => ({
-        ...prev,
-        total: response.total
-      }))
-    } catch (error) {
-      console.error('Error fetching colors:', error)
-      // TODO: Show error toast
-    } finally {
-      setLoading(false)
-    }
-  }, [])
-
-  React.useEffect(() => {
-    fetchColors({
-      page: pagination.current,
-      limit: pagination.pageSize
-    })
-  }, [pagination.current, pagination.pageSize, fetchColors])
-
-  const handleSearch = React.useCallback((search: string) => {
-    setSearchTerm(search)
-    fetchColors({
-      search,
-      page: 1,
-      limit: pagination.pageSize
-    })
-    setPagination(prev => ({ ...prev, current: 1 }))
-  }, [pagination.pageSize, fetchColors])
-
-  const handlePageChange = React.useCallback((page: number, pageSize: number) => {
-    setPagination(prev => ({ ...prev, current: page, pageSize }))
-  }, [])
+  }, [colors])
 
   const handleAdd = () => {
     setSelectedColor(null)
@@ -165,95 +173,52 @@ export default function ColorsPage() {
     setFormOpen(true)
   }
 
-  const handleFormSuccess = () => {
-    // Refresh the list after successful create/update
-    fetchColors({
-      page: pagination.current,
-      limit: pagination.pageSize
-    })
-  }
-
   const handleDelete = async (color: Color) => {
     if (confirm(`Are you sure you want to delete "${color.name}"?`)) {
       try {
-        await colorService.delete(color.id)
-        // Refresh the list
-        fetchColors({
-          page: pagination.current,
-          limit: pagination.pageSize
-        })
-        addToast(toast.success("Color deleted successfully", `${color.name} has been removed.`))
+        await deleteColorMutation.mutateAsync(color.id)
+        addToast(toast.success('Color deleted successfully', `${color.name} has been removed.`))
       } catch (error) {
         console.error('Error deleting color:', error)
-        addToast(toast.error("Failed to delete color", "Please try again later."))
+        addToast(toast.error('Failed to delete color', 'Please try again later.'))
       }
     }
   }
 
-  // Filter and sort colors locally for display
-  const filteredColors = React.useMemo(() => {
-    let filtered = colors
+  const handleFormSuccess = () => {
+    // Query will be automatically invalidated by mutations
+  }
 
-    // Apply status filter
-    if (statusFilter !== 'all') {
-      filtered = filtered.filter(color => color.status === statusFilter)
-    }
+  const handleSearch = React.useCallback((value: string) => {
+    setSearchTerm(value)
+    setPage(1) // Reset to first page on search
+  }, [])
 
-    // Apply sorting
-    filtered.sort((a, b) => {
-      switch (sortBy) {
-        case 'name':
-          return a.name.localeCompare(b.name)
-        case 'code':
-          return a.code.localeCompare(b.code)
-        case 'created_at':
-          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-        default:
-          return 0
-      }
-    })
-
-    return filtered
-  }, [colors, statusFilter, sortBy])
-
-  // Summary statistics
-  const summaryStats = React.useMemo(() => {
-    return {
-      totalColors: colors.length,
-      activeColors: colors.filter(c => c.status === 'active').length,
-      withHexCode: colors.filter(c => c.hex_code).length,
-      recentlyAdded: colors.filter(c => {
-        const createdDate = new Date(c.created_at)
-        const weekAgo = new Date()
-        weekAgo.setDate(weekAgo.getDate() - 7)
-        return createdDate > weekAgo
-      }).length
-    }
-  }, [colors])
+  const handlePageChange = React.useCallback((pageIndex: number) => {
+    setPage(pageIndex + 1)
+  }, [])
 
   return (
     <TwoLevelLayout>
-      <Header 
+      <Header
         title="Colors"
         description="Manage color variants and specifications"
         breadcrumbs={[
-          { label: "Dashboard", href: "/dashboard" },
-          { label: "Master Data", href: "/master-data" },
-          { label: "Colors" }
+          { label: 'Dashboard', href: '/dashboard' },
+          { label: 'Master Data', href: '/master-data' },
+          { label: 'Colors' },
         ]}
-        actions={
-          <Button onClick={handleAdd}>
-            Add Color
-          </Button>
-        }
+        actions={<Button onClick={handleAdd}>Add Color</Button>}
       />
-      
+
       <div className="flex-1 p-6 space-y-6">
         {/* Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card className="p-4">
-            <div className="flex items-center space-x-2">
-              <Palette className="h-4 w-4 text-blue-600" />
+            <div className="flex items-center space-x-3">
+              <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
+                <Palette className="h-5 w-5 text-foreground" />
+              </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Total Colors</p>
                 <p className="text-2xl font-bold">{mounted ? summaryStats.totalColors : ''}</p>
@@ -261,8 +226,10 @@ export default function ColorsPage() {
             </div>
           </Card>
           <Card className="p-4">
-            <div className="flex items-center space-x-2">
-              <CheckCircle className="h-4 w-4 text-green-600" />
+            <div className="flex items-center space-x-3">
+              <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
+                <CheckCircle className="h-5 w-5 text-foreground" />
+              </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Active</p>
                 <p className="text-2xl font-bold">{mounted ? summaryStats.activeColors : ''}</p>
@@ -270,8 +237,10 @@ export default function ColorsPage() {
             </div>
           </Card>
           <Card className="p-4">
-            <div className="flex items-center space-x-2">
-              <div className="h-4 w-4 bg-gradient-to-r from-red-500 via-yellow-500 to-blue-500 rounded-full" />
+            <div className="flex items-center space-x-3">
+              <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
+                <div className="h-5 w-5 bg-gradient-to-r from-red-500 via-yellow-500 to-blue-500 rounded-full" />
+              </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">With Hex Code</p>
                 <p className="text-2xl font-bold">{mounted ? summaryStats.withHexCode : ''}</p>
@@ -279,8 +248,10 @@ export default function ColorsPage() {
             </div>
           </Card>
           <Card className="p-4">
-            <div className="flex items-center space-x-2">
-              <BarChart3 className="h-4 w-4 text-purple-600" />
+            <div className="flex items-center space-x-3">
+              <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
+                <BarChart3 className="h-5 w-5 text-foreground" />
+              </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Recently Added</p>
                 <p className="text-2xl font-bold">{mounted ? summaryStats.recentlyAdded : ''}</p>
@@ -289,7 +260,7 @@ export default function ColorsPage() {
           </Card>
         </div>
 
-        {/* Filters and Controls */}
+        {/* Filters */}
         <div className="flex items-center justify-between gap-4">
           <div className="flex-1 max-w-md">
             <div className="relative">
@@ -302,16 +273,19 @@ export default function ColorsPage() {
               />
             </div>
           </div>
-          
+
           <div className="flex items-center gap-2">
             <div className="text-sm text-muted-foreground">
               {(() => {
-                const start = (pagination.current - 1) * pagination.pageSize + 1
-                const end = Math.min(pagination.current * pagination.pageSize, pagination.total)
-                return `${start}-${end} of ${pagination.total} items`
+                const start = (page - 1) * pageSize + 1
+                const end = Math.min(page * pageSize, total)
+                return `${start}-${end} of ${total} items`
               })()}
+              {isFetching && !isLoading && (
+                <span className="ml-2 text-blue-500">(updating...)</span>
+              )}
             </div>
-            
+
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-32">
                 <CheckCircle className="h-4 w-4 mr-2" />
@@ -323,57 +297,22 @@ export default function ColorsPage() {
                 <SelectItem value="inactive">Inactive</SelectItem>
               </SelectContent>
             </Select>
-            
-            <Select value={sortBy} onValueChange={setSortBy}>
-              <SelectTrigger className="w-32">
-                <BarChart3 className="h-4 w-4 mr-2" />
-                <SelectValue placeholder="Sort by" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="name">Name</SelectItem>
-                <SelectItem value="code">Code</SelectItem>
-                <SelectItem value="created_at">Created</SelectItem>
-              </SelectContent>
-            </Select>
           </div>
         </div>
 
-        {/* Content */}
-        <DataTable
+        {/* TanStack Data Table */}
+        <TanStackDataTable
           data={filteredColors}
-          columns={[
-            ...columns,
-            {
-              key: 'actions',
-              title: 'Actions',
-              width: '120px',
-              render: (_, color: Color) => (
-                <div className="flex gap-1">
-                  <Button 
-                    size="sm" 
-                    variant="outline"
-                    onClick={() => handleEdit(color)}
-                  >
-                    Edit
-                  </Button>
-                  <Button 
-                    size="sm" 
-                    variant="outline"
-                    onClick={() => handleDelete(color)}
-                  >
-                    Delete
-                  </Button>
-                </div>
-              )
-            }
-          ]}
-          loading={loading}
+          columns={columns}
+          loading={isLoading}
           pagination={{
-            current: pagination.current,
-            pageSize: pagination.pageSize,
-            total: pagination.total,
-            onChange: handlePageChange
+            pageIndex: page - 1,
+            pageSize,
+            totalRows: total,
+            onPageChange: handlePageChange,
           }}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
         />
 
         {/* Forms and Dialogs */}

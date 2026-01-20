@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { TwoLevelLayout } from '@/components/ui/two-level-layout'
 import { Header } from '@/components/ui/header'
-import { AdvancedDataTable } from '@/components/ui/advanced-data-table'
+import { AdvancedDataTable, AdvancedColumn } from '@/components/ui/advanced-data-table'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Progress } from '@/components/ui/progress'
 import { 
@@ -110,11 +110,11 @@ export default function PayrollProcessPage() {
     paidItems: payrollItems.filter(item => item.status === 'paid').length
   }
 
-  const payrollColumns = [
+  const payrollColumns: AdvancedColumn<PayrollItem>[] = [
     {
-      key: 'employee' as keyof PayrollItem,
+      key: 'employee',
       title: 'Employee',
-      render: (item: PayrollItem) => (
+      render: (_value: unknown, item: PayrollItem) => (
         <div>
           <div className="font-medium">{item.employee.name}</div>
           <div className="text-sm text-muted-foreground">{item.employee.employeeId} • {item.employee.position}</div>
@@ -122,36 +122,36 @@ export default function PayrollProcessPage() {
       )
     },
     {
-      key: 'basicSalary' as keyof PayrollItem,
+      key: 'basicSalary',
       title: 'Basic Salary',
-      render: (item: PayrollItem) => 
+      render: (_value: unknown, item: PayrollItem) =>
         mounted && item && item.basicSalary !== undefined ? `Rp ${item.basicSalary.toLocaleString('id-ID')}` : ''
     },
     {
-      key: 'grossPay' as keyof PayrollItem,
+      key: 'grossPay',
       title: 'Gross Pay',
-      render: (item: PayrollItem) => 
+      render: (_value: unknown, item: PayrollItem) =>
         mounted && item && item.grossPay !== undefined ? `Rp ${item.grossPay.toLocaleString('id-ID')}` : ''
     },
     {
-      key: 'totalDeductions' as keyof PayrollItem,
+      key: 'totalDeductions',
       title: 'Deductions',
-      render: (item: PayrollItem) => 
+      render: (_value: unknown, item: PayrollItem) =>
         mounted && item && item.totalDeductions !== undefined ? `Rp ${item.totalDeductions.toLocaleString('id-ID')}` : ''
     },
     {
-      key: 'netPay' as keyof PayrollItem,
+      key: 'netPay',
       title: 'Net Pay',
-      render: (item: PayrollItem) => (
+      render: (_value: unknown, item: PayrollItem) => (
         <div className="font-semibold text-green-600">
           {mounted && item && item.netPay !== undefined ? `Rp ${item.netPay.toLocaleString('id-ID')}` : ''}
         </div>
       )
     },
     {
-      key: 'status' as keyof PayrollItem,
+      key: 'status',
       title: 'Status',
-      render: (item: PayrollItem) => {
+      render: (_value: unknown, item: PayrollItem) => {
         const { variant, label } = getStatusBadge(item.status)
         return <Badge variant={variant}>{label}</Badge>
       }
@@ -333,14 +333,11 @@ export default function PayrollProcessPage() {
             <AdvancedDataTable
               data={payrollItems}
               columns={payrollColumns}
-              searchable={true}
-              filterable={true}
               searchPlaceholder="Search employees..."
               pagination={{
+                current: 1,
                 pageSize: 10,
-                currentPage: 1,
-                totalPages: Math.ceil(payrollItems.length / 10),
-                totalItems: payrollItems.length,
+                total: payrollItems.length,
                 onChange: () => {}
               }}
             />

@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"go.uber.org/zap"
 )
 
@@ -83,7 +84,7 @@ func RequestIDMiddleware() gin.HandlerFunc {
 	}
 }
 
-// generateRequestID creates a simple request ID
+// generateRequestID creates a unique request ID using UUID
 func generateRequestID() string {
-	return time.Now().Format("20060102-150405.000000")
+	return uuid.New().String()
 }

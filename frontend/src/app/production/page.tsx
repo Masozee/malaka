@@ -168,7 +168,7 @@ export default function ProductionDashboard() {
 
           {/* Quick Access Menu */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <Card className="p-6 hover:shadow-md transition-shadow cursor-pointer" asChild>
+          <Card className="p-6 hover: transition-shadow cursor-pointer" asChild>
             <Link href="/production/work-orders">
               <div className="flex items-center space-x-4">
                 <div className="p-3 bg-blue-100 rounded-lg">
@@ -185,7 +185,7 @@ export default function ProductionDashboard() {
             </Link>
           </Card>
 
-          <Card className="p-6 hover:shadow-md transition-shadow cursor-pointer" asChild>
+          <Card className="p-6 hover: transition-shadow cursor-pointer" asChild>
             <Link href="/production/quality-control">
               <div className="flex items-center space-x-4">
                 <div className="p-3 bg-green-100 rounded-lg">
@@ -202,7 +202,7 @@ export default function ProductionDashboard() {
             </Link>
           </Card>
 
-          <Card className="p-6 hover:shadow-md transition-shadow cursor-pointer" asChild>
+          <Card className="p-6 hover: transition-shadow cursor-pointer" asChild>
             <Link href="/production/material-planning">
               <div className="flex items-center space-x-4">
                 <div className="p-3 bg-purple-100 rounded-lg">
@@ -217,7 +217,7 @@ export default function ProductionDashboard() {
             </Link>
           </Card>
 
-          <Card className="p-6 hover:shadow-md transition-shadow cursor-pointer" asChild>
+          <Card className="p-6 hover: transition-shadow cursor-pointer" asChild>
             <Link href="/production/suppliers">
               <div className="flex items-center space-x-4">
                 <div className="p-3 bg-orange-100 rounded-lg">
@@ -232,7 +232,7 @@ export default function ProductionDashboard() {
             </Link>
           </Card>
 
-          <Card className="p-6 hover:shadow-md transition-shadow cursor-pointer" asChild>
+          <Card className="p-6 hover: transition-shadow cursor-pointer" asChild>
             <Link href="/production/warehouses">
               <div className="flex items-center space-x-4">
                 <div className="p-3 bg-gray-100 rounded-lg">
@@ -247,7 +247,7 @@ export default function ProductionDashboard() {
             </Link>
           </Card>
 
-          <Card className="p-6 hover:shadow-md transition-shadow cursor-pointer" asChild>
+          <Card className="p-6 hover: transition-shadow cursor-pointer" asChild>
             <Link href="/production/purchase-orders">
               <div className="flex items-center space-x-4">
                 <div className="p-3 bg-red-100 rounded-lg">

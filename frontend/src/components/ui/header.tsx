@@ -152,22 +152,24 @@ export function Header({ title, description, breadcrumbs, actions }: HeaderProps
           {/* Left Side - Breadcrumbs */}
           <div className="flex-1">
             {breadcrumbs && breadcrumbs.length > 0 && (
-              <nav className="flex items-center space-x-1 text-sm text-gray-500 dark:text-gray-400">
-                {breadcrumbs.map((item, index) => (
-                  <div key={index} className="flex items-center">
-                    {index > 0 && <ChevronRight className="h-4 w-4 mx-1" />}
-                    {item.href ? (
-                      <Link 
-                        href={item.href} 
-                        className="hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
-                      >
-                        {item.label}
-                      </Link>
-                    ) : (
-                      <span className="text-gray-900 dark:text-gray-100 font-medium">{item.label}</span>
-                    )}
-                  </div>
-                ))}
+              <nav className="flex items-center space-x-1 text-sm text-gray-500 dark:text-gray-400" aria-label="Breadcrumb">
+                <ol className="flex items-center space-x-1">
+                  {breadcrumbs.map((item, index) => (
+                    <li key={index} className="flex items-center">
+                      {index > 0 && <ChevronRight className="h-4 w-4 mx-1" aria-hidden="true" />}
+                      {item.href ? (
+                        <Link
+                          href={item.href}
+                          className="hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
+                        >
+                          {item.label}
+                        </Link>
+                      ) : (
+                        <span className="text-gray-900 dark:text-gray-100 font-medium" aria-current="page">{item.label}</span>
+                      )}
+                    </li>
+                  ))}
+                </ol>
               </nav>
             )}
           </div>
@@ -176,19 +178,22 @@ export function Header({ title, description, breadcrumbs, actions }: HeaderProps
           <div className="flex items-center space-x-2 ml-4">
             {/* Weather Display */}
             {mounted && (
-              <div className="flex items-center space-x-2 px-3 py-1 rounded-md bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+              <div
+                className="flex items-center space-x-2 px-3 py-1 rounded-md bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
+                aria-label={weather ? `Weather: ${weather.temperature}°C ${weather.condition} in ${weather.location}` : 'Loading weather'}
+              >
                 {loading ? (
-                  <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
-                    <MapPin className="h-4 w-4 animate-pulse" />
+                  <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400" role="status">
+                    <MapPin className="h-4 w-4 animate-pulse" aria-hidden="true" />
                     <span>Loading...</span>
                   </div>
                 ) : weather ? (
                   <div className="flex items-center space-x-2 text-sm">
-                    <MapPin className="h-3 w-3 text-gray-500" />
+                    <MapPin className="h-3 w-3 text-gray-500" aria-hidden="true" />
                     <span className="text-gray-700 dark:text-gray-300 font-medium">
                       {weather.location}
                     </span>
-                    {getWeatherIcon(weather.condition)}
+                    <span aria-hidden="true">{getWeatherIcon(weather.condition)}</span>
                     <span className="text-gray-900 dark:text-gray-100 font-semibold">
                       {weather.temperature}°C
                     </span>
@@ -206,10 +211,11 @@ export function Header({ title, description, breadcrumbs, actions }: HeaderProps
               size="sm"
               onClick={() => setCommandOpen(true)}
               className="relative h-8 w-8 p-0 xl:h-8 xl:w-64 xl:px-3 xl:py-2"
+              aria-label="Open search (⌘K)"
             >
-              <Command className="h-4 w-4 xl:mr-2" />
+              <Command className="h-4 w-4 xl:mr-2" aria-hidden="true" />
               <span className="hidden xl:inline-flex">Search</span>
-              <kbd className="pointer-events-none absolute right-1.5 top-1.5 hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 xl:flex">
+              <kbd className="pointer-events-none absolute right-1.5 top-1.5 hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 xl:flex" aria-hidden="true">
                 ⌘K
               </kbd>
             </Button>

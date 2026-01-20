@@ -1,9 +1,11 @@
 /**
  * API Client Configuration
- * Centralized HTTP client for backend communication
+ * Centralized HTTP client for backend communication with caching
  */
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8084'
+import { frontendCache, cacheTTL } from './cache'
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'
 
 export interface ApiResponse<T> {
   data: T
@@ -82,7 +84,7 @@ class ApiClient {
     }
   }
 
-  async get<T>(endpoint: string, params?: Record<string, unknown>): Promise<T> {
+  async get<T>(endpoint: string, params?: Record<string, unknown>, options?: { cache?: boolean, ttl?: number }): Promise<T> {
     let url = endpoint
     if (params) {
       const searchParams = new URLSearchParams()
@@ -95,6 +97,20 @@ class ApiClient {
       if (queryString) {
         url += (url.includes('?') ? '&' : '?') + queryString
       }
+    }
+    
+    // Check cache first
+    if (options?.cache !== false) {
+      const cacheKey = `GET:${url}`
+      const cached = frontendCache.get<T>(cacheKey)
+      if (cached) {
+        return cached
+      }
+      
+      // Make request and cache result
+      const result = await this.request<T>(url)
+      frontendCache.set(cacheKey, result, options?.ttl || cacheTTL.userProfile)
+      return result
     }
     
     return this.request<T>(url)

@@ -127,7 +127,7 @@ export default function MasterDataPage() {
                 title={module.title}
                 icon={module.icon}
                 description={module.description}
-                className="hover:shadow-lg transition-shadow cursor-pointer h-full"
+                className="hover: transition-shadow cursor-pointer h-full"
               />
             </Link>
           ))}

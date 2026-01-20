@@ -4,13 +4,22 @@ import { useState, useEffect } from 'react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Checkbox } from '@/components/ui/checkbox'
 import { TwoLevelLayout } from '@/components/ui/two-level-layout'
 import { Header } from '@/components/ui/header'
-import { AdvancedDataTable } from '@/components/ui/advanced-data-table'
+import { DataTable, Column } from '@/components/ui/data-table'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Progress } from '@/components/ui/progress'
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { 
   FileText,
   Plus,
@@ -28,7 +37,13 @@ import {
   AlertCircle,
   Search,
   Truck,
-  Building
+  Building,
+  MoreHorizontal,
+  Copy,
+  Trash2,
+  Send,
+  PrinterIcon,
+  Archive
 } from 'lucide-react'
 import Link from 'next/link'
 
@@ -325,7 +340,7 @@ const mockSalesOrders: SalesOrder[] = [
 
 export default function SalesOrdersPage() {
   const [mounted, setMounted] = useState(false)
-  const [activeView, setActiveView] = useState<'cards' | 'table'>('cards')
+  const [activeView, setActiveView] = useState<'cards' | 'table'>('table')
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [priorityFilter, setPriorityFilter] = useState<string>('all')
@@ -361,6 +376,12 @@ export default function SalesOrdersPage() {
     return true
   })
 
+  // Bulk action handlers
+  const handleBulkAction = (action: string) => {
+    console.log(`Bulk ${action} for orders:`)
+    // TODO: Implement bulk actions
+  }
+
   // Summary statistics
   const summaryStats = {
     totalOrders: mockSalesOrders.length,
@@ -374,35 +395,95 @@ export default function SalesOrdersPage() {
 
   const getStatusBadge = (status: string) => {
     const config = {
-      draft: { variant: 'secondary' as const, label: 'Draft', icon: Edit },
-      confirmed: { variant: 'default' as const, label: 'Confirmed', icon: CheckCircle },
-      production: { variant: 'secondary' as const, label: 'Production', icon: Package },
-      ready: { variant: 'default' as const, label: 'Ready', icon: CheckCircle },
-      shipped: { variant: 'default' as const, label: 'Shipped', icon: Truck },
-      delivered: { variant: 'default' as const, label: 'Delivered', icon: CheckCircle },
-      cancelled: { variant: 'destructive' as const, label: 'Cancelled', icon: AlertCircle }
+      draft: { 
+        variant: 'outline' as const, 
+        label: 'Draft',
+        className: 'border-yellow-300 bg-yellow-50 text-yellow-800 '
+      },
+      confirmed: { 
+        variant: 'default' as const, 
+        label: 'Confirmed',
+        className: 'bg-green-500 text-white  border-green-400 hover:bg-green-600'
+      },
+      production: { 
+        variant: 'secondary' as const, 
+        label: 'Production',
+        className: 'bg-blue-500 text-white  border-blue-400 hover:bg-blue-600'
+      },
+      ready: { 
+        variant: 'default' as const, 
+        label: 'Ready',
+        className: 'bg-purple-500 text-white  border-purple-400 hover:bg-purple-600'
+      },
+      shipped: { 
+        variant: 'default' as const, 
+        label: 'Shipped',
+        className: 'bg-orange-500 text-white  border-orange-400 hover:bg-orange-600'
+      },
+      delivered: { 
+        variant: 'default' as const, 
+        label: 'Delivered',
+        className: 'bg-emerald-500 text-white  border-emerald-400 hover:bg-emerald-600'
+      },
+      cancelled: { 
+        variant: 'outline' as const, 
+        label: 'Cancelled',
+        className: 'border-red-300 bg-red-50 text-red-800 '
+      }
     }
-    return config[status as keyof typeof config] || { variant: 'secondary' as const, label: status, icon: FileText }
+    return config[status as keyof typeof config] || { variant: 'secondary' as const, label: status, className: '' }
   }
 
   const getPriorityBadge = (priority: string) => {
     const config = {
-      low: { variant: 'outline' as const, label: 'Low', color: 'text-gray-600' },
-      normal: { variant: 'secondary' as const, label: 'Normal', color: 'text-blue-600' },
-      high: { variant: 'default' as const, label: 'High', color: 'text-orange-600' },
-      urgent: { variant: 'destructive' as const, label: 'Urgent', color: 'text-red-600' }
+      low: { 
+        variant: 'outline' as const, 
+        label: 'Low',
+        className: 'border-gray-300 bg-gray-50 text-gray-600 '
+      },
+      normal: { 
+        variant: 'secondary' as const, 
+        label: 'Normal',
+        className: 'bg-cyan-500 text-white  border-cyan-400 hover:bg-cyan-600'
+      },
+      high: { 
+        variant: 'default' as const, 
+        label: 'High',
+        className: 'bg-yellow-500 text-white  border-yellow-400 hover:bg-yellow-600'
+      },
+      urgent: { 
+        variant: 'destructive' as const, 
+        label: 'Urgent',
+        className: 'bg-red-500 text-white  border-red-400 hover:bg-red-600 animate-pulse'
+      }
     }
-    return config[priority as keyof typeof config] || { variant: 'secondary' as const, label: priority, color: 'text-gray-600' }
+    return config[priority as keyof typeof config] || { variant: 'secondary' as const, label: priority, className: '' }
   }
 
   const getOrderTypeBadge = (type: string) => {
     const config = {
-      wholesale: { variant: 'default' as const, label: 'Wholesale' },
-      retail: { variant: 'secondary' as const, label: 'Retail' },
-      distributor: { variant: 'outline' as const, label: 'Distributor' },
-      export: { variant: 'secondary' as const, label: 'Export' }
+      wholesale: { 
+        variant: 'default' as const, 
+        label: 'Wholesale',
+        className: 'bg-indigo-500 text-white  border-indigo-400 hover:bg-indigo-600'
+      },
+      retail: { 
+        variant: 'secondary' as const, 
+        label: 'Retail',
+        className: 'bg-pink-500 text-white  border-pink-400 hover:bg-pink-600'
+      },
+      distributor: { 
+        variant: 'outline' as const, 
+        label: 'Distributor',
+        className: 'bg-teal-500 text-white  border-teal-400 hover:bg-teal-600'
+      },
+      export: { 
+        variant: 'secondary' as const, 
+        label: 'Export',
+        className: 'bg-violet-500 text-white  border-violet-400 hover:bg-violet-600'
+      }
     }
-    return config[type as keyof typeof config] || { variant: 'secondary' as const, label: type }
+    return config[type as keyof typeof config] || { variant: 'secondary' as const, label: type, className: '' }
   }
 
   const getStatusProgress = (status: string): number => {
@@ -412,35 +493,33 @@ export default function SalesOrdersPage() {
     return index >= 0 ? ((index + 1) / statusOrder.length) * 100 : 0
   }
 
-  const columns = [
+  const columns: Column<SalesOrder>[] = [
     {
       key: 'order_number',
       title: 'Order Number',
-      render: (order: SalesOrder) => (
+      sortable: true,
+      render: (orderNumber: unknown, order: SalesOrder) => (
         <Link 
           href={`/sales/orders/${order.id}`}
           className="font-medium text-blue-600 hover:text-blue-800"
         >
-          {order.order_number}
+          {orderNumber as string}
         </Link>
       )
     },
     {
       key: 'order_date',
       title: 'Date',
-      render: (order: SalesOrder) => (
-        <div className="flex items-center space-x-2">
-          <Calendar className="h-4 w-4 text-muted-foreground" />
-          <span>{formatDate(order.order_date)}</span>
-        </div>
-      )
+      sortable: true,
+      render: (date: unknown) => formatDate(date as string),
+      width: '120px'
     },
     {
-      key: 'customer',
+      key: 'customer_name',
       title: 'Customer',
-      render: (order: SalesOrder) => (
+      render: (customerName: unknown, order: SalesOrder) => (
         <div>
-          <div className="font-medium">{order.customer_name}</div>
+          <div className="font-medium">{customerName as string}</div>
           <div className="text-sm text-muted-foreground">{order.customer_email}</div>
         </div>
       )
@@ -448,293 +527,234 @@ export default function SalesOrdersPage() {
     {
       key: 'sales_person',
       title: 'Sales Person',
-      render: (order: SalesOrder) => (
-        <div className="flex items-center space-x-2">
-          <User className="h-4 w-4 text-muted-foreground" />
-          <span>{order.sales_person}</span>
-        </div>
-      )
+      render: (salesPerson: unknown) => salesPerson as string
     },
     {
       key: 'order_type',
       title: 'Type',
-      render: (order: SalesOrder) => {
-        const { variant, label } = getOrderTypeBadge(order.order_type)
-        return <Badge variant={variant}>{label}</Badge>
+      render: (orderType: unknown) => {
+        const { variant, label, className } = getOrderTypeBadge(orderType as string)
+        return <Badge variant={variant} className={className}>{label}</Badge>
       }
     },
     {
       key: 'items',
       title: 'Items',
-      render: (order: SalesOrder) => (
-        <div className="flex items-center space-x-2">
-          <Package className="h-4 w-4 text-muted-foreground" />
-          <span>{order.items.length} items</span>
-        </div>
-      )
+      render: (items: unknown) => `${(items as OrderItem[]).length} items`
     },
     {
       key: 'total_amount',
       title: 'Total',
-      render: (order: SalesOrder) => (
+      render: (amount: unknown) => (
         <div className="text-right font-medium">
-          {formatCurrency(order.total_amount)}
+          {formatCurrency(amount as number)}
         </div>
-      )
+      ),
+      width: '120px'
     },
     {
       key: 'priority',
       title: 'Priority',
-      render: (order: SalesOrder) => {
-        const { variant, label } = getPriorityBadge(order.priority)
-        return <Badge variant={variant}>{label}</Badge>
+      render: (priority: unknown) => {
+        const { variant, label, className } = getPriorityBadge(priority as string)
+        return <Badge variant={variant} className={className}>{label}</Badge>
       }
     },
     {
       key: 'status',
       title: 'Status',
-      render: (order: SalesOrder) => {
-        const { variant, label, icon: Icon } = getStatusBadge(order.status)
-        return (
-          <div className="flex items-center space-x-2">
-            <Icon className="h-4 w-4" />
-            <Badge variant={variant}>{label}</Badge>
-          </div>
-        )
+      render: (status: unknown) => {
+        const { variant, label, className } = getStatusBadge(status as string)
+        return <Badge variant={variant} className={className}>{label}</Badge>
       }
-    },
-    {
-      key: 'actions',
-      title: 'Actions',
-      render: (order: SalesOrder) => (
-        <div className="flex items-center space-x-2">
-          <Button variant="ghost" size="sm" asChild>
-            <Link href={`/sales/orders/${order.id}`}>
-              <Eye className="h-4 w-4" />
-            </Link>
-          </Button>
-          {(order.status === 'draft' || order.status === 'confirmed') && (
-            <Button variant="ghost" size="sm" asChild>
-              <Link href={`/sales/orders/${order.id}/edit`}>
-                <Edit className="h-4 w-4" />
-              </Link>
-            </Button>
-          )}
-        </div>
-      )
     }
   ]
 
   return (
     <TwoLevelLayout>
-      <div className="flex-1 space-y-6">
-        <Header 
-          title="Sales Orders"
-          description="Manage customer orders and sales processes"
-          breadcrumbs={breadcrumbs}
-          actions={
-            <div className="flex items-center space-x-3">
-              <Button variant="outline" size="sm">
-                <Download className="h-4 w-4 mr-2" />
-                Export
-              </Button>
-              <Button size="sm" asChild>
-                <Link href="/sales/orders/new">
-                  <Plus className="h-4 w-4 mr-2" />
-                  New Order
-                </Link>
-              </Button>
-            </div>
-          }
-        />
+      <Header 
+        title="Sales Orders"
+        description="Manage customer orders and sales processes"
+        breadcrumbs={breadcrumbs}
+        actions={
+          <div className="flex gap-2">
+            <Button variant="outline">
+              <Download className="h-4 w-4 mr-2" />
+              Export
+            </Button>
+            <Button asChild>
+              <Link href="/sales/orders/new">
+                <Plus className="h-4 w-4 mr-2" />
+                New Order
+              </Link>
+            </Button>
+          </div>
+        }
+      />
+      
+      <div className="flex-1 p-6 space-y-6">
 
         {/* Summary Statistics */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-7 gap-6">
-          <Card className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Today&apos;s Orders</p>
-                <p className="text-2xl font-bold mt-1">{summaryStats.todayOrders}</p>
-                <p className="text-sm text-blue-600 mt-1">New orders</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card className="p-4">
+            <div className="flex items-center space-x-3">
+              <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
+                <ShoppingCart className="h-5 w-5 text-foreground" />
               </div>
-              <ShoppingCart className="h-8 w-8 text-blue-600" />
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Today's Orders</p>
+                <p className="text-2xl font-bold">{summaryStats.todayOrders}</p>
+              </div>
             </div>
           </Card>
 
-          <Card className="p-6">
-            <div className="flex items-center justify-between">
+          <Card className="p-4">
+            <div className="flex items-center space-x-3">
+              <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
+                <DollarSign className="h-5 w-5 text-foreground" />
+              </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Total Value</p>
-                <p className="text-2xl font-bold mt-1">
+                <p className="text-2xl font-bold">
                   {mounted ? `Rp ${(summaryStats.totalValue / 1000000000).toFixed(1)}B` : ''}
                 </p>
-                <p className="text-sm text-green-600 mt-1">Order value</p>
               </div>
-              <DollarSign className="h-8 w-8 text-green-600" />
             </div>
           </Card>
 
-          <Card className="p-6">
-            <div className="flex items-center justify-between">
+          <Card className="p-4">
+            <div className="flex items-center space-x-3">
+              <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
+                <CheckCircle className="h-5 w-5 text-foreground" />
+              </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Confirmed</p>
-                <p className="text-2xl font-bold mt-1 text-green-600">{summaryStats.confirmedOrders}</p>
-                <p className="text-sm text-green-600 mt-1">Ready for production</p>
+                <p className="text-2xl font-bold">{summaryStats.confirmedOrders}</p>
               </div>
-              <CheckCircle className="h-8 w-8 text-green-600" />
             </div>
           </Card>
 
-          <Card className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Production</p>
-                <p className="text-2xl font-bold mt-1 text-orange-600">{summaryStats.productionOrders}</p>
-                <p className="text-sm text-orange-600 mt-1">In production</p>
+          <Card className="p-4">
+            <div className="flex items-center space-x-3">
+              <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
+                <AlertCircle className="h-5 w-5 text-foreground" />
               </div>
-              <Package className="h-8 w-8 text-orange-600" />
-            </div>
-          </Card>
-
-          <Card className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Shipped</p>
-                <p className="text-2xl font-bold mt-1 text-blue-600">{summaryStats.shippedOrders}</p>
-                <p className="text-sm text-blue-600 mt-1">In transit</p>
-              </div>
-              <Truck className="h-8 w-8 text-blue-600" />
-            </div>
-          </Card>
-
-          <Card className="p-6">
-            <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Urgent</p>
-                <p className="text-2xl font-bold mt-1 text-red-600">{summaryStats.urgentOrders}</p>
-                <p className="text-sm text-red-600 mt-1">Need attention</p>
+                <p className="text-2xl font-bold">{summaryStats.urgentOrders}</p>
               </div>
-              <AlertCircle className="h-8 w-8 text-red-600" />
-            </div>
-          </Card>
-
-          <Card className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Total Orders</p>
-                <p className="text-2xl font-bold mt-1">{summaryStats.totalOrders}</p>
-                <p className="text-sm text-gray-600 mt-1">All time</p>
-              </div>
-              <FileText className="h-8 w-8 text-gray-600" />
             </div>
           </Card>
         </div>
 
-        {/* Filters */}
-        <Card className="p-6">
-          <div className="flex items-center space-x-4">
-            <Filter className="h-5 w-5 text-muted-foreground" />
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 flex-1">
-              <div className="space-y-2">
-                <Label htmlFor="search">Search</Label>
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="search"
-                    placeholder="Search orders..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-9"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="status">Status</Label>
-                <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="All statuses" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All statuses</SelectItem>
-                    <SelectItem value="draft">Draft</SelectItem>
-                    <SelectItem value="confirmed">Confirmed</SelectItem>
-                    <SelectItem value="production">Production</SelectItem>
-                    <SelectItem value="ready">Ready</SelectItem>
-                    <SelectItem value="shipped">Shipped</SelectItem>
-                    <SelectItem value="delivered">Delivered</SelectItem>
-                    <SelectItem value="cancelled">Cancelled</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="priority">Priority</Label>
-                <Select value={priorityFilter} onValueChange={setPriorityFilter}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="All priorities" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All priorities</SelectItem>
-                    <SelectItem value="low">Low</SelectItem>
-                    <SelectItem value="normal">Normal</SelectItem>
-                    <SelectItem value="high">High</SelectItem>
-                    <SelectItem value="urgent">Urgent</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="orderType">Order Type</Label>
-                <Select value={orderTypeFilter} onValueChange={setOrderTypeFilter}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="All types" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All types</SelectItem>
-                    <SelectItem value="wholesale">Wholesale</SelectItem>
-                    <SelectItem value="retail">Retail</SelectItem>
-                    <SelectItem value="distributor">Distributor</SelectItem>
-                    <SelectItem value="export">Export</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+        {/* Filters and View Toggle */}
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex-1 max-w-md">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search orders..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-9"
+              />
             </div>
           </div>
-        </Card>
+          
+          <div className="flex items-center gap-2">
+            <div className="text-sm text-muted-foreground">
+              Showing {filteredOrders.length} items
+            </div>
+            
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-32">
+                <Filter className="h-4 w-4 mr-2" />
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Status</SelectItem>
+                <SelectItem value="draft">Draft</SelectItem>
+                <SelectItem value="confirmed">Confirmed</SelectItem>
+                <SelectItem value="production">Production</SelectItem>
+                <SelectItem value="ready">Ready</SelectItem>
+                <SelectItem value="shipped">Shipped</SelectItem>
+                <SelectItem value="delivered">Delivered</SelectItem>
+                <SelectItem value="cancelled">Cancelled</SelectItem>
+              </SelectContent>
+            </Select>
 
-        {/* View Toggle */}
-        <div className="flex justify-between items-center">
-          <div className="flex space-x-1 bg-muted p-1 rounded-lg">
-            <Button
-              variant={activeView === 'cards' ? 'default' : 'ghost'}
-              size="sm"
-              onClick={() => setActiveView('cards')}
-            >
-              Cards
-            </Button>
-            <Button
-              variant={activeView === 'table' ? 'default' : 'ghost'}
-              size="sm"
-              onClick={() => setActiveView('table')}
-            >
-              Table
-            </Button>
+            <Select value={priorityFilter} onValueChange={setPriorityFilter}>
+              <SelectTrigger className="w-32">
+                <AlertCircle className="h-4 w-4 mr-2" />
+                <SelectValue placeholder="Priority" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Priority</SelectItem>
+                <SelectItem value="low">Low</SelectItem>
+                <SelectItem value="normal">Normal</SelectItem>
+                <SelectItem value="high">High</SelectItem>
+                <SelectItem value="urgent">Urgent</SelectItem>
+              </SelectContent>
+            </Select>
+            
+            <div className="flex space-x-1 bg-muted p-1 rounded-lg">
+              <Button 
+                variant={activeView === 'cards' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setActiveView('cards')}
+              >
+                <Package className="h-4 w-4 mr-2" />
+                Cards
+              </Button>
+              <Button 
+                variant={activeView === 'table' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setActiveView('table')}
+              >
+                <FileText className="h-4 w-4 mr-2" />
+                Table
+              </Button>
+            </div>
           </div>
         </div>
 
         {/* Content */}
-        {activeView === 'cards' ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {activeView === 'table' ? (
+          <DataTable
+            data={filteredOrders}
+            columns={columns}
+            loading={false}
+            batchSelection={true}
+            onEdit={(order) => {
+              // Handle edit
+              console.log('Edit order:', order)
+            }}
+            onDelete={(order) => {
+              // Handle delete
+              console.log('Delete order:', order)
+            }}
+            onBatchDelete={(orders) => {
+              // Handle batch delete
+              console.log('Batch delete orders:', orders)
+            }}
+            pagination={{
+              current: 1,
+              pageSize: 15,
+              total: filteredOrders.length,
+              onChange: () => {}
+            }}
+          />
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredOrders.map((order) => {
-              const { variant: statusVariant, label: statusLabel, icon: StatusIcon } = getStatusBadge(order.status)
-              const { variant: priorityVariant, label: priorityLabel } = getPriorityBadge(order.priority)
-              const { variant: typeVariant, label: typeLabel } = getOrderTypeBadge(order.order_type)
+              const { variant: statusVariant, label: statusLabel, className: statusClassName } = getStatusBadge(order.status)
+              const { variant: priorityVariant, label: priorityLabel, className: priorityClassName } = getPriorityBadge(order.priority)
+              const { variant: typeVariant, label: typeLabel, className: typeClassName } = getOrderTypeBadge(order.order_type)
               const progress = getStatusProgress(order.status)
               
               return (
-                <Card key={order.id} className="p-6 hover:shadow-md transition-shadow">
-                  <div className="flex justify-between items-start mb-4">
+                <Card key={order.id} className="p-4 hover:shadow-md transition-shadow">
+                  <div className="flex justify-between items-start mb-3">
                     <div>
                       <Link 
                         href={`/sales/orders/${order.id}`}
@@ -747,15 +767,12 @@ export default function SalesOrdersPage() {
                       </p>
                     </div>
                     <div className="flex flex-col items-end space-y-1">
-                      <div className="flex items-center space-x-1">
-                        <StatusIcon className="h-4 w-4" />
-                        <Badge variant={statusVariant}>{statusLabel}</Badge>
-                      </div>
-                      <Badge variant={priorityVariant}>{priorityLabel}</Badge>
+                      <Badge variant={statusVariant} className={statusClassName}>{statusLabel}</Badge>
+                      <Badge variant={priorityVariant} className={priorityClassName}>{priorityLabel}</Badge>
                     </div>
                   </div>
 
-                  <div className="space-y-3">
+                  <div className="space-y-2">
                     <div className="flex justify-between">
                       <span className="text-sm text-muted-foreground">Customer:</span>
                       <span className="text-sm font-medium">{order.customer_name}</span>
@@ -768,7 +785,7 @@ export default function SalesOrdersPage() {
 
                     <div className="flex justify-between">
                       <span className="text-sm text-muted-foreground">Type:</span>
-                      <Badge variant={typeVariant}>{typeLabel}</Badge>
+                      <Badge variant={typeVariant} className={typeClassName}>{typeLabel}</Badge>
                     </div>
 
                     <div className="flex justify-between">
@@ -776,60 +793,80 @@ export default function SalesOrdersPage() {
                       <span className="text-sm font-medium">{order.items.length} items</span>
                     </div>
 
-                    <div className="flex justify-between">
-                      <span className="text-sm text-muted-foreground">Due Date:</span>
-                      <span className="text-sm font-medium">{formatDate(order.due_date)}</span>
-                    </div>
-
-                    {order.status !== 'cancelled' && (
-                      <div className="space-y-2">
-                        <div className="flex justify-between text-sm">
-                          <span>Progress:</span>
-                          <span>{progress.toFixed(0)}%</span>
-                        </div>
-                        <Progress value={progress} className="h-2" />
-                      </div>
-                    )}
-
-                    <div className="border-t pt-3">
+                    <div className="border-t pt-2 mt-3">
                       <div className="flex justify-between items-center">
-                        <span className="text-lg font-semibold">Total</span>
-                        <span className="text-lg font-bold text-green-600">
+                        <span className="text-sm font-medium">Total</span>
+                        <span className="text-lg font-bold">
                           {formatCurrency(order.total_amount)}
                         </span>
                       </div>
                     </div>
 
-                    {order.notes && (
-                      <div className="bg-muted p-2 rounded text-sm">
-                        {order.notes}
-                      </div>
-                    )}
+                    <div className="flex justify-between items-center pt-2">
+                      <span className="text-sm text-muted-foreground">{order.sales_person}</span>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                            <MoreHorizontal className="h-4 w-4" />
+                            <span className="sr-only">Open menu</span>
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-48">
+                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                          <DropdownMenuItem asChild>
+                            <Link href={`/sales/orders/${order.id}`} className="flex items-center">
+                              <Eye className="mr-2 h-4 w-4" />
+                              View Details
+                            </Link>
+                          </DropdownMenuItem>
+                          {(order.status === 'draft' || order.status === 'confirmed') && (
+                            <DropdownMenuItem asChild>
+                              <Link href={`/sales/orders/${order.id}/edit`} className="flex items-center">
+                                <Edit className="mr-2 h-4 w-4" />
+                                Edit Order
+                              </Link>
+                            </DropdownMenuItem>
+                          )}
+                          <DropdownMenuItem>
+                            <Copy className="mr-2 h-4 w-4" />
+                            Duplicate Order
+                          </DropdownMenuItem>
+                          <DropdownMenuItem>
+                            <PrinterIcon className="mr-2 h-4 w-4" />
+                            Print Order
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          {order.status === 'confirmed' && (
+                            <DropdownMenuItem>
+                              <Send className="mr-2 h-4 w-4" />
+                              Send to Production
+                            </DropdownMenuItem>
+                          )}
+                          {order.status === 'ready' && (
+                            <DropdownMenuItem>
+                              <Truck className="mr-2 h-4 w-4" />
+                              Mark as Shipped
+                            </DropdownMenuItem>
+                          )}
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem>
+                            <Archive className="mr-2 h-4 w-4" />
+                            Archive
+                          </DropdownMenuItem>
+                          {order.status === 'draft' && (
+                            <DropdownMenuItem className="text-red-600">
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Delete Order
+                            </DropdownMenuItem>
+                          )}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
                   </div>
                 </Card>
               )
             })}
           </div>
-        ) : (
-          <Card>
-            <div className="p-6 border-b">
-              <h3 className="text-lg font-semibold">Sales Orders</h3>
-              <p className="text-sm text-muted-foreground">Manage all customer orders and sales processes</p>
-            </div>
-            <AdvancedDataTable
-              data={filteredOrders}
-              columns={columns}
-              searchable={false}
-              filterable={false}
-              pagination={{
-                pageSize: 10,
-                currentPage: 1,
-                totalPages: Math.ceil(filteredOrders.length / 10),
-                totalItems: filteredOrders.length,
-                onChange: () => {}
-              }}
-            />
-          </Card>
         )}
 
         {/* Urgent Orders Alert */}

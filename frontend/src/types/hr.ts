@@ -82,11 +82,19 @@ export interface PayrollPeriod {
   updatedAt: string
 }
 
+export interface PayrollItemEmployee {
+  id: string
+  employeeId: string
+  name: string
+  position: string
+  department: string
+}
+
 export interface PayrollItem {
   id: string
   payrollPeriodId: string
   employeeId: string
-  employee: Pick<Employee, 'id' | 'employeeId' | 'name' | 'position' | 'department'>
+  employee: PayrollItemEmployee
   basicSalary: number
   allowances: PayrollAllowance[]
   deductions: PayrollDeduction[]
@@ -149,6 +157,8 @@ export interface PayrollFilters {
   periodId?: string
   salaryMin?: number
   salaryMax?: number
+  year?: number
+  month?: number
 }
 
 export interface PayrollSettings {

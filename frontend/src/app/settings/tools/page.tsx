@@ -40,7 +40,7 @@ import {
   Shield,
   Search,
   ExternalLink,
-  Tool
+  Settings as Tool
 } from 'lucide-react'
 
 interface SystemTool {

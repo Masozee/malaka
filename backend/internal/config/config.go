@@ -1,6 +1,9 @@
 package config
 
-import "time"
+import (
+	"strings"
+	"time"
+)
 
 // Config stores all configuration of the application.
 // The values are read by viper from a config file or environment variable.
@@ -17,12 +20,63 @@ type Config struct {
 	CacheTTL      time.Duration `mapstructure:"CACHE_TTL"`
 	AppEnv        string        `mapstructure:"APP_ENV"`
 	LogLevel      string        `mapstructure:"LOG_LEVEL"`
-	
+
+	// CORS Configuration
+	CORSAllowedOrigins string `mapstructure:"CORS_ALLOWED_ORIGINS"` // Comma-separated list of allowed origins
+
+	// Rate Limiting Configuration
+	RateLimitRequestsPerSecond int64 `mapstructure:"RATE_LIMIT_RPS"`
+	RateLimitBurstSize         int64 `mapstructure:"RATE_LIMIT_BURST"`
+
 	// MinIO Configuration
 	MinIOEndpoint     string `mapstructure:"MINIO_ENDPOINT"`
 	MinIOAccessKey    string `mapstructure:"MINIO_ACCESS_KEY"`
 	MinIOSecretKey    string `mapstructure:"MINIO_SECRET_KEY"`
 	MinIOUseSSL       bool   `mapstructure:"MINIO_USE_SSL"`
-	MinIORegion       string `mapstructure:"MINIO_REGION"`
+	MinIORegion       string `mapstructure:"MINIO_REGION_NAME"`
 	MinIOBucketPrefix string `mapstructure:"MINIO_BUCKET_PREFIX"`
+}
+
+// GetCORSAllowedOrigins returns a slice of allowed CORS origins
+func (c *Config) GetCORSAllowedOrigins() []string {
+	if c.CORSAllowedOrigins == "" {
+		// Default allowed origins for development
+		return []string{
+			"http://localhost:3000",
+			"http://localhost:3003",
+			"http://127.0.0.1:3000",
+			"http://127.0.0.1:3003",
+		}
+	}
+	origins := strings.Split(c.CORSAllowedOrigins, ",")
+	for i := range origins {
+		origins[i] = strings.TrimSpace(origins[i])
+	}
+	return origins
+}
+
+// IsDevelopment returns true if running in development environment
+func (c *Config) IsDevelopment() bool {
+	return c.AppEnv == "" || c.AppEnv == "development" || c.AppEnv == "dev"
+}
+
+// IsProduction returns true if running in production environment
+func (c *Config) IsProduction() bool {
+	return c.AppEnv == "production" || c.AppEnv == "prod"
+}
+
+// GetRateLimitConfig returns rate limit configuration with defaults
+func (c *Config) GetRateLimitConfig() (requestsPerSecond, burstSize int64) {
+	requestsPerSecond = c.RateLimitRequestsPerSecond
+	burstSize = c.RateLimitBurstSize
+
+	// Set defaults
+	if requestsPerSecond <= 0 {
+		requestsPerSecond = 100 // 100 requests per second default
+	}
+	if burstSize <= 0 {
+		burstSize = 200 // Allow burst of 200 requests
+	}
+
+	return requestsPerSecond, burstSize
 }

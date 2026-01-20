@@ -327,9 +327,9 @@ export default function EmployeesPage() {
               </SelectContent>
             </Select>
 
-            <Select 
-              value={filters.employment_status || ''} 
-              onValueChange={(value) => setFilters({ ...filters, employment_status: value || undefined })}
+            <Select
+              value={filters.employment_status || ''}
+              onValueChange={(value) => setFilters({ ...filters, employment_status: (value || undefined) as 'ACTIVE' | 'INACTIVE' | 'TERMINATED' | undefined })}
             >
               <SelectTrigger className="w-32">
                 <div className="h-3 w-3 bg-gray-400 rounded-full mr-2"></div>

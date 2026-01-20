@@ -41,7 +41,7 @@ export function RevenueChart({
   }) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-white dark:bg-gray-800 p-3 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg">
+        <div className="bg-white dark:bg-gray-800 p-3 border border-gray-200 dark:border-gray-700 rounded-lg ">
           <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
             {new Date(label || '').toLocaleDateString('en-US', { 
               month: 'long', 
@@ -92,7 +92,11 @@ export function RevenueChart({
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div style={{ width: '100%', height }}>
+        <div
+          style={{ width: '100%', height }}
+          role="img"
+          aria-label={`${title} line chart showing revenue data over time`}
+        >
           <ResponsiveContainer>
             <LineChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" className="opacity-30" />

@@ -710,7 +710,7 @@ export default function SalesCompetitorsPage() {
               const { variant: threatVariant, label: threatLabel } = getThreatBadge(competitor.threat_level)
               
               return (
-                <Card key={competitor.id} className="p-6 hover:shadow-md transition-shadow">
+                <Card key={competitor.id} className="p-6 hover: transition-shadow">
                   <div className="flex justify-between items-start mb-4">
                     <div className="flex items-center space-x-2">
                       <Zap className="h-5 w-5 text-blue-600" />

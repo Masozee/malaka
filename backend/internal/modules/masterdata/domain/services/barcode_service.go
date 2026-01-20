@@ -11,12 +11,16 @@ import (
 
 // BarcodeService provides business logic for barcode operations.
 type BarcodeService struct {
-	repo repositories.BarcodeRepository
+	repo        repositories.BarcodeRepository
+	articleRepo repositories.ArticleRepository
 }
 
 // NewBarcodeService creates a new BarcodeService.
-func NewBarcodeService(repo repositories.BarcodeRepository) *BarcodeService {
-	return &BarcodeService{repo: repo}
+func NewBarcodeService(repo repositories.BarcodeRepository, articleRepo repositories.ArticleRepository) *BarcodeService {
+	return &BarcodeService{
+		repo:        repo,
+		articleRepo: articleRepo,
+	}
 }
 
 // CreateBarcode creates a new barcode.
@@ -61,4 +65,29 @@ func (s *BarcodeService) DeleteBarcode(ctx context.Context, id string) error {
 		return errors.New("barcode not found")
 	}
 	return s.repo.Delete(ctx, id)
+}
+
+// GetBarcodesByArticleID retrieves all barcodes for a specific article.
+func (s *BarcodeService) GetBarcodesByArticleID(ctx context.Context, articleID string) ([]*entities.Barcode, error) {
+	return s.repo.GetByArticleID(ctx, articleID)
+}
+
+// GetAllArticlesForBarcodeGeneration retrieves all articles for barcode generation.
+func (s *BarcodeService) GetAllArticlesForBarcodeGeneration(ctx context.Context) ([]*entities.Article, error) {
+	return s.articleRepo.GetAll(ctx)
+}
+
+// UpdateArticleBarcodeURL updates the barcode URL for an article.
+func (s *BarcodeService) UpdateArticleBarcodeURL(ctx context.Context, articleID, barcodeURL string) error {
+	article, err := s.articleRepo.GetByID(ctx, articleID)
+	if err != nil {
+		return err
+	}
+	if article == nil {
+		return errors.New("article not found")
+	}
+
+	// Update the article with the barcode URL
+	article.BarcodeURL = barcodeURL
+	return s.articleRepo.Update(ctx, article)
 }

@@ -740,7 +740,7 @@ export default function StockTransferPage() {
               const { variant: priorityVariant, label: priorityLabel } = getPriorityBadge(transfer.priority)
               
               return (
-                <Card key={transfer.id} className="p-6 hover:shadow-md transition-shadow">
+                <Card key={transfer.id} className="p-6 hover: transition-shadow">
                   <div className="flex justify-between items-start mb-4">
                     <div className="flex items-center space-x-2">
                       <ArrowRightLeft className="h-5 w-5 text-blue-600" />

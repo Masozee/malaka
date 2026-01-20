@@ -773,7 +773,7 @@ export default function ShipmentManagementPage() {
               const { variant: paymentVariant, label: paymentLabel } = getPaymentMethodBadge(shipment.payment_method)
               
               return (
-                <Card key={shipment.id} className="p-6 hover:shadow-md transition-shadow">
+                <Card key={shipment.id} className="p-6 hover: transition-shadow">
                   <div className="flex justify-between items-start mb-4">
                     <div>
                       <Link 

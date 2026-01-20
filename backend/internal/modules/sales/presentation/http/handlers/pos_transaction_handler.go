@@ -54,9 +54,14 @@ func (h *PosTransactionHandler) CreatePosTransaction(c *gin.Context) {
 }
 
 // GetAllPosTransactions handles retrieving all POS transactions.
-// TODO: Implement GetAllPosTransactions method in service layer
 func (h *PosTransactionHandler) GetAllPosTransactions(c *gin.Context) {
-	response.BadRequest(c, "GetAllPosTransactions not yet implemented", nil)
+	transactions, err := h.service.GetAllPosTransactions(c.Request.Context())
+	if err != nil {
+		response.InternalServerError(c, err.Error(), nil)
+		return
+	}
+
+	response.OK(c, "Sales orders retrieved successfully", transactions)
 }
 
 // GetPosTransactionByID handles retrieving a POS transaction by its ID.

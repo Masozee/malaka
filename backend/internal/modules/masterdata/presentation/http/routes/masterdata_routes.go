@@ -91,6 +91,12 @@ func RegisterMasterdataRoutes(router *gin.Engine, companyHandler *handlers.Compa
 			barcode.GET("/:id", barcodeHandler.GetBarcodeByID)
 			barcode.PUT("/:id", barcodeHandler.UpdateBarcode)
 			barcode.DELETE("/:id", barcodeHandler.DeleteBarcode)
+			
+			// Barcode generation endpoints
+			barcode.POST("/generate", barcodeHandler.GenerateBarcode)
+			barcode.POST("/generate/batch", barcodeHandler.GenerateBatchBarcodes)
+			barcode.POST("/generate/articles", barcodeHandler.GenerateArticleBarcodes)
+			barcode.POST("/generate/all", barcodeHandler.GenerateAllArticleBarcodes)
 		}
 
 		// Price routes

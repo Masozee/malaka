@@ -367,7 +367,7 @@ export default function GoodsReceiptPage() {
         {/* Quick Actions */}
         <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-6">
           <Card 
-            className="hover:shadow-lg transition-shadow cursor-pointer"
+            className="hover: transition-shadow cursor-pointer"
             onClick={() => router.push('/inventory/goods-receipt/create')}
           >
             <CardContent className="p-6 text-center">
@@ -379,7 +379,7 @@ export default function GoodsReceiptPage() {
             </CardContent>
           </Card>
 
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+          <Card className="hover: transition-shadow cursor-pointer">
             <CardContent className="p-6 text-center">
               <div className="w-12 h-12 bg-green-100 dark:bg-green-900/20 rounded-lg flex items-center justify-center mx-auto mb-4">
                 <CheckCircle className="w-6 h-6 text-green-600 dark:text-green-400" />
@@ -389,7 +389,7 @@ export default function GoodsReceiptPage() {
             </CardContent>
           </Card>
 
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+          <Card className="hover: transition-shadow cursor-pointer">
             <CardContent className="p-6 text-center">
               <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/20 rounded-lg flex items-center justify-center mx-auto mb-4">
                 <Download className="w-6 h-6 text-purple-600 dark:text-purple-400" />

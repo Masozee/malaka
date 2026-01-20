@@ -162,6 +162,7 @@ export interface TrialBalance {
 }
 
 export interface TrialBalanceAccount {
+  id: string // Used by DataTable, maps to account_id
   account_id: string
   account_code: string
   account_name: string

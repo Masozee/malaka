@@ -72,3 +72,24 @@ func (r *BarcodeRepositoryImpl) Delete(ctx context.Context, id string) error {
 	_, err := r.db.ExecContext(ctx, query, id)
 	return err
 }
+
+// GetByArticleID retrieves all barcodes for a specific article from the database.
+func (r *BarcodeRepositoryImpl) GetByArticleID(ctx context.Context, articleID string) ([]*entities.Barcode, error) {
+	query := `SELECT id, article_id, code, created_at, updated_at FROM barcodes WHERE article_id = $1 ORDER BY created_at DESC`
+	rows, err := r.db.QueryContext(ctx, query, articleID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var barcodes []*entities.Barcode
+	for rows.Next() {
+		barcode := &entities.Barcode{}
+		err := rows.Scan(&barcode.ID, &barcode.ArticleID, &barcode.Code, &barcode.CreatedAt, &barcode.UpdatedAt)
+		if err != nil {
+			return nil, err
+		}
+		barcodes = append(barcodes, barcode)
+	}
+	return barcodes, rows.Err()
+}

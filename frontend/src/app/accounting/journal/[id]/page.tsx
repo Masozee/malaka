@@ -337,7 +337,7 @@ export default function JournalEntryDetailPage() {
                     </tr>
                   </thead>
                   <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
-                    {(journalEntry.lines || journalEntry.journal_entry_lines || []).map((line) => (
+                    {(journalEntry.journal_entry_lines || []).map((line) => (
                       <tr key={line.id}>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
@@ -495,7 +495,7 @@ export default function JournalEntryDetailPage() {
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-gray-600 dark:text-gray-400">Total Lines</span>
-                  <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{(journalEntry.lines || journalEntry.journal_entry_lines || []).length}</span>
+                  <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{(journalEntry.journal_entry_lines || []).length}</span>
                 </div>
                 
                 <div className="flex justify-between items-center">

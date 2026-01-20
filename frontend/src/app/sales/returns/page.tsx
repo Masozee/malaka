@@ -665,7 +665,7 @@ export default function ReturnsPage() {
               const { variant: refundVariant, label: refundLabel } = getRefundMethodBadge(returnItem.refund_method)
               
               return (
-                <Card key={returnItem.id} className="p-6 hover:shadow-md transition-shadow">
+                <Card key={returnItem.id} className="p-6 hover: transition-shadow">
                   <div className="flex justify-between items-start mb-4">
                     <div>
                       <Link 

@@ -70,13 +70,17 @@ import {
   PanelLeft,
   // Help icons
   HelpCircle,
-  ExternalLink
+  ExternalLink,
+  LogOut,
+  ArrowRight,
+  Quote
 } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { ThemeToggle } from "@/components/ui/theme-toggle"
 import { useAuth } from "@/contexts/auth-context"
+import { useSessionActivity } from "@/hooks/useSessionActivity"
 
 interface LayoutProps {
   children: React.ReactNode
@@ -115,7 +119,8 @@ const menuData: MenuItem[] = [
       { id: "users", label: "Users", icon: UserCheck, href: "/master-data/users", count: 156 },
       { id: "customers", label: "Customers", icon: Users, href: "/master-data/customers", count: 3289 },
       { id: "divisions", label: "Divisions", icon: Network, href: "/master-data/divisions", count: 6 },
-      { id: "depstores", label: "Dept Stores", icon: Store, href: "/master-data/depstores", count: 12 }
+      { id: "depstores", label: "Dept Stores", icon: Store, href: "/master-data/depstores", count: 12 },
+      { id: "master-data-settings", label: "Settings", icon: Settings, href: "/master-data/settings" }
     ]
   },
   {
@@ -130,7 +135,8 @@ const menuData: MenuItem[] = [
       { id: "sizes", label: "Sizes", icon: Ruler, href: "/products/sizes", count: 28 },
       { id: "barcodes", label: "Barcodes", icon: ScanLine, href: "/master-data/barcodes" },
       { id: "prices", label: "Prices", icon: DollarSign, href: "/master-data/prices", count: 1543 },
-      { id: "gallery", label: "Gallery", icon: Image, href: "/master-data/gallery-images", count: 456 }
+      { id: "gallery", label: "Gallery", icon: Image, href: "/master-data/gallery-images", count: 456 },
+      { id: "products-settings", label: "Settings", icon: Settings, href: "/products/settings" }
     ]
   },
   {
@@ -142,13 +148,15 @@ const menuData: MenuItem[] = [
       { id: "pos", label: "Point of Sale", icon: CreditCard, href: "/sales/pos", count: 142 },
       { id: "online-sales", label: "Online Sales", icon: TrendingUp, href: "/sales/online", count: 789 },
       { id: "direct-sales", label: "Direct Sales", icon: Store, href: "/sales/direct", count: 234 },
+      { id: "quotations", label: "Quotations", icon: Quote, href: "/sales/quotations", count: 89 },
       { id: "orders", label: "Sales Orders", icon: FileText, href: "/sales/orders", count: 567 },
       { id: "returns", label: "Returns", icon: RefreshCw, href: "/sales/returns", count: 23 },
       { id: "consignment", label: "Consignment", icon: Package, href: "/sales/consignment", count: 45 },
       { id: "promotions", label: "Promotions", icon: Gift, href: "/sales/promotions", count: 8 },
       { id: "targets", label: "Sales Targets", icon: Target, href: "/sales/targets" },
       { id: "competitors", label: "Competitors", icon: BarChart, href: "/sales/competitors" },
-      { id: "reconciliation", label: "Reconciliation", icon: CheckCircle, href: "/sales/reconciliation", count: 12 }
+      { id: "reconciliation", label: "Reconciliation", icon: CheckCircle, href: "/sales/reconciliation", count: 12 },
+      { id: "sales-settings", label: "Settings", icon: Settings, href: "/sales/settings" }
     ]
   },
   {
@@ -165,7 +173,8 @@ const menuData: MenuItem[] = [
       { id: "adjustments", label: "Adjustments", icon: Plus, href: "/inventory/adjustments", count: 5 },
       { id: "stock-opname", label: "Stock Opname", icon: Search, href: "/inventory/stock-opname", count: 3 },
       { id: "return-supplier", label: "Return Supplier", icon: RefreshCw, href: "/inventory/return-supplier", count: 7 },
-      { id: "barcode-print", label: "Barcode Print", icon: ScanLine, href: "/inventory/barcode-print" }
+      { id: "barcode-print", label: "Barcode Print", icon: ScanLine, href: "/inventory/barcode-print" },
+      { id: "inventory-settings", label: "Settings", icon: Settings, href: "/inventory/settings" }
     ]
   },
   {
@@ -180,7 +189,8 @@ const menuData: MenuItem[] = [
       { id: "work-orders", label: "Work Orders", icon: Cog, href: "/production/work-orders", count: 45 },
       { id: "quality-control", label: "Quality Control", icon: CheckCircle, href: "/production/quality-control", count: 12 },
       { id: "material-planning", label: "Material Planning", icon: Package, href: "/production/material-planning", count: 15 },
-      { id: "analytics", label: "Analytics", icon: BarChart3, href: "/production/analytics" }
+      { id: "analytics", label: "Analytics", icon: BarChart3, href: "/production/analytics" },
+      { id: "production-settings", label: "Settings", icon: Settings, href: "/production/settings" }
     ]
   },
   {
@@ -195,7 +205,8 @@ const menuData: MenuItem[] = [
       { id: "rfq", label: "RFQ (Quotations)", icon: MessageSquare, href: "/procurement/rfq", count: 12 },
       { id: "vendor-evaluation", label: "Vendor Evaluation", icon: Star, href: "/procurement/vendor-evaluation", count: 8 },
       { id: "contracts", label: "Contracts", icon: HandHeart, href: "/procurement/contracts", count: 15 },
-      { id: "analytics", label: "Analytics", icon: BarChart3, href: "/procurement/analytics" }
+      { id: "analytics", label: "Analytics", icon: BarChart3, href: "/procurement/analytics" },
+      { id: "procurement-settings", label: "Settings", icon: Settings, href: "/procurement/settings" }
     ]
   },
   {
@@ -209,7 +220,8 @@ const menuData: MenuItem[] = [
       { id: "airwaybill", label: "Airwaybill", icon: FileText, href: "/shipping/airwaybill" },
       { id: "outbound-scanning", label: "Outbound Scanning", icon: ScanLine, href: "/shipping/outbound" },
       { id: "manifest", label: "Manifest", icon: ClipboardList, href: "/shipping/manifest" },
-      { id: "shipping-invoices", label: "Shipping Invoices", icon: Receipt, href: "/shipping/invoices" }
+      { id: "shipping-invoices", label: "Shipping Invoices", icon: Receipt, href: "/shipping/invoices" },
+      { id: "shipping-settings", label: "Settings", icon: Settings, href: "/shipping/settings" }
     ]
   },
   {
@@ -225,7 +237,8 @@ const menuData: MenuItem[] = [
       { id: "invoices", label: "Invoices", icon: Receipt, href: "/accounting/invoices" },
       { id: "cost-centers", label: "Cost Centers", icon: Target, href: "/accounting/cost-centers" },
       { id: "fixed-assets", label: "Fixed Assets", icon: Building, href: "/accounting/fixed-assets" },
-      { id: "currency", label: "Currency", icon: DollarSign, href: "/accounting/currency" }
+      { id: "currency", label: "Currency", icon: DollarSign, href: "/accounting/currency" },
+      { id: "accounting-settings", label: "Settings", icon: Settings, href: "/accounting/settings" }
     ]
   },
   {
@@ -240,7 +253,8 @@ const menuData: MenuItem[] = [
       { id: "leave", label: "Leave Management", icon: Calendar, href: "/hr/leave" },
       { id: "performance", label: "Performance", icon: Award, href: "/hr/performance" },
       { id: "training", label: "Training", icon: GraduationCap, href: "/hr/training" },
-      { id: "spg-stores", label: "SPG Stores", icon: Store, href: "/hr/spg-stores" }
+      { id: "spg-stores", label: "SPG Stores", icon: Store, href: "/hr/spg-stores" },
+      { id: "hr-settings", label: "Settings", icon: Settings, href: "/hr/settings" }
     ]
   },
   {
@@ -257,7 +271,8 @@ const menuData: MenuItem[] = [
       { id: "hr-reports", label: "HR Reports", icon: Users, href: "/reports/hr" },
       { id: "custom-reports", label: "Custom Reports", icon: FileSpreadsheet, href: "/reports/custom" },
       { id: "static-reports", label: "Static Reports", icon: FileText, href: "/reports/static" },
-      { id: "olap", label: "OLAP Analysis", icon: BarChart3, href: "/reports/olap" }
+      { id: "olap", label: "OLAP Analysis", icon: BarChart3, href: "/reports/olap" },
+      { id: "reporting-settings", label: "Settings", icon: Settings, href: "/reports/settings" }
     ]
   }
 ]
@@ -312,7 +327,13 @@ export function TwoLevelLayout({ children }: LayoutProps) {
   const [activeMenu, setActiveMenu] = React.useState<string | null>(null)
   const [isSecondSidebarCollapsed, setIsSecondSidebarCollapsed] = React.useState(false)
   const [showNotifications, setShowNotifications] = React.useState(false)
-  const [showProfile, setShowProfile] = React.useState(false)
+  const [showProfilePopup, setShowProfilePopup] = React.useState(false)
+  
+  // Initialize session activity tracking
+  useSessionActivity({
+    inactivityTimeout: 30 * 60 * 1000, // 30 minutes
+    sessionWarningTime: 5 * 60 * 1000   // 5 minutes
+  })
 
   // Auto-set active menu based on pathname
   React.useEffect(() => {
@@ -354,7 +375,11 @@ export function TwoLevelLayout({ children }: LayoutProps) {
       <aside className="fixed left-0 top-0 h-screen w-12 bg-gray-100 dark:bg-gray-800 border-r border-gray-300 dark:border-gray-600 flex flex-col z-20">
         {/* Header - Aligned with combined navbar height */}
         <div className="h-[54px] border-b border-gray-300 dark:border-gray-600 flex items-center justify-center">
-          <Building2 className="h-5 w-5 text-gray-700 dark:text-gray-300" />
+          <img 
+            src="/logo.png" 
+            alt="Malaka ERP" 
+            className="h-6 w-6 object-contain"
+          />
         </div>
         
         {/* Navigation */}
@@ -371,7 +396,7 @@ export function TwoLevelLayout({ children }: LayoutProps) {
                       href={menu.href}
                       className={`flex items-center justify-center p-2 rounded-md transition-colors ${
                         isActive
-                          ? 'shadow-lg shadow-[#cfff04]/50' 
+                          ? ' ' 
                           : 'hover:bg-gray-200 dark:hover:bg-gray-700'
                       }`}
                       style={isActive ? { backgroundColor: '#cfff04' } : {}}
@@ -384,7 +409,7 @@ export function TwoLevelLayout({ children }: LayoutProps) {
                       onClick={() => handleMenuClick(menu.id)}
                       className={`w-full flex items-center justify-center p-2 rounded-md transition-colors ${
                         isActive
-                          ? 'shadow-lg shadow-[#cfff04]/50' 
+                          ? ' ' 
                           : 'hover:bg-gray-200 dark:hover:bg-gray-700'
                       }`}
                       style={isActive ? { backgroundColor: '#cfff04' } : {}}
@@ -407,7 +432,7 @@ export function TwoLevelLayout({ children }: LayoutProps) {
               href="/calendar"
               className={`w-full flex items-center justify-center p-2 rounded-md transition-colors ${
                 pathname === '/calendar'
-                  ? 'shadow-lg shadow-[#cfff04]/50' 
+                  ? ' ' 
                   : 'hover:bg-gray-200 dark:hover:bg-gray-700'
               }`}
               style={pathname === '/calendar' ? { backgroundColor: '#cfff04' } : {}}
@@ -421,26 +446,13 @@ export function TwoLevelLayout({ children }: LayoutProps) {
               <ThemeToggle />
             </div>
             
-            {/* Profile */}
-            <Link 
-              href="/profile"
-              className={`w-full flex items-center justify-center p-2 rounded-md transition-colors ${
-                pathname.startsWith('/profile')
-                  ? 'shadow-lg shadow-[#cfff04]/50' 
-                  : 'hover:bg-gray-200 dark:hover:bg-gray-700'
-              }`}
-              style={pathname.startsWith('/profile') ? { backgroundColor: '#cfff04' } : {}}
-              title="Profile"
-            >
-              <User className={`h-4 w-4 ${pathname.startsWith('/profile') ? 'text-black' : 'text-gray-600 dark:text-gray-300'}`} />
-            </Link>
             
             {/* Settings */}
             <Link 
               href="/settings"
               className={`w-full flex items-center justify-center p-2 rounded-md transition-colors ${
                 pathname === '/settings'
-                  ? 'shadow-lg shadow-[#cfff04]/50' 
+                  ? ' ' 
                   : 'hover:bg-gray-200 dark:hover:bg-gray-700'
               }`}
               style={pathname === '/settings' ? { backgroundColor: '#cfff04' } : {}}
@@ -454,7 +466,6 @@ export function TwoLevelLayout({ children }: LayoutProps) {
               <button 
                 onClick={() => {
                   setShowNotifications(!showNotifications)
-                  setShowProfile(false)
                 }}
                 className="w-full flex items-center justify-center p-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
                 title="Notifications"
@@ -471,7 +482,7 @@ export function TwoLevelLayout({ children }: LayoutProps) {
               
               {/* Notifications Dropdown */}
               {showNotifications && (
-                <div className="absolute bottom-full left-12 mb-2 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50">
+                <div className="absolute bottom-full left-12 mb-2 w-80 bg-white dark:bg-gray-800 rounded-lg  border border-gray-200 dark:border-gray-700 z-50 animate-in slide-in-from-bottom-2 fade-in-0 duration-200">
                   <div className="p-4 border-b border-gray-200 dark:border-gray-700">
                     <div className="flex items-center justify-between">
                       <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100">Notifications</h3>
@@ -516,69 +527,92 @@ export function TwoLevelLayout({ children }: LayoutProps) {
               )}
             </div>
             
-            {/* Profile Button */}
+            {/* Profile Popup */}
             <div className="relative">
-              <button 
-                onClick={() => {
-                  setShowProfile(!showProfile)
-                  setShowNotifications(false)
+              <button
+                onClick={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  setShowProfilePopup(!showProfilePopup)
                 }}
-                className="w-full flex items-center justify-center p-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                className="w-full flex items-center justify-center p-2 rounded-md hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-all duration-300 hover:scale-110 hover:"
                 title="User Profile"
               >
                 {user ? (
-                  <div className="h-4 w-4 rounded-full bg-blue-600 flex items-center justify-center">
-                    <span className="text-[8px] text-white font-medium">
+                  <div className="h-4 w-4 rounded-full bg-blue-600 flex items-center justify-center transition-all duration-300 hover:bg-blue-700 hover: hover:scale-125 hover:ring-2 hover:ring-blue-300">
+                    <span className="text-[8px] text-white font-bold">
                       {user.username.charAt(0).toUpperCase()}
                     </span>
                   </div>
                 ) : (
-                  <User className="h-4 w-4 text-gray-600 dark:text-gray-300" />
+                  <User className="h-4 w-4 text-gray-600 dark:text-gray-300 transition-all duration-300 hover:text-blue-600 hover:scale-110" />
                 )}
               </button>
               
-              {/* Profile Dropdown */}
-              {showProfile && user && (
-                <div className="absolute bottom-full left-12 mb-2 w-64 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50">
-                  <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-                    <div className="flex items-center space-x-3">
-                      <div className="h-12 w-12 rounded-full bg-blue-600 flex items-center justify-center">
-                        <span className="text-white font-medium text-lg">
+              {/* Profile Popup */}
+              {showProfilePopup && user && (
+                <div className="absolute bottom-full left-12 mb-2 w-64 bg-white dark:bg-gray-800 rounded-lg  border border-gray-200 dark:border-gray-700 z-[9999] animate-in slide-in-from-left-2 fade-in-0 duration-200"
+                     style={{ pointerEvents: 'auto' }}>
+                  {/* User Info Header */}
+                  <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-full bg-blue-600 flex items-center justify-center">
+                        <span className="text-white font-semibold">
                           {user.username.charAt(0).toUpperCase()}
                         </span>
                       </div>
-                      <div>
-                        <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                      <div className="flex-1">
+                        <div className="font-medium text-sm text-gray-900 dark:text-gray-100">
                           {user.username}
-                        </p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                        </div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">
                           {user.email}
-                        </p>
+                        </div>
+                        <div className="mt-1">
+                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                            {user.role}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
+                  
+                  {/* Menu Items */}
                   <div className="py-2">
                     <Link
                       href="/profile"
-                      className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-                      onClick={() => setShowProfile(false)}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setShowProfilePopup(false)
+                      }}
+                      className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer"
+                      style={{ pointerEvents: 'auto' }}
                     >
-                      Profile Settings
+                      <User className="h-4 w-4 flex-shrink-0" />
+                      Profile
                     </Link>
+                    
                     <Link
-                      href="/profile/preferences"
-                      className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-                      onClick={() => setShowProfile(false)}
+                      href="/settings"
+                      onClick={() => setShowProfilePopup(false)}
+                      className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer"
+                      style={{ pointerEvents: 'auto' }}
                     >
-                      Preferences
+                      <Settings className="h-4 w-4 flex-shrink-0" />
+                      Settings
                     </Link>
+                    
+                    <hr className="my-2 border-gray-200 dark:border-gray-700" />
+                    
                     <button
                       onClick={() => {
-                        setShowProfile(false)
+                        setShowProfilePopup(false)
                         logout()
                       }}
-                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                      className="flex items-center gap-3 w-full px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors cursor-pointer"
+                      style={{ pointerEvents: 'auto' }}
                     >
+                      <LogOut className="h-4 w-4 flex-shrink-0" />
                       Sign out
                     </button>
                   </div>
@@ -631,7 +665,7 @@ export function TwoLevelLayout({ children }: LayoutProps) {
                         isSecondSidebarCollapsed ? 'justify-center p-3' : 'justify-between px-3 py-2'
                       } rounded-lg transition-colors ${
                         isActive
-                          ? 'text-black shadow-lg shadow-[#cfff04]/30' 
+                          ? 'text-black  ' 
                           : 'hover:bg-white dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
                       }`}
                       style={isActive ? { backgroundColor: '#cfff04' } : {}}
@@ -658,7 +692,7 @@ export function TwoLevelLayout({ children }: LayoutProps) {
           {/* Help Card - Bottom section */}
           {!isSecondSidebarCollapsed && (
             <div className="p-3 border-t border-gray-300 dark:border-gray-600">
-              <div className="bg-white dark:bg-gray-700 rounded-lg p-4 shadow-sm">
+              <div className="bg-white dark:bg-gray-700 rounded-lg p-4 ">
                 <div className="flex items-center space-x-2 mb-2">
                   <HelpCircle className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                   <span className="text-sm font-medium text-gray-900 dark:text-gray-100">Need Help?</span>
@@ -692,12 +726,19 @@ export function TwoLevelLayout({ children }: LayoutProps) {
       </main>
 
       {/* Click outside handlers */}
-      {(showNotifications || showProfile) && (
+      {showNotifications && (
         <div
           className="fixed inset-0 z-40"
           onClick={() => {
             setShowNotifications(false)
-            setShowProfile(false)
+          }}
+        />
+      )}
+      {showProfilePopup && (
+        <div
+          className="fixed inset-0 z-[9998]"
+          onClick={() => {
+            setShowProfilePopup(false)
           }}
         />
       )}

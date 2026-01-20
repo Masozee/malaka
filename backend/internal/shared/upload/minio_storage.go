@@ -1,6 +1,7 @@
 package upload
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"mime/multipart"
@@ -158,6 +159,45 @@ func (s *MinIOStorage) Upload(ctx context.Context, file *multipart.FileHeader) (
 
 	// Return the object URL
 	return fmt.Sprintf("%s/%s", bucketName, fileName), nil
+}
+
+// UploadBytes uploads raw bytes to MinIO with specified filename and content type
+func (s *MinIOStorage) UploadBytes(ctx context.Context, data []byte, filename, contentType string) (string, error) {
+	// Create reader from bytes
+	reader := bytes.NewReader(data)
+	
+	// Generate unique filename
+	uniqueFilename := s.generateFileName(filename)
+	
+	// Determine bucket based on file type
+	bucketName := s.getBucketName(filename)
+	
+	// Prepare upload options
+	options := minio.PutObjectOptions{
+		ContentType: contentType,
+		UserMetadata: map[string]string{
+			"uploaded-at": time.Now().UTC().Format(time.RFC3339),
+			"original-name": filename,
+		},
+	}
+
+	// Upload bytes to MinIO
+	info, err := s.client.PutObject(ctx, bucketName, uniqueFilename, reader, int64(len(data)), options)
+	if err != nil {
+		s.logger.Error("Failed to upload bytes to MinIO", 
+			zap.String("bucket", bucketName),
+			zap.String("filename", uniqueFilename),
+			zap.Error(err))
+		return "", fmt.Errorf("failed to upload bytes: %w", err)
+	}
+
+	s.logger.Info("Bytes uploaded successfully", 
+		zap.String("bucket", bucketName),
+		zap.String("filename", uniqueFilename),
+		zap.Int64("size", info.Size))
+
+	// Return the object URL
+	return fmt.Sprintf("%s/%s", bucketName, uniqueFilename), nil
 }
 
 // Delete removes a file from MinIO.

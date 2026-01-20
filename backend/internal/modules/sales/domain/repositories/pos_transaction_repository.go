@@ -10,6 +10,7 @@ import (
 type PosTransactionRepository interface {
 	Create(ctx context.Context, pt *entities.PosTransaction) error
 	GetByID(ctx context.Context, id string) (*entities.PosTransaction, error)
+	GetAll(ctx context.Context) ([]*entities.PosTransaction, error)
 	Update(ctx context.Context, pt *entities.PosTransaction) error
 	Delete(ctx context.Context, id string) error
 }

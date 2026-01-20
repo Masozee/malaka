@@ -7,7 +7,7 @@ import (
 )
 
 // RegisterSalesRoutes registers the sales routes.
-func RegisterSalesRoutes(router *gin.Engine, soHandler *handlers.SalesOrderHandler, siHandler *handlers.SalesInvoiceHandler, ptHandler *handlers.PosTransactionHandler, ooHandler *handlers.OnlineOrderHandler, csHandler *handlers.ConsignmentSalesHandler, srHandler *handlers.SalesReturnHandler, promoHandler *handlers.PromotionHandler, stHandler *handlers.SalesTargetHandler, skHandler *handlers.SalesKompetitorHandler, pmHandler *handlers.ProsesMarginHandler, srekHandler *handlers.SalesRekonsiliasiHandler) {
+func RegisterSalesRoutes(router gin.IRouter, soHandler *handlers.SalesOrderHandler, siHandler *handlers.SalesInvoiceHandler, ptHandler *handlers.PosTransactionHandler, ooHandler *handlers.OnlineOrderHandler, csHandler *handlers.ConsignmentSalesHandler, srHandler *handlers.SalesReturnHandler, promoHandler *handlers.PromotionHandler, stHandler *handlers.SalesTargetHandler, skHandler *handlers.SalesKompetitorHandler, pmHandler *handlers.ProsesMarginHandler, srekHandler *handlers.SalesRekonsiliasiHandler) {
 	sales := router.Group("/sales")
 	{
 		// Sales Order routes

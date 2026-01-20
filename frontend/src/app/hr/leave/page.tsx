@@ -5,7 +5,7 @@ import { TwoLevelLayout } from '@/components/ui/two-level-layout'
 import { Header } from '@/components/ui/header'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { AdvancedDataTable } from '@/components/ui/advanced-data-table'
+import { AdvancedDataTable, AdvancedColumn } from '@/components/ui/advanced-data-table'
 import { Badge } from '@/components/ui/badge'
 import { HRService } from '@/services/hr'
 import { LeaveRequestForm } from '@/components/forms/leave-request-form'
@@ -238,7 +238,7 @@ export default function LeavePage() {
     }
   }
 
-  const columns = [
+  const columns: AdvancedColumn<LeaveRequest>[] = [
     {
       key: 'employeeId',
       title: 'Employee',
@@ -504,19 +504,19 @@ export default function LeavePage() {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <input 
                 placeholder="Search employees, leave types..."
-                className="pl-9 w-full h-9 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-xs transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                className="pl-9 w-full h-9 rounded-md border border-input bg-background px-3 py-1 text-sm  transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
               />
             </div>
           </div>
           
           <div className="flex items-center gap-2">
-            <select className="h-9 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring">
+            <select className="h-9 rounded-md border border-input bg-background px-3 py-1 text-sm  transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring">
               <option value="">All Status</option>
               <option value="pending">Pending</option>
               <option value="approved">Approved</option>
               <option value="rejected">Rejected</option>
             </select>
-            <select className="h-9 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring">
+            <select className="h-9 rounded-md border border-input bg-background px-3 py-1 text-sm  transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring">
               <option value="">All Types</option>
               <option value="annual">Annual Leave</option>
               <option value="sick">Sick Leave</option>
@@ -549,7 +549,7 @@ export default function LeavePage() {
                 Table
               </Button>
             </div>
-            <select className="h-9 w-44 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-xs">
+            <select className="h-9 w-44 rounded-md border border-input bg-background px-3 py-1 text-sm ">
               <option>Sort by Applied Date</option>
               <option>Sort by Status</option>
               <option>Sort by Employee</option>

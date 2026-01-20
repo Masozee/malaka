@@ -23,9 +23,13 @@ class AuthService {
   async login(credentials: LoginRequest): Promise<LoginResponse> {
     const response = await apiClient.post<LoginResponse>('/api/v1/masterdata/users/login', credentials)
     
-    // Store token in localStorage
-    if (response.token) {
+    // Store token in both localStorage and cookies (browser only)
+    if (response.token && typeof window !== 'undefined') {
       localStorage.setItem(this.TOKEN_KEY, response.token)
+      
+      // Store in cookies for middleware access
+      this.setTokenCookie(response.token)
+      
       apiClient.setToken(response.token)
     }
     
@@ -33,9 +37,38 @@ class AuthService {
   }
 
   logout(): void {
-    localStorage.removeItem(this.TOKEN_KEY)
-    localStorage.removeItem(this.USER_KEY)
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem(this.TOKEN_KEY)
+      localStorage.removeItem(this.USER_KEY)
+      
+      // Remove token from cookies
+      this.removeTokenCookie()
+    }
     apiClient.setToken('')
+  }
+
+  private setTokenCookie(token: string): void {
+    if (typeof window === 'undefined') return
+    
+    // Calculate expiration from token
+    let maxAge = 24 * 60 * 60 // Default 24 hours in seconds
+    
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]))
+      if (payload.exp) {
+        const now = Math.floor(Date.now() / 1000)
+        maxAge = Math.max(0, payload.exp - now)
+      }
+    } catch {
+      // Use default if token parsing fails
+    }
+    
+    document.cookie = `${this.TOKEN_KEY}=${token}; path=/; max-age=${maxAge}; SameSite=Strict; Secure=${location.protocol === 'https:'}`
+  }
+
+  private removeTokenCookie(): void {
+    if (typeof window === 'undefined') return
+    document.cookie = `${this.TOKEN_KEY}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`
   }
 
   getToken(): string | null {
@@ -44,6 +77,9 @@ class AuthService {
   }
 
   isAuthenticated(): boolean {
+    // Server-side rendering safety check
+    if (typeof window === 'undefined') return false
+    
     const token = this.getToken()
     if (!token) return false
     
@@ -61,6 +97,8 @@ class AuthService {
     const token = this.getToken()
     if (token && this.isAuthenticated()) {
       apiClient.setToken(token)
+      // Ensure token is also in cookies for middleware
+      this.setTokenCookie(token)
     }
   }
 

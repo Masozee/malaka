@@ -692,7 +692,7 @@ export default function SalesConsignmentPage() {
               const sellThrough = getSellThroughRate(consignment)
               
               return (
-                <Card key={consignment.id} className="p-6 hover:shadow-md transition-shadow">
+                <Card key={consignment.id} className="p-6 hover: transition-shadow">
                   <div className="flex justify-between items-start mb-4">
                     <div className="flex items-center space-x-2">
                       <Handshake className="h-5 w-5 text-blue-600" />

@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { TwoLevelLayout } from '@/components/ui/two-level-layout'
 import { Header } from '@/components/ui/header'
-import { AdvancedDataTable } from '@/components/ui/advanced-data-table'
+import { AdvancedDataTable, AdvancedColumn } from '@/components/ui/advanced-data-table'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -107,11 +107,11 @@ export default function PayrollHistoryPage() {
       filteredPeriods.reduce((sum, period) => sum + (period?.totalNetPay || 0), 0) / filteredPeriods.length : 0
   }
 
-  const periodColumns = [
-    { 
-      key: 'period' as keyof PayrollPeriod, 
-      title: 'Period', 
-      render: (period: PayrollPeriod) => (
+  const periodColumns: AdvancedColumn<PayrollPeriod>[] = [
+    {
+      key: 'month',
+      title: 'Period',
+      render: (_value: unknown, period: PayrollPeriod) => (
         <div>
           <div className="font-medium">
             {formatPeriod(period?.month, period?.year, mounted)}
@@ -122,53 +122,53 @@ export default function PayrollHistoryPage() {
         </div>
       )
     },
-    { 
-      key: 'status' as keyof PayrollPeriod, 
+    {
+      key: 'status',
       title: 'Status',
-      render: (period: PayrollPeriod) => {
-        if (!period?.status) return ''
+      render: (_value: unknown, period: PayrollPeriod) => {
+        if (!period?.status) return null
         const { variant, label } = getStatusBadge(period.status)
         return <Badge variant={variant}>{label}</Badge>
       }
     },
-    { 
-      key: 'totalEmployees' as keyof PayrollPeriod, 
+    {
+      key: 'totalEmployees',
       title: 'Employees',
-      render: (period: PayrollPeriod) => (
+      render: (_value: unknown, period: PayrollPeriod) => (
         <div className="flex items-center space-x-2">
           <Users className="h-4 w-4 text-muted-foreground" />
           <span>{period?.totalEmployees || 0}</span>
         </div>
       )
     },
-    { 
-      key: 'totalGrossPay' as keyof PayrollPeriod, 
+    {
+      key: 'totalGrossPay',
       title: 'Gross Pay',
-      render: (period: PayrollPeriod) => formatCurrency(period?.totalGrossPay, mounted)
+      render: (_value: unknown, period: PayrollPeriod) => formatCurrency(period?.totalGrossPay, mounted)
     },
-    { 
-      key: 'totalDeductions' as keyof PayrollPeriod, 
+    {
+      key: 'totalDeductions',
       title: 'Deductions',
-      render: (period: PayrollPeriod) => formatCurrency(period?.totalDeductions, mounted)
+      render: (_value: unknown, period: PayrollPeriod) => formatCurrency(period?.totalDeductions, mounted)
     },
-    { 
-      key: 'totalNetPay' as keyof PayrollPeriod, 
+    {
+      key: 'totalNetPay',
       title: 'Net Pay',
-      render: (period: PayrollPeriod) => (
+      render: (_value: unknown, period: PayrollPeriod) => (
         <div className="font-semibold text-green-600">
           {formatCurrency(period?.totalNetPay, mounted)}
         </div>
       )
     },
-    { 
-      key: 'processedAt' as keyof PayrollPeriod, 
+    {
+      key: 'processedAt',
       title: 'Processed',
-      render: (period: PayrollPeriod) => formatDate(period?.processedAt, mounted) || '-'
+      render: (_value: unknown, period: PayrollPeriod) => formatDate(period?.processedAt, mounted) || '-'
     },
     {
-      key: 'actions' as keyof PayrollPeriod,
+      key: 'id',
       title: 'Actions',
-      render: (period: PayrollPeriod) => (
+      render: (_value: unknown, _period: PayrollPeriod) => (
         <div className="flex items-center space-x-2">
           <Button variant="ghost" size="sm">
             <Eye className="h-4 w-4" />
@@ -181,11 +181,11 @@ export default function PayrollHistoryPage() {
     }
   ]
 
-  const employeeColumns = [
+  const employeeColumns: AdvancedColumn<PayrollItem>[] = [
     {
-      key: 'employee' as keyof PayrollItem,
+      key: 'employee',
       title: 'Employee',
-      render: (item: PayrollItem) => (
+      render: (_value: unknown, item: PayrollItem) => (
         <div>
           <div className="font-medium">{item?.employee?.name || ''}</div>
           <div className="text-sm text-muted-foreground">{item?.employee?.employeeId || ''} • {item?.employee?.department || ''}</div>
@@ -193,34 +193,34 @@ export default function PayrollHistoryPage() {
       )
     },
     {
-      key: 'position' as keyof PayrollItem,
+      key: 'employeeId',
       title: 'Position',
-      render: (item: PayrollItem) => item?.employee?.position || ''
+      render: (_value: unknown, item: PayrollItem) => item?.employee?.position || ''
     },
     {
-      key: 'basicSalary' as keyof PayrollItem,
+      key: 'basicSalary',
       title: 'Basic Salary',
-      render: (item: PayrollItem) => formatCurrency(item?.basicSalary, mounted)
+      render: (_value: unknown, item: PayrollItem) => formatCurrency(item?.basicSalary, mounted)
     },
     {
-      key: 'grossPay' as keyof PayrollItem,
+      key: 'grossPay',
       title: 'Gross Pay',
-      render: (item: PayrollItem) => formatCurrency(item?.grossPay, mounted)
+      render: (_value: unknown, item: PayrollItem) => formatCurrency(item?.grossPay, mounted)
     },
     {
-      key: 'netPay' as keyof PayrollItem,
+      key: 'netPay',
       title: 'Net Pay',
-      render: (item: PayrollItem) => (
+      render: (_value: unknown, item: PayrollItem) => (
         <div className="font-semibold text-green-600">
           {formatCurrency(item?.netPay, mounted)}
         </div>
       )
     },
     {
-      key: 'status' as keyof PayrollItem,
+      key: 'status',
       title: 'Status',
-      render: (item: PayrollItem) => {
-        if (!item?.status) return ''
+      render: (_value: unknown, item: PayrollItem) => {
+        if (!item?.status) return null
         const { variant, label } = getPayrollItemStatusBadge(item.status)
         return <Badge variant={variant}>{label}</Badge>
       }
@@ -378,13 +378,10 @@ export default function PayrollHistoryPage() {
             <AdvancedDataTable
               data={filteredPeriods}
               columns={periodColumns}
-              searchable={false}
-              filterable={false}
               pagination={{
+                current: 1,
                 pageSize: 10,
-                currentPage: 1,
-                totalPages: Math.ceil(filteredPeriods.length / 10),
-                totalItems: filteredPeriods.length,
+                total: filteredPeriods.length,
                 onChange: () => {}
               }}
             />
@@ -397,13 +394,10 @@ export default function PayrollHistoryPage() {
             <AdvancedDataTable
               data={filteredPayrollItems}
               columns={employeeColumns}
-              searchable={false}
-              filterable={false}
               pagination={{
+                current: 1,
                 pageSize: 10,
-                currentPage: 1,
-                totalPages: Math.ceil(filteredPayrollItems.length / 10),
-                totalItems: filteredPayrollItems.length,
+                total: filteredPayrollItems.length,
                 onChange: () => {}
               }}
             />

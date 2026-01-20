@@ -435,7 +435,7 @@ export default function SuppliersPage() {
 
   // Supplier Card Component for cards view
   const SupplierCard = ({ supplier }: { supplier: Supplier }) => (
-    <Card className="p-4 hover:shadow-md transition-shadow">
+    <Card className="p-4 hover: transition-shadow">
       <div className="flex items-start justify-between mb-3">
         <div className="flex-1">
           <h3 className="font-semibold text-gray-900">{supplier.name}</h3>
