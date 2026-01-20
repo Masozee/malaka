@@ -13,13 +13,17 @@ import (
 
 // UserService provides business logic for user operations.
 type UserService struct {
-	repo      repositories.UserRepository
-	jwtSecret string
+	repo           repositories.UserRepository
+	jwtSecret      string
+	jwtExpiryHours int
 }
 
 // NewUserService creates a new UserService.
-func NewUserService(repo repositories.UserRepository, jwtSecret string) *UserService {
-	return &UserService{repo: repo, jwtSecret: jwtSecret}
+func NewUserService(repo repositories.UserRepository, jwtSecret string, jwtExpiryHours int) *UserService {
+	if jwtExpiryHours <= 0 {
+		jwtExpiryHours = 48 // Default: 2 days
+	}
+	return &UserService{repo: repo, jwtSecret: jwtSecret, jwtExpiryHours: jwtExpiryHours}
 }
 
 // CreateUser creates a new user.
@@ -89,11 +93,11 @@ func (s *UserService) AuthenticateUser(ctx context.Context, username, password s
 		return "", errors.New("invalid credentials")
 	}
 
-	// Create token
+	// Create token with configurable expiry (default 48 hours = 2 days)
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"sub":  user.ID,
 		"role": user.Role,
-		"exp":  time.Now().Add(time.Hour * 72).Unix(),
+		"exp":  time.Now().Add(time.Hour * time.Duration(s.jwtExpiryHours)).Unix(),
 	})
 
 	// Generate encoded token and send it as response.

@@ -103,12 +103,12 @@ export function middleware(request: NextRequest) {
       response.headers.set('x-user-role', user.role)
     }
     
-    // Refresh token cookie with updated expiration
+    // Refresh token cookie with updated expiration (2 days)
     const cookieOptions = {
       httpOnly: false, // Allow JS access for frontend auth context
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict' as const,
-      maxAge: 24 * 60 * 60, // 24 hours
+      maxAge: 48 * 60 * 60, // 48 hours (2 days)
       path: '/'
     }
     

@@ -13,6 +13,7 @@ type Config struct {
 	DBSource      string        `mapstructure:"DB_SOURCE"`
 	ServerAddress string        `mapstructure:"SERVER_ADDRESS"`
 	JWTSecret     string        `mapstructure:"JWT_SECRET"`
+	JWTExpiryHours int          `mapstructure:"JWT_EXPIRY_HOURS"` // Token expiry in hours (default: 48 = 2 days)
 	EncryptionKey string        `mapstructure:"ENCRYPTION_KEY"`
 	RedisAddr     string        `mapstructure:"REDIS_ADDR"`
 	RedisPassword string        `mapstructure:"REDIS_PASSWORD"`
@@ -79,4 +80,12 @@ func (c *Config) GetRateLimitConfig() (requestsPerSecond, burstSize int64) {
 	}
 
 	return requestsPerSecond, burstSize
+}
+
+// GetJWTExpiryHours returns JWT token expiry in hours with default of 48 hours (2 days)
+func (c *Config) GetJWTExpiryHours() int {
+	if c.JWTExpiryHours <= 0 {
+		return 48 // Default: 2 days
+	}
+	return c.JWTExpiryHours
 }

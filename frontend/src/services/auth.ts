@@ -49,20 +49,22 @@ class AuthService {
 
   private setTokenCookie(token: string): void {
     if (typeof window === 'undefined') return
-    
-    // Calculate expiration from token
-    let maxAge = 24 * 60 * 60 // Default 24 hours in seconds
-    
+
+    // Calculate expiration from token, default to 48 hours (2 days)
+    let maxAge = 48 * 60 * 60 // Default 48 hours (2 days) in seconds
+
     try {
       const payload = JSON.parse(atob(token.split('.')[1]))
       if (payload.exp) {
         const now = Math.floor(Date.now() / 1000)
-        maxAge = Math.max(0, payload.exp - now)
+        // Use token expiry or 48 hours, whichever is smaller
+        const tokenMaxAge = Math.max(0, payload.exp - now)
+        maxAge = Math.min(maxAge, tokenMaxAge)
       }
     } catch {
       // Use default if token parsing fails
     }
-    
+
     document.cookie = `${this.TOKEN_KEY}=${token}; path=/; max-age=${maxAge}; SameSite=Strict; Secure=${location.protocol === 'https:'}`
   }
 

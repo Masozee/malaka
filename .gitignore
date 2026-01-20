@@ -16,8 +16,11 @@ malaka.test
 *.out
 
 # Go build outputs
-server
-malaka
+/server
+/malaka
+backend/server
+backend/malaka
+backend/bin/
 
 # Dependency directories
 vendor/
