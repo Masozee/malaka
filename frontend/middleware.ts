@@ -107,7 +107,7 @@ export function middleware(request: NextRequest) {
     const cookieOptions = {
       httpOnly: false, // Allow JS access for frontend auth context
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict' as const,
+      sameSite: 'lax' as const, // Lax allows cookies on redirects
       maxAge: 48 * 60 * 60, // 48 hours (2 days)
       path: '/'
     }
@@ -158,7 +158,7 @@ export function middleware(request: NextRequest) {
       
       // Preserve full URL including search params for redirect
       if (fullUrl !== '/') {
-        loginUrl.searchParams.set('redirect', encodeURIComponent(fullUrl))
+        loginUrl.searchParams.set('redirect', fullUrl)
       }
       
       // Clear the auth attempt cookies

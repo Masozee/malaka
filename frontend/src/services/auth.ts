@@ -65,7 +65,8 @@ class AuthService {
       // Use default if token parsing fails
     }
 
-    document.cookie = `${this.TOKEN_KEY}=${token}; path=/; max-age=${maxAge}; SameSite=Strict; Secure=${location.protocol === 'https:'}`
+    const secureFlag = location.protocol === 'https:' ? '; Secure' : ''
+    document.cookie = `${this.TOKEN_KEY}=${token}; path=/; max-age=${maxAge}; SameSite=Lax${secureFlag}`
   }
 
   private removeTokenCookie(): void {
