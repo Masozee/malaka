@@ -15,14 +15,14 @@ import type { PurchaseOrder } from '@/types/procurement'
 import { HugeiconsIcon } from '@hugeicons/react'
 import {
     PlusSignIcon,
-    ShoppingCart01Icon,
+    ShoppingCartIcon,
     Clock01Icon,
     CheckmarkCircle01Icon,
     Dollar01Icon,
     Search01Icon,
     FilterIcon,
     Download01Icon,
-    Cancel01Icon,
+    CancelIcon,
 } from '@hugeicons/core-free-icons'
 import Link from 'next/link'
 
@@ -269,7 +269,7 @@ export default function PurchaseOrdersList({ initialData, userId }: PurchaseOrde
                     <Card className="p-4">
                         <div className="flex items-center space-x-3">
                             <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
-                                <HugeiconsIcon icon={ShoppingCart01Icon} className="h-5 w-5 text-foreground" />
+                                <HugeiconsIcon icon={ShoppingCartIcon} className="h-5 w-5 text-foreground" />
                             </div>
                             <div>
                                 <p className="text-sm font-medium text-muted-foreground">Total Orders</p>
@@ -349,7 +349,7 @@ export default function PurchaseOrdersList({ initialData, userId }: PurchaseOrde
                 ) : error ? (
                     <div className="flex items-center justify-center h-64">
                         <div className="text-center">
-                            <HugeiconsIcon icon={Cancel01Icon} className="h-12 w-12 text-red-500 mx-auto mb-4" />
+                            <HugeiconsIcon icon={CancelIcon} className="h-12 w-12 text-red-500 mx-auto mb-4" />
                             <p className="text-lg font-medium mb-2">Error Loading Purchase Orders</p>
                             <p className="text-muted-foreground mb-4">{error}</p>
                             <Button onClick={() => loadPurchaseOrders()}>Try Again</Button>
@@ -358,7 +358,7 @@ export default function PurchaseOrdersList({ initialData, userId }: PurchaseOrde
                 ) : purchaseOrders.length === 0 ? (
                     <div className="flex items-center justify-center h-64">
                         <div className="text-center">
-                            <HugeiconsIcon icon={ShoppingCart01Icon} className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                            <HugeiconsIcon icon={ShoppingCartIcon} className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                             <p className="text-lg font-medium mb-2">No Purchase Orders Found</p>
                             <p className="text-muted-foreground mb-4">Get started by creating your first purchase order.</p>
                             <Link href="/procurement/purchase-orders/new">

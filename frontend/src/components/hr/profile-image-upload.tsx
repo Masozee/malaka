@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react'
 import { HugeiconsIcon } from "@hugeicons/react"
-import { Camera01Icon, Upload01Icon, Cancel01Icon, AlertCircleIcon, CheckmarkCircle01Icon } from "@hugeicons/core-free-icons"
+import { CameraIcon, UploadIcon, CancelIcon, AlertCircleIcon, CheckmarkCircle01Icon } from "@hugeicons/core-free-icons"
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
@@ -159,7 +159,7 @@ export function ProfileImageUpload({
         {/* Overlay for editable mode */}
         {editable && (
           <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 rounded-full flex items-center justify-center cursor-pointer">
-            <HugeiconsIcon icon={Camera01Icon} className="h-6 w-6 text-white" onClick={() => setIsDialogOpen(true)} />
+            <HugeiconsIcon icon={CameraIcon} className="h-6 w-6 text-white" onClick={() => setIsDialogOpen(true)} />
           </div>
         )}
       </div>
@@ -170,7 +170,7 @@ export function ProfileImageUpload({
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button variant="outline" size="sm">
-                <HugeiconsIcon icon={Camera01Icon} className="h-4 w-4 mr-2" />
+                <HugeiconsIcon icon={CameraIcon} className="h-4 w-4 mr-2" />
                 {currentImageUrl ? 'Change Photo' : 'Add Photo'}
               </Button>
             </DialogTrigger>
@@ -245,7 +245,7 @@ export function ProfileImageUpload({
                         className="flex-1"
                         disabled={uploading}
                       >
-                        <HugeiconsIcon icon={Upload01Icon} className="h-4 w-4 mr-2" />
+                        <HugeiconsIcon icon={UploadIcon} className="h-4 w-4 mr-2" />
                         Select Image
                       </Button>
                       
@@ -255,7 +255,7 @@ export function ProfileImageUpload({
                           onClick={handleCancelUpload}
                           disabled={uploading}
                         >
-                          <HugeiconsIcon icon={Cancel01Icon} className="h-4 w-4" />
+                          <HugeiconsIcon icon={CancelIcon} className="h-4 w-4" />
                         </Button>
                       )}
                     </>
@@ -277,7 +277,7 @@ export function ProfileImageUpload({
           {/* Upload Status Badge */}
           {currentImageUrl && (
             <Badge variant="secondary" className="text-xs">
-              <HugeiconsIcon icon={Camera01Icon} className="h-3 w-3 mr-1" />
+              <HugeiconsIcon icon={CameraIcon} className="h-3 w-3 mr-1" />
               Photo uploaded
             </Badge>
           )}

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { HugeiconsIcon } from "@hugeicons/react"
-import { Mail01Icon, SmartSmartPhone01Icon, Calendar01Icon, Dollar01Icon } from "@hugeicons/core-free-icons"
+import { MailIcon, SmartphoneIcon, Calendar01Icon, Dollar01Icon } from "@hugeicons/core-free-icons"
 import { Badge } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
@@ -72,12 +72,12 @@ export function EmployeeCard({ employee }: EmployeeCardProps) {
 
           <div className="mt-4 space-y-2">
             <div className="flex items-center text-sm text-gray-600">
-              <HugeiconsIcon icon={Mail01Icon} className="h-4 w-4 mr-2 text-gray-400" />
+              <HugeiconsIcon icon={MailIcon} className="h-4 w-4 mr-2 text-gray-400" />
               <span className="truncate">{employee.email}</span>
             </div>
             
             <div className="flex items-center text-sm text-gray-600">
-              <HugeiconsIcon icon={SmartPhone01Icon} className="h-4 w-4 mr-2 text-gray-400" />
+              <HugeiconsIcon icon={SmartphoneIcon} className="h-4 w-4 mr-2 text-gray-400" />
               <span>{employee.phone}</span>
             </div>
 

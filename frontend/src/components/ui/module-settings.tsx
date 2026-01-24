@@ -3,9 +3,9 @@
 import * as React from "react"
 import { HugeiconsIcon } from "@hugeicons/react"
 import {
-  Settings01Icon,
+  SettingsIcon,
   FloppyDiskIcon,
-  RotateLeft01Icon,
+  RotateLeftIcon,
   AlertCircleIcon
 } from "@hugeicons/core-free-icons"
 import { Button } from "@/components/ui/button"
@@ -137,7 +137,7 @@ export function ModuleGear({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2">
-          <HugeiconsIcon icon={Settings01Icon} className="h-5 w-5" />
+          <HugeiconsIcon icon={SettingsIcon} className="h-5 w-5" />
           <h2 className="text-lg font-semibold">{moduleName} Gear</h2>
           {hasUnsavedChanges && (
             <Badge variant="secondary" className="ml-2">
@@ -154,7 +154,7 @@ export function ModuleGear({
             disabled={isLoading || !hasUnsavedChanges}
             className="flex items-center space-x-2"
           >
-            <HugeiconsIcon icon={RotateLeft01Icon} className="h-4 w-4" />
+            <HugeiconsIcon icon={RotateLeftIcon} className="h-4 w-4" />
             <span>Reset</span>
           </Button>
           <Button

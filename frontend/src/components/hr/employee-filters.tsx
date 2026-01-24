@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { HugeiconsIcon } from "@hugeicons/react"
-import { Cancel01Icon, FilterIcon, RotateLeft01Icon } from "@hugeicons/core-free-icons"
+import { CancelIcon, FilterIcon, RotateLeftIcon } from "@hugeicons/core-free-icons"
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -100,7 +100,7 @@ export function EmployeeFilters({ filters, onFiltersChange, onClearFilters }: Em
               size="sm" 
               onClick={onClearFilters}
             >
-              <HugeiconsIcon icon={RotateLeft01Icon} className="h-4 w-4 mr-1" />
+              <HugeiconsIcon icon={RotateLeftIcon} className="h-4 w-4 mr-1" />
               Clear All
             </Button>
           )}
@@ -132,7 +132,7 @@ export function EmployeeFilters({ filters, onFiltersChange, onClearFilters }: Em
                 className="h-4 w-4 p-0 hover:bg-transparent"
                 onClick={() => removeBadgeFilter(badge.key)}
               >
-                <HugeiconsIcon icon={Cancel01Icon} className="h-3 w-3" />
+                <HugeiconsIcon icon={CancelIcon} className="h-3 w-3" />
               </Button>
             </Badge>
           ))}

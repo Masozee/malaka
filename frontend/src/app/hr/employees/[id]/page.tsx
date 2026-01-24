@@ -19,16 +19,16 @@ import {
   UserCircleIcon,
   ArrowLeft01Icon,
   Download01Icon,
-  File01Icon,
+  FileIcon,
   PencilEdit01Icon,
   Clock01Icon,
   DollarCircleIcon,
   Briefcase01Icon,
   Building01Icon,
   Calendar01Icon,
-  Mail01Icon,
+  MailIcon,
   Call02Icon,
-  Location01Icon,
+  LocationIcon,
   UserIcon,
   CreditCardIcon,
   Delete01Icon
@@ -183,7 +183,7 @@ export default function EmployeeDetailPage() {
               Export
             </Button>
             <Button variant="outline" size="sm">
-              <HugeiconsIcon icon={File01Icon} className="h-4 w-4 mr-2" />
+              <HugeiconsIcon icon={FileIcon} className="h-4 w-4 mr-2" />
               Generate Report
             </Button>
             <Link href={`/hr/employees/${employee.id}/edit`}>
@@ -302,14 +302,14 @@ export default function EmployeeDetailPage() {
             {/* Contact Information */}
             <Card className="p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                <HugeiconsIcon icon={Mail01Icon} className="h-5 w-5 mr-2" />
+                <HugeiconsIcon icon={MailIcon} className="h-5 w-5 mr-2" />
                 Contact Information
               </h3>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-4">
                   <div className="flex items-start space-x-3">
-                    <HugeiconsIcon icon={Mail01Icon} className="h-5 w-5 text-gray-400 mt-0.5" />
+                    <HugeiconsIcon icon={MailIcon} className="h-5 w-5 text-gray-400 mt-0.5" />
                     <div>
                       <p className="text-sm font-medium text-gray-900">Email Address</p>
                       <p className="text-sm text-gray-600">{employee.email}</p>
@@ -327,7 +327,7 @@ export default function EmployeeDetailPage() {
 
                 <div className="space-y-4">
                   <div className="flex items-start space-x-3">
-                    <HugeiconsIcon icon={Location01Icon} className="h-5 w-5 text-gray-400 mt-0.5" />
+                    <HugeiconsIcon icon={LocationIcon} className="h-5 w-5 text-gray-400 mt-0.5" />
                     <div>
                       <p className="text-sm font-medium text-gray-900">Address</p>
                       <p className="text-sm text-gray-600">{employee.address}</p>
@@ -446,7 +446,7 @@ export default function EmployeeDetailPage() {
                   className="w-full justify-start hover:bg-green-50 hover:border-green-200 h-auto py-3"
                   onClick={() => window.open(`mailto:${employee.email}`, '_blank')}
                 >
-                  <HugeiconsIcon icon={Mail01Icon} className="h-4 w-4 mr-3" />
+                  <HugeiconsIcon icon={MailIcon} className="h-4 w-4 mr-3" />
                   <div className="text-left">
                     <div className="font-medium">Send Email</div>
                     <div className="text-xs text-muted-foreground mt-1">{employee.email}</div>
@@ -467,7 +467,7 @@ export default function EmployeeDetailPage() {
 
                 <Link href={`/hr/payroll?employee=${employee.id}`} className="w-full">
                   <Button variant="outline" className="w-full justify-start hover:bg-orange-50 hover:border-orange-200 h-auto py-3">
-                    <HugeiconsIcon icon={File01Icon} className="h-4 w-4 mr-3" />
+                    <HugeiconsIcon icon={FileIcon} className="h-4 w-4 mr-3" />
                     <div className="text-left">
                       <div className="font-medium">View Payroll</div>
                       <div className="text-xs text-muted-foreground mt-1">Salary & payment history</div>

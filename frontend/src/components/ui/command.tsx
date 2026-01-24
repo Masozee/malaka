@@ -6,18 +6,18 @@ import {
   Search01Icon,
   Home01Icon,
   Database01Icon,
-  ShoppingCart01Icon,
+  ShoppingCartIcon,
   Package01Icon,
   UserGroupIcon,
   ChartBarLineIcon,
-  Settings01Icon,
+  SettingsIcon,
   Factory01Icon,
   Calculator01Icon,
   Dollar01Icon,
-  File01Icon,
+  FileIcon,
   ChartIncreaseIcon,
   Clock01Icon,
-  Location01Icon
+  LocationIcon
 } from "@hugeicons/core-free-icons"
 
 import { useRouter } from "next/navigation"
@@ -47,10 +47,10 @@ const commands = [
   {
     group: "Sales & Commerce",
     items: [
-      { label: "Sales Management", icon: ShoppingCart01Icon, href: "#", keywords: ["sales", "orders", "customers", "pos"] },
-      { label: "Point of Sale", icon: ShoppingCart01Icon, href: "#", keywords: ["pos", "retail", "checkout", "payment"] },
+      { label: "Sales Management", icon: ShoppingCartIcon, href: "#", keywords: ["sales", "orders", "customers", "pos"] },
+      { label: "Point of Sale", icon: ShoppingCartIcon, href: "#", keywords: ["pos", "retail", "checkout", "payment"] },
       { label: "Online Sales", icon: ChartIncreaseIcon, href: "#", keywords: ["online", "ecommerce", "web", "digital"] },
-      { label: "Customer Returns", icon: ShoppingCart01Icon, href: "#", keywords: ["returns", "refunds", "exchanges"] },
+      { label: "Customer Returns", icon: ShoppingCartIcon, href: "#", keywords: ["returns", "refunds", "exchanges"] },
       { label: "Promotions", icon: ChartIncreaseIcon, href: "#", keywords: ["promotions", "discounts", "campaigns", "marketing"] },
     ]
   },
@@ -68,7 +68,7 @@ const commands = [
     group: "Inventory & Warehouse",
     items: [
       { label: "Inventory Control", icon: Package01Icon, href: "#", keywords: ["inventory", "stock", "warehouse", "items"] },
-      { label: "Stock Transfer", icon: Location01Icon, href: "#", keywords: ["transfer", "movement", "relocation", "stock"] },
+      { label: "Stock Transfer", icon: LocationIcon, href: "#", keywords: ["transfer", "movement", "relocation", "stock"] },
       { label: "Goods Receipt", icon: Package01Icon, href: "#", keywords: ["receipt", "receiving", "incoming", "delivery"] },
       { label: "Stock Adjustments", icon: Package01Icon, href: "#", keywords: ["adjustments", "corrections", "variance"] },
       { label: "Stock Opname", icon: Package01Icon, href: "#", keywords: ["opname", "counting", "physical", "audit"] },
@@ -81,7 +81,7 @@ const commands = [
       { label: "Accounts Receivable", icon: Dollar01Icon, href: "#", keywords: ["receivable", "ar", "collections", "invoices"] },
       { label: "Accounts Payable", icon: Dollar01Icon, href: "#", keywords: ["payable", "ap", "vendors", "bills"] },
       { label: "Cash Management", icon: Dollar01Icon, href: "#", keywords: ["cash", "bank", "payments", "receipts"] },
-      { label: "Financial Reports", icon: File01Icon, href: "#", keywords: ["financial", "reports", "statements", "balance"] },
+      { label: "Financial Reports", icon: FileIcon, href: "#", keywords: ["financial", "reports", "statements", "balance"] },
       { label: "Trial Balance", icon: Calculator01Icon, href: "#", keywords: ["trial", "balance", "accounts", "summary"] },
       { label: "Cost Centers", icon: Calculator01Icon, href: "#", keywords: ["cost", "centers", "allocation", "budget"] },
     ]
@@ -103,14 +103,14 @@ const commands = [
       { label: "Sales Reports", icon: ChartIncreaseIcon, href: "#", keywords: ["sales", "reports", "performance", "revenue"] },
       { label: "Inventory Reports", icon: Package01Icon, href: "#", keywords: ["inventory", "reports", "stock", "levels"] },
       { label: "Financial Analysis", icon: Calculator01Icon, href: "#", keywords: ["financial", "analysis", "ratios", "performance"] },
-      { label: "Custom Reports", icon: File01Icon, href: "#", keywords: ["custom", "reports", "builder", "designer"] },
+      { label: "Custom Reports", icon: FileIcon, href: "#", keywords: ["custom", "reports", "builder", "designer"] },
     ]
   },
   {
     group: "System",
     items: [
       { label: "User Management", icon: UserGroupIcon, href: "#", keywords: ["users", "permissions", "roles", "access"] },
-      { label: "System Gear", icon: Settings01Icon, href: "#", keywords: ["settings", "configuration", "preferences", "setup"] },
+      { label: "System Gear", icon: SettingsIcon, href: "#", keywords: ["settings", "configuration", "preferences", "setup"] },
       { label: "Data Import/Export", icon: Database01Icon, href: "#", keywords: ["import", "export", "data", "migration"] },
       { label: "Backup & Restore", icon: Database01Icon, href: "#", keywords: ["backup", "restore", "recovery", "archive"] },
     ]

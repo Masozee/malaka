@@ -1,7 +1,7 @@
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { HugeiconsIcon } from '@hugeicons/react'
-import { ArrowRight01Icon, MoreHorizontalIcon } from '@hugeicons/core-free-icons'
+import { ArrowRightIcon, MoreHorizontalIcon } from '@hugeicons/core-free-icons'
 
 import { cn } from "@/lib/utils"
 
@@ -76,7 +76,7 @@ function BreadcrumbSeparator({
       className={cn("[&>svg]:size-3.5", className)}
       {...props}
     >
-      {children ?? <HugeiconsIcon icon={ArrowRight01Icon} className="h-3.5 w-3.5" />}
+      {children ?? <HugeiconsIcon icon={ArrowRightIcon} className="h-3.5 w-3.5" />}
     </li>
   )
 }

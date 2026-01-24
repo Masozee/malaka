@@ -27,15 +27,15 @@ import {
     Package01Icon,
     ViewIcon,
     CheckmarkCircle01Icon,
-    Cancel01Icon,
+    CancelIcon,
     FilterIcon,
     Download01Icon,
-    Loading01Icon,
-    Location01Icon,
+    LoadingIcon,
+    LocationIcon,
     CallIcon,
     MailAtSign01Icon,
     UserIcon,
-    ShoppingCart01Icon
+    ShoppingCartIcon
 } from '@hugeicons/core-free-icons'
 
 // Extended interface for UI display (adds computed/mock fields to basic Supplier)
@@ -239,7 +239,7 @@ export default function SuppliersList({ initialData }: SuppliersListProps) {
             sortable: true,
             render: (value: unknown, record: SupplierDisplay) => (
                 <div className="flex items-center text-sm">
-                    <HugeiconsIcon icon={Location01Icon} className="h-3 w-3 mr-1 text-gray-400" />
+                    <HugeiconsIcon icon={LocationIcon} className="h-3 w-3 mr-1 text-gray-400" />
                     {record.city || 'Unknown'}, {record.country || 'Unknown'}
                 </div>
             )
@@ -304,7 +304,7 @@ export default function SuppliersList({ initialData }: SuppliersListProps) {
                             View Details
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => handleCreateOrder(record)}>
-                            <HugeiconsIcon icon={ShoppingCart01Icon} className="mr-2 h-4 w-4" />
+                            <HugeiconsIcon icon={ShoppingCartIcon} className="mr-2 h-4 w-4" />
                             Create Order
                         </DropdownMenuItem>
                     </DropdownMenuContent>
@@ -350,7 +350,7 @@ export default function SuppliersList({ initialData }: SuppliersListProps) {
                 </div>
 
                 <div className="flex items-center text-sm">
-                    <HugeiconsIcon icon={Location01Icon} className="h-3 w-3 mr-1 text-gray-400" />
+                    <HugeiconsIcon icon={LocationIcon} className="h-3 w-3 mr-1 text-gray-400" />
                     {supplier.city}, {supplier.country}
                 </div>
 
@@ -507,7 +507,7 @@ export default function SuppliersList({ initialData }: SuppliersListProps) {
                 {/* Content */}
                 {loading ? (
                     <div className="flex items-center justify-center h-64">
-                        <HugeiconsIcon icon={Loading01Icon} className="h-8 w-8 animate-spin" />
+                        <HugeiconsIcon icon={LoadingIcon} className="h-8 w-8 animate-spin" />
                         <span className="ml-2 text-muted-foreground">
                             Loading suppliers...
                         </span>
@@ -515,7 +515,7 @@ export default function SuppliersList({ initialData }: SuppliersListProps) {
                 ) : error ? (
                     <div className="flex items-center justify-center h-64">
                         <div className="text-center">
-                            <HugeiconsIcon icon={Cancel01Icon} className="h-12 w-12 text-red-500 mx-auto mb-4" />
+                            <HugeiconsIcon icon={CancelIcon} className="h-12 w-12 text-red-500 mx-auto mb-4" />
                             <p className="text-lg font-medium text-gray-900 mb-2">Error Loading Suppliers</p>
                             <p className="text-gray-500 mb-4">{error}</p>
                             <Button onClick={loadSuppliers}>

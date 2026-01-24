@@ -11,7 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { HugeiconsIcon } from '@hugeicons/react';
-import { Package01Icon, Calendar01Icon, UserIcon, File01Icon, ArrowLeft01Icon, FloppyDiskIcon } from '@hugeicons/core-free-icons';
+import { Package01Icon, Calendar01Icon, UserIcon, FileIcon, ArrowLeft01Icon, FloppyDiskIcon } from '@hugeicons/core-free-icons';
 import { goodsReceiptService } from '@/services/inventory';
 
 interface GoodsReceiptFormData {
@@ -246,7 +246,7 @@ export default function CreateGoodsReceiptPage() {
 
                 <div className="md:col-span-2 space-y-2">
                   <Label htmlFor="notes" className="flex items-center gap-2">
-                    <HugeiconsIcon icon={File01Icon} className="w-4 h-4" />
+                    <HugeiconsIcon icon={FileIcon} className="w-4 h-4" />
                     Notes
                   </Label>
                   <Textarea

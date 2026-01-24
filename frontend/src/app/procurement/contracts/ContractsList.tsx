@@ -14,12 +14,12 @@ import { HugeiconsIcon } from '@hugeicons/react'
 import {
     CheckmarkCircle01Icon,
     AlertCircleIcon,
-    File01Icon,
+    FileIcon,
     PlusSignIcon,
     Search01Icon,
     FilterIcon,
     Download01Icon,
-    Cancel01Icon,
+    CancelIcon,
     RefreshIcon
 } from '@hugeicons/core-free-icons'
 import { contractService } from '@/services/procurement'
@@ -153,7 +153,7 @@ export default function ContractsList({ initialData }: ContractsListProps) {
         },
         {
             label: 'Terminate',
-            icon: Cancel01Icon,
+            icon: CancelIcon,
             onClick: handleTerminate,
             show: (row) => row.status === 'active',
         },
@@ -276,7 +276,7 @@ export default function ContractsList({ initialData }: ContractsListProps) {
                     <Card className="p-4">
                         <div className="flex items-center space-x-3">
                             <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
-                                <HugeiconsIcon icon={File01Icon} className="h-5 w-5 text-foreground" />
+                                <HugeiconsIcon icon={FileIcon} className="h-5 w-5 text-foreground" />
                             </div>
                             <div>
                                 <p className="text-sm font-medium text-muted-foreground">Total</p>
@@ -312,7 +312,7 @@ export default function ContractsList({ initialData }: ContractsListProps) {
                     <Card className="p-4">
                         <div className="flex items-center space-x-3">
                             <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
-                                <HugeiconsIcon icon={Cancel01Icon} className="h-5 w-5 text-foreground" />
+                                <HugeiconsIcon icon={CancelIcon} className="h-5 w-5 text-foreground" />
                             </div>
                             <div>
                                 <p className="text-sm font-medium text-muted-foreground">Expired</p>
@@ -350,7 +350,7 @@ export default function ContractsList({ initialData }: ContractsListProps) {
                 {error ? (
                     <div className="flex items-center justify-center h-64">
                         <div className="text-center">
-                            <HugeiconsIcon icon={Cancel01Icon} className="h-12 w-12 text-red-500 mx-auto mb-4" />
+                            <HugeiconsIcon icon={CancelIcon} className="h-12 w-12 text-red-500 mx-auto mb-4" />
                             <p className="text-lg font-medium mb-2">Error Loading Contracts</p>
                             <p className="text-muted-foreground mb-4">{error}</p>
                             <Button onClick={fetchData}>Try Again</Button>
@@ -359,7 +359,7 @@ export default function ContractsList({ initialData }: ContractsListProps) {
                 ) : filteredContracts.length === 0 ? (
                     <div className="flex items-center justify-center h-64">
                         <div className="text-center">
-                            <HugeiconsIcon icon={File01Icon} className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                            <HugeiconsIcon icon={FileIcon} className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                             <p className="text-lg font-medium mb-2">No Contracts Found</p>
                             <p className="text-muted-foreground mb-4">Get started by creating your first contract.</p>
                             <Link href="/procurement/contracts/new">

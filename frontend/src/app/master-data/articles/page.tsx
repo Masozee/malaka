@@ -5,8 +5,8 @@ import {
   Search01Icon,
   GridIcon,
   Menu01Icon,
-  Upload01Icon,
-  Cancel01Icon,
+  UploadIcon,
+  CancelIcon,
   Image01Icon,
   ChartColumnIcon,
   QrCodeIcon,
@@ -828,7 +828,7 @@ export default function ArticlesPage() {
                   {/* Actions */}
                   <div className="flex gap-2 pt-2">
                     <Button size="sm" variant="outline" onClick={() => handleImageUpload(article)}>
-                      <HugeiconsIcon icon={Upload01Icon} className="h-3 w-3 mr-1" />
+                      <HugeiconsIcon icon={UploadIcon} className="h-3 w-3 mr-1" />
                       Images
                     </Button>
                     <Button size="sm" variant="outline" onClick={() => handleEdit(article)}>

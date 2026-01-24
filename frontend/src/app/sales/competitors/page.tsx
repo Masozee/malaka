@@ -10,6 +10,27 @@ import { AdvancedDataTable } from '@/components/ui/advanced-data-table'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { HugeiconsIcon } from '@hugeicons/react'
+import {
+  Building01Icon,
+  LocationIcon,
+  Globe01Icon,
+  Crown01Icon,
+  TrendUpIcon,
+  UserMultiple01Icon,
+  Star01Icon,
+  AlertCircleIcon,
+  Lightning01Icon,
+  Dollar01Icon,
+  ChartColumnIcon,
+  FilterIcon,
+  Search01Icon,
+  ViewIcon,
+  PencilEdit01Icon,
+  Download01Icon,
+  PlusSignIcon,
+  CheckmarkCircle01Icon
+} from '@hugeicons/core-free-icons'
 
 import Link from 'next/link'
 
@@ -319,22 +340,22 @@ export default function SalesCompetitorsPage() {
 
   const getTypeBadge = (type: string) => {
     const config = {
-      local: { variant: 'default' as const, label: 'Local', icon: Building },
-      national: { variant: 'secondary' as const, label: 'National', icon: MapPin },
-      international: { variant: 'outline' as const, label: 'International', icon: Globe },
-      online_only: { variant: 'secondary' as const, label: 'Online Only', icon: Globe }
+      local: { variant: 'default' as const, label: 'Local', icon: Building01Icon },
+      national: { variant: 'secondary' as const, label: 'National', icon: LocationIcon },
+      international: { variant: 'outline' as const, label: 'International', icon: Globe01Icon },
+      online_only: { variant: 'secondary' as const, label: 'Online Only', icon: Globe01Icon }
     }
-    return config[type as keyof typeof config] || { variant: 'secondary' as const, label: type, icon: Building }
+    return config[type as keyof typeof config] || { variant: 'secondary' as const, label: type, icon: Building01Icon }
   }
 
   const getPositionBadge = (position: string) => {
     const config = {
-      leader: { variant: 'default' as const, label: 'Leader', icon: Crown },
-      challenger: { variant: 'secondary' as const, label: 'Challenger', icon: TrendUp },
-      follower: { variant: 'outline' as const, label: 'Follower', icon: Users },
-      niche: { variant: 'secondary' as const, label: 'Niche', icon: Star }
+      leader: { variant: 'default' as const, label: 'Leader', icon: Crown01Icon },
+      challenger: { variant: 'secondary' as const, label: 'Challenger', icon: TrendUpIcon },
+      follower: { variant: 'outline' as const, label: 'Follower', icon: UserMultiple01Icon },
+      niche: { variant: 'secondary' as const, label: 'Niche', icon: Star01Icon }
     }
-    return config[position as keyof typeof config] || { variant: 'secondary' as const, label: position, icon: Star }
+    return config[position as keyof typeof config] || { variant: 'secondary' as const, label: position, icon: Star01Icon }
   }
 
   const getThreatBadge = (threat: string) => {
@@ -373,10 +394,10 @@ export default function SalesCompetitorsPage() {
       key: 'company_type',
       title: 'Type',
       render: (competitor: Competitor) => {
-        const { variant, label, icon: Icon } = getTypeBadge(competitor.company_type)
+        const { variant, label, icon } = getTypeBadge(competitor.company_type)
         return (
           <div className="flex items-center space-x-2">
-            <Icon className="h-4 w-4" />
+            <HugeiconsIcon icon={icon} className="h-4 w-4" />
             <Badge variant={variant}>{label}</Badge>
           </div>
         )
@@ -386,10 +407,10 @@ export default function SalesCompetitorsPage() {
       key: 'market_position',
       title: 'Position',
       render: (competitor: Competitor) => {
-        const { variant, label, icon: Icon } = getPositionBadge(competitor.market_position)
+        const { variant, label, icon } = getPositionBadge(competitor.market_position)
         return (
           <div className="flex items-center space-x-2">
-            <Icon className="h-4 w-4" />
+            <HugeiconsIcon icon={icon} className="h-4 w-4" />
             <Badge variant={variant}>{label}</Badge>
           </div>
         )
@@ -465,12 +486,12 @@ export default function SalesCompetitorsPage() {
         <div className="flex items-center space-x-2">
           <Button variant="ghost" size="sm" asChild>
             <Link href={`/sales/competitors/${competitor.id}`}>
-              <Eye className="h-4 w-4" />
+              <HugeiconsIcon icon={ViewIcon} className="h-4 w-4" />
             </Link>
           </Button>
           <Button variant="ghost" size="sm" asChild>
             <Link href={`/sales/competitors/${competitor.id}/edit`}>
-              <PencilSimple className="h-4 w-4" />
+              <HugeiconsIcon icon={PencilEdit01Icon} className="h-4 w-4" />
             </Link>
           </Button>
         </div>
@@ -488,12 +509,12 @@ export default function SalesCompetitorsPage() {
           actions={
             <div className="flex items-center space-x-3">
               <Button variant="outline" size="sm">
-                <DownloadSimple className="h-4 w-4 mr-2" />
+                <HugeiconsIcon icon={Download01Icon} className="h-4 w-4 mr-2" />
                 Export Report
               </Button>
               <Button size="sm" asChild>
                 <Link href="/sales/competitors/new">
-                  <Plus className="h-4 w-4 mr-2" />
+                  <HugeiconsIcon icon={PlusSignIcon} className="h-4 w-4 mr-2" />
                   Add Competitor
                 </Link>
               </Button>
@@ -510,7 +531,7 @@ export default function SalesCompetitorsPage() {
                 <p className="text-2xl font-bold mt-1">{summaryStats.totalCompetitors}</p>
                 <p className="text-sm text-blue-600 mt-1">Being tracked</p>
               </div>
-              <Lightning className="h-8 w-8 text-blue-600" />
+              <HugeiconsIcon icon={Lightning01Icon} className="h-8 w-8 text-blue-600" />
             </div>
           </Card>
 
@@ -521,7 +542,7 @@ export default function SalesCompetitorsPage() {
                 <p className="text-2xl font-bold mt-1 text-red-600">{summaryStats.criticalThreats}</p>
                 <p className="text-sm text-red-600 mt-1">High priority</p>
               </div>
-              <WarningCircle className="h-8 w-8 text-red-600" />
+              <HugeiconsIcon icon={AlertCircleIcon} className="h-8 w-8 text-red-600" />
             </div>
           </Card>
 
@@ -532,7 +553,7 @@ export default function SalesCompetitorsPage() {
                 <p className="text-2xl font-bold mt-1 text-orange-600">{summaryStats.marketLeaders}</p>
                 <p className="text-sm text-orange-600 mt-1">Top position</p>
               </div>
-              <Crown className="h-8 w-8 text-orange-600" />
+              <HugeiconsIcon icon={Crown01Icon} className="h-8 w-8 text-orange-600" />
             </div>
           </Card>
 
@@ -543,7 +564,7 @@ export default function SalesCompetitorsPage() {
                 <p className="text-2xl font-bold mt-1 text-green-600">{summaryStats.activeMonitoring}</p>
                 <p className="text-sm text-green-600 mt-1">Under watch</p>
               </div>
-              <CheckCircle className="h-8 w-8 text-green-600" />
+              <HugeiconsIcon icon={CheckmarkCircle01Icon} className="h-8 w-8 text-green-600" />
             </div>
           </Card>
 
@@ -556,7 +577,7 @@ export default function SalesCompetitorsPage() {
                 </p>
                 <p className="text-sm text-purple-600 mt-1">Combined</p>
               </div>
-              <ChartBar className="h-8 w-8 text-purple-600" />
+              <HugeiconsIcon icon={ChartColumnIcon} className="h-8 w-8 text-purple-600" />
             </div>
           </Card>
 
@@ -569,7 +590,7 @@ export default function SalesCompetitorsPage() {
                 </p>
                 <p className="text-sm text-green-600 mt-1">IDR per company</p>
               </div>
-              <CurrencyDollar className="h-8 w-8 text-green-600" />
+              <HugeiconsIcon icon={Dollar01Icon} className="h-8 w-8 text-green-600" />
             </div>
           </Card>
 
@@ -582,7 +603,7 @@ export default function SalesCompetitorsPage() {
                 </p>
                 <p className="text-sm text-gray-600 mt-1">Average digital</p>
               </div>
-              <Globe className="h-8 w-8 text-gray-600" />
+              <HugeiconsIcon icon={Globe01Icon} className="h-8 w-8 text-gray-600" />
             </div>
           </Card>
         </div>
@@ -590,12 +611,12 @@ export default function SalesCompetitorsPage() {
         {/* Filters */}
         <Card className="p-6">
           <div className="flex items-center space-x-4">
-            <Funnel className="h-5 w-5 text-muted-foreground" />
+            <HugeiconsIcon icon={FilterIcon} className="h-5 w-5 text-muted-foreground" />
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 flex-1">
               <div className="space-y-2">
                 <Label htmlFor="search">Search</Label>
                 <div className="relative">
-                  <MagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <HugeiconsIcon icon={Search01Icon} className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="search"
                     placeholder="Search competitors..."
@@ -684,17 +705,17 @@ export default function SalesCompetitorsPage() {
         {activeView === 'cards' ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {sortedCompetitors.map((competitor) => {
-              const { variant: typeVariant, label: typeLabel, icon: TypeIcon } = getTypeBadge(competitor.company_type)
-              const { variant: positionVariant, label: positionLabel, icon: PositionIcon } = getPositionBadge(competitor.market_position)
+              const { variant: typeVariant, label: typeLabel, icon: typeIcon } = getTypeBadge(competitor.company_type)
+              const { variant: positionVariant, label: positionLabel, icon: positionIcon } = getPositionBadge(competitor.market_position)
               const { variant: threatVariant, label: threatLabel } = getThreatBadge(competitor.threat_level)
-              
+
               return (
                 <Card key={competitor.id} className="p-6 hover: transition-shadow">
                   <div className="flex justify-between items-start mb-4">
                     <div className="flex items-center space-x-2">
-                      <Lightning className="h-5 w-5 text-blue-600" />
+                      <HugeiconsIcon icon={Lightning01Icon} className="h-5 w-5 text-blue-600" />
                       <div>
-                        <Link 
+                        <Link
                           href={`/sales/competitors/${competitor.id}`}
                           className="font-semibold text-blue-600 hover:text-blue-800"
                         >
@@ -714,7 +735,7 @@ export default function SalesCompetitorsPage() {
                     <div className="flex justify-between">
                       <span className="text-sm text-muted-foreground">Type:</span>
                       <div className="flex items-center space-x-1">
-                        <TypeIcon className="h-4 w-4" />
+                        <HugeiconsIcon icon={typeIcon} className="h-4 w-4" />
                         <Badge variant={typeVariant}>{typeLabel}</Badge>
                       </div>
                     </div>
@@ -722,7 +743,7 @@ export default function SalesCompetitorsPage() {
                     <div className="flex justify-between">
                       <span className="text-sm text-muted-foreground">Position:</span>
                       <div className="flex items-center space-x-1">
-                        <PositionIcon className="h-4 w-4" />
+                        <HugeiconsIcon icon={positionIcon} className="h-4 w-4" />
                         <Badge variant={positionVariant}>{positionLabel}</Badge>
                       </div>
                     </div>
@@ -788,13 +809,13 @@ export default function SalesCompetitorsPage() {
                     <div className="flex space-x-2 pt-3">
                       <Button variant="outline" size="sm" className="flex-1" asChild>
                         <Link href={`/sales/competitors/${competitor.id}`}>
-                          <Eye className="h-4 w-4 mr-2" />
+                          <HugeiconsIcon icon={ViewIcon} className="h-4 w-4 mr-2" />
                           Analyze
                         </Link>
                       </Button>
                       <Button variant="outline" size="sm" asChild>
                         <Link href={`/sales/competitors/${competitor.id}/edit`}>
-                          <PencilSimple className="h-4 w-4" />
+                          <HugeiconsIcon icon={PencilEdit01Icon} className="h-4 w-4" />
                         </Link>
                       </Button>
                     </div>
@@ -829,7 +850,7 @@ export default function SalesCompetitorsPage() {
         {summaryStats.criticalThreats > 0 && (
           <Card className="p-6 border-red-200 bg-red-50">
             <div className="flex items-center space-x-3">
-              <WarningCircle className="h-6 w-6 text-red-600" />
+              <HugeiconsIcon icon={AlertCircleIcon} className="h-6 w-6 text-red-600" />
               <div className="flex-1">
                 <h3 className="text-lg font-semibold text-red-800">Critical Threat Alert</h3>
                 <p className="text-red-700 mt-1">

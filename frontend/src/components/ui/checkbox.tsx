@@ -3,7 +3,7 @@
 import * as React from "react"
 import * as CheckboxPrimitive from "@radix-ui/react-checkbox"
 import { HugeiconsIcon } from "@hugeicons/react"
-import { Tick01Icon } from "@hugeicons/core-free-icons"
+import { TickIcon } from "@hugeicons/core-free-icons"
 
 import { cn } from "@/lib/utils"
 
@@ -22,7 +22,7 @@ const Checkbox = React.forwardRef<
     <CheckboxPrimitive.Indicator
       className={cn("flex items-center justify-center text-current")}
     >
-      <HugeiconsIcon icon={Tick01Icon} className="h-4 w-4" />
+      <HugeiconsIcon icon={TickIcon} className="h-4 w-4" />
     </CheckboxPrimitive.Indicator>
   </CheckboxPrimitive.Root>
 ))

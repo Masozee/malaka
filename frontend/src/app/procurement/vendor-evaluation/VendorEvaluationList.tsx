@@ -20,7 +20,7 @@ import {
     Search01Icon,
     FilterIcon,
     Download01Icon,
-    Cancel01Icon,
+    CancelIcon,
     CheckmarkCircle02Icon
 } from '@hugeicons/core-free-icons'
 import { vendorEvaluationService } from '@/services/procurement'
@@ -336,7 +336,7 @@ export default function VendorEvaluationList({ initialData }: VendorEvaluationLi
                 {error ? (
                     <div className="flex items-center justify-center h-64">
                         <div className="text-center">
-                            <HugeiconsIcon icon={Cancel01Icon} className="h-12 w-12 text-red-500 mx-auto mb-4" />
+                            <HugeiconsIcon icon={CancelIcon} className="h-12 w-12 text-red-500 mx-auto mb-4" />
                             <p className="text-lg font-medium mb-2">Error Loading Evaluations</p>
                             <p className="text-muted-foreground mb-4">{error}</p>
                             <Button onClick={fetchData}>Try Again</Button>

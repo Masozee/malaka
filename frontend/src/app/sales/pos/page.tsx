@@ -10,6 +10,24 @@ import { DataTable, Column } from '@/components/ui/data-table'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { HugeiconsIcon } from '@hugeicons/react'
+import {
+  CheckmarkCircle01Icon,
+  Clock01Icon,
+  AlertCircleIcon,
+  ReceiptIcon,
+  Calendar01Icon,
+  UserIcon,
+  Package01Icon,
+  Dollar01Icon,
+  ShoppingCartIcon,
+  CreditCardIcon,
+  Search01Icon,
+  ViewIcon,
+  PencilEdit01Icon,
+  Download01Icon,
+  PlusSignIcon
+} from '@hugeicons/core-free-icons'
 
 import Link from 'next/link'
 
@@ -266,12 +284,12 @@ export default function POSPage() {
 
   const getStatusBadge = (status: string) => {
     const config = {
-      completed: { variant: 'default' as const, label: 'Completed', icon: CheckCircle },
-      pending: { variant: 'secondary' as const, label: 'Pending', icon: Clock },
-      cancelled: { variant: 'destructive' as const, label: 'Cancelled', icon: WarningCircle },
-      refunded: { variant: 'outline' as const, label: 'Refunded', icon: WarningCircle }
+      completed: { variant: 'default' as const, label: 'Completed', icon: CheckmarkCircle01Icon },
+      pending: { variant: 'secondary' as const, label: 'Pending', icon: Clock01Icon },
+      cancelled: { variant: 'destructive' as const, label: 'Cancelled', icon: AlertCircleIcon },
+      refunded: { variant: 'outline' as const, label: 'Refunded', icon: AlertCircleIcon }
     }
-    return config[status as keyof typeof config] || { variant: 'secondary' as const, label: status, icon: Receipt }
+    return config[status as keyof typeof config] || { variant: 'secondary' as const, label: status, icon: ReceiptIcon }
   }
 
   const getPaymentMethodBadge = (method: string) => {
@@ -302,7 +320,7 @@ export default function POSPage() {
       title: 'Date & Time',
       render: (value: unknown, transaction: POSTransaction) => (
         <div className="flex items-center space-x-2">
-          <Calendar className="h-4 w-4 text-muted-foreground" />
+          <HugeiconsIcon icon={Calendar01Icon} className="h-4 w-4 text-muted-foreground" />
           <div>
             <div className="text-sm font-medium">{formatDateTime(transaction.created_at)}</div>
           </div>
@@ -314,7 +332,7 @@ export default function POSPage() {
       title: 'Cashier',
       render: (value: unknown, transaction: POSTransaction) => (
         <div className="flex items-center space-x-2">
-          <User className="h-4 w-4 text-muted-foreground" />
+          <HugeiconsIcon icon={UserIcon} className="h-4 w-4 text-muted-foreground" />
           <span>{transaction.cashier_name}</span>
         </div>
       )
@@ -336,7 +354,7 @@ export default function POSPage() {
       title: 'Items',
       render: (value: unknown, transaction: POSTransaction) => (
         <div className="flex items-center space-x-2">
-          <Package className="h-4 w-4 text-muted-foreground" />
+          <HugeiconsIcon icon={Package01Icon} className="h-4 w-4 text-muted-foreground" />
           <span>{transaction.items.length} items</span>
         </div>
       )
@@ -362,10 +380,10 @@ export default function POSPage() {
       key: 'status',
       title: 'Status',
       render: (transaction: POSTransaction) => {
-        const { variant, label, icon: Icon } = getStatusBadge(transaction.status)
+        const { variant, label, icon: IconData } = getStatusBadge(transaction.status)
         return (
           <div className="flex items-center space-x-2">
-            <Icon className="h-4 w-4" />
+            <HugeiconsIcon icon={IconData} className="h-4 w-4" />
             <Badge variant={variant}>{label}</Badge>
           </div>
         )
@@ -378,18 +396,18 @@ export default function POSPage() {
         <div className="flex items-center space-x-2">
           <Button variant="ghost" size="sm" asChild aria-label="View transaction details">
             <Link href={`/sales/pos/${transaction.id}`}>
-              <Eye className="h-4 w-4" />
+              <HugeiconsIcon icon={ViewIcon} className="h-4 w-4" />
               <span className="sr-only">View {transaction.transaction_number}</span>
             </Link>
           </Button>
           <Button variant="ghost" size="sm" aria-label="Print receipt">
-            <Receipt className="h-4 w-4" />
+            <HugeiconsIcon icon={ReceiptIcon} className="h-4 w-4" />
             <span className="sr-only">Print receipt for {transaction.transaction_number}</span>
           </Button>
           {transaction.status === 'pending' && (
             <Button variant="ghost" size="sm" asChild aria-label="Edit transaction">
               <Link href={`/sales/pos/${transaction.id}/edit`}>
-                <PencilSimple className="h-4 w-4" />
+                <HugeiconsIcon icon={PencilEdit01Icon} className="h-4 w-4" />
                 <span className="sr-only">Edit {transaction.transaction_number}</span>
               </Link>
             </Button>
@@ -409,12 +427,12 @@ export default function POSPage() {
           actions={
             <div className="flex items-center space-x-3">
               <Button variant="outline" size="sm">
-                <DownloadSimple className="h-4 w-4 mr-2" />
+                <HugeiconsIcon icon={Download01Icon} className="h-4 w-4 mr-2" />
                 Export
               </Button>
               <Button size="sm" asChild>
                 <Link href="/sales/pos/new">
-                  <Plus className="h-4 w-4 mr-2" />
+                  <HugeiconsIcon icon={PlusSignIcon} className="h-4 w-4 mr-2" />
                   New Sale
                 </Link>
               </Button>
@@ -427,7 +445,7 @@ export default function POSPage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
-                <ShoppingCart className="h-5 w-5 text-foreground" aria-hidden="true" />
+                <HugeiconsIcon icon={ShoppingCartIcon} className="h-5 w-5 text-foreground" aria-hidden="true" />
               </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Today&apos;s Sales</p>
@@ -439,7 +457,7 @@ export default function POSPage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
-                <CurrencyDollar className="h-5 w-5 text-foreground" aria-hidden="true" />
+                <HugeiconsIcon icon={Dollar01Icon} className="h-5 w-5 text-foreground" aria-hidden="true" />
               </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Total Revenue</p>
@@ -453,7 +471,7 @@ export default function POSPage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
-                <CheckCircle className="h-5 w-5 text-foreground" aria-hidden="true" />
+                <HugeiconsIcon icon={CheckmarkCircle01Icon} className="h-5 w-5 text-foreground" aria-hidden="true" />
               </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Completed</p>
@@ -465,7 +483,7 @@ export default function POSPage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
-                <Clock className="h-5 w-5 text-foreground" aria-hidden="true" />
+                <HugeiconsIcon icon={Clock01Icon} className="h-5 w-5 text-foreground" aria-hidden="true" />
               </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Pending</p>
@@ -480,7 +498,7 @@ export default function POSPage() {
           {/* Search on the left */}
           <div className="flex-1 max-w-md">
             <div className="relative">
-              <MagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <HugeiconsIcon icon={Search01Icon} className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search transactions..."
                 value={searchTerm}
@@ -494,7 +512,7 @@ export default function POSPage() {
           <div className="flex items-center gap-2">
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-32">
-                <CheckCircle className="h-4 w-4 mr-2" />
+                <HugeiconsIcon icon={CheckmarkCircle01Icon} className="h-4 w-4 mr-2" />
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
@@ -508,7 +526,7 @@ export default function POSPage() {
             
             <Select value={paymentMethodFilter} onValueChange={setPaymentMethodFilter}>
               <SelectTrigger className="w-36">
-                <CreditCard className="h-4 w-4 mr-2" />
+                <HugeiconsIcon icon={CreditCardIcon} className="h-4 w-4 mr-2" />
                 <SelectValue placeholder="Payment" />
               </SelectTrigger>
               <SelectContent>
@@ -522,7 +540,7 @@ export default function POSPage() {
             
             <Select value={dateFilter} onValueChange={setDateFilter}>
               <SelectTrigger className="w-32">
-                <Calendar className="h-4 w-4 mr-2" />
+                <HugeiconsIcon icon={Calendar01Icon} className="h-4 w-4 mr-2" />
                 <SelectValue placeholder="Date" />
               </SelectTrigger>
               <SelectContent>
@@ -565,14 +583,14 @@ export default function POSPage() {
         {activeView === 'cards' ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredTransactions.map((transaction) => {
-              const { variant: statusVariant, label: statusLabel, icon: StatusIcon } = getStatusBadge(transaction.status)
+              const { variant: statusVariant, label: statusLabel, icon: StatusIconData } = getStatusBadge(transaction.status)
               const { variant: paymentVariant, label: paymentLabel } = getPaymentMethodBadge(transaction.payment_method)
-              
+
               return (
                 <Card key={transaction.id} className="p-4 hover:shadow-md transition-shadow">
                   <div className="flex justify-between items-start mb-4">
                     <div>
-                      <Link 
+                      <Link
                         href={`/sales/pos/${transaction.id}`}
                         className="font-semibold text-blue-600 hover:text-blue-800"
                       >
@@ -583,7 +601,7 @@ export default function POSPage() {
                       </p>
                     </div>
                     <div className="flex items-center space-x-1">
-                      <StatusIcon className="h-4 w-4" />
+                      <HugeiconsIcon icon={StatusIconData} className="h-4 w-4" />
                       <Badge variant={statusVariant}>{statusLabel}</Badge>
                     </div>
                   </div>
@@ -645,7 +663,7 @@ export default function POSPage() {
         {summaryStats.pendingTransactions > 0 && (
           <Card className="p-6 border-orange-200 bg-orange-50">
             <div className="flex items-center space-x-3">
-              <Clock className="h-6 w-6 text-orange-600" />
+              <HugeiconsIcon icon={Clock01Icon} className="h-6 w-6 text-orange-600" />
               <div className="flex-1">
                 <h3 className="text-lg font-semibold text-orange-800">Pending Transactions</h3>
                 <p className="text-orange-700 mt-1">

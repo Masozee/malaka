@@ -8,7 +8,7 @@ import {
   Download01Icon,
   MoreVerticalIcon,
   ArrowLeft01Icon,
-  ArrowRight01Icon
+  ArrowRightIcon
 } from "@hugeicons/core-free-icons"
 
 import { Button } from "@/components/ui/button"
@@ -495,7 +495,7 @@ export function AdvancedDataTable<T extends { id: string }>({
               onClick={() => pagination.onChange(pagination.current + 1, pagination.pageSize)}
               disabled={pagination.current >= Math.ceil(pagination.total / pagination.pageSize)}
             >
-              <HugeiconsIcon icon={ArrowRight01Icon} className="h-4 w-4" />
+              <HugeiconsIcon icon={ArrowRightIcon} className="h-4 w-4" />
             </Button>
           </div>
         </div>

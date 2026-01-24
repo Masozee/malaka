@@ -10,6 +10,24 @@ import { AdvancedDataTable } from '@/components/ui/advanced-data-table'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { HugeiconsIcon } from '@hugeicons/react'
+import {
+  Clock01Icon,
+  CheckmarkCircle01Icon,
+  Package01Icon,
+  TruckIcon,
+  AlertCircleIcon,
+  ShoppingCartIcon,
+  Dollar01Icon,
+  Calendar01Icon,
+  FilterIcon,
+  Search01Icon,
+  ViewIcon,
+  PencilEdit01Icon,
+  Download01Icon,
+  PlusSignIcon,
+  LocationIcon
+} from '@hugeicons/core-free-icons'
 
 import Link from 'next/link'
 
@@ -306,14 +324,14 @@ export default function OnlineSalesPage() {
 
   const getOrderStatusBadge = (status: string) => {
     const config = {
-      pending: { variant: 'secondary' as const, label: 'Pending', icon: Clock },
-      confirmed: { variant: 'default' as const, label: 'Confirmed', icon: CheckCircle },
-      processing: { variant: 'secondary' as const, label: 'Processing', icon: Package },
-      shipped: { variant: 'default' as const, label: 'Shipped', icon: Truck },
-      delivered: { variant: 'default' as const, label: 'Delivered', icon: CheckCircle },
-      cancelled: { variant: 'destructive' as const, label: 'Cancelled', icon: WarningCircle }
+      pending: { variant: 'secondary' as const, label: 'Pending', icon: Clock01Icon },
+      confirmed: { variant: 'default' as const, label: 'Confirmed', icon: CheckmarkCircle01Icon },
+      processing: { variant: 'secondary' as const, label: 'Processing', icon: Package01Icon },
+      shipped: { variant: 'default' as const, label: 'Shipped', icon: TruckIcon },
+      delivered: { variant: 'default' as const, label: 'Delivered', icon: CheckmarkCircle01Icon },
+      cancelled: { variant: 'destructive' as const, label: 'Cancelled', icon: AlertCircleIcon }
     }
-    return config[status as keyof typeof config] || { variant: 'secondary' as const, label: status, icon: Package }
+    return config[status as keyof typeof config] || { variant: 'secondary' as const, label: status, icon: Package01Icon }
   }
 
   const getPaymentStatusBadge = (status: string) => {
@@ -354,7 +372,7 @@ export default function OnlineSalesPage() {
       title: 'Date',
       render: (sale: OnlineSale) => (
         <div className="flex items-center space-x-2">
-          <Calendar className="h-4 w-4 text-muted-foreground" />
+          <HugeiconsIcon icon={Calendar01Icon} className="h-4 w-4 text-muted-foreground" />
           <span>{formatDateTime(sale.created_at)}</span>
         </div>
       )
@@ -387,7 +405,7 @@ export default function OnlineSalesPage() {
       title: 'Items',
       render: (sale: OnlineSale) => (
         <div className="flex items-center space-x-2">
-          <Package className="h-4 w-4 text-muted-foreground" />
+          <HugeiconsIcon icon={Package01Icon} className="h-4 w-4 text-muted-foreground" />
           <span>{sale.items.length} items</span>
         </div>
       )
@@ -413,10 +431,10 @@ export default function OnlineSalesPage() {
       key: 'order_status',
       title: 'Status',
       render: (sale: OnlineSale) => {
-        const { variant, label, icon: Icon } = getOrderStatusBadge(sale.order_status)
+        const { variant, label, icon: IconData } = getOrderStatusBadge(sale.order_status)
         return (
           <div className="flex items-center space-x-2">
-            <Icon className="h-4 w-4" />
+            <HugeiconsIcon icon={IconData} className="h-4 w-4" />
             <Badge variant={variant}>{label}</Badge>
           </div>
         )
@@ -429,13 +447,13 @@ export default function OnlineSalesPage() {
         <div className="flex items-center space-x-2">
           <Button variant="ghost" size="sm" asChild>
             <Link href={`/sales/online/${sale.id}`}>
-              <Eye className="h-4 w-4" />
+              <HugeiconsIcon icon={ViewIcon} className="h-4 w-4" />
             </Link>
           </Button>
           {(sale.order_status === 'pending' || sale.order_status === 'confirmed') && (
             <Button variant="ghost" size="sm" asChild>
               <Link href={`/sales/online/${sale.id}/edit`}>
-                <PencilSimple className="h-4 w-4" />
+                <HugeiconsIcon icon={PencilEdit01Icon} className="h-4 w-4" />
               </Link>
             </Button>
           )}
@@ -454,12 +472,12 @@ export default function OnlineSalesPage() {
           actions={
             <div className="flex items-center space-x-3">
               <Button variant="outline" size="sm">
-                <DownloadSimple className="h-4 w-4 mr-2" />
+                <HugeiconsIcon icon={Download01Icon} className="h-4 w-4 mr-2" />
                 Export
               </Button>
               <Button size="sm" asChild>
                 <Link href="/sales/online/new">
-                  <Plus className="h-4 w-4 mr-2" />
+                  <HugeiconsIcon icon={PlusSignIcon} className="h-4 w-4 mr-2" />
                   New Order
                 </Link>
               </Button>
@@ -476,7 +494,7 @@ export default function OnlineSalesPage() {
                 <p className="text-2xl font-bold mt-1">{summaryStats.todayOrders}</p>
                 <p className="text-sm text-blue-600 mt-1">New orders</p>
               </div>
-              <ShoppingCart className="h-8 w-8 text-blue-600" />
+              <HugeiconsIcon icon={ShoppingCartIcon} className="h-8 w-8 text-blue-600" />
             </div>
           </Card>
 
@@ -489,7 +507,7 @@ export default function OnlineSalesPage() {
                 </p>
                 <p className="text-sm text-green-600 mt-1">Online sales</p>
               </div>
-              <CurrencyDollar className="h-8 w-8 text-green-600" />
+              <HugeiconsIcon icon={Dollar01Icon} className="h-8 w-8 text-green-600" />
             </div>
           </Card>
 
@@ -500,7 +518,7 @@ export default function OnlineSalesPage() {
                 <p className="text-2xl font-bold mt-1 text-orange-600">{summaryStats.pendingOrders}</p>
                 <p className="text-sm text-orange-600 mt-1">Need processing</p>
               </div>
-              <Clock className="h-8 w-8 text-orange-600" />
+              <HugeiconsIcon icon={Clock01Icon} className="h-8 w-8 text-orange-600" />
             </div>
           </Card>
 
@@ -511,7 +529,7 @@ export default function OnlineSalesPage() {
                 <p className="text-2xl font-bold mt-1 text-blue-600">{summaryStats.shippedOrders}</p>
                 <p className="text-sm text-blue-600 mt-1">In transit</p>
               </div>
-              <Truck className="h-8 w-8 text-blue-600" />
+              <HugeiconsIcon icon={TruckIcon} className="h-8 w-8 text-blue-600" />
             </div>
           </Card>
 
@@ -520,12 +538,12 @@ export default function OnlineSalesPage() {
         {/* Filters */}
         <Card className="p-4">
           <div className="flex items-center space-x-4">
-            <Funnel className="h-5 w-5 text-muted-foreground" />
+            <HugeiconsIcon icon={FilterIcon} className="h-5 w-5 text-muted-foreground" />
             <div className="grid grid-cols-1 md:grid-cols-4 gap-3 flex-1">
               <div className="space-y-2">
                 <Label htmlFor="search">Search</Label>
                 <div className="relative">
-                  <MagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <HugeiconsIcon icon={Search01Icon} className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="search"
                     placeholder="Search orders..."
@@ -613,15 +631,15 @@ export default function OnlineSalesPage() {
         {activeView === 'cards' ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredSales.map((sale) => {
-              const { variant: orderVariant, label: orderLabel, icon: OrderIcon } = getOrderStatusBadge(sale.order_status)
+              const { variant: orderVariant, label: orderLabel, icon: OrderIconData } = getOrderStatusBadge(sale.order_status)
               const { variant: paymentVariant, label: paymentLabel } = getPaymentStatusBadge(sale.payment_status)
               const { variant: platformVariant, label: platformLabel } = getPlatformBadge(sale.platform)
-              
+
               return (
                 <Card key={sale.id} className="p-6 hover: transition-shadow">
                   <div className="flex justify-between items-start mb-4">
                     <div>
-                      <Link 
+                      <Link
                         href={`/sales/online/${sale.id}`}
                         className="font-semibold text-blue-600 hover:text-blue-800"
                       >
@@ -633,7 +651,7 @@ export default function OnlineSalesPage() {
                     </div>
                     <div className="flex flex-col items-end space-y-1">
                       <div className="flex items-center space-x-1">
-                        <OrderIcon className="h-4 w-4" />
+                        <HugeiconsIcon icon={OrderIconData} className="h-4 w-4" />
                         <Badge variant={orderVariant}>{orderLabel}</Badge>
                       </div>
                       <Badge variant={platformVariant}>{platformLabel}</Badge>
@@ -680,7 +698,7 @@ export default function OnlineSalesPage() {
                     {sale.shipping_address && (
                       <div className="bg-muted p-2 rounded text-sm">
                         <div className="flex items-start space-x-2">
-                          <MapPin className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                          <HugeiconsIcon icon={LocationIcon} className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
                           <span className="text-xs">{sale.shipping_address}</span>
                         </div>
                       </div>
@@ -716,7 +734,7 @@ export default function OnlineSalesPage() {
         {summaryStats.pendingOrders > 0 && (
           <Card className="p-6 border-orange-200 bg-orange-50">
             <div className="flex items-center space-x-3">
-              <Clock className="h-6 w-6 text-orange-600" />
+              <HugeiconsIcon icon={Clock01Icon} className="h-6 w-6 text-orange-600" />
               <div className="flex-1">
                 <h3 className="text-lg font-semibold text-orange-800">Pending Orders</h3>
                 <p className="text-orange-700 mt-1">

@@ -5,11 +5,11 @@ import {
   Calendar01Icon,
   Clock01Icon,
   UserIcon,
-  SmartSmartPhone01Icon,
-  File01Icon,
+  SmartphoneIcon,
+  FileIcon,
   AlertCircleIcon,
   CheckmarkCircle01Icon,
-  Cancel01Icon
+  CancelIcon
 } from "@hugeicons/core-free-icons"
 
 import { useState, useEffect } from 'react'
@@ -215,9 +215,9 @@ export function LeaveRequestForm({ isOpen, onClose, onSubmit, initialData, mode 
       case 'approved':
         return <HugeiconsIcon icon={CheckmarkCircle01Icon} className="h-4 w-4 text-green-600" />
       case 'rejected':
-        return <HugeiconsIcon icon={Cancel01Icon} className="h-4 w-4 text-red-600" />
+        return <HugeiconsIcon icon={CancelIcon} className="h-4 w-4 text-red-600" />
       case 'cancelled':
-        return <HugeiconsIcon icon={Cancel01Icon} className="h-4 w-4 text-gray-600" />
+        return <HugeiconsIcon icon={CancelIcon} className="h-4 w-4 text-gray-600" />
       default:
         return null
     }
@@ -248,7 +248,7 @@ export function LeaveRequestForm({ isOpen, onClose, onSubmit, initialData, mode 
         <DialogHeader>
           <div className="flex items-center justify-between">
             <DialogTitle className="flex items-center space-x-2">
-              <HugeiconsIcon icon={File01Icon} className="h-5 w-5" />
+              <HugeiconsIcon icon={FileIcon} className="h-5 w-5" />
               <span>
                 {mode === 'create' ? 'New Leave Request' : 'Edit Leave Request'}
               </span>
@@ -450,7 +450,7 @@ export function LeaveRequestForm({ isOpen, onClose, onSubmit, initialData, mode 
           {/* Emergency Contact */}
           <div className="space-y-2">
             <Label htmlFor="emergency_contact" className="flex items-center space-x-2">
-              <HugeiconsIcon icon={SmartPhone01Icon} className="h-4 w-4" />
+              <HugeiconsIcon icon={SmartphoneIcon} className="h-4 w-4" />
               <span>Emergency Contact</span>
             </Label>
             <Input

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import { HugeiconsIcon } from "@hugeicons/react"
-import { PencilEdit01Icon, SendToMobileIcon, CheckmarkCircle01Icon, AlertCircleIcon, File01Icon, ArrowLeft01Icon, PrinterIcon, Download01Icon } from "@hugeicons/core-free-icons"
+import { PencilEdit01Icon, SendToMobileIcon, CheckmarkCircle01Icon, AlertCircleIcon, FileIcon, ArrowLeft01Icon, PrinterIcon, Download01Icon } from "@hugeicons/core-free-icons"
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -97,7 +97,7 @@ export default function InvoiceDetailPage() {
       overdue: { variant: 'destructive' as const, label: 'Overdue', icon: AlertCircleIcon },
       cancelled: { variant: 'destructive' as const, label: 'Cancelled', icon: AlertCircleIcon }
     }
-    return config[status as keyof typeof config] || { variant: 'secondary' as const, label: status, icon: File01Icon }
+    return config[status as keyof typeof config] || { variant: 'secondary' as const, label: status, icon: FileIcon }
   }
 
   const getPaymentStatusBadge = (status: string) => {

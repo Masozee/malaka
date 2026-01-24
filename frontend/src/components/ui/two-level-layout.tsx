@@ -6,11 +6,11 @@ import { SidebarProvider } from "@/contexts/sidebar-context"
 import {
   Home01Icon,
   Database01Icon,
-  ShoppingCart01Icon,
+  ShoppingCartIcon,
   Package01Icon,
   UserGroupIcon,
   ChartColumnIcon,
-  Settings01Icon,
+  SettingsIcon,
   Building01Icon,
   Notification01Icon,
   Factory01Icon,
@@ -30,7 +30,7 @@ import {
   UserCheck01Icon,
   // Sales icons
   CreditCardIcon,
-  Store01Icon,
+  StoreIcon,
   RefreshIcon,
   GiftIcon,
   ChartIncreaseIcon,
@@ -46,8 +46,8 @@ import {
   BookOpen01Icon,
   ReceiptDollarIcon,
   PiggyBankIcon,
-  File01Icon,
-  Target01Icon,
+  FileIcon,
+  TargetIcon,
   Building02Icon,
   // HR icons
   Calendar01Icon,
@@ -69,8 +69,8 @@ import {
   // Help icons
   HelpCircleIcon,
   Share01Icon,
-  Logout01Icon,
-  ArrowRight01Icon,
+  LogoutIcon,
+  ArrowRightIcon,
   QuotesIcon,
   MoreVerticalIcon
 } from '@hugeicons/core-free-icons'
@@ -137,8 +137,8 @@ const menuData: MenuItem[] = [
       { id: "users", label: "Users", icon: UserCheck01Icon, href: "/master-data/users", count: 156 },
       { id: "customers", label: "Customers", icon: UserGroupIcon, href: "/master-data/customers", count: 3289 },
       { id: "divisions", label: "Divisions", icon: HierarchyIcon, href: "/master-data/divisions", count: 6 },
-      { id: "depstores", label: "Dept Stores", icon: Store01Icon, href: "/master-data/depstores", count: 12 },
-      { id: "master-data-settings", label: "Settings", icon: Settings01Icon, href: "/master-data/settings" }
+      { id: "depstores", label: "Dept Stores", icon: StoreIcon, href: "/master-data/depstores", count: 12 },
+      { id: "master-data-settings", label: "Settings", icon: SettingsIcon, href: "/master-data/settings" }
     ]
   },
   {
@@ -154,27 +154,27 @@ const menuData: MenuItem[] = [
       { id: "barcodes", label: "Barcodes", icon: BarcodeScanIcon, href: "/master-data/barcodes" },
       { id: "prices", label: "Prices", icon: Dollar01Icon, href: "/master-data/prices", count: 1543 },
       { id: "gallery", label: "Gallery", icon: Image01Icon, href: "/master-data/gallery-images", count: 456 },
-      { id: "products-settings", label: "Settings", icon: Settings01Icon, href: "/products/settings" }
+      { id: "products-settings", label: "Settings", icon: SettingsIcon, href: "/products/settings" }
     ]
   },
   {
     id: "sales",
     label: "Sales",
-    icon: ShoppingCart01Icon,
+    icon: ShoppingCartIcon,
     href: "/sales",
     items: [
       { id: "pos", label: "Point of Sale", icon: CreditCardIcon, href: "/sales/pos", count: 142 },
       { id: "online-sales", label: "Online Sales", icon: ChartIncreaseIcon, href: "/sales/online", count: 789 },
-      { id: "direct-sales", label: "Direct Sales", icon: Store01Icon, href: "/sales/direct", count: 234 },
+      { id: "direct-sales", label: "Direct Sales", icon: StoreIcon, href: "/sales/direct", count: 234 },
       { id: "quotations", label: "Quotations", icon: QuotesIcon, href: "/sales/quotations", count: 89 },
-      { id: "orders", label: "Sales Orders", icon: File01Icon, href: "/sales/orders", count: 567 },
+      { id: "orders", label: "Sales Orders", icon: FileIcon, href: "/sales/orders", count: 567 },
       { id: "returns", label: "Returns", icon: RefreshIcon, href: "/sales/returns", count: 23 },
       { id: "consignment", label: "Consignment", icon: Package01Icon, href: "/sales/consignment", count: 45 },
       { id: "promotions", label: "Promotions", icon: GiftIcon, href: "/sales/promotions", count: 8 },
-      { id: "targets", label: "Sales Targets", icon: Target01Icon, href: "/sales/targets" },
+      { id: "targets", label: "Sales Targets", icon: TargetIcon, href: "/sales/targets" },
       { id: "competitors", label: "Competitors", icon: ChartColumnIcon, href: "/sales/competitors" },
       { id: "reconciliation", label: "Reconciliation", icon: CheckmarkCircle01Icon, href: "/sales/reconciliation", count: 12 },
-      { id: "sales-settings", label: "Settings", icon: Settings01Icon, href: "/sales/settings" }
+      { id: "sales-settings", label: "Settings", icon: SettingsIcon, href: "/sales/settings" }
     ]
   },
   {
@@ -192,7 +192,7 @@ const menuData: MenuItem[] = [
       { id: "stock-opname", label: "Stock Opname", icon: Search01Icon, href: "/inventory/stock-opname", count: 3 },
       { id: "return-supplier", label: "Return Supplier", icon: RefreshIcon, href: "/inventory/return-supplier", count: 7 },
       { id: "barcode-print", label: "Barcode Print", icon: BarcodeScanIcon, href: "/inventory/barcode-print" },
-      { id: "inventory-settings", label: "Settings", icon: Settings01Icon, href: "/inventory/settings" }
+      { id: "inventory-settings", label: "Settings", icon: SettingsIcon, href: "/inventory/settings" }
     ]
   },
   {
@@ -203,12 +203,12 @@ const menuData: MenuItem[] = [
     items: [
       { id: "suppliers", label: "Suppliers", icon: TruckIcon, href: "/production/suppliers", count: 67 },
       { id: "warehouses", label: "Warehouses", icon: WarehouseIcon, href: "/production/warehouses", count: 8 },
-      { id: "purchase-orders", label: "Purchase Orders", icon: File01Icon, href: "/production/purchase-orders", count: 89 },
-      { id: "work-orders", label: "Work Orders", icon: Settings01Icon, href: "/production/work-orders", count: 45 },
+      { id: "purchase-orders", label: "Purchase Orders", icon: FileIcon, href: "/production/purchase-orders", count: 89 },
+      { id: "work-orders", label: "Work Orders", icon: SettingsIcon, href: "/production/work-orders", count: 45 },
       { id: "quality-control", label: "Quality Control", icon: CheckmarkCircle01Icon, href: "/production/quality-control", count: 12 },
       { id: "material-planning", label: "Material Planning", icon: Package01Icon, href: "/production/material-planning", count: 15 },
       { id: "analytics", label: "Analytics", icon: ChartColumnIcon, href: "/production/analytics" },
-      { id: "production-settings", label: "Settings", icon: Settings01Icon, href: "/production/settings" }
+      { id: "production-settings", label: "Settings", icon: SettingsIcon, href: "/production/settings" }
     ]
   },
   {
@@ -224,7 +224,7 @@ const menuData: MenuItem[] = [
       { id: "vendor-evaluation", label: "Vendor Evaluation", icon: StarIcon, href: "/procurement/vendor-evaluation", count: 8 },
       { id: "contracts", label: "Contracts", icon: Agreement01Icon, href: "/procurement/contracts", count: 15 },
       { id: "analytics", label: "Analytics", icon: ChartColumnIcon, href: "/procurement/analytics" },
-      { id: "procurement-settings", label: "Settings", icon: Settings01Icon, href: "/procurement/settings" }
+      { id: "procurement-settings", label: "Settings", icon: SettingsIcon, href: "/procurement/settings" }
     ]
   },
   {
@@ -235,11 +235,11 @@ const menuData: MenuItem[] = [
     items: [
       { id: "couriers", label: "Couriers", icon: MapsIcon, href: "/shipping/couriers", count: 15 },
       { id: "shipment-management", label: "Shipment Management", icon: Package01Icon, href: "/shipping/management" },
-      { id: "airwaybill", label: "Airwaybill", icon: File01Icon, href: "/shipping/airwaybill" },
+      { id: "airwaybill", label: "Airwaybill", icon: FileIcon, href: "/shipping/airwaybill" },
       { id: "outbound-scanning", label: "Outbound Scanning", icon: BarcodeScanIcon, href: "/shipping/outbound" },
       { id: "manifest", label: "Manifest", icon: ClipboardIcon, href: "/shipping/manifest" },
       { id: "shipping-invoices", label: "Shipping Invoices", icon: ReceiptDollarIcon, href: "/shipping/invoices" },
-      { id: "shipping-settings", label: "Settings", icon: Settings01Icon, href: "/shipping/settings" }
+      { id: "shipping-settings", label: "Settings", icon: SettingsIcon, href: "/shipping/settings" }
     ]
   },
   {
@@ -249,14 +249,14 @@ const menuData: MenuItem[] = [
     href: "/accounting",
     items: [
       { id: "general-ledger", label: "General Ledger", icon: BookOpen01Icon, href: "/accounting/general-ledger" },
-      { id: "journal-entries", label: "Journal Entries", icon: File01Icon, href: "/accounting/journal" },
+      { id: "journal-entries", label: "Journal Entries", icon: FileIcon, href: "/accounting/journal" },
       { id: "trial-balance", label: "Trial Balance", icon: ChartColumnIcon, href: "/accounting/trial-balance" },
       { id: "cash-bank", label: "Cash & Bank", icon: PiggyBankIcon, href: "/accounting/cash-bank" },
       { id: "invoices", label: "Invoices", icon: ReceiptDollarIcon, href: "/accounting/invoices" },
-      { id: "cost-centers", label: "Cost Centers", icon: Target01Icon, href: "/accounting/cost-centers" },
+      { id: "cost-centers", label: "Cost Centers", icon: TargetIcon, href: "/accounting/cost-centers" },
       { id: "fixed-assets", label: "Fixed Assets", icon: Building02Icon, href: "/accounting/fixed-assets" },
       { id: "currency", label: "Currency", icon: Dollar01Icon, href: "/accounting/currency" },
-      { id: "accounting-settings", label: "Settings", icon: Settings01Icon, href: "/accounting/settings" }
+      { id: "accounting-settings", label: "Settings", icon: SettingsIcon, href: "/accounting/settings" }
     ]
   },
   {
@@ -271,8 +271,8 @@ const menuData: MenuItem[] = [
       { id: "leave", label: "Leave Management", icon: Calendar01Icon, href: "/hr/leave" },
       { id: "performance", label: "Performance", icon: Medal01Icon, href: "/hr/performance" },
       { id: "training", label: "Training", icon: GraduationScrollIcon, href: "/hr/training" },
-      { id: "spg-stores", label: "SPG Stores", icon: Store01Icon, href: "/hr/spg-stores" },
-      { id: "hr-settings", label: "Settings", icon: Settings01Icon, href: "/hr/settings" }
+      { id: "spg-stores", label: "SPG Stores", icon: StoreIcon, href: "/hr/spg-stores" },
+      { id: "hr-settings", label: "Settings", icon: SettingsIcon, href: "/hr/settings" }
     ]
   },
   {
@@ -288,9 +288,9 @@ const menuData: MenuItem[] = [
       { id: "production-reports", label: "Production Reports", icon: Factory01Icon, href: "/reports/production" },
       { id: "hr-reports", label: "HR Reports", icon: UserGroupIcon, href: "/reports/hr" },
       { id: "custom-reports", label: "Custom Reports", icon: Xls01Icon, href: "/reports/custom" },
-      { id: "static-reports", label: "Static Reports", icon: File01Icon, href: "/reports/static" },
+      { id: "static-reports", label: "Static Reports", icon: FileIcon, href: "/reports/static" },
       { id: "olap", label: "OLAP Analysis", icon: ChartColumnIcon, href: "/reports/olap" },
-      { id: "reporting-settings", label: "Settings", icon: Settings01Icon, href: "/reports/settings" }
+      { id: "reporting-settings", label: "Settings", icon: SettingsIcon, href: "/reports/settings" }
     ]
   }
 ]
@@ -476,7 +476,7 @@ export function TwoLevelLayout({ children }: LayoutProps) {
               style={pathname === '/settings' ? { backgroundColor: '#cfff04' } : {}}
               title="Settings"
             >
-              <Icon icon={Settings01Icon} className={`h-4 w-4 ${pathname === '/settings' ? 'text-black' : 'text-gray-600 dark:text-gray-300'}`} strokeWidth={2} />
+              <Icon icon={SettingsIcon} className={`h-4 w-4 ${pathname === '/settings' ? 'text-black' : 'text-gray-600 dark:text-gray-300'}`} strokeWidth={2} />
             </Link>
 
             {/* Notifications Button with Badge */}
@@ -551,7 +551,7 @@ export function TwoLevelLayout({ children }: LayoutProps) {
               className="w-full flex items-center justify-center p-2 rounded-md hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
               title="Logout"
             >
-              <Icon icon={Logout01Icon} className="h-4 w-4 text-gray-600 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400" strokeWidth={2} />
+              <Icon icon={LogoutIcon} className="h-4 w-4 text-gray-600 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400" strokeWidth={2} />
             </button>
           </div>
         </div>
@@ -576,7 +576,7 @@ export function TwoLevelLayout({ children }: LayoutProps) {
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem asChild>
                       <Link href={`/${activeMenu}/settings`} className="flex items-center">
-                        <Icon icon={Settings01Icon} className="mr-2 h-4 w-4" />
+                        <Icon icon={SettingsIcon} className="mr-2 h-4 w-4" />
                         Settings
                       </Link>
                     </DropdownMenuItem>
@@ -599,7 +599,7 @@ export function TwoLevelLayout({ children }: LayoutProps) {
                 <DropdownMenuContent align="start" side="right">
                   <DropdownMenuItem asChild>
                     <Link href={`/${activeMenu}/settings`} className="flex items-center">
-                      <Icon icon={Settings01Icon} className="mr-2 h-4 w-4" />
+                      <Icon icon={SettingsIcon} className="mr-2 h-4 w-4" />
                       Settings
                     </Link>
                   </DropdownMenuItem>

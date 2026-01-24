@@ -2,9 +2,9 @@
 
 import { HugeiconsIcon } from "@hugeicons/react"
 import {
-  Cancel01Icon,
+  CancelIcon,
   FilterIcon,
-  RotateLeft01Icon
+  RotateLeftIcon
 } from "@hugeicons/core-free-icons"
 
 import { useState, useEffect } from 'react'
@@ -104,7 +104,7 @@ export function JournalEntryFilters({ filters, onFiltersChange, onClearFilters }
               size="sm" 
               onClick={onClearFilters}
             >
-              <HugeiconsIcon icon={RotateLeft01Icon} className="h-4 w-4 mr-1" />
+              <HugeiconsIcon icon={RotateLeftIcon} className="h-4 w-4 mr-1" />
               Clear All
             </Button>
           )}
@@ -136,7 +136,7 @@ export function JournalEntryFilters({ filters, onFiltersChange, onClearFilters }
                 className="h-4 w-4 p-0 hover:bg-transparent"
                 onClick={() => removeBadgeFilter(badge.key)}
               >
-                <HugeiconsIcon icon={Cancel01Icon} className="h-3 w-3" />
+                <HugeiconsIcon icon={CancelIcon} className="h-3 w-3" />
               </Button>
             </Badge>
           ))}

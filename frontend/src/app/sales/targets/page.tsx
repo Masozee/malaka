@@ -10,6 +10,27 @@ import { AdvancedDataTable } from '@/components/ui/advanced-data-table'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { HugeiconsIcon } from '@hugeicons/react'
+import {
+  UserIcon,
+  UserMultiple01Icon,
+  Building01Icon,
+  ChartColumnIcon,
+  Award01Icon,
+  TargetIcon,
+  Clock01Icon,
+  CheckmarkCircle01Icon,
+  AlertCircleIcon,
+  Dollar01Icon,
+  TrendUpIcon,
+  TrendDownIcon,
+  FilterIcon,
+  Search01Icon,
+  ViewIcon,
+  PencilEdit01Icon,
+  Download01Icon,
+  PlusSignIcon
+} from '@hugeicons/core-free-icons'
 
 import Link from 'next/link'
 
@@ -327,23 +348,23 @@ export default function SalesTargetsPage() {
 
   const getTypeBadge = (type: string) => {
     const config = {
-      individual: { variant: 'default' as const, label: 'Individual', icon: User },
-      team: { variant: 'secondary' as const, label: 'Team', icon: Users },
-      store: { variant: 'outline' as const, label: 'Store', icon: Building },
-      region: { variant: 'secondary' as const, label: 'Region', icon: ChartBar },
-      company: { variant: 'default' as const, label: 'Company', icon: Award }
+      individual: { variant: 'default' as const, label: 'Individual', icon: UserIcon },
+      team: { variant: 'secondary' as const, label: 'Team', icon: UserMultiple01Icon },
+      store: { variant: 'outline' as const, label: 'Store', icon: Building01Icon },
+      region: { variant: 'secondary' as const, label: 'Region', icon: ChartColumnIcon },
+      company: { variant: 'default' as const, label: 'Company', icon: Award01Icon }
     }
-    return config[type as keyof typeof config] || { variant: 'secondary' as const, label: type, icon: Target }
+    return config[type as keyof typeof config] || { variant: 'secondary' as const, label: type, icon: TargetIcon }
   }
 
   const getStatusBadge = (status: string) => {
     const config = {
-      active: { variant: 'default' as const, label: 'Active', icon: Clock },
-      completed: { variant: 'default' as const, label: 'Completed', icon: CheckCircle },
-      overdue: { variant: 'destructive' as const, label: 'Overdue', icon: WarningCircle },
-      cancelled: { variant: 'secondary' as const, label: 'Cancelled', icon: WarningCircle }
+      active: { variant: 'default' as const, label: 'Active', icon: Clock01Icon },
+      completed: { variant: 'default' as const, label: 'Completed', icon: CheckmarkCircle01Icon },
+      overdue: { variant: 'destructive' as const, label: 'Overdue', icon: AlertCircleIcon },
+      cancelled: { variant: 'secondary' as const, label: 'Cancelled', icon: AlertCircleIcon }
     }
-    return config[status as keyof typeof config] || { variant: 'secondary' as const, label: status, icon: Clock }
+    return config[status as keyof typeof config] || { variant: 'secondary' as const, label: status, icon: Clock01Icon }
   }
 
   const getPeriodBadge = (period: string) => {
@@ -390,10 +411,10 @@ export default function SalesTargetsPage() {
       key: 'target_type',
       title: 'Type',
       render: (target: SalesTarget) => {
-        const { variant, label, icon: Icon } = getTypeBadge(target.target_type)
+        const { variant, label, icon: IconData } = getTypeBadge(target.target_type)
         return (
           <div className="flex items-center space-x-2">
-            <Icon className="h-4 w-4" />
+            <HugeiconsIcon icon={IconData} className="h-4 w-4" />
             <Badge variant={variant}>{label}</Badge>
           </div>
         )
@@ -470,10 +491,10 @@ export default function SalesTargetsPage() {
       key: 'status',
       title: 'Status',
       render: (target: SalesTarget) => {
-        const { variant, label, icon: Icon } = getStatusBadge(target.status)
+        const { variant, label, icon: IconData } = getStatusBadge(target.status)
         return (
           <div className="flex items-center space-x-2">
-            <Icon className="h-4 w-4" />
+            <HugeiconsIcon icon={IconData} className="h-4 w-4" />
             <Badge variant={variant}>{label}</Badge>
           </div>
         )
@@ -486,12 +507,12 @@ export default function SalesTargetsPage() {
         <div className="flex items-center space-x-2">
           <Button variant="ghost" size="sm" asChild>
             <Link href={`/sales/targets/${target.id}`}>
-              <Eye className="h-4 w-4" />
+              <HugeiconsIcon icon={ViewIcon} className="h-4 w-4" />
             </Link>
           </Button>
           <Button variant="ghost" size="sm" asChild>
             <Link href={`/sales/targets/${target.id}/edit`}>
-              <PencilSimple className="h-4 w-4" />
+              <HugeiconsIcon icon={PencilEdit01Icon} className="h-4 w-4" />
             </Link>
           </Button>
         </div>
@@ -509,12 +530,12 @@ export default function SalesTargetsPage() {
           actions={
             <div className="flex items-center space-x-3">
               <Button variant="outline" size="sm">
-                <DownloadSimple className="h-4 w-4 mr-2" />
+                <HugeiconsIcon icon={Download01Icon} className="h-4 w-4 mr-2" />
                 Export
               </Button>
               <Button size="sm" asChild>
                 <Link href="/sales/targets/new">
-                  <Plus className="h-4 w-4 mr-2" />
+                  <HugeiconsIcon icon={PlusSignIcon} className="h-4 w-4 mr-2" />
                   New Target
                 </Link>
               </Button>
@@ -531,7 +552,7 @@ export default function SalesTargetsPage() {
                 <p className="text-2xl font-bold mt-1">{summaryStats.totalTargets}</p>
                 <p className="text-sm text-blue-600 mt-1">All targets</p>
               </div>
-              <Target className="h-8 w-8 text-blue-600" />
+              <HugeiconsIcon icon={TargetIcon} className="h-8 w-8 text-blue-600" />
             </div>
           </Card>
 
@@ -542,7 +563,7 @@ export default function SalesTargetsPage() {
                 <p className="text-2xl font-bold mt-1 text-blue-600">{summaryStats.activeTargets}</p>
                 <p className="text-sm text-blue-600 mt-1">In progress</p>
               </div>
-              <Clock className="h-8 w-8 text-blue-600" />
+              <HugeiconsIcon icon={Clock01Icon} className="h-8 w-8 text-blue-600" />
             </div>
           </Card>
 
@@ -553,7 +574,7 @@ export default function SalesTargetsPage() {
                 <p className="text-2xl font-bold mt-1 text-green-600">{summaryStats.completedTargets}</p>
                 <p className="text-sm text-green-600 mt-1">Achieved</p>
               </div>
-              <CheckCircle className="h-8 w-8 text-green-600" />
+              <HugeiconsIcon icon={CheckmarkCircle01Icon} className="h-8 w-8 text-green-600" />
             </div>
           </Card>
 
@@ -564,7 +585,7 @@ export default function SalesTargetsPage() {
                 <p className="text-2xl font-bold mt-1 text-red-600">{summaryStats.overdueTargets}</p>
                 <p className="text-sm text-red-600 mt-1">Behind schedule</p>
               </div>
-              <WarningCircle className="h-8 w-8 text-red-600" />
+              <HugeiconsIcon icon={AlertCircleIcon} className="h-8 w-8 text-red-600" />
             </div>
           </Card>
 
@@ -577,7 +598,7 @@ export default function SalesTargetsPage() {
                 </p>
                 <p className="text-sm text-purple-600 mt-1">IDR target</p>
               </div>
-              <CurrencyDollar className="h-8 w-8 text-purple-600" />
+              <HugeiconsIcon icon={Dollar01Icon} className="h-8 w-8 text-purple-600" />
             </div>
           </Card>
 
@@ -590,7 +611,7 @@ export default function SalesTargetsPage() {
                 </p>
                 <p className="text-sm text-green-600 mt-1">IDR achieved</p>
               </div>
-              <TrendUp className="h-8 w-8 text-green-600" />
+              <HugeiconsIcon icon={TrendUpIcon} className="h-8 w-8 text-green-600" />
             </div>
           </Card>
 
@@ -603,7 +624,7 @@ export default function SalesTargetsPage() {
                 </p>
                 <p className="text-sm text-gray-600 mt-1">Overall</p>
               </div>
-              <ChartBar className="h-8 w-8 text-gray-600" />
+              <HugeiconsIcon icon={ChartColumnIcon} className="h-8 w-8 text-gray-600" />
             </div>
           </Card>
         </div>
@@ -611,12 +632,12 @@ export default function SalesTargetsPage() {
         {/* Filters */}
         <Card className="p-6">
           <div className="flex items-center space-x-4">
-            <Funnel className="h-5 w-5 text-muted-foreground" />
+            <HugeiconsIcon icon={FilterIcon} className="h-5 w-5 text-muted-foreground" />
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 flex-1">
               <div className="space-y-2">
                 <Label htmlFor="search">Search</Label>
                 <div className="relative">
-                  <MagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <HugeiconsIcon icon={Search01Icon} className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="search"
                     placeholder="Search targets..."
@@ -706,18 +727,18 @@ export default function SalesTargetsPage() {
         {activeView === 'cards' ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {sortedTargets.map((target) => {
-              const { variant: typeVariant, label: typeLabel, icon: TypeIcon } = getTypeBadge(target.target_type)
-              const { variant: statusVariant, label: statusLabel, icon: StatusIcon } = getStatusBadge(target.status)
+              const { variant: typeVariant, label: typeLabel, icon: TypeIconData } = getTypeBadge(target.target_type)
+              const { variant: statusVariant, label: statusLabel, icon: StatusIconData } = getStatusBadge(target.status)
               const { variant: periodVariant, label: periodLabel } = getPeriodBadge(target.target_period)
               const { variant: priorityVariant, label: priorityLabel } = getPriorityBadge(target.priority)
-              
+
               return (
                 <Card key={target.id} className="p-6 hover: transition-shadow">
                   <div className="flex justify-between items-start mb-4">
                     <div className="flex items-center space-x-2">
-                      <Target className="h-5 w-5 text-blue-600" />
+                      <HugeiconsIcon icon={TargetIcon} className="h-5 w-5 text-blue-600" />
                       <div>
-                        <Link 
+                        <Link
                           href={`/sales/targets/${target.id}`}
                           className="font-semibold text-blue-600 hover:text-blue-800 text-sm"
                         >
@@ -730,7 +751,7 @@ export default function SalesTargetsPage() {
                     </div>
                     <div className="flex flex-col items-end space-y-1">
                       <div className="flex items-center space-x-1">
-                        <StatusIcon className="h-4 w-4" />
+                        <HugeiconsIcon icon={StatusIconData} className="h-4 w-4" />
                         <Badge variant={statusVariant}>{statusLabel}</Badge>
                       </div>
                       <Badge variant={priorityVariant}>{priorityLabel}</Badge>
@@ -741,7 +762,7 @@ export default function SalesTargetsPage() {
                     <div className="flex justify-between">
                       <span className="text-sm text-muted-foreground">Type:</span>
                       <div className="flex items-center space-x-1">
-                        <TypeIcon className="h-4 w-4" />
+                        <HugeiconsIcon icon={TypeIconData} className="h-4 w-4" />
                         <Badge variant={typeVariant}>{typeLabel}</Badge>
                       </div>
                     </div>
@@ -813,13 +834,13 @@ export default function SalesTargetsPage() {
                     <div className="flex space-x-2 pt-3">
                       <Button variant="outline" size="sm" className="flex-1" asChild>
                         <Link href={`/sales/targets/${target.id}`}>
-                          <Eye className="h-4 w-4 mr-2" />
+                          <HugeiconsIcon icon={ViewIcon} className="h-4 w-4 mr-2" />
                           View
                         </Link>
                       </Button>
                       <Button variant="outline" size="sm" asChild>
                         <Link href={`/sales/targets/${target.id}/edit`}>
-                          <PencilSimple className="h-4 w-4" />
+                          <HugeiconsIcon icon={PencilEdit01Icon} className="h-4 w-4" />
                         </Link>
                       </Button>
                     </div>
@@ -856,7 +877,7 @@ export default function SalesTargetsPage() {
           {summaryStats.overdueTargets > 0 && (
             <Card className="p-6 border-red-200 bg-red-50">
               <div className="flex items-center space-x-3">
-                <WarningCircle className="h-6 w-6 text-red-600" />
+                <HugeiconsIcon icon={AlertCircleIcon} className="h-6 w-6 text-red-600" />
                 <div className="flex-1">
                   <h3 className="text-lg font-semibold text-red-800">Overdue Targets</h3>
                   <p className="text-red-700 mt-1">
@@ -874,7 +895,7 @@ export default function SalesTargetsPage() {
           {mockTargets.filter(t => t.achievement_percentage < 50 && t.status === 'active').length > 0 && (
             <Card className="p-6 border-orange-200 bg-orange-50">
               <div className="flex items-center space-x-3">
-                <TrendDown className="h-6 w-6 text-orange-600" />
+                <HugeiconsIcon icon={TrendDownIcon} className="h-6 w-6 text-orange-600" />
                 <div className="flex-1">
                   <h3 className="text-lg font-semibold text-orange-800">Low Performance</h3>
                   <p className="text-orange-700 mt-1">

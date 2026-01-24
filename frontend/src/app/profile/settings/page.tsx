@@ -2,7 +2,7 @@
 
 import { HugeiconsIcon } from "@hugeicons/react"
 import {
-  Settings01Icon,
+  SettingsIcon,
   Notification01Icon,
   Shield01Icon,
   PaintBrush01Icon,
@@ -11,14 +11,14 @@ import {
   LockIcon,
   ViewIcon,
   ViewOffIcon,
-  SmartPhone01Icon,
-  Mail01Icon,
+  SmartphoneIcon,
+  MailIcon,
   ComputerIcon,
   Sun01Icon,
   Moon01Icon,
   LaptopIcon,
-  Tick01Icon,
-  Cancel01Icon,
+  TickIcon,
+  CancelIcon,
   AlertCircleIcon,
   FloppyDiskIcon,
   RefreshIcon
@@ -670,7 +670,7 @@ export default function ProfileGearPage() {
                   <Badge className="bg-green-100 text-green-800">Current</Badge>
                 ) : (
                   <Button variant="outline" size="sm">
-                    <HugeiconsIcon icon={Cancel01Icon} className="h-4 w-4" />
+                    <HugeiconsIcon icon={CancelIcon} className="h-4 w-4" />
                   </Button>
                 )}
               </div>
@@ -969,7 +969,7 @@ export default function ProfileGearPage() {
               onClick={() => setHasChanges(false)}
               disabled={!hasChanges}
             >
-              <HugeiconsIcon icon={Cancel01Icon} className="w-4 h-4 mr-2" />
+              <HugeiconsIcon icon={CancelIcon} className="w-4 h-4 mr-2" />
               Discard
             </Button>
             <Button 

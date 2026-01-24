@@ -3,14 +3,14 @@
 import { HugeiconsIcon } from "@hugeicons/react"
 import {
   Image01Icon,
-  Upload01Icon,
+  UploadIcon,
   Download01Icon,
   ViewIcon,
   PencilEdit01Icon,
   Delete01Icon,
   GridIcon,
   Menu01Icon,
-  Camera01Icon,
+  CameraIcon,
   Tag01Icon,
   PaintBrush01Icon,
   CheckmarkCircle01Icon,
@@ -631,11 +631,11 @@ export default function GalleryImagesPage() {
               Bulk Process
             </Button>
             <Button variant="outline" size="sm">
-              <HugeiconsIcon icon={Camera01Icon} className="h-4 w-4 mr-2" />
+              <HugeiconsIcon icon={CameraIcon} className="h-4 w-4 mr-2" />
               Templates
             </Button>
             <Button size="sm">
-              <HugeiconsIcon icon={Upload01Icon} className="h-4 w-4 mr-2" />
+              <HugeiconsIcon icon={UploadIcon} className="h-4 w-4 mr-2" />
               Upload Images
             </Button>
           </div>

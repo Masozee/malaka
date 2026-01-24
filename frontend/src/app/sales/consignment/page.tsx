@@ -10,6 +10,26 @@ import { AdvancedDataTable } from '@/components/ui/advanced-data-table'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { HugeiconsIcon } from '@hugeicons/react'
+import {
+  StoreIcon,
+  Package01Icon,
+  UserIcon,
+  ViewIcon,
+  CheckmarkCircle01Icon,
+  Clock01Icon,
+  AlertCircleIcon,
+  HandshakeIcon,
+  ChartColumnIcon,
+  TrendUpIcon,
+  TrendDownIcon,
+  Dollar01Icon,
+  FilterIcon,
+  Search01Icon,
+  PencilEdit01Icon,
+  Download01Icon,
+  PlusSignIcon
+} from '@hugeicons/core-free-icons'
 
 import Link from 'next/link'
 
@@ -311,23 +331,23 @@ export default function SalesConsignmentPage() {
 
   const getPartnerTypeBadge = (type: string) => {
     const config = {
-      store: { variant: 'default' as const, label: 'Store', icon: Store },
-      distributor: { variant: 'secondary' as const, label: 'Distributor', icon: Package },
-      agent: { variant: 'outline' as const, label: 'Agent', icon: User },
-      individual: { variant: 'secondary' as const, label: 'Individual', icon: User }
+      store: { variant: 'default' as const, label: 'Store', icon: StoreIcon },
+      distributor: { variant: 'secondary' as const, label: 'Distributor', icon: Package01Icon },
+      agent: { variant: 'outline' as const, label: 'Agent', icon: UserIcon },
+      individual: { variant: 'secondary' as const, label: 'Individual', icon: UserIcon }
     }
-    return config[type as keyof typeof config] || { variant: 'secondary' as const, label: type, icon: User }
+    return config[type as keyof typeof config] || { variant: 'secondary' as const, label: type, icon: UserIcon }
   }
 
   const getStatusBadge = (status: string) => {
     const config = {
-      active: { variant: 'default' as const, label: 'Active', icon: CheckCircle },
-      pending: { variant: 'outline' as const, label: 'Pending', icon: Clock },
-      completed: { variant: 'default' as const, label: 'Completed', icon: CheckCircle },
-      cancelled: { variant: 'destructive' as const, label: 'Cancelled', icon: WarningCircle },
-      expired: { variant: 'secondary' as const, label: 'Expired', icon: Clock }
+      active: { variant: 'default' as const, label: 'Active', icon: CheckmarkCircle01Icon },
+      pending: { variant: 'outline' as const, label: 'Pending', icon: Clock01Icon },
+      completed: { variant: 'default' as const, label: 'Completed', icon: CheckmarkCircle01Icon },
+      cancelled: { variant: 'destructive' as const, label: 'Cancelled', icon: AlertCircleIcon },
+      expired: { variant: 'secondary' as const, label: 'Expired', icon: Clock01Icon }
     }
-    return config[status as keyof typeof config] || { variant: 'secondary' as const, label: status, icon: Clock }
+    return config[status as keyof typeof config] || { variant: 'secondary' as const, label: status, icon: Clock01Icon }
   }
 
   const getPaymentTermsBadge = (terms: string) => {
@@ -361,10 +381,10 @@ export default function SalesConsignmentPage() {
       key: 'partner_type',
       title: 'Partner Type',
       render: (consignment: ConsignmentDeal) => {
-        const { variant, label, icon: Icon } = getPartnerTypeBadge(consignment.partner_type)
+        const { variant, label, icon: IconData } = getPartnerTypeBadge(consignment.partner_type)
         return (
           <div className="flex items-center space-x-2">
-            <Icon className="h-4 w-4" />
+            <HugeiconsIcon icon={IconData} className="h-4 w-4" />
             <Badge variant={variant}>{label}</Badge>
           </div>
         )
@@ -428,10 +448,10 @@ export default function SalesConsignmentPage() {
       key: 'status',
       title: 'Status',
       render: (consignment: ConsignmentDeal) => {
-        const { variant, label, icon: Icon } = getStatusBadge(consignment.status)
+        const { variant, label, icon: IconData } = getStatusBadge(consignment.status)
         return (
           <div className="flex items-center space-x-2">
-            <Icon className="h-4 w-4" />
+            <HugeiconsIcon icon={IconData} className="h-4 w-4" />
             <Badge variant={variant}>{label}</Badge>
           </div>
         )
@@ -444,12 +464,12 @@ export default function SalesConsignmentPage() {
         <div className="flex items-center space-x-2">
           <Button variant="ghost" size="sm" asChild>
             <Link href={`/sales/consignment/${consignment.id}`}>
-              <Eye className="h-4 w-4" />
+              <HugeiconsIcon icon={ViewIcon} className="h-4 w-4" />
             </Link>
           </Button>
           <Button variant="ghost" size="sm" asChild>
             <Link href={`/sales/consignment/${consignment.id}/edit`}>
-              <PencilSimple className="h-4 w-4" />
+              <HugeiconsIcon icon={PencilEdit01Icon} className="h-4 w-4" />
             </Link>
           </Button>
         </div>
@@ -467,12 +487,12 @@ export default function SalesConsignmentPage() {
           actions={
             <div className="flex items-center space-x-3">
               <Button variant="outline" size="sm">
-                <DownloadSimple className="h-4 w-4 mr-2" />
+                <HugeiconsIcon icon={Download01Icon} className="h-4 w-4 mr-2" />
                 Export
               </Button>
               <Button size="sm" asChild>
                 <Link href="/sales/consignment/new">
-                  <Plus className="h-4 w-4 mr-2" />
+                  <HugeiconsIcon icon={PlusSignIcon} className="h-4 w-4 mr-2" />
                   New Consignment
                 </Link>
               </Button>
@@ -489,7 +509,7 @@ export default function SalesConsignmentPage() {
                 <p className="text-2xl font-bold mt-1">{summaryStats.totalConsignments}</p>
                 <p className="text-sm text-blue-600 mt-1">All partnerships</p>
               </div>
-              <Handshake className="h-8 w-8 text-blue-600" />
+              <HugeiconsIcon icon={HandshakeIcon} className="h-8 w-8 text-blue-600" />
             </div>
           </Card>
 
@@ -500,7 +520,7 @@ export default function SalesConsignmentPage() {
                 <p className="text-2xl font-bold mt-1 text-green-600">{summaryStats.activeConsignments}</p>
                 <p className="text-sm text-green-600 mt-1">Running</p>
               </div>
-              <CheckCircle className="h-8 w-8 text-green-600" />
+              <HugeiconsIcon icon={CheckmarkCircle01Icon} className="h-8 w-8 text-green-600" />
             </div>
           </Card>
 
@@ -511,7 +531,7 @@ export default function SalesConsignmentPage() {
                 <p className="text-2xl font-bold mt-1 text-orange-600">{summaryStats.completedConsignments}</p>
                 <p className="text-sm text-orange-600 mt-1">Finished</p>
               </div>
-              <CheckCircle className="h-8 w-8 text-orange-600" />
+              <HugeiconsIcon icon={CheckmarkCircle01Icon} className="h-8 w-8 text-orange-600" />
             </div>
           </Card>
 
@@ -524,7 +544,7 @@ export default function SalesConsignmentPage() {
                 </p>
                 <p className="text-sm text-purple-600 mt-1">IDR consigned</p>
               </div>
-              <ChartBar className="h-8 w-8 text-purple-600" />
+              <HugeiconsIcon icon={ChartColumnIcon} className="h-8 w-8 text-purple-600" />
             </div>
           </Card>
 
@@ -537,7 +557,7 @@ export default function SalesConsignmentPage() {
                 </p>
                 <p className="text-sm text-green-600 mt-1">Revenue generated</p>
               </div>
-              <TrendUp className="h-8 w-8 text-green-600" />
+              <HugeiconsIcon icon={TrendUpIcon} className="h-8 w-8 text-green-600" />
             </div>
           </Card>
 
@@ -550,7 +570,7 @@ export default function SalesConsignmentPage() {
                 </p>
                 <p className="text-sm text-green-600 mt-1">Earned</p>
               </div>
-              <CurrencyDollar className="h-8 w-8 text-green-600" />
+              <HugeiconsIcon icon={Dollar01Icon} className="h-8 w-8 text-green-600" />
             </div>
           </Card>
 
@@ -563,7 +583,7 @@ export default function SalesConsignmentPage() {
                 </p>
                 <p className="text-sm text-gray-600 mt-1">Commission</p>
               </div>
-              <ChartBar className="h-8 w-8 text-gray-600" />
+              <HugeiconsIcon icon={ChartColumnIcon} className="h-8 w-8 text-gray-600" />
             </div>
           </Card>
         </div>
@@ -571,12 +591,12 @@ export default function SalesConsignmentPage() {
         {/* Filters */}
         <Card className="p-6">
           <div className="flex items-center space-x-4">
-            <Funnel className="h-5 w-5 text-muted-foreground" />
+            <HugeiconsIcon icon={FilterIcon} className="h-5 w-5 text-muted-foreground" />
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 flex-1">
               <div className="space-y-2">
                 <Label htmlFor="search">Search</Label>
                 <div className="relative">
-                  <MagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <HugeiconsIcon icon={Search01Icon} className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="search"
                     placeholder="Search consignments..."
@@ -666,8 +686,8 @@ export default function SalesConsignmentPage() {
         {activeView === 'cards' ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {sortedConsignments.map((consignment) => {
-              const { variant: typeVariant, label: typeLabel, icon: TypeIcon } = getPartnerTypeBadge(consignment.partner_type)
-              const { variant: statusVariant, label: statusLabel, icon: StatusIcon } = getStatusBadge(consignment.status)
+              const { variant: typeVariant, label: typeLabel, icon: TypeIconData } = getPartnerTypeBadge(consignment.partner_type)
+              const { variant: statusVariant, label: statusLabel, icon: StatusIconData } = getStatusBadge(consignment.status)
               const { variant: termsVariant, label: termsLabel } = getPaymentTermsBadge(consignment.payment_terms)
               const sellThrough = getSellThroughRate(consignment)
               
@@ -675,7 +695,7 @@ export default function SalesConsignmentPage() {
                 <Card key={consignment.id} className="p-6 hover: transition-shadow">
                   <div className="flex justify-between items-start mb-4">
                     <div className="flex items-center space-x-2">
-                      <Handshake className="h-5 w-5 text-blue-600" />
+                      <HugeiconsIcon icon={HandshakeIcon} className="h-5 w-5 text-blue-600" />
                       <div>
                         <Link 
                           href={`/sales/consignment/${consignment.id}`}
@@ -690,7 +710,7 @@ export default function SalesConsignmentPage() {
                     </div>
                     <div className="flex flex-col items-end space-y-1">
                       <div className="flex items-center space-x-1">
-                        <StatusIcon className="h-4 w-4" />
+                        <HugeiconsIcon icon={StatusIconData} className="h-4 w-4" />
                         <Badge variant={statusVariant}>{statusLabel}</Badge>
                       </div>
                     </div>
@@ -700,7 +720,7 @@ export default function SalesConsignmentPage() {
                     <div className="flex justify-between">
                       <span className="text-sm text-muted-foreground">Partner Type:</span>
                       <div className="flex items-center space-x-1">
-                        <TypeIcon className="h-4 w-4" />
+                        <HugeiconsIcon icon={TypeIconData} className="h-4 w-4" />
                         <Badge variant={typeVariant}>{typeLabel}</Badge>
                       </div>
                     </div>
@@ -769,13 +789,13 @@ export default function SalesConsignmentPage() {
                     <div className="flex space-x-2 pt-3">
                       <Button variant="outline" size="sm" className="flex-1" asChild>
                         <Link href={`/sales/consignment/${consignment.id}`}>
-                          <Eye className="h-4 w-4 mr-2" />
+                          <HugeiconsIcon icon={ViewIcon} className="h-4 w-4 mr-2" />
                           View
                         </Link>
                       </Button>
                       <Button variant="outline" size="sm" asChild>
                         <Link href={`/sales/consignment/${consignment.id}/edit`}>
-                          <PencilSimple className="h-4 w-4" />
+                          <HugeiconsIcon icon={PencilEdit01Icon} className="h-4 w-4" />
                         </Link>
                       </Button>
                     </div>
@@ -810,7 +830,7 @@ export default function SalesConsignmentPage() {
         {mockConsignments.filter(c => getSellThroughRate(c) < 30 && c.status === 'active').length > 0 && (
           <Card className="p-6 border-orange-200 bg-orange-50">
             <div className="flex items-center space-x-3">
-              <TrendDown className="h-6 w-6 text-orange-600" />
+              <HugeiconsIcon icon={TrendDownIcon} className="h-6 w-6 text-orange-600" />
               <div className="flex-1">
                 <h3 className="text-lg font-semibold text-orange-800">Low Performance Partners</h3>
                 <p className="text-orange-700 mt-1">

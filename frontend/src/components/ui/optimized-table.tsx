@@ -5,7 +5,7 @@
 
 import React, { useMemo, useState, useCallback } from 'react'
 import { HugeiconsIcon } from "@hugeicons/react"
-import { Search01Icon, ArrowLeft01Icon, ArrowRight01Icon } from "@hugeicons/core-free-icons"
+import { Search01Icon, ArrowLeft01Icon, ArrowRightIcon } from "@hugeicons/core-free-icons"
 import { Card } from './card'
 import { Button } from './button'
 import { Input } from './input'
@@ -191,7 +191,7 @@ export function OptimizedTable<T extends Record<string, any>>({
               onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
               disabled={currentPage === totalPages}
             >
-              <HugeiconsIcon icon={ArrowRight01Icon} className="h-4 w-4" />
+              <HugeiconsIcon icon={ArrowRightIcon} className="h-4 w-4" />
             </Button>
           </div>
         </div>

@@ -17,7 +17,7 @@ import {
   AlertCircleIcon,
   Search01Icon,
   HashtagIcon,
-  Target01Icon,
+  TargetIcon,
   PercentIcon,
   UserGroupIcon
 } from "@hugeicons/core-free-icons"
@@ -472,7 +472,7 @@ export default function ProductPricesPage() {
 
   const getDefaultBadge = (isDefault: boolean) => {
     return isDefault
-      ? { variant: 'default' as const, label: 'Default', icon: Target01Icon }
+      ? { variant: 'default' as const, label: 'Default', icon: TargetIcon }
       : { variant: 'outline' as const, label: 'Alternative', icon: HashtagIcon }
   }
 
@@ -652,7 +652,7 @@ export default function ProductPricesPage() {
                 <p className="text-2xl font-bold mt-1 text-orange-600">{summaryStats.defaultPrices}</p>
                 <p className="text-sm text-orange-600 mt-1">Primary prices</p>
               </div>
-              <HugeiconsIcon icon={Target01Icon} className="h-8 w-8 text-orange-600" />
+              <HugeiconsIcon icon={TargetIcon} className="h-8 w-8 text-orange-600" />
             </div>
           </Card>
 

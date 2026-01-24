@@ -12,9 +12,9 @@ import {
   DropletIcon,
   Thermometer01Icon,
   SunriseIcon,
-  Location01Icon,
+  LocationIcon,
   ReloadIcon,
-  Loading01Icon
+  LoadingIcon
 } from "@hugeicons/core-free-icons"
 import { Card } from '@/components/ui/card'
 import { weatherService, WeatherData } from '@/services/weather'
@@ -97,7 +97,7 @@ export function WeatherWidget({ city = 'Jakarta', compact = false, className = '
     return (
       <Card className={`p-4 ${className}`}>
         <div className="flex items-center justify-center h-24">
-          <HugeiconsIcon icon={Loading01Icon} className="h-6 w-6 animate-spin text-muted-foreground" />
+          <HugeiconsIcon icon={LoadingIcon} className="h-6 w-6 animate-spin text-muted-foreground" />
         </div>
       </Card>
     )
@@ -144,7 +144,7 @@ export function WeatherWidget({ city = 'Jakarta', compact = false, className = '
           </div>
           <div className="text-right">
             <div className="text-xs text-muted-foreground flex items-center">
-              <HugeiconsIcon icon={Location01Icon} className="h-3 w-3 mr-1" />
+              <HugeiconsIcon icon={LocationIcon} className="h-3 w-3 mr-1" />
               {weather.location.split(',')[0]}
             </div>
             <div className="text-xs text-muted-foreground flex items-center mt-1">
@@ -163,7 +163,7 @@ export function WeatherWidget({ city = 'Jakarta', compact = false, className = '
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <HugeiconsIcon icon={Location01Icon} className="h-4 w-4 text-muted-foreground" />
+            <HugeiconsIcon icon={LocationIcon} className="h-4 w-4 text-muted-foreground" />
             <span className="font-medium">{weather.location}</span>
           </div>
           <Button 

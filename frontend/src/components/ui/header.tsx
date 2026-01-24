@@ -3,9 +3,9 @@
 import * as React from "react"
 import { HugeiconsIcon } from '@hugeicons/react'
 import {
-  ArrowRight01Icon,
+  ArrowRightIcon,
   Search01Icon,
-  Location01Icon,
+  LocationIcon,
   Sun01Icon,
   CloudIcon,
   RainIcon,
@@ -186,7 +186,7 @@ export function Header({ title, description, breadcrumbs, actions }: HeaderProps
                 <ol className="flex items-center space-x-1">
                   {breadcrumbs.map((item, index) => (
                     <li key={index} className="flex items-center">
-                      {index > 0 && <HugeiconsIcon icon={ArrowRight01Icon} className="h-4 w-4 mx-1" aria-hidden="true" />}
+                      {index > 0 && <HugeiconsIcon icon={ArrowRightIcon} className="h-4 w-4 mx-1" aria-hidden="true" />}
                       {item.href ? (
                         <Link
                           href={item.href}

@@ -4,11 +4,11 @@ import { HugeiconsIcon } from '@hugeicons/react'
 import {
   Home01Icon,
   Database01Icon,
-  ShoppingCart01Icon,
+  ShoppingCartIcon,
   Package01Icon,
   UserGroupIcon,
   ChartColumnIcon,
-  Settings01Icon,
+  SettingsIcon,
   Building01Icon,
   Notification01Icon,
   UserIcon,
@@ -92,7 +92,7 @@ export function Layout({ children }: LayoutProps) {
                 className="w-full flex items-center justify-center p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                 title="Sales"
               >
-                <Icon icon={ShoppingCart01Icon} className="h-5 w-5 text-black dark:text-white" />
+                <Icon icon={ShoppingCartIcon} className="h-5 w-5 text-black dark:text-white" />
               </button>
             </li>
 
@@ -146,7 +146,7 @@ export function Layout({ children }: LayoutProps) {
                 className="w-full flex items-center justify-center p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                 title="Settings"
               >
-                <Icon icon={Settings01Icon} className="h-5 w-5 text-black dark:text-white" />
+                <Icon icon={SettingsIcon} className="h-5 w-5 text-black dark:text-white" />
               </button>
             </li>
           </ul>

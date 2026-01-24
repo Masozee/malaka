@@ -4,9 +4,9 @@ import { HugeiconsIcon } from "@hugeicons/react"
 import {
   Calendar01Icon,
   Clock01Icon,
-  Location01Icon,
+  LocationIcon,
   UserGroupIcon,
-  File01Icon
+  FileIcon
 } from "@hugeicons/core-free-icons"
 
 import React from 'react';
@@ -57,7 +57,7 @@ const initialFormData: EventFormData = {
 const eventTypes = [
   { value: 'event', label: 'Event', icon: Calendar01Icon },
   { value: 'meeting', label: 'Meeting', icon: UserGroupIcon },
-  { value: 'task', label: 'Task', icon: File01Icon },
+  { value: 'task', label: 'Task', icon: FileIcon },
   { value: 'reminder', label: 'Reminder', icon: Clock01Icon }
 ];
 
@@ -233,7 +233,7 @@ export function EventForm({ open, onOpenChange, onSubmit, initialData, selectedD
           {/* Location */}
           <div className="space-y-2">
             <Label htmlFor="location" className="flex items-center gap-2">
-              <HugeiconsIcon icon={Location01Icon} className="w-4 h-4" />
+              <HugeiconsIcon icon={LocationIcon} className="w-4 h-4" />
               Location
             </Label>
             <Input

@@ -3,14 +3,14 @@
 import { useState } from 'react'
 import { HugeiconsIcon } from "@hugeicons/react"
 import {
-  ShoppingCart01Icon,
+  ShoppingCartIcon,
   Invoice02Icon,
   Calendar01Icon,
-  File01Icon,
+  FileIcon,
   AlertCircleIcon,
   CheckmarkCircle01Icon,
-  Loading01Icon,
-  Cancel01Icon
+  LoadingIcon,
+  CancelIcon
 } from "@hugeicons/core-free-icons"
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -132,7 +132,7 @@ export function ConversionModal({
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-2">
               {type === 'sales-order' ? (
-                <HugeiconsIcon icon={ShoppingCart01Icon} className="h-5 w-5 text-blue-600" />
+                <HugeiconsIcon icon={ShoppingCartIcon} className="h-5 w-5 text-blue-600" />
               ) : (
                 <HugeiconsIcon icon={Invoice02Icon} className="h-5 w-5 text-green-600" />
               )}
@@ -144,7 +144,7 @@ export function ConversionModal({
               onClick={handleClose}
               className="text-gray-400 hover:text-gray-600"
             >
-              <HugeiconsIcon icon={Cancel01Icon} className="h-5 w-5" />
+              <HugeiconsIcon icon={CancelIcon} className="h-5 w-5" />
             </button>
           </div>
           <p className="text-gray-600 mb-6">
@@ -301,13 +301,13 @@ export function ConversionModal({
             >
               {converting ? (
                 <>
-                  <HugeiconsIcon icon={Loading01Icon} className="mr-2 h-4 w-4 animate-spin" />
+                  <HugeiconsIcon icon={LoadingIcon} className="mr-2 h-4 w-4 animate-spin" />
                   Converting...
                 </>
               ) : (
                 <>
                   {type === 'sales-order' ? (
-                    <HugeiconsIcon icon={ShoppingCart01Icon} className="mr-2 h-4 w-4" />
+                    <HugeiconsIcon icon={ShoppingCartIcon} className="mr-2 h-4 w-4" />
                   ) : (
                     <HugeiconsIcon icon={Invoice02Icon} className="mr-2 h-4 w-4" />
                   )}

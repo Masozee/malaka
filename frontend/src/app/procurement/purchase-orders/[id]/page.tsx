@@ -21,12 +21,12 @@ import {
   Delete01Icon,
   SentIcon,
   CheckmarkCircle01Icon,
-  Loading01Icon,
-  Cancel01Icon,
-  ShoppingCart01Icon,
+  LoadingIcon,
+  CancelIcon,
+  ShoppingCartIcon,
   Calendar01Icon,
   Dollar01Icon,
-  DeliveryTruck01Icon,
+  DeliveryTruckIcon,
 } from '@hugeicons/core-free-icons'
 
 const statusColors: Record<string, string> = {
@@ -132,7 +132,7 @@ export default function PurchaseOrderDetailPage() {
           ]}
         />
         <div className="flex-1 p-6 flex items-center justify-center">
-          <HugeiconsIcon icon={Loading01Icon} className="h-8 w-8 animate-spin" />
+          <HugeiconsIcon icon={LoadingIcon} className="h-8 w-8 animate-spin" />
         </div>
       </TwoLevelLayout>
     )
@@ -151,7 +151,7 @@ export default function PurchaseOrderDetailPage() {
         />
         <div className="flex-1 p-6 flex items-center justify-center">
           <div className="text-center">
-            <HugeiconsIcon icon={Cancel01Icon} className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <HugeiconsIcon icon={CancelIcon} className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-lg font-medium mb-2">Purchase order not found</h3>
             <p className="text-muted-foreground mb-4">
               The purchase order you&apos;re looking for doesn&apos;t exist.
@@ -213,7 +213,7 @@ export default function PurchaseOrderDetailPage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
-                <HugeiconsIcon icon={ShoppingCart01Icon} className="h-5 w-5 text-foreground" />
+                <HugeiconsIcon icon={ShoppingCartIcon} className="h-5 w-5 text-foreground" />
               </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Order Status</p>
@@ -255,7 +255,7 @@ export default function PurchaseOrderDetailPage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
-                <HugeiconsIcon icon={DeliveryTruck01Icon} className="h-5 w-5 text-foreground" />
+                <HugeiconsIcon icon={DeliveryTruckIcon} className="h-5 w-5 text-foreground" />
               </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Expected Delivery</p>

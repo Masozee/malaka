@@ -24,11 +24,11 @@ import {
     PlusSignIcon,
     MoreHorizontalIcon,
     Search01Icon,
-    Loading01Icon,
-    Cancel01Icon,
+    LoadingIcon,
+    CancelIcon,
     PencilEdit01Icon,
     SentIcon,
-    File01Icon
+    FileIcon
 } from '@hugeicons/core-free-icons'
 
 interface RFQListProps {
@@ -421,12 +421,12 @@ export default function RFQList({ initialData }: RFQListProps) {
                 {/* Content */}
                 {loading ? (
                     <div className="flex items-center justify-center h-64">
-                        <HugeiconsIcon icon={Loading01Icon} className="h-8 w-8 animate-spin" />
+                        <HugeiconsIcon icon={LoadingIcon} className="h-8 w-8 animate-spin" />
                     </div>
                 ) : error ? (
                     <div className="flex items-center justify-center h-64">
                         <div className="text-center">
-                            <HugeiconsIcon icon={Cancel01Icon} className="h-12 w-12 text-red-500 mx-auto mb-4" />
+                            <HugeiconsIcon icon={CancelIcon} className="h-12 w-12 text-red-500 mx-auto mb-4" />
                             <p className="text-lg font-medium text-gray-900 mb-2">Error Loading RFQs</p>
                             <p className="text-gray-500 mb-4">{error}</p>
                             <Button onClick={loadData}>
@@ -437,7 +437,7 @@ export default function RFQList({ initialData }: RFQListProps) {
                 ) : filteredRfqs.length === 0 ? (
                     <div className="flex items-center justify-center h-64">
                         <div className="text-center">
-                            <HugeiconsIcon icon={File01Icon} className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                            <HugeiconsIcon icon={FileIcon} className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                             <p className="text-lg font-medium text-gray-900 mb-2">No RFQs Found</p>
                             <p className="text-gray-500 mb-4">Get started by creating your first RFQ.</p>
                             <Button onClick={() => router.push('/procurement/rfq/new')}>

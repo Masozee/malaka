@@ -11,7 +11,7 @@ import {
   Tag01Icon,
   Archive01Icon,
   Dollar01Icon,
-  File01Icon,
+  FileIcon,
   UserIcon,
   Delete01Icon
 } from '@hugeicons/core-free-icons'
@@ -294,7 +294,7 @@ export default function JournalEntryDetailPage() {
 
                   {journalEntry.source_document && (
                     <div className="flex items-center space-x-3">
-                      <HugeiconsIcon icon={File01Icon} className="h-5 w-5 text-gray-400 dark:text-gray-500" />
+                      <HugeiconsIcon icon={FileIcon} className="h-5 w-5 text-gray-400 dark:text-gray-500" />
                       <div>
                         <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Source Document</p>
                         <p className="text-sm text-gray-600 dark:text-gray-400">{journalEntry.source_document}</p>
@@ -434,7 +434,7 @@ export default function JournalEntryDetailPage() {
                 )}
                 
                 <Button variant="outline" className="w-full justify-start">
-                  <HugeiconsIcon icon={File01Icon} className="h-4 w-4 mr-2" />
+                  <HugeiconsIcon icon={FileIcon} className="h-4 w-4 mr-2" />
                   Print Entry
                 </Button>
                 

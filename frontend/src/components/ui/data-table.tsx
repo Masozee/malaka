@@ -4,7 +4,7 @@ import * as React from "react"
 import { HugeiconsIcon } from '@hugeicons/react'
 import {
   ArrowLeft01Icon,
-  ArrowRight01Icon,
+  ArrowRightIcon,
   ArrowLeftDoubleIcon,
   ArrowRightDoubleIcon,
   Search01Icon,
@@ -380,7 +380,7 @@ export function DataTable<T extends { id: string }>({
               disabled={currentPage === totalPages}
               aria-label="Go to next page"
             >
-              <HugeiconsIcon icon={ArrowRight01Icon} className="h-4 w-4" />
+              <HugeiconsIcon icon={ArrowRightIcon} className="h-4 w-4" />
             </Button>
             <Button
               variant="outline"

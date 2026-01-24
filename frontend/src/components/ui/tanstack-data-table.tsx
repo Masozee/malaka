@@ -4,11 +4,11 @@ import * as React from "react"
 import { HugeiconsIcon } from "@hugeicons/react"
 import {
   ArrowLeft01Icon,
-  ArrowRight01Icon,
+  ArrowRightIcon,
   ArrowLeftDoubleIcon,
   ArrowRightDoubleIcon,
-  ArrowUp01Icon,
-  ArrowDown01Icon,
+  ArrowUpIcon,
+  ArrowDownIcon,
   Search01Icon,
   PlusSignIcon,
   PencilEdit01Icon,
@@ -16,7 +16,7 @@ import {
   MoreHorizontalIcon,
   QrCodeIcon,
   BarCode01Icon,
-  Settings01Icon,
+  SettingsIcon,
   type IconSvgElement,
 } from "@hugeicons/core-free-icons"
 import {
@@ -199,8 +199,8 @@ export function TanStackDataTable<T extends { id: string }>({
               aria-label={`Sort by ${col.header}${sortState ? `, currently sorted ${sortState}ending` : ''}`}
             >
               <span>{col.header}</span>
-              {sortState === "asc" && <HugeiconsIcon icon={ArrowUp01Icon} className="h-4 w-4" />}
-              {sortState === "desc" && <HugeiconsIcon icon={ArrowDown01Icon} className="h-4 w-4" />}
+              {sortState === "asc" && <HugeiconsIcon icon={ArrowUpIcon} className="h-4 w-4" />}
+              {sortState === "desc" && <HugeiconsIcon icon={ArrowDownIcon} className="h-4 w-4" />}
             </button>
           )
         },
@@ -445,7 +445,7 @@ export function TanStackDataTable<T extends { id: string }>({
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="sm">
-                <HugeiconsIcon icon={Settings01Icon} className="h-4 w-4 mr-1" />
+                <HugeiconsIcon icon={SettingsIcon} className="h-4 w-4 mr-1" />
                 Columns
               </Button>
             </DropdownMenuTrigger>
@@ -567,7 +567,7 @@ export function TanStackDataTable<T extends { id: string }>({
             disabled={currentPage === totalPages}
             aria-label="Go to next page"
           >
-            <HugeiconsIcon icon={ArrowRight01Icon} className="h-4 w-4" />
+            <HugeiconsIcon icon={ArrowRightIcon} className="h-4 w-4" />
           </Button>
           <Button
             variant="outline"

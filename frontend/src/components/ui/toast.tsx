@@ -3,7 +3,7 @@
 import * as React from "react"
 import { HugeiconsIcon } from "@hugeicons/react"
 import {
-  Cancel01Icon,
+  CancelIcon,
   CheckmarkCircle01Icon,
   AlertCircleIcon,
   CancelCircleIcon,
@@ -173,7 +173,7 @@ function ToastItem({ toast, onRemove }: ToastItemProps) {
           className="h-6 w-6 p-0 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
           aria-label="Dismiss notification"
         >
-          <HugeiconsIcon icon={Cancel01Icon} className="h-4 w-4" />
+          <HugeiconsIcon icon={CancelIcon} className="h-4 w-4" />
         </Button>
       </div>
     </div>

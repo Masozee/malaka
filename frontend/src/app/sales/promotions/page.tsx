@@ -10,6 +10,28 @@ import { AdvancedDataTable } from '@/components/ui/advanced-data-table'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { HugeiconsIcon } from '@hugeicons/react'
+import {
+  PercentIcon,
+  Dollar01Icon,
+  Gift01Icon,
+  Package01Icon,
+  TargetIcon,
+  Tag01Icon,
+  Clock01Icon,
+  CheckmarkCircle01Icon,
+  AlertCircleIcon,
+  Star01Icon,
+  TrendUpIcon,
+  UserMultiple01Icon,
+  ChartColumnIcon,
+  FilterIcon,
+  Search01Icon,
+  ViewIcon,
+  PencilEdit01Icon,
+  Download01Icon,
+  PlusSignIcon
+} from '@hugeicons/core-free-icons'
 
 import Link from 'next/link'
 
@@ -319,25 +341,25 @@ export default function SalesPromotionsPage() {
 
   const getTypeBadge = (type: string) => {
     const config = {
-      percentage: { variant: 'default' as const, label: 'Percentage', icon: Percent },
-      fixed_amount: { variant: 'secondary' as const, label: 'Fixed Amount', icon: CurrencyDollar },
-      buy_one_get_one: { variant: 'outline' as const, label: 'BOGO', icon: Gift },
-      bundle: { variant: 'secondary' as const, label: 'Bundle', icon: Package },
-      free_shipping: { variant: 'outline' as const, label: 'Free Ship', icon: Target },
-      cashback: { variant: 'default' as const, label: 'Cashback', icon: CurrencyDollar }
+      percentage: { variant: 'default' as const, label: 'Percentage', icon: PercentIcon },
+      fixed_amount: { variant: 'secondary' as const, label: 'Fixed Amount', icon: Dollar01Icon },
+      buy_one_get_one: { variant: 'outline' as const, label: 'BOGO', icon: Gift01Icon },
+      bundle: { variant: 'secondary' as const, label: 'Bundle', icon: Package01Icon },
+      free_shipping: { variant: 'outline' as const, label: 'Free Ship', icon: TargetIcon },
+      cashback: { variant: 'default' as const, label: 'Cashback', icon: Dollar01Icon }
     }
-    return config[type as keyof typeof config] || { variant: 'secondary' as const, label: type, icon: Tag }
+    return config[type as keyof typeof config] || { variant: 'secondary' as const, label: type, icon: Tag01Icon }
   }
 
   const getStatusBadge = (status: string) => {
     const config = {
-      draft: { variant: 'secondary' as const, label: 'Draft', icon: Clock },
-      active: { variant: 'default' as const, label: 'Active', icon: CheckCircle },
-      paused: { variant: 'outline' as const, label: 'Paused', icon: Clock },
-      completed: { variant: 'default' as const, label: 'Completed', icon: CheckCircle },
-      cancelled: { variant: 'destructive' as const, label: 'Cancelled', icon: WarningCircle }
+      draft: { variant: 'secondary' as const, label: 'Draft', icon: Clock01Icon },
+      active: { variant: 'default' as const, label: 'Active', icon: CheckmarkCircle01Icon },
+      paused: { variant: 'outline' as const, label: 'Paused', icon: Clock01Icon },
+      completed: { variant: 'default' as const, label: 'Completed', icon: CheckmarkCircle01Icon },
+      cancelled: { variant: 'destructive' as const, label: 'Cancelled', icon: AlertCircleIcon }
     }
-    return config[status as keyof typeof config] || { variant: 'secondary' as const, label: status, icon: Clock }
+    return config[status as keyof typeof config] || { variant: 'secondary' as const, label: status, icon: Clock01Icon }
   }
 
   const getAudienceBadge = (audience: string) => {
@@ -391,10 +413,10 @@ export default function SalesPromotionsPage() {
       key: 'promotion_type',
       title: 'Type',
       render: (promotion: SalesPromotion) => {
-        const { variant, label, icon: Icon } = getTypeBadge(promotion.promotion_type)
+        const { variant, label, icon: IconData } = getTypeBadge(promotion.promotion_type)
         return (
           <div className="flex items-center space-x-2">
-            <Icon className="h-4 w-4" />
+            <HugeiconsIcon icon={IconData} className="h-4 w-4" />
             <Badge variant={variant}>{label}</Badge>
           </div>
         )
@@ -454,10 +476,10 @@ export default function SalesPromotionsPage() {
       key: 'status',
       title: 'Status',
       render: (promotion: SalesPromotion) => {
-        const { variant, label, icon: Icon } = getStatusBadge(promotion.status)
+        const { variant, label, icon: IconData } = getStatusBadge(promotion.status)
         return (
           <div className="flex items-center space-x-2">
-            <Icon className="h-4 w-4" />
+            <HugeiconsIcon icon={IconData} className="h-4 w-4" />
             <Badge variant={variant}>{label}</Badge>
           </div>
         )
@@ -470,12 +492,12 @@ export default function SalesPromotionsPage() {
         <div className="flex items-center space-x-2">
           <Button variant="ghost" size="sm" asChild>
             <Link href={`/sales/promotions/${promotion.id}`}>
-              <Eye className="h-4 w-4" />
+              <HugeiconsIcon icon={ViewIcon} className="h-4 w-4" />
             </Link>
           </Button>
           <Button variant="ghost" size="sm" asChild>
             <Link href={`/sales/promotions/${promotion.id}/edit`}>
-              <PencilSimple className="h-4 w-4" />
+              <HugeiconsIcon icon={PencilEdit01Icon} className="h-4 w-4" />
             </Link>
           </Button>
         </div>
@@ -493,12 +515,12 @@ export default function SalesPromotionsPage() {
           actions={
             <div className="flex items-center space-x-3">
               <Button variant="outline" size="sm">
-                <DownloadSimple className="h-4 w-4 mr-2" />
+                <HugeiconsIcon icon={Download01Icon} className="h-4 w-4 mr-2" />
                 Export
               </Button>
               <Button size="sm" asChild>
                 <Link href="/sales/promotions/new">
-                  <Plus className="h-4 w-4 mr-2" />
+                  <HugeiconsIcon icon={PlusSignIcon} className="h-4 w-4 mr-2" />
                   New Promotion
                 </Link>
               </Button>
@@ -515,7 +537,7 @@ export default function SalesPromotionsPage() {
                 <p className="text-2xl font-bold mt-1">{summaryStats.totalPromotions}</p>
                 <p className="text-sm text-blue-600 mt-1">All promotions</p>
               </div>
-              <Gift className="h-8 w-8 text-blue-600" />
+              <HugeiconsIcon icon={Gift01Icon} className="h-8 w-8 text-blue-600" />
             </div>
           </Card>
 
@@ -526,7 +548,7 @@ export default function SalesPromotionsPage() {
                 <p className="text-2xl font-bold mt-1 text-green-600">{summaryStats.activePromotions}</p>
                 <p className="text-sm text-green-600 mt-1">Running now</p>
               </div>
-              <CheckCircle className="h-8 w-8 text-green-600" />
+              <HugeiconsIcon icon={CheckmarkCircle01Icon} className="h-8 w-8 text-green-600" />
             </div>
           </Card>
 
@@ -537,7 +559,7 @@ export default function SalesPromotionsPage() {
                 <p className="text-2xl font-bold mt-1 text-orange-600">{summaryStats.completedPromotions}</p>
                 <p className="text-sm text-orange-600 mt-1">Finished</p>
               </div>
-              <Star className="h-8 w-8 text-orange-600" />
+              <HugeiconsIcon icon={Star01Icon} className="h-8 w-8 text-orange-600" />
             </div>
           </Card>
 
@@ -550,7 +572,7 @@ export default function SalesPromotionsPage() {
                 </p>
                 <p className="text-sm text-purple-600 mt-1">IDR revenue</p>
               </div>
-              <TrendUp className="h-8 w-8 text-purple-600" />
+              <HugeiconsIcon icon={TrendUpIcon} className="h-8 w-8 text-purple-600" />
             </div>
           </Card>
 
@@ -563,7 +585,7 @@ export default function SalesPromotionsPage() {
                 </p>
                 <p className="text-sm text-red-600 mt-1">Cost of promo</p>
               </div>
-              <CurrencyDollar className="h-8 w-8 text-red-600" />
+              <HugeiconsIcon icon={Dollar01Icon} className="h-8 w-8 text-red-600" />
             </div>
           </Card>
 
@@ -576,7 +598,7 @@ export default function SalesPromotionsPage() {
                 </p>
                 <p className="text-sm text-green-600 mt-1">Times used</p>
               </div>
-              <Users className="h-8 w-8 text-green-600" />
+              <HugeiconsIcon icon={UserMultiple01Icon} className="h-8 w-8 text-green-600" />
             </div>
           </Card>
 
@@ -589,7 +611,7 @@ export default function SalesPromotionsPage() {
                 </p>
                 <p className="text-sm text-gray-600 mt-1">Effectiveness</p>
               </div>
-              <ChartBar className="h-8 w-8 text-gray-600" />
+              <HugeiconsIcon icon={ChartColumnIcon} className="h-8 w-8 text-gray-600" />
             </div>
           </Card>
         </div>
@@ -597,12 +619,12 @@ export default function SalesPromotionsPage() {
         {/* Filters */}
         <Card className="p-6">
           <div className="flex items-center space-x-4">
-            <Funnel className="h-5 w-5 text-muted-foreground" />
+            <HugeiconsIcon icon={FilterIcon} className="h-5 w-5 text-muted-foreground" />
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 flex-1">
               <div className="space-y-2">
                 <Label htmlFor="search">Search</Label>
                 <div className="relative">
-                  <MagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <HugeiconsIcon icon={Search01Icon} className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="search"
                     placeholder="Search promotions..."
@@ -694,17 +716,17 @@ export default function SalesPromotionsPage() {
         {activeView === 'cards' ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {sortedPromotions.map((promotion) => {
-              const { variant: typeVariant, label: typeLabel, icon: TypeIcon } = getTypeBadge(promotion.promotion_type)
-              const { variant: statusVariant, label: statusLabel, icon: StatusIcon } = getStatusBadge(promotion.status)
+              const { variant: typeVariant, label: typeLabel, icon: TypeIconData } = getTypeBadge(promotion.promotion_type)
+              const { variant: statusVariant, label: statusLabel, icon: StatusIconData } = getStatusBadge(promotion.status)
               const { variant: audienceVariant, label: audienceLabel } = getAudienceBadge(promotion.target_audience)
-              
+
               return (
                 <Card key={promotion.id} className="p-6 hover: transition-shadow">
                   <div className="flex justify-between items-start mb-4">
                     <div className="flex items-center space-x-2">
-                      <Gift className="h-5 w-5 text-blue-600" />
+                      <HugeiconsIcon icon={Gift01Icon} className="h-5 w-5 text-blue-600" />
                       <div>
-                        <Link 
+                        <Link
                           href={`/sales/promotions/${promotion.id}`}
                           className="font-semibold text-blue-600 hover:text-blue-800"
                         >
@@ -717,7 +739,7 @@ export default function SalesPromotionsPage() {
                     </div>
                     <div className="flex flex-col items-end space-y-1">
                       <div className="flex items-center space-x-1">
-                        <StatusIcon className="h-4 w-4" />
+                        <HugeiconsIcon icon={StatusIconData} className="h-4 w-4" />
                         <Badge variant={statusVariant}>{statusLabel}</Badge>
                       </div>
                     </div>
@@ -727,7 +749,7 @@ export default function SalesPromotionsPage() {
                     <div className="flex justify-between">
                       <span className="text-sm text-muted-foreground">Type:</span>
                       <div className="flex items-center space-x-1">
-                        <TypeIcon className="h-4 w-4" />
+                        <HugeiconsIcon icon={TypeIconData} className="h-4 w-4" />
                         <Badge variant={typeVariant}>{typeLabel}</Badge>
                       </div>
                     </div>
@@ -786,13 +808,13 @@ export default function SalesPromotionsPage() {
                     <div className="flex space-x-2 pt-3">
                       <Button variant="outline" size="sm" className="flex-1" asChild>
                         <Link href={`/sales/promotions/${promotion.id}`}>
-                          <Eye className="h-4 w-4 mr-2" />
+                          <HugeiconsIcon icon={ViewIcon} className="h-4 w-4 mr-2" />
                           View
                         </Link>
                       </Button>
                       <Button variant="outline" size="sm" asChild>
                         <Link href={`/sales/promotions/${promotion.id}/edit`}>
-                          <PencilSimple className="h-4 w-4" />
+                          <HugeiconsIcon icon={PencilEdit01Icon} className="h-4 w-4" />
                         </Link>
                       </Button>
                     </div>
@@ -827,7 +849,7 @@ export default function SalesPromotionsPage() {
         {mockPromotions.filter(p => p.conversion_rate < 10 && p.status === 'active').length > 0 && (
           <Card className="p-6 border-red-200 bg-red-50">
             <div className="flex items-center space-x-3">
-              <WarningCircle className="h-6 w-6 text-red-600" />
+              <HugeiconsIcon icon={AlertCircleIcon} className="h-6 w-6 text-red-600" />
               <div className="flex-1">
                 <h3 className="text-lg font-semibold text-red-800">Low Performance Promotions</h3>
                 <p className="text-red-700 mt-1">

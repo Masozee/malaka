@@ -8,21 +8,21 @@ import {
   ArrowLeft01Icon,
   Book01Icon,
   Home01Icon,
-  File01Icon,
+  FileIcon,
   UserGroupIcon,
-  Settings01Icon,
+  SettingsIcon,
   HelpCircleIcon,
   Database01Icon,
-  ShoppingCart01Icon,
+  ShoppingCartIcon,
   Package01Icon,
   Factory01Icon,
   ShoppingBag01Icon,
-  DeliveryTruck01Icon,
+  DeliveryTruckIcon,
   Calculator01Icon,
   ChartBarLineIcon,
   Building01Icon,
   Shirt01Icon,
-  ArrowRight01Icon
+  ArrowRightIcon
 } from "@hugeicons/core-free-icons"
 import { Button } from "@/components/ui/button"
 import { ThemeToggle } from "@/components/ui/theme-toggle"
@@ -68,7 +68,7 @@ const guidelineSections: GuidelineSection[] = [
     id: "administration",
     title: "System Administration",
     href: "/guidelines/administration",
-    icon: Settings01Icon
+    icon: SettingsIcon
   },
   {
     id: "troubleshooting",
@@ -95,7 +95,7 @@ const moduleSections: ModuleSection[] = [
     id: "sales",
     title: "Sales",
     href: "/guidelines/modules/sales",
-    icon: ShoppingCart01Icon
+    icon: ShoppingCartIcon
   },
   {
     id: "inventory",
@@ -119,7 +119,7 @@ const moduleSections: ModuleSection[] = [
     id: "shipping",
     title: "Shipping",
     href: "/guidelines/modules/shipping",
-    icon: DeliveryTruck01Icon
+    icon: DeliveryTruckIcon
   },
   {
     id: "accounting",

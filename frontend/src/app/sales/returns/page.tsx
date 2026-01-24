@@ -10,6 +10,25 @@ import { AdvancedDataTable } from '@/components/ui/advanced-data-table'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { HugeiconsIcon } from '@hugeicons/react'
+import {
+  Clock01Icon,
+  CheckmarkCircle01Icon,
+  CancelIcon,
+  AlertCircleIcon,
+  RotateClockwiseIcon,
+  Calendar01Icon,
+  ArrowLeft01Icon,
+  Package01Icon,
+  Dollar01Icon,
+  UserIcon,
+  FilterIcon,
+  Search01Icon,
+  ViewIcon,
+  PencilEdit01Icon,
+  Download01Icon,
+  PlusSignIcon
+} from '@hugeicons/core-free-icons'
 
 import Link from 'next/link'
 
@@ -300,13 +319,13 @@ export default function ReturnsPage() {
 
   const getStatusBadge = (status: string) => {
     const config = {
-      pending: { variant: 'secondary' as const, label: 'Pending', icon: Clock },
-      approved: { variant: 'default' as const, label: 'Approved', icon: CheckCircle },
-      rejected: { variant: 'destructive' as const, label: 'Rejected', icon: XCircle },
-      completed: { variant: 'default' as const, label: 'Completed', icon: CheckCircle },
-      cancelled: { variant: 'destructive' as const, label: 'Cancelled', icon: WarningCircle }
+      pending: { variant: 'secondary' as const, label: 'Pending', icon: Clock01Icon },
+      approved: { variant: 'default' as const, label: 'Approved', icon: CheckmarkCircle01Icon },
+      rejected: { variant: 'destructive' as const, label: 'Rejected', icon: CancelIcon },
+      completed: { variant: 'default' as const, label: 'Completed', icon: CheckmarkCircle01Icon },
+      cancelled: { variant: 'destructive' as const, label: 'Cancelled', icon: AlertCircleIcon }
     }
-    return config[status as keyof typeof config] || { variant: 'secondary' as const, label: status, icon: ArrowsClockwise }
+    return config[status as keyof typeof config] || { variant: 'secondary' as const, label: status, icon: RotateClockwiseIcon }
   }
 
   const getReturnTypeBadge = (type: string) => {
@@ -350,7 +369,7 @@ export default function ReturnsPage() {
       title: 'Date',
       render: (returnItem: Return) => (
         <div className="flex items-center space-x-2">
-          <Calendar className="h-4 w-4 text-muted-foreground" />
+          <HugeiconsIcon icon={Calendar01Icon} className="h-4 w-4 text-muted-foreground" />
           <span>{formatDate(returnItem.return_date)}</span>
         </div>
       )
@@ -360,7 +379,7 @@ export default function ReturnsPage() {
       title: 'Original Order',
       render: (returnItem: Return) => (
         <div className="flex items-center space-x-2">
-          <ArrowLeft className="h-4 w-4 text-muted-foreground" />
+          <HugeiconsIcon icon={ArrowLeft01Icon} className="h-4 w-4 text-muted-foreground" />
           <span className="font-mono text-sm">{returnItem.original_transaction}</span>
         </div>
       )
@@ -390,7 +409,7 @@ export default function ReturnsPage() {
       title: 'Items',
       render: (returnItem: Return) => (
         <div className="flex items-center space-x-2">
-          <Package className="h-4 w-4 text-muted-foreground" />
+          <HugeiconsIcon icon={Package01Icon} className="h-4 w-4 text-muted-foreground" />
           <span>{returnItem.items.length} items</span>
         </div>
       )
@@ -418,10 +437,10 @@ export default function ReturnsPage() {
       key: 'status',
       title: 'Status',
       render: (returnItem: Return) => {
-        const { variant, label, icon: Icon } = getStatusBadge(returnItem.status)
+        const { variant, label, icon: IconData } = getStatusBadge(returnItem.status)
         return (
           <div className="flex items-center space-x-2">
-            <Icon className="h-4 w-4" />
+            <HugeiconsIcon icon={IconData} className="h-4 w-4" />
             <Badge variant={variant}>{label}</Badge>
           </div>
         )
@@ -434,13 +453,13 @@ export default function ReturnsPage() {
         <div className="flex items-center space-x-2">
           <Button variant="ghost" size="sm" asChild>
             <Link href={`/sales/returns/${returnItem.id}`}>
-              <Eye className="h-4 w-4" />
+              <HugeiconsIcon icon={ViewIcon} className="h-4 w-4" />
             </Link>
           </Button>
           {returnItem.status === 'pending' && (
             <Button variant="ghost" size="sm" asChild>
               <Link href={`/sales/returns/${returnItem.id}/edit`}>
-                <PencilSimple className="h-4 w-4" />
+                <HugeiconsIcon icon={PencilEdit01Icon} className="h-4 w-4" />
               </Link>
             </Button>
           )}
@@ -459,12 +478,12 @@ export default function ReturnsPage() {
           actions={
             <div className="flex items-center space-x-3">
               <Button variant="outline" size="sm">
-                <DownloadSimple className="h-4 w-4 mr-2" />
+                <HugeiconsIcon icon={Download01Icon} className="h-4 w-4 mr-2" />
                 Export
               </Button>
               <Button size="sm" asChild>
                 <Link href="/sales/returns/new">
-                  <Plus className="h-4 w-4 mr-2" />
+                  <HugeiconsIcon icon={PlusSignIcon} className="h-4 w-4 mr-2" />
                   New Return
                 </Link>
               </Button>
@@ -481,7 +500,7 @@ export default function ReturnsPage() {
                 <p className="text-2xl font-bold mt-1">{summaryStats.todayReturns}</p>
                 <p className="text-sm text-blue-600 mt-1">New returns</p>
               </div>
-              <ArrowsClockwise className="h-8 w-8 text-blue-600" />
+              <HugeiconsIcon icon={RotateClockwiseIcon} className="h-8 w-8 text-blue-600" />
             </div>
           </Card>
 
@@ -492,7 +511,7 @@ export default function ReturnsPage() {
                 <p className="text-2xl font-bold mt-1 text-orange-600">{summaryStats.pendingReturns}</p>
                 <p className="text-sm text-orange-600 mt-1">Need approval</p>
               </div>
-              <Clock className="h-8 w-8 text-orange-600" />
+              <HugeiconsIcon icon={Clock01Icon} className="h-8 w-8 text-orange-600" />
             </div>
           </Card>
 
@@ -503,7 +522,7 @@ export default function ReturnsPage() {
                 <p className="text-2xl font-bold mt-1 text-green-600">{summaryStats.completedReturns}</p>
                 <p className="text-sm text-green-600 mt-1">Processed</p>
               </div>
-              <CheckCircle className="h-8 w-8 text-green-600" />
+              <HugeiconsIcon icon={CheckmarkCircle01Icon} className="h-8 w-8 text-green-600" />
             </div>
           </Card>
 
@@ -516,7 +535,7 @@ export default function ReturnsPage() {
                 </p>
                 <p className="text-sm text-red-600 mt-1">Refunded amount</p>
               </div>
-              <CurrencyDollar className="h-8 w-8 text-red-600" />
+              <HugeiconsIcon icon={Dollar01Icon} className="h-8 w-8 text-red-600" />
             </div>
           </Card>
 
@@ -529,7 +548,7 @@ export default function ReturnsPage() {
                 </p>
                 <p className="text-sm text-purple-600 mt-1">Per return</p>
               </div>
-              <Package className="h-8 w-8 text-purple-600" />
+              <HugeiconsIcon icon={Package01Icon} className="h-8 w-8 text-purple-600" />
             </div>
           </Card>
 
@@ -540,7 +559,7 @@ export default function ReturnsPage() {
                 <p className="text-2xl font-bold mt-1">{summaryStats.totalReturns}</p>
                 <p className="text-sm text-gray-600 mt-1">All time</p>
               </div>
-              <User className="h-8 w-8 text-gray-600" />
+              <HugeiconsIcon icon={UserIcon} className="h-8 w-8 text-gray-600" />
             </div>
           </Card>
         </div>
@@ -548,12 +567,12 @@ export default function ReturnsPage() {
         {/* Filters */}
         <Card className="p-6">
           <div className="flex items-center space-x-4">
-            <Funnel className="h-5 w-5 text-muted-foreground" />
+            <HugeiconsIcon icon={FilterIcon} className="h-5 w-5 text-muted-foreground" />
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 flex-1">
               <div className="space-y-2">
                 <Label htmlFor="search">Search</Label>
                 <div className="relative">
-                  <MagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <HugeiconsIcon icon={Search01Icon} className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="search"
                     placeholder="Search returns..."
@@ -643,15 +662,15 @@ export default function ReturnsPage() {
         {activeView === 'cards' ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredReturns.map((returnItem) => {
-              const { variant: statusVariant, label: statusLabel, icon: StatusIcon } = getStatusBadge(returnItem.status)
+              const { variant: statusVariant, label: statusLabel, icon: StatusIconData } = getStatusBadge(returnItem.status)
               const { variant: typeVariant, label: typeLabel } = getReturnTypeBadge(returnItem.return_type)
               const { variant: refundVariant, label: refundLabel } = getRefundMethodBadge(returnItem.refund_method)
-              
+
               return (
                 <Card key={returnItem.id} className="p-6 hover: transition-shadow">
                   <div className="flex justify-between items-start mb-4">
                     <div>
-                      <Link 
+                      <Link
                         href={`/sales/returns/${returnItem.id}`}
                         className="font-semibold text-blue-600 hover:text-blue-800"
                       >
@@ -663,7 +682,7 @@ export default function ReturnsPage() {
                     </div>
                     <div className="flex flex-col items-end space-y-1">
                       <div className="flex items-center space-x-1">
-                        <StatusIcon className="h-4 w-4" />
+                        <HugeiconsIcon icon={StatusIconData} className="h-4 w-4" />
                         <Badge variant={statusVariant}>{statusLabel}</Badge>
                       </div>
                       <Badge variant={typeVariant}>{typeLabel}</Badge>
@@ -749,7 +768,7 @@ export default function ReturnsPage() {
         {summaryStats.pendingReturns > 0 && (
           <Card className="p-6 border-orange-200 bg-orange-50">
             <div className="flex items-center space-x-3">
-              <Clock className="h-6 w-6 text-orange-600" />
+              <HugeiconsIcon icon={Clock01Icon} className="h-6 w-6 text-orange-600" />
               <div className="flex-1">
                 <h3 className="text-lg font-semibold text-orange-800">Pending Returns</h3>
                 <p className="text-orange-700 mt-1">

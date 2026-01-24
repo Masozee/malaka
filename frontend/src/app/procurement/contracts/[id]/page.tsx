@@ -16,9 +16,9 @@ import {
   Download01Icon,
   Building03Icon,
   RefreshIcon,
-  Cancel01Icon,
+  CancelIcon,
   Delete01Icon,
-  File01Icon,
+  FileIcon,
   Pdf01Icon,
   Image01Icon,
   FileAttachmentIcon,
@@ -348,7 +348,7 @@ export default function ContractDetailPage() {
                 </div>
               ) : (
                 <div className="text-center py-8">
-                  <HugeiconsIcon icon={File01Icon} className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
+                  <HugeiconsIcon icon={FileIcon} className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
                   <p className="text-sm text-muted-foreground">No documents attached</p>
                   <Button variant="outline" size="sm" className="mt-3">
                     <HugeiconsIcon icon={FileAttachmentIcon} className="h-4 w-4 mr-2" />
@@ -404,7 +404,7 @@ export default function ContractDetailPage() {
                       className="w-full justify-start text-orange-600 hover:text-orange-700"
                       onClick={handleTerminate}
                     >
-                      <HugeiconsIcon icon={Cancel01Icon} className="h-4 w-4 mr-2" />
+                      <HugeiconsIcon icon={CancelIcon} className="h-4 w-4 mr-2" />
                       Terminate
                     </Button>
                   </>

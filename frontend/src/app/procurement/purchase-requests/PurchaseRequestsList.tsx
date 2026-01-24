@@ -24,10 +24,10 @@ import {
     Search01Icon,
     FilterIcon,
     Download01Icon,
-    Loading01Icon,
-    Cancel01Icon,
+    LoadingIcon,
+    CancelIcon,
     PencilEdit01Icon,
-    File01Icon,
+    FileIcon,
     SentIcon,
     Delete01Icon
 } from '@hugeicons/core-free-icons'
@@ -258,7 +258,7 @@ export default function PurchaseRequestsList({ initialData }: PurchaseRequestsLi
                                     Approve
                                 </DropdownMenuItem>
                                 <DropdownMenuItem onClick={() => handleCancel(record)}>
-                                    <HugeiconsIcon icon={Cancel01Icon} className="mr-2 h-4 w-4" />
+                                    <HugeiconsIcon icon={CancelIcon} className="mr-2 h-4 w-4" />
                                     Cancel
                                 </DropdownMenuItem>
                             </>
@@ -434,12 +434,12 @@ export default function PurchaseRequestsList({ initialData }: PurchaseRequestsLi
                 {/* Content */}
                 {loading ? (
                     <div className="flex items-center justify-center h-64">
-                        <HugeiconsIcon icon={Loading01Icon} className="h-8 w-8 animate-spin" />
+                        <HugeiconsIcon icon={LoadingIcon} className="h-8 w-8 animate-spin" />
                     </div>
                 ) : error ? (
                     <div className="flex items-center justify-center h-64">
                         <div className="text-center">
-                            <HugeiconsIcon icon={Cancel01Icon} className="h-12 w-12 text-red-500 mx-auto mb-4" />
+                            <HugeiconsIcon icon={CancelIcon} className="h-12 w-12 text-red-500 mx-auto mb-4" />
                             <p className="text-lg font-medium text-gray-900 mb-2">Error Loading Requests</p>
                             <p className="text-gray-500 mb-4">{error}</p>
                             <Button onClick={() => fetchData()}>
@@ -450,7 +450,7 @@ export default function PurchaseRequestsList({ initialData }: PurchaseRequestsLi
                 ) : purchaseRequests.length === 0 ? (
                     <div className="flex items-center justify-center h-64">
                         <div className="text-center">
-                            <HugeiconsIcon icon={File01Icon} className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                            <HugeiconsIcon icon={FileIcon} className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                             <p className="text-lg font-medium text-gray-900 mb-2">No Purchase Requests Found</p>
                             <p className="text-gray-500 mb-4">Get started by creating your first purchase request.</p>
                             <Button onClick={handleNewRequest}>

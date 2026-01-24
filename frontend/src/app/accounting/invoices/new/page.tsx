@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react'
 import { HugeiconsIcon } from "@hugeicons/react"
-import { ViewIcon, FloppyDiskIcon, SendToMobileIcon, File01Icon, UserGroupIcon, PlusSignIcon, Package01Icon, Delete01Icon, Calculator01Icon, Download01Icon, PencilEdit01Icon } from "@hugeicons/core-free-icons"
+import { ViewIcon, FloppyDiskIcon, SendToMobileIcon, FileIcon, UserGroupIcon, PlusSignIcon, Package01Icon, Delete01Icon, Calculator01Icon, Download01Icon, PencilEdit01Icon } from "@hugeicons/core-free-icons"
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -525,7 +525,7 @@ export default function InvoiceDesignerPage() {
             <Card className="p-6">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-lg font-semibold flex items-center">
-                  <HugeiconsIcon icon={File01Icon} className="h-5 w-5 mr-2" />
+                  <HugeiconsIcon icon={FileIcon} className="h-5 w-5 mr-2" />
                   Invoice Details
                 </h3>
                 <Select value={selectedTemplate} onValueChange={setSelectedTemplate}>

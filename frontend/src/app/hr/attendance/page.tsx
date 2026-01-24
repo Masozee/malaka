@@ -15,7 +15,7 @@ import {
   PlusSignIcon,
   UserGroupIcon,
   CheckmarkCircle01Icon,
-  Cancel01Icon,
+  CancelIcon,
   AlertCircleIcon,
   Clock01Icon,
   Search01Icon,
@@ -476,7 +476,7 @@ export default function AttendancePage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-red-100 rounded-lg">
-                <HugeiconsIcon icon={Cancel01Icon} className="h-5 w-5 text-red-600" />
+                <HugeiconsIcon icon={CancelIcon} className="h-5 w-5 text-red-600" />
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600">Absent</p>

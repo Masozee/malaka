@@ -16,7 +16,7 @@ import {
   AlertCircleIcon,
   Search01Icon,
   HashtagIcon,
-  Target01Icon,
+  TargetIcon,
   ChartIncreaseIcon,
   Copy01Icon
 } from "@hugeicons/core-free-icons"
@@ -157,7 +157,7 @@ export default function ProductBarcodesPage() {
 
   const getPrimaryBadge = (isPrimary: boolean) => {
     return isPrimary
-      ? { variant: 'default' as const, label: 'Primary', icon: Target01Icon }
+      ? { variant: 'default' as const, label: 'Primary', icon: TargetIcon }
       : { variant: 'outline' as const, label: 'Secondary', icon: HashtagIcon }
   }
 
@@ -341,7 +341,7 @@ export default function ProductBarcodesPage() {
                 <p className="text-2xl font-bold mt-1 text-orange-600">{summaryStats.primaryBarcodes}</p>
                 <p className="text-sm text-orange-600 mt-1">Main codes</p>
               </div>
-              <HugeiconsIcon icon={Target01Icon} className="h-8 w-8 text-orange-600" />
+              <HugeiconsIcon icon={TargetIcon} className="h-8 w-8 text-orange-600" />
             </div>
           </Card>
 
@@ -404,7 +404,7 @@ export default function ProductBarcodesPage() {
 
             <Select value={primaryFilter} onValueChange={setPrimaryFilter}>
               <SelectTrigger className="w-32">
-                <HugeiconsIcon icon={Target01Icon} className="h-4 w-4 mr-2" />
+                <HugeiconsIcon icon={TargetIcon} className="h-4 w-4 mr-2" />
                 <SelectValue placeholder="Priority" />
               </SelectTrigger>
               <SelectContent>
