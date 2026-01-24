@@ -1,5 +1,20 @@
 -- Indonesian Users Seed Data
--- Password: password123 (bcrypt hash)
+-- Password: password123 (bcrypt hash) unless otherwise noted
+
+-- Dev user (password: 687654)
+INSERT INTO users (username, password, email, company_id, full_name, phone, role, status)
+SELECT
+    'dev',
+    '$2a$14$pE900.PrEfaPGAut2DpRa.uPCV0IvNL/MEwX0Jku1HM9ML5eokY5e',
+    'dev@malaka.co.id',
+    id,
+    'Development User',
+    '021-5550000',
+    'admin',
+    'active'
+FROM companies WHERE name = 'PT Sepatu Nusantara'
+ON CONFLICT DO NOTHING;
+
 INSERT INTO users (username, password, email, company_id, full_name, phone, role, status)
 SELECT
     'admin',

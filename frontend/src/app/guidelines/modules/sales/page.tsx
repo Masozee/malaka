@@ -5,7 +5,6 @@ import Link from "next/link"
 import { GuidelinesLayout } from "@/components/ui/guidelines-layout"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { ArrowLeft, ArrowRight } from "lucide-react"
 
 export default function SalesGuidePage() {
   return (
@@ -97,7 +96,7 @@ export default function SalesGuidePage() {
 
           <h2>Getting Started</h2>
 
-          <h3>Step 1: Configure Sales Settings</h3>
+          <h3>Step 1: Configure Sales Gear</h3>
           <p>
             Set up basic sales configuration including default terms, tax settings, 
             and order numbering sequences. Configure your sales workflow stages 
@@ -277,14 +276,12 @@ export default function SalesGuidePage() {
         <div className="flex justify-between items-center mt-12 pt-8 border-t">
           <Button variant="outline" asChild>
             <Link href="/guidelines/modules/products">
-              <ArrowLeft className="h-4 w-4 mr-2" />
               Products Guide
             </Link>
           </Button>
           <Button asChild>
             <Link href="/guidelines/modules/inventory">
               Inventory Guide
-              <ArrowRight className="h-4 w-4 ml-2" />
             </Link>
           </Button>
         </div>

@@ -1,6 +1,17 @@
 "use client"
 
 import { useState } from 'react'
+import { HugeiconsIcon } from "@hugeicons/react"
+import {
+  ShoppingCart01Icon,
+  Invoice02Icon,
+  Calendar01Icon,
+  File01Icon,
+  AlertCircleIcon,
+  CheckmarkCircle01Icon,
+  Loading01Icon,
+  Cancel01Icon
+} from "@hugeicons/core-free-icons"
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -16,16 +27,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 //   DialogHeader,
 //   DialogTitle,
 // } from '@/components/ui/dialog'
-import { 
-  ShoppingCart,
-  Receipt,
-  Calendar,
-  FileText,
-  AlertCircle,
-  CheckCircle,
-  Loader2,
-  X
-} from 'lucide-react'
+
 import { QuotationConversionService, ConversionOptions, ConversionResult } from '@/services/quotation-conversion'
 
 interface ConversionModalProps {
@@ -130,9 +132,9 @@ export function ConversionModal({
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-2">
               {type === 'sales-order' ? (
-                <ShoppingCart className="h-5 w-5 text-blue-600" />
+                <HugeiconsIcon icon={ShoppingCart01Icon} className="h-5 w-5 text-blue-600" />
               ) : (
-                <Receipt className="h-5 w-5 text-green-600" />
+                <HugeiconsIcon icon={Invoice02Icon} className="h-5 w-5 text-green-600" />
               )}
               <h2 className="text-xl font-semibold">
                 Convert to {type === 'sales-order' ? 'Sales Order' : 'Invoice'}
@@ -142,7 +144,7 @@ export function ConversionModal({
               onClick={handleClose}
               className="text-gray-400 hover:text-gray-600"
             >
-              <X className="h-5 w-5" />
+              <HugeiconsIcon icon={Cancel01Icon} className="h-5 w-5" />
             </button>
           </div>
           <p className="text-gray-600 mb-6">
@@ -154,7 +156,7 @@ export function ConversionModal({
           {!canConvert && (
             <Card className="p-4 border-amber-200 bg-amber-50">
               <div className="flex items-center space-x-3">
-                <AlertCircle className="h-5 w-5 text-amber-600" />
+                <HugeiconsIcon icon={AlertCircleIcon} className="h-5 w-5 text-amber-600" />
                 <div>
                   <h4 className="font-medium text-amber-800">Conversion Not Available</h4>
                   <p className="text-sm text-amber-700">
@@ -173,9 +175,9 @@ export function ConversionModal({
             <Card className={`p-4 ${result.success ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}`}>
               <div className="flex items-center space-x-3">
                 {result.success ? (
-                  <CheckCircle className="h-5 w-5 text-green-600" />
+                  <HugeiconsIcon icon={CheckmarkCircle01Icon} className="h-5 w-5 text-green-600" />
                 ) : (
-                  <AlertCircle className="h-5 w-5 text-red-600" />
+                  <HugeiconsIcon icon={AlertCircleIcon} className="h-5 w-5 text-red-600" />
                 )}
                 <div>
                   <h4 className={`font-medium ${result.success ? 'text-green-800' : 'text-red-800'}`}>
@@ -299,15 +301,15 @@ export function ConversionModal({
             >
               {converting ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <HugeiconsIcon icon={Loading01Icon} className="mr-2 h-4 w-4 animate-spin" />
                   Converting...
                 </>
               ) : (
                 <>
                   {type === 'sales-order' ? (
-                    <ShoppingCart className="mr-2 h-4 w-4" />
+                    <HugeiconsIcon icon={ShoppingCart01Icon} className="mr-2 h-4 w-4" />
                   ) : (
-                    <Receipt className="mr-2 h-4 w-4" />
+                    <HugeiconsIcon icon={Invoice02Icon} className="mr-2 h-4 w-4" />
                   )}
                   Convert to {type === 'sales-order' ? 'Sales Order' : 'Invoice'}
                 </>

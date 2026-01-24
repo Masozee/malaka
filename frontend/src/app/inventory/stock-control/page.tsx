@@ -1,4 +1,4 @@
-'use client';
+'use client'
 
 import React, { useState, useEffect } from 'react';
 import { TwoLevelLayout } from '@/components/ui/two-level-layout';
@@ -11,19 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { DataTable } from '@/components/ui/data-table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
-import { 
-  Package, 
-  Search, 
-  Filter, 
-  Download, 
-  AlertTriangle,
-  Eye,
-  Edit,
-  Warehouse,
-  Plus,
-  RefreshCw,
-  X
-} from 'lucide-react';
+;
 import { stockService, StockItem, InventoryFilters } from '@/services/inventory';
 
 // Extended interface for display purposes
@@ -195,7 +183,7 @@ export default function StockControlPage() {
             <Eye className="w-4 h-4" />
           </Button>
           <Button variant="ghost" size="sm" onClick={() => handleEditStock(item as StockItemDisplay)}>
-            <Edit className="w-4 h-4" />
+            <PencilSimple className="w-4 h-4" />
           </Button>
         </div>
       )
@@ -260,7 +248,7 @@ export default function StockControlPage() {
         actions={
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" onClick={fetchStockData}>
-              <RefreshCw className="w-4 h-4 mr-2" />
+              <ArrowsClockwise className="w-4 h-4 mr-2" />
               Refresh
             </Button>
             <Button size="sm" onClick={handleCreateStock}>
@@ -307,7 +295,7 @@ export default function StockControlPage() {
                   <p className="text-sm text-gray-600 dark:text-gray-400">Low Stock Alerts</p>
                   <p className="text-2xl font-bold text-red-600">{lowStockItems}</p>
                 </div>
-                <AlertTriangle className="w-8 h-8 text-red-500" />
+                <Warning className="w-8 h-8 text-red-500" />
               </div>
             </CardContent>
           </Card>
@@ -329,7 +317,7 @@ export default function StockControlPage() {
         <div className="flex items-center justify-between gap-4 mb-6">
           <div className="flex-1 max-w-md">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <MagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search by product name, code, category, or warehouse..."
                 value={searchTerm}
@@ -357,7 +345,7 @@ export default function StockControlPage() {
 
             <Select value={selectedStatus} onValueChange={setSelectedStatus}>
               <SelectTrigger className="w-36">
-                <AlertTriangle className="h-4 w-4 mr-2" />
+                <Warning className="h-4 w-4 mr-2" />
                 <SelectValue placeholder="All Status" />
               </SelectTrigger>
               <SelectContent>
@@ -402,7 +390,7 @@ export default function StockControlPage() {
             )}
             
             <Button variant="outline" size="sm">
-              <Download className="w-4 h-4 mr-2" />
+              <DownloadSimple className="w-4 h-4 mr-2" />
               Export
             </Button>
           </div>

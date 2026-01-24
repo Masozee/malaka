@@ -11,20 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Progress } from '@/components/ui/progress'
-import { 
-  CheckCircle, 
-  Plus, 
-  Eye, 
-  Edit, 
-  Trash2, 
-  Filter, 
-  Download, 
-  Calendar,
-  AlertTriangle,
-  XCircle,
-  Clock,
-  BarChart3
-} from 'lucide-react'
+
 import Link from 'next/link'
 import { mockQualityControls } from '@/services/production'
 import type { QualityControl, QualityControlFilters } from '@/types/production'
@@ -68,10 +55,10 @@ export default function QualityControlPage() {
   const getStatusBadge = (status: QualityControl['status']) => {
     const statusConfig = {
       draft: { variant: 'secondary' as const, label: 'Draft', icon: Clock },
-      testing: { variant: 'default' as const, label: 'Testing', icon: BarChart3 },
+      testing: { variant: 'default' as const, label: 'Testing', icon: ChartBar },
       passed: { variant: 'default' as const, label: 'Passed', icon: CheckCircle },
       failed: { variant: 'destructive' as const, label: 'Failed', icon: XCircle },
-      conditional: { variant: 'outline' as const, label: 'Conditional', icon: AlertTriangle }
+      conditional: { variant: 'outline' as const, label: 'Conditional', icon: Warning }
     }
     return statusConfig[status] || { variant: 'secondary' as const, label: status, icon: Clock }
   }
@@ -213,11 +200,11 @@ export default function QualityControlPage() {
           </Button>
           <Button variant="ghost" size="sm" asChild>
             <Link href={`/production/quality-control/${qc?.id || ''}/edit`}>
-              <Edit className="h-4 w-4" />
+              <PencilSimple className="h-4 w-4" />
             </Link>
           </Button>
           <Button variant="ghost" size="sm">
-            <Trash2 className="h-4 w-4" />
+            <Trash className="h-4 w-4" />
           </Button>
         </div>
       )
@@ -238,7 +225,7 @@ export default function QualityControlPage() {
                 Schedule Inspection
               </Button>
               <Button variant="outline" size="sm">
-                <Download className="h-4 w-4 mr-2" />
+                <DownloadSimple className="h-4 w-4 mr-2" />
                 Export Report
               </Button>
               <Button size="sm" asChild>
@@ -259,7 +246,7 @@ export default function QualityControlPage() {
                 <p className="text-sm font-medium text-muted-foreground">Total Inspections</p>
                 <p className="text-2xl font-bold mt-1">{summaryStats.total}</p>
               </div>
-              <BarChart3 className="h-8 w-8 text-blue-600" />
+              <ChartBar className="h-8 w-8 text-blue-600" />
             </div>
           </Card>
 
@@ -305,7 +292,7 @@ export default function QualityControlPage() {
                   <Progress value={summaryStats.averageScore * 10} className="h-2" />
                 </div>
               </div>
-              <AlertTriangle className="h-8 w-8 text-purple-600" />
+              <Warning className="h-8 w-8 text-purple-600" />
             </div>
           </Card>
         </div>
@@ -313,7 +300,7 @@ export default function QualityControlPage() {
         {/* Filters */}
         <Card className="p-6">
           <div className="flex items-center space-x-4">
-            <Filter className="h-5 w-5 text-muted-foreground" />
+            <Funnel className="h-5 w-5 text-muted-foreground" />
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 flex-1">
               <div className="space-y-2">
                 <Label htmlFor="search">Search</Label>

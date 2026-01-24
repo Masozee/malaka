@@ -1,4 +1,4 @@
-'use client';
+'use client'
 
 import React, { useState, useEffect } from 'react';
 import { TwoLevelLayout } from '@/components/ui/two-level-layout';
@@ -8,20 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { DataTable } from '@/components/ui/data-table';
-import { 
-  Plus, 
-  Search, 
-  Filter, 
-  Download, 
-  TrendingDown,
-  CheckCircle,
-  Clock,
-  AlertCircle,
-  Eye,
-  Edit,
-  Truck,
-  Package
-} from 'lucide-react';
+;
 import { goodsIssueService, GoodsIssue, InventoryFilters } from '@/services/inventory';
 
 // Extended interface for display purposes
@@ -49,7 +36,7 @@ const getStatusBadge = (status: GoodsIssue['status']) => {
       variant: 'default' as const, 
       label: 'Approved', 
       className: 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400',
-      icon: AlertCircle
+      icon: WarningCircle
     },
     completed: { 
       variant: 'default' as const, 
@@ -239,7 +226,7 @@ export default function GoodsIssuePage() {
           </Button>
           {item.status === 'pending' && (
             <Button variant="ghost" size="sm" title="Process Issue">
-              <Edit className="w-4 h-4" />
+              <PencilSimple className="w-4 h-4" />
             </Button>
           )}
         </div>
@@ -289,7 +276,7 @@ export default function GoodsIssuePage() {
                   <p className="text-sm text-gray-600 dark:text-gray-400">Total Value</p>
                   <p className="text-2xl font-bold">${totalValue.toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
                 </div>
-                <TrendingDown className="w-8 h-8 text-red-500" />
+                <TrendDown className="w-8 h-8 text-red-500" />
               </div>
             </CardContent>
           </Card>
@@ -325,7 +312,7 @@ export default function GoodsIssuePage() {
             <div className="flex flex-col md:flex-row gap-4">
               <div className="flex-1">
                 <div className="relative">
-                  <Search className="w-4 h-4 absolute left-3 top-3 text-gray-400" />
+                  <MagnifyingGlass className="w-4 h-4 absolute left-3 top-3 text-gray-400" />
                   <Input
                     placeholder="Search by issue number, customer, or order number..."
                     value={searchTerm}
@@ -360,12 +347,12 @@ export default function GoodsIssuePage() {
                 </select>
                 
                 <Button variant="outline" size="sm">
-                  <Filter className="w-4 h-4 mr-2" />
+                  <Funnel className="w-4 h-4 mr-2" />
                   Filter
                 </Button>
                 
                 <Button variant="outline" size="sm">
-                  <Download className="w-4 h-4 mr-2" />
+                  <DownloadSimple className="w-4 h-4 mr-2" />
                   Export
                 </Button>
                 

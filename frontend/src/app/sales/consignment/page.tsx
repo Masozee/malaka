@@ -10,27 +10,7 @@ import { AdvancedDataTable } from '@/components/ui/advanced-data-table'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { 
-  Handshake,
-  Plus,
-  Eye,
-  Edit,
-  Filter,
-  Download,
-  Package,
-  Store,
-  Calendar,
-  TrendingUp,
-  TrendingDown,
-  CheckCircle,
-  Clock,
-  AlertCircle,
-  Search,
-  User,
-  DollarSign,
-  BarChart3,
-  MapPin
-} from 'lucide-react'
+
 import Link from 'next/link'
 
 // Consignment types
@@ -344,7 +324,7 @@ export default function SalesConsignmentPage() {
       active: { variant: 'default' as const, label: 'Active', icon: CheckCircle },
       pending: { variant: 'outline' as const, label: 'Pending', icon: Clock },
       completed: { variant: 'default' as const, label: 'Completed', icon: CheckCircle },
-      cancelled: { variant: 'destructive' as const, label: 'Cancelled', icon: AlertCircle },
+      cancelled: { variant: 'destructive' as const, label: 'Cancelled', icon: WarningCircle },
       expired: { variant: 'secondary' as const, label: 'Expired', icon: Clock }
     }
     return config[status as keyof typeof config] || { variant: 'secondary' as const, label: status, icon: Clock }
@@ -469,7 +449,7 @@ export default function SalesConsignmentPage() {
           </Button>
           <Button variant="ghost" size="sm" asChild>
             <Link href={`/sales/consignment/${consignment.id}/edit`}>
-              <Edit className="h-4 w-4" />
+              <PencilSimple className="h-4 w-4" />
             </Link>
           </Button>
         </div>
@@ -487,7 +467,7 @@ export default function SalesConsignmentPage() {
           actions={
             <div className="flex items-center space-x-3">
               <Button variant="outline" size="sm">
-                <Download className="h-4 w-4 mr-2" />
+                <DownloadSimple className="h-4 w-4 mr-2" />
                 Export
               </Button>
               <Button size="sm" asChild>
@@ -544,7 +524,7 @@ export default function SalesConsignmentPage() {
                 </p>
                 <p className="text-sm text-purple-600 mt-1">IDR consigned</p>
               </div>
-              <BarChart3 className="h-8 w-8 text-purple-600" />
+              <ChartBar className="h-8 w-8 text-purple-600" />
             </div>
           </Card>
 
@@ -557,7 +537,7 @@ export default function SalesConsignmentPage() {
                 </p>
                 <p className="text-sm text-green-600 mt-1">Revenue generated</p>
               </div>
-              <TrendingUp className="h-8 w-8 text-green-600" />
+              <TrendUp className="h-8 w-8 text-green-600" />
             </div>
           </Card>
 
@@ -570,7 +550,7 @@ export default function SalesConsignmentPage() {
                 </p>
                 <p className="text-sm text-green-600 mt-1">Earned</p>
               </div>
-              <DollarSign className="h-8 w-8 text-green-600" />
+              <CurrencyDollar className="h-8 w-8 text-green-600" />
             </div>
           </Card>
 
@@ -583,7 +563,7 @@ export default function SalesConsignmentPage() {
                 </p>
                 <p className="text-sm text-gray-600 mt-1">Commission</p>
               </div>
-              <BarChart3 className="h-8 w-8 text-gray-600" />
+              <ChartBar className="h-8 w-8 text-gray-600" />
             </div>
           </Card>
         </div>
@@ -591,12 +571,12 @@ export default function SalesConsignmentPage() {
         {/* Filters */}
         <Card className="p-6">
           <div className="flex items-center space-x-4">
-            <Filter className="h-5 w-5 text-muted-foreground" />
+            <Funnel className="h-5 w-5 text-muted-foreground" />
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 flex-1">
               <div className="space-y-2">
                 <Label htmlFor="search">Search</Label>
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <MagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="search"
                     placeholder="Search consignments..."
@@ -795,7 +775,7 @@ export default function SalesConsignmentPage() {
                       </Button>
                       <Button variant="outline" size="sm" asChild>
                         <Link href={`/sales/consignment/${consignment.id}/edit`}>
-                          <Edit className="h-4 w-4" />
+                          <PencilSimple className="h-4 w-4" />
                         </Link>
                       </Button>
                     </div>
@@ -830,7 +810,7 @@ export default function SalesConsignmentPage() {
         {mockConsignments.filter(c => getSellThroughRate(c) < 30 && c.status === 'active').length > 0 && (
           <Card className="p-6 border-orange-200 bg-orange-50">
             <div className="flex items-center space-x-3">
-              <TrendingDown className="h-6 w-6 text-orange-600" />
+              <TrendDown className="h-6 w-6 text-orange-600" />
               <div className="flex-1">
                 <h3 className="text-lg font-semibold text-orange-800">Low Performance Partners</h3>
                 <p className="text-orange-700 mt-1">

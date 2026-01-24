@@ -5,7 +5,6 @@ import { TwoLevelLayout } from "@/components/ui/two-level-layout"
 import { Header } from "@/components/ui/header"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { DollarSign, TrendingUp, TrendingDown, FileText, Download } from "lucide-react"
 
 export default function FinancialReportsPage() {
   const breadcrumbs = [
@@ -23,7 +22,6 @@ export default function FinancialReportsPage() {
           actions={
             <div className="flex items-center space-x-3">
               <Button variant="outline" size="sm">
-                <Download className="h-4 w-4 mr-2" />
                 Export All
               </Button>
             </div>
@@ -36,7 +34,7 @@ export default function FinancialReportsPage() {
             <Card className="p-6 bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950 dark:to-green-900">
               <div className="flex items-center space-x-4">
                 <div className="p-3 bg-green-500 text-white rounded-xl">
-                  <TrendingUp className="h-6 w-6" />
+                  <div className="h-6 w-6" />
                 </div>
                 <div>
                   <p className="text-sm font-medium text-green-700 dark:text-green-300">Total Revenue</p>
@@ -49,7 +47,7 @@ export default function FinancialReportsPage() {
             <Card className="p-6 bg-gradient-to-br from-red-50 to-red-100 dark:from-red-950 dark:to-red-900">
               <div className="flex items-center space-x-4">
                 <div className="p-3 bg-red-500 text-white rounded-xl">
-                  <TrendingDown className="h-6 w-6" />
+                  <div className="h-6 w-6" />
                 </div>
                 <div>
                   <p className="text-sm font-medium text-red-700 dark:text-red-300">Total Expenses</p>
@@ -62,7 +60,7 @@ export default function FinancialReportsPage() {
             <Card className="p-6 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950 dark:to-blue-900">
               <div className="flex items-center space-x-4">
                 <div className="p-3 bg-blue-500 text-white rounded-xl">
-                  <DollarSign className="h-6 w-6" />
+                  <div className="h-6 w-6" />
                 </div>
                 <div>
                   <p className="text-sm font-medium text-blue-700 dark:text-blue-300">Net Profit</p>
@@ -78,7 +76,6 @@ export default function FinancialReportsPage() {
             <Card className="hover: transition-shadow">
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
-                  <FileText className="h-5 w-5" />
                   <span>Profit & Loss</span>
                 </CardTitle>
                 <CardDescription>
@@ -93,7 +90,6 @@ export default function FinancialReportsPage() {
             <Card className="hover: transition-shadow">
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
-                  <FileText className="h-5 w-5" />
                   <span>Balance Sheet</span>
                 </CardTitle>
                 <CardDescription>
@@ -108,7 +104,6 @@ export default function FinancialReportsPage() {
             <Card className="hover: transition-shadow">
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
-                  <FileText className="h-5 w-5" />
                   <span>Cash Flow</span>
                 </CardTitle>
                 <CardDescription>

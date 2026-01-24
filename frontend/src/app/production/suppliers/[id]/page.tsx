@@ -9,20 +9,7 @@ import { Header } from '@/components/ui/header'
 import { Progress } from '@/components/ui/progress'
 import { Separator } from '@/components/ui/separator'
 import { AdvancedDataTable } from '@/components/ui/advanced-data-table'
-import { 
-  Truck, 
-  Edit, 
-  Star, 
-  Phone, 
-  Mail, 
-  MapPin, 
-  Calendar, 
-  DollarSign,
-  Package,
-  TrendingUp,
-  FileText,
-  AlertTriangle
-} from 'lucide-react'
+
 import Link from 'next/link'
 import { mockSuppliers, mockPurchaseOrders } from '@/services/production'
 import type { Supplier, PurchaseOrder } from '@/types/production'
@@ -189,7 +176,7 @@ export default function SupplierDetailsPage() {
               </Button>
               <Button size="sm" asChild>
                 <Link href={`/production/suppliers/${supplier.id}/edit`}>
-                  <Edit className="h-4 w-4 mr-2" />
+                  <PencilSimple className="h-4 w-4 mr-2" />
                   Edit
                 </Link>
               </Button>
@@ -268,7 +255,7 @@ export default function SupplierDetailsPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-4">
                   <div className="flex items-center space-x-3">
-                    <Mail className="h-5 w-5 text-muted-foreground" />
+                    <Envelope className="h-5 w-5 text-muted-foreground" />
                     <div>
                       <label className="text-sm font-medium text-muted-foreground">Email</label>
                       <p className="font-medium">{supplier.email}</p>
@@ -381,7 +368,7 @@ export default function SupplierDetailsPage() {
                 
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
-                    <DollarSign className="h-4 w-4 text-green-600" />
+                    <CurrencyDollar className="h-4 w-4 text-green-600" />
                     <span className="text-sm text-muted-foreground">Total Value</span>
                   </div>
                   <span className="font-bold">{formatCurrency(supplier.totalValue)}</span>
@@ -389,7 +376,7 @@ export default function SupplierDetailsPage() {
                 
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
-                    <TrendingUp className="h-4 w-4 text-purple-600" />
+                    <TrendUp className="h-4 w-4 text-purple-600" />
                     <span className="text-sm text-muted-foreground">Avg Order Value</span>
                   </div>
                   <span className="font-bold">{formatCurrency(performanceMetrics.averageOrderValue)}</span>
@@ -456,7 +443,7 @@ export default function SupplierDetailsPage() {
                 </Button>
                 
                 <Button variant="outline" className="w-full justify-start">
-                  <Mail className="h-4 w-4 mr-2" />
+                  <Envelope className="h-4 w-4 mr-2" />
                   Send Email
                 </Button>
                 
@@ -466,7 +453,7 @@ export default function SupplierDetailsPage() {
                 </Button>
                 
                 <Button variant="outline" className="w-full justify-start">
-                  <TrendingUp className="h-4 w-4 mr-2" />
+                  <TrendUp className="h-4 w-4 mr-2" />
                   Performance Report
                 </Button>
               </div>
@@ -476,7 +463,7 @@ export default function SupplierDetailsPage() {
             {supplier.status !== 'active' && (
               <Card className="p-6 border-orange-200 bg-orange-50">
                 <div className="flex items-center space-x-2 text-orange-800">
-                  <AlertTriangle className="h-5 w-5" />
+                  <Warning className="h-5 w-5" />
                   <p className="font-medium">Supplier Status</p>
                 </div>
                 <p className="text-sm text-orange-700 mt-1">

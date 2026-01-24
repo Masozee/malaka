@@ -7,25 +7,6 @@ import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { AdvancedDataTable } from '@/components/ui/advanced-data-table'
 import { Badge } from '@/components/ui/badge'
-import { 
-  Package,
-  TrendingUp,
-  TrendingDown,
-  AlertTriangle,
-  CheckCircle,
-  Clock,
-  BarChart3,
-  Calendar,
-  Download,
-  Filter,
-  RefreshCw,
-  Eye,
-  FileText,
-  Warehouse,
-  ArrowUpRight,
-  ArrowDownRight,
-  Target
-} from 'lucide-react'
 
 interface InventoryReport {
   id: string
@@ -53,7 +34,6 @@ interface InventoryMetric {
   change: number
   changeType: 'increase' | 'decrease'
   period: string
-  icon: React.ComponentType<{ className?: string }>
   color: string
 }
 
@@ -191,7 +171,6 @@ const mockInventoryMetrics: InventoryMetric[] = [
     change: 5.2,
     changeType: 'increase',
     period: 'vs last month',
-    icon: Package,
     color: 'text-blue-600'
   },
   {
@@ -201,7 +180,6 @@ const mockInventoryMetrics: InventoryMetric[] = [
     change: 2.8,
     changeType: 'increase',
     period: 'vs last month',
-    icon: FileText,
     color: 'text-green-600'
   },
   {
@@ -211,7 +189,6 @@ const mockInventoryMetrics: InventoryMetric[] = [
     change: 12.3,
     changeType: 'increase',
     period: 'vs last month',
-    icon: TrendingUp,
     color: 'text-purple-600'
   },
   {
@@ -221,7 +198,6 @@ const mockInventoryMetrics: InventoryMetric[] = [
     change: 0.5,
     changeType: 'increase',
     period: 'vs last month',
-    icon: CheckCircle,
     color: 'text-teal-600'
   },
   {
@@ -231,7 +207,6 @@ const mockInventoryMetrics: InventoryMetric[] = [
     change: -15.2,
     changeType: 'decrease',
     period: 'vs last month',
-    icon: AlertTriangle,
     color: 'text-orange-600'
   },
   {
@@ -241,7 +216,6 @@ const mockInventoryMetrics: InventoryMetric[] = [
     change: -8.1,
     changeType: 'decrease',
     period: 'vs last month',
-    icon: Clock,
     color: 'text-indigo-600'
   }
 ]
@@ -484,11 +458,9 @@ export default function InventoryReportsPage() {
       
       <div className="flex space-x-2 mt-4">
         <Button size="sm" variant="outline" className="flex-1">
-          <Eye className="h-4 w-4 mr-1" />
           View
         </Button>
         <Button size="sm" className="flex-1" disabled={report.status !== 'generated'}>
-          <Download className="h-4 w-4 mr-1" />
           Download
         </Button>
       </div>
@@ -508,19 +480,16 @@ export default function InventoryReportsPage() {
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Inventory Performance Overview</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
             {mockInventoryMetrics.map((metric) => {
-              const Icon = metric.icon
-              const TrendIcon = metric.changeType === 'increase' ? ArrowUpRight : ArrowDownRight
               const trendColor = metric.changeType === 'increase' ? 'text-green-600' : 'text-red-600'
-              
+
               return (
                 <Card key={metric.id} className="p-4">
                   <div className="flex items-center justify-between mb-2">
                     <div className="p-2 bg-gray-100 rounded-lg">
-                      <Icon className={`h-5 w-5 ${metric.color}`} />
+                      <div className={`h-5 w-5 ${metric.color}`} />
                     </div>
                     <div className={`flex items-center space-x-1 ${trendColor}`}>
-                      <TrendIcon className="h-3 w-3" />
-                      <span className="text-xs font-medium">{Math.abs(metric.change)}%</span>
+                      <span className="text-xs font-medium">{metric.changeType === 'increase' ? '+' : '-'}{Math.abs(metric.change)}%</span>
                     </div>
                   </div>
                   <div>
@@ -578,7 +547,7 @@ export default function InventoryReportsPage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-blue-100 rounded-lg">
-                <FileText className="h-5 w-5 text-blue-600" />
+                <div className="h-5 w-5" />
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600">Total Reports</p>
@@ -590,7 +559,7 @@ export default function InventoryReportsPage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-green-100 rounded-lg">
-                <CheckCircle className="h-5 w-5 text-green-600" />
+                <div className="h-5 w-5" />
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600">Generated</p>
@@ -602,7 +571,7 @@ export default function InventoryReportsPage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-blue-100 rounded-lg">
-                <RefreshCw className="h-5 w-5 text-blue-600" />
+                <div className="h-5 w-5" />
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600">Processing</p>
@@ -614,7 +583,7 @@ export default function InventoryReportsPage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-yellow-100 rounded-lg">
-                <Calendar className="h-5 w-5 text-yellow-600" />
+                <div className="h-5 w-5" />
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600">Scheduled</p>
@@ -626,7 +595,7 @@ export default function InventoryReportsPage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-purple-100 rounded-lg">
-                <Package className="h-5 w-5 text-purple-600" />
+                <div className="h-5 w-5" />
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600">Total Value</p>
@@ -640,7 +609,7 @@ export default function InventoryReportsPage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-indigo-100 rounded-lg">
-                <Warehouse className="h-5 w-5 text-indigo-600" />
+                <div className="h-5 w-5" />
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600">Total Items</p>
@@ -654,7 +623,7 @@ export default function InventoryReportsPage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-teal-100 rounded-lg">
-                <TrendingUp className="h-5 w-5 text-teal-600" />
+                <div className="h-5 w-5" />
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600">Avg Turnover</p>
@@ -668,7 +637,7 @@ export default function InventoryReportsPage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-red-100 rounded-lg">
-                <AlertTriangle className="h-5 w-5 text-red-600" />
+                <div className="h-5 w-5" />
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600">Alerts</p>
@@ -699,15 +668,12 @@ export default function InventoryReportsPage() {
           
           <div className="flex items-center space-x-2">
             <Button variant="outline" size="sm">
-              <Filter className="h-4 w-4 mr-2" />
               Filter Reports
             </Button>
             <Button variant="outline" size="sm">
-              <Calendar className="h-4 w-4 mr-2" />
               Schedule Report
             </Button>
             <Button size="sm">
-              <BarChart3 className="h-4 w-4 mr-2" />
               Generate Report
             </Button>
           </div>

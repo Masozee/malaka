@@ -11,19 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { TwoLevelLayout } from '@/components/ui/two-level-layout'
 import { Header } from '@/components/ui/header'
 import { Separator } from '@/components/ui/separator'
-import { 
-  Factory, 
-  Plus, 
-  Minus,
-  Save, 
-  ArrowLeft,
-  Package,
-  Calendar,
-  User,
-  AlertTriangle,
-  Clock,
-  DollarSign
-} from 'lucide-react'
+
 import Link from 'next/link'
 import { mockWarehouses } from '@/services/production'
 import type { WorkOrder } from '@/types/production'
@@ -276,7 +264,7 @@ export default function NewWorkOrderPage() {
               type="submit"
               disabled={isSubmitting}
             >
-              <Save className="h-4 w-4 mr-2" />
+              <FloppyDisk className="h-4 w-4 mr-2" />
               {isSubmitting ? 'Creating...' : 'Create Work Order'}
             </Button>
           </div>

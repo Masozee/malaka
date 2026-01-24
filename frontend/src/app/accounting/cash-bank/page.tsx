@@ -9,22 +9,7 @@ import { Header } from '@/components/ui/header'
 import { AdvancedDataTable } from '@/components/ui/advanced-data-table'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
-import { 
-  PiggyBank,
-  Plus,
-  Eye,
-  Edit,
-  Trash2,
-  Filter,
-  Download,
-  Calendar,
-  DollarSign,
-  TrendingUp,
-  CreditCard,
-  Banknote,
-  ArrowUpCircle,
-  ArrowDownCircle
-} from 'lucide-react'
+
 import Link from 'next/link'
 import { cashBankService } from '@/services/accounting'
 
@@ -56,7 +41,6 @@ interface CashBankTransaction {
   status: 'pending' | 'cleared' | 'cancelled'
   created_by: string
 }
-
 
 export default function CashBankPage() {
   const [mounted, setMounted] = useState(false)
@@ -155,11 +139,11 @@ export default function CashBankPage() {
 
   const getTransactionTypeBadge = (type: string) => {
     const config = {
-      deposit: { variant: 'default' as const, label: 'Deposit', icon: ArrowUpCircle, color: 'text-green-600' },
-      withdrawal: { variant: 'outline' as const, label: 'Withdrawal', icon: ArrowDownCircle, color: 'text-red-600' },
-      transfer: { variant: 'secondary' as const, label: 'Transfer', icon: CreditCard, color: 'text-blue-600' }
+      deposit: { variant: 'default' as const, label: 'Deposit', color: 'text-green-600' },
+      withdrawal: { variant: 'outline' as const, label: 'Withdrawal', color: 'text-red-600' },
+      transfer: { variant: 'secondary' as const, label: 'Transfer', color: 'text-blue-600' }
     }
-    return config[type as keyof typeof config] || { variant: 'secondary' as const, label: type, icon: CreditCard, color: 'text-gray-600' }
+    return config[type as keyof typeof config] || { variant: 'secondary' as const, label: type, color: 'text-gray-600' }
   }
 
   const accountColumns = [
@@ -178,11 +162,6 @@ export default function CashBankPage() {
       title: 'Type',
       render: (value: unknown, account: CashBankAccount) => (
         <div className="flex items-center space-x-2">
-          {account.account_type === 'cash' ? (
-            <Banknote className="h-4 w-4 text-green-600" />
-          ) : (
-            <CreditCard className="h-4 w-4 text-blue-600" />
-          )}
           <span className="capitalize">{account.account_type}</span>
         </div>
       )
@@ -245,16 +224,16 @@ export default function CashBankPage() {
         <div className="flex items-center space-x-2">
           <Button variant="ghost" size="sm" asChild>
             <Link href={`/accounting/cash-bank/${account.id}`}>
-              <Eye className="h-4 w-4" />
+              View
             </Link>
           </Button>
           <Button variant="ghost" size="sm" asChild>
             <Link href={`/accounting/cash-bank/${account.id}/edit`}>
-              <Edit className="h-4 w-4" />
+              Edit
             </Link>
           </Button>
           <Button variant="ghost" size="sm">
-            <Trash2 className="h-4 w-4" />
+            Delete
           </Button>
         </div>
       )
@@ -267,7 +246,6 @@ export default function CashBankPage() {
       title: 'Date',
       render: (value: unknown, transaction: CashBankTransaction) => (
         <div className="flex items-center space-x-2">
-          <Calendar className="h-4 w-4 text-muted-foreground" />
           <span>{formatDate(transaction.transaction_date)}</span>
         </div>
       )
@@ -297,10 +275,9 @@ export default function CashBankPage() {
       key: 'transaction_type' as keyof CashBankTransaction,
       title: 'Type',
       render: (value: unknown, transaction: CashBankTransaction) => {
-        const { variant, label, icon: Icon, color } = getTransactionTypeBadge(transaction.transaction_type)
+        const { variant, label } = getTransactionTypeBadge(transaction.transaction_type)
         return (
           <div className="flex items-center space-x-2">
-            <Icon className={`h-4 w-4 ${color}`} />
             <Badge variant={variant}>{label}</Badge>
           </div>
         )
@@ -338,11 +315,11 @@ export default function CashBankPage() {
       render: (value: unknown, transaction: CashBankTransaction) => (
         <div className="flex items-center space-x-2">
           <Button variant="ghost" size="sm">
-            <Eye className="h-4 w-4" />
+            View
           </Button>
           {transaction.status === 'pending' && (
             <Button variant="ghost" size="sm">
-              <Edit className="h-4 w-4" />
+              Edit
             </Button>
           )}
         </div>
@@ -359,12 +336,10 @@ export default function CashBankPage() {
         actions={
           <div className="flex items-center space-x-3">
             <Button variant="outline" size="sm">
-              <Download className="h-4 w-4 mr-2" />
               Export
             </Button>
             <Button size="sm" asChild>
               <Link href="/accounting/cash-bank/new">
-                <Plus className="h-4 w-4 mr-2" />
                 New Account
               </Link>
             </Button>
@@ -382,7 +357,7 @@ export default function CashBankPage() {
                 <p className="text-2xl font-bold mt-1">{summaryStats.totalCashAccounts}</p>
                 <p className="text-sm text-green-600 mt-1">Active accounts</p>
               </div>
-              <Banknote className="h-8 w-8 text-green-600" />
+              <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center" />
             </div>
           </Card>
 
@@ -393,7 +368,7 @@ export default function CashBankPage() {
                 <p className="text-2xl font-bold mt-1">{summaryStats.totalBankAccounts}</p>
                 <p className="text-sm text-blue-600 mt-1">Active accounts</p>
               </div>
-              <CreditCard className="h-8 w-8 text-blue-600" />
+              <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center" />
             </div>
           </Card>
 
@@ -406,7 +381,7 @@ export default function CashBankPage() {
                 </p>
                 <p className="text-sm text-green-600 mt-1">Total cash</p>
               </div>
-              <TrendingUp className="h-8 w-8 text-green-600" />
+              <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center" />
             </div>
           </Card>
 
@@ -419,7 +394,7 @@ export default function CashBankPage() {
                 </p>
                 <p className="text-sm text-blue-600 mt-1">Total banks</p>
               </div>
-              <DollarSign className="h-8 w-8 text-blue-600" />
+              <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center" />
             </div>
           </Card>
         </div>
@@ -440,7 +415,6 @@ export default function CashBankPage() {
           <div className="flex items-center gap-2">
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-32">
-                <Filter className="h-4 w-4 mr-2" />
                 <SelectValue placeholder="All statuses" />
               </SelectTrigger>
               <SelectContent>
@@ -457,7 +431,6 @@ export default function CashBankPage() {
             {activeTab === 'accounts' && (
               <Select value={accountTypeFilter} onValueChange={setAccountTypeFilter}>
                 <SelectTrigger className="w-32">
-                  <PiggyBank className="h-4 w-4 mr-2" />
                   <SelectValue placeholder="All types" />
                 </SelectTrigger>
                 <SelectContent>
@@ -471,7 +444,6 @@ export default function CashBankPage() {
             {activeTab === 'transactions' && (
               <Select value={transactionTypeFilter} onValueChange={setTransactionTypeFilter}>
                 <SelectTrigger className="w-32">
-                  <Calendar className="h-4 w-4 mr-2" />
                   <SelectValue placeholder="All types" />
                 </SelectTrigger>
                 <SelectContent>
@@ -494,7 +466,6 @@ export default function CashBankPage() {
                 size="sm"
                 onClick={() => setActiveTab('accounts')}
               >
-                <PiggyBank className="h-4 w-4 mr-2" />
                 Accounts
               </Button>
               <Button
@@ -502,7 +473,6 @@ export default function CashBankPage() {
                 size="sm"
                 onClick={() => setActiveTab('transactions')}
               >
-                <Calendar className="h-4 w-4 mr-2" />
                 Transactions
               </Button>
             </div>
@@ -548,7 +518,7 @@ export default function CashBankPage() {
         {summaryStats.pendingTransactions > 0 && (
           <Card className="p-6 border-orange-200 bg-orange-50">
             <div className="flex items-center space-x-3">
-              <Calendar className="h-6 w-6 text-orange-600" />
+              <div className="h-6 w-6 rounded-full bg-orange-600" />
               <div className="flex-1">
                 <h3 className="text-lg font-semibold text-orange-800">Pending Transactions</h3>
                 <p className="text-orange-700 mt-1">

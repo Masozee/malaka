@@ -10,28 +10,7 @@ import { AdvancedDataTable } from '@/components/ui/advanced-data-table'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { 
-  Calculator,
-  Plus,
-  Eye,
-  Edit,
-  Filter,
-  Download,
-  Calendar,
-  TrendingUp,
-  TrendingDown,
-  CheckCircle,
-  Clock,
-  AlertCircle,
-  Search,
-  DollarSign,
-  BarChart3,
-  FileText,
-  Building,
-  CreditCard,
-  Banknote,
-  Receipt
-} from 'lucide-react'
+
 import Link from 'next/link'
 
 // Sales Reconciliation types
@@ -351,23 +330,23 @@ export default function SalesReconciliationPage() {
 
   const getLocationTypeBadge = (type: string) => {
     const config = {
-      store: { variant: 'default' as const, label: 'Store', icon: Building },
-      warehouse: { variant: 'secondary' as const, label: 'Warehouse', icon: Building },
-      region: { variant: 'outline' as const, label: 'Region', icon: BarChart3 },
-      online: { variant: 'secondary' as const, label: 'Online', icon: Building }
+      store: { variant: 'default' as const, label: 'Store' },
+      warehouse: { variant: 'secondary' as const, label: 'Warehouse' },
+      region: { variant: 'outline' as const, label: 'Region' },
+      online: { variant: 'secondary' as const, label: 'Online' }
     }
-    return config[type as keyof typeof config] || { variant: 'secondary' as const, label: type, icon: Building }
+    return config[type as keyof typeof config] || { variant: 'secondary' as const, label: type }
   }
 
   const getStatusBadge = (status: string) => {
     const config = {
-      pending: { variant: 'outline' as const, label: 'Pending', icon: Clock },
-      in_review: { variant: 'secondary' as const, label: 'In Review', icon: Clock },
-      approved: { variant: 'default' as const, label: 'Approved', icon: CheckCircle },
-      rejected: { variant: 'destructive' as const, label: 'Rejected', icon: AlertCircle },
-      completed: { variant: 'default' as const, label: 'Completed', icon: CheckCircle }
+      pending: { variant: 'outline' as const, label: 'Pending' },
+      in_review: { variant: 'secondary' as const, label: 'In Review' },
+      approved: { variant: 'default' as const, label: 'Approved' },
+      rejected: { variant: 'destructive' as const, label: 'Rejected' },
+      completed: { variant: 'default' as const, label: 'Completed' }
     }
-    return config[status as keyof typeof config] || { variant: 'secondary' as const, label: status, icon: Clock }
+    return config[status as keyof typeof config] || { variant: 'secondary' as const, label: status }
   }
 
   const getTypeBadge = (type: string) => {
@@ -415,10 +394,9 @@ export default function SalesReconciliationPage() {
       key: 'location_type',
       title: 'Type',
       render: (reconciliation: SalesReconciliation) => {
-        const { variant, label, icon: Icon } = getLocationTypeBadge(reconciliation.location_type)
+        const { variant, label } = getLocationTypeBadge(reconciliation.location_type)
         return (
           <div className="flex items-center space-x-2">
-            <Icon className="h-4 w-4" />
             <Badge variant={variant}>{label}</Badge>
           </div>
         )
@@ -481,10 +459,9 @@ export default function SalesReconciliationPage() {
       key: 'status',
       title: 'Status',
       render: (reconciliation: SalesReconciliation) => {
-        const { variant, label, icon: Icon } = getStatusBadge(reconciliation.status)
+        const { variant, label } = getStatusBadge(reconciliation.status)
         return (
           <div className="flex items-center space-x-2">
-            <Icon className="h-4 w-4" />
             <Badge variant={variant}>{label}</Badge>
           </div>
         )
@@ -497,12 +474,12 @@ export default function SalesReconciliationPage() {
         <div className="flex items-center space-x-2">
           <Button variant="ghost" size="sm" asChild>
             <Link href={`/sales/reconciliation/${reconciliation.id}`}>
-              <Eye className="h-4 w-4" />
+              View
             </Link>
           </Button>
           <Button variant="ghost" size="sm" asChild>
             <Link href={`/sales/reconciliation/${reconciliation.id}/edit`}>
-              <Edit className="h-4 w-4" />
+              Edit
             </Link>
           </Button>
         </div>
@@ -520,12 +497,10 @@ export default function SalesReconciliationPage() {
           actions={
             <div className="flex items-center space-x-3">
               <Button variant="outline" size="sm">
-                <Download className="h-4 w-4 mr-2" />
                 Export
               </Button>
               <Button size="sm" asChild>
                 <Link href="/sales/reconciliation/new">
-                  <Plus className="h-4 w-4 mr-2" />
                   New Reconciliation
                 </Link>
               </Button>
@@ -542,7 +517,7 @@ export default function SalesReconciliationPage() {
                 <p className="text-2xl font-bold mt-1">{summaryStats.totalReconciliations}</p>
                 <p className="text-sm text-blue-600 mt-1">All reconciliations</p>
               </div>
-              <Calculator className="h-8 w-8 text-blue-600" />
+              <div className="h-8 w-8 bg-muted rounded-lg" />
             </div>
           </Card>
 
@@ -553,7 +528,7 @@ export default function SalesReconciliationPage() {
                 <p className="text-2xl font-bold mt-1 text-orange-600">{summaryStats.pendingReconciliations}</p>
                 <p className="text-sm text-orange-600 mt-1">Need review</p>
               </div>
-              <Clock className="h-8 w-8 text-orange-600" />
+              <div className="h-8 w-8 bg-muted rounded-lg" />
             </div>
           </Card>
 
@@ -564,7 +539,7 @@ export default function SalesReconciliationPage() {
                 <p className="text-2xl font-bold mt-1 text-green-600">{summaryStats.approvedReconciliations}</p>
                 <p className="text-sm text-green-600 mt-1">Verified</p>
               </div>
-              <CheckCircle className="h-8 w-8 text-green-600" />
+              <div className="h-8 w-8 bg-muted rounded-lg" />
             </div>
           </Card>
 
@@ -575,7 +550,7 @@ export default function SalesReconciliationPage() {
                 <p className="text-2xl font-bold mt-1 text-blue-600">{summaryStats.completedReconciliations}</p>
                 <p className="text-sm text-blue-600 mt-1">Finalized</p>
               </div>
-              <FileText className="h-8 w-8 text-blue-600" />
+              <div className="h-8 w-8 bg-muted rounded-lg" />
             </div>
           </Card>
 
@@ -588,7 +563,7 @@ export default function SalesReconciliationPage() {
                 </p>
                 <p className="text-sm text-purple-600 mt-1">IDR recorded</p>
               </div>
-              <DollarSign className="h-8 w-8 text-purple-600" />
+              <div className="h-8 w-8 bg-muted rounded-lg" />
             </div>
           </Card>
 
@@ -601,7 +576,7 @@ export default function SalesReconciliationPage() {
                 </p>
                 <p className="text-sm text-red-600 mt-1">Absolute variance</p>
               </div>
-              <TrendingDown className="h-8 w-8 text-red-600" />
+              <div className="h-8 w-8 bg-muted rounded-lg" />
             </div>
           </Card>
 
@@ -614,7 +589,7 @@ export default function SalesReconciliationPage() {
                 </p>
                 <p className="text-sm text-gray-600 mt-1">Average</p>
               </div>
-              <BarChart3 className="h-8 w-8 text-gray-600" />
+              <div className="h-8 w-8 bg-muted rounded-lg" />
             </div>
           </Card>
         </div>
@@ -622,18 +597,16 @@ export default function SalesReconciliationPage() {
         {/* Filters */}
         <Card className="p-6">
           <div className="flex items-center space-x-4">
-            <Filter className="h-5 w-5 text-muted-foreground" />
+            <div className="h-5 w-5 bg-muted rounded" />
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 flex-1">
               <div className="space-y-2">
                 <Label htmlFor="search">Search</Label>
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="search"
                     placeholder="Search reconciliations..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-9"
                   />
                 </div>
               </div>
@@ -717,17 +690,17 @@ export default function SalesReconciliationPage() {
         {activeView === 'cards' ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {sortedReconciliations.map((reconciliation) => {
-              const { variant: locationVariant, label: locationLabel, icon: LocationIcon } = getLocationTypeBadge(reconciliation.location_type)
-              const { variant: statusVariant, label: statusLabel, icon: StatusIcon } = getStatusBadge(reconciliation.status)
+              const { variant: locationVariant, label: locationLabel } = getLocationTypeBadge(reconciliation.location_type)
+              const { variant: statusVariant, label: statusLabel } = getStatusBadge(reconciliation.status)
               const { variant: typeVariant, label: typeLabel } = getTypeBadge(reconciliation.reconciliation_type)
-              
+
               return (
                 <Card key={reconciliation.id} className="p-6 hover: transition-shadow">
                   <div className="flex justify-between items-start mb-4">
                     <div className="flex items-center space-x-2">
-                      <Calculator className="h-5 w-5 text-blue-600" />
+                      <div className="h-5 w-5 bg-muted rounded" />
                       <div>
-                        <Link 
+                        <Link
                           href={`/sales/reconciliation/${reconciliation.id}`}
                           className="font-semibold text-blue-600 hover:text-blue-800"
                         >
@@ -740,7 +713,6 @@ export default function SalesReconciliationPage() {
                     </div>
                     <div className="flex flex-col items-end space-y-1">
                       <div className="flex items-center space-x-1">
-                        <StatusIcon className="h-4 w-4" />
                         <Badge variant={statusVariant}>{statusLabel}</Badge>
                       </div>
                     </div>
@@ -750,7 +722,6 @@ export default function SalesReconciliationPage() {
                     <div className="flex justify-between">
                       <span className="text-sm text-muted-foreground">Type:</span>
                       <div className="flex items-center space-x-1">
-                        <LocationIcon className="h-4 w-4" />
                         <Badge variant={locationVariant}>{locationLabel}</Badge>
                       </div>
                     </div>
@@ -837,13 +808,12 @@ export default function SalesReconciliationPage() {
                     <div className="flex space-x-2 pt-3">
                       <Button variant="outline" size="sm" className="flex-1" asChild>
                         <Link href={`/sales/reconciliation/${reconciliation.id}`}>
-                          <Eye className="h-4 w-4 mr-2" />
                           Review
                         </Link>
                       </Button>
                       <Button variant="outline" size="sm" asChild>
                         <Link href={`/sales/reconciliation/${reconciliation.id}/edit`}>
-                          <Edit className="h-4 w-4" />
+                          Edit
                         </Link>
                       </Button>
                     </div>
@@ -880,7 +850,7 @@ export default function SalesReconciliationPage() {
           {summaryStats.pendingReconciliations > 0 && (
             <Card className="p-6 border-orange-200 bg-orange-50">
               <div className="flex items-center space-x-3">
-                <Clock className="h-6 w-6 text-orange-600" />
+                <div className="h-6 w-6 bg-orange-200 rounded" />
                 <div className="flex-1">
                   <h3 className="text-lg font-semibold text-orange-800">Pending Reconciliations</h3>
                   <p className="text-orange-700 mt-1">
@@ -898,7 +868,7 @@ export default function SalesReconciliationPage() {
           {mockReconciliations.filter(r => Math.abs(r.variance_percentage) > 1.0 && r.status !== 'completed').length > 0 && (
             <Card className="p-6 border-red-200 bg-red-50">
               <div className="flex items-center space-x-3">
-                <AlertCircle className="h-6 w-6 text-red-600" />
+                <div className="h-6 w-6 bg-red-200 rounded" />
                 <div className="flex-1">
                   <h3 className="text-lg font-semibold text-red-800">High Variance Alert</h3>
                   <p className="text-red-700 mt-1">

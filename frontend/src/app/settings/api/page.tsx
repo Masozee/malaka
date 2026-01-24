@@ -6,29 +6,6 @@ import { Header } from '@/components/ui/header'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { 
-  Key,
-  Server,
-  Database,
-  Shield,
-  Clock,
-  Activity,
-  AlertTriangle,
-  CheckCircle,
-  Copy,
-  RefreshCw,
-  Eye,
-  EyeOff,
-  Edit,
-  Trash2,
-  Plus,
-  Save,
-  X,
-  BarChart3,
-  Globe,
-  Zap,
-  Settings
-} from 'lucide-react'
 
 interface APIKey {
   id: string
@@ -43,7 +20,7 @@ interface APIKey {
   permissions: string[]
 }
 
-interface APISettings {
+interface APIGear {
   general: {
     baseUrl: string
     version: string
@@ -91,12 +68,12 @@ interface APISettings {
   }
 }
 
-export default function APISettingsPage() {
+export default function APIGearPage() {
   const [mounted, setMounted] = useState(false)
   const [activeTab, setActiveTab] = useState('overview')
   const [hasChanges, setHasChanges] = useState(false)
   const [showPasswords, setShowPasswords] = useState(false)
-  const [settings, setSettings] = useState<APISettings>({
+  const [settings, setGear] = useState<APIGear>({
     general: {
       baseUrl: 'https://api.malaka.com',
       version: 'v1',
@@ -187,17 +164,17 @@ export default function APISettingsPage() {
 
   const breadcrumbs = [
     { label: 'Dashboard', href: '/dashboard' },
-    { label: 'Settings', href: '/settings' },
-    { label: 'API Settings' }
+    { label: 'Gear', href: '/settings' },
+    { label: 'API Gear' }
   ]
 
   const tabs = [
-    { id: 'overview', label: 'Overview', icon: Activity },
-    { id: 'general', label: 'General', icon: Settings },
-    { id: 'security', label: 'Security', icon: Shield },
-    { id: 'database', label: 'Database', icon: Database },
-    { id: 'monitoring', label: 'Monitoring', icon: BarChart3 },
-    { id: 'api-keys', label: 'API Keys', icon: Key }
+    { id: 'overview', label: 'Overview' },
+    { id: 'general', label: 'General' },
+    { id: 'security', label: 'Security' },
+    { id: 'database', label: 'Database' },
+    { id: 'monitoring', label: 'Monitoring' },
+    { id: 'api-keys', label: 'API Keys' }
   ]
 
   const handleSave = () => {
@@ -226,8 +203,8 @@ export default function APISettingsPage() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card className="p-4">
           <div className="flex items-center space-x-3">
-            <div className="p-2 bg-green-100 rounded-lg">
-              <CheckCircle className="h-5 w-5 text-green-600" />
+            <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
+              <div className="h-5 w-5 bg-green-600/20 rounded" />
             </div>
             <div>
               <p className="text-sm font-medium text-gray-600">API Status</p>
@@ -238,8 +215,8 @@ export default function APISettingsPage() {
 
         <Card className="p-4">
           <div className="flex items-center space-x-3">
-            <div className="p-2 bg-blue-100 rounded-lg">
-              <Clock className="h-5 w-5 text-blue-600" />
+            <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
+              <div className="h-5 w-5 bg-blue-600/20 rounded" />
             </div>
             <div>
               <p className="text-sm font-medium text-gray-600">Response Time</p>
@@ -250,8 +227,8 @@ export default function APISettingsPage() {
 
         <Card className="p-4">
           <div className="flex items-center space-x-3">
-            <div className="p-2 bg-purple-100 rounded-lg">
-              <Activity className="h-5 w-5 text-purple-600" />
+            <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
+              <div className="h-5 w-5 bg-purple-600/20 rounded" />
             </div>
             <div>
               <p className="text-sm font-medium text-gray-600">Requests/min</p>
@@ -262,8 +239,8 @@ export default function APISettingsPage() {
 
         <Card className="p-4">
           <div className="flex items-center space-x-3">
-            <div className="p-2 bg-orange-100 rounded-lg">
-              <Server className="h-5 w-5 text-orange-600" />
+            <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
+              <div className="h-5 w-5 bg-orange-600/20 rounded" />
             </div>
             <div>
               <p className="text-sm font-medium text-gray-600">Uptime</p>
@@ -337,7 +314,7 @@ export default function APISettingsPage() {
               type="url"
               value={settings.general.baseUrl}
               onChange={(e) => {
-                setSettings(prev => ({
+                setGear(prev => ({
                   ...prev,
                   general: { ...prev.general, baseUrl: e.target.value }
                 }))
@@ -353,7 +330,7 @@ export default function APISettingsPage() {
               type="text"
               value={settings.general.version}
               onChange={(e) => {
-                setSettings(prev => ({
+                setGear(prev => ({
                   ...prev,
                   general: { ...prev.general, version: e.target.value }
                 }))
@@ -369,7 +346,7 @@ export default function APISettingsPage() {
               type="number"
               value={settings.general.timeout}
               onChange={(e) => {
-                setSettings(prev => ({
+                setGear(prev => ({
                   ...prev,
                   general: { ...prev.general, timeout: parseInt(e.target.value) }
                 }))
@@ -385,7 +362,7 @@ export default function APISettingsPage() {
               type="number"
               value={settings.general.retryAttempts}
               onChange={(e) => {
-                setSettings(prev => ({
+                setGear(prev => ({
                   ...prev,
                   general: { ...prev.general, retryAttempts: parseInt(e.target.value) }
                 }))
@@ -401,7 +378,7 @@ export default function APISettingsPage() {
               type="number"
               value={settings.general.cacheTtl}
               onChange={(e) => {
-                setSettings(prev => ({
+                setGear(prev => ({
                   ...prev,
                   general: { ...prev.general, cacheTtl: parseInt(e.target.value) }
                 }))
@@ -432,7 +409,7 @@ export default function APISettingsPage() {
                   type="checkbox" 
                   checked={settings.general[key as keyof typeof settings.general] as boolean}
                   onChange={(e) => {
-                    setSettings(prev => ({
+                    setGear(prev => ({
                       ...prev,
                       general: { ...prev.general, [key]: e.target.checked }
                     }))
@@ -472,7 +449,7 @@ export default function APISettingsPage() {
                   type="checkbox" 
                   checked={settings.security[key as keyof typeof settings.security] as boolean}
                   onChange={(e) => {
-                    setSettings(prev => ({
+                    setGear(prev => ({
                       ...prev,
                       security: { ...prev.security, [key]: e.target.checked }
                     }))
@@ -497,7 +474,7 @@ export default function APISettingsPage() {
               type="number"
               value={settings.security.defaultRateLimit}
               onChange={(e) => {
-                setSettings(prev => ({
+                setGear(prev => ({
                   ...prev,
                   security: { ...prev.security, defaultRateLimit: parseInt(e.target.value) }
                 }))
@@ -513,7 +490,7 @@ export default function APISettingsPage() {
               type="number"
               value={settings.security.rateLimitWindow}
               onChange={(e) => {
-                setSettings(prev => ({
+                setGear(prev => ({
                   ...prev,
                   security: { ...prev.security, rateLimitWindow: parseInt(e.target.value) }
                 }))
@@ -529,7 +506,7 @@ export default function APISettingsPage() {
               type="number"
               value={settings.security.logRetentionDays}
               onChange={(e) => {
-                setSettings(prev => ({
+                setGear(prev => ({
                   ...prev,
                   security: { ...prev.security, logRetentionDays: parseInt(e.target.value) }
                 }))
@@ -555,7 +532,7 @@ export default function APISettingsPage() {
               type="text"
               value={settings.database.host}
               onChange={(e) => {
-                setSettings(prev => ({
+                setGear(prev => ({
                   ...prev,
                   database: { ...prev.database, host: e.target.value }
                 }))
@@ -571,7 +548,7 @@ export default function APISettingsPage() {
               type="number"
               value={settings.database.port}
               onChange={(e) => {
-                setSettings(prev => ({
+                setGear(prev => ({
                   ...prev,
                   database: { ...prev.database, port: parseInt(e.target.value) }
                 }))
@@ -587,7 +564,7 @@ export default function APISettingsPage() {
               type="text"
               value={settings.database.database}
               onChange={(e) => {
-                setSettings(prev => ({
+                setGear(prev => ({
                   ...prev,
                   database: { ...prev.database, database: e.target.value }
                 }))
@@ -603,7 +580,7 @@ export default function APISettingsPage() {
               type="text"
               value={settings.database.username}
               onChange={(e) => {
-                setSettings(prev => ({
+                setGear(prev => ({
                   ...prev,
                   database: { ...prev.database, username: e.target.value }
                 }))
@@ -620,7 +597,7 @@ export default function APISettingsPage() {
                 type={showPasswords ? "text" : "password"}
                 value={settings.database.password}
                 onChange={(e) => {
-                  setSettings(prev => ({
+                  setGear(prev => ({
                     ...prev,
                     database: { ...prev.database, password: e.target.value }
                   }))
@@ -633,7 +610,7 @@ export default function APISettingsPage() {
                 size="sm"
                 onClick={() => setShowPasswords(!showPasswords)}
               >
-                {showPasswords ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                {showPasswords ? 'Hide' : 'Show'}
               </Button>
             </div>
           </div>
@@ -644,7 +621,7 @@ export default function APISettingsPage() {
               type="number"
               value={settings.database.connectionPool}
               onChange={(e) => {
-                setSettings(prev => ({
+                setGear(prev => ({
                   ...prev,
                   database: { ...prev.database, connectionPool: parseInt(e.target.value) }
                 }))
@@ -660,7 +637,7 @@ export default function APISettingsPage() {
               type="number"
               value={settings.database.connectionTimeout}
               onChange={(e) => {
-                setSettings(prev => ({
+                setGear(prev => ({
                   ...prev,
                   database: { ...prev.database, connectionTimeout: parseInt(e.target.value) }
                 }))
@@ -675,7 +652,7 @@ export default function APISettingsPage() {
             <select
               value={settings.database.sslMode}
               onChange={(e) => {
-                setSettings(prev => ({
+                setGear(prev => ({
                   ...prev,
                   database: { ...prev.database, sslMode: e.target.value as any }
                 }))
@@ -692,7 +669,6 @@ export default function APISettingsPage() {
 
         <div className="mt-6 flex space-x-2">
           <Button onClick={handleTestConnection}>
-            <Database className="h-4 w-4 mr-2" />
             Test Connection
           </Button>
         </div>
@@ -721,7 +697,7 @@ export default function APISettingsPage() {
                   type="checkbox" 
                   checked={settings.monitoring[key as keyof typeof settings.monitoring] as boolean}
                   onChange={(e) => {
-                    setSettings(prev => ({
+                    setGear(prev => ({
                       ...prev,
                       monitoring: { ...prev.monitoring, [key]: e.target.checked }
                     }))
@@ -746,7 +722,7 @@ export default function APISettingsPage() {
               type="number"
               value={settings.monitoring.alertThresholds.responseTime}
               onChange={(e) => {
-                setSettings(prev => ({
+                setGear(prev => ({
                   ...prev,
                   monitoring: { 
                     ...prev.monitoring, 
@@ -768,7 +744,7 @@ export default function APISettingsPage() {
               type="number"
               value={settings.monitoring.alertThresholds.errorRate}
               onChange={(e) => {
-                setSettings(prev => ({
+                setGear(prev => ({
                   ...prev,
                   monitoring: { 
                     ...prev.monitoring, 
@@ -790,7 +766,7 @@ export default function APISettingsPage() {
               type="number"
               value={settings.monitoring.alertThresholds.requestsPerSecond}
               onChange={(e) => {
-                setSettings(prev => ({
+                setGear(prev => ({
                   ...prev,
                   monitoring: { 
                     ...prev.monitoring, 
@@ -816,7 +792,6 @@ export default function APISettingsPage() {
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-lg font-semibold text-gray-900">API Keys</h3>
           <Button>
-            <Plus className="h-4 w-4 mr-2" />
             Create API Key
           </Button>
         </div>
@@ -845,7 +820,7 @@ export default function APISettingsPage() {
                       size="sm"
                       onClick={() => copyToClipboard(key.key)}
                     >
-                      <Copy className="h-3 w-3" />
+                      Copy
                     </Button>
                   </div>
                   
@@ -890,21 +865,21 @@ export default function APISettingsPage() {
                 
                 <div className="flex space-x-2">
                   <Button variant="outline" size="sm">
-                    <Edit className="h-4 w-4" />
+                    Edit
                   </Button>
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     size="sm"
                     onClick={() => handleRegenerateKey(key.id)}
                   >
-                    <RefreshCw className="h-4 w-4" />
+                    Regenerate
                   </Button>
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     size="sm"
                     onClick={() => handleDeleteKey(key.id)}
                   >
-                    <Trash2 className="h-4 w-4" />
+                    Delete
                   </Button>
                 </div>
               </div>
@@ -937,7 +912,7 @@ export default function APISettingsPage() {
   return (
     <TwoLevelLayout>
       <Header 
-        title="API Settings"
+        title="API Gear"
         description="Configure API endpoints, security, and monitoring"
         breadcrumbs={breadcrumbs}
       />
@@ -948,16 +923,14 @@ export default function APISettingsPage() {
           <Card className="p-4 border-orange-200 bg-orange-50">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
-                <AlertTriangle className="h-5 w-5 text-orange-600" />
+                <div className="h-5 w-5 bg-orange-600/20 rounded" />
                 <span className="text-sm font-medium text-orange-800">You have unsaved changes</span>
               </div>
               <div className="flex space-x-2">
                 <Button variant="outline" size="sm" onClick={() => setHasChanges(false)}>
-                  <X className="h-4 w-4 mr-1" />
                   Discard
                 </Button>
                 <Button size="sm" onClick={handleSave}>
-                  <Save className="h-4 w-4 mr-1" />
                   Save Changes
                 </Button>
               </div>
@@ -968,23 +941,19 @@ export default function APISettingsPage() {
         {/* Tab Navigation */}
         <Card className="p-1">
           <div className="flex space-x-1 overflow-x-auto">
-            {tabs.map((tab) => {
-              const Icon = tab.icon
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center space-x-2 px-4 py-2 rounded-md whitespace-nowrap transition-colors ${
-                    activeTab === tab.id
-                      ? 'bg-blue-100 text-blue-700 font-medium'
-                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                  }`}
-                >
-                  <Icon className="h-4 w-4" />
-                  <span className="text-sm">{tab.label}</span>
-                </button>
-              )
-            })}
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex items-center space-x-2 px-4 py-2 rounded-md whitespace-nowrap transition-colors ${
+                  activeTab === tab.id
+                    ? 'bg-blue-100 text-blue-700 font-medium'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                }`}
+              >
+                <span className="text-sm">{tab.label}</span>
+              </button>
+            ))}
           </div>
         </Card>
 

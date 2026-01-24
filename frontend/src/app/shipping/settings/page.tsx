@@ -3,10 +3,10 @@
 import * as React from "react"
 import { TwoLevelLayout } from "@/components/ui/two-level-layout"
 import { Header } from "@/components/ui/header"
-import { ModuleSettings } from "@/components/ui/module-settings"
+import { ModuleGear } from "@/components/ui/module-settings"
 
-export default function ShippingSettingsPage() {
-  const [settings, setSettings] = React.useState([
+export default function ShippingGearPage() {
+  const [settings, setGear] = React.useState([
     {
       id: "auto_courier_selection",
       label: "Auto Courier Selection",
@@ -37,7 +37,7 @@ export default function ShippingSettingsPage() {
   const [isLoading, setIsLoading] = React.useState(false)
 
   const handleSettingChange = (settingId: string, value: any) => {
-    setSettings(prev => prev.map(setting => 
+    setGear(prev => prev.map(setting => 
       setting.id === settingId ? { ...setting, value } : setting
     ))
     setHasUnsavedChanges(true)
@@ -56,15 +56,15 @@ export default function ShippingSettingsPage() {
 
   const breadcrumbs = [
     { label: "Shipping", href: "/shipping" },
-    { label: "Settings" }
+    { label: "Gear" }
   ]
 
   return (
     <TwoLevelLayout>
       <div className="flex-1 flex flex-col overflow-hidden">
-        <Header title="Shipping Settings" breadcrumbs={breadcrumbs} />
+        <Header title="Shipping Gear" breadcrumbs={breadcrumbs} />
         <div className="flex-1 overflow-auto p-6">
-          <ModuleSettings
+          <ModuleGear
             moduleName="Shipping"
             moduleId="shipping"
             settings={settings}

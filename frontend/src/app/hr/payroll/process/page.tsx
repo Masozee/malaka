@@ -9,17 +9,7 @@ import { Header } from '@/components/ui/header'
 import { AdvancedDataTable, AdvancedColumn } from '@/components/ui/advanced-data-table'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Progress } from '@/components/ui/progress'
-import { 
-  Calculator, 
-  Play, 
-  Pause, 
-  CheckCircle, 
-  AlertCircle, 
-  Users, 
-  DollarSign,
-  FileText,
-  Download
-} from 'lucide-react'
+
 import type { PayrollPeriod, PayrollItem } from '@/types/hr'
 import { mockPayrollPeriods, mockPayrollItems } from '@/services/hr'
 
@@ -172,7 +162,7 @@ export default function PayrollProcessPage() {
                 Preview Report
               </Button>
               <Button variant="outline" size="sm">
-                <Download className="h-4 w-4 mr-2" />
+                <DownloadSimple className="h-4 w-4 mr-2" />
                 Export Data
               </Button>
             </div>
@@ -296,7 +286,7 @@ export default function PayrollProcessPage() {
                     {mounted ? `Rp ${summaryStats.totalGrossPay.toLocaleString('id-ID')}` : ''}
                   </p>
                 </div>
-                <DollarSign className="h-8 w-8 text-green-600" />
+                <CurrencyDollar className="h-8 w-8 text-green-600" />
               </div>
             </Card>
 
@@ -308,7 +298,7 @@ export default function PayrollProcessPage() {
                     {mounted ? `Rp ${summaryStats.totalDeductions.toLocaleString('id-ID')}` : ''}
                   </p>
                 </div>
-                <AlertCircle className="h-8 w-8 text-orange-600" />
+                <WarningCircle className="h-8 w-8 text-orange-600" />
               </div>
             </Card>
 

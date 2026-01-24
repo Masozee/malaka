@@ -5,36 +5,13 @@ import { Header } from '@/components/ui/header'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { 
-  Calculator, 
-  FileText, 
-  TrendingUp, 
-  DollarSign, 
-  CreditCard, 
-  Building, 
-  PieChart, 
-  BookOpen,
-  Plus,
-  ArrowRight,
-  BarChart,
-  Settings,
-  Calendar,
-  CheckCircle,
-  AlertTriangle,
-  Clock,
-  Target,
-  Wallet,
-  Receipt,
-  Eye,
-  Globe
-} from 'lucide-react'
+
 import Link from 'next/link'
 
 const accountingModules = [
   {
     title: 'General Ledger',
     description: 'Manage chart of accounts and general ledger entries',
-    icon: BookOpen,
     href: '/accounting/general-ledger',
     stats: '1,247 entries this month',
     color: 'bg-blue-100 text-blue-600'
@@ -42,7 +19,6 @@ const accountingModules = [
   {
     title: 'Journal Entries',
     description: 'Create and manage accounting journal entries',
-    icon: FileText,
     href: '/accounting/journal',
     stats: '89 entries pending',
     color: 'bg-green-100 text-green-600'
@@ -50,7 +26,6 @@ const accountingModules = [
   {
     title: 'Trial Balance',
     description: 'Generate trial balance and balance sheet reports',
-    icon: Calculator,
     href: '/accounting/trial-balance',
     stats: 'Last updated: Today',
     color: 'bg-yellow-100 text-yellow-600'
@@ -58,7 +33,6 @@ const accountingModules = [
   {
     title: 'Cash & Bank',
     description: 'Manage cash accounts and bank reconciliation',
-    icon: CreditCard,
     href: '/accounting/cash-bank',
     stats: '8 bank accounts',
     color: 'bg-purple-100 text-purple-600'
@@ -66,7 +40,6 @@ const accountingModules = [
   {
     title: 'Fixed Assets',
     description: 'Track and manage company fixed assets',
-    icon: Building,
     href: '/accounting/fixed-assets',
     stats: '234 assets tracked',
     color: 'bg-red-100 text-red-600'
@@ -74,7 +47,6 @@ const accountingModules = [
   {
     title: 'Cost Centers',
     description: 'Manage departmental cost allocation and tracking',
-    icon: Target,
     href: '/accounting/cost-centers',
     stats: '12 cost centers',
     color: 'bg-indigo-100 text-indigo-600'
@@ -82,7 +54,6 @@ const accountingModules = [
   {
     title: 'Currency Settings',
     description: 'Manage multi-currency and exchange rates',
-    icon: Globe,
     href: '/accounting/currency',
     stats: '5 currencies active',
     color: 'bg-pink-100 text-pink-600'
@@ -90,7 +61,6 @@ const accountingModules = [
   {
     title: 'Invoices',
     description: 'Create and manage customer invoices',
-    icon: Receipt,
     href: '/accounting/invoices',
     stats: '156 invoices this month',
     color: 'bg-orange-100 text-orange-600'
@@ -105,7 +75,7 @@ export default function AccountingPage() {
   return (
     <TwoLevelLayout>
       <div className="flex-1 flex flex-col overflow-hidden">
-        <Header 
+        <Header
           title="Accounting & Finance"
           description="Manage financial records, reporting, and compliance"
           breadcrumbs={breadcrumbs}
@@ -113,19 +83,16 @@ export default function AccountingPage() {
             <div className="flex items-center space-x-3">
               <Button variant="outline" size="sm" asChild>
                 <Link href="/accounting/reports">
-                  <BarChart className="h-4 w-4 mr-2" />
                   Reports
                 </Link>
               </Button>
               <Button variant="outline" size="sm" asChild>
                 <Link href="/accounting/settings">
-                  <Settings className="h-4 w-4 mr-2" />
                   Settings
                 </Link>
               </Button>
               <Button size="sm" asChild>
                 <Link href="/accounting/journal/new">
-                  <Plus className="h-4 w-4 mr-2" />
                   New Entry
                 </Link>
               </Button>
@@ -144,7 +111,6 @@ export default function AccountingPage() {
                   <p className="text-3xl font-bold text-gray-900">Rp 15.2B</p>
                 </div>
                 <div className="h-12 w-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <Building className="h-6 w-6 text-blue-600" />
                 </div>
               </div>
               <div className="mt-2">
@@ -160,7 +126,6 @@ export default function AccountingPage() {
                   <p className="text-3xl font-bold text-green-600">Rp 2.8B</p>
                 </div>
                 <div className="h-12 w-12 bg-green-100 rounded-lg flex items-center justify-center">
-                  <TrendingUp className="h-6 w-6 text-green-600" />
                 </div>
               </div>
               <div className="mt-2">
@@ -176,7 +141,6 @@ export default function AccountingPage() {
                   <p className="text-3xl font-bold text-yellow-600">Rp 890M</p>
                 </div>
                 <div className="h-12 w-12 bg-yellow-100 rounded-lg flex items-center justify-center">
-                  <Wallet className="h-6 w-6 text-yellow-600" />
                 </div>
               </div>
               <div className="mt-2">
@@ -192,7 +156,6 @@ export default function AccountingPage() {
                   <p className="text-3xl font-bold text-purple-600">18.5%</p>
                 </div>
                 <div className="h-12 w-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                  <PieChart className="h-6 w-6 text-purple-600" />
                 </div>
               </div>
               <div className="mt-2">
@@ -207,26 +170,23 @@ export default function AccountingPage() {
             <h2 className="text-lg font-semibold text-gray-900 mb-4">Accounting Modules</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {accountingModules.map((module) => {
-                const Icon = module.icon
                 return (
                   <Card key={module.title} className="p-6 hover: transition-shadow duration-200">
                     <div className="flex items-start justify-between mb-4">
                       <div className={`h-12 w-12 rounded-lg flex items-center justify-center ${module.color}`}>
-                        <Icon className="h-6 w-6" />
                       </div>
                       <Link href={module.href}>
                         <Button variant="ghost" size="sm">
-                          <ArrowRight className="h-4 w-4" />
                         </Button>
                       </Link>
                     </div>
-                    
+
                     <div className="space-y-2">
                       <h3 className="font-semibold text-gray-900">{module.title}</h3>
                       <p className="text-sm text-gray-600">{module.description}</p>
                       <p className="text-xs text-gray-500">{module.stats}</p>
                     </div>
-                    
+
                     <div className="mt-4">
                       <Link href={module.href}>
                         <Button variant="outline" size="sm" className="w-full">
@@ -247,7 +207,6 @@ export default function AccountingPage() {
               <Card className="p-4">
                 <div className="flex items-center space-x-3">
                   <div className="h-10 w-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                    <Plus className="h-5 w-5 text-blue-600" />
                   </div>
                   <div className="flex-1">
                     <p className="font-medium text-gray-900">New Journal Entry</p>
@@ -262,7 +221,6 @@ export default function AccountingPage() {
               <Card className="p-4">
                 <div className="flex items-center space-x-3">
                   <div className="h-10 w-10 bg-green-100 rounded-lg flex items-center justify-center">
-                    <Receipt className="h-5 w-5 text-green-600" />
                   </div>
                   <div className="flex-1">
                     <p className="font-medium text-gray-900">New Invoice</p>
@@ -277,7 +235,6 @@ export default function AccountingPage() {
               <Card className="p-4">
                 <div className="flex items-center space-x-3">
                   <div className="h-10 w-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                    <Calculator className="h-5 w-5 text-purple-600" />
                   </div>
                   <div className="flex-1">
                     <p className="font-medium text-gray-900">Trial Balance</p>
@@ -292,7 +249,6 @@ export default function AccountingPage() {
               <Card className="p-4">
                 <div className="flex items-center space-x-3">
                   <div className="h-10 w-10 bg-orange-100 rounded-lg flex items-center justify-center">
-                    <CreditCard className="h-5 w-5 text-orange-600" />
                   </div>
                   <div className="flex-1">
                     <p className="font-medium text-gray-900">Bank Reconciliation</p>
@@ -313,17 +269,15 @@ export default function AccountingPage() {
                 <h3 className="text-lg font-semibold text-gray-900">Recent Journal Entries</h3>
                 <Button variant="ghost" size="sm" asChild>
                   <Link href="/accounting/journal">
-                    <Eye className="h-4 w-4 mr-1" />
                     View All
                   </Link>
                 </Button>
               </div>
-              
+
               <div className="space-y-4">
                 <div className="flex items-center justify-between py-3 border-b border-gray-100">
                   <div className="flex items-center space-x-3">
                     <div className="h-8 w-8 bg-green-100 rounded-full flex items-center justify-center">
-                      <CheckCircle className="h-4 w-4 text-green-600" />
                     </div>
                     <div>
                       <p className="font-medium text-gray-900">JE-2024-0234</p>
@@ -336,7 +290,6 @@ export default function AccountingPage() {
                 <div className="flex items-center justify-between py-3 border-b border-gray-100">
                   <div className="flex items-center space-x-3">
                     <div className="h-8 w-8 bg-blue-100 rounded-full flex items-center justify-center">
-                      <Clock className="h-4 w-4 text-blue-600" />
                     </div>
                     <div>
                       <p className="font-medium text-gray-900">JE-2024-0235</p>
@@ -349,7 +302,6 @@ export default function AccountingPage() {
                 <div className="flex items-center justify-between py-3 border-b border-gray-100">
                   <div className="flex items-center space-x-3">
                     <div className="h-8 w-8 bg-yellow-100 rounded-full flex items-center justify-center">
-                      <DollarSign className="h-4 w-4 text-yellow-600" />
                     </div>
                     <div>
                       <p className="font-medium text-gray-900">JE-2024-0236</p>
@@ -362,7 +314,6 @@ export default function AccountingPage() {
                 <div className="flex items-center justify-between py-3">
                   <div className="flex items-center space-x-3">
                     <div className="h-8 w-8 bg-purple-100 rounded-full flex items-center justify-center">
-                      <FileText className="h-4 w-4 text-purple-600" />
                     </div>
                     <div>
                       <p className="font-medium text-gray-900">JE-2024-0237</p>
@@ -379,17 +330,15 @@ export default function AccountingPage() {
                 <h3 className="text-lg font-semibold text-gray-900">Financial Summary</h3>
                 <Button variant="ghost" size="sm" asChild>
                   <Link href="/accounting/reports">
-                    <Eye className="h-4 w-4 mr-1" />
                     View Reports
                   </Link>
                 </Button>
               </div>
-              
+
               <div className="space-y-4">
                 <div className="flex items-center justify-between py-3 border-b border-gray-100">
                   <div className="flex items-center space-x-3">
                     <div className="h-8 w-8 bg-green-100 rounded-full flex items-center justify-center">
-                      <TrendingUp className="h-4 w-4 text-green-600" />
                     </div>
                     <div>
                       <p className="font-medium text-gray-900">Current Assets</p>
@@ -405,7 +354,6 @@ export default function AccountingPage() {
                 <div className="flex items-center justify-between py-3 border-b border-gray-100">
                   <div className="flex items-center space-x-3">
                     <div className="h-8 w-8 bg-blue-100 rounded-full flex items-center justify-center">
-                      <Building className="h-4 w-4 text-blue-600" />
                     </div>
                     <div>
                       <p className="font-medium text-gray-900">Fixed Assets</p>
@@ -421,7 +369,6 @@ export default function AccountingPage() {
                 <div className="flex items-center justify-between py-3 border-b border-gray-100">
                   <div className="flex items-center space-x-3">
                     <div className="h-8 w-8 bg-red-100 rounded-full flex items-center justify-center">
-                      <CreditCard className="h-4 w-4 text-red-600" />
                     </div>
                     <div>
                       <p className="font-medium text-gray-900">Current Liabilities</p>
@@ -437,7 +384,6 @@ export default function AccountingPage() {
                 <div className="flex items-center justify-between py-3">
                   <div className="flex items-center space-x-3">
                     <div className="h-8 w-8 bg-purple-100 rounded-full flex items-center justify-center">
-                      <PieChart className="h-4 w-4 text-purple-600" />
                     </div>
                     <div>
                       <p className="font-medium text-gray-900">Owner's Equity</p>
@@ -456,13 +402,11 @@ export default function AccountingPage() {
           {/* Accounting Alerts */}
           <Card className="p-6">
             <div className="flex items-center space-x-2 mb-4">
-              <AlertTriangle className="h-5 w-5 text-yellow-600" />
               <h3 className="text-lg font-semibold text-gray-900">Accounting Alerts</h3>
             </div>
-            
+
             <div className="space-y-3">
               <div className="flex items-center space-x-3 p-3 bg-red-50 border border-red-200 rounded-lg">
-                <Clock className="h-5 w-5 text-red-600" />
                 <div className="flex-1">
                   <p className="font-medium text-red-800">Month-End Closing Due</p>
                   <p className="text-sm text-red-700">Financial period closes in 3 days - 12 journal entries pending</p>
@@ -471,9 +415,8 @@ export default function AccountingPage() {
                   <Link href="/accounting/journal?status=pending">Review Entries</Link>
                 </Button>
               </div>
-              
+
               <div className="flex items-center space-x-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                <AlertTriangle className="h-5 w-5 text-yellow-600" />
                 <div className="flex-1">
                   <p className="font-medium text-yellow-800">Bank Reconciliation Required</p>
                   <p className="text-sm text-yellow-700">3 bank accounts need reconciliation for current month</p>
@@ -484,7 +427,6 @@ export default function AccountingPage() {
               </div>
 
               <div className="flex items-center space-x-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                <Calendar className="h-5 w-5 text-blue-600" />
                 <div className="flex-1">
                   <p className="font-medium text-blue-800">Tax Filing Reminder</p>
                   <p className="text-sm text-blue-700">Monthly VAT return due in 7 days</p>

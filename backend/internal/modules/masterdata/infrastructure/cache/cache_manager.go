@@ -9,12 +9,12 @@ import (
 )
 
 // CacheManager handles cache operations and warming for master data.
+// Note: Users are NOT cached for security reasons (passwords, permissions)
 type CacheManager struct {
 	articleRepo        *CachedArticleRepository
 	classificationRepo *CachedClassificationRepository
 	companyRepo        *CachedCompanyRepository
 	customerRepo       *CachedCustomerRepository
-	userRepo           *CachedUserRepository
 	depstoreRepo       *CachedDepstoreRepository
 	divisionRepo       *CachedDivisionRepository
 	colorRepo          *CachedColorRepository
@@ -23,12 +23,12 @@ type CacheManager struct {
 }
 
 // NewCacheManager creates a new CacheManager.
+// Note: Users are NOT cached for security reasons
 func NewCacheManager(
 	articleRepo *CachedArticleRepository,
 	classificationRepo *CachedClassificationRepository,
 	companyRepo *CachedCompanyRepository,
 	customerRepo *CachedCustomerRepository,
-	userRepo *CachedUserRepository,
 	depstoreRepo *CachedDepstoreRepository,
 	divisionRepo *CachedDivisionRepository,
 	colorRepo *CachedColorRepository,
@@ -40,7 +40,6 @@ func NewCacheManager(
 		classificationRepo: classificationRepo,
 		companyRepo:        companyRepo,
 		customerRepo:       customerRepo,
-		userRepo:           userRepo,
 		depstoreRepo:       depstoreRepo,
 		divisionRepo:       divisionRepo,
 		colorRepo:          colorRepo,
@@ -55,13 +54,13 @@ func (cm *CacheManager) WarmAllCaches(ctx context.Context) error {
 	start := time.Now()
 
 	// Warm master data caches in order of importance
+	// Note: Users are NOT cached for security reasons
 	cacheOperations := []struct {
 		name string
 		fn   func(context.Context) error
 	}{
 		{"classifications", cm.classificationRepo.WarmCache},
 		{"companies", cm.companyRepo.WarmCache},
-		{"users", cm.userRepo.WarmCache},
 		{"colors", cm.colorRepo.WarmCache},
 		{"divisions", cm.divisionRepo.WarmCache},
 		{"depstores", cm.depstoreRepo.WarmCache},
@@ -101,6 +100,7 @@ func (cm *CacheManager) InvalidateAllCaches(ctx context.Context) error {
 	cm.logger.Info("Invalidating all master data caches")
 
 	// Define all cache keys to invalidate
+	// Note: Users are NOT cached for security reasons
 	cacheKeys := []string{
 		// Article caches
 		articleListKey,
@@ -108,14 +108,14 @@ func (cm *CacheManager) InvalidateAllCaches(ctx context.Context) error {
 		classificationListKey,
 		// Company caches
 		companyListKey,
-		// Customer caches (assuming similar pattern)
+		// Customer caches
 		"customers:all",
-		// User caches
-		"users:all",
 		// Division caches
 		"divisions:all",
 		// Depstore caches
 		"depstores:all",
+		// Color caches
+		"colors:all",
 	}
 
 	successCount := 0

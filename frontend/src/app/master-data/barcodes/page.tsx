@@ -1,5 +1,26 @@
 'use client'
 
+import { HugeiconsIcon } from "@hugeicons/react"
+import {
+  BarCode01Icon,
+  PlusSignIcon,
+  ViewIcon,
+  PencilEdit01Icon,
+  FilterIcon,
+  Download01Icon,
+  Package01Icon,
+  PrinterIcon,
+  BarcodeScanIcon,
+  CheckmarkCircle01Icon,
+  Clock01Icon,
+  AlertCircleIcon,
+  Search01Icon,
+  HashtagIcon,
+  Target01Icon,
+  ChartIncreaseIcon,
+  Copy01Icon
+} from "@hugeicons/core-free-icons"
+
 import { useState, useEffect } from 'react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -10,25 +31,7 @@ import { AdvancedDataTable } from '@/components/ui/advanced-data-table'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { 
-  Barcode,
-  Plus,
-  Eye,
-  Edit,
-  Filter,
-  Download,
-  Package,
-  Printer,
-  Scan,
-  CheckCircle,
-  Clock,
-  AlertCircle,
-  Search,
-  Hash,
-  Target,
-  TrendingUp,
-  Copy
-} from 'lucide-react'
+
 import Link from 'next/link'
 import { barcodeService } from '@/services/masterdata'
 import { Barcode as BarcodeType, MasterDataFilters } from '@/types/masterdata'
@@ -48,7 +51,6 @@ interface ProductBarcode extends BarcodeType {
   created_by?: string
   updated_by?: string
 }
-
 
 export default function ProductBarcodesPage() {
   const [mounted, setMounted] = useState(false)
@@ -149,14 +151,14 @@ export default function ProductBarcodesPage() {
 
   const getStatusBadge = (status: string) => {
     return status === 'active'
-      ? { variant: 'default' as const, label: 'Active', icon: CheckCircle }
-      : { variant: 'destructive' as const, label: 'Inactive', icon: AlertCircle }
+      ? { variant: 'default' as const, label: 'Active', icon: CheckmarkCircle01Icon }
+      : { variant: 'destructive' as const, label: 'Inactive', icon: AlertCircleIcon }
   }
 
   const getPrimaryBadge = (isPrimary: boolean) => {
-    return isPrimary 
-      ? { variant: 'default' as const, label: 'Primary', icon: Target }
-      : { variant: 'outline' as const, label: 'Secondary', icon: Hash }
+    return isPrimary
+      ? { variant: 'default' as const, label: 'Primary', icon: Target01Icon }
+      : { variant: 'outline' as const, label: 'Secondary', icon: HashtagIcon }
   }
 
   const columns = [
@@ -165,15 +167,15 @@ export default function ProductBarcodesPage() {
       title: 'Barcode',
       render: (barcode: ProductBarcode) => (
         <div className="flex items-center space-x-2">
-          <Barcode className="h-4 w-4 text-muted-foreground" />
-          <Link 
+          <HugeiconsIcon icon={BarCode01Icon} className="h-4 w-4 text-muted-foreground" />
+          <Link
             href={`/master-data/barcodes/${barcode.id}`}
             className="font-mono text-blue-600 hover:text-blue-800"
           >
             {barcode.code}
           </Link>
           <Button variant="ghost" size="sm" onClick={() => navigator.clipboard.writeText(barcode.code || '')}>
-            <Copy className="h-4 w-4" />
+            <HugeiconsIcon icon={Copy01Icon} className="h-4 w-4" />
           </Button>
         </div>
       )
@@ -208,10 +210,10 @@ export default function ProductBarcodesPage() {
       key: 'primary',
       title: 'Priority',
       render: (barcode: ProductBarcode) => {
-        const { variant, label, icon: Icon } = getPrimaryBadge(barcode.is_primary)
+        const { variant, label, icon: IconData } = getPrimaryBadge(barcode.is_primary)
         return (
           <div className="flex items-center space-x-2">
-            <Icon className="h-4 w-4" />
+            <HugeiconsIcon icon={IconData} className="h-4 w-4" />
             <Badge variant={variant}>{label}</Badge>
           </div>
         )
@@ -222,7 +224,7 @@ export default function ProductBarcodesPage() {
       title: 'Prints',
       render: (barcode: ProductBarcode) => (
         <div className="flex items-center space-x-2">
-          <Printer className="h-4 w-4 text-muted-foreground" />
+          <HugeiconsIcon icon={PrinterIcon} className="h-4 w-4 text-muted-foreground" />
           <span>{barcode.print_count}</span>
         </div>
       )
@@ -232,7 +234,7 @@ export default function ProductBarcodesPage() {
       title: 'Scans',
       render: (barcode: ProductBarcode) => (
         <div className="flex items-center space-x-2">
-          <Scan className="h-4 w-4 text-muted-foreground" />
+          <HugeiconsIcon icon={BarcodeScanIcon} className="h-4 w-4 text-muted-foreground" />
           <span className="font-medium">{barcode.scan_count}</span>
         </div>
       )
@@ -248,10 +250,10 @@ export default function ProductBarcodesPage() {
       key: 'status',
       title: 'Status',
       render: (barcode: ProductBarcode) => {
-        const { variant, label, icon: Icon } = getStatusBadge(barcode.status || 'inactive')
+        const { variant, label, icon: IconData } = getStatusBadge(barcode.status || 'inactive')
         return (
           <div className="flex items-center space-x-2">
-            <Icon className="h-4 w-4" />
+            <HugeiconsIcon icon={IconData} className="h-4 w-4" />
             <Badge variant={variant}>{label}</Badge>
           </div>
         )
@@ -264,16 +266,16 @@ export default function ProductBarcodesPage() {
         <div className="flex items-center space-x-2">
           <Button variant="ghost" size="sm" asChild>
             <Link href={`/master-data/barcodes/${barcode.id}`}>
-              <Eye className="h-4 w-4" />
+              <HugeiconsIcon icon={ViewIcon} className="h-4 w-4" />
             </Link>
           </Button>
           <Button variant="ghost" size="sm" asChild>
             <Link href={`/master-data/barcodes/${barcode.id}/edit`}>
-              <Edit className="h-4 w-4" />
+              <HugeiconsIcon icon={PencilEdit01Icon} className="h-4 w-4" />
             </Link>
           </Button>
           <Button variant="ghost" size="sm">
-            <Printer className="h-4 w-4" />
+            <HugeiconsIcon icon={PrinterIcon} className="h-4 w-4" />
           </Button>
         </div>
       )
@@ -289,16 +291,16 @@ export default function ProductBarcodesPage() {
         actions={
           <div className="flex items-center space-x-3">
             <Button variant="outline" size="sm">
-              <Printer className="h-4 w-4 mr-2" />
+              <HugeiconsIcon icon={PrinterIcon} className="h-4 w-4 mr-2" />
               Print Labels
             </Button>
             <Button variant="outline" size="sm">
-              <Download className="h-4 w-4 mr-2" />
+              <HugeiconsIcon icon={Download01Icon} className="h-4 w-4 mr-2" />
               Export
             </Button>
             <Button size="sm" asChild>
               <Link href="/master-data/barcodes/new">
-                <Plus className="h-4 w-4 mr-2" />
+                <HugeiconsIcon icon={PlusSignIcon} className="h-4 w-4 mr-2" />
                 New Barcode
               </Link>
             </Button>
@@ -317,7 +319,7 @@ export default function ProductBarcodesPage() {
                 <p className="text-2xl font-bold mt-1">{summaryStats.totalBarcodes}</p>
                 <p className="text-sm text-blue-600 mt-1">All codes</p>
               </div>
-              <Barcode className="h-8 w-8 text-blue-600" />
+              <HugeiconsIcon icon={BarCode01Icon} className="h-8 w-8 text-blue-600" />
             </div>
           </Card>
 
@@ -328,7 +330,7 @@ export default function ProductBarcodesPage() {
                 <p className="text-2xl font-bold mt-1 text-green-600">{summaryStats.activeBarcodes}</p>
                 <p className="text-sm text-green-600 mt-1">In use</p>
               </div>
-              <CheckCircle className="h-8 w-8 text-green-600" />
+              <HugeiconsIcon icon={CheckmarkCircle01Icon} className="h-8 w-8 text-green-600" />
             </div>
           </Card>
 
@@ -339,7 +341,7 @@ export default function ProductBarcodesPage() {
                 <p className="text-2xl font-bold mt-1 text-orange-600">{summaryStats.primaryBarcodes}</p>
                 <p className="text-sm text-orange-600 mt-1">Main codes</p>
               </div>
-              <Target className="h-8 w-8 text-orange-600" />
+              <HugeiconsIcon icon={Target01Icon} className="h-8 w-8 text-orange-600" />
             </div>
           </Card>
 
@@ -352,7 +354,7 @@ export default function ProductBarcodesPage() {
                 </p>
                 <p className="text-sm text-green-600 mt-1">Scanned times</p>
               </div>
-              <Scan className="h-8 w-8 text-green-600" />
+              <HugeiconsIcon icon={BarcodeScanIcon} className="h-8 w-8 text-green-600" />
             </div>
           </Card>
         </div>
@@ -361,7 +363,7 @@ export default function ProductBarcodesPage() {
         <div className="flex items-center justify-between gap-4">
           <div className="flex-1 max-w-md">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <HugeiconsIcon icon={Search01Icon} className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search barcodes..."
                 value={searchTerm}
@@ -370,11 +372,11 @@ export default function ProductBarcodesPage() {
               />
             </div>
           </div>
-          
+
           <div className="flex items-center gap-2">
             <Select value={typeFilter} onValueChange={setTypeFilter}>
               <SelectTrigger className="w-36">
-                <Barcode className="h-4 w-4 mr-2" />
+                <HugeiconsIcon icon={BarCode01Icon} className="h-4 w-4 mr-2" />
                 <SelectValue placeholder="Type" />
               </SelectTrigger>
               <SelectContent>
@@ -390,7 +392,7 @@ export default function ProductBarcodesPage() {
             
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-32">
-                <CheckCircle className="h-4 w-4 mr-2" />
+                <HugeiconsIcon icon={CheckmarkCircle01Icon} className="h-4 w-4 mr-2" />
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
@@ -402,7 +404,7 @@ export default function ProductBarcodesPage() {
 
             <Select value={primaryFilter} onValueChange={setPrimaryFilter}>
               <SelectTrigger className="w-32">
-                <Target className="h-4 w-4 mr-2" />
+                <HugeiconsIcon icon={Target01Icon} className="h-4 w-4 mr-2" />
                 <SelectValue placeholder="Priority" />
               </SelectTrigger>
               <SelectContent>
@@ -456,9 +458,9 @@ export default function ProductBarcodesPage() {
                 <Card key={barcode.id} className="p-6 hover: transition-shadow">
                   <div className="flex justify-between items-start mb-4">
                     <div className="flex items-center space-x-2">
-                      <Barcode className="h-5 w-5 text-blue-600" />
+                      <HugeiconsIcon icon={BarCode01Icon} className="h-5 w-5 text-blue-600" />
                       <div>
-                        <Link 
+                        <Link
                           href={`/master-data/barcodes/${barcode.id}`}
                           className="font-mono text-blue-600 hover:text-blue-800 text-lg font-semibold"
                         >
@@ -471,7 +473,7 @@ export default function ProductBarcodesPage() {
                     </div>
                     <div className="flex flex-col items-end space-y-1">
                       <div className="flex items-center space-x-1">
-                        <StatusIcon className="h-4 w-4" />
+                        <HugeiconsIcon icon={StatusIcon} className="h-4 w-4" />
                         <Badge variant={statusVariant}>{statusLabel}</Badge>
                       </div>
                     </div>
@@ -523,15 +525,15 @@ export default function ProductBarcodesPage() {
                     <div className="flex space-x-2 pt-3">
                       <Button variant="outline" size="sm" className="flex-1" asChild>
                         <Link href={`/master-data/barcodes/${barcode.id}`}>
-                          <Eye className="h-4 w-4 mr-2" />
+                          <HugeiconsIcon icon={ViewIcon} className="h-4 w-4 mr-2" />
                           View
                         </Link>
                       </Button>
                       <Button variant="outline" size="sm">
-                        <Printer className="h-4 w-4" />
+                        <HugeiconsIcon icon={PrinterIcon} className="h-4 w-4" />
                       </Button>
                       <Button variant="outline" size="sm" onClick={() => navigator.clipboard.writeText(barcode.code || '')}>
-                        <Copy className="h-4 w-4" />
+                        <HugeiconsIcon icon={Copy01Icon} className="h-4 w-4" />
                       </Button>
                     </div>
                   </div>
@@ -559,7 +561,7 @@ export default function ProductBarcodesPage() {
         {barcodes.filter(b => (b.scan_count || 0) < 50 && b.status === 'active').length > 0 && (
           <Card className="p-6 border-orange-200 bg-orange-50">
             <div className="flex items-center space-x-3">
-              <AlertCircle className="h-6 w-6 text-orange-600" />
+              <HugeiconsIcon icon={AlertCircleIcon} className="h-6 w-6 text-orange-600" />
               <div className="flex-1">
                 <h3 className="text-lg font-semibold text-orange-800">Low Usage Barcodes</h3>
                 <p className="text-orange-700 mt-1">

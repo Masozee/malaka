@@ -11,22 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Progress } from '@/components/ui/progress'
-import { 
-  Factory, 
-  Plus, 
-  Eye, 
-  Edit, 
-  Trash2, 
-  Filter, 
-  Download, 
-  Calendar,
-  Users,
-  Clock,
-  Package,
-  CheckCircle,
-  Search,
-  BarChart3
-} from 'lucide-react'
+
 import Link from 'next/link'
 import { ProductionService } from '@/services/production'
 import type { WorkOrder, WorkOrderFilters } from '@/types/production'
@@ -245,11 +230,11 @@ export default function WorkOrdersPage() {
           </Button>
           <Button variant="ghost" size="sm" asChild>
             <Link href={`/production/work-orders/${record?.id || ''}/edit`}>
-              <Edit className="h-4 w-4" />
+              <PencilSimple className="h-4 w-4" />
             </Link>
           </Button>
           <Button variant="ghost" size="sm">
-            <Trash2 className="h-4 w-4" />
+            <Trash className="h-4 w-4" />
           </Button>
         </div>
       )
@@ -269,7 +254,7 @@ export default function WorkOrdersPage() {
               Schedule
             </Button>
             <Button variant="outline" size="sm">
-              <Download className="h-4 w-4 mr-2" />
+              <DownloadSimple className="h-4 w-4 mr-2" />
               Export
             </Button>
             <Button size="sm" asChild>
@@ -334,7 +319,7 @@ export default function WorkOrdersPage() {
         <div className="flex items-center justify-between gap-4">
           <div className="flex-1 max-w-md">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <MagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search work orders..."
                 value={searchTerm}
@@ -428,7 +413,7 @@ export default function WorkOrdersPage() {
             </div>
             <Select value={sortBy} onValueChange={setSortBy}>
               <SelectTrigger className="w-44">
-                <BarChart3 className="h-4 w-4 mr-2" />
+                <ChartBar className="h-4 w-4 mr-2" />
                 <SelectValue placeholder="Sort by" />
               </SelectTrigger>
               <SelectContent>
@@ -529,11 +514,11 @@ export default function WorkOrdersPage() {
                     </Button>
                     <Button variant="ghost" size="sm" asChild>
                       <Link href={`/production/work-orders/${order.id}/edit`}>
-                        <Edit className="h-4 w-4" />
+                        <PencilSimple className="h-4 w-4" />
                       </Link>
                     </Button>
                     <Button variant="ghost" size="sm">
-                      <Trash2 className="h-4 w-4" />
+                      <Trash className="h-4 w-4" />
                     </Button>
                   </div>
                 </div>

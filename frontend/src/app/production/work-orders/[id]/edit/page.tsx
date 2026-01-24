@@ -10,19 +10,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { TwoLevelLayout } from '@/components/ui/two-level-layout'
 import { Header } from '@/components/ui/header'
-import { 
-  Factory, 
-  Plus, 
-  Minus,
-  Save, 
-  ArrowLeft,
-  Package,
-  Calendar,
-  User,
-  AlertTriangle,
-  Clock,
-  DollarSign
-} from 'lucide-react'
+
 import Link from 'next/link'
 import { mockWorkOrders, mockWarehouses } from '@/services/production'
 import type { WorkOrder } from '@/types/production'
@@ -315,7 +303,7 @@ export default function EditWorkOrderPage() {
         />
         <div className="flex-1 p-6">
           <Card className="p-8 text-center">
-            <AlertTriangle className="h-12 w-12 text-orange-500 mx-auto mb-4" />
+            <Warning className="h-12 w-12 text-orange-500 mx-auto mb-4" />
             <h3 className="text-lg font-semibold mb-2">Work Order Not Found</h3>
             <p className="text-muted-foreground mb-4">
               The work order you're trying to edit doesn't exist or may have been deleted.
@@ -352,7 +340,7 @@ export default function EditWorkOrderPage() {
               type="submit"
               disabled={isSubmitting}
             >
-              <Save className="h-4 w-4 mr-2" />
+              <FloppyDisk className="h-4 w-4 mr-2" />
               {isSubmitting ? 'Saving...' : 'Save Changes'}
             </Button>
           </div>

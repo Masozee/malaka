@@ -2,27 +2,14 @@
 
 import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
+import { HugeiconsIcon } from "@hugeicons/react"
+import { PencilEdit01Icon, SendToMobileIcon, CheckmarkCircle01Icon, AlertCircleIcon, File01Icon, ArrowLeft01Icon, PrinterIcon, Download01Icon } from "@hugeicons/core-free-icons"
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { TwoLevelLayout } from '@/components/ui/two-level-layout'
 import { Header } from '@/components/ui/header'
-import { 
-  Receipt,
-  ArrowLeft,
-  Edit,
-  Download,
-  Send,
-  Calendar,
-  DollarSign,
-  User,
-  FileText,
-  CheckCircle,
-  Clock,
-  AlertCircle,
-  CreditCard,
-  Building
-} from 'lucide-react'
+
 import Link from 'next/link'
 import { invoiceService } from '@/services/accounting'
 
@@ -104,13 +91,13 @@ export default function InvoiceDetailPage() {
 
   const getStatusBadge = (status: string) => {
     const config = {
-      draft: { variant: 'secondary' as const, label: 'Draft', icon: Edit },
-      sent: { variant: 'default' as const, label: 'Sent', icon: Send },
-      paid: { variant: 'default' as const, label: 'Paid', icon: CheckCircle },
-      overdue: { variant: 'destructive' as const, label: 'Overdue', icon: AlertCircle },
-      cancelled: { variant: 'destructive' as const, label: 'Cancelled', icon: AlertCircle }
+      draft: { variant: 'secondary' as const, label: 'Draft', icon: PencilEdit01Icon },
+      sent: { variant: 'default' as const, label: 'Sent', icon: SendToMobileIcon },
+      paid: { variant: 'default' as const, label: 'Paid', icon: CheckmarkCircle01Icon },
+      overdue: { variant: 'destructive' as const, label: 'Overdue', icon: AlertCircleIcon },
+      cancelled: { variant: 'destructive' as const, label: 'Cancelled', icon: AlertCircleIcon }
     }
-    return config[status as keyof typeof config] || { variant: 'secondary' as const, label: status, icon: FileText }
+    return config[status as keyof typeof config] || { variant: 'secondary' as const, label: status, icon: File01Icon }
   }
 
   const getPaymentStatusBadge = (status: string) => {
@@ -158,14 +145,14 @@ export default function InvoiceDetailPage() {
         />
         <div className="flex-1 p-6">
           <Card className="p-6 text-center">
-            <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+            <HugeiconsIcon icon={AlertCircleIcon} className="h-12 w-12 text-red-500 mx-auto mb-4" />
             <h3 className="text-lg font-semibold mb-2">Invoice Not Found</h3>
             <p className="text-muted-foreground mb-4">
               The invoice with ID "{invoiceId}" could not be found.
             </p>
             <Button asChild>
               <Link href="/accounting/invoices">
-                <ArrowLeft className="h-4 w-4 mr-2" />
+                <HugeiconsIcon icon={ArrowLeft01Icon} className="h-4 w-4 mr-2" />
                 Back to Invoices
               </Link>
             </Button>
@@ -187,26 +174,26 @@ export default function InvoiceDetailPage() {
         actions={
           <div className="flex items-center space-x-3">
             <Button variant="outline" size="sm">
-              <Download className="h-4 w-4 mr-2" />
+              <HugeiconsIcon icon={Download01Icon} className="h-4 w-4 mr-2" />
               Download PDF
             </Button>
             {invoice.status === 'draft' && (
               <Button variant="outline" size="sm">
-                <Send className="h-4 w-4 mr-2" />
+                <HugeiconsIcon icon={SendToMobileIcon} className="h-4 w-4 mr-2" />
                 Send Invoice
               </Button>
             )}
             {invoice.status === 'draft' && (
               <Button size="sm" asChild>
                 <Link href={`/accounting/invoices/${invoiceId}/edit`}>
-                  <Edit className="h-4 w-4 mr-2" />
+                  <HugeiconsIcon icon={PencilEdit01Icon} className="h-4 w-4 mr-2" />
                   Edit
                 </Link>
               </Button>
             )}
             <Button variant="ghost" size="sm" asChild>
               <Link href="/accounting/invoices">
-                <ArrowLeft className="h-4 w-4 mr-2" />
+                <HugeiconsIcon icon={ArrowLeft01Icon} className="h-4 w-4 mr-2" />
                 Back
               </Link>
             </Button>
@@ -224,7 +211,6 @@ export default function InvoiceDetailPage() {
                 <h2 className="text-2xl font-bold mb-2">{invoice.invoice_number}</h2>
                 <div className="flex items-center space-x-4">
                   <div className="flex items-center space-x-2">
-                    <StatusIcon className="h-4 w-4" />
                     <Badge variant={statusVariant}>{statusLabel}</Badge>
                   </div>
                   <Badge variant={paymentVariant}>{paymentLabel}</Badge>
@@ -239,7 +225,6 @@ export default function InvoiceDetailPage() {
             {/* Customer Info */}
             <div className="border-t pt-4">
               <div className="flex items-center space-x-2 mb-2">
-                <Building className="h-4 w-4 text-muted-foreground" />
                 <span className="font-medium">Bill To</span>
               </div>
               <div className="pl-6">
@@ -255,15 +240,13 @@ export default function InvoiceDetailPage() {
             <h3 className="font-semibold mb-4">Invoice Details</h3>
             <div className="space-y-3">
               <div className="flex items-center space-x-2">
-                <Calendar className="h-4 w-4 text-muted-foreground" />
                 <div>
                   <p className="text-sm font-medium">Invoice Date</p>
                   <p className="text-sm text-muted-foreground">{formatDate(invoice.invoice_date)}</p>
                 </div>
               </div>
-              
+
               <div className="flex items-center space-x-2">
-                <Clock className="h-4 w-4 text-muted-foreground" />
                 <div>
                   <p className="text-sm font-medium">Due Date</p>
                   <p className="text-sm text-muted-foreground">{formatDate(invoice.due_date)}</p>
@@ -272,7 +255,6 @@ export default function InvoiceDetailPage() {
 
               {invoice.payment_date && (
                 <div className="flex items-center space-x-2">
-                  <CheckCircle className="h-4 w-4 text-green-600" />
                   <div>
                     <p className="text-sm font-medium">Payment Date</p>
                     <p className="text-sm text-muted-foreground">{formatDate(invoice.payment_date)}</p>
@@ -281,7 +263,6 @@ export default function InvoiceDetailPage() {
               )}
 
               <div className="flex items-center space-x-2">
-                <FileText className="h-4 w-4 text-muted-foreground" />
                 <div>
                   <p className="text-sm font-medium">Payment Terms</p>
                   <p className="text-sm text-muted-foreground">{invoice.payment_terms}</p>
@@ -289,7 +270,6 @@ export default function InvoiceDetailPage() {
               </div>
 
               <div className="flex items-center space-x-2">
-                <User className="h-4 w-4 text-muted-foreground" />
                 <div>
                   <p className="text-sm font-medium">Created By</p>
                   <p className="text-sm text-muted-foreground">{invoice.created_by}</p>

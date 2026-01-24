@@ -7,20 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { TwoLevelLayout } from '@/components/ui/two-level-layout'
 import { Header } from '@/components/ui/header'
 import { Progress } from '@/components/ui/progress'
-import { 
-  Factory, 
-  Package, 
-  Truck, 
-  Users, 
-  TrendingUp, 
-  Clock, 
-  CheckCircle, 
-  AlertTriangle,
-  Plus,
-  Eye,
-  Settings,
-  BarChart3
-} from 'lucide-react'
+
 import Link from 'next/link'
 import { mockProductionSummary, mockWorkOrders, mockQualityControls, mockPurchaseOrders } from '@/services/production'
 import type { WorkOrder, QualityControl, PurchaseOrder } from '@/types/production'
@@ -83,7 +70,7 @@ export default function ProductionDashboard() {
   return (
     <TwoLevelLayout>
       <div className="flex-1 flex flex-col overflow-hidden">
-        <Header 
+        <Header
           title="Production Dashboard"
           description="Monitor and manage all production activities"
           breadcrumbs={breadcrumbs}
@@ -91,19 +78,16 @@ export default function ProductionDashboard() {
             <div className="flex items-center space-x-3">
               <Button variant="outline" size="sm" asChild>
                 <Link href="/production/reports">
-                  <BarChart3 className="h-4 w-4 mr-2" />
                   Reports
                 </Link>
               </Button>
               <Button variant="outline" size="sm" asChild>
                 <Link href="/production/settings">
-                  <Settings className="h-4 w-4 mr-2" />
                   Settings
                 </Link>
               </Button>
               <Button size="sm" asChild>
                 <Link href="/production/work-orders/new">
-                  <Plus className="h-4 w-4 mr-2" />
                   New Work Order
                 </Link>
               </Button>
@@ -124,7 +108,6 @@ export default function ProductionDashboard() {
                   {mockProductionSummary.activeWorkOrders} active
                 </p>
               </div>
-              <Factory className="h-8 w-8 text-blue-600" />
             </div>
           </Card>
 
@@ -135,7 +118,6 @@ export default function ProductionDashboard() {
                 <p className="text-2xl font-bold mt-1">{mockProductionSummary.totalProduction.toLocaleString()}</p>
                 <p className="text-sm text-green-600 mt-1">Units this month</p>
               </div>
-              <Package className="h-8 w-8 text-green-600" />
             </div>
           </Card>
 
@@ -148,7 +130,6 @@ export default function ProductionDashboard() {
                   <Progress value={mockProductionSummary.averageEfficiency} className="h-2" />
                 </div>
               </div>
-              <TrendingUp className="h-8 w-8 text-purple-600" />
             </div>
           </Card>
 
@@ -161,7 +142,6 @@ export default function ProductionDashboard() {
                   <Progress value={mockProductionSummary.qualityScore} className="h-2" />
                 </div>
               </div>
-              <CheckCircle className="h-8 w-8 text-orange-600" />
             </div>
           </Card>
           </div>
@@ -172,7 +152,6 @@ export default function ProductionDashboard() {
             <Link href="/production/work-orders">
               <div className="flex items-center space-x-4">
                 <div className="p-3 bg-blue-100 rounded-lg">
-                  <Factory className="h-6 w-6 text-blue-600" />
                 </div>
                 <div>
                   <h3 className="font-semibold">Work Orders</h3>
@@ -189,7 +168,6 @@ export default function ProductionDashboard() {
             <Link href="/production/quality-control">
               <div className="flex items-center space-x-4">
                 <div className="p-3 bg-green-100 rounded-lg">
-                  <CheckCircle className="h-6 w-6 text-green-600" />
                 </div>
                 <div>
                   <h3 className="font-semibold">Quality Control</h3>
@@ -206,7 +184,6 @@ export default function ProductionDashboard() {
             <Link href="/production/material-planning">
               <div className="flex items-center space-x-4">
                 <div className="p-3 bg-purple-100 rounded-lg">
-                  <Package className="h-6 w-6 text-purple-600" />
                 </div>
                 <div>
                   <h3 className="font-semibold">Material Planning</h3>
@@ -221,7 +198,6 @@ export default function ProductionDashboard() {
             <Link href="/production/suppliers">
               <div className="flex items-center space-x-4">
                 <div className="p-3 bg-orange-100 rounded-lg">
-                  <Truck className="h-6 w-6 text-orange-600" />
                 </div>
                 <div>
                   <h3 className="font-semibold">Suppliers</h3>
@@ -236,7 +212,6 @@ export default function ProductionDashboard() {
             <Link href="/production/warehouses">
               <div className="flex items-center space-x-4">
                 <div className="p-3 bg-gray-100 rounded-lg">
-                  <Package className="h-6 w-6 text-gray-600" />
                 </div>
                 <div>
                   <h3 className="font-semibold">Warehouses</h3>
@@ -251,7 +226,6 @@ export default function ProductionDashboard() {
             <Link href="/production/purchase-orders">
               <div className="flex items-center space-x-4">
                 <div className="p-3 bg-red-100 rounded-lg">
-                  <Clock className="h-6 w-6 text-red-600" />
                 </div>
                 <div>
                   <h3 className="font-semibold">Purchase Orders</h3>
@@ -270,12 +244,11 @@ export default function ProductionDashboard() {
               <h3 className="text-lg font-semibold">Recent Work Orders</h3>
               <Button variant="ghost" size="sm" asChild>
                 <Link href="/production/work-orders">
-                  <Eye className="h-4 w-4 mr-1" />
                   View All
                 </Link>
               </Button>
             </div>
-            
+
             <div className="space-y-3">
               {recentWorkOrders.map((order) => (
                 <div key={order.id} className="flex items-center justify-between p-3 border rounded-lg">
@@ -306,12 +279,11 @@ export default function ProductionDashboard() {
               <h3 className="text-lg font-semibold">Quality Control</h3>
               <Button variant="ghost" size="sm" asChild>
                 <Link href="/production/quality-control">
-                  <Eye className="h-4 w-4 mr-1" />
                   View All
                 </Link>
               </Button>
             </div>
-            
+
             <div className="space-y-3">
               {recentQualityControls.map((qc) => (
                 <div key={qc.id} className="flex items-center justify-between p-3 border rounded-lg">
@@ -345,12 +317,11 @@ export default function ProductionDashboard() {
             <h3 className="text-lg font-semibold">Recent Purchase Orders</h3>
             <Button variant="ghost" size="sm" asChild>
               <Link href="/production/purchase-orders">
-                <Eye className="h-4 w-4 mr-1" />
                 View All
               </Link>
             </Button>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {recentPurchaseOrders.map((po) => (
               <div key={po.id} className="p-4 border rounded-lg">
@@ -375,13 +346,11 @@ export default function ProductionDashboard() {
           {/* Production Alerts */}
           <Card className="p-6">
           <div className="flex items-center space-x-2 mb-4">
-            <AlertTriangle className="h-5 w-5 text-yellow-600" />
             <h3 className="text-lg font-semibold">Production Alerts</h3>
           </div>
-          
+
           <div className="space-y-3">
             <div className="flex items-center space-x-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-              <AlertTriangle className="h-5 w-5 text-yellow-600" />
               <div className="flex-1">
                 <p className="font-medium text-yellow-800">Material Shortage Alert</p>
                 <p className="text-sm text-yellow-700">Premium Leather Black is running low (12 units remaining)</p>
@@ -390,9 +359,8 @@ export default function ProductionDashboard() {
                 <Link href="/production/materials">View Details</Link>
               </Button>
             </div>
-            
+
             <div className="flex items-center space-x-3 p-3 bg-red-50 border border-red-200 rounded-lg">
-              <Clock className="h-5 w-5 text-red-600" />
               <div className="flex-1">
                 <p className="font-medium text-red-800">Delayed Work Orders</p>
                 <p className="text-sm text-red-700">{mockProductionSummary.delayedWorkOrders} work orders are behind schedule</p>

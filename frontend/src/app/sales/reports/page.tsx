@@ -11,16 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { TextField } from "@/components/ui/form-field"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { 
-  Calendar,
-  Download,
-  Filter,
-  Search,
-  BarChart3,
-  TrendingUp,
-  Users,
-  ShoppingCart
-} from "lucide-react"
+
 import { generateDashboardData, generateRevenueTimeSeries } from "@/lib/dashboard-data"
 import { DashboardResponse, SalesReport, ProductSales, TopCustomer } from "@/types/dashboard"
 import { format, subDays } from "date-fns"
@@ -303,7 +294,7 @@ export default function SalesReportsPage() {
               size="sm" 
               onClick={() => handleExport(selectedReport)}
             >
-              <Download className="h-4 w-4 mr-2" />
+              <DownloadSimple className="h-4 w-4 mr-2" />
               Export
             </Button>
           </div>
@@ -314,7 +305,7 @@ export default function SalesReportsPage() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-              <BarChart3 className="h-4 w-4 text-muted-foreground" />
+              <ChartBar className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-green-600">
@@ -344,7 +335,7 @@ export default function SalesReportsPage() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Avg Order Value</CardTitle>
-              <TrendingUp className="h-4 w-4 text-muted-foreground" />
+              <TrendUp className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-purple-600">

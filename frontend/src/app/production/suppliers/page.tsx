@@ -11,27 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Progress } from '@/components/ui/progress'
-import { 
-  Truck, 
-  Plus, 
-  Eye, 
-  Edit, 
-  Trash2, 
-  Filter, 
-  Download, 
-  Star,
-  Phone,
-  Mail,
-  MapPin,
-  DollarSign,
-  TrendingUp,
-  Users,
-  Package,
-  Search,
-  BarChart3,
-  Building2,
-  X
-} from 'lucide-react'
+
 import Link from 'next/link'
 
 // Enhanced Supplier Interface
@@ -479,7 +459,7 @@ export default function SuppliersPage() {
         </div>
         
         <div className="flex items-center text-sm">
-          <Mail className="h-3 w-3 mr-2 text-muted-foreground" />
+          <Envelope className="h-3 w-3 mr-2 text-muted-foreground" />
           <span className="truncate">{supplier.email}</span>
         </div>
         
@@ -522,7 +502,7 @@ export default function SuppliersPage() {
         </Button>
         <Button size="sm" className="flex-1" asChild>
           <Link href={`/production/suppliers/${supplier.id}/edit`}>
-            <Edit className="h-4 w-4 mr-1" />
+            <PencilSimple className="h-4 w-4 mr-1" />
             Edit
           </Link>
         </Button>
@@ -657,11 +637,11 @@ export default function SuppliersPage() {
         actions={
           <div className="flex items-center space-x-3">
             <Button variant="outline" size="sm">
-              <TrendingUp className="h-4 w-4 mr-2" />
+              <TrendUp className="h-4 w-4 mr-2" />
               Performance Report
             </Button>
             <Button variant="outline" size="sm">
-              <Download className="h-4 w-4 mr-2" />
+              <DownloadSimple className="h-4 w-4 mr-2" />
               Export
             </Button>
             <Button size="sm" asChild>
@@ -709,7 +689,7 @@ export default function SuppliersPage() {
                 </p>
                 <p className="text-sm text-green-600 mt-1">{summaryStats.totalOrders.toLocaleString()} orders</p>
               </div>
-              <DollarSign className="h-8 w-8 text-purple-600" />
+              <CurrencyDollar className="h-8 w-8 text-purple-600" />
             </div>
           </Card>
 
@@ -734,7 +714,7 @@ export default function SuppliersPage() {
         <div className="flex items-center justify-between gap-4">
           <div className="flex-1 max-w-md">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <MagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input 
                 placeholder="Search suppliers, categories, or contact..." 
                 className="pl-9"
@@ -762,7 +742,7 @@ export default function SuppliersPage() {
             
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-32">
-                <Filter className="h-4 w-4 mr-2" />
+                <Funnel className="h-4 w-4 mr-2" />
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
@@ -829,7 +809,7 @@ export default function SuppliersPage() {
             </div>
             <Select value={sortBy} onValueChange={setSortBy}>
               <SelectTrigger className="w-44">
-                <BarChart3 className="h-4 w-4 mr-2" />
+                <ChartBar className="h-4 w-4 mr-2" />
                 <SelectValue placeholder="Sort by" />
               </SelectTrigger>
               <SelectContent>

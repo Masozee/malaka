@@ -1,7 +1,15 @@
 "use client"
 
 import * as React from "react"
-import { X, CheckCircle, AlertCircle, XCircle, Info } from "lucide-react"
+import { HugeiconsIcon } from "@hugeicons/react"
+import {
+  Cancel01Icon,
+  CheckmarkCircle01Icon,
+  AlertCircleIcon,
+  CancelCircleIcon,
+  InformationCircleIcon
+} from "@hugeicons/core-free-icons"
+
 import { Button } from "@/components/ui/button"
 
 export type ToastType = "success" | "error" | "warning" | "info"
@@ -102,38 +110,38 @@ function ToastItem({ toast, onRemove }: ToastItemProps) {
       case "success":
         return {
           bg: "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800",
-          icon: CheckCircle,
+          icon: CheckmarkCircle01Icon,
           iconColor: "text-green-500 dark:text-green-400"
         }
       case "error":
         return {
           bg: "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800",
-          icon: XCircle,
+          icon: CancelCircleIcon,
           iconColor: "text-red-500 dark:text-red-400"
         }
       case "warning":
         return {
           bg: "bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800",
-          icon: AlertCircle,
+          icon: AlertCircleIcon,
           iconColor: "text-yellow-500 dark:text-yellow-400"
         }
       case "info":
         return {
           bg: "bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800",
-          icon: Info,
+          icon: InformationCircleIcon,
           iconColor: "text-blue-500 dark:text-blue-400"
         }
       default:
         return {
           bg: "bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700",
-          icon: Info,
+          icon: InformationCircleIcon,
           iconColor: "text-gray-500 dark:text-gray-400"
         }
     }
   }
 
   const typeStyles = getTypeStyles(toast.type)
-  const Icon = typeStyles.icon
+  const IconData = typeStyles.icon
 
   return (
     <div
@@ -147,7 +155,7 @@ function ToastItem({ toast, onRemove }: ToastItemProps) {
       `}
     >
       <div className="flex items-start space-x-3">
-        <Icon className={`h-5 w-5 mt-0.5 flex-shrink-0 ${typeStyles.iconColor}`} aria-hidden="true" />
+        <HugeiconsIcon icon={IconData} className={`h-5 w-5 mt-0.5 flex-shrink-0 ${typeStyles.iconColor}`} />
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
             {toast.title}
@@ -165,7 +173,7 @@ function ToastItem({ toast, onRemove }: ToastItemProps) {
           className="h-6 w-6 p-0 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
           aria-label="Dismiss notification"
         >
-          <X className="h-4 w-4" aria-hidden="true" />
+          <HugeiconsIcon icon={Cancel01Icon} className="h-4 w-4" />
         </Button>
       </div>
     </div>

@@ -11,21 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Progress } from '@/components/ui/progress'
-import { 
-  Package, 
-  Plus, 
-  Eye, 
-  Edit, 
-  Trash2, 
-  Filter, 
-  Download, 
-  Calendar,
-  AlertTriangle,
-  TrendingUp,
-  Clock,
-  Truck,
-  BarChart3
-} from 'lucide-react'
+
 import Link from 'next/link'
 import { mockProductionPlans } from '@/services/production'
 import type { ProductionPlan, ProductionPlanFilters } from '@/types/production'
@@ -234,11 +220,11 @@ export default function MaterialPlanningPage() {
           </Button>
           <Button variant="ghost" size="sm" asChild>
             <Link href={`/production/material-planning/${plan?.id || ''}/edit`}>
-              <Edit className="h-4 w-4" />
+              <PencilSimple className="h-4 w-4" />
             </Link>
           </Button>
           <Button variant="ghost" size="sm">
-            <Trash2 className="h-4 w-4" />
+            <Trash className="h-4 w-4" />
           </Button>
         </div>
       )
@@ -335,11 +321,11 @@ export default function MaterialPlanningPage() {
           actions={
             <div className="flex items-center space-x-3">
               <Button variant="outline" size="sm">
-                <BarChart3 className="h-4 w-4 mr-2" />
+                <ChartBar className="h-4 w-4 mr-2" />
                 MRP Report
               </Button>
               <Button variant="outline" size="sm">
-                <Download className="h-4 w-4 mr-2" />
+                <DownloadSimple className="h-4 w-4 mr-2" />
                 Export
               </Button>
               <Button size="sm" asChild>
@@ -372,7 +358,7 @@ export default function MaterialPlanningPage() {
                 <p className="text-2xl font-bold mt-1 text-red-600">{materialStats.shortage}</p>
                 <p className="text-sm text-red-600 mt-1">Need attention</p>
               </div>
-              <AlertTriangle className="h-8 w-8 text-red-600" />
+              <Warning className="h-8 w-8 text-red-600" />
             </div>
           </Card>
 
@@ -383,7 +369,7 @@ export default function MaterialPlanningPage() {
                 <p className="text-2xl font-bold mt-1">{mounted ? `Rp ${(planStats.totalValue / 1000000).toFixed(1)}M` : ''}</p>
                 <p className="text-sm text-green-600 mt-1">Total production</p>
               </div>
-              <TrendingUp className="h-8 w-8 text-green-600" />
+              <TrendUp className="h-8 w-8 text-green-600" />
             </div>
           </Card>
 
@@ -402,7 +388,7 @@ export default function MaterialPlanningPage() {
         {/* Filters */}
         <Card className="p-6">
           <div className="flex items-center space-x-4">
-            <Filter className="h-5 w-5 text-muted-foreground" />
+            <Funnel className="h-5 w-5 text-muted-foreground" />
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 flex-1">
               <div className="space-y-2">
                 <Label htmlFor="search">Search</Label>
@@ -512,7 +498,7 @@ export default function MaterialPlanningPage() {
         {materialStats.shortage > 0 && (
           <Card className="p-6 border-red-200 bg-red-50">
             <div className="flex items-center space-x-3">
-              <AlertTriangle className="h-6 w-6 text-red-600" />
+              <Warning className="h-6 w-6 text-red-600" />
               <div className="flex-1">
                 <h3 className="text-lg font-semibold text-red-800">Material Shortage Alert</h3>
                 <p className="text-red-700 mt-1">

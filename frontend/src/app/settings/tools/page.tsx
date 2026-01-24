@@ -6,42 +6,6 @@ import { Header } from '@/components/ui/header'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { 
-  Wrench,
-  Database,
-  FileText,
-  Download,
-  Upload,
-  RefreshCw,
-  Trash2,
-  Settings,
-  Calendar,
-  Mail,
-  Printer,
-  Camera,
-  QrCode,
-  BarChart3,
-  Users,
-  Package,
-  Truck,
-  AlertTriangle,
-  CheckCircle,
-  Clock,
-  Activity,
-  Server,
-  Play,
-  Pause,
-  StopCircle,
-  Edit,
-  Save,
-  X,
-  Plus,
-  Zap,
-  Shield,
-  Search,
-  ExternalLink,
-  Settings as Tool
-} from 'lucide-react'
 
 interface SystemTool {
   id: string
@@ -57,7 +21,7 @@ interface SystemTool {
   config: Record<string, any>
 }
 
-interface ToolsSettings {
+interface ToolsGear {
   maintenance: {
     autoCleanup: boolean
     cleanupFrequency: 'daily' | 'weekly' | 'monthly'
@@ -95,11 +59,11 @@ interface ToolsSettings {
   }
 }
 
-export default function ToolsSettingsPage() {
+export default function ToolsGearPage() {
   const [mounted, setMounted] = useState(false)
   const [activeTab, setActiveTab] = useState('tools')
   const [hasChanges, setHasChanges] = useState(false)
-  const [settings, setSettings] = useState<ToolsSettings>({
+  const [settings, setGear] = useState<ToolsGear>({
     maintenance: {
       autoCleanup: true,
       cleanupFrequency: 'weekly',
@@ -235,16 +199,16 @@ export default function ToolsSettingsPage() {
 
   const breadcrumbs = [
     { label: 'Dashboard', href: '/dashboard' },
-    { label: 'Settings', href: '/settings' },
-    { label: 'Tools Settings' }
+    { label: 'Gear', href: '/settings' },
+    { label: 'Tools Gear' }
   ]
 
   const tabs = [
-    { id: 'tools', label: 'System Tools', icon: Wrench },
-    { id: 'maintenance', label: 'Maintenance', icon: Settings },
-    { id: 'backup', label: 'Backup', icon: Download },
-    { id: 'sync', label: 'Sync & Integration', icon: RefreshCw },
-    { id: 'notifications', label: 'Notifications', icon: Mail }
+    { id: 'tools', label: 'System Tools' },
+    { id: 'maintenance', label: 'Maintenance' },
+    { id: 'backup', label: 'Backup' },
+    { id: 'sync', label: 'Sync & Integration' },
+    { id: 'notifications', label: 'Notifications' }
   ]
 
   const handleSave = () => {
@@ -291,13 +255,13 @@ export default function ToolsSettingsPage() {
   const getStatusIcon = (status: SystemTool['status']) => {
     switch (status) {
       case 'running':
-        return <RefreshCw className="h-4 w-4 text-blue-600 animate-spin" />
+        return <div className="h-4 w-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
       case 'completed':
-        return <CheckCircle className="h-4 w-4 text-green-600" />
+        return <div className="h-4 w-4 bg-green-600/20 rounded" />
       case 'failed':
-        return <AlertTriangle className="h-4 w-4 text-red-600" />
+        return <div className="h-4 w-4 bg-red-600/20 rounded" />
       default:
-        return <Clock className="h-4 w-4 text-gray-600" />
+        return <div className="h-4 w-4 bg-gray-600/20 rounded" />
     }
   }
 
@@ -317,19 +281,19 @@ export default function ToolsSettingsPage() {
   const getCategoryIcon = (category: SystemTool['category']) => {
     switch (category) {
       case 'maintenance':
-        return <Wrench className="h-4 w-4" />
+        return <div className="h-4 w-4 bg-foreground/20 rounded" />
       case 'backup':
-        return <Download className="h-4 w-4" />
+        return <div className="h-4 w-4 bg-foreground/20 rounded" />
       case 'import':
-        return <Upload className="h-4 w-4" />
+        return <div className="h-4 w-4 bg-foreground/20 rounded" />
       case 'export':
-        return <FileText className="h-4 w-4" />
+        return <div className="h-4 w-4 bg-foreground/20 rounded" />
       case 'sync':
-        return <RefreshCw className="h-4 w-4" />
+        return <div className="h-4 w-4 bg-foreground/20 rounded" />
       case 'utility':
-        return <Tool className="h-4 w-4" />
+        return <div className="h-4 w-4 bg-foreground/20 rounded" />
       default:
-        return <Settings className="h-4 w-4" />
+        return <div className="h-4 w-4 bg-foreground/20 rounded" />
     }
   }
 
@@ -339,8 +303,8 @@ export default function ToolsSettingsPage() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card className="p-4">
           <div className="flex items-center space-x-3">
-            <div className="p-2 bg-blue-100 rounded-lg">
-              <Activity className="h-5 w-5 text-blue-600" />
+            <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
+              <div className="h-5 w-5 bg-blue-600/20 rounded" />
             </div>
             <div>
               <p className="text-sm font-medium text-gray-600">Running Tools</p>
@@ -353,8 +317,8 @@ export default function ToolsSettingsPage() {
 
         <Card className="p-4">
           <div className="flex items-center space-x-3">
-            <div className="p-2 bg-green-100 rounded-lg">
-              <CheckCircle className="h-5 w-5 text-green-600" />
+            <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
+              <div className="h-5 w-5 bg-green-600/20 rounded" />
             </div>
             <div>
               <p className="text-sm font-medium text-gray-600">Completed</p>
@@ -367,8 +331,8 @@ export default function ToolsSettingsPage() {
 
         <Card className="p-4">
           <div className="flex items-center space-x-3">
-            <div className="p-2 bg-red-100 rounded-lg">
-              <AlertTriangle className="h-5 w-5 text-red-600" />
+            <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
+              <div className="h-5 w-5 bg-red-600/20 rounded" />
             </div>
             <div>
               <p className="text-sm font-medium text-gray-600">Failed</p>
@@ -381,8 +345,8 @@ export default function ToolsSettingsPage() {
 
         <Card className="p-4">
           <div className="flex items-center space-x-3">
-            <div className="p-2 bg-purple-100 rounded-lg">
-              <Settings className="h-5 w-5 text-purple-600" />
+            <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
+              <div className="h-5 w-5 bg-purple-600/20 rounded" />
             </div>
             <div>
               <p className="text-sm font-medium text-gray-600">Enabled</p>
@@ -399,7 +363,6 @@ export default function ToolsSettingsPage() {
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-lg font-semibold text-gray-900">Available Tools</h3>
           <Button>
-            <Plus className="h-4 w-4 mr-2" />
             Add Custom Tool
           </Button>
         </div>
@@ -472,26 +435,26 @@ export default function ToolsSettingsPage() {
                   </label>
                   
                   {tool.status === 'running' ? (
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       size="sm"
                       onClick={() => handleStopTool(tool.id)}
                     >
-                      <StopCircle className="h-4 w-4" />
+                      Stop
                     </Button>
                   ) : (
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       size="sm"
                       onClick={() => handleRunTool(tool.id)}
                       disabled={!tool.enabled}
                     >
-                      <Play className="h-4 w-4" />
+                      Run
                     </Button>
                   )}
-                  
+
                   <Button variant="outline" size="sm">
-                    <Edit className="h-4 w-4" />
+                    Edit
                   </Button>
                 </div>
               </div>
@@ -518,7 +481,7 @@ export default function ToolsSettingsPage() {
                 type="checkbox" 
                 checked={settings.maintenance.autoCleanup}
                 onChange={(e) => {
-                  setSettings(prev => ({
+                  setGear(prev => ({
                     ...prev,
                     maintenance: { ...prev.maintenance, autoCleanup: e.target.checked }
                   }))
@@ -546,7 +509,7 @@ export default function ToolsSettingsPage() {
                   type="checkbox" 
                   checked={settings.maintenance[key as keyof typeof settings.maintenance] as boolean}
                   onChange={(e) => {
-                    setSettings(prev => ({
+                    setGear(prev => ({
                       ...prev,
                       maintenance: { ...prev.maintenance, [key]: e.target.checked }
                     }))
@@ -570,7 +533,7 @@ export default function ToolsSettingsPage() {
             <select
               value={settings.maintenance.cleanupFrequency}
               onChange={(e) => {
-                setSettings(prev => ({
+                setGear(prev => ({
                   ...prev,
                   maintenance: { ...prev.maintenance, cleanupFrequency: e.target.value as any }
                 }))
@@ -590,7 +553,7 @@ export default function ToolsSettingsPage() {
               type="number"
               value={settings.maintenance.retentionDays}
               onChange={(e) => {
-                setSettings(prev => ({
+                setGear(prev => ({
                   ...prev,
                   maintenance: { ...prev.maintenance, retentionDays: parseInt(e.target.value) }
                 }))
@@ -620,7 +583,7 @@ export default function ToolsSettingsPage() {
                 type="checkbox" 
                 checked={settings.backup.autoBackup}
                 onChange={(e) => {
-                  setSettings(prev => ({
+                  setGear(prev => ({
                     ...prev,
                     backup: { ...prev.backup, autoBackup: e.target.checked }
                   }))
@@ -647,7 +610,7 @@ export default function ToolsSettingsPage() {
                   type="checkbox" 
                   checked={settings.backup[key as keyof typeof settings.backup] as boolean}
                   onChange={(e) => {
-                    setSettings(prev => ({
+                    setGear(prev => ({
                       ...prev,
                       backup: { ...prev.backup, [key]: e.target.checked }
                     }))
@@ -663,7 +626,7 @@ export default function ToolsSettingsPage() {
       </Card>
 
       <Card className="p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-6">Backup Settings</h3>
+        <h3 className="text-lg font-semibold text-gray-900 mb-6">Backup Gear</h3>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
@@ -672,7 +635,7 @@ export default function ToolsSettingsPage() {
               type="text"
               value={settings.backup.backupSchedule}
               onChange={(e) => {
-                setSettings(prev => ({
+                setGear(prev => ({
                   ...prev,
                   backup: { ...prev.backup, backupSchedule: e.target.value }
                 }))
@@ -690,7 +653,7 @@ export default function ToolsSettingsPage() {
               type="number"
               value={settings.backup.backupRetention}
               onChange={(e) => {
-                setSettings(prev => ({
+                setGear(prev => ({
                   ...prev,
                   backup: { ...prev.backup, backupRetention: parseInt(e.target.value) }
                 }))
@@ -705,7 +668,7 @@ export default function ToolsSettingsPage() {
             <select
               value={settings.backup.backupLocation}
               onChange={(e) => {
-                setSettings(prev => ({
+                setGear(prev => ({
                   ...prev,
                   backup: { ...prev.backup, backupLocation: e.target.value as any }
                 }))
@@ -723,7 +686,7 @@ export default function ToolsSettingsPage() {
             <select
               value={settings.backup.cloudProvider}
               onChange={(e) => {
-                setSettings(prev => ({
+                setGear(prev => ({
                   ...prev,
                   backup: { ...prev.backup, cloudProvider: e.target.value }
                 }))
@@ -758,7 +721,7 @@ export default function ToolsSettingsPage() {
                 type="checkbox" 
                 checked={settings.sync.enableSync}
                 onChange={(e) => {
-                  setSettings(prev => ({
+                  setGear(prev => ({
                     ...prev,
                     sync: { ...prev.sync, enableSync: e.target.checked }
                   }))
@@ -780,7 +743,7 @@ export default function ToolsSettingsPage() {
                 type="checkbox" 
                 checked={settings.sync.enableWebhooks}
                 onChange={(e) => {
-                  setSettings(prev => ({
+                  setGear(prev => ({
                     ...prev,
                     sync: { ...prev.sync, enableWebhooks: e.target.checked }
                   }))
@@ -795,7 +758,7 @@ export default function ToolsSettingsPage() {
       </Card>
 
       <Card className="p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-6">Sync Settings</h3>
+        <h3 className="text-lg font-semibold text-gray-900 mb-6">Sync Gear</h3>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
@@ -804,7 +767,7 @@ export default function ToolsSettingsPage() {
               type="number"
               value={settings.sync.syncInterval}
               onChange={(e) => {
-                setSettings(prev => ({
+                setGear(prev => ({
                   ...prev,
                   sync: { ...prev.sync, syncInterval: parseInt(e.target.value) }
                 }))
@@ -819,7 +782,7 @@ export default function ToolsSettingsPage() {
             <select
               value={settings.sync.conflictResolution}
               onChange={(e) => {
-                setSettings(prev => ({
+                setGear(prev => ({
                   ...prev,
                   sync: { ...prev.sync, conflictResolution: e.target.value as any }
                 }))
@@ -858,7 +821,7 @@ export default function ToolsSettingsPage() {
                   type="checkbox" 
                   checked={settings.notifications[key as keyof typeof settings.notifications] as boolean}
                   onChange={(e) => {
-                    setSettings(prev => ({
+                    setGear(prev => ({
                       ...prev,
                       notifications: { ...prev.notifications, [key]: e.target.checked }
                     }))
@@ -874,7 +837,7 @@ export default function ToolsSettingsPage() {
       </Card>
 
       <Card className="p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-6">Notification Settings</h3>
+        <h3 className="text-lg font-semibold text-gray-900 mb-6">Notification Gear</h3>
         
         <div className="space-y-6">
           <div>
@@ -888,7 +851,7 @@ export default function ToolsSettingsPage() {
                     onChange={(e) => {
                       const newRecipients = [...settings.notifications.emailRecipients]
                       newRecipients[index] = e.target.value
-                      setSettings(prev => ({
+                      setGear(prev => ({
                         ...prev,
                         notifications: { ...prev.notifications, emailRecipients: newRecipients }
                       }))
@@ -902,14 +865,14 @@ export default function ToolsSettingsPage() {
                     size="sm"
                     onClick={() => {
                       const newRecipients = settings.notifications.emailRecipients.filter((_, i) => i !== index)
-                      setSettings(prev => ({
+                      setGear(prev => ({
                         ...prev,
                         notifications: { ...prev.notifications, emailRecipients: newRecipients }
                       }))
                       setHasChanges(true)
                     }}
                   >
-                    <Trash2 className="h-4 w-4" />
+                    Remove
                   </Button>
                 </div>
               ))}
@@ -917,17 +880,16 @@ export default function ToolsSettingsPage() {
                 variant="outline"
                 size="sm"
                 onClick={() => {
-                  setSettings(prev => ({
+                  setGear(prev => ({
                     ...prev,
-                    notifications: { 
-                      ...prev.notifications, 
+                    notifications: {
+                      ...prev.notifications,
                       emailRecipients: [...prev.notifications.emailRecipients, '']
                     }
                   }))
                   setHasChanges(true)
                 }}
               >
-                <Plus className="h-4 w-4 mr-2" />
                 Add Email
               </Button>
             </div>
@@ -939,7 +901,7 @@ export default function ToolsSettingsPage() {
               type="text"
               value={settings.notifications.slackChannel}
               onChange={(e) => {
-                setSettings(prev => ({
+                setGear(prev => ({
                   ...prev,
                   notifications: { ...prev.notifications, slackChannel: e.target.value }
                 }))
@@ -956,7 +918,7 @@ export default function ToolsSettingsPage() {
               type="url"
               value={settings.notifications.webhookUrl}
               onChange={(e) => {
-                setSettings(prev => ({
+                setGear(prev => ({
                   ...prev,
                   notifications: { ...prev.notifications, webhookUrl: e.target.value }
                 }))
@@ -991,7 +953,7 @@ export default function ToolsSettingsPage() {
   return (
     <TwoLevelLayout>
       <Header 
-        title="Tools Settings"
+        title="Tools Gear"
         description="Configure system tools, maintenance, and automation"
         breadcrumbs={breadcrumbs}
       />
@@ -1002,16 +964,14 @@ export default function ToolsSettingsPage() {
           <Card className="p-4 border-orange-200 bg-orange-50">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
-                <AlertTriangle className="h-5 w-5 text-orange-600" />
+                <div className="h-5 w-5 bg-orange-600/20 rounded" />
                 <span className="text-sm font-medium text-orange-800">You have unsaved changes</span>
               </div>
               <div className="flex space-x-2">
                 <Button variant="outline" size="sm" onClick={() => setHasChanges(false)}>
-                  <X className="h-4 w-4 mr-1" />
                   Discard
                 </Button>
                 <Button size="sm" onClick={handleSave}>
-                  <Save className="h-4 w-4 mr-1" />
                   Save Changes
                 </Button>
               </div>
@@ -1022,23 +982,19 @@ export default function ToolsSettingsPage() {
         {/* Tab Navigation */}
         <Card className="p-1">
           <div className="flex space-x-1 overflow-x-auto">
-            {tabs.map((tab) => {
-              const Icon = tab.icon
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center space-x-2 px-4 py-2 rounded-md whitespace-nowrap transition-colors ${
-                    activeTab === tab.id
-                      ? 'bg-blue-100 text-blue-700 font-medium'
-                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                  }`}
-                >
-                  <Icon className="h-4 w-4" />
-                  <span className="text-sm">{tab.label}</span>
-                </button>
-              )
-            })}
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex items-center space-x-2 px-4 py-2 rounded-md whitespace-nowrap transition-colors ${
+                  activeTab === tab.id
+                    ? 'bg-blue-100 text-blue-700 font-medium'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                }`}
+              >
+                <span className="text-sm">{tab.label}</span>
+              </button>
+            ))}
           </div>
         </Card>
 

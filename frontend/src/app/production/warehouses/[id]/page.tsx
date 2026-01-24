@@ -9,19 +9,7 @@ import { Header } from '@/components/ui/header'
 import { Progress } from '@/components/ui/progress'
 import { Separator } from '@/components/ui/separator'
 import { AdvancedDataTable } from '@/components/ui/advanced-data-table'
-import { 
-  Package, 
-  Edit, 
-  MapPin, 
-  Phone, 
-  User, 
-  Building, 
-  TrendingUp,
-  BarChart3,
-  AlertTriangle,
-  FileText,
-  Plus
-} from 'lucide-react'
+
 import Link from 'next/link'
 import { mockWarehouses } from '@/services/production'
 import type { Warehouse, WarehouseZone } from '@/types/production'
@@ -193,7 +181,7 @@ export default function WarehouseDetailsPage() {
               </Button>
               <Button size="sm" asChild>
                 <Link href={`/production/warehouses/${warehouse.id}/edit`}>
-                  <Edit className="h-4 w-4 mr-2" />
+                  <PencilSimple className="h-4 w-4 mr-2" />
                   Edit
                 </Link>
               </Button>
@@ -378,7 +366,7 @@ export default function WarehouseDetailsPage() {
                 
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
-                    <TrendingUp className="h-4 w-4 text-green-600" />
+                    <TrendUp className="h-4 w-4 text-green-600" />
                     <span className="text-sm text-muted-foreground">Current Stock</span>
                   </div>
                   <span className="font-bold">{warehouse.currentStock.toLocaleString()}</span>
@@ -386,7 +374,7 @@ export default function WarehouseDetailsPage() {
                 
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
-                    <Building className="h-4 w-4 text-purple-600" />
+                    <BuildingOffice className="h-4 w-4 text-purple-600" />
                     <span className="text-sm text-muted-foreground">Zones</span>
                   </div>
                   <span className="font-bold">{warehouse.zones.length}</span>
@@ -441,7 +429,7 @@ export default function WarehouseDetailsPage() {
               
               <div className="space-y-3">
                 <Button variant="outline" className="w-full justify-start">
-                  <BarChart3 className="h-4 w-4 mr-2" />
+                  <ChartBar className="h-4 w-4 mr-2" />
                   Generate Report
                 </Button>
                 
@@ -466,7 +454,7 @@ export default function WarehouseDetailsPage() {
             {warehouseMetrics.totalUtilization >= 85 && (
               <Card className="p-6 border-orange-200 bg-orange-50">
                 <div className="flex items-center space-x-2 text-orange-800">
-                  <AlertTriangle className="h-5 w-5" />
+                  <Warning className="h-5 w-5" />
                   <p className="font-medium">High Utilization</p>
                 </div>
                 <p className="text-sm text-orange-700 mt-1">
@@ -480,7 +468,7 @@ export default function WarehouseDetailsPage() {
             {warehouse.status !== 'active' && (
               <Card className="p-6 border-red-200 bg-red-50">
                 <div className="flex items-center space-x-2 text-red-800">
-                  <AlertTriangle className="h-5 w-5" />
+                  <Warning className="h-5 w-5" />
                   <p className="font-medium">Warehouse Status</p>
                 </div>
                 <p className="text-sm text-red-700 mt-1">

@@ -112,12 +112,12 @@ class AuthService {
         return true
       }
 
-      // Try to login with test credentials
+      // Try to login with dev credentials
       await this.login({
-        username: 'testuser',
-        password: 'testpass'
+        username: 'dev',
+        password: '687654'
       })
-      
+
       return true
     } catch (error) {
       console.error('Auto-login failed:', error)

@@ -6,18 +6,6 @@ import { GuidelinesLayout } from "@/components/ui/guidelines-layout"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { 
-  ArrowRight,
-  ArrowLeft,
-  Settings,
-  Database,
-  Shield,
-  Globe,
-  Monitor,
-  HardDrive,
-  Users,
-  AlertTriangle
-} from "lucide-react"
 
 export default function AdministrationPage() {
   return (
@@ -50,7 +38,7 @@ export default function AdministrationPage() {
         <Card className="mb-8 bg-red-50 dark:bg-red-950 border-red-200 dark:border-red-800">
           <CardContent className="p-6">
             <div className="flex items-center space-x-3">
-              <AlertTriangle className="h-6 w-6 text-red-600 dark:text-red-400" />
+              <div className="h-6 w-6 bg-red-600/20 rounded" />
               <div>
                 <h3 className="font-semibold text-red-900 dark:text-red-100 mb-1">Administrator Access Required</h3>
                 <p className="text-red-800 dark:text-red-200">
@@ -67,7 +55,7 @@ export default function AdministrationPage() {
           <Card className="hover: transition-shadow">
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
-                <Settings className="h-5 w-5 text-blue-500" />
+                <div className="h-5 w-5 bg-blue-500/20 rounded" />
                 <span>System Configuration</span>
               </CardTitle>
               <CardDescription>
@@ -76,10 +64,10 @@ export default function AdministrationPage() {
             </CardHeader>
             <CardContent>
               <ul className="text-sm text-muted-foreground space-y-2">
-                <li>• Global system preferences</li>
-                <li>• Module-specific configurations</li>
-                <li>• Business rules and workflows</li>
-                <li>• Integration settings</li>
+                <li>- Global system preferences</li>
+                <li>- Module-specific configurations</li>
+                <li>- Business rules and workflows</li>
+                <li>- Integration settings</li>
               </ul>
               <Button className="w-full mt-4">
                 Configure System
@@ -90,7 +78,7 @@ export default function AdministrationPage() {
           <Card className="hover: transition-shadow">
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
-                <Users className="h-5 w-5 text-green-500" />
+                <div className="h-5 w-5 bg-green-500/20 rounded" />
                 <span>User Management</span>
               </CardTitle>
               <CardDescription>
@@ -99,10 +87,10 @@ export default function AdministrationPage() {
             </CardHeader>
             <CardContent>
               <ul className="text-sm text-muted-foreground space-y-2">
-                <li>• User account management</li>
-                <li>• Role and permission assignment</li>
-                <li>• Password policies</li>
-                <li>• Session management</li>
+                <li>- User account management</li>
+                <li>- Role and permission assignment</li>
+                <li>- Password policies</li>
+                <li>- Session management</li>
               </ul>
               <Button className="w-full mt-4">
                 Manage Users
@@ -113,7 +101,7 @@ export default function AdministrationPage() {
           <Card className="hover: transition-shadow">
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
-                <Database className="h-5 w-5 text-purple-500" />
+                <div className="h-5 w-5 bg-purple-500/20 rounded" />
                 <span>Database Management</span>
               </CardTitle>
               <CardDescription>
@@ -122,10 +110,10 @@ export default function AdministrationPage() {
             </CardHeader>
             <CardContent>
               <ul className="text-sm text-muted-foreground space-y-2">
-                <li>• Database backup and restore</li>
-                <li>• Performance optimization</li>
-                <li>• Index maintenance</li>
-                <li>• Data cleanup procedures</li>
+                <li>- Database backup and restore</li>
+                <li>- Performance optimization</li>
+                <li>- Index maintenance</li>
+                <li>- Data cleanup procedures</li>
               </ul>
               <Button className="w-full mt-4">
                 Database Tools
@@ -136,7 +124,7 @@ export default function AdministrationPage() {
           <Card className="hover: transition-shadow">
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
-                <Shield className="h-5 w-5 text-red-500" />
+                <div className="h-5 w-5 bg-red-500/20 rounded" />
                 <span>Security & Compliance</span>
               </CardTitle>
               <CardDescription>
@@ -145,13 +133,13 @@ export default function AdministrationPage() {
             </CardHeader>
             <CardContent>
               <ul className="text-sm text-muted-foreground space-y-2">
-                <li>• Security policy configuration</li>
-                <li>• Audit log management</li>
-                <li>• Compliance reporting</li>
-                <li>• Data privacy controls</li>
+                <li>- Security policy configuration</li>
+                <li>- Audit log management</li>
+                <li>- Compliance reporting</li>
+                <li>- Data privacy controls</li>
               </ul>
               <Button className="w-full mt-4">
-                Security Settings
+                Security Gear
               </Button>
             </CardContent>
           </Card>
@@ -159,7 +147,7 @@ export default function AdministrationPage() {
           <Card className="hover: transition-shadow">
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
-                <Globe className="h-5 w-5 text-orange-500" />
+                <div className="h-5 w-5 bg-orange-500/20 rounded" />
                 <span>Integration Management</span>
               </CardTitle>
               <CardDescription>
@@ -168,13 +156,13 @@ export default function AdministrationPage() {
             </CardHeader>
             <CardContent>
               <ul className="text-sm text-muted-foreground space-y-2">
-                <li>• API endpoint configuration</li>
-                <li>• Third-party integrations</li>
-                <li>• Data synchronization</li>
-                <li>• Webhook management</li>
+                <li>- API endpoint configuration</li>
+                <li>- Third-party integrations</li>
+                <li>- Data synchronization</li>
+                <li>- Webhook management</li>
               </ul>
               <Button className="w-full mt-4">
-                Integration Settings
+                Integration Gear
               </Button>
             </CardContent>
           </Card>
@@ -182,7 +170,7 @@ export default function AdministrationPage() {
           <Card className="hover: transition-shadow">
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
-                <Monitor className="h-5 w-5 text-indigo-500" />
+                <div className="h-5 w-5 bg-indigo-500/20 rounded" />
                 <span>System Monitoring</span>
               </CardTitle>
               <CardDescription>
@@ -191,10 +179,10 @@ export default function AdministrationPage() {
             </CardHeader>
             <CardContent>
               <ul className="text-sm text-muted-foreground space-y-2">
-                <li>• System performance metrics</li>
-                <li>• Resource usage monitoring</li>
-                <li>• Alert configuration</li>
-                <li>• Health check dashboards</li>
+                <li>- System performance metrics</li>
+                <li>- Resource usage monitoring</li>
+                <li>- Alert configuration</li>
+                <li>- Health check dashboards</li>
               </ul>
               <Button className="w-full mt-4">
                 Monitor System
@@ -247,7 +235,7 @@ export default function AdministrationPage() {
             <div className="space-y-4">
               <div className="p-4 bg-background rounded-lg">
                 <h4 className="font-semibold mb-2 flex items-center space-x-2">
-                  <HardDrive className="h-4 w-4" />
+                  <div className="h-4 w-4 bg-foreground/20 rounded" />
                   <span>System Downtime</span>
                 </h4>
                 <ol className="text-sm text-muted-foreground space-y-1 ml-6">
@@ -261,7 +249,7 @@ export default function AdministrationPage() {
 
               <div className="p-4 bg-background rounded-lg">
                 <h4 className="font-semibold mb-2 flex items-center space-x-2">
-                  <Shield className="h-4 w-4" />
+                  <div className="h-4 w-4 bg-foreground/20 rounded" />
                   <span>Security Incident</span>
                 </h4>
                 <ol className="text-sm text-muted-foreground space-y-1 ml-6">
@@ -275,7 +263,7 @@ export default function AdministrationPage() {
 
               <div className="p-4 bg-background rounded-lg">
                 <h4 className="font-semibold mb-2 flex items-center space-x-2">
-                  <Database className="h-4 w-4" />
+                  <div className="h-4 w-4 bg-foreground/20 rounded" />
                   <span>Data Corruption</span>
                 </h4>
                 <ol className="text-sm text-muted-foreground space-y-1 ml-6">
@@ -315,14 +303,12 @@ export default function AdministrationPage() {
         <div className="flex justify-between items-center mt-12 pt-8 border-t">
           <Button variant="outline" asChild>
             <Link href="/guidelines/user-roles">
-              <ArrowLeft className="h-4 w-4 mr-2" />
               User Roles & Permissions
             </Link>
           </Button>
           <Button asChild>
             <Link href="/guidelines/troubleshooting">
               Troubleshooting
-              <ArrowRight className="h-4 w-4 ml-2" />
             </Link>
           </Button>
         </div>

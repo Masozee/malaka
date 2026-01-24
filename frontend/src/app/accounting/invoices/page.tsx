@@ -8,19 +8,7 @@ import { TwoLevelLayout } from '@/components/ui/two-level-layout'
 import { Header } from '@/components/ui/header'
 import { AdvancedDataTable } from '@/components/ui/advanced-data-table'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu'
-import { 
-  Plus,
-  Eye,
-  Edit,
-  Trash2,
-  Download,
-  Calendar,
-  CheckCircle,
-  AlertCircle,
-  FileText,
-  Send,
-  MoreHorizontal
-} from 'lucide-react'
+
 import Link from 'next/link'
 import { invoiceService } from '@/services/accounting'
 
@@ -63,7 +51,6 @@ interface InvoiceItem {
   line_total: number
 }
 
-
 export default function InvoicesPage() {
   const [mounted, setMounted] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -101,23 +88,20 @@ export default function InvoicesPage() {
     return new Date(dateString).toLocaleDateString('id-ID')
   }
 
-
   const breadcrumbs = [
     { label: 'Accounting', href: '/accounting' },
     { label: 'Invoices', href: '/accounting/invoices' }
   ]
 
-
-
   const getStatusBadge = (status: string) => {
     const config = {
-      draft: { variant: 'secondary' as const, label: 'Draft', icon: Edit },
-      sent: { variant: 'default' as const, label: 'Sent', icon: Send },
-      paid: { variant: 'default' as const, label: 'Paid', icon: CheckCircle },
-      overdue: { variant: 'destructive' as const, label: 'Overdue', icon: AlertCircle },
-      cancelled: { variant: 'destructive' as const, label: 'Cancelled', icon: AlertCircle }
+      draft: { variant: 'secondary' as const, label: 'Draft' },
+      sent: { variant: 'default' as const, label: 'Sent' },
+      paid: { variant: 'default' as const, label: 'Paid' },
+      overdue: { variant: 'destructive' as const, label: 'Overdue' },
+      cancelled: { variant: 'destructive' as const, label: 'Cancelled' }
     }
-    return config[status as keyof typeof config] || { variant: 'secondary' as const, label: status, icon: FileText }
+    return config[status as keyof typeof config] || { variant: 'secondary' as const, label: status }
   }
 
   const getPaymentStatusBadge = (status: string) => {
@@ -158,7 +142,6 @@ export default function InvoicesPage() {
       title: 'Invoice Date',
       render: (value: unknown, invoice: Invoice) => (
         <div className="flex items-center space-x-2">
-          <Calendar className="h-4 w-4 text-muted-foreground" />
           <div>
             <div className="text-sm">{formatDate(invoice.invoice_date)}</div>
             <div className="text-xs text-muted-foreground">Due: {formatDate(invoice.due_date)}</div>
@@ -204,10 +187,9 @@ export default function InvoicesPage() {
       key: 'status' as keyof Invoice,
       title: 'Status',
       render: (value: unknown, invoice: Invoice) => {
-        const { variant, label, icon: Icon } = getStatusBadge(invoice.status)
+        const { variant, label } = getStatusBadge(invoice.status)
         return (
           <div className="flex items-center space-x-2">
-            <Icon className="h-4 w-4" />
             <Badge variant={variant}>{label}</Badge>
           </div>
         )
@@ -228,33 +210,29 @@ export default function InvoicesPage() {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="sm">
-              <MoreHorizontal className="h-4 w-4" />
+              ...
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem asChild>
               <Link href={`/accounting/invoices/${invoice.id}`} className="flex items-center">
-                <Eye className="h-4 w-4 mr-2" />
                 View Details
               </Link>
             </DropdownMenuItem>
             {invoice.status === 'draft' && (
               <DropdownMenuItem asChild>
                 <Link href={`/accounting/invoices/${invoice.id}/edit`} className="flex items-center">
-                  <Edit className="h-4 w-4 mr-2" />
                   Edit Invoice
                 </Link>
               </DropdownMenuItem>
             )}
             <DropdownMenuItem>
-              <Download className="h-4 w-4 mr-2" />
               Download PDF
             </DropdownMenuItem>
             {(invoice.status === 'draft' || invoice.status === 'cancelled') && (
               <>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem className="text-red-600">
-                  <Trash2 className="h-4 w-4 mr-2" />
                   Delete Invoice
                 </DropdownMenuItem>
               </>
@@ -274,12 +252,10 @@ export default function InvoicesPage() {
         actions={
           <div className="flex items-center space-x-3">
             <Button variant="outline" size="sm">
-              <Download className="h-4 w-4 mr-2" />
               Export
             </Button>
             <Button size="sm" asChild>
               <Link href="/accounting/invoices/new">
-                <Plus className="h-4 w-4 mr-2" />
                 New Invoice
               </Link>
             </Button>
@@ -288,8 +264,6 @@ export default function InvoicesPage() {
       />
       
       <div className="flex-1 p-6 space-y-6">
-
-
 
         {/* Invoices Table */}
         <AdvancedDataTable

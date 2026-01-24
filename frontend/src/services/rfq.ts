@@ -124,9 +124,9 @@ export class RFQService {
   /**
    * Get all RFQs with optional filtering and pagination
    */
-  async getAllRFQs(filters?: RFQFilter): Promise<RFQListResponse> {
+  async getAllRFQs(filters?: RFQFilter, token?: string): Promise<RFQListResponse> {
     const params = new URLSearchParams();
-    
+
     if (filters?.status) params.append('status', filters.status);
     if (filters?.created_by) params.append('created_by', filters.created_by);
     if (filters?.page) params.append('page', filters.page.toString());
@@ -134,10 +134,10 @@ export class RFQService {
 
     const queryString = params.toString();
     const url = `${this.baseUrl}/${queryString ? `?${queryString}` : ''}`;
-    
+
     console.log('RFQ Service: Making API call to:', url);
-    
-    const response = await api.get<{ success: boolean; data: RFQListResponse }>(url);
+
+    const response = await api.get<{ success: boolean; data: RFQListResponse }>(url, {}, { token });
     console.log('RFQ Service: API response:', response);
     return response.data;
   }

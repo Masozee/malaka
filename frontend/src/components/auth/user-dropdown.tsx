@@ -1,8 +1,10 @@
 'use client'
 
 import { useState } from 'react'
+import { HugeiconsIcon } from "@hugeicons/react"
+import { UserIcon, Settings01Icon, Logout01Icon, ArrowDown01Icon } from "@hugeicons/core-free-icons"
 import { useAuth } from '@/contexts/auth-context'
-import { User, Settings, LogOut, ChevronDown } from 'lucide-react'
+
 import { useRouter } from 'next/navigation'
 
 export function UserDropdown() {
@@ -19,7 +21,7 @@ export function UserDropdown() {
     router.push('/profile')
   }
 
-  const handleSettingsClick = (e: React.MouseEvent) => {
+  const handleGearClick = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
     setIsOpen(false)
@@ -61,9 +63,9 @@ export function UserDropdown() {
             {user.role}
           </span>
         </div>
-        <ChevronDown
+        <HugeiconsIcon
+          icon={ArrowDown01Icon}
           className={`h-4 w-4 text-gray-500 transition-transform ${isOpen ? 'rotate-180' : ''}`}
-          aria-hidden="true"
         />
       </button>
 
@@ -105,17 +107,17 @@ export function UserDropdown() {
               className="flex items-center gap-3 w-full px-4 py-2 text-sm text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
               role="menuitem"
             >
-              <User className="h-4 w-4 flex-shrink-0" aria-hidden="true" />
+              <HugeiconsIcon icon={UserIcon} className="h-4 w-4 flex-shrink-0" />
               Profile
             </button>
 
             <button
-              onClick={handleSettingsClick}
+              onClick={handleGearClick}
               className="flex items-center gap-3 w-full px-4 py-2 text-sm text-left text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
               role="menuitem"
             >
-              <Settings className="h-4 w-4 flex-shrink-0" aria-hidden="true" />
-              Settings
+              <HugeiconsIcon icon={Settings01Icon} className="h-4 w-4 flex-shrink-0" />
+              Gear
             </button>
 
             <hr className="my-2 border-gray-200 dark:border-gray-700" aria-hidden="true" />
@@ -125,7 +127,7 @@ export function UserDropdown() {
               className="flex items-center gap-3 w-full px-4 py-2 text-sm text-left text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
               role="menuitem"
             >
-              <LogOut className="h-4 w-4 flex-shrink-0" aria-hidden="true" />
+              <HugeiconsIcon icon={Logout01Icon} className="h-4 w-4 flex-shrink-0" />
               Sign out
             </button>
           </div>

@@ -9,24 +9,7 @@ import { Header } from '@/components/ui/header'
 import { Progress } from '@/components/ui/progress'
 import { Separator } from '@/components/ui/separator'
 // import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { 
-  Factory, 
-  Edit, 
-  Calendar, 
-  Users, 
-  Package, 
-  Clock, 
-  DollarSign, 
-  CheckCircle, 
-  AlertTriangle,
-  Play,
-  Pause,
-  Square,
-  FileText,
-  ArrowLeft,
-  TrendingUp,
-  User
-} from 'lucide-react'
+
 import Link from 'next/link'
 import { mockWorkOrders } from '@/services/production'
 import type { WorkOrder, WorkOrderOperation, WorkOrderMaterial } from '@/types/production'
@@ -179,7 +162,7 @@ export default function WorkOrderDetailsPage() {
             )}
             <Button size="sm" asChild>
               <Link href={`/production/work-orders/${workOrder.id}/edit`}>
-                <Edit className="h-4 w-4 mr-2" />
+                <PencilSimple className="h-4 w-4 mr-2" />
                 Edit
               </Link>
             </Button>
@@ -205,7 +188,7 @@ export default function WorkOrderDetailsPage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className={`p-2 rounded-full ${getPriorityColor(workOrder.priority)}`}>
-                <AlertTriangle className="h-5 w-5" />
+                <Warning className="h-5 w-5" />
               </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Priority</p>
@@ -217,7 +200,7 @@ export default function WorkOrderDetailsPage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="p-2 rounded-full bg-blue-100 text-blue-700">
-                <TrendingUp className="h-5 w-5" />
+                <TrendUp className="h-5 w-5" />
               </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Efficiency</p>
@@ -229,7 +212,7 @@ export default function WorkOrderDetailsPage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="p-2 rounded-full bg-green-100 text-green-700">
-                <DollarSign className="h-5 w-5" />
+                <CurrencyDollar className="h-5 w-5" />
               </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Budget Usage</p>

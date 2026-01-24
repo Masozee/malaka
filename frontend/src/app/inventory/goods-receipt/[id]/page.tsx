@@ -1,4 +1,4 @@
-'use client';
+'use client'
 
 import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
@@ -8,21 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { DataTable } from '@/components/ui/data-table';
-import { 
-  ArrowLeft,
-  Edit,
-  Trash2,
-  Package,
-  Calendar,
-  MapPin,
-  User,
-  FileText,
-  CheckCircle,
-  Clock,
-  AlertCircle,
-  Download,
-  Printer
-} from 'lucide-react';
+;
 import { goodsReceiptService, GoodsReceipt, GoodsReceiptItem } from '@/services/inventory';
 
 const getStatusBadge = (status?: 'pending' | 'approved' | 'completed') => {
@@ -37,7 +23,7 @@ const getStatusBadge = (status?: 'pending' | 'approved' | 'completed') => {
       variant: 'default' as const, 
       label: 'Approved', 
       className: 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400',
-      icon: AlertCircle
+      icon: WarningCircle
     },
     completed: { 
       variant: 'default' as const, 
@@ -200,7 +186,7 @@ export default function GoodsReceiptDetailPage() {
         <div className="flex-1 p-6">
           <Card>
             <CardContent className="p-12 text-center">
-              <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+              <WarningCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
                 {error || 'Goods Receipt Not Found'}
               </h3>
@@ -235,15 +221,15 @@ export default function GoodsReceiptDetailPage() {
               Print
             </Button>
             <Button variant="outline" size="sm">
-              <Download className="w-4 h-4 mr-2" />
+              <DownloadSimple className="w-4 h-4 mr-2" />
               Export
             </Button>
             <Button variant="outline" size="sm" onClick={handleEdit}>
-              <Edit className="w-4 h-4 mr-2" />
+              <PencilSimple className="w-4 h-4 mr-2" />
               Edit
             </Button>
             <Button variant="destructive" size="sm" onClick={handleDelete}>
-              <Trash2 className="w-4 h-4 mr-2" />
+              <Trash className="w-4 h-4 mr-2" />
               Delete
             </Button>
             <Button variant="outline" size="sm" onClick={handleBack}>
@@ -391,7 +377,7 @@ export default function GoodsReceiptDetailPage() {
             Back to List
           </Button>
           <Button onClick={handleEdit}>
-            <Edit className="w-4 h-4 mr-2" />
+            <PencilSimple className="w-4 h-4 mr-2" />
             Edit Receipt
           </Button>
         </div>

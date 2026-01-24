@@ -5,7 +5,6 @@ import Link from "next/link"
 import { GuidelinesLayout } from "@/components/ui/guidelines-layout"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { ArrowLeft, ArrowRight } from "lucide-react"
 
 export default function InventoryGuidePage() {
   return (
@@ -110,7 +109,7 @@ export default function InventoryGuidePage() {
             information, contact details, and operational parameters.
           </p>
 
-          <h3>Step 2: Configure Stock Control Settings</h3>
+          <h3>Step 2: Configure Stock Control Gear</h3>
           <p>
             Set up your inventory tracking preferences including costing methods 
             (FIFO, LIFO, or Average), stock level calculations, and reorder point 
@@ -297,14 +296,12 @@ export default function InventoryGuidePage() {
         <div className="flex justify-between items-center mt-12 pt-8 border-t">
           <Button variant="outline" asChild>
             <Link href="/guidelines/modules/sales">
-              <ArrowLeft className="h-4 w-4 mr-2" />
               Sales Guide
             </Link>
           </Button>
           <Button asChild>
             <Link href="/guidelines/modules/production">
               Production Guide
-              <ArrowRight className="h-4 w-4 ml-2" />
             </Link>
           </Button>
         </div>

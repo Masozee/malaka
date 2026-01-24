@@ -7,18 +7,6 @@ import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { AdvancedDataTable } from '@/components/ui/advanced-data-table'
 import { Badge } from '@/components/ui/badge'
-import { 
-  ScanLine,
-  Package,
-  Truck,
-  CheckCircle,
-  Clock,
-  AlertTriangle,
-  MapPin,
-  User,
-  Calendar,
-  BarChart3
-} from 'lucide-react'
 
 interface OutboundScan {
   id: string
@@ -455,7 +443,7 @@ export default function OutboundScanningPage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-red-100 rounded-lg">
-                <AlertTriangle className="h-5 w-5 text-red-600" />
+                <Warning className="h-5 w-5 text-red-600" />
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600">Failed</p>
@@ -467,7 +455,7 @@ export default function OutboundScanningPage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-orange-100 rounded-lg">
-                <AlertTriangle className="h-5 w-5 text-orange-600" />
+                <Warning className="h-5 w-5 text-orange-600" />
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600">Exceptions</p>
@@ -493,7 +481,7 @@ export default function OutboundScanningPage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-teal-100 rounded-lg">
-                <BarChart3 className="h-5 w-5 text-teal-600" />
+                <ChartBar className="h-5 w-5 text-teal-600" />
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600">Success Rate</p>

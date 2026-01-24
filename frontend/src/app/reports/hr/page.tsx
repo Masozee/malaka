@@ -5,7 +5,6 @@ import { TwoLevelLayout } from "@/components/ui/two-level-layout"
 import { Header } from "@/components/ui/header"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Users, Clock, Calendar, Award, FileText, Download } from "lucide-react"
 
 export default function HRReportsPage() {
   const breadcrumbs = [
@@ -23,7 +22,6 @@ export default function HRReportsPage() {
           actions={
             <div className="flex items-center space-x-3">
               <Button variant="outline" size="sm">
-                <Download className="h-4 w-4 mr-2" />
                 Export All
               </Button>
             </div>
@@ -36,7 +34,7 @@ export default function HRReportsPage() {
             <Card className="p-4 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950 dark:to-blue-900">
               <div className="flex items-center space-x-3">
                 <div className="p-2 bg-blue-500 text-white rounded-lg">
-                  <Users className="h-5 w-5" />
+                  <div className="h-5 w-5" />
                 </div>
                 <div>
                   <p className="text-sm font-medium text-blue-700 dark:text-blue-300">Total Employees</p>
@@ -48,7 +46,7 @@ export default function HRReportsPage() {
             <Card className="p-4 bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950 dark:to-green-900">
               <div className="flex items-center space-x-3">
                 <div className="p-2 bg-green-500 text-white rounded-lg">
-                  <Clock className="h-5 w-5" />
+                  <div className="h-5 w-5" />
                 </div>
                 <div>
                   <p className="text-sm font-medium text-green-700 dark:text-green-300">Attendance Rate</p>
@@ -60,7 +58,7 @@ export default function HRReportsPage() {
             <Card className="p-4 bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-950 dark:to-purple-900">
               <div className="flex items-center space-x-3">
                 <div className="p-2 bg-purple-500 text-white rounded-lg">
-                  <Calendar className="h-5 w-5" />
+                  <div className="h-5 w-5" />
                 </div>
                 <div>
                   <p className="text-sm font-medium text-purple-700 dark:text-purple-300">Leave Requests</p>
@@ -72,7 +70,7 @@ export default function HRReportsPage() {
             <Card className="p-4 bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-950 dark:to-orange-900">
               <div className="flex items-center space-x-3">
                 <div className="p-2 bg-orange-500 text-white rounded-lg">
-                  <Award className="h-5 w-5" />
+                  <div className="h-5 w-5" />
                 </div>
                 <div>
                   <p className="text-sm font-medium text-orange-700 dark:text-orange-300">Avg Performance</p>
@@ -87,7 +85,6 @@ export default function HRReportsPage() {
             <Card className="hover: transition-shadow">
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
-                  <Clock className="h-5 w-5" />
                   <span>Attendance Report</span>
                 </CardTitle>
                 <CardDescription>
@@ -102,7 +99,6 @@ export default function HRReportsPage() {
             <Card className="hover: transition-shadow">
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
-                  <Award className="h-5 w-5" />
                   <span>Performance Report</span>
                 </CardTitle>
                 <CardDescription>
@@ -117,7 +113,6 @@ export default function HRReportsPage() {
             <Card className="hover: transition-shadow">
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
-                  <Calendar className="h-5 w-5" />
                   <span>Leave Report</span>
                 </CardTitle>
                 <CardDescription>

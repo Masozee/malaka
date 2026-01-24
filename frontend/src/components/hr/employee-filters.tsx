@@ -1,13 +1,15 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { HugeiconsIcon } from "@hugeicons/react"
+import { Cancel01Icon, FilterIcon, RotateLeft01Icon } from "@hugeicons/core-free-icons"
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { X, Filter, RotateCcw } from 'lucide-react'
+
 import type { Employee, EmployeeFilters } from '@/types/hr'
 import { mockDepartments, mockDivisions, mockPositions } from '@/services/hr'
 
@@ -82,7 +84,7 @@ export function EmployeeFilters({ filters, onFiltersChange, onClearFilters }: Em
     <Card className="p-4 mb-6">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center space-x-2">
-          <Filter className="h-5 w-5 text-gray-500" />
+          <HugeiconsIcon icon={FilterIcon} className="h-5 w-5 text-gray-500" />
           <h3 className="font-medium">Filters</h3>
           {activeFiltersCount > 0 && (
             <Badge variant="secondary" className="ml-2">
@@ -98,7 +100,7 @@ export function EmployeeFilters({ filters, onFiltersChange, onClearFilters }: Em
               size="sm" 
               onClick={onClearFilters}
             >
-              <RotateCcw className="h-4 w-4 mr-1" />
+              <HugeiconsIcon icon={RotateLeft01Icon} className="h-4 w-4 mr-1" />
               Clear All
             </Button>
           )}
@@ -130,7 +132,7 @@ export function EmployeeFilters({ filters, onFiltersChange, onClearFilters }: Em
                 className="h-4 w-4 p-0 hover:bg-transparent"
                 onClick={() => removeBadgeFilter(badge.key)}
               >
-                <X className="h-3 w-3" />
+                <HugeiconsIcon icon={Cancel01Icon} className="h-3 w-3" />
               </Button>
             </Badge>
           ))}

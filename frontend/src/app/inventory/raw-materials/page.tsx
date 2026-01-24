@@ -1,4 +1,4 @@
-'use client';
+'use client'
 
 import React, { useState, useEffect } from 'react';
 import { TwoLevelLayout } from '@/components/ui/two-level-layout';
@@ -12,17 +12,7 @@ import { DataTable } from '@/components/ui/data-table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { 
-  Search, 
-  Download, 
-  Eye,
-  Edit,
-  Plus,
-  RefreshCw,
-  X,
-  Truck,
-  Warehouse
-} from 'lucide-react';
+;
 import { rawMaterialService, RawMaterial, RawMaterialFilters, RawMaterialListResponse } from '@/services/raw-materials';
 import type { RawMaterialCategory, RawMaterialStatus } from '@/types/raw-materials';
 
@@ -43,7 +33,6 @@ const getStatusBadge = (status: RawMaterialStatus) => {
     </Badge>
   );
 };
-
 
 export default function RawMaterialsPage() {
   const [mounted, setMounted] = useState(false);
@@ -210,7 +199,7 @@ export default function RawMaterialsPage() {
             <Eye className="w-4 h-4" />
           </Button>
           <Button variant="ghost" size="sm" onClick={() => handleEditMaterial(item)}>
-            <Edit className="w-4 h-4" />
+            <PencilSimple className="w-4 h-4" />
           </Button>
         </div>
       )
@@ -268,7 +257,7 @@ export default function RawMaterialsPage() {
         actions={
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" onClick={fetchRawMaterials}>
-              <RefreshCw className="w-4 h-4 mr-2" />
+              <ArrowsClockwise className="w-4 h-4 mr-2" />
               Refresh
             </Button>
             <Button size="sm" onClick={handleCreateMaterial}>
@@ -284,7 +273,7 @@ export default function RawMaterialsPage() {
         <div className="flex items-center justify-between gap-4">
           <div className="flex-1 max-w-md">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <MagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search by material name, code, or supplier..."
                 value={searchTerm}
@@ -355,7 +344,7 @@ export default function RawMaterialsPage() {
             )}
             
             <Button variant="outline" size="sm">
-              <Download className="w-4 h-4 mr-2" />
+              <DownloadSimple className="w-4 h-4 mr-2" />
               Export
             </Button>
           </div>

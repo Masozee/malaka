@@ -1,7 +1,16 @@
 "use client"
 
 import * as React from "react"
-import { Search, Filter, Download, MoreVertical, ChevronLeft, ChevronRight } from "lucide-react"
+import { HugeiconsIcon } from "@hugeicons/react"
+import {
+  Search01Icon,
+  FilterIcon,
+  Download01Icon,
+  MoreVerticalIcon,
+  ArrowLeft01Icon,
+  ArrowRight01Icon
+} from "@hugeicons/core-free-icons"
+
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -202,7 +211,7 @@ export function AdvancedDataTable<T extends { id: string }>({
         {/* Search */}
         <div className="flex items-center space-x-2 flex-1 max-w-md">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <HugeiconsIcon icon={Search01Icon} className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
               placeholder={searchPlaceholder}
               value={searchTerm}
@@ -215,7 +224,7 @@ export function AdvancedDataTable<T extends { id: string }>({
           <Dialog open={filterOpen} onOpenChange={setFilterOpen}>
             <DialogTrigger asChild>
               <Button variant="outline" size="sm" className="relative">
-                <Filter className="h-4 w-4 mr-2" />
+                <HugeiconsIcon icon={FilterIcon} className="h-4 w-4 mr-2" />
                 Filters
                 {activeFiltersCount > 0 && (
                   <Badge variant="secondary" className="ml-2 h-5 w-5 p-0 text-xs">
@@ -295,7 +304,7 @@ export function AdvancedDataTable<T extends { id: string }>({
           {/* Export */}
           {exportEnabled && (
             <Button variant="outline" size="sm" onClick={handleExport}>
-              <Download className="h-4 w-4 mr-2" />
+              <HugeiconsIcon icon={Download01Icon} className="h-4 w-4 mr-2" />
               Export
             </Button>
           )}
@@ -408,7 +417,7 @@ export function AdvancedDataTable<T extends { id: string }>({
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button variant="ghost" size="sm">
-                              <MoreVertical className="h-4 w-4" />
+                              <HugeiconsIcon icon={MoreVerticalIcon} className="h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
@@ -473,7 +482,7 @@ export function AdvancedDataTable<T extends { id: string }>({
               onClick={() => pagination.onChange(pagination.current - 1, pagination.pageSize)}
               disabled={pagination.current <= 1}
             >
-              <ChevronLeft className="h-4 w-4" />
+              <HugeiconsIcon icon={ArrowLeft01Icon} className="h-4 w-4" />
             </Button>
             
             <span className="text-sm text-gray-500">
@@ -486,7 +495,7 @@ export function AdvancedDataTable<T extends { id: string }>({
               onClick={() => pagination.onChange(pagination.current + 1, pagination.pageSize)}
               disabled={pagination.current >= Math.ceil(pagination.total / pagination.pageSize)}
             >
-              <ChevronRight className="h-4 w-4" />
+              <HugeiconsIcon icon={ArrowRight01Icon} className="h-4 w-4" />
             </Button>
           </div>
         </div>

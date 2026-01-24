@@ -9,30 +9,30 @@ import { Badge } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Separator } from '@/components/ui/separator'
-import { 
-  Mail, 
-  Phone, 
-  MapPin, 
-  Calendar, 
-  DollarSign, 
-  User, 
-  Building, 
-  Edit, 
-  Trash2,
-  ArrowLeft,
-  AlertTriangle,
-  CreditCard,
-  Briefcase,
-  Heart,
-  Clock,
-  Download,
-  FileText,
-  UserCircle
-} from 'lucide-react'
+
 import type { Employee } from '@/types/hr'
 import { HRService } from '@/services/hr'
 import { ProfileImageUpload } from '@/components/hr/profile-image-upload'
 import Link from 'next/link'
+import { HugeiconsIcon } from '@hugeicons/react'
+import {
+  UserCircleIcon,
+  ArrowLeft01Icon,
+  Download01Icon,
+  File01Icon,
+  PencilEdit01Icon,
+  Clock01Icon,
+  DollarCircleIcon,
+  Briefcase01Icon,
+  Building01Icon,
+  Calendar01Icon,
+  Mail01Icon,
+  Call02Icon,
+  Location01Icon,
+  UserIcon,
+  CreditCardIcon,
+  Delete01Icon
+} from '@hugeicons/core-free-icons'
 
 const statusColors = {
   ACTIVE: 'bg-green-500',
@@ -119,12 +119,12 @@ export default function EmployeeDetailPage() {
         
         <div className="flex-1 p-6 flex items-center justify-center">
           <div className="text-center">
-            <UserCircle className="h-24 w-24 text-gray-300 mx-auto mb-4" />
+            <HugeiconsIcon icon={UserCircleIcon} className="h-24 w-24 text-gray-300 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-gray-900 mb-2">Employee not found</h3>
             <p className="text-gray-500 mb-4">The employee you&apos;re looking for doesn&apos;t exist or may have been removed.</p>
             <Link href="/hr/employees">
               <Button variant="outline">
-                <ArrowLeft className="h-4 w-4 mr-2" />
+                <HugeiconsIcon icon={ArrowLeft01Icon} className="h-4 w-4 mr-2" />
                 Back to Employees
               </Button>
             </Link>
@@ -179,16 +179,16 @@ export default function EmployeeDetailPage() {
         actions={
           <div className="flex items-center space-x-3">
             <Button variant="outline" size="sm">
-              <Download className="h-4 w-4 mr-2" />
+              <HugeiconsIcon icon={Download01Icon} className="h-4 w-4 mr-2" />
               Export
             </Button>
             <Button variant="outline" size="sm">
-              <FileText className="h-4 w-4 mr-2" />
+              <HugeiconsIcon icon={File01Icon} className="h-4 w-4 mr-2" />
               Generate Report
             </Button>
             <Link href={`/hr/employees/${employee.id}/edit`}>
               <Button size="sm">
-                <Edit className="h-4 w-4 mr-2" />
+                <HugeiconsIcon icon={PencilEdit01Icon} className="h-4 w-4 mr-2" />
                 Edit Employee
               </Button>
             </Link>
@@ -208,7 +208,7 @@ export default function EmployeeDetailPage() {
                 </p>
                 <p className="text-sm text-muted-foreground mt-1">years</p>
               </div>
-              <Clock className="h-8 w-8 text-blue-600" />
+              <HugeiconsIcon icon={Clock01Icon} className="h-8 w-8 text-blue-600" />
             </div>
           </Card>
 
@@ -221,7 +221,7 @@ export default function EmployeeDetailPage() {
                 </p>
                 <p className="text-sm text-green-600 mt-1">per month</p>
               </div>
-              <DollarSign className="h-8 w-8 text-green-600" />
+              <HugeiconsIcon icon={DollarCircleIcon} className="h-8 w-8 text-green-600" />
             </div>
           </Card>
 
@@ -234,7 +234,7 @@ export default function EmployeeDetailPage() {
                   {employee.employment_status}
                 </Badge>
               </div>
-              <Briefcase className="h-8 w-8 text-purple-600" />
+              <HugeiconsIcon icon={Briefcase01Icon} className="h-8 w-8 text-purple-600" />
             </div>
           </Card>
 
@@ -245,7 +245,7 @@ export default function EmployeeDetailPage() {
                 <p className="text-2xl font-bold mt-1">{employee.department}</p>
                 <p className="text-sm text-muted-foreground mt-1">{employee.position}</p>
               </div>
-              <Building className="h-8 w-8 text-orange-600" />
+              <HugeiconsIcon icon={Building01Icon} className="h-8 w-8 text-orange-600" />
             </div>
           </Card>
         </div>
@@ -277,7 +277,7 @@ export default function EmployeeDetailPage() {
                       {statusLabels[employee.employment_status]}
                     </Badge>
                     <div className="flex items-center text-sm text-gray-500">
-                      <Calendar className="h-4 w-4 mr-1" />
+                      <HugeiconsIcon icon={Calendar01Icon} className="h-4 w-4 mr-1" />
                       Joined {mounted ? new Date(employee.hire_date).toLocaleDateString('id-ID', {
                         year: 'numeric',
                         month: 'long',
@@ -302,14 +302,14 @@ export default function EmployeeDetailPage() {
             {/* Contact Information */}
             <Card className="p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                <Mail className="h-5 w-5 mr-2" />
+                <HugeiconsIcon icon={Mail01Icon} className="h-5 w-5 mr-2" />
                 Contact Information
               </h3>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-4">
                   <div className="flex items-start space-x-3">
-                    <Mail className="h-5 w-5 text-gray-400 mt-0.5" />
+                    <HugeiconsIcon icon={Mail01Icon} className="h-5 w-5 text-gray-400 mt-0.5" />
                     <div>
                       <p className="text-sm font-medium text-gray-900">Email Address</p>
                       <p className="text-sm text-gray-600">{employee.email}</p>
@@ -317,7 +317,7 @@ export default function EmployeeDetailPage() {
                   </div>
 
                   <div className="flex items-start space-x-3">
-                    <Phone className="h-5 w-5 text-gray-400 mt-0.5" />
+                    <HugeiconsIcon icon={Call02Icon} className="h-5 w-5 text-gray-400 mt-0.5" />
                     <div>
                       <p className="text-sm font-medium text-gray-900">Phone Number</p>
                       <p className="text-sm text-gray-600">{employee.phone}</p>
@@ -327,7 +327,7 @@ export default function EmployeeDetailPage() {
 
                 <div className="space-y-4">
                   <div className="flex items-start space-x-3">
-                    <MapPin className="h-5 w-5 text-gray-400 mt-0.5" />
+                    <HugeiconsIcon icon={Location01Icon} className="h-5 w-5 text-gray-400 mt-0.5" />
                     <div>
                       <p className="text-sm font-medium text-gray-900">Address</p>
                       <p className="text-sm text-gray-600">{employee.address}</p>
@@ -340,7 +340,7 @@ export default function EmployeeDetailPage() {
             {/* Personal Information */}
             <Card className="p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                <User className="h-5 w-5 mr-2" />
+                <HugeiconsIcon icon={UserIcon} className="h-5 w-5 mr-2" />
                 Personal Information
               </h3>
               
@@ -385,7 +385,7 @@ export default function EmployeeDetailPage() {
             {/* Financial Information */}
             <Card className="p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                <CreditCard className="h-5 w-5 mr-2" />
+                <HugeiconsIcon icon={CreditCardIcon} className="h-5 w-5 mr-2" />
                 Financial Information
               </h3>
               
@@ -433,7 +433,7 @@ export default function EmployeeDetailPage() {
               <div className="space-y-3">
                 <Link href={`/hr/employees/${employee.id}/edit`} className="w-full">
                   <Button variant="outline" className="w-full justify-start hover:bg-blue-50 hover:border-blue-200 h-auto py-3">
-                    <Edit className="h-4 w-4 mr-3" />
+                    <HugeiconsIcon icon={PencilEdit01Icon} className="h-4 w-4 mr-3" />
                     <div className="text-left">
                       <div className="font-medium">Edit Employee</div>
                       <div className="text-xs text-muted-foreground mt-1">Update employee information</div>
@@ -446,7 +446,7 @@ export default function EmployeeDetailPage() {
                   className="w-full justify-start hover:bg-green-50 hover:border-green-200 h-auto py-3"
                   onClick={() => window.open(`mailto:${employee.email}`, '_blank')}
                 >
-                  <Mail className="h-4 w-4 mr-3" />
+                  <HugeiconsIcon icon={Mail01Icon} className="h-4 w-4 mr-3" />
                   <div className="text-left">
                     <div className="font-medium">Send Email</div>
                     <div className="text-xs text-muted-foreground mt-1">{employee.email}</div>
@@ -458,7 +458,7 @@ export default function EmployeeDetailPage() {
                   className="w-full justify-start hover:bg-purple-50 hover:border-purple-200 h-auto py-3"
                   onClick={() => window.open(`tel:${employee.phone}`, '_blank')}
                 >
-                  <Phone className="h-4 w-4 mr-3" />
+                  <HugeiconsIcon icon={Call02Icon} className="h-4 w-4 mr-3" />
                   <div className="text-left">
                     <div className="font-medium">Call Employee</div>
                     <div className="text-xs text-muted-foreground mt-1">{employee.phone}</div>
@@ -467,7 +467,7 @@ export default function EmployeeDetailPage() {
 
                 <Link href={`/hr/payroll?employee=${employee.id}`} className="w-full">
                   <Button variant="outline" className="w-full justify-start hover:bg-orange-50 hover:border-orange-200 h-auto py-3">
-                    <FileText className="h-4 w-4 mr-3" />
+                    <HugeiconsIcon icon={File01Icon} className="h-4 w-4 mr-3" />
                     <div className="text-left">
                       <div className="font-medium">View Payroll</div>
                       <div className="text-xs text-muted-foreground mt-1">Salary & payment history</div>
@@ -480,7 +480,7 @@ export default function EmployeeDetailPage() {
                   className="w-full justify-start hover:bg-gray-50 hover:border-gray-200 h-auto py-3"
                   onClick={() => window.print()}
                 >
-                  <Download className="h-4 w-4 mr-3" />
+                  <HugeiconsIcon icon={Download01Icon} className="h-4 w-4 mr-3" />
                   <div className="text-left">
                     <div className="font-medium">Print Profile</div>
                     <div className="text-xs text-muted-foreground mt-1">Employee information sheet</div>
@@ -494,7 +494,7 @@ export default function EmployeeDetailPage() {
                   className="w-full justify-start text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300 h-auto py-3"
                   onClick={handleDelete}
                 >
-                  <Trash2 className="h-4 w-4 mr-3" />
+                  <HugeiconsIcon icon={Delete01Icon} className="h-4 w-4 mr-3" />
                   <div className="text-left">
                     <div className="font-medium">Delete Employee</div>
                     <div className="text-xs text-red-500 mt-1">Permanently remove from system</div>

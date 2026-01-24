@@ -10,29 +10,7 @@ import { AdvancedDataTable } from '@/components/ui/advanced-data-table'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { 
-  FileText,
-  Plus,
-  Eye,
-  Edit,
-  Filter,
-  Download,
-  Calendar,
-  MapPin,
-  User,
-  Package,
-  Truck,
-  CheckCircle,
-  Clock,
-  AlertCircle,
-  Search,
-  DollarSign,
-  BarChart3,
-  TrendingUp,
-  Phone,
-  Printer,
-  QrCode
-} from 'lucide-react'
+
 import Link from 'next/link'
 
 // Airwaybill types
@@ -404,7 +382,7 @@ export default function AirwaybillPage() {
       printed: { variant: 'secondary' as const, label: 'Printed', icon: Printer },
       dispatched: { variant: 'default' as const, label: 'Dispatched', icon: Truck },
       delivered: { variant: 'default' as const, label: 'Delivered', icon: CheckCircle },
-      cancelled: { variant: 'destructive' as const, label: 'Cancelled', icon: AlertCircle }
+      cancelled: { variant: 'destructive' as const, label: 'Cancelled', icon: WarningCircle }
     }
     return config[status as keyof typeof config] || { variant: 'secondary' as const, label: status, icon: FileText }
   }
@@ -569,7 +547,7 @@ export default function AirwaybillPage() {
           {awb.status === 'draft' && (
             <Button variant="ghost" size="sm" asChild>
               <Link href={`/shipping/airwaybill/${awb.id}/edit`}>
-                <Edit className="h-4 w-4" />
+                <PencilSimple className="h-4 w-4" />
               </Link>
             </Button>
           )}
@@ -588,7 +566,7 @@ export default function AirwaybillPage() {
           actions={
             <div className="flex items-center space-x-3">
               <Button variant="outline" size="sm">
-                <Download className="h-4 w-4 mr-2" />
+                <DownloadSimple className="h-4 w-4 mr-2" />
                 Export
               </Button>
               <Button variant="outline" size="sm">
@@ -671,7 +649,7 @@ export default function AirwaybillPage() {
                 </p>
                 <p className="text-sm text-green-600 mt-1">Declared</p>
               </div>
-              <DollarSign className="h-8 w-8 text-green-600" />
+              <CurrencyDollar className="h-8 w-8 text-green-600" />
             </div>
           </Card>
 
@@ -684,7 +662,7 @@ export default function AirwaybillPage() {
                 </p>
                 <p className="text-sm text-purple-600 mt-1">Collected</p>
               </div>
-              <BarChart3 className="h-8 w-8 text-purple-600" />
+              <ChartBar className="h-8 w-8 text-purple-600" />
             </div>
           </Card>
 
@@ -697,7 +675,7 @@ export default function AirwaybillPage() {
                 </p>
                 <p className="text-sm text-gray-600 mt-1">Days</p>
               </div>
-              <TrendingUp className="h-8 w-8 text-gray-600" />
+              <TrendUp className="h-8 w-8 text-gray-600" />
             </div>
           </Card>
         </div>
@@ -705,12 +683,12 @@ export default function AirwaybillPage() {
         {/* Filters */}
         <Card className="p-6">
           <div className="flex items-center space-x-4">
-            <Filter className="h-5 w-5 text-muted-foreground" />
+            <Funnel className="h-5 w-5 text-muted-foreground" />
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 flex-1">
               <div className="space-y-2">
                 <Label htmlFor="search">Search</Label>
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <MagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="search"
                     placeholder="Search AWB..."

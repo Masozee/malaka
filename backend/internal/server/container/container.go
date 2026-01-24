@@ -3,6 +3,7 @@ package container
 import (
 	"context"
 	"database/sql"
+	"time"
 
 	"github.com/jmoiron/sqlx"
 	"go.uber.org/zap"
@@ -12,50 +13,55 @@ import (
 	"malaka/internal/modules/shipping/domain"
 	"malaka/internal/modules/shipping/domain/services"
 	"malaka/internal/modules/shipping/infrastructure/persistence"
+	"malaka/internal/shared/auth"
 	"malaka/internal/shared/cache"
-	
+
 	// Masterdata imports
 	masterdata_services "malaka/internal/modules/masterdata/domain/services"
-	masterdata_persistence "malaka/internal/modules/masterdata/infrastructure/persistence"
 	masterdata_cache "malaka/internal/modules/masterdata/infrastructure/cache"
 	masterdata_external "malaka/internal/modules/masterdata/infrastructure/external"
-	
+	masterdata_persistence "malaka/internal/modules/masterdata/infrastructure/persistence"
+
 	// Inventory imports
 	inventory_services "malaka/internal/modules/inventory/domain/services"
 	inventory_persistence "malaka/internal/modules/inventory/infrastructure/persistence"
-	
+
 	// Shipping imports
 	shipping_services "malaka/internal/modules/shipping/domain/services"
 	shipping_persistence "malaka/internal/modules/shipping/infrastructure/persistence"
-	
+
 	// Sales imports
 	sales_services "malaka/internal/modules/sales/domain/services"
 	sales_persistence "malaka/internal/modules/sales/infrastructure/persistence"
-	
+
 	// Finance imports
 	finance_services "malaka/internal/modules/finance/domain/services"
 	finance_persistence "malaka/internal/modules/finance/infrastructure/persistence"
-	
+
 	// HR imports
 	hr_services "malaka/internal/modules/hr/domain/services"
 	hr_persistence "malaka/internal/modules/hr/infrastructure/persistence"
-	
+
 	// Calendar imports
 	calendar_services "malaka/internal/modules/calendar/domain/services"
 	calendar_persistence "malaka/internal/modules/calendar/infrastructure/persistence"
-	
+
 	// Settings imports
 	settings_services "malaka/internal/modules/settings/domain/services"
 	settings_persistence "malaka/internal/modules/settings/infrastructure/persistence"
-	
+
 	// Production imports
 	production_services "malaka/internal/modules/production/domain/services"
 	production_persistence "malaka/internal/modules/production/infrastructure/persistence"
-	
+
 	// Accounting imports
 	accounting_services "malaka/internal/modules/accounting/domain/services"
 	accounting_persistence "malaka/internal/modules/accounting/infrastructure/persistence"
-	
+
+	// Procurement imports
+	procurement_services "malaka/internal/modules/procurement/domain/services"
+	procurement_persistence "malaka/internal/modules/procurement/infrastructure/persistence"
+
 	// Storage imports
 	"malaka/internal/shared/storage"
 	"malaka/internal/shared/upload"
@@ -66,47 +72,49 @@ type Container struct {
 	Config              *config.Config
 	Logger              *zap.Logger
 	DB                  *sql.DB
+	SqlxDB              *sqlx.DB
 	GormDB              *gorm.DB
 	Cache               cache.Cache
+	SafeCache           *cache.SafeCacheManager
 	CacheManager        *masterdata_cache.CacheManager
 	OutboundScanService domain.OutboundScanService
-	
+
 	// Masterdata services
-	CompanyService      *masterdata_services.CompanyService
-	UserService         *masterdata_services.UserService
-	ClassificationService *masterdata_services.ClassificationService
-	ArticleService      *masterdata_services.ArticleService
-	ColorService        *masterdata_services.ColorService
-	SizeService         *masterdata_services.SizeService
-	ModelService        *masterdata_services.ModelService
-	BarcodeService      *masterdata_services.BarcodeService
+	CompanyService          *masterdata_services.CompanyService
+	UserService             *masterdata_services.UserService
+	ClassificationService   *masterdata_services.ClassificationService
+	ArticleService          *masterdata_services.ArticleService
+	ColorService            *masterdata_services.ColorService
+	SizeService             *masterdata_services.SizeService
+	ModelService            *masterdata_services.ModelService
+	BarcodeService          *masterdata_services.BarcodeService
 	BarcodeGeneratorService masterdata_external.BarcodeGeneratorService
-	PriceService        *masterdata_services.PriceService
-	SupplierService     *masterdata_services.SupplierService
-	CustomerService     *masterdata_services.CustomerService
-	WarehouseService    *masterdata_services.WarehouseService
-	GalleryImageService *masterdata_services.GalleryImageService
-	CourierRateService  masterdata_services.CourierRateService
-	DepstoreService     *masterdata_services.DepstoreService
-	DivisionService     *masterdata_services.DivisionService
-	
+	PriceService            *masterdata_services.PriceService
+	SupplierService         *masterdata_services.SupplierService
+	CustomerService         *masterdata_services.CustomerService
+	WarehouseService        *masterdata_services.WarehouseService
+	GalleryImageService     *masterdata_services.GalleryImageService
+	CourierRateService      masterdata_services.CourierRateService
+	DepstoreService         *masterdata_services.DepstoreService
+	DivisionService         *masterdata_services.DivisionService
+
 	// Storage services
-	StorageService      *storage.MinIOService
-	
+	StorageService *storage.MinIOService
+
 	// Inventory services
-	PurchaseOrderService     *inventory_services.PurchaseOrderService
-	GoodsReceiptService      *inventory_services.GoodsReceiptService
-	StockService             *inventory_services.StockService
-	TransferService          *inventory_services.TransferService
-	DraftOrderService        inventory_services.DraftOrderService
-	StockAdjustmentService   inventory_services.StockAdjustmentService
-	StockOpnameService       inventory_services.StockOpnameService
-	ReturnSupplierService    inventory_services.ReturnSupplierService
-	SimpleGoodsIssueService  inventory_services.SimpleGoodsIssueService
-	GoodsIssueService        inventory_services.GoodsIssueService
+	PurchaseOrderService      *inventory_services.PurchaseOrderService
+	GoodsReceiptService       *inventory_services.GoodsReceiptService
+	StockService              *inventory_services.StockService
+	TransferService           *inventory_services.TransferService
+	DraftOrderService         inventory_services.DraftOrderService
+	StockAdjustmentService    inventory_services.StockAdjustmentService
+	StockOpnameService        inventory_services.StockOpnameService
+	ReturnSupplierService     inventory_services.ReturnSupplierService
+	SimpleGoodsIssueService   inventory_services.SimpleGoodsIssueService
+	GoodsIssueService         inventory_services.GoodsIssueService
 	InventoryValuationService *inventory_services.InventoryValuationService
-	RFQService               *inventory_services.RFQService
-	
+	RFQService                *inventory_services.RFQService
+
 	// Shipping services
 	CourierService         *shipping_services.CourierService
 	ShipmentService        domain.ShipmentService
@@ -114,102 +122,121 @@ type Container struct {
 	ManifestService        domain.ManifestService
 	TrackingService        *shipping_services.TrackingService
 	ShippingInvoiceService domain.ShippingInvoiceService
-	
+
 	// Sales services
-	SalesOrderService      *sales_services.SalesOrderService
-	SalesInvoiceService    sales_services.SalesInvoiceService
-	PosTransactionService  *sales_services.PosTransactionService
-	OnlineOrderService     *sales_services.OnlineOrderService
-	ConsignmentSalesService *sales_services.ConsignmentSalesService
-	SalesReturnService     *sales_services.SalesReturnService
-	PromotionService       *sales_services.PromotionService
-	SalesTargetService     *sales_services.SalesTargetService
-	SalesKompetitorService sales_services.SalesKompetitorService
-	ProsesMarginService    sales_services.ProsesMarginService
+	SalesOrderService        *sales_services.SalesOrderService
+	SalesInvoiceService      sales_services.SalesInvoiceService
+	PosTransactionService    *sales_services.PosTransactionService
+	OnlineOrderService       *sales_services.OnlineOrderService
+	ConsignmentSalesService  *sales_services.ConsignmentSalesService
+	SalesReturnService       *sales_services.SalesReturnService
+	PromotionService         *sales_services.PromotionService
+	SalesTargetService       *sales_services.SalesTargetService
+	SalesKompetitorService   sales_services.SalesKompetitorService
+	ProsesMarginService      sales_services.ProsesMarginService
 	SalesRekonsiliasiService sales_services.SalesRekonsiliasiService
-	
+
 	// Finance services
-	CashBankService        *finance_services.CashBankService
-	PaymentService         *finance_services.PaymentService
-	InvoiceService         *finance_services.InvoiceService
-	AccountsPayableService *finance_services.AccountsPayableService
+	CashBankService           *finance_services.CashBankService
+	PaymentService            *finance_services.PaymentService
+	InvoiceService            *finance_services.InvoiceService
+	AccountsPayableService    *finance_services.AccountsPayableService
 	AccountsReceivableService *finance_services.AccountsReceivableService
-	CashDisbursementService *finance_services.CashDisbursementService
-	CashReceiptService     *finance_services.CashReceiptService
-	BankTransferService    *finance_services.BankTransferService
+	CashDisbursementService   *finance_services.CashDisbursementService
+	CashReceiptService        *finance_services.CashReceiptService
+	BankTransferService       *finance_services.BankTransferService
 	CashOpeningBalanceService *finance_services.CashOpeningBalanceService
-	PurchaseVoucherService finance_services.PurchaseVoucherService
+	PurchaseVoucherService    finance_services.PurchaseVoucherService
 	ExpenditureRequestService finance_services.ExpenditureRequestService
-	CheckClearanceService  finance_services.CheckClearanceService
-	MonthlyClosingService  finance_services.MonthlyClosingService
-	CashBookService        finance_services.CashBookService
-	
+	CheckClearanceService     finance_services.CheckClearanceService
+	MonthlyClosingService     finance_services.MonthlyClosingService
+	CashBookService           finance_services.CashBookService
+
 	// HR services
-	EmployeeService        *hr_services.EmployeeService
-	PayrollService         hr_services.PayrollService
-	LeaveService           hr_services.LeaveService
+	EmployeeService          *hr_services.EmployeeService
+	PayrollService           hr_services.PayrollService
+	LeaveService             hr_services.LeaveService
 	PerformanceReviewService hr_services.PerformanceReviewService
-	
+
 	// Calendar services
-	EventService           calendar_services.EventService
-	
+	EventService calendar_services.EventService
+
 	// Settings services
-	SettingService         *settings_services.SettingService
-	
+	SettingService *settings_services.SettingService
+
 	// Production services
-	WorkOrderService       production_services.WorkOrderService
-	
+	WorkOrderService production_services.WorkOrderService
+
 	// Accounting services
-	JournalEntryService     accounting_services.JournalEntryService
-	AutoJournalService      accounting_services.AutoJournalService
-	GeneralLedgerService    accounting_services.GeneralLedgerService
-	CostCenterService       accounting_services.CostCenterService
-	ExchangeRateService     *accounting_services.ExchangeRateService
+	JournalEntryService  accounting_services.JournalEntryService
+	AutoJournalService   accounting_services.AutoJournalService
+	GeneralLedgerService accounting_services.GeneralLedgerService
+	CostCenterService    accounting_services.CostCenterService
+	ExchangeRateService  *accounting_services.ExchangeRateService
 	// TrialBalanceService     accounting_services.TrialBalanceService
+
+	// Procurement services
+	PurchaseRequestService          *procurement_services.PurchaseRequestService
+	ProcurementPurchaseOrderService *procurement_services.PurchaseOrderService
+	ContractService                 *procurement_services.ContractService
+	VendorEvaluationService         *procurement_services.VendorEvaluationService
+	ProcurementAnalyticsService     *procurement_services.AnalyticsService
+	ProcurementRFQService           *procurement_services.RFQService
 }
 
 // NewContainer creates a new dependency container.
 func NewContainer(cfg *config.Config, logger *zap.Logger, db *sql.DB, gormDB *gorm.DB, redisCache cache.Cache) *Container {
 	// Convert sql.DB to sqlx.DB for repository implementations
 	sqlxDB := sqlx.NewDb(db, "postgres")
-	
+
+	// Initialize SafeCacheManager for error-resilient caching
+	var safeCache *cache.SafeCacheManager
+	if redisCache != nil {
+		redisClient := redisCache.(*cache.RedisCache).Client()
+		safeCache = cache.NewSafeCacheManager(redisClient, cache.SafeCacheConfig{
+			KeyPrefix:     "malaka",
+			CheckInterval: 30 * time.Second,
+		})
+		logger.Info("SafeCacheManager initialized with health monitoring")
+	}
+
 	// Initialize shipping services
 	outboundScanRepo := persistence.NewOutboundScanRepository(gormDB)
 	outboundScanSvc := services.NewOutboundScanService(outboundScanRepo)
-	
+
 	// Initialize masterdata repositories with caching
 	baseCompanyRepo := masterdata_persistence.NewCompanyRepositoryImpl(sqlxDB)
 	companyRepo := masterdata_cache.NewCachedCompanyRepository(baseCompanyRepo, redisCache)
-	
-	baseUserRepo := masterdata_persistence.NewUserRepositoryImpl(sqlxDB)
-	userRepo := masterdata_cache.NewCachedUserRepository(baseUserRepo, redisCache)
-	
+
+	// User repository - NO CACHING for security (passwords, permissions)
+	userRepo := masterdata_persistence.NewUserRepositoryImpl(sqlxDB)
+
 	baseCustomerRepo := masterdata_persistence.NewCustomerRepositoryImpl(sqlxDB)
 	customerRepo := masterdata_cache.NewCachedCustomerRepository(baseCustomerRepo, redisCache)
-	
+
 	baseDepstoreRepo := masterdata_persistence.NewDepstoreRepository(sqlxDB)
 	depstoreRepo := masterdata_cache.NewCachedDepstoreRepository(baseDepstoreRepo, redisCache)
-	
+
 	baseDivisionRepo := masterdata_persistence.NewDivisionRepository(sqlxDB)
 	divisionRepo := masterdata_cache.NewCachedDivisionRepository(baseDivisionRepo, redisCache)
-	
+
 	// Cached repositories for frequently accessed data
 	baseClassificationRepo := masterdata_persistence.NewClassificationRepositoryImpl(sqlxDB)
 	classificationRepo := masterdata_cache.NewCachedClassificationRepository(baseClassificationRepo, redisCache)
-	
+
 	baseArticleRepo := masterdata_persistence.NewArticleRepositoryImpl(sqlxDB)
 	articleRepo := masterdata_cache.NewCachedArticleRepository(baseArticleRepo, redisCache)
-	
+
 	baseColorRepo := masterdata_persistence.NewColorRepositoryImpl(sqlxDB)
 	colorRepo := masterdata_cache.NewCachedColorRepository(baseColorRepo, redisCache)
-	
+
 	// Initialize cache manager for warming and invalidation
+	// Note: Users are NOT cached for security reasons
 	cacheManager := masterdata_cache.NewCacheManager(
 		articleRepo,
 		classificationRepo,
 		companyRepo,
 		customerRepo,
-		userRepo,
 		depstoreRepo,
 		divisionRepo,
 		colorRepo,
@@ -224,7 +251,7 @@ func NewContainer(cfg *config.Config, logger *zap.Logger, db *sql.DB, gormDB *go
 	warehouseRepo := masterdata_persistence.NewWarehouseRepositoryImpl(sqlxDB)
 	galleryImageRepo := masterdata_persistence.NewGalleryImageRepositoryImpl(sqlxDB)
 	courierRateRepo := masterdata_persistence.NewCourierRateRepository(sqlxDB)
-	
+
 	// Initialize inventory repositories
 	purchaseOrderRepo := inventory_persistence.NewPurchaseOrderRepositoryImpl(sqlxDB)
 	goodsReceiptRepo := inventory_persistence.NewGoodsReceiptRepositoryImpl(sqlxDB)
@@ -239,7 +266,7 @@ func NewContainer(cfg *config.Config, logger *zap.Logger, db *sql.DB, gormDB *go
 	simpleGoodsIssueRepo := inventory_persistence.NewSimpleGoodsIssueRepositoryImpl(sqlxDB)
 	goodsIssueRepo := inventory_persistence.NewGoodsIssuePostgreSQLRepository(db)
 	rfqRepo := inventory_persistence.NewRFQRepository(db)
-	
+
 	// Initialize masterdata services
 	companyService := masterdata_services.NewCompanyService(companyRepo)
 	userService := masterdata_services.NewUserService(userRepo, cfg.JWTSecret, cfg.GetJWTExpiryHours())
@@ -249,7 +276,7 @@ func NewContainer(cfg *config.Config, logger *zap.Logger, db *sql.DB, gormDB *go
 	sizeService := masterdata_services.NewSizeService(sizeRepo)
 	modelService := masterdata_services.NewModelService(modelRepo)
 	barcodeService := masterdata_services.NewBarcodeService(barcodeRepo, articleRepo)
-	
+
 	// Initialize storage services first (needed for barcode generator)
 	var storageService *storage.MinIOService
 	minioConfig := &upload.MinIOConfig{
@@ -267,7 +294,7 @@ func NewContainer(cfg *config.Config, logger *zap.Logger, db *sql.DB, gormDB *go
 	} else {
 		storageService = storage.NewMinIOService(minioStorage, redisCache.(*cache.RedisCache).Client(), logger)
 	}
-	
+
 	// Now initialize services that depend on storage
 	barcodeGeneratorService := masterdata_external.NewBarcodeGeneratorService(storageService, logger)
 	priceService := masterdata_services.NewPriceService(priceRepo)
@@ -278,7 +305,7 @@ func NewContainer(cfg *config.Config, logger *zap.Logger, db *sql.DB, gormDB *go
 	courierRateService := masterdata_services.NewCourierRateService(courierRateRepo)
 	depstoreService := masterdata_services.NewDepstoreService(depstoreRepo)
 	divisionService := masterdata_services.NewDivisionService(divisionRepo)
-	
+
 	// Initialize shipping repositories
 	courierRepo := shipping_persistence.NewCourierRepositoryImpl(sqlxDB)
 	shipmentRepo := shipping_persistence.NewShipmentRepository(sqlxDB)
@@ -286,7 +313,7 @@ func NewContainer(cfg *config.Config, logger *zap.Logger, db *sql.DB, gormDB *go
 	manifestRepo := shipping_persistence.NewManifestRepositoryImpl(sqlxDB)
 	trackingRepo := shipping_persistence.NewTrackingRepositoryImpl(sqlxDB)
 	shippingInvoiceRepo := shipping_persistence.NewShippingInvoiceRepositoryImpl(sqlxDB)
-	
+
 	// Initialize inventory services
 	purchaseOrderService := inventory_services.NewPurchaseOrderService(purchaseOrderRepo)
 	goodsReceiptService := inventory_services.NewGoodsReceiptService(goodsReceiptRepo)
@@ -300,7 +327,7 @@ func NewContainer(cfg *config.Config, logger *zap.Logger, db *sql.DB, gormDB *go
 	goodsIssueService := inventory_services.NewGoodsIssueService(goodsIssueRepo)
 	inventoryValuationService := inventory_services.NewInventoryValuationService(stockMovementRepo)
 	rfqService := inventory_services.NewRFQService(rfqRepo)
-	
+
 	// Initialize shipping services
 	courierService := shipping_services.NewCourierService(courierRepo)
 	shipmentService := shipping_services.NewShipmentService(shipmentRepo)
@@ -308,7 +335,7 @@ func NewContainer(cfg *config.Config, logger *zap.Logger, db *sql.DB, gormDB *go
 	manifestService := shipping_services.NewManifestService(manifestRepo)
 	trackingService := shipping_services.NewTrackingService(trackingRepo)
 	shippingInvoiceService := shipping_services.NewShippingInvoiceService(shippingInvoiceRepo)
-	
+
 	// Initialize sales repositories
 	salesOrderRepo := sales_persistence.NewSalesOrderRepositoryImpl(sqlxDB)
 	salesOrderItemRepo := sales_persistence.NewSalesOrderItemRepositoryImpl(sqlxDB)
@@ -322,9 +349,9 @@ func NewContainer(cfg *config.Config, logger *zap.Logger, db *sql.DB, gormDB *go
 	promotionRepo := sales_persistence.NewPromotionRepositoryImpl(sqlxDB)
 	salesTargetRepo := sales_persistence.NewSalesTargetRepositoryImpl(sqlxDB)
 	salesKompetitorRepo := sales_persistence.NewSalesKompetitorRepositoryImpl(sqlxDB)
-		prosesMarginRepo := sales_persistence.NewProsesMarginRepositoryImpl(sqlxDB)
+	prosesMarginRepo := sales_persistence.NewProsesMarginRepositoryImpl(sqlxDB)
 	salesRekonsiliasiRepo := sales_persistence.NewSalesRekonsiliasiRepositoryImpl(sqlxDB)
-	
+
 	// Initialize sales services
 	salesOrderService := sales_services.NewSalesOrderService(salesOrderRepo, salesOrderItemRepo, stockService)
 	salesInvoiceService := sales_services.NewSalesInvoiceService(salesInvoiceRepo, salesInvoiceItemRepo)
@@ -337,7 +364,7 @@ func NewContainer(cfg *config.Config, logger *zap.Logger, db *sql.DB, gormDB *go
 	salesKompetitorService := sales_services.NewSalesKompetitorService(salesKompetitorRepo)
 	prosesMarginService := sales_services.NewProsesMarginService(prosesMarginRepo)
 	salesRekonsiliasiService := sales_services.NewSalesRekonsiliasiService(salesRekonsiliasiRepo)
-	
+
 	// Initialize finance repositories
 	cashBankRepo := finance_persistence.NewCashBankRepositoryImpl(sqlxDB)
 	paymentRepo := finance_persistence.NewPaymentRepositoryImpl(sqlxDB)
@@ -353,13 +380,13 @@ func NewContainer(cfg *config.Config, logger *zap.Logger, db *sql.DB, gormDB *go
 	checkClearanceRepo := finance_persistence.NewCheckClearanceRepository(db)
 	monthlyClosingRepo := finance_persistence.NewMonthlyClosingRepository(db)
 	cashBookRepo := finance_persistence.NewCashBookRepository(db)
-	
+
 	// Initialize accounting repositories
 	journalEntryRepo := accounting_persistence.NewJournalEntryRepository(db)
 	autoJournalConfigRepo := accounting_persistence.NewAutoJournalConfigRepository(db)
 	generalLedgerRepo := accounting_persistence.NewGeneralLedgerRepository(db)
 	costCenterRepo := accounting_persistence.NewSimpleCostCenterRepository(db)
-	
+
 	// Initialize exchange rate repository with SQLite
 	exchangeRateRepo, err := accounting_persistence.NewExchangeRateSQLiteRepository("data/exchange_rates.db")
 	if err != nil {
@@ -367,7 +394,7 @@ func NewContainer(cfg *config.Config, logger *zap.Logger, db *sql.DB, gormDB *go
 		exchangeRateRepo = nil
 	}
 	// trialBalanceRepo := accounting_persistence.NewTrialBalanceRepositoryImpl(sqlxDB)
-	
+
 	// Initialize finance services
 	cashBankService := finance_services.NewCashBankService(cashBankRepo)
 	paymentService := finance_services.NewPaymentService(paymentRepo)
@@ -383,7 +410,7 @@ func NewContainer(cfg *config.Config, logger *zap.Logger, db *sql.DB, gormDB *go
 	checkClearanceService := finance_services.NewCheckClearanceService(checkClearanceRepo)
 	monthlyClosingService := finance_services.NewMonthlyClosingService(monthlyClosingRepo)
 	cashBookService := finance_services.NewCashBookService(cashBookRepo)
-	
+
 	// Initialize HR repositories
 	employeeRepo := hr_persistence.NewPostgreSQLEmployeeRepository(sqlxDB)
 	payrollPeriodRepo := hr_persistence.NewPostgreSQLPayrollPeriodRepository(db)
@@ -396,22 +423,22 @@ func NewContainer(cfg *config.Config, logger *zap.Logger, db *sql.DB, gormDB *go
 	payrollService := hr_services.NewPayrollService(payrollPeriodRepo, salaryCalculationRepo, employeeRepo)
 	leaveService := hr_services.NewLeaveService(leaveRepo)
 	performanceReviewService := hr_services.NewPerformanceReviewService(performanceReviewRepo)
-	
+
 	// Initialize calendar repositories
 	eventRepo := calendar_persistence.NewEventRepository(sqlxDB)
-	
+
 	// Initialize calendar services
 	eventService := calendar_services.NewEventService(eventRepo)
-	
+
 	// Initialize settings repositories
 	settingRepo := settings_persistence.NewSettingRepositoryImpl(sqlxDB)
-	
+
 	// Initialize settings services
 	settingService := settings_services.NewSettingService(settingRepo, cfg.EncryptionKey)
-	
+
 	// Initialize production repositories
 	workOrderRepo := production_persistence.NewWorkOrderRepositoryImpl(sqlxDB)
-	
+
 	// Initialize production services
 	workOrderService := production_services.NewWorkOrderService(workOrderRepo)
 
@@ -420,7 +447,7 @@ func NewContainer(cfg *config.Config, logger *zap.Logger, db *sql.DB, gormDB *go
 	autoJournalService := accounting_services.NewAutoJournalService(journalEntryRepo, autoJournalConfigRepo, journalEntryService)
 	generalLedgerService := accounting_services.NewGeneralLedgerServiceImpl(generalLedgerRepo, journalEntryRepo)
 	costCenterService := accounting_services.NewCostCenterService(costCenterRepo)
-	
+
 	// Initialize exchange rate service
 	var exchangeRateService *accounting_services.ExchangeRateService
 	if exchangeRateRepo != nil {
@@ -428,51 +455,73 @@ func NewContainer(cfg *config.Config, logger *zap.Logger, db *sql.DB, gormDB *go
 	}
 	// trialBalanceService := accounting_services.NewTrialBalanceServiceImpl(trialBalanceRepo, generalLedgerRepo)
 
+	// Initialize procurement repositories
+	purchaseRequestRepo := procurement_persistence.NewPurchaseRequestRepositoryImpl(sqlxDB)
+	procurementPurchaseOrderRepo := procurement_persistence.NewPurchaseOrderRepository(sqlxDB)
+	contractRepo := procurement_persistence.NewContractRepositoryImpl(sqlxDB)
+	vendorEvaluationRepo := procurement_persistence.NewVendorEvaluationRepositoryImpl(sqlxDB)
+	procurementRFQRepo := procurement_persistence.NewRFQRepository(sqlxDB)
+
+	// Initialize shared services
+	rbacService := auth.NewRBACService(sqlxDB)
+
+	// Initialize procurement services
+	purchaseRequestService := procurement_services.NewPurchaseRequestService(purchaseRequestRepo)
+	purchaseRequestService.SetPurchaseOrderRepository(procurementPurchaseOrderRepo) // Enable PR to PO conversion
+	procurementPurchaseOrderService := procurement_services.NewPurchaseOrderService(procurementPurchaseOrderRepo, rbacService)
+	contractService := procurement_services.NewContractService(contractRepo)
+	vendorEvaluationService := procurement_services.NewVendorEvaluationService(vendorEvaluationRepo)
+	procurementAnalyticsService := procurement_services.NewAnalyticsService(sqlxDB)
+	procurementRFQService := procurement_services.NewRFQService(procurementRFQRepo)
+	procurementRFQService.SetPurchaseOrderRepository(procurementPurchaseOrderRepo) // Enable RFQ to PO conversion
+
 	return &Container{
 		Config:              cfg,
 		Logger:              logger,
 		DB:                  db,
+		SqlxDB:              sqlxDB,
 		GormDB:              gormDB,
 		Cache:               redisCache,
+		SafeCache:           safeCache,
 		CacheManager:        cacheManager,
 		OutboundScanService: outboundScanSvc,
-		
+
 		// Masterdata services
-		CompanyService:      companyService,
-		UserService:         userService,
-		ClassificationService: classificationService,
-		ArticleService:      articleService,
-		ColorService:        colorService,
-		SizeService:         sizeService,
-		ModelService:        modelService,
-		BarcodeService:      barcodeService,
+		CompanyService:          companyService,
+		UserService:             userService,
+		ClassificationService:   classificationService,
+		ArticleService:          articleService,
+		ColorService:            colorService,
+		SizeService:             sizeService,
+		ModelService:            modelService,
+		BarcodeService:          barcodeService,
 		BarcodeGeneratorService: barcodeGeneratorService,
-		PriceService:        priceService,
-		SupplierService:     supplierService,
-		CustomerService:     customerService,
-		WarehouseService:    warehouseService,
-		GalleryImageService: galleryImageService,
-		CourierRateService:  courierRateService,
-		DepstoreService:     depstoreService,
-		DivisionService:     divisionService,
-		
+		PriceService:            priceService,
+		SupplierService:         supplierService,
+		CustomerService:         customerService,
+		WarehouseService:        warehouseService,
+		GalleryImageService:     galleryImageService,
+		CourierRateService:      courierRateService,
+		DepstoreService:         depstoreService,
+		DivisionService:         divisionService,
+
 		// Storage services
-		StorageService:      storageService,
-		
+		StorageService: storageService,
+
 		// Inventory services
-		PurchaseOrderService:     purchaseOrderService,
-		GoodsReceiptService:      goodsReceiptService,
-		StockService:             stockService,
-		TransferService:          transferService,
-		DraftOrderService:        draftOrderService,
-		StockAdjustmentService:   stockAdjustmentService,
-		StockOpnameService:       stockOpnameService,
-		ReturnSupplierService:    returnSupplierService,
-		SimpleGoodsIssueService:  simpleGoodsIssueService,
-		GoodsIssueService:        goodsIssueService,
+		PurchaseOrderService:      purchaseOrderService,
+		GoodsReceiptService:       goodsReceiptService,
+		StockService:              stockService,
+		TransferService:           transferService,
+		DraftOrderService:         draftOrderService,
+		StockAdjustmentService:    stockAdjustmentService,
+		StockOpnameService:        stockOpnameService,
+		ReturnSupplierService:     returnSupplierService,
+		SimpleGoodsIssueService:   simpleGoodsIssueService,
+		GoodsIssueService:         goodsIssueService,
 		InventoryValuationService: inventoryValuationService,
-		RFQService:               rfqService,
-		
+		RFQService:                rfqService,
+
 		// Shipping services
 		CourierService:         courierService,
 		ShipmentService:        shipmentService,
@@ -480,58 +529,66 @@ func NewContainer(cfg *config.Config, logger *zap.Logger, db *sql.DB, gormDB *go
 		ManifestService:        manifestService,
 		TrackingService:        trackingService,
 		ShippingInvoiceService: shippingInvoiceService,
-		
+
 		// Sales services
-		SalesOrderService:      salesOrderService,
-		SalesInvoiceService:    salesInvoiceService,
-		PosTransactionService:  posTransactionService,
-		OnlineOrderService:     onlineOrderService,
-		ConsignmentSalesService: consignmentSalesService,
-		SalesReturnService:     salesReturnService,
-		PromotionService:       promotionService,
-		SalesTargetService:     salesTargetService,
-		SalesKompetitorService: salesKompetitorService,
-		ProsesMarginService:    prosesMarginService,
+		SalesOrderService:        salesOrderService,
+		SalesInvoiceService:      salesInvoiceService,
+		PosTransactionService:    posTransactionService,
+		OnlineOrderService:       onlineOrderService,
+		ConsignmentSalesService:  consignmentSalesService,
+		SalesReturnService:       salesReturnService,
+		PromotionService:         promotionService,
+		SalesTargetService:       salesTargetService,
+		SalesKompetitorService:   salesKompetitorService,
+		ProsesMarginService:      prosesMarginService,
 		SalesRekonsiliasiService: salesRekonsiliasiService,
-		
+
 		// Finance services
-		CashBankService:        cashBankService,
-		PaymentService:         paymentService,
-		InvoiceService:         financeInvoiceService,
-		AccountsPayableService: accountsPayableService,
+		CashBankService:           cashBankService,
+		PaymentService:            paymentService,
+		InvoiceService:            financeInvoiceService,
+		AccountsPayableService:    accountsPayableService,
 		AccountsReceivableService: accountsReceivableService,
-		CashDisbursementService: cashDisbursementService,
-		CashReceiptService:     cashReceiptService,
-		BankTransferService:    bankTransferService,
+		CashDisbursementService:   cashDisbursementService,
+		CashReceiptService:        cashReceiptService,
+		BankTransferService:       bankTransferService,
 		CashOpeningBalanceService: cashOpeningBalanceService,
-		PurchaseVoucherService: purchaseVoucherService,
+		PurchaseVoucherService:    purchaseVoucherService,
 		ExpenditureRequestService: expenditureRequestService,
-		CheckClearanceService:  checkClearanceService,
-		MonthlyClosingService:  monthlyClosingService,
-		CashBookService:        cashBookService,
-		
+		CheckClearanceService:     checkClearanceService,
+		MonthlyClosingService:     monthlyClosingService,
+		CashBookService:           cashBookService,
+
 		// HR services
-		EmployeeService:        employeeService,
-		PayrollService:         payrollService,
-		LeaveService:           leaveService,
+		EmployeeService:          employeeService,
+		PayrollService:           payrollService,
+		LeaveService:             leaveService,
 		PerformanceReviewService: performanceReviewService,
-		
+
 		// Calendar services
-		EventService:           eventService,
-		
+		EventService: eventService,
+
 		// Settings services
-		SettingService:         settingService,
-		
+		SettingService: settingService,
+
 		// Production services
-		WorkOrderService:       workOrderService,
-		
+		WorkOrderService: workOrderService,
+
 		// Accounting services
-		JournalEntryService:   journalEntryService,
-		AutoJournalService:    autoJournalService,
-		GeneralLedgerService:  generalLedgerService,
-		CostCenterService:     costCenterService,
-		ExchangeRateService:   exchangeRateService,
+		JournalEntryService:  journalEntryService,
+		AutoJournalService:   autoJournalService,
+		GeneralLedgerService: generalLedgerService,
+		CostCenterService:    costCenterService,
+		ExchangeRateService:  exchangeRateService,
 		// TrialBalanceService:   trialBalanceService,
+
+		// Procurement services
+		PurchaseRequestService:          purchaseRequestService,
+		ProcurementPurchaseOrderService: procurementPurchaseOrderService,
+		ContractService:                 contractService,
+		VendorEvaluationService:         vendorEvaluationService,
+		ProcurementAnalyticsService:     procurementAnalyticsService,
+		ProcurementRFQService:           procurementRFQService,
 	}
 }
 

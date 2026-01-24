@@ -1,10 +1,20 @@
 "use client"
 
 import * as React from "react"
-import { 
-  ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, 
-  Search, Plus, Edit, Trash2, MoreHorizontal, QrCode, BarChart3 
-} from "lucide-react"
+import { HugeiconsIcon } from '@hugeicons/react'
+import {
+  ArrowLeft01Icon,
+  ArrowRight01Icon,
+  ArrowLeftDoubleIcon,
+  ArrowRightDoubleIcon,
+  Search01Icon,
+  PlusSignIcon,
+  PencilEdit01Icon,
+  Delete01Icon,
+  MoreHorizontalIcon,
+  QrCodeIcon,
+  BarCode01Icon
+} from '@hugeicons/core-free-icons'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -129,15 +139,15 @@ export function DataTable<T extends { id: string }>({
 
   if (loading) {
     return (
-      <div className="w-full" role="status" aria-label="Loading data">
+      <div className="w-full" role="status" aria-label="Loading data" aria-busy="true">
         <div className="rounded-md border">
           <div className="p-4">
             <div className="space-y-3">
               {[...Array(5)].map((_, i) => (
                 <div key={i} className="flex space-x-4">
-                  <div className="h-4 bg-gray-200 rounded flex-1 animate-pulse" />
-                  <div className="h-4 bg-gray-200 rounded flex-1 animate-pulse" />
-                  <div className="h-4 bg-gray-200 rounded flex-1 animate-pulse" />
+                  <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded flex-1 animate-pulse" />
+                  <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded flex-1 animate-pulse" />
+                  <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded flex-1 animate-pulse" />
                 </div>
               ))}
             </div>
@@ -155,7 +165,7 @@ export function DataTable<T extends { id: string }>({
         <div className="flex items-center space-x-2">
           {batchSelection && selectedIds.size > 0 && (
             <div className="flex items-center space-x-2 mr-4">
-              <span className="text-sm text-gray-600">
+              <span className="text-sm text-gray-600 dark:text-gray-400">
                 {selectedIds.size} item{selectedIds.size !== 1 ? 's' : ''} selected
               </span>
               <div className="flex items-center space-x-2">
@@ -166,7 +176,7 @@ export function DataTable<T extends { id: string }>({
                     onClick={handleBatchDelete}
                     className="flex items-center space-x-1"
                   >
-                    <Trash2 className="h-4 w-4" />
+                    <HugeiconsIcon icon={Delete01Icon} className="h-4 w-4" />
                     <span>Delete</span>
                   </Button>
                 )}
@@ -180,7 +190,7 @@ export function DataTable<T extends { id: string }>({
                     }}
                     className="flex items-center space-x-1"
                   >
-                    <BarChart3 className="h-4 w-4" />
+                    <HugeiconsIcon icon={BarCode01Icon} className="h-4 w-4" />
                     <span>Barcodes</span>
                   </Button>
                 )}
@@ -194,7 +204,7 @@ export function DataTable<T extends { id: string }>({
                     }}
                     className="flex items-center space-x-1"
                   >
-                    <QrCode className="h-4 w-4" />
+                    <HugeiconsIcon icon={QrCodeIcon} className="h-4 w-4" />
                     <span>QR Codes</span>
                   </Button>
                 )}
@@ -203,32 +213,33 @@ export function DataTable<T extends { id: string }>({
           )}
           {onSearch && (
             <div className="relative">
-              <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <HugeiconsIcon icon={Search01Icon} className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
               <Input
                 placeholder={searchPlaceholder}
                 value={searchValue}
                 onChange={handleSearchChange}
-                className="pl-8 w-64"
+                className="pl-8 w-64 bg-white dark:bg-gray-900"
               />
             </div>
           )}
         </div>
         {onAdd && (
           <Button onClick={onAdd} className="flex items-center space-x-2">
-            <Plus className="h-4 w-4" />
+            <HugeiconsIcon icon={PlusSignIcon} className="h-4 w-4" />
             <span>{addButtonText}</span>
           </Button>
         )}
       </div>
 
       {/* Table */}
-      <div className="rounded-md border">
+      <div className="rounded-lg border bg-white dark:bg-gray-900 overflow-hidden" role="region" aria-label="Data table">
         <div className="overflow-x-auto">
           <table className="w-full">
+            <caption className="sr-only">Data table with row selection and actions</caption>
             <thead>
-              <tr className="border-b bg-gray-50">
+              <tr className="bg-gray-200 dark:bg-gray-700">
                 {batchSelection && (
-                  <th scope="col" className="px-4 py-3 text-left text-sm font-medium text-gray-900 w-12">
+                  <th scope="col" className="px-4 py-3 text-left text-sm font-medium text-gray-700 dark:text-white w-12">
                     <Checkbox
                       checked={selectAll}
                       onCheckedChange={handleSelectAll}
@@ -240,24 +251,24 @@ export function DataTable<T extends { id: string }>({
                   <th
                     key={String(column.key)}
                     scope="col"
-                    className="px-4 py-3 text-left text-sm font-medium text-gray-900"
+                    className="px-4 py-3 text-left text-sm font-medium text-gray-700 dark:text-white"
                     style={column.width ? { width: column.width } : undefined}
                   >
                     {column.title}
                   </th>
                 ))}
                 {(onEdit || onDelete || onGenerateBarcode || onGenerateQRCode) && (
-                  <th scope="col" className="px-4 py-3 text-left text-sm font-medium text-gray-900 w-20">
+                  <th scope="col" className="px-4 py-3 text-left text-sm font-medium text-gray-700 dark:text-white w-20">
                     Actions
                   </th>
                 )}
               </tr>
             </thead>
-            <tbody>
+            <tbody className="bg-white dark:bg-gray-900">
               {data.length === 0 ? (
                 <tr>
-                  <td 
-                    colSpan={columns.length + (batchSelection ? 1 : 0) + (onEdit || onDelete || onGenerateBarcode || onGenerateQRCode ? 1 : 0)} 
+                  <td
+                    colSpan={columns.length + (batchSelection ? 1 : 0) + (onEdit || onDelete || onGenerateBarcode || onGenerateQRCode ? 1 : 0)}
                     className="px-4 py-8 text-center text-gray-500"
                   >
                     No data available
@@ -265,17 +276,18 @@ export function DataTable<T extends { id: string }>({
                 </tr>
               ) : (
                 data.map((record) => (
-                  <tr key={record.id} className="border-b hover:bg-gray-50">
+                  <tr key={record.id} className="border-b bg-white hover:bg-gray-100 dark:bg-gray-900 dark:hover:bg-gray-800">
                     {batchSelection && (
                       <td className="px-4 py-3">
                         <Checkbox
                           checked={selectedIds.has(record.id)}
                           onCheckedChange={(checked) => handleSelectItem(record.id, checked as boolean)}
+                          aria-label={`Select row ${record.id}`}
                         />
                       </td>
                     )}
                     {columns.map((column) => (
-                      <td key={String(column.key)} className="px-4 py-3 text-sm text-gray-900">
+                      <td key={String(column.key)} className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">
                         {column.render 
                           ? column.render(record[column.key], record)
                           : String(record[column.key] || '-')
@@ -287,14 +299,14 @@ export function DataTable<T extends { id: string }>({
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button variant="outline" size="sm" className="h-8 w-8 p-0" aria-label="Actions menu">
-                              <MoreHorizontal className="h-4 w-4" />
+                              <HugeiconsIcon icon={MoreHorizontalIcon} className="h-4 w-4" />
                               <span className="sr-only">Open actions menu</span>
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             {onEdit && (
                               <DropdownMenuItem onClick={() => onEdit(record)}>
-                                <Edit className="mr-2 h-4 w-4" />
+                                <HugeiconsIcon icon={PencilEdit01Icon} className="mr-2 h-4 w-4" />
                                 Edit
                               </DropdownMenuItem>
                             )}
@@ -303,20 +315,20 @@ export function DataTable<T extends { id: string }>({
                                 onClick={() => onDelete(record)}
                                 className="text-red-600"
                               >
-                                <Trash2 className="mr-2 h-4 w-4" />
+                                <HugeiconsIcon icon={Delete01Icon} className="mr-2 h-4 w-4" />
                                 Delete
                               </DropdownMenuItem>
                             )}
                             {(onGenerateBarcode || onGenerateQRCode) && onEdit && <DropdownMenuSeparator />}
                             {onGenerateBarcode && (
                               <DropdownMenuItem onClick={() => onGenerateBarcode(record)}>
-                                <BarChart3 className="mr-2 h-4 w-4" />
+                                <HugeiconsIcon icon={BarCode01Icon} className="mr-2 h-4 w-4" />
                                 Generate Barcode
                               </DropdownMenuItem>
                             )}
                             {onGenerateQRCode && (
                               <DropdownMenuItem onClick={() => onGenerateQRCode(record)}>
-                                <QrCode className="mr-2 h-4 w-4" />
+                                <HugeiconsIcon icon={QrCodeIcon} className="mr-2 h-4 w-4" />
                                 Generate QR Code
                               </DropdownMenuItem>
                             )}
@@ -335,7 +347,7 @@ export function DataTable<T extends { id: string }>({
       {/* Pagination */}
       {pagination && (
         <div className="flex items-center justify-between">
-          <div className="text-sm text-gray-700">
+          <div className="text-sm text-gray-700 dark:text-gray-300">
             Showing {Math.min((currentPage - 1) * pagination.pageSize + 1, pagination.total)} to{' '}
             {Math.min(currentPage * pagination.pageSize, pagination.total)} of {pagination.total} entries
           </div>
@@ -347,7 +359,7 @@ export function DataTable<T extends { id: string }>({
               disabled={currentPage === 1}
               aria-label="Go to first page"
             >
-              <ChevronsLeft className="h-4 w-4" />
+              <HugeiconsIcon icon={ArrowLeftDoubleIcon} className="h-4 w-4" />
             </Button>
             <Button
               variant="outline"
@@ -356,9 +368,9 @@ export function DataTable<T extends { id: string }>({
               disabled={currentPage === 1}
               aria-label="Go to previous page"
             >
-              <ChevronLeft className="h-4 w-4" />
+              <HugeiconsIcon icon={ArrowLeft01Icon} className="h-4 w-4" />
             </Button>
-            <span className="text-sm" aria-current="page">
+            <span className="text-sm" aria-current="page" aria-live="polite" aria-atomic="true">
               Page {currentPage} of {totalPages}
             </span>
             <Button
@@ -368,7 +380,7 @@ export function DataTable<T extends { id: string }>({
               disabled={currentPage === totalPages}
               aria-label="Go to next page"
             >
-              <ChevronRight className="h-4 w-4" />
+              <HugeiconsIcon icon={ArrowRight01Icon} className="h-4 w-4" />
             </Button>
             <Button
               variant="outline"
@@ -377,7 +389,7 @@ export function DataTable<T extends { id: string }>({
               disabled={currentPage === totalPages}
               aria-label="Go to last page"
             >
-              <ChevronsRight className="h-4 w-4" />
+              <HugeiconsIcon icon={ArrowRightDoubleIcon} className="h-4 w-4" />
             </Button>
           </nav>
         </div>

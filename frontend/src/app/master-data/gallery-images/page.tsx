@@ -1,5 +1,23 @@
 'use client'
 
+import { HugeiconsIcon } from "@hugeicons/react"
+import {
+  Image01Icon,
+  Upload01Icon,
+  Download01Icon,
+  ViewIcon,
+  PencilEdit01Icon,
+  Delete01Icon,
+  GridIcon,
+  Menu01Icon,
+  Camera01Icon,
+  Tag01Icon,
+  PaintBrush01Icon,
+  CheckmarkCircle01Icon,
+  Clock01Icon,
+  AlertCircleIcon
+} from "@hugeicons/core-free-icons"
+
 import { useState, useEffect } from 'react'
 import { TwoLevelLayout } from '@/components/ui/two-level-layout'
 import { Header } from '@/components/ui/header'
@@ -7,23 +25,7 @@ import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { AdvancedDataTable } from '@/components/ui/advanced-data-table'
 import { Badge } from '@/components/ui/badge'
-import { 
-  Image,
-  Upload,
-  Download,
-  Eye,
-  Edit,
-  Trash2,
-  Grid3X3,
-  List,
-  Camera,
-  Tag,
-  Palette,
-  FileImage,
-  CheckCircle,
-  Clock,
-  AlertTriangle
-} from 'lucide-react'
+
 import { galleryImageService } from '@/services/masterdata'
 import { GalleryImage as GalleryImageType, MasterDataFilters } from '@/types/masterdata'
 
@@ -378,7 +380,7 @@ export default function GalleryImagesPage() {
       cell: ({ row }: any) => (
         <div className="flex items-center space-x-3">
           <div className="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center">
-            <Image className="h-6 w-6 text-gray-400" />
+            <HugeiconsIcon icon={Image01Icon} className="h-6 w-6 text-gray-400" />
           </div>
           <div>
             <div className="font-medium">{row.getValue('fileName')}</div>
@@ -451,9 +453,9 @@ export default function GalleryImagesPage() {
       cell: ({ row }: any) => (
         <div className="flex items-center">
           {row.getValue('isApproved') ? (
-            <CheckCircle className="h-4 w-4 text-green-600" />
+            <HugeiconsIcon icon={CheckmarkCircle01Icon} className="h-4 w-4 text-green-600" />
           ) : (
-            <Clock className="h-4 w-4 text-yellow-600" />
+            <HugeiconsIcon icon={Clock01Icon} className="h-4 w-4 text-yellow-600" />
           )}
         </div>
       )
@@ -472,7 +474,7 @@ export default function GalleryImagesPage() {
   const ImageCard = ({ image }: { image: GalleryImage }) => (
     <Card className="p-4">
       <div className="aspect-square bg-gray-100 rounded-lg mb-3 flex items-center justify-center">
-        <Image className="h-12 w-12 text-gray-400" />
+        <HugeiconsIcon icon={Image01Icon} className="h-12 w-12 text-gray-400" />
       </div>
       
       <div className="space-y-2">
@@ -513,12 +515,12 @@ export default function GalleryImagesPage() {
           </Badge>
           <div className="flex items-center space-x-1">
             {image.isApproved ? (
-              <CheckCircle className="h-4 w-4 text-green-600" />
+              <HugeiconsIcon icon={CheckmarkCircle01Icon} className="h-4 w-4 text-green-600" />
             ) : (
-              <Clock className="h-4 w-4 text-yellow-600" />
+              <HugeiconsIcon icon={Clock01Icon} className="h-4 w-4 text-yellow-600" />
             )}
             {image.seoOptimized && (
-              <Tag className="h-4 w-4 text-blue-600" />
+              <HugeiconsIcon icon={Tag01Icon} className="h-4 w-4 text-blue-600" />
             )}
           </div>
         </div>
@@ -533,11 +535,11 @@ export default function GalleryImagesPage() {
       
       <div className="flex space-x-2 mt-4">
         <Button size="sm" variant="outline" className="flex-1">
-          <Eye className="h-4 w-4 mr-1" />
+          <HugeiconsIcon icon={ViewIcon} className="h-4 w-4 mr-1" />
           View
         </Button>
         <Button size="sm" variant="outline" className="flex-1">
-          <Edit className="h-4 w-4 mr-1" />
+          <HugeiconsIcon icon={PencilEdit01Icon} className="h-4 w-4 mr-1" />
           Edit
         </Button>
       </div>
@@ -562,7 +564,7 @@ export default function GalleryImagesPage() {
                 <p className="text-2xl font-bold mt-1">{totalImages}</p>
                 <p className="text-sm text-blue-600 mt-1">All files</p>
               </div>
-              <FileImage className="h-8 w-8 text-blue-600" />
+              <HugeiconsIcon icon={Image01Icon} className="h-8 w-8 text-blue-600" />
             </div>
           </Card>
 
@@ -573,7 +575,7 @@ export default function GalleryImagesPage() {
                 <p className="text-2xl font-bold mt-1 text-green-600">{activeImages}</p>
                 <p className="text-sm text-green-600 mt-1">In use</p>
               </div>
-              <CheckCircle className="h-8 w-8 text-green-600" />
+              <HugeiconsIcon icon={CheckmarkCircle01Icon} className="h-8 w-8 text-green-600" />
             </div>
           </Card>
 
@@ -584,7 +586,7 @@ export default function GalleryImagesPage() {
                 <p className="text-2xl font-bold mt-1 text-purple-600">{approvedImages}</p>
                 <p className="text-sm text-purple-600 mt-1">Ready to use</p>
               </div>
-              <CheckCircle className="h-8 w-8 text-purple-600" />
+              <HugeiconsIcon icon={CheckmarkCircle01Icon} className="h-8 w-8 text-purple-600" />
             </div>
           </Card>
 
@@ -597,7 +599,7 @@ export default function GalleryImagesPage() {
                 </p>
                 <p className="text-sm text-teal-600 mt-1">Storage used</p>
               </div>
-              <Download className="h-8 w-8 text-teal-600" />
+              <HugeiconsIcon icon={Download01Icon} className="h-8 w-8 text-teal-600" />
             </div>
           </Card>
         </div>
@@ -610,7 +612,7 @@ export default function GalleryImagesPage() {
               size="sm"
               onClick={() => setViewMode('grid')}
             >
-              <Grid3X3 className="h-4 w-4 mr-2" />
+              <HugeiconsIcon icon={GridIcon} className="h-4 w-4 mr-2" />
               Grid
             </Button>
             <Button
@@ -618,22 +620,22 @@ export default function GalleryImagesPage() {
               size="sm"
               onClick={() => setViewMode('table')}
             >
-              <List className="h-4 w-4 mr-2" />
+              <HugeiconsIcon icon={Menu01Icon} className="h-4 w-4 mr-2" />
               Table
             </Button>
           </div>
           
           <div className="flex items-center space-x-2">
             <Button variant="outline" size="sm">
-              <Palette className="h-4 w-4 mr-2" />
+              <HugeiconsIcon icon={PaintBrush01Icon} className="h-4 w-4 mr-2" />
               Bulk Process
             </Button>
             <Button variant="outline" size="sm">
-              <Camera className="h-4 w-4 mr-2" />
+              <HugeiconsIcon icon={Camera01Icon} className="h-4 w-4 mr-2" />
               Templates
             </Button>
             <Button size="sm">
-              <Upload className="h-4 w-4 mr-2" />
+              <HugeiconsIcon icon={Upload01Icon} className="h-4 w-4 mr-2" />
               Upload Images
             </Button>
           </div>

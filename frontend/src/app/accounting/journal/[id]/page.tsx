@@ -2,24 +2,26 @@
 
 import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
+import { HugeiconsIcon } from '@hugeicons/react'
+import {
+  ArrowLeft01Icon,
+  PencilEdit01Icon,
+  CheckmarkCircle01Icon,
+  Calendar01Icon,
+  Tag01Icon,
+  Archive01Icon,
+  Dollar01Icon,
+  File01Icon,
+  UserIcon,
+  Delete01Icon
+} from '@hugeicons/core-free-icons'
 import { TwoLevelLayout } from '@/components/ui/two-level-layout'
 import { Header } from '@/components/ui/header'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
-import { 
-  ArrowLeft,
-  Edit, 
-  Trash2, 
-  CheckCircle,
-  FileText,
-  Calendar,
-  DollarSign,
-  User,
-  Hash,
-  Archive
-} from 'lucide-react'
+
 import type { JournalEntry } from '@/types/accounting'
 import { journalEntryService } from '@/services/accounting'
 import Link from 'next/link'
@@ -170,7 +172,7 @@ export default function JournalEntryDetailPage() {
             <p className="text-gray-500 dark:text-gray-400 mb-4">The journal entry you&apos;re looking for doesn&apos;t exist.</p>
             <Link href="/accounting/journal">
               <Button variant="outline">
-                <ArrowLeft className="h-4 w-4 mr-2" />
+                <HugeiconsIcon icon={ArrowLeft01Icon} className="h-4 w-4 mr-2" />
                 Back to Journal Entries
               </Button>
             </Link>
@@ -196,7 +198,7 @@ export default function JournalEntryDetailPage() {
           <div className="flex items-center space-x-2">
             <Link href="/accounting/journal">
               <Button variant="outline" size="sm">
-                <ArrowLeft className="h-4 w-4 mr-2" />
+                <HugeiconsIcon icon={ArrowLeft01Icon} className="h-4 w-4 mr-2" />
                 Back to Journal Entries
               </Button>
             </Link>
@@ -204,7 +206,7 @@ export default function JournalEntryDetailPage() {
               <>
                 <Link href={`/accounting/journal/${journalEntry.id}/edit`}>
                   <Button variant="outline" size="sm">
-                    <Edit className="h-4 w-4 mr-2" />
+                    <HugeiconsIcon icon={PencilEdit01Icon} className="h-4 w-4 mr-2" />
                     Edit
                   </Button>
                 </Link>
@@ -214,7 +216,7 @@ export default function JournalEntryDetailPage() {
                   onClick={handlePostEntry}
                   className="text-green-600 border-green-200 hover:bg-green-50"
                 >
-                  <CheckCircle className="h-4 w-4 mr-2" />
+                  <HugeiconsIcon icon={CheckmarkCircle01Icon} className="h-4 w-4 mr-2" />
                   Post
                 </Button>
               </>
@@ -245,7 +247,7 @@ export default function JournalEntryDetailPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-4">
                   <div className="flex items-center space-x-3">
-                    <Calendar className="h-5 w-5 text-gray-400 dark:text-gray-500" />
+                    <HugeiconsIcon icon={Calendar01Icon} className="h-5 w-5 text-gray-400 dark:text-gray-500" />
                     <div>
                       <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Entry Date</p>
                       <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -259,7 +261,7 @@ export default function JournalEntryDetailPage() {
                   </div>
 
                   <div className="flex items-center space-x-3">
-                    <Hash className="h-5 w-5 text-gray-400 dark:text-gray-500" />
+                    <HugeiconsIcon icon={Tag01Icon} className="h-5 w-5 text-gray-400 dark:text-gray-500" />
                     <div>
                       <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Period</p>
                       <p className="text-sm text-gray-600 dark:text-gray-400">{journalEntry.period}</p>
@@ -267,7 +269,7 @@ export default function JournalEntryDetailPage() {
                   </div>
 
                   <div className="flex items-center space-x-3">
-                    <Archive className="h-5 w-5 text-gray-400 dark:text-gray-500" />
+                    <HugeiconsIcon icon={Archive01Icon} className="h-5 w-5 text-gray-400 dark:text-gray-500" />
                     <div>
                       <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Fiscal Year</p>
                       <p className="text-sm text-gray-600 dark:text-gray-400">{journalEntry.fiscal_year}</p>
@@ -277,7 +279,7 @@ export default function JournalEntryDetailPage() {
 
                 <div className="space-y-4">
                   <div className="flex items-center space-x-3">
-                    <DollarSign className="h-5 w-5 text-gray-400 dark:text-gray-500" />
+                    <HugeiconsIcon icon={Dollar01Icon} className="h-5 w-5 text-gray-400 dark:text-gray-500" />
                     <div>
                       <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Total Amount</p>
                       <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -292,7 +294,7 @@ export default function JournalEntryDetailPage() {
 
                   {journalEntry.source_document && (
                     <div className="flex items-center space-x-3">
-                      <FileText className="h-5 w-5 text-gray-400 dark:text-gray-500" />
+                      <HugeiconsIcon icon={File01Icon} className="h-5 w-5 text-gray-400 dark:text-gray-500" />
                       <div>
                         <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Source Document</p>
                         <p className="text-sm text-gray-600 dark:text-gray-400">{journalEntry.source_document}</p>
@@ -301,7 +303,7 @@ export default function JournalEntryDetailPage() {
                   )}
 
                   <div className="flex items-center space-x-3">
-                    <User className="h-5 w-5 text-gray-400 dark:text-gray-500" />
+                    <HugeiconsIcon icon={UserIcon} className="h-5 w-5 text-gray-400 dark:text-gray-500" />
                     <div>
                       <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Created By</p>
                       <p className="text-sm text-gray-600 dark:text-gray-400">{journalEntry.created_by}</p>
@@ -415,7 +417,7 @@ export default function JournalEntryDetailPage() {
                   <>
                     <Link href={`/accounting/journal/${journalEntry.id}/edit`} className="w-full">
                       <Button variant="outline" className="w-full justify-start">
-                        <Edit className="h-4 w-4 mr-2" />
+                        <HugeiconsIcon icon={PencilEdit01Icon} className="h-4 w-4 mr-2" />
                         Edit Entry
                       </Button>
                     </Link>
@@ -425,14 +427,14 @@ export default function JournalEntryDetailPage() {
                       className="w-full justify-start text-green-600 border-green-200 hover:bg-green-50"
                       onClick={handlePostEntry}
                     >
-                      <CheckCircle className="h-4 w-4 mr-2" />
+                      <HugeiconsIcon icon={CheckmarkCircle01Icon} className="h-4 w-4 mr-2" />
                       Post Entry
                     </Button>
                   </>
                 )}
                 
                 <Button variant="outline" className="w-full justify-start">
-                  <FileText className="h-4 w-4 mr-2" />
+                  <HugeiconsIcon icon={File01Icon} className="h-4 w-4 mr-2" />
                   Print Entry
                 </Button>
                 
@@ -444,7 +446,7 @@ export default function JournalEntryDetailPage() {
                     className="w-full justify-start text-red-600 border-red-200 hover:bg-red-50"
                     onClick={handleDeleteEntry}
                   >
-                    <Trash2 className="h-4 w-4 mr-2" />
+                    <HugeiconsIcon icon={Delete01Icon} className="h-4 w-4 mr-2" />
                     Delete Entry
                   </Button>
                 )}

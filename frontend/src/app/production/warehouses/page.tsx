@@ -11,22 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Progress } from '@/components/ui/progress'
-import { 
-  Package, 
-  Plus, 
-  Eye, 
-  Edit, 
-  Trash2, 
-  Filter, 
-  Download, 
-  MapPin, 
-  Phone, 
-  User, 
-  Building, 
-  TrendingUp,
-  BarChart3,
-  Search
-} from 'lucide-react'
+
 import Link from 'next/link'
 import { ProductionService } from '@/services/production'
 import type { Warehouse, WarehouseFilters } from '@/types/production'
@@ -304,11 +289,11 @@ export default function WarehousesPage() {
           </Button>
           <Button variant="ghost" size="sm" asChild>
             <Link href={`/production/warehouses/${warehouse?.id || ''}/edit`}>
-              <Edit className="h-4 w-4" />
+              <PencilSimple className="h-4 w-4" />
             </Link>
           </Button>
           <Button variant="ghost" size="sm">
-            <Trash2 className="h-4 w-4" />
+            <Trash className="h-4 w-4" />
           </Button>
         </div>
       )
@@ -324,11 +309,11 @@ export default function WarehousesPage() {
         actions={
           <div className="flex items-center space-x-3">
             <Button variant="outline" size="sm">
-              <BarChart3 className="h-4 w-4 mr-2" />
+              <ChartBar className="h-4 w-4 mr-2" />
               Utilization Report
             </Button>
             <Button variant="outline" size="sm">
-              <Download className="h-4 w-4 mr-2" />
+              <DownloadSimple className="h-4 w-4 mr-2" />
               Export
             </Button>
             <Button size="sm" asChild>
@@ -351,7 +336,7 @@ export default function WarehousesPage() {
                 <p className="text-2xl font-bold mt-1">{summaryStats.total}</p>
                 <p className="text-sm text-green-600 mt-1">{summaryStats.active} active</p>
               </div>
-              <Building className="h-8 w-8 text-blue-600" />
+              <BuildingOffice className="h-8 w-8 text-blue-600" />
             </div>
           </Card>
 
@@ -373,7 +358,7 @@ export default function WarehousesPage() {
                 <p className="text-2xl font-bold mt-1">{summaryStats.totalStock.toLocaleString()}</p>
                 <p className="text-sm text-green-600 mt-1">units stored</p>
               </div>
-              <TrendingUp className="h-8 w-8 text-purple-600" />
+              <TrendUp className="h-8 w-8 text-purple-600" />
             </div>
           </Card>
 
@@ -386,7 +371,7 @@ export default function WarehousesPage() {
                   <Progress value={summaryStats.averageUtilization} className="h-2" />
                 </div>
               </div>
-              <BarChart3 className="h-8 w-8 text-orange-600" />
+              <ChartBar className="h-8 w-8 text-orange-600" />
             </div>
           </Card>
         </div>
@@ -395,7 +380,7 @@ export default function WarehousesPage() {
         <div className="flex items-center justify-between gap-4">
           <div className="flex-1 max-w-md">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <MagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search warehouses..."
                 value={searchTerm}
@@ -408,7 +393,7 @@ export default function WarehousesPage() {
           <div className="flex items-center gap-2">
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-32">
-                <Filter className="h-4 w-4 mr-2" />
+                <Funnel className="h-4 w-4 mr-2" />
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
@@ -527,11 +512,11 @@ export default function WarehousesPage() {
                         </Button>
                         <Button variant="ghost" size="sm" asChild>
                           <Link href={`/production/warehouses/${warehouse.id}/edit`}>
-                            <Edit className="h-4 w-4" />
+                            <PencilSimple className="h-4 w-4" />
                           </Link>
                         </Button>
                         <Button variant="ghost" size="sm">
-                          <Trash2 className="h-4 w-4" />
+                          <Trash className="h-4 w-4" />
                         </Button>
                       </div>
                     </td>

@@ -1,0 +1,31 @@
+# Traefik Static Configuration for Malaka ERP (Development Mode)
+# No HTTPS, simpler setup for local development
+
+global:
+  checkNewVersion: false
+  sendAnonymousUsage: false
+
+api:
+  dashboard: true
+  insecure: true
+
+entryPoints:
+  web:
+    address: ":80"
+
+  traefik:
+    address: ":8081"
+
+providers:
+  file:
+    directory: /Users/pro/Dev/malaka/traefik/dynamic
+    watch: true
+
+log:
+  level: DEBUG
+  filePath: /Users/pro/Dev/malaka/traefik/logs/traefik.log
+  format: common
+
+accessLog:
+  filePath: /Users/pro/Dev/malaka/traefik/logs/access.log
+  format: common

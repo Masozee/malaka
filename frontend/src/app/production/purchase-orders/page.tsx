@@ -11,25 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Progress } from '@/components/ui/progress'
-import { 
-  ShoppingCart, 
-  Plus, 
-  Eye, 
-  Edit, 
-  Trash2, 
-  Download, 
-  Calendar, 
-  Package, 
-  DollarSign, 
-  Clock,
-  CheckCircle,
-  AlertTriangle,
-  Truck,
-  Search,
-  BarChart3,
-  Filter,
-  Building
-} from 'lucide-react'
+
 import Link from 'next/link'
 import { mockPurchaseOrders, mockWarehouses, mockSuppliers } from '@/services/production'
 import type { PurchaseOrder, PurchaseOrderFilters } from '@/types/production'
@@ -78,12 +60,12 @@ export default function PurchaseOrdersPage() {
 
   const getStatusBadge = (status: PurchaseOrder['status']) => {
     const statusConfig = {
-      draft: { variant: 'secondary' as const, label: 'Draft', icon: Edit },
+      draft: { variant: 'secondary' as const, label: 'Draft', icon: PencilSimple },
       sent: { variant: 'outline' as const, label: 'Sent', icon: Clock },
       confirmed: { variant: 'default' as const, label: 'Confirmed', icon: CheckCircle },
       partial: { variant: 'default' as const, label: 'Partial', icon: Package },
       delivered: { variant: 'default' as const, label: 'Delivered', icon: Truck },
-      cancelled: { variant: 'destructive' as const, label: 'Cancelled', icon: AlertTriangle }
+      cancelled: { variant: 'destructive' as const, label: 'Cancelled', icon: Warning }
     }
     return statusConfig[status] || { variant: 'secondary' as const, label: status, icon: Clock }
   }
@@ -250,7 +232,7 @@ export default function PurchaseOrdersPage() {
           </Button>
           <Button variant="ghost" size="sm" asChild>
             <Link href={`/production/purchase-orders/${po?.id || ''}/edit`}>
-              <Edit className="h-4 w-4" />
+              <PencilSimple className="h-4 w-4" />
             </Link>
           </Button>
         </div>
@@ -271,7 +253,7 @@ export default function PurchaseOrdersPage() {
               Schedule
             </Button>
             <Button variant="outline" size="sm">
-              <Download className="h-4 w-4 mr-2" />
+              <DownloadSimple className="h-4 w-4 mr-2" />
               Export
             </Button>
             <Button size="sm" asChild>
@@ -328,7 +310,7 @@ export default function PurchaseOrdersPage() {
                 </p>
                 <p className="text-sm text-green-600 mt-1">This period</p>
               </div>
-              <DollarSign className="h-8 w-8 text-green-600" />
+              <CurrencyDollar className="h-8 w-8 text-green-600" />
             </div>
           </Card>
         </div>
@@ -337,7 +319,7 @@ export default function PurchaseOrdersPage() {
         <div className="flex items-center justify-between gap-4">
           <div className="flex-1 max-w-md">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <MagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input 
                 placeholder="Search orders..." 
                 className="pl-9"
@@ -363,7 +345,7 @@ export default function PurchaseOrdersPage() {
             
             <Select value={priorityFilter} onValueChange={setPriorityFilter}>
               <SelectTrigger className="w-36">
-                <AlertTriangle className="h-4 w-4 mr-2" />
+                <Warning className="h-4 w-4 mr-2" />
                 <SelectValue placeholder="Priority" />
               </SelectTrigger>
               <SelectContent>
@@ -376,7 +358,7 @@ export default function PurchaseOrdersPage() {
             
             <Select value={supplierFilter} onValueChange={setSupplierFilter}>
               <SelectTrigger className="w-44">
-                <Building className="h-4 w-4 mr-2" />
+                <BuildingOffice className="h-4 w-4 mr-2" />
                 <SelectValue placeholder="All Suppliers" />
               </SelectTrigger>
               <SelectContent>
@@ -407,7 +389,7 @@ export default function PurchaseOrdersPage() {
         {summaryStats.urgent > 0 && (
           <Card className="p-6 border-red-200 bg-red-50">
             <div className="flex items-center space-x-3">
-              <AlertTriangle className="h-6 w-6 text-red-600" />
+              <Warning className="h-6 w-6 text-red-600" />
               <div className="flex-1">
                 <h3 className="text-lg font-semibold text-red-800">Urgent Orders Alert</h3>
                 <p className="text-red-700 mt-1">
@@ -415,7 +397,7 @@ export default function PurchaseOrdersPage() {
                 </p>
               </div>
               <Button variant="outline" className="border-red-300 text-red-700 hover:bg-red-100">
-                <AlertTriangle className="h-4 w-4 mr-2" />
+                <Warning className="h-4 w-4 mr-2" />
                 Review Urgent Orders
               </Button>
             </div>

@@ -7,21 +7,6 @@ import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { AdvancedDataTable, AdvancedColumn } from '@/components/ui/advanced-data-table'
 import { Badge } from '@/components/ui/badge'
-import { 
-  Store,
-  Users,
-  MapPin,
-  Phone,
-  Calendar,
-  TrendingUp,
-  DollarSign,
-  Award,
-  CheckCircle,
-  XCircle,
-  AlertCircle,
-  User,
-  Clock
-} from 'lucide-react'
 
 interface SPGAssignment {
   id: string
@@ -347,7 +332,7 @@ export default function SPGStoresPage() {
         const color = performance >= 100 ? 'text-green-600' : performance >= 90 ? 'text-yellow-600' : 'text-red-600'
         return (
           <div className={`font-bold ${color} flex items-center`}>
-            <TrendingUp className="h-4 w-4 mr-1" />
+            <TrendUp className="h-4 w-4 mr-1" />
             {performance}%
           </div>
         )
@@ -535,7 +520,7 @@ export default function SPGStoresPage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-yellow-100 rounded-lg">
-                <AlertCircle className="h-5 w-5 text-yellow-600" />
+                <WarningCircle className="h-5 w-5 text-yellow-600" />
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600">On Leave</p>
@@ -547,7 +532,7 @@ export default function SPGStoresPage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-purple-100 rounded-lg">
-                <DollarSign className="h-5 w-5 text-purple-600" />
+                <CurrencyDollar className="h-5 w-5 text-purple-600" />
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600">Total Sales</p>
@@ -561,7 +546,7 @@ export default function SPGStoresPage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-indigo-100 rounded-lg">
-                <TrendingUp className="h-5 w-5 text-indigo-600" />
+                <TrendUp className="h-5 w-5 text-indigo-600" />
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600">Achievement</p>
@@ -589,7 +574,7 @@ export default function SPGStoresPage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-orange-100 rounded-lg">
-                <DollarSign className="h-5 w-5 text-orange-600" />
+                <CurrencyDollar className="h-5 w-5 text-orange-600" />
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600">Total Commission</p>

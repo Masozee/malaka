@@ -10,28 +10,7 @@ import { AdvancedDataTable } from '@/components/ui/advanced-data-table'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { 
-  Zap,
-  Plus,
-  Eye,
-  Edit,
-  Filter,
-  Download,
-  TrendingUp,
-  TrendingDown,
-  CheckCircle,
-  AlertCircle,
-  Search,
-  Building,
-  Globe,
-  Star,
-  Users,
-  DollarSign,
-  BarChart3,
-  MapPin,
-  Calendar,
-  Crown
-} from 'lucide-react'
+
 import Link from 'next/link'
 
 // Competitor types
@@ -351,7 +330,7 @@ export default function SalesCompetitorsPage() {
   const getPositionBadge = (position: string) => {
     const config = {
       leader: { variant: 'default' as const, label: 'Leader', icon: Crown },
-      challenger: { variant: 'secondary' as const, label: 'Challenger', icon: TrendingUp },
+      challenger: { variant: 'secondary' as const, label: 'Challenger', icon: TrendUp },
       follower: { variant: 'outline' as const, label: 'Follower', icon: Users },
       niche: { variant: 'secondary' as const, label: 'Niche', icon: Star }
     }
@@ -491,7 +470,7 @@ export default function SalesCompetitorsPage() {
           </Button>
           <Button variant="ghost" size="sm" asChild>
             <Link href={`/sales/competitors/${competitor.id}/edit`}>
-              <Edit className="h-4 w-4" />
+              <PencilSimple className="h-4 w-4" />
             </Link>
           </Button>
         </div>
@@ -509,7 +488,7 @@ export default function SalesCompetitorsPage() {
           actions={
             <div className="flex items-center space-x-3">
               <Button variant="outline" size="sm">
-                <Download className="h-4 w-4 mr-2" />
+                <DownloadSimple className="h-4 w-4 mr-2" />
                 Export Report
               </Button>
               <Button size="sm" asChild>
@@ -531,7 +510,7 @@ export default function SalesCompetitorsPage() {
                 <p className="text-2xl font-bold mt-1">{summaryStats.totalCompetitors}</p>
                 <p className="text-sm text-blue-600 mt-1">Being tracked</p>
               </div>
-              <Zap className="h-8 w-8 text-blue-600" />
+              <Lightning className="h-8 w-8 text-blue-600" />
             </div>
           </Card>
 
@@ -542,7 +521,7 @@ export default function SalesCompetitorsPage() {
                 <p className="text-2xl font-bold mt-1 text-red-600">{summaryStats.criticalThreats}</p>
                 <p className="text-sm text-red-600 mt-1">High priority</p>
               </div>
-              <AlertCircle className="h-8 w-8 text-red-600" />
+              <WarningCircle className="h-8 w-8 text-red-600" />
             </div>
           </Card>
 
@@ -577,7 +556,7 @@ export default function SalesCompetitorsPage() {
                 </p>
                 <p className="text-sm text-purple-600 mt-1">Combined</p>
               </div>
-              <BarChart3 className="h-8 w-8 text-purple-600" />
+              <ChartBar className="h-8 w-8 text-purple-600" />
             </div>
           </Card>
 
@@ -590,7 +569,7 @@ export default function SalesCompetitorsPage() {
                 </p>
                 <p className="text-sm text-green-600 mt-1">IDR per company</p>
               </div>
-              <DollarSign className="h-8 w-8 text-green-600" />
+              <CurrencyDollar className="h-8 w-8 text-green-600" />
             </div>
           </Card>
 
@@ -611,12 +590,12 @@ export default function SalesCompetitorsPage() {
         {/* Filters */}
         <Card className="p-6">
           <div className="flex items-center space-x-4">
-            <Filter className="h-5 w-5 text-muted-foreground" />
+            <Funnel className="h-5 w-5 text-muted-foreground" />
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 flex-1">
               <div className="space-y-2">
                 <Label htmlFor="search">Search</Label>
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <MagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="search"
                     placeholder="Search competitors..."
@@ -713,7 +692,7 @@ export default function SalesCompetitorsPage() {
                 <Card key={competitor.id} className="p-6 hover: transition-shadow">
                   <div className="flex justify-between items-start mb-4">
                     <div className="flex items-center space-x-2">
-                      <Zap className="h-5 w-5 text-blue-600" />
+                      <Lightning className="h-5 w-5 text-blue-600" />
                       <div>
                         <Link 
                           href={`/sales/competitors/${competitor.id}`}
@@ -815,7 +794,7 @@ export default function SalesCompetitorsPage() {
                       </Button>
                       <Button variant="outline" size="sm" asChild>
                         <Link href={`/sales/competitors/${competitor.id}/edit`}>
-                          <Edit className="h-4 w-4" />
+                          <PencilSimple className="h-4 w-4" />
                         </Link>
                       </Button>
                     </div>
@@ -850,7 +829,7 @@ export default function SalesCompetitorsPage() {
         {summaryStats.criticalThreats > 0 && (
           <Card className="p-6 border-red-200 bg-red-50">
             <div className="flex items-center space-x-3">
-              <AlertCircle className="h-6 w-6 text-red-600" />
+              <WarningCircle className="h-6 w-6 text-red-600" />
               <div className="flex-1">
                 <h3 className="text-lg font-semibold text-red-800">Critical Threat Alert</h3>
                 <p className="text-red-700 mt-1">

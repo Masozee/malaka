@@ -11,14 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { TwoLevelLayout } from '@/components/ui/two-level-layout'
 import { Header } from '@/components/ui/header'
 import { Separator } from '@/components/ui/separator'
-import { 
-  ArrowLeft,
-  Save,
-  X,
-  Plus,
-  Trash2,
-  Calendar
-} from 'lucide-react'
+
 import Link from 'next/link'
 
 // Types
@@ -289,7 +282,7 @@ export default function EditSalesOrderPage() {
               </Link>
             </Button>
             <Button onClick={handleSave} disabled={saving}>
-              <Save className="h-4 w-4 mr-2" />
+              <FloppyDisk className="h-4 w-4 mr-2" />
               {saving ? 'Saving...' : 'Save Changes'}
             </Button>
           </div>
@@ -437,7 +430,7 @@ export default function EditSalesOrderPage() {
                     onClick={() => removeOrderItem(item.id)}
                     disabled={order.items.length === 1}
                   >
-                    <Trash2 className="h-4 w-4" />
+                    <Trash className="h-4 w-4" />
                   </Button>
                 </div>
                 

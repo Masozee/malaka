@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { TwoLevelLayout } from '@/components/ui/two-level-layout'
 import { Header } from '@/components/ui/header'
 import { AdvancedDataTable, AdvancedColumn } from '@/components/ui/advanced-data-table'
-import { DollarSign, Users, Clock, TrendingUp, Calculator, FileText, Settings } from 'lucide-react'
+
 import type { PayrollPeriod } from '@/types/hr'
 import { HRService } from '@/services/hr'
 import { formatCurrency, formatDate, formatPeriod } from '@/lib/payroll-utils'
@@ -57,7 +57,7 @@ export default function PayrollDashboard() {
       value: formatCurrency(currentPeriod?.totalGrossPay, mounted),
       change: '+5.2% from last month',
       changeType: 'positive' as const,
-      icon: DollarSign,
+      icon: CurrencyDollar,
       color: 'green'
     },
     {
@@ -65,7 +65,7 @@ export default function PayrollDashboard() {
       value: formatCurrency(currentPeriod?.totalNetPay, mounted),
       change: '+4.8% from last month',
       changeType: 'positive' as const,
-      icon: TrendingUp,
+      icon: TrendUp,
       color: 'purple'
     },
     {
@@ -96,9 +96,9 @@ export default function PayrollDashboard() {
       color: 'green'
     },
     {
-      title: 'Payroll Settings',
+      title: 'Payroll Gear',
       description: 'Configure tax rates, allowances, and policies',
-      icon: Settings,
+      icon: Gear,
       href: '/hr/payroll/settings',
       color: 'purple'
     }

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.malaka.backend</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/Users/pro/Dev/malaka/backend/bin/malaka-server</string>
+    </array>
+
+    <key>WorkingDirectory</key>
+    <string>/Users/pro/Dev/malaka/backend</string>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>GIN_MODE</key>
+        <string>release</string>
+        <key>PATH</key>
+        <string>/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/homebrew/bin</string>
+    </dict>
+
+    <key>RunAtLoad</key>
+    <true/>
+
+    <key>KeepAlive</key>
+    <dict>
+        <key>SuccessfulExit</key>
+        <false/>
+    </dict>
+
+    <key>StandardOutPath</key>
+    <string>/Users/pro/Dev/malaka/logs/backend/stdout.log</string>
+
+    <key>StandardErrorPath</key>
+    <string>/Users/pro/Dev/malaka/logs/backend/stderr.log</string>
+
+    <key>ThrottleInterval</key>
+    <integer>10</integer>
+
+    <key>SoftResourceLimits</key>
+    <dict>
+        <key>NumberOfFiles</key>
+        <integer>65536</integer>
+    </dict>
+
+    <key>HardResourceLimits</key>
+    <dict>
+        <key>NumberOfFiles</key>
+        <integer>65536</integer>
+    </dict>
+</dict>
+</plist>

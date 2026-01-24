@@ -7,21 +7,6 @@ import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { AdvancedDataTable } from '@/components/ui/advanced-data-table'
 import { Badge } from '@/components/ui/badge'
-import { 
-  RefreshCw,
-  Package,
-  Truck,
-  AlertTriangle,
-  CheckCircle,
-  Clock,
-  DollarSign,
-  User,
-  Calendar,
-  FileText,
-  Download,
-  Eye,
-  ArrowLeft
-} from 'lucide-react'
 
 interface ReturnSupplier {
   id: string
@@ -532,7 +517,7 @@ export default function ReturnSupplierPage() {
           View Details
         </Button>
         <Button size="sm" className="flex-1">
-          <Download className="h-4 w-4 mr-1" />
+          <DownloadSimple className="h-4 w-4 mr-1" />
           Download
         </Button>
       </div>
@@ -552,7 +537,7 @@ export default function ReturnSupplierPage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-blue-100 rounded-lg">
-                <RefreshCw className="h-5 w-5 text-blue-600" />
+                <ArrowsClockwise className="h-5 w-5 text-blue-600" />
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600">Total Returns</p>
@@ -600,7 +585,7 @@ export default function ReturnSupplierPage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-red-100 rounded-lg">
-                <AlertTriangle className="h-5 w-5 text-red-600" />
+                <Warning className="h-5 w-5 text-red-600" />
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600">Rejected</p>
@@ -612,7 +597,7 @@ export default function ReturnSupplierPage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-purple-100 rounded-lg">
-                <DollarSign className="h-5 w-5 text-purple-600" />
+                <CurrencyDollar className="h-5 w-5 text-purple-600" />
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600">Total Value</p>
@@ -626,7 +611,7 @@ export default function ReturnSupplierPage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-indigo-100 rounded-lg">
-                <DollarSign className="h-5 w-5 text-indigo-600" />
+                <CurrencyDollar className="h-5 w-5 text-indigo-600" />
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600">Expected Refunds</p>

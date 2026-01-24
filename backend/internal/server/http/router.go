@@ -16,6 +16,10 @@ import (
 	// Inventory imports
 	inventory_handlers "malaka/internal/modules/inventory/presentation/http/handlers"
 	inventory_routes "malaka/internal/modules/inventory/presentation/http/routes"
+
+	// Procurement imports
+	procurement_handlers "malaka/internal/modules/procurement/presentation/http/handlers"
+	procurement_routes "malaka/internal/modules/procurement/presentation/http/routes"
 )
 
 func SetupRouter(router *gin.Engine, c *container.Container) {
@@ -98,4 +102,15 @@ func SetupRouter(router *gin.Engine, c *container.Container) {
 	
 	// Register inventory routes under v1 API
 	inventory_routes.RegisterInventoryRoutes(apiV1, purchaseOrderHandler, goodsReceiptHandler, stockHandler, transferHandler, draftOrderHandler, stockAdjustmentHandler, stockOpnameHandler, returnSupplierHandler, simpleGoodsIssueHandler, rfqHandler)
+
+	// Initialize procurement handlers
+	purchaseRequestHandler := procurement_handlers.NewPurchaseRequestHandler(c.PurchaseRequestService, c.SqlxDB)
+	procurementPurchaseOrderHandler := procurement_handlers.NewPurchaseOrderHandler(c.ProcurementPurchaseOrderService, c.SqlxDB)
+	contractHandler := procurement_handlers.NewContractHandler(c.ContractService)
+	vendorEvaluationHandler := procurement_handlers.NewVendorEvaluationHandler(c.VendorEvaluationService, c.SqlxDB)
+	analyticsHandler := procurement_handlers.NewAnalyticsHandler(c.ProcurementAnalyticsService)
+	procurementRFQHandler := procurement_handlers.NewRFQHandler(c.ProcurementRFQService, c.SqlxDB)
+
+	// Register procurement routes under v1 API
+	procurement_routes.RegisterProcurementRoutes(apiV1, purchaseRequestHandler, procurementPurchaseOrderHandler, contractHandler, vendorEvaluationHandler, analyticsHandler, procurementRFQHandler)
 }

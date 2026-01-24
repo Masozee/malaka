@@ -12,26 +12,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Progress } from '@/components/ui/progress'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu'
-import { 
-  Building,
-  Plus,
-  Eye,
-  Edit,
-  Trash2,
-  Filter,
-  Download,
-  Calendar,
-  DollarSign,
-  TrendingDown,
-  Package,
-  Factory,
-  Car,
-  Monitor,
-  Settings,
-  AlertTriangle,
-  MoreHorizontal,
-  Search
-} from 'lucide-react'
+
 import Link from 'next/link'
 
 // Fixed Asset types and interfaces
@@ -320,27 +301,15 @@ export default function FixedAssetsPage() {
     criticalAssets: mockFixedAssets.filter(asset => asset.condition === 'critical' || asset.condition === 'poor').length
   }
 
-  const getCategoryIcon = (category: string) => {
+  const getCategoryLabel = (category: string) => {
     switch (category) {
-      case 'building': return Building
-      case 'machinery': return Factory
-      case 'vehicle': return Car
-      case 'computer': return Monitor
-      case 'equipment': return Settings
-      case 'furniture': return Package
-      default: return Package
-    }
-  }
-
-  const getCategoryColor = (category: string) => {
-    switch (category) {
-      case 'building': return 'text-blue-600'
-      case 'machinery': return 'text-red-600'
-      case 'vehicle': return 'text-green-600'
-      case 'computer': return 'text-purple-600'
-      case 'equipment': return 'text-orange-600'
-      case 'furniture': return 'text-gray-600'
-      default: return 'text-gray-600'
+      case 'building': return 'Building'
+      case 'machinery': return 'Machinery'
+      case 'vehicle': return 'Vehicle'
+      case 'computer': return 'Computer'
+      case 'equipment': return 'Equipment'
+      case 'furniture': return 'Furniture'
+      default: return 'Other'
     }
   }
 
@@ -399,12 +368,9 @@ export default function FixedAssetsPage() {
       key: 'category',
       title: 'Category',
       render: (_: unknown, asset: FixedAsset) => {
-        const Icon = getCategoryIcon(asset.category)
-        const color = getCategoryColor(asset.category)
         return (
           <div className="flex items-center space-x-2">
-            <Icon className={`h-4 w-4 ${color}`} />
-            <span className="capitalize">{asset.category}</span>
+            <span className="capitalize">{getCategoryLabel(asset.category)}</span>
           </div>
         )
       }
@@ -499,35 +465,30 @@ export default function FixedAssetsPage() {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="sm">
-              <MoreHorizontal className="h-4 w-4" />
+              ...
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem asChild>
               <Link href={`/accounting/fixed-assets/${asset.id}`} className="flex items-center">
-                <Eye className="h-4 w-4 mr-2" />
                 View Details
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
               <Link href={`/accounting/fixed-assets/${asset.id}/edit`} className="flex items-center">
-                <Edit className="h-4 w-4 mr-2" />
                 Edit Asset
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem>
-              <Calendar className="h-4 w-4 mr-2" />
               Schedule Maintenance
             </DropdownMenuItem>
             <DropdownMenuItem>
-              <Download className="h-4 w-4 mr-2" />
               Export Report
             </DropdownMenuItem>
             {asset.status !== 'disposed' && (
               <>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem className="text-red-600">
-                  <Trash2 className="h-4 w-4 mr-2" />
                   Dispose Asset
                 </DropdownMenuItem>
               </>
@@ -558,16 +519,13 @@ export default function FixedAssetsPage() {
         actions={
           <div className="flex items-center space-x-2">
             <Button variant="outline" size="sm">
-              <Calendar className="h-4 w-4 mr-2" />
               Maintenance Schedule
             </Button>
             <Button variant="outline" size="sm">
-              <Download className="h-4 w-4 mr-2" />
               Export
             </Button>
             <Button asChild>
               <Link href="/accounting/fixed-assets/new">
-                <Plus className="h-4 w-4 mr-2" />
                 Add Asset
               </Link>
             </Button>
@@ -580,9 +538,7 @@ export default function FixedAssetsPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card className="p-4">
             <div className="flex items-center space-x-3">
-              <div className="p-2 rounded-full bg-blue-100 text-blue-700">
-                <Building className="h-5 w-5" />
-              </div>
+              <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center" />
               <div>
                 <p className="text-sm font-medium text-gray-600">Total Assets</p>
                 <p className="text-2xl font-bold">{summaryStats.totalAssets}</p>
@@ -592,9 +548,7 @@ export default function FixedAssetsPage() {
 
           <Card className="p-4">
             <div className="flex items-center space-x-3">
-              <div className="p-2 rounded-full bg-green-100 text-green-700">
-                <DollarSign className="h-5 w-5" />
-              </div>
+              <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center" />
               <div>
                 <p className="text-sm font-medium text-gray-600">Purchase Value</p>
                 <p className="text-2xl font-bold">
@@ -606,9 +560,7 @@ export default function FixedAssetsPage() {
 
           <Card className="p-4">
             <div className="flex items-center space-x-3">
-              <div className="p-2 rounded-full bg-purple-100 text-purple-700">
-                <TrendingDown className="h-5 w-5" />
-              </div>
+              <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center" />
               <div>
                 <p className="text-sm font-medium text-gray-600">Book Value</p>
                 <p className="text-2xl font-bold">
@@ -620,9 +572,7 @@ export default function FixedAssetsPage() {
 
           <Card className="p-4">
             <div className="flex items-center space-x-3">
-              <div className="p-2 rounded-full bg-red-100 text-red-700">
-                <AlertTriangle className="h-5 w-5" />
-              </div>
+              <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center" />
               <div>
                 <p className="text-sm font-medium text-gray-600">Critical Assets</p>
                 <p className="text-2xl font-bold">{summaryStats.criticalAssets}</p>
@@ -635,20 +585,18 @@ export default function FixedAssetsPage() {
         <div className="flex items-center justify-between gap-4">
           <div className="flex-1 max-w-md">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input 
-                placeholder="Search assets..." 
+              <Input
+                placeholder="Search assets..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-9" 
+                className="pl-3"
               />
             </div>
           </div>
-          
+
           <div className="flex items-center gap-2">
             <Select value={categoryFilter} onValueChange={setCategoryFilter}>
               <SelectTrigger className="w-32">
-                <Filter className="h-4 w-4 mr-2" />
                 <SelectValue placeholder="Category" />
               </SelectTrigger>
               <SelectContent>
@@ -714,7 +662,7 @@ export default function FixedAssetsPage() {
         {summaryStats.criticalAssets > 0 && (
           <Card className="p-6 border-red-200 bg-red-50">
             <div className="flex items-center space-x-3">
-              <AlertTriangle className="h-6 w-6 text-red-600" />
+              <div className="h-6 w-6 rounded-full bg-red-600" />
               <div className="flex-1">
                 <h3 className="text-lg font-semibold text-red-800">Critical Assets Alert</h3>
                 <p className="text-red-700 mt-1">
@@ -722,7 +670,6 @@ export default function FixedAssetsPage() {
                 </p>
               </div>
               <Button variant="outline" className="border-red-300 text-red-700 hover:bg-red-100">
-                <Settings className="h-4 w-4 mr-2" />
                 Schedule Maintenance
               </Button>
             </div>

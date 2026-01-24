@@ -3,17 +3,16 @@
 import * as React from "react"
 import { TwoLevelLayout } from "@/components/ui/two-level-layout"
 import { Header } from "@/components/ui/header"
-import { ModuleSettings } from "@/components/ui/module-settings"
+import { ModuleGear } from "@/components/ui/module-settings"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { QrCode, BarChart3, Download, Settings } from "lucide-react"
 
-export default function ProductsSettingsPage() {
-  const [settings, setSettings] = React.useState([
+export default function ProductsGearPage() {
+  const [settings, setGear] = React.useState([
     // Product Configuration
     {
       id: "auto_sku_generation",
@@ -102,7 +101,7 @@ export default function ProductsSettingsPage() {
   const [isLoading, setIsLoading] = React.useState(false)
 
   const handleSettingChange = (settingId: string, value: any) => {
-    setSettings(prev => prev.map(setting => 
+    setGear(prev => prev.map(setting => 
       setting.id === settingId ? { ...setting, value } : setting
     ))
     setHasUnsavedChanges(true)
@@ -192,28 +191,26 @@ export default function ProductsSettingsPage() {
 
   const breadcrumbs = [
     { label: "Products", href: "/products" },
-    { label: "Settings" }
+    { label: "Gear" }
   ]
 
   return (
     <TwoLevelLayout>
       <div className="flex-1 flex flex-col overflow-hidden">
-        <Header title="Products Settings" breadcrumbs={breadcrumbs} />
+        <Header title="Products Gear" breadcrumbs={breadcrumbs} />
         <div className="flex-1 overflow-auto p-6">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
             <TabsList className="inline-flex">
               <TabsTrigger value="settings" className="flex items-center gap-2">
-                <Settings className="h-4 w-4" />
-                General Settings
+                General Gear
               </TabsTrigger>
               <TabsTrigger value="barcode" className="flex items-center gap-2">
-                <QrCode className="h-4 w-4" />
                 Barcode Design
               </TabsTrigger>
             </TabsList>
             
             <TabsContent value="settings" className="mt-6">
-              <ModuleSettings
+              <ModuleGear
                 moduleName="Products"
                 moduleId="products"
                 settings={settings}
@@ -231,7 +228,6 @@ export default function ProductsSettingsPage() {
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                      <BarChart3 className="h-5 w-5" />
                       Universal Product Code (UPC)
                     </CardTitle>
                     <CardDescription>
@@ -293,7 +289,6 @@ export default function ProductsSettingsPage() {
                           disabled={!barcodeCanvas}
                           className="flex items-center gap-2"
                         >
-                          <Download className="h-4 w-4" />
                           Download
                         </Button>
                       </div>
@@ -305,7 +300,6 @@ export default function ProductsSettingsPage() {
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                      <QrCode className="h-5 w-5" />
                       QR Code
                     </CardTitle>
                     <CardDescription>
@@ -345,7 +339,6 @@ export default function ProductsSettingsPage() {
                           disabled={!qrCanvas}
                           className="flex items-center gap-2"
                         >
-                          <Download className="h-4 w-4" />
                           Download
                         </Button>
                       </div>

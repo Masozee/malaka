@@ -1,0 +1,132 @@
+# Traefik Dynamic Configuration for Malaka ERP
+# Routes and middleware configuration
+
+http:
+  routers:
+    # Frontend (Next.js)
+    frontend:
+      rule: "Host(`malaka.local`) || Host(`malaka.test`) || Host(`localhost`)"
+      entryPoints:
+        - web
+      service: frontend
+      middlewares:
+        - compress
+        - secure-headers
+        - rate-limit
+
+    # Backend API
+    api:
+      rule: "(Host(`malaka.local`) || Host(`malaka.test`) || Host(`localhost`)) && PathPrefix(`/api`)"
+      entryPoints:
+        - web
+      service: backend
+      middlewares:
+        - compress
+        - secure-headers
+        - rate-limit
+        - cors
+      priority: 100
+
+    # Static files (uploads)
+    uploads:
+      rule: "(Host(`malaka.local`) || Host(`malaka.test`) || Host(`localhost`)) && PathPrefix(`/uploads`)"
+      entryPoints:
+        - web
+      service: backend
+      middlewares:
+        - compress
+        - cache-static
+      priority: 90
+
+    # WebSocket support
+    websocket:
+      rule: "(Host(`malaka.local`) || Host(`malaka.test`) || Host(`localhost`)) && PathPrefix(`/ws`)"
+      entryPoints:
+        - web
+      service: backend
+      middlewares:
+        - secure-headers
+      priority: 100
+
+    # Health check endpoint
+    health:
+      rule: "(Host(`malaka.local`) || Host(`malaka.test`) || Host(`localhost`)) && Path(`/health`)"
+      entryPoints:
+        - web
+      service: backend
+      priority: 110
+
+  services:
+    frontend:
+      loadBalancer:
+        servers:
+          - url: "http://127.0.0.1:3000"
+        healthCheck:
+          path: /
+          interval: 10s
+          timeout: 3s
+        passHostHeader: true
+
+    backend:
+      loadBalancer:
+        servers:
+          - url: "http://127.0.0.1:8080"
+        healthCheck:
+          path: /health
+          interval: 10s
+          timeout: 3s
+        passHostHeader: true
+
+  middlewares:
+    compress:
+      compress:
+        excludedContentTypes:
+          - text/event-stream
+
+    secure-headers:
+      headers:
+        frameDeny: true
+        browserXssFilter: true
+        contentTypeNosniff: true
+        referrerPolicy: "strict-origin-when-cross-origin"
+        customResponseHeaders:
+          X-Powered-By: ""
+          Server: ""
+
+    rate-limit:
+      rateLimit:
+        average: 100
+        burst: 200
+        period: 1s
+        sourceCriterion:
+          ipStrategy:
+            depth: 1
+
+    cors:
+      headers:
+        accessControlAllowMethods:
+          - GET
+          - POST
+          - PUT
+          - PATCH
+          - DELETE
+          - OPTIONS
+        accessControlAllowHeaders:
+          - Content-Type
+          - Authorization
+          - X-Requested-With
+          - Accept
+          - Origin
+        accessControlAllowOriginList:
+          - "http://localhost:3000"
+          - "http://localhost"
+          - "http://malaka.local"
+          - "http://malaka.test"
+        accessControlMaxAge: 86400
+        accessControlAllowCredentials: true
+        addVaryHeader: true
+
+    cache-static:
+      headers:
+        customResponseHeaders:
+          Cache-Control: "public, max-age=31536000, immutable"

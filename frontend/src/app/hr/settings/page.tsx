@@ -12,7 +12,6 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
-import { Settings2, Save, RotateCcw, AlertCircle, DollarSign, FileText, Calendar, Users, BarChart, GraduationCap, Plus, Trash2, Edit } from "lucide-react"
 
 interface SettingItem {
   id: string
@@ -34,11 +33,11 @@ interface PayrollComponent {
   description?: string
 }
 
-interface TabSettings {
+interface TabGear {
   [key: string]: SettingItem[]
 }
 
-export default function HRSettingsPage() {
+export default function HRGearPage() {
   const [activeTab, setActiveTab] = React.useState("payroll")
   const [hasUnsavedChanges, setHasUnsavedChanges] = React.useState(false)
   const [isLoading, setIsLoading] = React.useState(false)
@@ -127,7 +126,7 @@ export default function HRSettingsPage() {
     }
   ])
 
-  const [tabSettings, setTabSettings] = React.useState<TabSettings>({
+  const [tabGear, setTabGear] = React.useState<TabGear>({
     // Payroll Components Tab
     payroll: [
       {
@@ -144,7 +143,7 @@ export default function HRSettingsPage() {
       }
     ],
 
-    // Tax Settings Tab
+    // Tax Gear Tab
     tax: [
       {
         id: "enable_income_tax",
@@ -454,16 +453,16 @@ export default function HRSettingsPage() {
   })
 
   const tabs = [
-    { id: "payroll", label: "Payroll Components", icon: DollarSign },
-    { id: "tax", label: "Tax Settings", icon: FileText },
+    { id: "payroll", label: "Payroll Components", icon: CurrencyDollar },
+    { id: "tax", label: "Tax Gear", icon: FileText },
     { id: "leave", label: "Leave Approval", icon: Calendar },
     { id: "employees", label: "Employee Management", icon: Users },
-    { id: "attendance", label: "Attendance", icon: BarChart },
+    { id: "attendance", label: "Attendance", icon: ChartBar },
     { id: "performance", label: "Performance", icon: GraduationCap }
   ]
 
   const handleSettingChange = (tabId: string, settingId: string, value: any) => {
-    setTabSettings(prev => ({
+    setTabGear(prev => ({
       ...prev,
       [tabId]: prev[tabId].map(setting => 
         setting.id === settingId ? { ...setting, value } : setting
@@ -503,7 +502,7 @@ export default function HRSettingsPage() {
     setIsLoading(true)
     try {
       await new Promise(resolve => setTimeout(resolve, 1000))
-      console.log('Saving HR settings:', tabSettings)
+      console.log('Saving HR settings:', tabGear)
       setHasUnsavedChanges(false)
     } catch (error) {
       console.error('Error saving settings:', error)
@@ -514,15 +513,15 @@ export default function HRSettingsPage() {
 
   const handleReset = () => {
     // Reset to default values
-    setTabSettings(prev => {
-      const resetSettings = { ...prev }
-      Object.keys(resetSettings).forEach(tabId => {
-        resetSettings[tabId] = resetSettings[tabId].map(setting => ({
+    setTabGear(prev => {
+      const resetGear = { ...prev }
+      Object.keys(resetGear).forEach(tabId => {
+        resetGear[tabId] = resetGear[tabId].map(setting => ({
           ...setting,
           value: getDefaultValue(setting.id)
         }))
       })
-      return resetSettings
+      return resetGear
     })
     setHasUnsavedChanges(false)
   }
@@ -674,7 +673,7 @@ export default function HRSettingsPage() {
             className="text-destructive hover:text-destructive"
             disabled={['basic_salary', 'income_tax', 'jamsostek', 'bpjs_kesehatan'].includes(component.id)}
           >
-            <Trash2 className="h-4 w-4" />
+            <Trash className="h-4 w-4" />
           </Button>
         </div>
       </div>
@@ -761,14 +760,14 @@ export default function HRSettingsPage() {
 
   const breadcrumbs = [
     { label: "HR Management", href: "/hr" },
-    { label: "Settings" }
+    { label: "Gear" }
   ]
 
   return (
     <TwoLevelLayout>
       <div className="flex-1 flex flex-col overflow-hidden">
         <Header 
-          title="HR Management Settings"
+          title="HR Management Gear"
           breadcrumbs={breadcrumbs}
         />
 
@@ -776,11 +775,11 @@ export default function HRSettingsPage() {
           {/* Header with Save/Reset */}
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
-              <Settings2 className="h-5 w-5" />
+              <Gear2 className="h-5 w-5" />
               <h2 className="text-lg font-semibold">HR Configuration</h2>
               {hasUnsavedChanges && (
                 <Badge variant="secondary" className="ml-2">
-                  <AlertCircle className="h-3 w-3 mr-1" />
+                  <WarningCircle className="h-3 w-3 mr-1" />
                   Unsaved Changes
                 </Badge>
               )}
@@ -801,7 +800,7 @@ export default function HRSettingsPage() {
                 disabled={isLoading || !hasUnsavedChanges}
                 className="flex items-center space-x-2"
               >
-                <Save className="h-4 w-4" />
+                <FloppyDisk className="h-4 w-4" />
                 <span>{isLoading ? 'Saving...' : 'Save Changes'}</span>
               </Button>
             </div>
@@ -867,16 +866,16 @@ export default function HRSettingsPage() {
                           {payrollComponents.map(component => renderPayrollComponentRow(component))}
                         </div>
 
-                        {/* Regular Settings for Payroll Tab */}
-                        {tabSettings[tab.id]?.length > 0 && (
+                        {/* Regular Gear for Payroll Tab */}
+                        {tabGear[tab.id]?.length > 0 && (
                           <>
                             <Separator />
                             <div className="space-y-6">
-                              <h4 className="text-sm font-medium">General Settings</h4>
-                              {tabSettings[tab.id]?.map((setting, index) => (
+                              <h4 className="text-sm font-medium">General Gear</h4>
+                              {tabGear[tab.id]?.map((setting, index) => (
                                 <div key={setting.id}>
                                   {renderSettingControl(tab.id, setting)}
-                                  {index < tabSettings[tab.id].length - 1 && (
+                                  {index < tabGear[tab.id].length - 1 && (
                                     <Separator className="mt-6" />
                                   )}
                                 </div>
@@ -886,11 +885,11 @@ export default function HRSettingsPage() {
                         )}
                       </>
                     ) : (
-                      /* Other Tabs Regular Settings */
-                      tabSettings[tab.id]?.map((setting, index) => (
+                      /* Other Tabs Regular Gear */
+                      tabGear[tab.id]?.map((setting, index) => (
                         <div key={setting.id}>
                           {renderSettingControl(tab.id, setting)}
-                          {index < tabSettings[tab.id].length - 1 && (
+                          {index < tabGear[tab.id].length - 1 && (
                             <Separator className="mt-6" />
                           )}
                         </div>

@@ -1,5 +1,12 @@
 'use client'
 
+import { HugeiconsIcon } from "@hugeicons/react"
+import {
+  PlusSignIcon,
+  Delete01Icon,
+  Calculator01Icon
+} from "@hugeicons/core-free-icons"
+
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -8,7 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Plus, Trash2, Calculator } from 'lucide-react'
+
 import type { CreateJournalEntryRequest, UpdateJournalEntryRequest, JournalEntry } from '@/types/accounting'
 import { mockChartOfAccounts, mockCostCenters } from '@/services/accounting'
 
@@ -222,7 +229,7 @@ export function JournalEntryForm({ journalEntry, onSubmit, onCancel, loading = f
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold text-gray-900">Journal Entry Lines</h3>
           <Button type="button" onClick={addLine} variant="outline" size="sm">
-            <Plus className="h-4 w-4 mr-2" />
+            <HugeiconsIcon icon={PlusSignIcon} className="h-4 w-4 mr-2" />
             Add Line
           </Button>
         </div>
@@ -325,7 +332,7 @@ export function JournalEntryForm({ journalEntry, onSubmit, onCancel, loading = f
                   disabled={formData.journal_entry_lines.length === 1}
                   className="text-red-600 border-red-200 hover:bg-red-50"
                 >
-                  <Trash2 className="h-4 w-4" />
+                  <HugeiconsIcon icon={Delete01Icon} className="h-4 w-4" />
                 </Button>
               </div>
             </div>
@@ -336,7 +343,7 @@ export function JournalEntryForm({ journalEntry, onSubmit, onCancel, loading = f
         <div className="mt-4 p-4 bg-gray-50 rounded-lg">
           <div className="flex items-center justify-between text-sm">
             <div className="flex items-center space-x-4">
-              <Calculator className="h-4 w-4 text-gray-500" />
+              <HugeiconsIcon icon={Calculator01Icon} className="h-4 w-4 text-gray-500" />
               <span>Total Debit: {mounted ? totalDebit.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' }) : 'Rp 0'}</span>
               <span>Total Credit: {mounted ? totalCredit.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' }) : 'Rp 0'}</span>
             </div>

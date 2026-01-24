@@ -11,22 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Input } from '@/components/ui/input'
 import { Progress } from '@/components/ui/progress'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu'
-import { 
-  Target,
-  Plus,
-  Eye,
-  Edit,
-  Trash2,
-  Filter,
-  Download,
-  BarChart3,
-  DollarSign,
-  TrendingUp,
-  Users,
-  Building,
-  Search,
-  MoreHorizontal
-} from 'lucide-react'
+
 import Link from 'next/link'
 import type { CostCenter } from '@/types/accounting'
 import { apiClient } from '@/lib/api'
@@ -140,7 +125,6 @@ export default function CostCentersPage() {
       title: 'Manager',
       render: (_: unknown, cc: CostCenter) => (
         <div className="flex items-center space-x-2">
-          <Users className="h-4 w-4 text-gray-400" />
           <span>{cc?.manager_id || 'Not assigned'}</span>
         </div>
       )
@@ -206,31 +190,27 @@ export default function CostCentersPage() {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="sm">
-              <MoreHorizontal className="h-4 w-4" />
+              ...
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem asChild>
               <Link href={`/accounting/cost-centers/${cc?.id || ''}`} className="flex items-center">
-                <Eye className="h-4 w-4 mr-2" />
                 View Details
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
               <Link href={`/accounting/cost-centers/${cc?.id || ''}/edit`} className="flex items-center">
-                <Edit className="h-4 w-4 mr-2" />
                 Edit Cost Center
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem>
-              <Download className="h-4 w-4 mr-2" />
               Export Budget Report
             </DropdownMenuItem>
             {!cc?.is_active && (
               <>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem className="text-red-600">
-                  <Trash2 className="h-4 w-4 mr-2" />
                   Delete Cost Center
                 </DropdownMenuItem>
               </>
@@ -255,16 +235,13 @@ export default function CostCentersPage() {
         actions={
           <div className="flex items-center space-x-2">
             <Button variant="outline" size="sm">
-              <BarChart3 className="h-4 w-4 mr-2" />
               Budget Report
             </Button>
             <Button variant="outline" size="sm">
-              <Download className="h-4 w-4 mr-2" />
               Export
             </Button>
             <Button asChild>
               <Link href="/accounting/cost-centers/new">
-                <Plus className="h-4 w-4 mr-2" />
                 Add Cost Center
               </Link>
             </Button>
@@ -277,45 +254,37 @@ export default function CostCentersPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card className="p-4">
             <div className="flex items-center space-x-3">
-              <div className="p-2 rounded-full bg-blue-100 text-blue-700">
-                <Building className="h-5 w-5" />
-              </div>
+              <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center" />
               <div>
                 <p className="text-sm font-medium text-gray-600">Total Cost Centers</p>
                 <p className="text-2xl font-bold">{summaryStats.totalCostCenters}</p>
               </div>
             </div>
           </Card>
-          
+
           <Card className="p-4">
             <div className="flex items-center space-x-3">
-              <div className="p-2 rounded-full bg-green-100 text-green-700">
-                <Target className="h-5 w-5" />
-              </div>
+              <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center" />
               <div>
                 <p className="text-sm font-medium text-gray-600">Active Centers</p>
                 <p className="text-2xl font-bold">{summaryStats.activeCostCenters}</p>
               </div>
             </div>
           </Card>
-          
+
           <Card className="p-4">
             <div className="flex items-center space-x-3">
-              <div className="p-2 rounded-full bg-purple-100 text-purple-700">
-                <DollarSign className="h-5 w-5" />
-              </div>
+              <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center" />
               <div>
                 <p className="text-sm font-medium text-gray-600">Total Budget</p>
                 <p className="text-2xl font-bold">{mounted ? formatCurrency(summaryStats.totalBudget) : 'Rp 0'}</p>
               </div>
             </div>
           </Card>
-          
+
           <Card className="p-4">
             <div className="flex items-center space-x-3">
-              <div className="p-2 rounded-full bg-orange-100 text-orange-700">
-                <TrendingUp className="h-5 w-5" />
-              </div>
+              <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center" />
               <div>
                 <p className="text-sm font-medium text-gray-600">Actual Spending</p>
                 <p className="text-2xl font-bold">{mounted ? formatCurrency(summaryStats.totalActual) : 'Rp 0'}</p>
@@ -328,7 +297,7 @@ export default function CostCentersPage() {
         {error && (
           <Card className="p-6 border-red-200 bg-red-50">
             <div className="flex items-center space-x-3">
-              <Target className="h-6 w-6 text-red-600" />
+              <div className="h-6 w-6 rounded-full bg-red-600" />
               <div className="flex-1">
                 <h3 className="text-lg font-semibold text-red-800">Error Loading Cost Centers</h3>
                 <p className="text-red-700 mt-1">{error}</p>
@@ -344,20 +313,18 @@ export default function CostCentersPage() {
         <div className="flex items-center justify-between gap-4">
           <div className="flex-1 max-w-md">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input 
-                placeholder="Search cost centers..." 
+              <Input
+                placeholder="Search cost centers..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-9" 
+                className="pl-3"
               />
             </div>
           </div>
-          
+
           <div className="flex items-center gap-2">
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-32">
-                <Filter className="h-4 w-4 mr-2" />
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>

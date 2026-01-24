@@ -10,16 +10,7 @@ import { AdvancedDataTable } from '@/components/ui/advanced-data-table'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
 import { Progress } from '@/components/ui/progress'
-import { 
-  Download,
-  Calculator,
-  Calendar,
-  TrendingUp,
-  TrendingDown,
-  RefreshCw,
-  FileText,
-  CheckCircle
-} from 'lucide-react'
+
 import { trialBalanceService } from '@/services/accounting'
 import type { TrialBalance, TrialBalanceAccount } from '@/types/accounting'
 
@@ -177,11 +168,9 @@ export default function TrialBalancePage() {
         actions={
           <div className="flex items-center space-x-3">
             <Button variant="outline" size="sm" onClick={generateTrialBalance} disabled={loading}>
-              <RefreshCw className="h-4 w-4 mr-2" />
               Generate
             </Button>
             <Button variant="outline" size="sm" onClick={exportTrialBalance}>
-              <Download className="h-4 w-4 mr-2" />
               Export
             </Button>
           </div>
@@ -194,11 +183,11 @@ export default function TrialBalancePage() {
           <Card className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Total Accounts</p>  
+                <p className="text-sm font-medium text-muted-foreground">Total Accounts</p>
                 <p className="text-2xl font-bold mt-1">{summaryStats.totalAccounts}</p>
                 <p className="text-sm text-blue-600 mt-1">Active accounts</p>
               </div>
-              <FileText className="h-8 w-8 text-blue-600" />
+              <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center" />
             </div>
           </Card>
 
@@ -211,7 +200,7 @@ export default function TrialBalancePage() {
                 </p>
                 <p className="text-sm text-green-600 mt-1">Debit balances</p>
               </div>
-              <TrendingUp className="h-8 w-8 text-green-600" />
+              <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center" />
             </div>
           </Card>
 
@@ -224,7 +213,7 @@ export default function TrialBalancePage() {
                 </p>
                 <p className="text-sm text-red-600 mt-1">Credit balances</p>
               </div>
-              <TrendingDown className="h-8 w-8 text-red-600" />
+              <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center" />
             </div>
           </Card>
 
@@ -239,11 +228,7 @@ export default function TrialBalancePage() {
                   {summaryStats.isBalanced ? 'Trial balance is balanced' : `Difference: ${formatCurrency(summaryStats.balanceDifference)}`}
                 </p>
               </div>
-              {summaryStats.isBalanced ? (
-                <CheckCircle className="h-8 w-8 text-green-600" />
-              ) : (
-                <Calculator className="h-8 w-8 text-red-600" />
-              )}
+              <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center" />
             </div>
           </Card>
         </div>
@@ -252,15 +237,13 @@ export default function TrialBalancePage() {
         <div className="flex items-center justify-between gap-4">
           <div className="flex-1 max-w-md">
             <div className="relative">
-              <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Label htmlFor="period" className="sr-only">Select Period</Label>
             </div>
           </div>
-          
+
           <div className="flex items-center gap-2">
             <Select value={selectedFiscalYear.toString()} onValueChange={(value) => setSelectedFiscalYear(parseInt(value))}>
               <SelectTrigger className="w-32">
-                <Calendar className="h-4 w-4 mr-2" />
                 <SelectValue placeholder="Year" />
               </SelectTrigger>
               <SelectContent>
@@ -272,7 +255,6 @@ export default function TrialBalancePage() {
 
             <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
               <SelectTrigger className="w-44">
-                <Calendar className="h-4 w-4 mr-2" />
                 <SelectValue placeholder="Select period" />
               </SelectTrigger>
               <SelectContent>
@@ -296,7 +278,7 @@ export default function TrialBalancePage() {
         {!summaryStats.isBalanced && (
           <Card className="p-4 border-red-200 bg-red-50">
             <div className="flex items-center space-x-3">
-              <Calculator className="h-6 w-6 text-red-600" />
+              <div className="h-6 w-6 rounded-full bg-red-600" />
               <div className="flex-1">
                 <h3 className="text-lg font-semibold text-red-800">Trial Balance is Unbalanced</h3>
                 <p className="text-red-700 mt-1">

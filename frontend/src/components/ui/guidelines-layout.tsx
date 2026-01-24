@@ -3,28 +3,29 @@
 import * as React from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { HugeiconsIcon } from "@hugeicons/react"
+import {
+  ArrowLeft01Icon,
+  Book01Icon,
+  Home01Icon,
+  File01Icon,
+  UserGroupIcon,
+  Settings01Icon,
+  HelpCircleIcon,
+  Database01Icon,
+  ShoppingCart01Icon,
+  Package01Icon,
+  Factory01Icon,
+  ShoppingBag01Icon,
+  DeliveryTruck01Icon,
+  Calculator01Icon,
+  ChartBarLineIcon,
+  Building01Icon,
+  Shirt01Icon,
+  ArrowRight01Icon
+} from "@hugeicons/core-free-icons"
 import { Button } from "@/components/ui/button"
 import { ThemeToggle } from "@/components/ui/theme-toggle"
-import { 
-  ArrowLeft, 
-  Book, 
-  Home,
-  FileText,
-  Users,
-  Settings,
-  HelpCircle,
-  Database,
-  ShoppingCart,
-  Package,
-  Factory,
-  ShoppingBag,
-  Map,
-  Calculator,
-  BarChart,
-  Building2,
-  Shirt,
-  ChevronRight
-} from "lucide-react"
 
 interface GuidelinesLayoutProps {
   children: React.ReactNode
@@ -34,14 +35,14 @@ interface GuidelineSection {
   id: string
   title: string
   href: string
-  icon: React.ComponentType<{ className?: string }>
+  icon: typeof Home01Icon
 }
 
 interface ModuleSection {
   id: string
   title: string
   href: string
-  icon: React.ComponentType<{ className?: string }>
+  icon: typeof Home01Icon
 }
 
 const guidelineSections: GuidelineSection[] = [
@@ -49,31 +50,31 @@ const guidelineSections: GuidelineSection[] = [
     id: "overview",
     title: "System Overview",
     href: "/guidelines/overview",
-    icon: Home
+    icon: Home01Icon
   },
   {
     id: "getting-started",
     title: "Getting Started",
-    href: "/guidelines/getting-started", 
-    icon: Book
+    href: "/guidelines/getting-started",
+    icon: Book01Icon
   },
   {
     id: "user-roles",
     title: "User Roles & Permissions",
     href: "/guidelines/user-roles",
-    icon: Users
+    icon: UserGroupIcon
   },
   {
     id: "administration",
     title: "System Administration",
     href: "/guidelines/administration",
-    icon: Settings
+    icon: Settings01Icon
   },
   {
     id: "troubleshooting",
     title: "Troubleshooting",
     href: "/guidelines/troubleshooting",
-    icon: HelpCircle
+    icon: HelpCircleIcon
   }
 ]
 
@@ -82,68 +83,68 @@ const moduleSections: ModuleSection[] = [
     id: "master-data",
     title: "Master Data",
     href: "/guidelines/modules/master-data",
-    icon: Database
+    icon: Database01Icon
   },
   {
     id: "products",
     title: "Products",
     href: "/guidelines/modules/products",
-    icon: Shirt
+    icon: Shirt01Icon
   },
   {
     id: "sales",
     title: "Sales",
     href: "/guidelines/modules/sales",
-    icon: ShoppingCart
+    icon: ShoppingCart01Icon
   },
   {
     id: "inventory",
     title: "Inventory",
     href: "/guidelines/modules/inventory",
-    icon: Package
+    icon: Package01Icon
   },
   {
     id: "production",
     title: "Production",
     href: "/guidelines/modules/production",
-    icon: Factory
+    icon: Factory01Icon
   },
   {
     id: "procurement",
     title: "Procurement",
     href: "/guidelines/modules/procurement",
-    icon: ShoppingBag
+    icon: ShoppingBag01Icon
   },
   {
     id: "shipping",
     title: "Shipping",
     href: "/guidelines/modules/shipping",
-    icon: Map
+    icon: DeliveryTruck01Icon
   },
   {
     id: "accounting",
     title: "Accounting",
     href: "/guidelines/modules/accounting",
-    icon: Calculator
+    icon: Calculator01Icon
   },
   {
     id: "hr",
     title: "HR Management",
     href: "/guidelines/modules/hr",
-    icon: Users
+    icon: UserGroupIcon
   },
   {
     id: "reporting",
     title: "Reports & Analytics",
     href: "/guidelines/modules/reporting",
-    icon: BarChart
+    icon: ChartBarLineIcon
   }
 ]
 
 export function GuidelinesLayout({ children }: GuidelinesLayoutProps) {
   const pathname = usePathname()
-  const isHomePage = pathname === "/guidelines"
-  const showSidebar = !isHomePage
+  const isHousePage = pathname === "/guidelines"
+  const showSidebar = !isHousePage
 
   return (
     <div className="min-h-screen bg-background">
@@ -155,7 +156,7 @@ export function GuidelinesLayout({ children }: GuidelinesLayoutProps) {
               href="/"
               className="flex items-center space-x-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors group"
             >
-              <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
+              <HugeiconsIcon icon={ArrowLeft01Icon} className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
               <span>Back to System</span>
             </Link>
             <div className="h-6 w-px bg-border" />
@@ -163,7 +164,7 @@ export function GuidelinesLayout({ children }: GuidelinesLayoutProps) {
               href="/guidelines/overview"
               className="flex items-center space-x-3 group"
             >
-              <Book className="h-6 w-6 text-primary" />
+              <HugeiconsIcon icon={Book01Icon} className="h-6 w-6 text-primary" />
               <div>
                 <span className="font-bold text-lg">Malaka ERP</span>
                 <div className="text-xs text-muted-foreground -mt-1">Guidelines</div>
@@ -209,9 +210,8 @@ export function GuidelinesLayout({ children }: GuidelinesLayoutProps) {
                 </h3>
                 <div className="space-y-1">
                   {guidelineSections.map((section) => {
-                    const Icon = section.icon
                     const isActive = pathname === section.href
-                    
+
                     return (
                       <Link
                         key={section.id}
@@ -222,7 +222,7 @@ export function GuidelinesLayout({ children }: GuidelinesLayoutProps) {
                             : "text-muted-foreground hover:text-foreground hover:bg-muted"
                         }`}
                       >
-                        <Icon className="h-4 w-4" />
+                        <HugeiconsIcon icon={section.icon} className="h-4 w-4" />
                         <span>{section.title}</span>
                       </Link>
                     )
@@ -237,9 +237,8 @@ export function GuidelinesLayout({ children }: GuidelinesLayoutProps) {
                 </h3>
                 <div className="space-y-1">
                   {moduleSections.map((module) => {
-                    const Icon = module.icon
                     const isActive = pathname === module.href
-                    
+
                     return (
                       <Link
                         key={module.id}
@@ -250,7 +249,7 @@ export function GuidelinesLayout({ children }: GuidelinesLayoutProps) {
                             : "text-muted-foreground hover:text-foreground hover:bg-muted"
                         }`}
                       >
-                        <Icon className="h-4 w-4" />
+                        <HugeiconsIcon icon={module.icon} className="h-4 w-4" />
                         <span>{module.title}</span>
                       </Link>
                     )
@@ -273,7 +272,7 @@ export function GuidelinesLayout({ children }: GuidelinesLayoutProps) {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div className="col-span-1 md:col-span-1">
               <div className="flex items-center space-x-3 mb-4">
-                <Book className="h-6 w-6 text-primary" />
+                <HugeiconsIcon icon={Book01Icon} className="h-6 w-6 text-primary" />
                 <div>
                   <div className="font-bold text-lg">Malaka ERP</div>
                   <div className="text-xs text-muted-foreground">Guidelines</div>
@@ -357,7 +356,7 @@ export function GuidelinesLayout({ children }: GuidelinesLayoutProps) {
               </Link>
               <span>•</span>
               <Link href="/guidelines/overview" className="hover:text-foreground transition-colors">
-                Guidelines Home
+                Guidelines House
               </Link>
             </div>
           </div>

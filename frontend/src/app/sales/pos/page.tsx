@@ -10,25 +10,7 @@ import { DataTable, Column } from '@/components/ui/data-table'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { 
-  CreditCard,
-  Plus,
-  Eye,
-  Edit,
-  Trash2,
-  Filter,
-  Download,
-  Calendar,
-  DollarSign,
-  ShoppingCart,
-  User,
-  Package,
-  Receipt,
-  CheckCircle,
-  Clock,
-  AlertCircle,
-  Search
-} from 'lucide-react'
+
 import Link from 'next/link'
 
 // POS Transaction types
@@ -286,8 +268,8 @@ export default function POSPage() {
     const config = {
       completed: { variant: 'default' as const, label: 'Completed', icon: CheckCircle },
       pending: { variant: 'secondary' as const, label: 'Pending', icon: Clock },
-      cancelled: { variant: 'destructive' as const, label: 'Cancelled', icon: AlertCircle },
-      refunded: { variant: 'outline' as const, label: 'Refunded', icon: AlertCircle }
+      cancelled: { variant: 'destructive' as const, label: 'Cancelled', icon: WarningCircle },
+      refunded: { variant: 'outline' as const, label: 'Refunded', icon: WarningCircle }
     }
     return config[status as keyof typeof config] || { variant: 'secondary' as const, label: status, icon: Receipt }
   }
@@ -407,7 +389,7 @@ export default function POSPage() {
           {transaction.status === 'pending' && (
             <Button variant="ghost" size="sm" asChild aria-label="Edit transaction">
               <Link href={`/sales/pos/${transaction.id}/edit`}>
-                <Edit className="h-4 w-4" />
+                <PencilSimple className="h-4 w-4" />
                 <span className="sr-only">Edit {transaction.transaction_number}</span>
               </Link>
             </Button>
@@ -427,7 +409,7 @@ export default function POSPage() {
           actions={
             <div className="flex items-center space-x-3">
               <Button variant="outline" size="sm">
-                <Download className="h-4 w-4 mr-2" />
+                <DownloadSimple className="h-4 w-4 mr-2" />
                 Export
               </Button>
               <Button size="sm" asChild>
@@ -457,7 +439,7 @@ export default function POSPage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
-                <DollarSign className="h-5 w-5 text-foreground" aria-hidden="true" />
+                <CurrencyDollar className="h-5 w-5 text-foreground" aria-hidden="true" />
               </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Total Revenue</p>
@@ -498,7 +480,7 @@ export default function POSPage() {
           {/* Search on the left */}
           <div className="flex-1 max-w-md">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <MagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search transactions..."
                 value={searchTerm}

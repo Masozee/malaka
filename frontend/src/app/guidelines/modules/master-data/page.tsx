@@ -5,7 +5,6 @@ import Link from "next/link"
 import { GuidelinesLayout } from "@/components/ui/guidelines-layout"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { ArrowLeft, ArrowRight } from "lucide-react"
 
 export default function MasterDataGuidePage() {
   return (
@@ -262,14 +261,12 @@ export default function MasterDataGuidePage() {
         <div className="flex justify-between items-center mt-12 pt-8 border-t">
           <Button variant="outline" asChild>
             <Link href="/guidelines/modules">
-              <ArrowLeft className="h-4 w-4 mr-2" />
               Module Guides
             </Link>
           </Button>
           <Button asChild>
             <Link href="/guidelines/modules/products">
               Products Guide
-              <ArrowRight className="h-4 w-4 ml-2" />
             </Link>
           </Button>
         </div>

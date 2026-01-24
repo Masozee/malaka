@@ -10,23 +10,7 @@ import { AdvancedDataTable } from '@/components/ui/advanced-data-table'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { 
-  DollarSign,
-  Plus,
-  Eye,
-  Edit,
-  Trash2,
-  Download,
-  TrendingUp,
-  TrendingDown,
-  RefreshCw,
-  Globe,
-  Calculator,
-  Loader2,
-  AlertTriangle,
-  Search,
-  BarChart3,
-} from 'lucide-react'
+
 import Link from 'next/link'
 import { currencyService, type CurrencyData } from '@/services/currency'
 
@@ -221,10 +205,10 @@ export default function CurrencyPage() {
     return 'text-gray-600'
   }
 
-  const getRateChangeIcon = (change: number) => {
-    if (change > 0) return TrendingUp
-    if (change < 0) return TrendingDown
-    return DollarSign
+  const getRateChangeIndicator = (change: number) => {
+    if (change > 0) return '+'
+    if (change < 0) return '-'
+    return ''
   }
 
   const currencyColumns = [
@@ -294,14 +278,12 @@ export default function CurrencyPage() {
       render: (value: unknown, currency: Currency) => {
         if (!currency) return null
         if (currency.is_base) return <span className="text-muted-foreground">-</span>
-        
-        const Icon = getRateChangeIcon(currency.rate_change_24h)
+
         const color = getRateChangeColor(currency.rate_change_24h)
         const percentage = currency.exchange_rate > 0 ? (currency.rate_change_24h / currency.exchange_rate) * 100 : 0
-        
+
         return (
           <div className="flex items-center space-x-2">
-            <Icon className={`h-4 w-4 ${color}`} />
             <div className={color}>
               <div className="font-medium">
                 {currency.rate_change_24h > 0 ? '+' : ''}{formatCurrency(currency.rate_change_24h, 'IDR')}
@@ -392,11 +374,9 @@ export default function CurrencyPage() {
       render: (value: unknown, history: ExchangeRateHistory) => {
         if (!history) return null
         const color = getRateChangeColor(history.change)
-        const Icon = getRateChangeIcon(history.change)
-        
+
         return (
           <div className="flex items-center space-x-2">
-            <Icon className={`h-4 w-4 ${color}`} />
             <div className={color}>
               <div className="font-medium">
                 {history.change > 0 ? '+' : ''}{formatCurrency(history.change, 'IDR')}
@@ -419,26 +399,19 @@ export default function CurrencyPage() {
         breadcrumbs={breadcrumbs}
         actions={
           <div className="flex items-center space-x-3">
-            <Button 
-              variant="outline" 
-              size="sm" 
+            <Button
+              variant="outline"
+              size="sm"
               onClick={handleRefreshRates}
               disabled={loading}
             >
-              {loading ? (
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              ) : (
-                <RefreshCw className="h-4 w-4 mr-2" />
-              )}
               Update Rates
             </Button>
             <Button variant="outline" size="sm">
-              <Download className="h-4 w-4 mr-2" />
               Export
             </Button>
             <Button size="sm" asChild>
               <Link href="/accounting/currency/new">
-                <Plus className="h-4 w-4 mr-2" />
                 Add Currency
               </Link>
             </Button>
@@ -451,14 +424,14 @@ export default function CurrencyPage() {
         {error && (
           <Card className="p-4 border-red-200 bg-red-50">
             <div className="flex items-center space-x-3">
-              <AlertTriangle className="h-5 w-5 text-red-600" />
+              <div className="h-5 w-5 rounded-full bg-red-600" />
               <div className="flex-1">
                 <h3 className="text-sm font-semibold text-red-800">Error Loading Exchange Rates</h3>
                 <p className="text-red-700 text-sm mt-1">{error}</p>
               </div>
-              <Button 
-                variant="outline" 
-                size="sm" 
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={fetchCurrencies}
                 className="border-red-300 text-red-700 hover:bg-red-100"
               >
@@ -472,7 +445,7 @@ export default function CurrencyPage() {
         {loading && currencies.length === 0 && (
           <Card className="p-8">
             <div className="flex items-center justify-center space-x-3">
-              <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+              <div className="h-6 w-6 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
               <p className="text-muted-foreground">Fetching real-time exchange rates from Bank Indonesia...</p>
             </div>
           </Card>
@@ -489,7 +462,7 @@ export default function CurrencyPage() {
                     <p className="text-2xl font-bold mt-1">{summaryStats.totalCurrencies}</p>
                     <p className="text-sm text-blue-600 mt-1">{summaryStats.activeCurrencies} active</p>
                   </div>
-                  <Globe className="h-8 w-8 text-blue-600" />
+                  <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center" />
                 </div>
               </Card>
 
@@ -500,7 +473,7 @@ export default function CurrencyPage() {
                     <p className="text-2xl font-bold mt-1">{summaryStats.baseCurrency}</p>
                     <p className="text-sm text-green-600 mt-1">Primary currency</p>
                   </div>
-                  <DollarSign className="h-8 w-8 text-green-600" />
+                  <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center" />
                 </div>
               </Card>
 
@@ -512,13 +485,13 @@ export default function CurrencyPage() {
                       {summaryStats.strongestGainer?.code || '-'}
                     </p>
                     <p className="text-sm text-green-600 mt-1">
-                      {summaryStats.strongestGainer ? 
-                        `+${formatCurrency(summaryStats.strongestGainer.rate_change_24h, 'IDR')}` : 
+                      {summaryStats.strongestGainer ?
+                        `+${formatCurrency(summaryStats.strongestGainer.rate_change_24h, 'IDR')}` :
                         'No gains'
                       }
                     </p>
                   </div>
-                  <TrendingUp className="h-8 w-8 text-green-600" />
+                  <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center" />
                 </div>
               </Card>
 
@@ -531,7 +504,7 @@ export default function CurrencyPage() {
                     </p>
                     <p className="text-sm text-purple-600 mt-1">Bank Indonesia rates</p>
                   </div>
-                  <RefreshCw className="h-8 w-8 text-purple-600" />
+                  <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center" />
                 </div>
               </Card>
             </div>
@@ -540,20 +513,18 @@ export default function CurrencyPage() {
             <div className="flex items-center justify-between gap-4">
               <div className="flex-1 max-w-md">
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input 
-                    placeholder="Search currencies..." 
-                    className="pl-9"
+                  <Input
+                    placeholder="Search currencies..."
+                    className="pl-3"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
                 </div>
               </div>
-              
+
               <div className="flex items-center gap-2">
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
                   <SelectTrigger className="w-32">
-                    <DollarSign className="h-4 w-4 mr-2" />
                     <SelectValue placeholder="Status" />
                   </SelectTrigger>
                   <SelectContent>
@@ -586,7 +557,6 @@ export default function CurrencyPage() {
                 </div>
                 <Select defaultValue="name">
                   <SelectTrigger className="w-44">
-                    <BarChart3 className="h-4 w-4 mr-2" />
                     <SelectValue placeholder="Sort by" />
                   </SelectTrigger>
                   <SelectContent>

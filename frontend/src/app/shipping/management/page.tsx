@@ -11,27 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Progress } from '@/components/ui/progress'
-import { 
-  Ship,
-  Plus,
-  Eye,
-  Edit,
-  Filter,
-  Download,
-  Calendar,
-  MapPin,
-  User,
-  Package,
-  Truck,
-  CheckCircle,
-  Clock,
-  AlertCircle,
-  Search,
-  DollarSign,
-  BarChart3,
-  TrendingUp,
-  Phone
-} from 'lucide-react'
+
 import Link from 'next/link'
 
 // Shipment types
@@ -391,8 +371,8 @@ export default function ShipmentManagementPage() {
       in_transit: { variant: 'default' as const, label: 'In Transit', icon: Ship, progress: 50 },
       out_for_delivery: { variant: 'default' as const, label: 'Out for Delivery', icon: Truck, progress: 75 },
       delivered: { variant: 'default' as const, label: 'Delivered', icon: CheckCircle, progress: 100 },
-      failed: { variant: 'destructive' as const, label: 'Failed', icon: AlertCircle, progress: 0 },
-      returned: { variant: 'destructive' as const, label: 'Returned', icon: AlertCircle, progress: 0 }
+      failed: { variant: 'destructive' as const, label: 'Failed', icon: WarningCircle, progress: 0 },
+      returned: { variant: 'destructive' as const, label: 'Returned', icon: WarningCircle, progress: 0 }
     }
     return config[status as keyof typeof config] || { variant: 'secondary' as const, label: status, icon: Package, progress: 0 }
   }
@@ -540,7 +520,7 @@ export default function ShipmentManagementPage() {
           {shipment.status === 'pending' && (
             <Button variant="ghost" size="sm" asChild>
               <Link href={`/shipping/management/${shipment.id}/edit`}>
-                <Edit className="h-4 w-4" />
+                <PencilSimple className="h-4 w-4" />
               </Link>
             </Button>
           )}
@@ -559,7 +539,7 @@ export default function ShipmentManagementPage() {
           actions={
             <div className="flex items-center space-x-3">
               <Button variant="outline" size="sm">
-                <Download className="h-4 w-4 mr-2" />
+                <DownloadSimple className="h-4 w-4 mr-2" />
                 Export
               </Button>
               <Button size="sm" asChild>
@@ -625,7 +605,7 @@ export default function ShipmentManagementPage() {
                 <p className="text-2xl font-bold mt-1 text-red-600">{summaryStats.failedShipments}</p>
                 <p className="text-sm text-red-600 mt-1">Need action</p>
               </div>
-              <AlertCircle className="h-8 w-8 text-red-600" />
+              <WarningCircle className="h-8 w-8 text-red-600" />
             </div>
           </Card>
 
@@ -638,7 +618,7 @@ export default function ShipmentManagementPage() {
                 </p>
                 <p className="text-sm text-green-600 mt-1">Shipping fees</p>
               </div>
-              <DollarSign className="h-8 w-8 text-green-600" />
+              <CurrencyDollar className="h-8 w-8 text-green-600" />
             </div>
           </Card>
 
@@ -651,7 +631,7 @@ export default function ShipmentManagementPage() {
                 </p>
                 <p className="text-sm text-gray-600 mt-1">Days</p>
               </div>
-              <BarChart3 className="h-8 w-8 text-gray-600" />
+              <ChartBar className="h-8 w-8 text-gray-600" />
             </div>
           </Card>
 
@@ -664,7 +644,7 @@ export default function ShipmentManagementPage() {
                 </p>
                 <p className="text-sm text-green-600 mt-1">Delivery rate</p>
               </div>
-              <TrendingUp className="h-8 w-8 text-green-600" />
+              <TrendUp className="h-8 w-8 text-green-600" />
             </div>
           </Card>
         </div>
@@ -672,12 +652,12 @@ export default function ShipmentManagementPage() {
         {/* Filters */}
         <Card className="p-6">
           <div className="flex items-center space-x-4">
-            <Filter className="h-5 w-5 text-muted-foreground" />
+            <Funnel className="h-5 w-5 text-muted-foreground" />
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 flex-1">
               <div className="space-y-2">
                 <Label htmlFor="search">Search</Label>
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <MagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="search"
                     placeholder="Search shipments..."
@@ -902,7 +882,7 @@ export default function ShipmentManagementPage() {
         {summaryStats.failedShipments > 0 && (
           <Card className="p-6 border-red-200 bg-red-50">
             <div className="flex items-center space-x-3">
-              <AlertCircle className="h-6 w-6 text-red-600" />
+              <WarningCircle className="h-6 w-6 text-red-600" />
               <div className="flex-1">
                 <h3 className="text-lg font-semibold text-red-800">Failed Deliveries</h3>
                 <p className="text-red-700 mt-1">

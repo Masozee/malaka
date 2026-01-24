@@ -8,21 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { TwoLevelLayout } from '@/components/ui/two-level-layout'
 import { Header } from '@/components/ui/header'
 import { AdvancedDataTable, type AdvancedColumn } from '@/components/ui/advanced-data-table'
-import { 
-  ArrowRightLeft,
-  Edit,
-  MapPin,
-  User,
-  Package,
-  Building,
-  Truck,
-  CheckCircle,
-  Clock,
-  XCircle,
-  FileText,
-  Download,
-  ArrowLeft
-} from 'lucide-react'
+
 import Link from 'next/link'
 
 // Mock transfer item interface
@@ -366,13 +352,13 @@ export default function StockTransferDetailPage() {
         actions={
           <div className="flex items-center space-x-3">
             <Button variant="outline" size="sm">
-              <Download className="h-4 w-4 mr-2" />
+              <DownloadSimple className="h-4 w-4 mr-2" />
               Export
             </Button>
             {transfer.status !== 'completed' && transfer.status !== 'cancelled' && (
               <Button size="sm" asChild>
                 <Link href={`/inventory/stock-transfer/${transfer.id}/edit`}>
-                  <Edit className="h-4 w-4 mr-2" />
+                  <PencilSimple className="h-4 w-4 mr-2" />
                   Edit Transfer
                 </Link>
               </Button>
@@ -393,7 +379,7 @@ export default function StockTransferDetailPage() {
           {/* Basic Information */}
           <Card className="p-6">
             <div className="flex items-center space-x-3 mb-4">
-              <ArrowRightLeft className="h-6 w-6 text-blue-600" />
+              <ArrowsLeftRight className="h-6 w-6 text-blue-600" />
               <h3 className="text-lg font-semibold">Transfer Information</h3>
             </div>
             <div className="space-y-3">
@@ -438,7 +424,7 @@ export default function StockTransferDetailPage() {
             <div className="space-y-4">
               <div>
                 <div className="flex items-center space-x-2 mb-2">
-                  <Building className="h-4 w-4 text-blue-600" />
+                  <BuildingOffice className="h-4 w-4 text-blue-600" />
                   <span className="text-sm font-medium">From:</span>
                 </div>
                 <div className="pl-6">
@@ -451,7 +437,7 @@ export default function StockTransferDetailPage() {
               </div>
               <div>
                 <div className="flex items-center space-x-2 mb-2">
-                  <Building className="h-4 w-4 text-green-600" />
+                  <BuildingOffice className="h-4 w-4 text-green-600" />
                   <span className="text-sm font-medium">To:</span>
                 </div>
                 <div className="pl-6">

@@ -9,22 +9,13 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
-import { 
-  Settings, 
-  Save, 
-  RotateCcw, 
-  Calculator, 
-  DollarSign, 
-  Percent,
-  Clock,
-  Building
-} from 'lucide-react'
+
 import type { PayrollSettings } from '@/types/hr'
 import { mockPayrollSettings } from '@/services/hr'
 
 export default function PayrollSettingsPage() {
   const [mounted, setMounted] = useState(false)
-  const [settings, setSettings] = useState<PayrollSettings>(mockPayrollSettings)
+  const [settings, setGear] = useState<PayrollSettings>(mockPayrollSettings)
   const [hasChanges, setHasChanges] = useState(false)
 
   useEffect(() => {
@@ -34,13 +25,13 @@ export default function PayrollSettingsPage() {
   const breadcrumbs = [
     { label: 'Human Resources', href: '/hr' },
     { label: 'Payroll', href: '/hr/payroll' },
-    { label: 'Settings', href: '/hr/payroll/settings' }
+    { label: 'Gear', href: '/hr/payroll/settings' }
   ]
 
   const handleSettingChange = (key: string, value: any) => {
     if (key.includes('.')) {
       const [parentKey, childKey] = key.split('.')
-      setSettings(prev => ({
+      setGear(prev => ({
         ...prev,
         [parentKey]: {
           ...prev[parentKey as keyof PayrollSettings] as any,
@@ -48,7 +39,7 @@ export default function PayrollSettingsPage() {
         }
       }))
     } else {
-      setSettings(prev => ({ ...prev, [key]: value }))
+      setGear(prev => ({ ...prev, [key]: value }))
     }
     setHasChanges(true)
   }
@@ -61,7 +52,7 @@ export default function PayrollSettingsPage() {
   }
 
   const handleReset = () => {
-    setSettings(mockPayrollSettings)
+    setGear(mockPayrollSettings)
     setHasChanges(false)
   }
 
@@ -69,7 +60,7 @@ export default function PayrollSettingsPage() {
     <TwoLevelLayout>
       <div className="flex-1 space-y-6">
         <Header 
-          title="Payroll Settings"
+          title="Payroll Gear"
           description="Configure payroll calculation rules and company policies"
           breadcrumbs={breadcrumbs}
           actions={
@@ -81,7 +72,7 @@ export default function PayrollSettingsPage() {
                 </Button>
               )}
               <Button size="sm" onClick={handleSave} disabled={!hasChanges}>
-                <Save className="h-4 w-4 mr-2" />
+                <FloppyDisk className="h-4 w-4 mr-2" />
                 Save Changes
               </Button>
             </div>
@@ -91,7 +82,7 @@ export default function PayrollSettingsPage() {
         {/* Company Information */}
         <Card className="p-6">
           <div className="flex items-center space-x-2 mb-6">
-            <Building className="h-5 w-5 text-blue-600" />
+            <BuildingOffice className="h-5 w-5 text-blue-600" />
             <h2 className="text-xl font-semibold">Company Information</h2>
           </div>
           
@@ -165,7 +156,7 @@ export default function PayrollSettingsPage() {
           </div>
         </Card>
 
-        {/* Tax Settings */}
+        {/* Tax Gear */}
         <Card className="p-6">
           <div className="flex items-center space-x-2 mb-6">
             <Percent className="h-5 w-5 text-red-600" />
@@ -179,8 +170,8 @@ export default function PayrollSettingsPage() {
                 id="incomeTaxRate"
                 type="number"
                 step="0.1"
-                value={settings.taxSettings.incomeTaxRate}
-                onChange={(e) => handleSettingChange('taxSettings.incomeTaxRate', parseFloat(e.target.value))}
+                value={settings.taxGear.incomeTaxRate}
+                onChange={(e) => handleSettingChange('taxGear.incomeTaxRate', parseFloat(e.target.value))}
               />
             </div>
 
@@ -190,8 +181,8 @@ export default function PayrollSettingsPage() {
                 id="socialSecurityRate"
                 type="number"
                 step="0.1"
-                value={settings.taxSettings.socialSecurityRate}
-                onChange={(e) => handleSettingChange('taxSettings.socialSecurityRate', parseFloat(e.target.value))}
+                value={settings.taxGear.socialSecurityRate}
+                onChange={(e) => handleSettingChange('taxGear.socialSecurityRate', parseFloat(e.target.value))}
               />
             </div>
 
@@ -201,8 +192,8 @@ export default function PayrollSettingsPage() {
                 id="healthInsuranceRate"
                 type="number"
                 step="0.1"
-                value={settings.taxSettings.healthInsuranceRate}
-                onChange={(e) => handleSettingChange('taxSettings.healthInsuranceRate', parseFloat(e.target.value))}
+                value={settings.taxGear.healthInsuranceRate}
+                onChange={(e) => handleSettingChange('taxGear.healthInsuranceRate', parseFloat(e.target.value))}
               />
             </div>
           </div>
@@ -214,10 +205,10 @@ export default function PayrollSettingsPage() {
           </div>
         </Card>
 
-        {/* Allowance Settings */}
+        {/* Allowance Gear */}
         <Card className="p-6">
           <div className="flex items-center space-x-2 mb-6">
-            <DollarSign className="h-5 w-5 text-purple-600" />
+            <CurrencyDollar className="h-5 w-5 text-purple-600" />
             <h2 className="text-xl font-semibold">Standard Allowances</h2>
           </div>
           
@@ -227,8 +218,8 @@ export default function PayrollSettingsPage() {
               <Input
                 id="transportAllowance"
                 type="number"
-                value={settings.allowanceSettings.transportAllowance}
-                onChange={(e) => handleSettingChange('allowanceSettings.transportAllowance', parseInt(e.target.value))}
+                value={settings.allowanceGear.transportAllowance}
+                onChange={(e) => handleSettingChange('allowanceGear.transportAllowance', parseInt(e.target.value))}
               />
             </div>
 
@@ -237,8 +228,8 @@ export default function PayrollSettingsPage() {
               <Input
                 id="mealAllowance"
                 type="number"
-                value={settings.allowanceSettings.mealAllowance}
-                onChange={(e) => handleSettingChange('allowanceSettings.mealAllowance', parseInt(e.target.value))}
+                value={settings.allowanceGear.mealAllowance}
+                onChange={(e) => handleSettingChange('allowanceGear.mealAllowance', parseInt(e.target.value))}
               />
             </div>
 
@@ -247,8 +238,8 @@ export default function PayrollSettingsPage() {
               <Input
                 id="housingAllowance"
                 type="number"
-                value={settings.allowanceSettings.housingAllowance}
-                onChange={(e) => handleSettingChange('allowanceSettings.housingAllowance', parseInt(e.target.value))}
+                value={settings.allowanceGear.housingAllowance}
+                onChange={(e) => handleSettingChange('allowanceGear.housingAllowance', parseInt(e.target.value))}
               />
             </div>
           </div>
@@ -279,17 +270,17 @@ export default function PayrollSettingsPage() {
                   </div>
                   <div className="flex justify-between">
                     <span>Transport Allowance:</span>
-                    <span className="font-mono">{mounted ? `Rp ${settings.allowanceSettings.transportAllowance.toLocaleString('id-ID')}` : ''}</span>
+                    <span className="font-mono">{mounted ? `Rp ${settings.allowanceGear.transportAllowance.toLocaleString('id-ID')}` : ''}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Meal Allowance:</span>
-                    <span className="font-mono">{mounted ? `Rp ${settings.allowanceSettings.mealAllowance.toLocaleString('id-ID')}` : ''}</span>
+                    <span className="font-mono">{mounted ? `Rp ${settings.allowanceGear.mealAllowance.toLocaleString('id-ID')}` : ''}</span>
                   </div>
                   <Separator className="my-2" />
                   <div className="flex justify-between font-medium">
                     <span>Gross Pay:</span>
                     <span className="font-mono">
-                      {mounted ? `Rp ${(10000000 + settings.allowanceSettings.transportAllowance + settings.allowanceSettings.mealAllowance).toLocaleString('id-ID')}` : ''}
+                      {mounted ? `Rp ${(10000000 + settings.allowanceGear.transportAllowance + settings.allowanceGear.mealAllowance).toLocaleString('id-ID')}` : ''}
                     </span>
                   </div>
                 </div>
@@ -299,22 +290,22 @@ export default function PayrollSettingsPage() {
                 <h5 className="font-medium text-red-600 mb-2">Deductions</h5>
                 <div className="space-y-1">
                   <div className="flex justify-between">
-                    <span>Income Tax ({settings.taxSettings.incomeTaxRate}%):</span>
-                    <span className="font-mono">{mounted ? `Rp ${(10000000 * settings.taxSettings.incomeTaxRate / 100).toLocaleString('id-ID')}` : ''}</span>
+                    <span>Income Tax ({settings.taxGear.incomeTaxRate}%):</span>
+                    <span className="font-mono">{mounted ? `Rp ${(10000000 * settings.taxGear.incomeTaxRate / 100).toLocaleString('id-ID')}` : ''}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Social Security ({settings.taxSettings.socialSecurityRate}%):</span>
-                    <span className="font-mono">{mounted ? `Rp ${(10000000 * settings.taxSettings.socialSecurityRate / 100).toLocaleString('id-ID')}` : ''}</span>
+                    <span>Social Security ({settings.taxGear.socialSecurityRate}%):</span>
+                    <span className="font-mono">{mounted ? `Rp ${(10000000 * settings.taxGear.socialSecurityRate / 100).toLocaleString('id-ID')}` : ''}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Health Insurance ({settings.taxSettings.healthInsuranceRate}%):</span>
-                    <span className="font-mono">{mounted ? `Rp ${(10000000 * settings.taxSettings.healthInsuranceRate / 100).toLocaleString('id-ID')}` : ''}</span>
+                    <span>Health Insurance ({settings.taxGear.healthInsuranceRate}%):</span>
+                    <span className="font-mono">{mounted ? `Rp ${(10000000 * settings.taxGear.healthInsuranceRate / 100).toLocaleString('id-ID')}` : ''}</span>
                   </div>
                   <Separator className="my-2" />
                   <div className="flex justify-between font-medium">
                     <span>Total Deductions:</span>
                     <span className="font-mono">
-                      {mounted ? `Rp ${(10000000 * (settings.taxSettings.incomeTaxRate + settings.taxSettings.socialSecurityRate + settings.taxSettings.healthInsuranceRate) / 100).toLocaleString('id-ID')}` : ''}
+                      {mounted ? `Rp ${(10000000 * (settings.taxGear.incomeTaxRate + settings.taxGear.socialSecurityRate + settings.taxGear.healthInsuranceRate) / 100).toLocaleString('id-ID')}` : ''}
                     </span>
                   </div>
                 </div>
@@ -325,7 +316,7 @@ export default function PayrollSettingsPage() {
             <div className="flex justify-between text-lg font-bold">
               <span>Net Pay:</span>
               <span className="text-green-600 font-mono">
-                {mounted ? `Rp ${(10000000 + settings.allowanceSettings.transportAllowance + settings.allowanceSettings.mealAllowance - (10000000 * (settings.taxSettings.incomeTaxRate + settings.taxSettings.socialSecurityRate + settings.taxSettings.healthInsuranceRate) / 100)).toLocaleString('id-ID')}` : ''}
+                {mounted ? `Rp ${(10000000 + settings.allowanceGear.transportAllowance + settings.allowanceGear.mealAllowance - (10000000 * (settings.taxGear.incomeTaxRate + settings.taxGear.socialSecurityRate + settings.taxGear.healthInsuranceRate) / 100)).toLocaleString('id-ID')}` : ''}
               </span>
             </div>
           </div>
@@ -335,7 +326,7 @@ export default function PayrollSettingsPage() {
         {hasChanges && (
           <Card className="p-4 border-orange-200 bg-orange-50">
             <div className="flex items-center space-x-2 text-orange-800">
-              <Settings className="h-5 w-5" />
+              <Gear className="h-5 w-5" />
               <p className="font-medium">Unsaved Changes</p>
             </div>
             <p className="text-sm text-orange-700 mt-1">

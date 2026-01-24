@@ -9,23 +9,21 @@ import { AdvancedDataTable } from '@/components/ui/advanced-data-table'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { 
-  Calendar,
-  Clock,
-  Users,
-  CheckCircle,
-  XCircle,
-  AlertTriangle,
-  Timer,
-  TrendingUp,
-  MapPin,
-  Search,
-  Filter,
-  BarChart3,
-  Download,
-  Plus,
-  FileText
-} from 'lucide-react'
+import { HugeiconsIcon } from '@hugeicons/react'
+import {
+  Download01Icon,
+  PlusSignIcon,
+  UserGroupIcon,
+  CheckmarkCircle01Icon,
+  Cancel01Icon,
+  AlertCircleIcon,
+  Clock01Icon,
+  Search01Icon,
+  FilterIcon,
+  Calendar01Icon,
+  ChartColumnIcon
+} from '@hugeicons/core-free-icons'
+
 import { HRService } from '@/services/hr'
 import type { Employee } from '@/types/hr'
 
@@ -437,11 +435,11 @@ export default function AttendancePage() {
         actions={
           <div className="flex items-center space-x-2">
             <Button variant="outline" size="sm">
-              <Download className="h-4 w-4 mr-2" />
+              <HugeiconsIcon icon={Download01Icon} className="h-4 w-4 mr-2" />
               Export
             </Button>
             <Button size="sm">
-              <Plus className="h-4 w-4 mr-2" />
+              <HugeiconsIcon icon={PlusSignIcon} className="h-4 w-4 mr-2" />
               Add Record
             </Button>
           </div>
@@ -454,7 +452,7 @@ export default function AttendancePage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-blue-100 rounded-lg">
-                <Users className="h-5 w-5 text-blue-600" />
+                <HugeiconsIcon icon={UserGroupIcon} className="h-5 w-5 text-blue-600" />
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600">Total Employees</p>
@@ -466,7 +464,7 @@ export default function AttendancePage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-green-100 rounded-lg">
-                <CheckCircle className="h-5 w-5 text-green-600" />
+                <HugeiconsIcon icon={CheckmarkCircle01Icon} className="h-5 w-5 text-green-600" />
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600">Present Today</p>
@@ -478,7 +476,7 @@ export default function AttendancePage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-red-100 rounded-lg">
-                <XCircle className="h-5 w-5 text-red-600" />
+                <HugeiconsIcon icon={Cancel01Icon} className="h-5 w-5 text-red-600" />
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600">Absent</p>
@@ -490,7 +488,7 @@ export default function AttendancePage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-yellow-100 rounded-lg">
-                <AlertTriangle className="h-5 w-5 text-yellow-600" />
+                <HugeiconsIcon icon={AlertCircleIcon} className="h-5 w-5 text-yellow-600" />
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600">Late Arrivals</p>
@@ -502,7 +500,7 @@ export default function AttendancePage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-purple-100 rounded-lg">
-                <Timer className="h-5 w-5 text-purple-600" />
+                <HugeiconsIcon icon={Clock01Icon} className="h-5 w-5 text-purple-600" />
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600">Overtime</p>
@@ -517,20 +515,20 @@ export default function AttendancePage() {
         <div className="flex items-center justify-between gap-4">
           <div className="flex-1 max-w-md">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input 
-                placeholder="Search employees, departments..." 
+              <HugeiconsIcon icon={Search01Icon} className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search employees, departments..."
                 className="pl-9"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
           </div>
-          
+
           <div className="flex items-center gap-2">
             <Select value={selectedDepartment} onValueChange={setSelectedDepartment}>
               <SelectTrigger className="w-40">
-                <Filter className="h-4 w-4 mr-2" />
+                <HugeiconsIcon icon={FilterIcon} className="h-4 w-4 mr-2" />
                 <SelectValue placeholder="Department" />
               </SelectTrigger>
               <SelectContent>
@@ -543,7 +541,7 @@ export default function AttendancePage() {
             
             <Select value={selectedStatus} onValueChange={setSelectedStatus}>
               <SelectTrigger className="w-32">
-                <CheckCircle className="h-4 w-4 mr-2" />
+                <HugeiconsIcon icon={CheckmarkCircle01Icon} className="h-4 w-4 mr-2" />
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
@@ -558,7 +556,7 @@ export default function AttendancePage() {
             
             <Select value={selectedDate} onValueChange={setSelectedDate}>
               <SelectTrigger className="w-32">
-                <Calendar className="h-4 w-4 mr-2" />
+                <HugeiconsIcon icon={Calendar01Icon} className="h-4 w-4 mr-2" />
                 <SelectValue placeholder="Date" />
               </SelectTrigger>
               <SelectContent>
@@ -570,7 +568,7 @@ export default function AttendancePage() {
             
             <Select value={selectedMonth} onValueChange={setSelectedMonth}>
               <SelectTrigger className="w-32">
-                <Calendar className="h-4 w-4 mr-2" />
+                <HugeiconsIcon icon={Calendar01Icon} className="h-4 w-4 mr-2" />
                 <SelectValue placeholder="Month" />
               </SelectTrigger>
               <SelectContent>
@@ -583,7 +581,7 @@ export default function AttendancePage() {
             
             <Select value={selectedYear} onValueChange={setSelectedYear}>
               <SelectTrigger className="w-24">
-                <Calendar className="h-4 w-4 mr-2" />
+                <HugeiconsIcon icon={Calendar01Icon} className="h-4 w-4 mr-2" />
                 <SelectValue placeholder="Year" />
               </SelectTrigger>
               <SelectContent>
@@ -617,7 +615,7 @@ export default function AttendancePage() {
             </div>
             <Select>
               <SelectTrigger className="w-44">
-                <BarChart3 className="h-4 w-4 mr-2" />
+                <HugeiconsIcon icon={ChartColumnIcon} className="h-4 w-4 mr-2" />
                 <SelectValue placeholder="Sort by Date" />
               </SelectTrigger>
               <SelectContent>

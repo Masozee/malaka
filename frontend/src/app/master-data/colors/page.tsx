@@ -1,5 +1,13 @@
 "use client"
 
+import { HugeiconsIcon } from "@hugeicons/react"
+import {
+  Search01Icon,
+  PaintBrushIcon,
+  ChartColumnIcon,
+  CheckmarkCircle01Icon
+} from "@hugeicons/core-free-icons"
+
 import * as React from "react"
 import { TwoLevelLayout } from "@/components/ui/two-level-layout"
 import { Header } from "@/components/ui/header"
@@ -13,7 +21,6 @@ import { ColorForm } from "@/components/forms/color-form"
 import { useToast, toast } from "@/components/ui/toast"
 import { useColors, useDeleteColor } from "@/hooks/queries"
 import { Color } from "@/types/masterdata"
-import { Search, Palette, BarChart3, CheckCircle } from "lucide-react"
 
 export default function ColorsPage() {
   const [mounted, setMounted] = React.useState(false)
@@ -217,7 +224,7 @@ export default function ColorsPage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
-                <Palette className="h-5 w-5 text-foreground" />
+                <HugeiconsIcon icon={PaintBrushIcon} className="h-5 w-5 text-foreground" />
               </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Total Colors</p>
@@ -228,7 +235,7 @@ export default function ColorsPage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
-                <CheckCircle className="h-5 w-5 text-foreground" />
+                <HugeiconsIcon icon={CheckmarkCircle01Icon} className="h-5 w-5 text-foreground" />
               </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Active</p>
@@ -250,7 +257,7 @@ export default function ColorsPage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
-                <BarChart3 className="h-5 w-5 text-foreground" />
+                <HugeiconsIcon icon={ChartColumnIcon} className="h-5 w-5 text-foreground" />
               </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Recently Added</p>
@@ -264,7 +271,7 @@ export default function ColorsPage() {
         <div className="flex items-center justify-between gap-4">
           <div className="flex-1 max-w-md">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <HugeiconsIcon icon={Search01Icon} className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search colors..."
                 value={searchTerm}
@@ -288,7 +295,7 @@ export default function ColorsPage() {
 
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-32">
-                <CheckCircle className="h-4 w-4 mr-2" />
+                <HugeiconsIcon icon={CheckmarkCircle01Icon} className="h-4 w-4 mr-2" />
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>

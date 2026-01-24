@@ -9,16 +9,7 @@ import { TopProductsChart } from "@/components/charts/top-products-chart"
 import { SalesDistributionChart } from "@/components/charts/sales-distribution-chart"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { 
-  DollarSign, 
-  ShoppingCart, 
-  Users, 
-  TrendingUp, 
-  Target, 
-  Calendar,
-  Download,
-  RefreshCw 
-} from "lucide-react"
+
 import { generateDashboardData } from "@/lib/dashboard-data"
 import { DashboardResponse } from "@/types/dashboard"
 
@@ -123,14 +114,14 @@ export default function SalesDashboardPage() {
               onClick={handleRefresh}
               disabled={refreshing}
             >
-              <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+              <ArrowsClockwise className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
               Refresh
             </Button>
           </div>
 
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" onClick={handleExport}>
-              <Download className="h-4 w-4 mr-2" />
+              <DownloadSimple className="h-4 w-4 mr-2" />
               Export
             </Button>
           </div>
@@ -140,7 +131,7 @@ export default function SalesDashboardPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6 gap-4">
           <KPICard 
             metric={metrics.total_revenue} 
-            icon={<DollarSign className="h-5 w-5 text-green-600" />}
+            icon={<CurrencyDollar className="h-5 w-5 text-green-600" />}
             showTarget={true}
           />
           <KPICard 
@@ -149,7 +140,7 @@ export default function SalesDashboardPage() {
           />
           <KPICard 
             metric={metrics.average_order_value} 
-            icon={<TrendingUp className="h-5 w-5 text-purple-600" />}
+            icon={<TrendUp className="h-5 w-5 text-purple-600" />}
             showTarget={true}
           />
           <KPICard 

@@ -11,16 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { TwoLevelLayout } from '@/components/ui/two-level-layout'
 import { Header } from '@/components/ui/header'
 import { Separator } from '@/components/ui/separator'
-import { 
-  ArrowLeft,
-  Save,
-  X,
-  Plus,
-  Trash2,
-  FileText,
-  Package,
-  AlertCircle
-} from 'lucide-react'
+
 import Link from 'next/link'
 
 // Types
@@ -233,7 +224,7 @@ export default function NewQuotationPage() {
               onClick={() => handleSave('sent')} 
               disabled={saving || !isFormValid()}
             >
-              <Save className="h-4 w-4 mr-2" />
+              <FloppyDisk className="h-4 w-4 mr-2" />
               {saving ? 'Saving...' : 'Save & Send'}
             </Button>
           </div>
@@ -406,7 +397,7 @@ export default function NewQuotationPage() {
                     onClick={() => removeItem(item.id)}
                     className="text-red-600 hover:text-red-800"
                   >
-                    <Trash2 className="h-4 w-4" />
+                    <Trash className="h-4 w-4" />
                   </Button>
                 </div>
 
@@ -558,7 +549,7 @@ export default function NewQuotationPage() {
         {!isFormValid() && (
           <Card className="p-4 border-amber-200 bg-amber-50">
             <div className="flex items-center space-x-3">
-              <AlertCircle className="h-5 w-5 text-amber-600" />
+              <WarningCircle className="h-5 w-5 text-amber-600" />
               <div>
                 <h4 className="font-medium text-amber-800">Form Incomplete</h4>
                 <p className="text-sm text-amber-700">Please fill in all required fields (*) and add at least one item.</p>

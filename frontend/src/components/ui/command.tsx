@@ -1,7 +1,25 @@
 "use client"
 
 import * as React from "react"
-import { Search, Home, Database, ShoppingCart, Package, Users, BarChart, Settings, Factory, Calculator, DollarSign, FileText, TrendingUp, Clock, MapPin } from "lucide-react"
+import { HugeiconsIcon } from "@hugeicons/react"
+import {
+  Search01Icon,
+  Home01Icon,
+  Database01Icon,
+  ShoppingCart01Icon,
+  Package01Icon,
+  UserGroupIcon,
+  ChartBarLineIcon,
+  Settings01Icon,
+  Factory01Icon,
+  Calculator01Icon,
+  Dollar01Icon,
+  File01Icon,
+  ChartIncreaseIcon,
+  Clock01Icon,
+  Location01Icon
+} from "@hugeicons/core-free-icons"
+
 import { useRouter } from "next/navigation"
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
@@ -16,85 +34,85 @@ const commands = [
   {
     group: "Navigation",
     items: [
-      { label: "Dashboard", icon: Home, href: "/dashboard", keywords: ["home", "dashboard", "overview"] },
-      { label: "Master Data", icon: Database, href: "/master-data", keywords: ["master", "data", "companies", "articles"] },
-      { label: "Companies", icon: Database, href: "/master-data/companies", keywords: ["companies", "company", "organization"] },
-      { label: "Articles", icon: Database, href: "/master-data/articles", keywords: ["articles", "products", "shoes", "items"] },
-      { label: "Colors", icon: Database, href: "/master-data/colors", keywords: ["colors", "variants", "palette"] },
-      { label: "Classifications", icon: Database, href: "/master-data/classifications", keywords: ["classifications", "categories", "types"] },
-      { label: "Models", icon: Database, href: "/master-data/models", keywords: ["models", "designs", "variants"] },
-      { label: "Sizes", icon: Database, href: "/master-data/sizes", keywords: ["sizes", "measurements", "dimensions"] },
+      { label: "Dashboard", icon: Home01Icon, href: "/dashboard", keywords: ["home", "dashboard", "overview"] },
+      { label: "Master Data", icon: Database01Icon, href: "/master-data", keywords: ["master", "data", "companies", "articles"] },
+      { label: "Companies", icon: Database01Icon, href: "/master-data/companies", keywords: ["companies", "company", "organization"] },
+      { label: "Articles", icon: Database01Icon, href: "/master-data/articles", keywords: ["articles", "products", "shoes", "items"] },
+      { label: "Colors", icon: Database01Icon, href: "/master-data/colors", keywords: ["colors", "variants", "palette"] },
+      { label: "Classifications", icon: Database01Icon, href: "/master-data/classifications", keywords: ["classifications", "categories", "types"] },
+      { label: "Models", icon: Database01Icon, href: "/master-data/models", keywords: ["models", "designs", "variants"] },
+      { label: "Sizes", icon: Database01Icon, href: "/master-data/sizes", keywords: ["sizes", "measurements", "dimensions"] },
     ]
   },
   {
     group: "Sales & Commerce",
     items: [
-      { label: "Sales Management", icon: ShoppingCart, href: "#", keywords: ["sales", "orders", "customers", "pos"] },
-      { label: "Point of Sale", icon: ShoppingCart, href: "#", keywords: ["pos", "retail", "checkout", "payment"] },
-      { label: "Online Sales", icon: TrendingUp, href: "#", keywords: ["online", "ecommerce", "web", "digital"] },
-      { label: "Customer Returns", icon: ShoppingCart, href: "#", keywords: ["returns", "refunds", "exchanges"] },
-      { label: "Promotions", icon: TrendingUp, href: "#", keywords: ["promotions", "discounts", "campaigns", "marketing"] },
+      { label: "Sales Management", icon: ShoppingCart01Icon, href: "#", keywords: ["sales", "orders", "customers", "pos"] },
+      { label: "Point of Sale", icon: ShoppingCart01Icon, href: "#", keywords: ["pos", "retail", "checkout", "payment"] },
+      { label: "Online Sales", icon: ChartIncreaseIcon, href: "#", keywords: ["online", "ecommerce", "web", "digital"] },
+      { label: "Customer Returns", icon: ShoppingCart01Icon, href: "#", keywords: ["returns", "refunds", "exchanges"] },
+      { label: "Promotions", icon: ChartIncreaseIcon, href: "#", keywords: ["promotions", "discounts", "campaigns", "marketing"] },
     ]
   },
   {
     group: "Production & Manufacturing",
     items: [
-      { label: "Production Planning", icon: Factory, href: "#", keywords: ["production", "manufacturing", "planning", "scheduling"] },
-      { label: "Work Orders", icon: Factory, href: "#", keywords: ["work", "orders", "manufacturing", "jobs"] },
-      { label: "Quality Control", icon: Factory, href: "#", keywords: ["quality", "control", "inspection", "testing"] },
-      { label: "Material Planning", icon: Package, href: "#", keywords: ["material", "planning", "mrp", "requirements"] },
-      { label: "Production Reports", icon: BarChart, href: "#", keywords: ["production", "reports", "efficiency", "output"] },
+      { label: "Production Planning", icon: Factory01Icon, href: "#", keywords: ["production", "manufacturing", "planning", "scheduling"] },
+      { label: "Work Orders", icon: Factory01Icon, href: "#", keywords: ["work", "orders", "manufacturing", "jobs"] },
+      { label: "Quality Control", icon: Factory01Icon, href: "#", keywords: ["quality", "control", "inspection", "testing"] },
+      { label: "Material Planning", icon: Package01Icon, href: "#", keywords: ["material", "planning", "mrp", "requirements"] },
+      { label: "Production Reports", icon: ChartBarLineIcon, href: "#", keywords: ["production", "reports", "efficiency", "output"] },
     ]
   },
   {
     group: "Inventory & Warehouse",
     items: [
-      { label: "Inventory Control", icon: Package, href: "#", keywords: ["inventory", "stock", "warehouse", "items"] },
-      { label: "Stock Transfer", icon: MapPin, href: "#", keywords: ["transfer", "movement", "relocation", "stock"] },
-      { label: "Goods Receipt", icon: Package, href: "#", keywords: ["receipt", "receiving", "incoming", "delivery"] },
-      { label: "Stock Adjustments", icon: Package, href: "#", keywords: ["adjustments", "corrections", "variance"] },
-      { label: "Stock Opname", icon: Package, href: "#", keywords: ["opname", "counting", "physical", "audit"] },
+      { label: "Inventory Control", icon: Package01Icon, href: "#", keywords: ["inventory", "stock", "warehouse", "items"] },
+      { label: "Stock Transfer", icon: Location01Icon, href: "#", keywords: ["transfer", "movement", "relocation", "stock"] },
+      { label: "Goods Receipt", icon: Package01Icon, href: "#", keywords: ["receipt", "receiving", "incoming", "delivery"] },
+      { label: "Stock Adjustments", icon: Package01Icon, href: "#", keywords: ["adjustments", "corrections", "variance"] },
+      { label: "Stock Opname", icon: Package01Icon, href: "#", keywords: ["opname", "counting", "physical", "audit"] },
     ]
   },
   {
     group: "Finance & Accounting",
     items: [
-      { label: "General Ledger", icon: Calculator, href: "#", keywords: ["ledger", "gl", "accounts", "journal"] },
-      { label: "Accounts Receivable", icon: DollarSign, href: "#", keywords: ["receivable", "ar", "collections", "invoices"] },
-      { label: "Accounts Payable", icon: DollarSign, href: "#", keywords: ["payable", "ap", "vendors", "bills"] },
-      { label: "Cash Management", icon: DollarSign, href: "#", keywords: ["cash", "bank", "payments", "receipts"] },
-      { label: "Financial Reports", icon: FileText, href: "#", keywords: ["financial", "reports", "statements", "balance"] },
-      { label: "Trial Balance", icon: Calculator, href: "#", keywords: ["trial", "balance", "accounts", "summary"] },
-      { label: "Cost Centers", icon: Calculator, href: "#", keywords: ["cost", "centers", "allocation", "budget"] },
+      { label: "General Ledger", icon: Calculator01Icon, href: "#", keywords: ["ledger", "gl", "accounts", "journal"] },
+      { label: "Accounts Receivable", icon: Dollar01Icon, href: "#", keywords: ["receivable", "ar", "collections", "invoices"] },
+      { label: "Accounts Payable", icon: Dollar01Icon, href: "#", keywords: ["payable", "ap", "vendors", "bills"] },
+      { label: "Cash Management", icon: Dollar01Icon, href: "#", keywords: ["cash", "bank", "payments", "receipts"] },
+      { label: "Financial Reports", icon: File01Icon, href: "#", keywords: ["financial", "reports", "statements", "balance"] },
+      { label: "Trial Balance", icon: Calculator01Icon, href: "#", keywords: ["trial", "balance", "accounts", "summary"] },
+      { label: "Cost Centers", icon: Calculator01Icon, href: "#", keywords: ["cost", "centers", "allocation", "budget"] },
     ]
   },
   {
     group: "Human Resources",
     items: [
-      { label: "Employee Management", icon: Users, href: "#", keywords: ["employees", "staff", "personnel", "hr"] },
-      { label: "Payroll Processing", icon: DollarSign, href: "#", keywords: ["payroll", "salary", "wages", "compensation"] },
-      { label: "Attendance Tracking", icon: Clock, href: "#", keywords: ["attendance", "time", "tracking", "biometric"] },
-      { label: "Leave Management", icon: Clock, href: "#", keywords: ["leave", "vacation", "absence", "time off"] },
-      { label: "Performance Review", icon: TrendingUp, href: "#", keywords: ["performance", "review", "evaluation", "appraisal"] },
+      { label: "Employee Management", icon: UserGroupIcon, href: "#", keywords: ["employees", "staff", "personnel", "hr"] },
+      { label: "Payroll Processing", icon: Dollar01Icon, href: "#", keywords: ["payroll", "salary", "wages", "compensation"] },
+      { label: "Attendance Tracking", icon: Clock01Icon, href: "#", keywords: ["attendance", "time", "tracking", "biometric"] },
+      { label: "Leave Management", icon: Clock01Icon, href: "#", keywords: ["leave", "vacation", "absence", "time off"] },
+      { label: "Performance Review", icon: ChartIncreaseIcon, href: "#", keywords: ["performance", "review", "evaluation", "appraisal"] },
     ]
   },
   {
     group: "Reports & Analytics",
     items: [
-      { label: "Business Intelligence", icon: BarChart, href: "#", keywords: ["bi", "analytics", "intelligence", "insights"] },
-      { label: "Sales Reports", icon: TrendingUp, href: "#", keywords: ["sales", "reports", "performance", "revenue"] },
-      { label: "Inventory Reports", icon: Package, href: "#", keywords: ["inventory", "reports", "stock", "levels"] },
-      { label: "Financial Analysis", icon: Calculator, href: "#", keywords: ["financial", "analysis", "ratios", "performance"] },
-      { label: "Custom Reports", icon: FileText, href: "#", keywords: ["custom", "reports", "builder", "designer"] },
+      { label: "Business Intelligence", icon: ChartBarLineIcon, href: "#", keywords: ["bi", "analytics", "intelligence", "insights"] },
+      { label: "Sales Reports", icon: ChartIncreaseIcon, href: "#", keywords: ["sales", "reports", "performance", "revenue"] },
+      { label: "Inventory Reports", icon: Package01Icon, href: "#", keywords: ["inventory", "reports", "stock", "levels"] },
+      { label: "Financial Analysis", icon: Calculator01Icon, href: "#", keywords: ["financial", "analysis", "ratios", "performance"] },
+      { label: "Custom Reports", icon: File01Icon, href: "#", keywords: ["custom", "reports", "builder", "designer"] },
     ]
   },
   {
     group: "System",
     items: [
-      { label: "User Management", icon: Users, href: "#", keywords: ["users", "permissions", "roles", "access"] },
-      { label: "System Settings", icon: Settings, href: "#", keywords: ["settings", "configuration", "preferences", "setup"] },
-      { label: "Data Import/Export", icon: Database, href: "#", keywords: ["import", "export", "data", "migration"] },
-      { label: "Backup & Restore", icon: Database, href: "#", keywords: ["backup", "restore", "recovery", "archive"] },
+      { label: "User Management", icon: UserGroupIcon, href: "#", keywords: ["users", "permissions", "roles", "access"] },
+      { label: "System Gear", icon: Settings01Icon, href: "#", keywords: ["settings", "configuration", "preferences", "setup"] },
+      { label: "Data Import/Export", icon: Database01Icon, href: "#", keywords: ["import", "export", "data", "migration"] },
+      { label: "Backup & Restore", icon: Database01Icon, href: "#", keywords: ["backup", "restore", "recovery", "archive"] },
     ]
   }
 ]
@@ -145,7 +163,7 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
         </DialogHeader>
         
         <div className="flex items-center border-b px-4 pb-4">
-          <Search className="mr-3 h-5 w-5 shrink-0 opacity-50" aria-hidden="true" />
+          <HugeiconsIcon icon={Search01Icon} className="mr-3 h-5 w-5 shrink-0 opacity-50" />
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -170,14 +188,13 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
                   {group.group}
                 </div>
                 {group.items.map((item) => {
-                  const Icon = item.icon
                   return (
                     <button
                       key={item.href}
                       onClick={() => handleSelect(item.href)}
                       className="relative flex w-full cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
                     >
-                      <Icon className="mr-2 h-4 w-4" aria-hidden="true" />
+                      <HugeiconsIcon icon={item.icon} className="mr-2 h-4 w-4" />
                       <span>{item.label}</span>
                     </button>
                   )

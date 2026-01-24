@@ -6,27 +6,6 @@ import { Header } from '@/components/ui/header'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { 
-  BarChart3,
-  PieChart,
-  LineChart,
-  TrendingUp,
-  TrendingDown,
-  DollarSign,
-  Package,
-  Users,
-  ShoppingCart,
-  Factory,
-  Truck,
-  Calendar,
-  Download,
-  RefreshCw,
-  Settings,
-  Filter,
-  Eye,
-  ArrowUpRight,
-  ArrowDownRight
-} from 'lucide-react'
 
 interface KPIMetric {
   id: string
@@ -35,7 +14,6 @@ interface KPIMetric {
   change: number
   changeType: 'increase' | 'decrease'
   period: string
-  icon: React.ComponentType<{ className?: string }>
   color: string
 }
 
@@ -58,7 +36,6 @@ const mockKPIMetrics: KPIMetric[] = [
     change: 12.5,
     changeType: 'increase',
     period: 'vs last month',
-    icon: DollarSign,
     color: 'text-green-600'
   },
   {
@@ -68,7 +45,6 @@ const mockKPIMetrics: KPIMetric[] = [
     change: -3.2,
     changeType: 'decrease',
     period: 'vs last month',
-    icon: ShoppingCart,
     color: 'text-blue-600'
   },
   {
@@ -78,7 +54,6 @@ const mockKPIMetrics: KPIMetric[] = [
     change: 8.1,
     changeType: 'increase',
     period: 'vs last month',
-    icon: Users,
     color: 'text-purple-600'
   },
   {
@@ -88,7 +63,6 @@ const mockKPIMetrics: KPIMetric[] = [
     change: 5.7,
     changeType: 'increase',
     period: 'vs last month',
-    icon: Package,
     color: 'text-orange-600'
   },
   {
@@ -98,7 +72,6 @@ const mockKPIMetrics: KPIMetric[] = [
     change: 15.3,
     changeType: 'increase',
     period: 'vs last month',
-    icon: Factory,
     color: 'text-teal-600'
   },
   {
@@ -108,7 +81,6 @@ const mockKPIMetrics: KPIMetric[] = [
     change: -1.8,
     changeType: 'decrease',
     period: 'vs last month',
-    icon: Truck,
     color: 'text-indigo-600'
   }
 ]
@@ -201,12 +173,6 @@ const priorityColors = {
   low: 'bg-gray-100 text-gray-800'
 }
 
-const chartIcons = {
-  chart: BarChart3,
-  table: TrendingUp,
-  metric: PieChart,
-  gauge: LineChart
-}
 
 export default function BIDashboardPage() {
   const [mounted, setMounted] = useState(false)
@@ -222,22 +188,19 @@ export default function BIDashboardPage() {
   ]
 
   const KPICard = ({ metric }: { metric: KPIMetric }) => {
-    const Icon = metric.icon
-    const TrendIcon = metric.changeType === 'increase' ? ArrowUpRight : ArrowDownRight
     const trendColor = metric.changeType === 'increase' ? 'text-green-600' : 'text-red-600'
-    
+
     return (
       <Card className="p-6">
         <div className="flex items-center justify-between mb-4">
           <div className={`p-3 rounded-lg bg-gray-100`}>
-            <Icon className={`h-6 w-6 ${metric.color}`} />
+            <div className={`h-6 w-6 ${metric.color}`} />
           </div>
           <div className={`flex items-center space-x-1 ${trendColor}`}>
-            <TrendIcon className="h-4 w-4" />
-            <span className="text-sm font-medium">{Math.abs(metric.change)}%</span>
+            <span className="text-sm font-medium">{metric.changeType === 'increase' ? '+' : '-'}{Math.abs(metric.change)}%</span>
           </div>
         </div>
-        
+
         <div className="space-y-2">
           <h3 className="text-sm font-medium text-gray-600">{metric.title}</h3>
           <p className="text-2xl font-bold text-gray-900">{metric.value}</p>
@@ -248,14 +211,12 @@ export default function BIDashboardPage() {
   }
 
   const ReportWidgetCard = ({ widget }: { widget: ReportWidget }) => {
-    const ChartIcon = chartIcons[widget.type]
-    
     return (
       <Card className="p-6">
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-center space-x-3">
             <div className="p-2 bg-blue-100 rounded-lg">
-              <ChartIcon className="h-5 w-5 text-blue-600" />
+              <div className="h-5 w-5" />
             </div>
             <div>
               <h3 className="font-semibold text-gray-900">{widget.title}</h3>
@@ -271,24 +232,22 @@ export default function BIDashboardPage() {
             </Badge>
           </div>
         </div>
-        
+
         <div className="h-48 bg-gray-50 rounded-lg flex items-center justify-center mb-4">
           <div className="text-center text-gray-500">
-            <ChartIcon className="h-12 w-12 mx-auto mb-2" />
+            <div className="h-12 w-12 mx-auto mb-2 bg-muted rounded-lg" />
             <p className="text-sm font-medium">{widget.title}</p>
             <p className="text-xs">Interactive {widget.type} would be here</p>
           </div>
         </div>
-        
+
         <div className="flex items-center justify-between">
           <span className="text-xs text-gray-500">Updated {widget.lastUpdated}</span>
           <div className="flex space-x-2">
             <Button size="sm" variant="outline">
-              <Eye className="h-4 w-4 mr-1" />
               View
             </Button>
             <Button size="sm" variant="outline">
-              <Download className="h-4 w-4 mr-1" />
               Export
             </Button>
           </div>
@@ -309,8 +268,7 @@ export default function BIDashboardPage() {
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-2">
-              <Calendar className="h-4 w-4 text-gray-500" />
-              <select 
+              <select
                 value={selectedPeriod}
                 onChange={(e) => setSelectedPeriod(e.target.value)}
                 className="border border-gray-300 rounded-md px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -322,22 +280,18 @@ export default function BIDashboardPage() {
               </select>
             </div>
             <Button variant="outline" size="sm">
-              <Filter className="h-4 w-4 mr-2" />
               Filters
             </Button>
           </div>
-          
+
           <div className="flex items-center space-x-2">
             <Button variant="outline" size="sm">
-              <RefreshCw className="h-4 w-4 mr-2" />
               Refresh
             </Button>
             <Button variant="outline" size="sm">
-              <Settings className="h-4 w-4 mr-2" />
               Customize
             </Button>
             <Button size="sm">
-              <Download className="h-4 w-4 mr-2" />
               Export Dashboard
             </Button>
           </div>
@@ -358,7 +312,6 @@ export default function BIDashboardPage() {
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-gray-900">Reports & Analytics</h2>
             <Button variant="outline" size="sm">
-              <Settings className="h-4 w-4 mr-2" />
               Manage Widgets
             </Button>
           </div>
@@ -375,21 +328,20 @@ export default function BIDashboardPage() {
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Access Reports</h3>
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
             {[
-              { label: 'Sales Report', href: '/reports/sales', icon: ShoppingCart },
-              { label: 'Inventory Report', href: '/reports/inventory', icon: Package },
-              { label: 'Financial Report', href: '/reports/financial', icon: DollarSign },
-              { label: 'Production Report', href: '/reports/production', icon: Factory },
-              { label: 'HR Report', href: '/reports/hr', icon: Users },
-              { label: 'Custom Reports', href: '/reports/custom', icon: BarChart3 }
+              { label: 'Sales Report', href: '/reports/sales' },
+              { label: 'Inventory Report', href: '/reports/inventory' },
+              { label: 'Financial Report', href: '/reports/financial' },
+              { label: 'Production Report', href: '/reports/production' },
+              { label: 'HR Report', href: '/reports/hr' },
+              { label: 'Custom Reports', href: '/reports/custom' }
             ].map((report, index) => {
-              const Icon = report.icon
               return (
                 <Button
                   key={index}
                   variant="outline"
                   className="h-20 flex flex-col items-center justify-center space-y-2"
                 >
-                  <Icon className="h-6 w-6" />
+                  <div className="h-6 w-6 bg-muted rounded" />
                   <span className="text-xs text-center">{report.label}</span>
                 </Button>
               )

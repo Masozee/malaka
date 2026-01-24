@@ -10,27 +10,7 @@ import { AdvancedDataTable } from '@/components/ui/advanced-data-table'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { 
-  Target,
-  Plus,
-  Eye,
-  Edit,
-  Filter,
-  Download,
-  Calendar,
-  TrendingUp,
-  TrendingDown,
-  CheckCircle,
-  Clock,
-  AlertCircle,
-  Search,
-  Users,
-  DollarSign,
-  BarChart3,
-  Award,
-  User,
-  Building
-} from 'lucide-react'
+
 import Link from 'next/link'
 
 // Sales Target types
@@ -350,7 +330,7 @@ export default function SalesTargetsPage() {
       individual: { variant: 'default' as const, label: 'Individual', icon: User },
       team: { variant: 'secondary' as const, label: 'Team', icon: Users },
       store: { variant: 'outline' as const, label: 'Store', icon: Building },
-      region: { variant: 'secondary' as const, label: 'Region', icon: BarChart3 },
+      region: { variant: 'secondary' as const, label: 'Region', icon: ChartBar },
       company: { variant: 'default' as const, label: 'Company', icon: Award }
     }
     return config[type as keyof typeof config] || { variant: 'secondary' as const, label: type, icon: Target }
@@ -360,8 +340,8 @@ export default function SalesTargetsPage() {
     const config = {
       active: { variant: 'default' as const, label: 'Active', icon: Clock },
       completed: { variant: 'default' as const, label: 'Completed', icon: CheckCircle },
-      overdue: { variant: 'destructive' as const, label: 'Overdue', icon: AlertCircle },
-      cancelled: { variant: 'secondary' as const, label: 'Cancelled', icon: AlertCircle }
+      overdue: { variant: 'destructive' as const, label: 'Overdue', icon: WarningCircle },
+      cancelled: { variant: 'secondary' as const, label: 'Cancelled', icon: WarningCircle }
     }
     return config[status as keyof typeof config] || { variant: 'secondary' as const, label: status, icon: Clock }
   }
@@ -511,7 +491,7 @@ export default function SalesTargetsPage() {
           </Button>
           <Button variant="ghost" size="sm" asChild>
             <Link href={`/sales/targets/${target.id}/edit`}>
-              <Edit className="h-4 w-4" />
+              <PencilSimple className="h-4 w-4" />
             </Link>
           </Button>
         </div>
@@ -529,7 +509,7 @@ export default function SalesTargetsPage() {
           actions={
             <div className="flex items-center space-x-3">
               <Button variant="outline" size="sm">
-                <Download className="h-4 w-4 mr-2" />
+                <DownloadSimple className="h-4 w-4 mr-2" />
                 Export
               </Button>
               <Button size="sm" asChild>
@@ -584,7 +564,7 @@ export default function SalesTargetsPage() {
                 <p className="text-2xl font-bold mt-1 text-red-600">{summaryStats.overdueTargets}</p>
                 <p className="text-sm text-red-600 mt-1">Behind schedule</p>
               </div>
-              <AlertCircle className="h-8 w-8 text-red-600" />
+              <WarningCircle className="h-8 w-8 text-red-600" />
             </div>
           </Card>
 
@@ -597,7 +577,7 @@ export default function SalesTargetsPage() {
                 </p>
                 <p className="text-sm text-purple-600 mt-1">IDR target</p>
               </div>
-              <DollarSign className="h-8 w-8 text-purple-600" />
+              <CurrencyDollar className="h-8 w-8 text-purple-600" />
             </div>
           </Card>
 
@@ -610,7 +590,7 @@ export default function SalesTargetsPage() {
                 </p>
                 <p className="text-sm text-green-600 mt-1">IDR achieved</p>
               </div>
-              <TrendingUp className="h-8 w-8 text-green-600" />
+              <TrendUp className="h-8 w-8 text-green-600" />
             </div>
           </Card>
 
@@ -623,7 +603,7 @@ export default function SalesTargetsPage() {
                 </p>
                 <p className="text-sm text-gray-600 mt-1">Overall</p>
               </div>
-              <BarChart3 className="h-8 w-8 text-gray-600" />
+              <ChartBar className="h-8 w-8 text-gray-600" />
             </div>
           </Card>
         </div>
@@ -631,12 +611,12 @@ export default function SalesTargetsPage() {
         {/* Filters */}
         <Card className="p-6">
           <div className="flex items-center space-x-4">
-            <Filter className="h-5 w-5 text-muted-foreground" />
+            <Funnel className="h-5 w-5 text-muted-foreground" />
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 flex-1">
               <div className="space-y-2">
                 <Label htmlFor="search">Search</Label>
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <MagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="search"
                     placeholder="Search targets..."
@@ -839,7 +819,7 @@ export default function SalesTargetsPage() {
                       </Button>
                       <Button variant="outline" size="sm" asChild>
                         <Link href={`/sales/targets/${target.id}/edit`}>
-                          <Edit className="h-4 w-4" />
+                          <PencilSimple className="h-4 w-4" />
                         </Link>
                       </Button>
                     </div>
@@ -876,7 +856,7 @@ export default function SalesTargetsPage() {
           {summaryStats.overdueTargets > 0 && (
             <Card className="p-6 border-red-200 bg-red-50">
               <div className="flex items-center space-x-3">
-                <AlertCircle className="h-6 w-6 text-red-600" />
+                <WarningCircle className="h-6 w-6 text-red-600" />
                 <div className="flex-1">
                   <h3 className="text-lg font-semibold text-red-800">Overdue Targets</h3>
                   <p className="text-red-700 mt-1">
@@ -894,7 +874,7 @@ export default function SalesTargetsPage() {
           {mockTargets.filter(t => t.achievement_percentage < 50 && t.status === 'active').length > 0 && (
             <Card className="p-6 border-orange-200 bg-orange-50">
               <div className="flex items-center space-x-3">
-                <TrendingDown className="h-6 w-6 text-orange-600" />
+                <TrendDown className="h-6 w-6 text-orange-600" />
                 <div className="flex-1">
                   <h3 className="text-lg font-semibold text-orange-800">Low Performance</h3>
                   <p className="text-orange-700 mt-1">

@@ -10,28 +10,7 @@ import { AdvancedDataTable } from '@/components/ui/advanced-data-table'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { 
-  Gift,
-  Plus,
-  Eye,
-  Edit,
-  Filter,
-  Download,
-  Percent,
-  DollarSign,
-  Calendar,
-  Target,
-  TrendingUp,
-  CheckCircle,
-  Clock,
-  AlertCircle,
-  Search,
-  Users,
-  Package,
-  BarChart3,
-  Tag,
-  Star
-} from 'lucide-react'
+
 import Link from 'next/link'
 
 // Promotion types
@@ -341,11 +320,11 @@ export default function SalesPromotionsPage() {
   const getTypeBadge = (type: string) => {
     const config = {
       percentage: { variant: 'default' as const, label: 'Percentage', icon: Percent },
-      fixed_amount: { variant: 'secondary' as const, label: 'Fixed Amount', icon: DollarSign },
+      fixed_amount: { variant: 'secondary' as const, label: 'Fixed Amount', icon: CurrencyDollar },
       buy_one_get_one: { variant: 'outline' as const, label: 'BOGO', icon: Gift },
       bundle: { variant: 'secondary' as const, label: 'Bundle', icon: Package },
       free_shipping: { variant: 'outline' as const, label: 'Free Ship', icon: Target },
-      cashback: { variant: 'default' as const, label: 'Cashback', icon: DollarSign }
+      cashback: { variant: 'default' as const, label: 'Cashback', icon: CurrencyDollar }
     }
     return config[type as keyof typeof config] || { variant: 'secondary' as const, label: type, icon: Tag }
   }
@@ -356,7 +335,7 @@ export default function SalesPromotionsPage() {
       active: { variant: 'default' as const, label: 'Active', icon: CheckCircle },
       paused: { variant: 'outline' as const, label: 'Paused', icon: Clock },
       completed: { variant: 'default' as const, label: 'Completed', icon: CheckCircle },
-      cancelled: { variant: 'destructive' as const, label: 'Cancelled', icon: AlertCircle }
+      cancelled: { variant: 'destructive' as const, label: 'Cancelled', icon: WarningCircle }
     }
     return config[status as keyof typeof config] || { variant: 'secondary' as const, label: status, icon: Clock }
   }
@@ -496,7 +475,7 @@ export default function SalesPromotionsPage() {
           </Button>
           <Button variant="ghost" size="sm" asChild>
             <Link href={`/sales/promotions/${promotion.id}/edit`}>
-              <Edit className="h-4 w-4" />
+              <PencilSimple className="h-4 w-4" />
             </Link>
           </Button>
         </div>
@@ -514,7 +493,7 @@ export default function SalesPromotionsPage() {
           actions={
             <div className="flex items-center space-x-3">
               <Button variant="outline" size="sm">
-                <Download className="h-4 w-4 mr-2" />
+                <DownloadSimple className="h-4 w-4 mr-2" />
                 Export
               </Button>
               <Button size="sm" asChild>
@@ -571,7 +550,7 @@ export default function SalesPromotionsPage() {
                 </p>
                 <p className="text-sm text-purple-600 mt-1">IDR revenue</p>
               </div>
-              <TrendingUp className="h-8 w-8 text-purple-600" />
+              <TrendUp className="h-8 w-8 text-purple-600" />
             </div>
           </Card>
 
@@ -584,7 +563,7 @@ export default function SalesPromotionsPage() {
                 </p>
                 <p className="text-sm text-red-600 mt-1">Cost of promo</p>
               </div>
-              <DollarSign className="h-8 w-8 text-red-600" />
+              <CurrencyDollar className="h-8 w-8 text-red-600" />
             </div>
           </Card>
 
@@ -610,7 +589,7 @@ export default function SalesPromotionsPage() {
                 </p>
                 <p className="text-sm text-gray-600 mt-1">Effectiveness</p>
               </div>
-              <BarChart3 className="h-8 w-8 text-gray-600" />
+              <ChartBar className="h-8 w-8 text-gray-600" />
             </div>
           </Card>
         </div>
@@ -618,12 +597,12 @@ export default function SalesPromotionsPage() {
         {/* Filters */}
         <Card className="p-6">
           <div className="flex items-center space-x-4">
-            <Filter className="h-5 w-5 text-muted-foreground" />
+            <Funnel className="h-5 w-5 text-muted-foreground" />
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 flex-1">
               <div className="space-y-2">
                 <Label htmlFor="search">Search</Label>
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <MagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="search"
                     placeholder="Search promotions..."
@@ -813,7 +792,7 @@ export default function SalesPromotionsPage() {
                       </Button>
                       <Button variant="outline" size="sm" asChild>
                         <Link href={`/sales/promotions/${promotion.id}/edit`}>
-                          <Edit className="h-4 w-4" />
+                          <PencilSimple className="h-4 w-4" />
                         </Link>
                       </Button>
                     </div>
@@ -848,7 +827,7 @@ export default function SalesPromotionsPage() {
         {mockPromotions.filter(p => p.conversion_rate < 10 && p.status === 'active').length > 0 && (
           <Card className="p-6 border-red-200 bg-red-50">
             <div className="flex items-center space-x-3">
-              <AlertCircle className="h-6 w-6 text-red-600" />
+              <WarningCircle className="h-6 w-6 text-red-600" />
               <div className="flex-1">
                 <h3 className="text-lg font-semibold text-red-800">Low Performance Promotions</h3>
                 <p className="text-red-700 mt-1">

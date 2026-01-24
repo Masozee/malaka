@@ -7,23 +7,6 @@ import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { AdvancedDataTable } from '@/components/ui/advanced-data-table'
 import { Badge } from '@/components/ui/badge'
-import { 
-  BarChart3,
-  TrendingUp,
-  DollarSign,
-  ShoppingCart,
-  Users,
-  Calendar,
-  Download,
-  Filter,
-  RefreshCw,
-  Eye,
-  FileText,
-  PieChart,
-  LineChart,
-  Target,
-  Store
-} from 'lucide-react'
 
 interface SalesReport {
   id: string
@@ -49,7 +32,6 @@ interface SalesMetric {
   change: number
   changeType: 'increase' | 'decrease'
   period: string
-  icon: React.ComponentType<{ className?: string }>
   color: string
 }
 
@@ -194,7 +176,6 @@ const mockSalesMetrics: SalesMetric[] = [
     change: 15.3,
     changeType: 'increase',
     period: 'vs last month',
-    icon: DollarSign,
     color: 'text-green-600'
   },
   {
@@ -204,7 +185,6 @@ const mockSalesMetrics: SalesMetric[] = [
     change: 8.7,
     changeType: 'increase',
     period: 'vs last month',
-    icon: ShoppingCart,
     color: 'text-blue-600'
   },
   {
@@ -214,7 +194,6 @@ const mockSalesMetrics: SalesMetric[] = [
     change: -2.1,
     changeType: 'decrease',
     period: 'vs last month',
-    icon: Target,
     color: 'text-purple-600'
   },
   {
@@ -224,7 +203,6 @@ const mockSalesMetrics: SalesMetric[] = [
     change: 12.4,
     changeType: 'increase',
     period: 'vs last month',
-    icon: Users,
     color: 'text-orange-600'
   },
   {
@@ -234,7 +212,6 @@ const mockSalesMetrics: SalesMetric[] = [
     change: 0.5,
     changeType: 'increase',
     period: 'vs last month',
-    icon: TrendingUp,
     color: 'text-teal-600'
   },
   {
@@ -244,7 +221,6 @@ const mockSalesMetrics: SalesMetric[] = [
     change: -0.3,
     changeType: 'decrease',
     period: 'vs last month',
-    icon: Store,
     color: 'text-indigo-600'
   }
 ]
@@ -447,11 +423,9 @@ export default function SalesReportsPage() {
       
       <div className="flex space-x-2 mt-4">
         <Button size="sm" variant="outline" className="flex-1">
-          <Eye className="h-4 w-4 mr-1" />
           View
         </Button>
         <Button size="sm" className="flex-1" disabled={report.status !== 'generated'}>
-          <Download className="h-4 w-4 mr-1" />
           Download
         </Button>
       </div>
@@ -471,12 +445,11 @@ export default function SalesReportsPage() {
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Sales Performance Overview</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
             {mockSalesMetrics.map((metric) => {
-              const Icon = metric.icon
               return (
                 <Card key={metric.id} className="p-4">
                   <div className="flex items-center justify-between mb-2">
                     <div className="p-2 bg-gray-100 rounded-lg">
-                      <Icon className={`h-5 w-5 ${metric.color}`} />
+                      <div className={`h-5 w-5 ${metric.color}`} />
                     </div>
                     <div className={`text-sm font-medium ${metric.changeType === 'increase' ? 'text-green-600' : 'text-red-600'}`}>
                       {metric.changeType === 'increase' ? '+' : ''}{metric.change}%
@@ -498,7 +471,7 @@ export default function SalesReportsPage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-blue-100 rounded-lg">
-                <FileText className="h-5 w-5 text-blue-600" />
+                <div className="h-5 w-5" />
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600">Total Reports</p>
@@ -510,7 +483,7 @@ export default function SalesReportsPage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-green-100 rounded-lg">
-                <FileText className="h-5 w-5 text-green-600" />
+                <div className="h-5 w-5" />
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600">Generated</p>
@@ -522,7 +495,7 @@ export default function SalesReportsPage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-blue-100 rounded-lg">
-                <RefreshCw className="h-5 w-5 text-blue-600" />
+                <div className="h-5 w-5" />
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600">Processing</p>
@@ -534,7 +507,7 @@ export default function SalesReportsPage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-yellow-100 rounded-lg">
-                <Calendar className="h-5 w-5 text-yellow-600" />
+                <div className="h-5 w-5" />
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600">Scheduled</p>
@@ -546,7 +519,7 @@ export default function SalesReportsPage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-red-100 rounded-lg">
-                <FileText className="h-5 w-5 text-red-600" />
+                <div className="h-5 w-5" />
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600">Failed</p>
@@ -558,7 +531,7 @@ export default function SalesReportsPage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-purple-100 rounded-lg">
-                <DollarSign className="h-5 w-5 text-purple-600" />
+                <div className="h-5 w-5" />
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600">Total Revenue</p>
@@ -572,7 +545,7 @@ export default function SalesReportsPage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-indigo-100 rounded-lg">
-                <ShoppingCart className="h-5 w-5 text-indigo-600" />
+                <div className="h-5 w-5" />
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600">Total Orders</p>
@@ -586,7 +559,7 @@ export default function SalesReportsPage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-teal-100 rounded-lg">
-                <TrendingUp className="h-5 w-5 text-teal-600" />
+                <div className="h-5 w-5" />
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600">Success Rate</p>
@@ -619,15 +592,12 @@ export default function SalesReportsPage() {
           
           <div className="flex items-center space-x-2">
             <Button variant="outline" size="sm">
-              <Filter className="h-4 w-4 mr-2" />
               Filter Reports
             </Button>
             <Button variant="outline" size="sm">
-              <Calendar className="h-4 w-4 mr-2" />
               Schedule Report
             </Button>
             <Button size="sm">
-              <BarChart3 className="h-4 w-4 mr-2" />
               Generate Report
             </Button>
           </div>

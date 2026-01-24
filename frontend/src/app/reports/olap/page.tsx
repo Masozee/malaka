@@ -5,7 +5,6 @@ import { TwoLevelLayout } from "@/components/ui/two-level-layout"
 import { Header } from "@/components/ui/header"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { BarChart3, Database, Filter, RefreshCw } from "lucide-react"
 
 export default function OLAPAnalysisPage() {
   const breadcrumbs = [
@@ -23,7 +22,6 @@ export default function OLAPAnalysisPage() {
           actions={
             <div className="flex items-center space-x-3">
               <Button variant="outline" size="sm">
-                <RefreshCw className="h-4 w-4 mr-2" />
                 Refresh Data
               </Button>
             </div>
@@ -36,7 +34,6 @@ export default function OLAPAnalysisPage() {
             <Card className="hover: transition-shadow">
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
-                  <BarChart3 className="h-5 w-5" />
                   <span>Sales Cube</span>
                 </CardTitle>
                 <CardDescription>
@@ -54,7 +51,6 @@ export default function OLAPAnalysisPage() {
                     <span className="font-medium">12</span>
                   </div>
                   <Button className="w-full">
-                    <Database className="h-3 w-3 mr-2" />
                     Analyze
                   </Button>
                 </div>
@@ -64,7 +60,6 @@ export default function OLAPAnalysisPage() {
             <Card className="hover: transition-shadow">
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
-                  <BarChart3 className="h-5 w-5" />
                   <span>Inventory Cube</span>
                 </CardTitle>
                 <CardDescription>
@@ -82,7 +77,6 @@ export default function OLAPAnalysisPage() {
                     <span className="font-medium">8</span>
                   </div>
                   <Button className="w-full">
-                    <Database className="h-3 w-3 mr-2" />
                     Analyze
                   </Button>
                 </div>
@@ -92,7 +86,6 @@ export default function OLAPAnalysisPage() {
             <Card className="hover: transition-shadow">
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
-                  <BarChart3 className="h-5 w-5" />
                   <span>Financial Cube</span>
                 </CardTitle>
                 <CardDescription>
@@ -110,7 +103,6 @@ export default function OLAPAnalysisPage() {
                     <span className="font-medium">15</span>
                   </div>
                   <Button className="w-full">
-                    <Database className="h-3 w-3 mr-2" />
                     Analyze
                   </Button>
                 </div>
@@ -128,7 +120,7 @@ export default function OLAPAnalysisPage() {
             </CardHeader>
             <CardContent>
               <div className="text-center py-12">
-                <Filter className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                <div className="h-12 w-12 mx-auto mb-4 bg-muted rounded-lg" />
                 <h3 className="text-lg font-semibold mb-2">Interactive Analysis Tool</h3>
                 <p className="text-sm text-muted-foreground mb-4">
                   Drag dimensions and measures to create custom analysis views

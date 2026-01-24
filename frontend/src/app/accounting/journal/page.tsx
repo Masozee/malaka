@@ -16,17 +16,7 @@ import {
 import { DataTable } from '@/components/ui/data-table'
 import { JournalEntryFilters } from '@/components/accounting/journal-entry-filters'
 import { JournalEntryForm } from '@/components/accounting/journal-entry-form'
-import { 
-  Plus, 
-  Eye, 
-  Edit, 
-  Trash2, 
-  CheckCircle,
-  FileText,
-  Download,
-  Calendar,
-  DollarSign
-} from 'lucide-react'
+
 import type { 
   JournalEntry, 
   AccountingFilters,
@@ -35,6 +25,8 @@ import type {
 } from '@/types/accounting'
 import { journalEntryService } from '@/services/accounting'
 import Link from 'next/link'
+import { HugeiconsIcon } from '@hugeicons/react'
+import { Calendar01Icon, Dollar01Icon } from '@hugeicons/core-free-icons'
 
 const statusColors = {
   DRAFT: 'bg-gray-500',
@@ -176,7 +168,7 @@ export default function AccountingJournalPage() {
       title: 'Date',
       render: (value: unknown, record: JournalEntry) => (
         <div className="flex items-center space-x-2">
-          <Calendar className="h-4 w-4 text-gray-400" />
+          <HugeiconsIcon icon={Calendar01Icon} className="h-4 w-4 text-gray-400" />
           <span>
             {mounted ? new Date(record.entry_date).toLocaleDateString('id-ID') : record.entry_date}
           </span>
@@ -204,7 +196,7 @@ export default function AccountingJournalPage() {
       title: 'Amount',
       render: (value: unknown, record: JournalEntry) => (
         <div className="flex items-center space-x-1">
-          <DollarSign className="h-4 w-4 text-gray-400" />
+          <HugeiconsIcon icon={Dollar01Icon} className="h-4 w-4 text-gray-400" />
           <span className="font-medium">
             {mounted ? new Intl.NumberFormat('id-ID', {
               style: 'currency',
@@ -230,7 +222,6 @@ export default function AccountingJournalPage() {
       render: (value: unknown, record: JournalEntry) => (
         record.source_document && (
           <div className="flex items-center space-x-1">
-            <FileText className="h-4 w-4 text-gray-400" />
             <span className="text-sm">{record.source_document}</span>
           </div>
         )
@@ -243,38 +234,38 @@ export default function AccountingJournalPage() {
         <div className="flex items-center space-x-2">
           <Link href={`/accounting/journal/${record.id}`}>
             <Button variant="outline" size="sm">
-              <Eye className="h-4 w-4" />
+              View
             </Button>
           </Link>
-          
+
           {record.status === 'DRAFT' && (
             <>
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 size="sm"
                 onClick={() => openEditDialog(record)}
               >
-                <Edit className="h-4 w-4" />
+                Edit
               </Button>
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 size="sm"
                 onClick={() => handlePostEntry(record.id)}
                 className="text-green-600 border-green-200 hover:bg-green-50"
               >
-                <CheckCircle className="h-4 w-4" />
+                Post
               </Button>
             </>
           )}
-          
+
           {(record.status === 'DRAFT' || record.status === 'CANCELLED') && (
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               size="sm"
               onClick={() => handleDeleteEntry(record.id)}
               className="text-red-600 border-red-200 hover:bg-red-50"
             >
-              <Trash2 className="h-4 w-4" />
+              Delete
             </Button>
           )}
         </div>
@@ -300,7 +291,6 @@ export default function AccountingJournalPage() {
           <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
             <DialogTrigger asChild>
               <Button>
-                <Plus className="h-4 w-4 mr-2" />
                 New Journal Entry
               </Button>
             </DialogTrigger>
@@ -322,9 +312,7 @@ export default function AccountingJournalPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card className="p-4">
             <div className="flex items-center space-x-3">
-              <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
-                <FileText className="h-6 w-6 text-blue-600 dark:text-blue-300" />
-              </div>
+              <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center" />
               <div>
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Entries</p>
                 <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{summaryStats.totalEntries}</p>
@@ -334,9 +322,7 @@ export default function AccountingJournalPage() {
 
           <Card className="p-4">
             <div className="flex items-center space-x-3">
-              <div className="p-2 bg-green-100 dark:bg-green-900 rounded-lg">
-                <DollarSign className="h-6 w-6 text-green-600 dark:text-green-300" />
-              </div>
+              <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center" />
               <div>
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Amount</p>
                 <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
@@ -351,9 +337,7 @@ export default function AccountingJournalPage() {
 
           <Card className="p-4">
             <div className="flex items-center space-x-3">
-              <div className="p-2 bg-yellow-100 dark:bg-yellow-900 rounded-lg">
-                <Edit className="h-6 w-6 text-yellow-600 dark:text-yellow-300" />
-              </div>
+              <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center" />
               <div>
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Draft Entries</p>
                 <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{summaryStats.draftEntries}</p>
@@ -363,9 +347,7 @@ export default function AccountingJournalPage() {
 
           <Card className="p-4">
             <div className="flex items-center space-x-3">
-              <div className="p-2 bg-green-100 dark:bg-green-900 rounded-lg">
-                <CheckCircle className="h-6 w-6 text-green-600 dark:text-green-300" />
-              </div>
+              <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center" />
               <div>
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Posted Entries</p>
                 <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{summaryStats.postedEntries}</p>
@@ -388,7 +370,6 @@ export default function AccountingJournalPage() {
           </div>
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm">
-              <Download className="h-4 w-4 mr-2" />
               Export
             </Button>
           </div>

@@ -1,26 +1,14 @@
-'use client';
+'use client'
 
 import Link from 'next/link';
 import { TwoLevelLayout } from '@/components/ui/two-level-layout';
 import { Header } from '@/components/ui/header';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { 
-  Package, 
-  TrendingUp, 
-  TrendingDown, 
-  AlertTriangle,
-  ArrowLeftRight,
-  PackageCheck,
-  Plus,
-  Search,
-  BarChart3
-} from 'lucide-react';
 
 const inventoryModules = [
   {
     title: 'Stock Control',
     href: '/inventory/stock-control',
-    icon: Package,
     description: 'Monitor and manage inventory levels across all locations',
     stats: '1.2k items',
     color: 'text-blue-600 bg-blue-100 dark:text-blue-400 dark:bg-blue-900/20'
@@ -28,7 +16,6 @@ const inventoryModules = [
   {
     title: 'Goods Receipt',
     href: '/inventory/goods-receipt',
-    icon: TrendingUp,
     description: 'Record incoming inventory and supplier deliveries',
     stats: '34 pending',
     color: 'text-green-600 bg-green-100 dark:text-green-400 dark:bg-green-900/20'
@@ -36,7 +23,6 @@ const inventoryModules = [
   {
     title: 'Goods Issue',
     href: '/inventory/goods-issue',
-    icon: TrendingDown,
     description: 'Process outgoing inventory and shipments',
     stats: '78 today',
     color: 'text-orange-600 bg-orange-100 dark:text-orange-400 dark:bg-orange-900/20'
@@ -44,7 +30,6 @@ const inventoryModules = [
   {
     title: 'Stock Transfer',
     href: '/inventory/stock-transfer',
-    icon: ArrowLeftRight,
     description: 'Transfer stock between warehouses and locations',
     stats: '16 active',
     color: 'text-purple-600 bg-purple-100 dark:text-purple-400 dark:bg-purple-900/20'
@@ -52,7 +37,6 @@ const inventoryModules = [
   {
     title: 'Stock Adjustments',
     href: '/inventory/adjustments',
-    icon: Plus,
     description: 'Adjust inventory levels for discrepancies',
     stats: '5 this week',
     color: 'text-indigo-600 bg-indigo-100 dark:text-indigo-400 dark:bg-indigo-900/20'
@@ -60,7 +44,6 @@ const inventoryModules = [
   {
     title: 'Stock Opname',
     href: '/inventory/stock-opname',
-    icon: Search,
     description: 'Physical inventory counting and reconciliation',
     stats: '3 scheduled',
     color: 'text-cyan-600 bg-cyan-100 dark:text-cyan-400 dark:bg-cyan-900/20'
@@ -72,48 +55,43 @@ const quickStats = [
     title: 'Total Items',
     value: '1,245',
     change: '+12%',
-    trend: 'up',
-    icon: Package
+    trend: 'up'
   },
   {
     title: 'Low Stock Items',
     value: '23',
     change: '-5%',
-    trend: 'down',
-    icon: AlertTriangle
+    trend: 'down'
   },
   {
     title: 'Pending Receipts',
     value: '34',
     change: '+8%',
-    trend: 'up',
-    icon: PackageCheck
+    trend: 'up'
   },
   {
     title: 'Stock Value',
     value: '$487K',
     change: '+15%',
-    trend: 'up',
-    icon: BarChart3
+    trend: 'up'
   }
 ];
 
 export default function InventoryPage() {
   return (
     <TwoLevelLayout>
-      <Header 
+      <Header
         title="Inventory Management"
         description="Manage stock levels, track inventory movements, and optimize warehouse operations"
         breadcrumbs={[
           { label: "Inventory" }
         ]}
       />
-      
+
       <div className="flex-1 p-6">
         {/* Quick Stats */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {quickStats.map((stat) => {
-            const Icon = stat.icon;
             return (
               <Card key={stat.title}>
                 <CardContent className="p-6">
@@ -127,17 +105,16 @@ export default function InventoryPage() {
                       </p>
                     </div>
                     <div className={`p-3 rounded-full ${
-                      stat.title === 'Low Stock Items' 
+                      stat.title === 'Low Stock Items'
                         ? 'text-red-600 bg-red-100 dark:text-red-400 dark:bg-red-900/20'
                         : 'text-blue-600 bg-blue-100 dark:text-blue-400 dark:bg-blue-900/20'
                     }`}>
-                      <Icon className="w-6 h-6" />
                     </div>
                   </div>
                   <div className="mt-4 flex items-center">
                     <span className={`text-sm font-medium ${
-                      stat.trend === 'up' 
-                        ? 'text-green-600 dark:text-green-400' 
+                      stat.trend === 'up'
+                        ? 'text-green-600 dark:text-green-400'
                         : 'text-red-600 dark:text-red-400'
                     }`}>
                       {stat.change}
@@ -159,7 +136,6 @@ export default function InventoryPage() {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {inventoryModules.map((module) => {
-              const Icon = module.icon;
               return (
                 <Link key={module.title} href={module.href}>
                   <Card className="hover:shadow-md transition-shadow cursor-pointer h-full">
@@ -167,7 +143,6 @@ export default function InventoryPage() {
                       <div className="flex items-center justify-between">
                         <CardTitle className="text-lg">{module.title}</CardTitle>
                         <div className={`p-2 rounded-lg ${module.color}`}>
-                          <Icon className="w-5 h-5" aria-hidden="true" />
                         </div>
                       </div>
                     </CardHeader>
@@ -213,10 +188,6 @@ export default function InventoryPage() {
                         activity.type === 'transfer' ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400' :
                         'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/20 dark:text-yellow-400'
                       }`}>
-                        {activity.type === 'receipt' && <TrendingUp className="w-4 h-4" />}
-                        {activity.type === 'issue' && <TrendingDown className="w-4 h-4" />}
-                        {activity.type === 'transfer' && <ArrowLeftRight className="w-4 h-4" />}
-                        {activity.type === 'adjustment' && <Plus className="w-4 h-4" />}
                       </div>
                       <div>
                         <p className="font-medium text-gray-900 dark:text-gray-100">
@@ -229,8 +200,8 @@ export default function InventoryPage() {
                     </div>
                     <div className="text-right">
                       <p className={`font-medium ${
-                        activity.qty.startsWith('+') ? 'text-green-600 dark:text-green-400' : 
-                        activity.qty.startsWith('-') ? 'text-red-600 dark:text-red-400' : 
+                        activity.qty.startsWith('+') ? 'text-green-600 dark:text-green-400' :
+                        activity.qty.startsWith('-') ? 'text-red-600 dark:text-red-400' :
                         'text-blue-600 dark:text-blue-400'
                       }`}>
                         {activity.qty} units

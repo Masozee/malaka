@@ -27,23 +27,7 @@ import {
   SheetTitle,
   SheetFooter
 } from '@/components/ui/sheet'
-import {
-  Tag,
-  Plus,
-  Eye,
-  Edit,
-  Download,
-  Package,
-  CheckCircle,
-  AlertCircle,
-  Search,
-  TrendingUp,
-  MoreHorizontal,
-  Trash2,
-  CheckSquare,
-  Archive,
-  Loader2
-} from 'lucide-react'
+
 import Link from 'next/link'
 import { Classification } from '@/types/masterdata'
 import { useClassifications } from '@/hooks/queries'
@@ -245,8 +229,8 @@ export default function ProductClassificationsPage() {
 
   const getStatusBadge = (status: string) => {
     return status === 'active'
-      ? { variant: 'default' as const, label: 'Active', icon: CheckCircle }
-      : { variant: 'destructive' as const, label: 'Inactive', icon: AlertCircle }
+      ? { variant: 'default' as const, label: 'Active' }
+      : { variant: 'destructive' as const, label: 'Inactive' }
   }
 
   const handleEdit = (classification: ProductClassification) => {
@@ -419,24 +403,21 @@ export default function ProductClassificationsPage() {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-              <MoreHorizontal className="h-4 w-4" />
+              ...
               <span className="sr-only">Open menu</span>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem asChild>
               <Link href={`/products/classifications/${row.original.id}`}>
-                <Eye className="mr-2 h-4 w-4" />
                 View Details
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => handleEdit(row.original)}>
-              <Edit className="mr-2 h-4 w-4" />
               Edit
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem className="text-destructive">
-              <Trash2 className="mr-2 h-4 w-4" />
               Delete
             </DropdownMenuItem>
           </DropdownMenuContent>
@@ -454,15 +435,13 @@ export default function ProductClassificationsPage() {
         actions={
           <div className="flex items-center space-x-3">
             {isFetching && !isLoading && (
-              <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-muted-foreground border-t-transparent" />
             )}
             <Button variant="outline" size="sm">
-              <Download className="h-4 w-4 mr-2" />
               Export
             </Button>
             <Button size="sm" asChild>
               <Link href="/products/classifications/new">
-                <Plus className="h-4 w-4 mr-2" />
                 New Classification
               </Link>
             </Button>
@@ -477,7 +456,7 @@ export default function ProductClassificationsPage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
-                <Tag className="h-5 w-5 text-foreground" />
+                <div className="h-5 w-5 bg-foreground/20 rounded" />
               </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Total Classifications</p>
@@ -489,7 +468,7 @@ export default function ProductClassificationsPage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
-                <CheckCircle className="h-5 w-5 text-foreground" />
+                <div className="h-5 w-5 bg-foreground/20 rounded" />
               </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Active</p>
@@ -501,7 +480,7 @@ export default function ProductClassificationsPage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
-                <Package className="h-5 w-5 text-foreground" />
+                <div className="h-5 w-5 bg-foreground/20 rounded" />
               </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Total Products</p>
@@ -513,7 +492,7 @@ export default function ProductClassificationsPage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
-                <TrendingUp className="h-5 w-5 text-foreground" />
+                <div className="h-5 w-5 bg-foreground/20 rounded" />
               </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Total Value</p>
@@ -532,12 +511,10 @@ export default function ProductClassificationsPage() {
           <div className="flex items-center justify-between gap-4">
             <div className="w-96">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                 <Input
                   placeholder="Search classifications..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
                 />
               </div>
             </div>
@@ -611,7 +588,7 @@ export default function ProductClassificationsPage() {
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4">
                 <div className="flex items-center space-x-2">
-                  <CheckSquare className="h-4 w-4 text-primary" />
+                  <div className="h-4 w-4 bg-primary/20 rounded" />
                   <span className="text-sm font-medium">
                     {selectedItems.size} item{selectedItems.size !== 1 ? 's' : ''} selected
                   </span>
@@ -632,17 +609,14 @@ export default function ProductClassificationsPage() {
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="outline" size="sm">
-                      <Archive className="h-4 w-4 mr-2" />
                       Change Status
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
                     <DropdownMenuItem onClick={() => handleBulkStatusChange('active')}>
-                      <CheckCircle className="mr-2 h-4 w-4" />
                       Set Active
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => handleBulkStatusChange('inactive')}>
-                      <AlertCircle className="mr-2 h-4 w-4" />
                       Set Inactive
                     </DropdownMenuItem>
                   </DropdownMenuContent>
@@ -653,7 +627,6 @@ export default function ProductClassificationsPage() {
                   size="sm"
                   onClick={handleBulkDelete}
                 >
-                  <Trash2 className="h-4 w-4 mr-2" />
                   Delete Selected
                 </Button>
               </div>
@@ -718,24 +691,21 @@ export default function ProductClassificationsPage() {
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                          <MoreHorizontal className="h-4 w-4" />
+                          ...
                           <span className="sr-only">Open menu</span>
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem asChild>
                           <Link href={`/products/classifications/${classification.id}`}>
-                            <Eye className="mr-2 h-4 w-4" />
                             View Details
                           </Link>
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => handleEdit(classification)}>
-                          <Edit className="mr-2 h-4 w-4" />
                           Edit
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem className="text-destructive">
-                          <Trash2 className="mr-2 h-4 w-4" />
                           Delete
                         </DropdownMenuItem>
                       </DropdownMenuContent>
@@ -766,7 +736,7 @@ export default function ProductClassificationsPage() {
         {classifications.filter(c => c.status !== 'active').length > 0 && (
           <Card className="p-6 border-orange-200 bg-orange-50">
             <div className="flex items-center space-x-3">
-              <AlertCircle className="h-6 w-6 text-orange-600" />
+              <div className="h-6 w-6 rounded-full bg-orange-600/20" />
               <div className="flex-1">
                 <h3 className="text-lg font-semibold text-orange-800">Inactive Classifications</h3>
                 <p className="text-orange-700 mt-1">
@@ -857,7 +827,6 @@ export default function ProductClassificationsPage() {
                 {/* Help Section */}
                 <div className="rounded-lg border bg-muted/30 p-5">
                   <h4 className="font-semibold text-sm mb-4 flex items-center text-foreground">
-                    <Package className="h-4 w-4 mr-2.5" />
                     Classification Guidelines
                   </h4>
                   <ul className="text-sm text-muted-foreground space-y-2.5 leading-relaxed">

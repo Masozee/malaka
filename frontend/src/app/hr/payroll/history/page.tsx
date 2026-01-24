@@ -10,16 +10,7 @@ import { AdvancedDataTable, AdvancedColumn } from '@/components/ui/advanced-data
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { 
-  FileText, 
-  Download, 
-  Calendar, 
-  Filter,
-  TrendingUp,
-  Users,
-  DollarSign,
-  Eye
-} from 'lucide-react'
+
 import type { PayrollPeriod, PayrollItem } from '@/types/hr'
 import { HRService } from '@/services/hr'
 import { formatCurrency, formatDate, formatPeriod } from '@/lib/payroll-utils'
@@ -174,7 +165,7 @@ export default function PayrollHistoryPage() {
             <Eye className="h-4 w-4" />
           </Button>
           <Button variant="ghost" size="sm">
-            <Download className="h-4 w-4" />
+            <DownloadSimple className="h-4 w-4" />
           </Button>
         </div>
       )
@@ -245,7 +236,7 @@ export default function PayrollHistoryPage() {
                 Generate Report
               </Button>
               <Button size="sm">
-                <Download className="h-4 w-4 mr-2" />
+                <DownloadSimple className="h-4 w-4 mr-2" />
                 Export Data
               </Button>
             </div>
@@ -276,7 +267,7 @@ export default function PayrollHistoryPage() {
                 </p>
                 <p className="text-sm text-green-600 mt-1">+8.2% vs last year</p>
               </div>
-              <DollarSign className="h-8 w-8 text-green-600" />
+              <CurrencyDollar className="h-8 w-8 text-green-600" />
             </div>
           </Card>
 
@@ -289,7 +280,7 @@ export default function PayrollHistoryPage() {
                 </p>
                 <p className="text-sm text-blue-600 mt-1">Per period</p>
               </div>
-              <TrendingUp className="h-8 w-8 text-purple-600" />
+              <TrendUp className="h-8 w-8 text-purple-600" />
             </div>
           </Card>
 
@@ -308,7 +299,7 @@ export default function PayrollHistoryPage() {
         {/* Filters */}
         <Card className="p-6">
           <div className="flex items-center space-x-4">
-            <Filter className="h-5 w-5 text-muted-foreground" />
+            <Funnel className="h-5 w-5 text-muted-foreground" />
             <div className="flex items-center space-x-4 flex-1">
               <div className="space-y-2">
                 <Label htmlFor="year">Year</Label>

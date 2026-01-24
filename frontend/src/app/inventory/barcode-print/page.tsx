@@ -7,21 +7,6 @@ import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { AdvancedDataTable } from '@/components/ui/advanced-data-table'
 import { Badge } from '@/components/ui/badge'
-import { 
-  ScanLine,
-  Printer,
-  Package,
-  FileText,
-  Download,
-  Eye,
-  Settings,
-  RefreshCw,
-  CheckCircle,
-  Clock,
-  BarChart3,
-  QrCode,
-  Hash
-} from 'lucide-react'
 
 interface BarcodePrintJob {
   id: string
@@ -577,7 +562,7 @@ export default function BarcodePrintPage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-red-100 rounded-lg">
-                <RefreshCw className="h-5 w-5 text-red-600" />
+                <ArrowsClockwise className="h-5 w-5 text-red-600" />
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600">Failed</p>
@@ -603,7 +588,7 @@ export default function BarcodePrintPage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-teal-100 rounded-lg">
-                <BarChart3 className="h-5 w-5 text-teal-600" />
+                <ChartBar className="h-5 w-5 text-teal-600" />
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600">Success Rate</p>
@@ -636,8 +621,8 @@ export default function BarcodePrintPage() {
           
           <div className="flex items-center space-x-2">
             <Button variant="outline" size="sm">
-              <Settings className="h-4 w-4 mr-2" />
-              Printer Settings
+              <Gear className="h-4 w-4 mr-2" />
+              Printer Gear
             </Button>
             <Button variant="outline" size="sm">
               <QrCode className="h-4 w-4 mr-2" />

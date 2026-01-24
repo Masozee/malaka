@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { DataTable } from '@/components/ui/data-table'
 import { EmployeeCard } from '@/components/hr/employee-card'
-import { Grid, List, Plus, Download, Upload, Search, Users, BarChart3 } from 'lucide-react'
+
 import type { Employee, EmployeeFilters as FilterType } from '@/types/hr'
 import { HRService } from '@/services/hr'
 import Link from 'next/link'
@@ -301,7 +301,7 @@ export default function EmployeesPage() {
         <div className="flex items-center justify-between gap-4">
           <div className="flex-1 max-w-md">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <MagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input 
                 placeholder="Search employees..." 
                 className="pl-9"
@@ -353,7 +353,7 @@ export default function EmployeesPage() {
                 size="sm"
                 onClick={() => setViewMode('grid')}
               >
-                <Grid className="h-4 w-4 mr-2" />
+                <SquaresFour className="h-4 w-4 mr-2" />
                 Cards
               </Button>
               <Button 
@@ -367,7 +367,7 @@ export default function EmployeesPage() {
             </div>
             <Select value={sortBy} onValueChange={setSortBy}>
               <SelectTrigger className="w-44">
-                <BarChart3 className="h-4 w-4 mr-2" />
+                <ChartBar className="h-4 w-4 mr-2" />
                 <SelectValue placeholder="Sort by" />
               </SelectTrigger>
               <SelectContent>
@@ -385,11 +385,11 @@ export default function EmployeesPage() {
             </div>
             <div className="flex items-center gap-2">
               <Button variant="outline" size="sm">
-                <Upload className="h-4 w-4 mr-2" />
+                <UploadSimple className="h-4 w-4 mr-2" />
                 Import
               </Button>
               <Button variant="outline" size="sm">
-                <Download className="h-4 w-4 mr-2" />
+                <DownloadSimple className="h-4 w-4 mr-2" />
                 Export
               </Button>
             </div>

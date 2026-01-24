@@ -12,24 +12,7 @@ import { AdvancedDataTable } from '@/components/ui/advanced-data-table'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { 
-  Store,
-  Plus,
-  Eye,
-  Edit,
-  Filter,
-  Download,
-  Calendar,
-  DollarSign,
-  User,
-  Package,
-  CheckCircle,
-  Clock,
-  AlertCircle,
-  Search,
-  MapPin,
-  Phone
-} from 'lucide-react'
+
 import Link from 'next/link'
 
 // Extended DirectSale interface for UI
@@ -420,7 +403,7 @@ export default function DirectSalesPage() {
   const getVisitTypeBadge = (type: string) => {
     const config = {
       showroom: { variant: 'default' as const, label: 'Showroom' },
-      home_visit: { variant: 'secondary' as const, label: 'Home Visit' },
+      home_visit: { variant: 'secondary' as const, label: 'House Visit' },
       office_visit: { variant: 'outline' as const, label: 'Office Visit' },
       exhibition: { variant: 'secondary' as const, label: 'Exhibition' }
     }
@@ -458,7 +441,6 @@ export default function DirectSalesPage() {
       title: 'Date',
       render: (sale: DirectSale) => (
         <div className="flex items-center space-x-2">
-          <Calendar className="h-4 w-4 text-muted-foreground" />
           <span>{formatDate(sale.sale_date)}</span>
         </div>
       )
@@ -468,7 +450,6 @@ export default function DirectSalesPage() {
       title: 'Sales Person',
       render: (sale: DirectSale) => (
         <div className="flex items-center space-x-2">
-          <User className="h-4 w-4 text-muted-foreground" />
           <span>{sale.sales_person}</span>
         </div>
       )
@@ -481,7 +462,6 @@ export default function DirectSalesPage() {
           <div className="font-medium">{sale.customer_name || 'Walk-in'}</div>
           {sale.customer_phone && (
             <div className="text-sm text-muted-foreground flex items-center space-x-1">
-              <Phone className="h-3 w-3" />
               <span>{sale.customer_phone}</span>
             </div>
           )}
@@ -497,7 +477,6 @@ export default function DirectSalesPage() {
           <div>
             <Badge variant={variant}>{label}</Badge>
             <div className="text-sm text-muted-foreground mt-1 flex items-center space-x-1">
-              <MapPin className="h-3 w-3" />
               <span>{sale.location}</span>
             </div>
           </div>
@@ -509,7 +488,6 @@ export default function DirectSalesPage() {
       title: 'Items',
       render: (sale: DirectSale) => (
         <div className="flex items-center space-x-2">
-          <Package className="h-4 w-4 text-muted-foreground" />
           <span>{sale.items.length} items</span>
         </div>
       )
@@ -548,13 +526,13 @@ export default function DirectSalesPage() {
         <div className="flex items-center space-x-2">
           <Button variant="ghost" size="sm" asChild>
             <Link href={`/sales/direct/${sale.id}`}>
-              <Eye className="h-4 w-4" />
+              View
             </Link>
           </Button>
           {sale.payment_status === 'pending' && (
             <Button variant="ghost" size="sm" asChild>
               <Link href={`/sales/direct/${sale.id}/edit`}>
-                <Edit className="h-4 w-4" />
+                Edit
               </Link>
             </Button>
           )}
@@ -573,12 +551,10 @@ export default function DirectSalesPage() {
           actions={
             <div className="flex items-center space-x-3">
               <Button variant="outline" size="sm">
-                <Download className="h-4 w-4 mr-2" />
                 Export
               </Button>
               <Button size="sm" asChild>
                 <Link href="/sales/direct/new">
-                  <Plus className="h-4 w-4 mr-2" />
                   New Sale
                 </Link>
               </Button>
@@ -592,8 +568,8 @@ export default function DirectSalesPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-2">
             <Card className="p-4 lg:p-6 hover: transition-all duration-200 border-0  bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950 dark:to-blue-900">
               <div className="flex items-center space-x-4">
-                <div className="p-3 bg-blue-500 text-white rounded-xl ">
-                  <Store className="h-5 w-5 lg:h-6 lg:w-6" />
+                <div className="p-3 bg-blue-500 text-white rounded-xl">
+                  <div className="h-5 w-5 lg:h-6 lg:w-6" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-xs lg:text-sm font-medium text-blue-700 dark:text-blue-300 uppercase tracking-wide">Today&apos;s Sales</p>
@@ -605,8 +581,8 @@ export default function DirectSalesPage() {
 
             <Card className="p-4 lg:p-6 hover: transition-all duration-200 border-0  bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950 dark:to-green-900">
               <div className="flex items-center space-x-4">
-                <div className="p-3 bg-green-500 text-white rounded-xl ">
-                  <DollarSign className="h-5 w-5 lg:h-6 lg:w-6" />
+                <div className="p-3 bg-green-500 text-white rounded-xl">
+                  <div className="h-5 w-5 lg:h-6 lg:w-6" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-xs lg:text-sm font-medium text-green-700 dark:text-green-300 uppercase tracking-wide">Total Revenue</p>
@@ -620,8 +596,8 @@ export default function DirectSalesPage() {
 
             <Card className="p-4 lg:p-6 hover: transition-all duration-200 border-0  bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-950 dark:to-orange-900">
               <div className="flex items-center space-x-4">
-                <div className="p-3 bg-orange-500 text-white rounded-xl ">
-                  <Clock className="h-5 w-5 lg:h-6 lg:w-6" />
+                <div className="p-3 bg-orange-500 text-white rounded-xl">
+                  <div className="h-5 w-5 lg:h-6 lg:w-6" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-xs lg:text-sm font-medium text-orange-700 dark:text-orange-300 uppercase tracking-wide">Pending</p>
@@ -633,8 +609,8 @@ export default function DirectSalesPage() {
 
             <Card className="p-4 lg:p-6 hover: transition-all duration-200 border-0  bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-950 dark:to-purple-900">
               <div className="flex items-center space-x-4">
-                <div className="p-3 bg-purple-500 text-white rounded-xl ">
-                  <User className="h-5 w-5 lg:h-6 lg:w-6" />
+                <div className="p-3 bg-purple-500 text-white rounded-xl">
+                  <div className="h-5 w-5 lg:h-6 lg:w-6" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-xs lg:text-sm font-medium text-purple-700 dark:text-purple-300 uppercase tracking-wide">Commission</p>
@@ -648,8 +624,8 @@ export default function DirectSalesPage() {
 
             <Card className="p-4 lg:p-6 hover: transition-all duration-200 border-0  bg-gradient-to-br from-teal-50 to-teal-100 dark:from-teal-950 dark:to-teal-900">
               <div className="flex items-center space-x-4">
-                <div className="p-3 bg-teal-500 text-white rounded-xl ">
-                  <Package className="h-5 w-5 lg:h-6 lg:w-6" />
+                <div className="p-3 bg-teal-500 text-white rounded-xl">
+                  <div className="h-5 w-5 lg:h-6 lg:w-6" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-xs lg:text-sm font-medium text-teal-700 dark:text-teal-300 uppercase tracking-wide">Average Sale</p>
@@ -663,8 +639,8 @@ export default function DirectSalesPage() {
 
             <Card className="p-4 lg:p-6 hover: transition-all duration-200 border-0  bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
               <div className="flex items-center space-x-4">
-                <div className="p-3 bg-slate-600 text-white rounded-xl ">
-                  <CheckCircle className="h-5 w-5 lg:h-6 lg:w-6" />
+                <div className="p-3 bg-slate-600 text-white rounded-xl">
+                  <div className="h-5 w-5 lg:h-6 lg:w-6" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-xs lg:text-sm font-medium text-slate-700 dark:text-slate-300 uppercase tracking-wide">Total Sales</p>
@@ -681,22 +657,19 @@ export default function DirectSalesPage() {
             <div className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center">
               <div className="flex-1">
                 <div className="relative">
-                  <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                   <Input
                     placeholder="Search sales, customers, or sales persons..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-12 pr-4 py-3 text-base border-2 focus:border-blue-500 rounded-lg "
+                    className="pr-4 py-3 text-base border-2 focus:border-blue-500 rounded-lg "
                   />
                 </div>
               </div>
               <div className="flex items-center gap-3">
                 <Button variant="outline" size="default" className="flex-shrink-0  hover: transition-all">
-                  <Filter className="h-4 w-4 mr-2" />
                   Advanced Filters
                 </Button>
                 <Button variant="outline" size="default" className="flex-shrink-0  hover: transition-all">
-                  <Download className="h-4 w-4 mr-2" />
                   Export
                 </Button>
               </div>
@@ -748,7 +721,7 @@ export default function DirectSalesPage() {
                       <SelectContent>
                         <SelectItem value="all">All types</SelectItem>
                         <SelectItem value="showroom">Showroom</SelectItem>
-                        <SelectItem value="home_visit">Home Visit</SelectItem>
+                        <SelectItem value="home_visit">House Visit</SelectItem>
                         <SelectItem value="office_visit">Office Visit</SelectItem>
                         <SelectItem value="exhibition">Exhibition</SelectItem>
                       </SelectContent>
@@ -773,22 +746,20 @@ export default function DirectSalesPage() {
                   <div className="space-y-3">
                     <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">Quick Filters</Label>
                     <div className="flex flex-wrap gap-2">
-                      <Button 
-                        variant={paymentStatusFilter === 'pending' ? 'default' : 'outline'} 
+                      <Button
+                        variant={paymentStatusFilter === 'pending' ? 'default' : 'outline'}
                         size="sm"
                         onClick={() => setPaymentStatusFilter(paymentStatusFilter === 'pending' ? 'all' : 'pending')}
                         className=" hover: transition-all"
                       >
-                        <Clock className="h-3 w-3 mr-1" />
                         Pending
                       </Button>
-                      <Button 
-                        variant={paymentStatusFilter === 'paid' ? 'default' : 'outline'} 
+                      <Button
+                        variant={paymentStatusFilter === 'paid' ? 'default' : 'outline'}
                         size="sm"
                         onClick={() => setPaymentStatusFilter(paymentStatusFilter === 'paid' ? 'all' : 'paid')}
                         className=" hover: transition-all"
                       >
-                        <CheckCircle className="h-3 w-3 mr-1" />
                         Paid
                       </Button>
                     </div>
@@ -806,7 +777,6 @@ export default function DirectSalesPage() {
                   onClick={() => setActiveView('cards')}
                   className="px-4 py-2 rounded-lg transition-all "
                 >
-                  <Package className="h-4 w-4 mr-2" />
                   Cards
                 </Button>
                 <Button
@@ -815,7 +785,6 @@ export default function DirectSalesPage() {
                   onClick={() => setActiveView('table')}
                   className="px-4 py-2 rounded-lg transition-all "
                 >
-                  <Eye className="h-4 w-4 mr-2" />
                   Table
                 </Button>
               </div>
@@ -836,9 +805,6 @@ export default function DirectSalesPage() {
             <div className="flex flex-col items-center justify-center space-y-4">
               <div className="relative">
                 <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-200 border-t-blue-600"></div>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <Store className="h-5 w-5 text-blue-600" />
-                </div>
               </div>
               <div className="space-y-2">
                 <p className="font-semibold text-lg text-gray-900 dark:text-gray-100">Loading Direct Sales</p>
@@ -850,7 +816,7 @@ export default function DirectSalesPage() {
           <Card className="p-12 text-center border-0  bg-gradient-to-br from-red-50 via-white to-red-50 dark:from-red-950 dark:via-slate-900 dark:to-red-950">
             <div className="flex flex-col items-center justify-center space-y-4">
               <div className="p-4 bg-red-100 dark:bg-red-900/30 rounded-full">
-                <AlertCircle className="h-12 w-12 text-red-600 dark:text-red-400" />
+                <div className="h-12 w-12" />
               </div>
               <div className="space-y-2">
                 <p className="font-semibold text-xl text-red-900 dark:text-red-100">Failed to Load Sales Data</p>
@@ -858,20 +824,18 @@ export default function DirectSalesPage() {
                 <p className="text-sm text-muted-foreground">Please check your connection and try again.</p>
               </div>
               <div className="flex space-x-3">
-                <Button 
-                  onClick={loadDirectSales} 
-                  variant="outline" 
+                <Button
+                  onClick={loadDirectSales}
+                  variant="outline"
                   className=" hover: transition-all"
                 >
-                  <Calendar className="h-4 w-4 mr-2" />
                   Retry Loading
                 </Button>
-                <Button 
-                  asChild 
+                <Button
+                  asChild
                   className=" hover: transition-all"
                 >
                   <Link href="/sales/direct/new">
-                    <Plus className="h-4 w-4 mr-2" />
                     Create New Sale
                   </Link>
                 </Button>
@@ -882,7 +846,7 @@ export default function DirectSalesPage() {
           <Card className="p-12 text-center border-0  bg-gradient-to-br from-slate-50 via-white to-slate-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
             <div className="flex flex-col items-center justify-center space-y-6">
               <div className="p-6 bg-slate-100 dark:bg-slate-800 rounded-full">
-                <Store className="h-16 w-16 text-slate-600 dark:text-slate-400" />
+                <div className="h-16 w-16" />
               </div>
               <div className="space-y-3">
                 <p className="font-bold text-2xl text-gray-900 dark:text-gray-100">No Direct Sales Yet</p>
@@ -891,24 +855,22 @@ export default function DirectSalesPage() {
                 </p>
               </div>
               <div className="flex flex-col sm:flex-row gap-3">
-                <Button 
-                  asChild 
+                <Button
+                  asChild
                   size="lg"
                   className=" hover: transition-all"
                 >
                   <Link href="/sales/direct/new">
-                    <Plus className="h-5 w-5 mr-2" />
                     Create Your First Sale
                   </Link>
                 </Button>
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   size="lg"
                   className=" hover: transition-all"
                   asChild
                 >
                   <Link href="/sales">
-                    <Eye className="h-5 w-5 mr-2" />
                     View All Sales
                   </Link>
                 </Button>
@@ -938,7 +900,6 @@ export default function DirectSalesPage() {
                           {sale.sale_number}
                         </Link>
                         <div className="flex items-center space-x-2 mt-2">
-                          <Calendar className="h-4 w-4 text-muted-foreground" />
                           <p className="text-sm text-muted-foreground">
                             {formatDate(sale.sale_date)}
                           </p>
@@ -966,17 +927,17 @@ export default function DirectSalesPage() {
                       <div className="grid grid-cols-1 gap-3">
                         <div className="flex items-center space-x-3">
                           <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
-                            <User className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                            <div className="h-4 w-4" />
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className="text-xs text-muted-foreground uppercase tracking-wide">Sales Person</p>
                             <p className="font-medium text-sm truncate">{sale.sales_person}</p>
                           </div>
                         </div>
-                        
+
                         <div className="flex items-center space-x-3">
                           <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
-                            <Phone className="h-4 w-4 text-green-600 dark:text-green-400" />
+                            <div className="h-4 w-4" />
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className="text-xs text-muted-foreground uppercase tracking-wide">Customer</p>
@@ -991,15 +952,13 @@ export default function DirectSalesPage() {
                       {/* Location & Items */}
                       <div className="grid grid-cols-2 gap-3">
                         <div className="flex items-center space-x-2">
-                          <MapPin className="h-4 w-4 text-orange-600" />
                           <div className="flex-1 min-w-0">
                             <p className="text-xs text-muted-foreground">Location</p>
                             <p className="text-sm font-medium truncate">{sale.location}</p>
                           </div>
                         </div>
-                        
+
                         <div className="flex items-center space-x-2">
-                          <Package className="h-4 w-4 text-purple-600" />
                           <div className="flex-1 min-w-0">
                             <p className="text-xs text-muted-foreground">Items</p>
                             <p className="text-sm font-medium">{sale.items.length} items</p>
@@ -1010,7 +969,6 @@ export default function DirectSalesPage() {
                       {deliveryBadge && (
                         <div className="flex items-center justify-between bg-slate-100 dark:bg-slate-800 rounded-lg p-3">
                           <div className="flex items-center space-x-2">
-                            <Package className="h-4 w-4 text-muted-foreground" />
                             <span className="text-sm text-muted-foreground">Delivery Status</span>
                           </div>
                           <Badge variant={deliveryBadge.variant} className="">{deliveryBadge.label}</Badge>
@@ -1024,7 +982,6 @@ export default function DirectSalesPage() {
                     <div className="space-y-3">
                       <div className="flex justify-between items-center">
                         <div className="flex items-center space-x-2">
-                          <DollarSign className="h-5 w-5 text-green-600" />
                           <span className="font-semibold text-gray-700 dark:text-gray-300">Total Amount</span>
                         </div>
                         <span className="text-xl font-bold text-green-600">
@@ -1055,7 +1012,6 @@ export default function DirectSalesPage() {
                     <div className="px-6 pb-4">
                       <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
                         <div className="flex items-start space-x-3">
-                          <MapPin className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
                           <div>
                             <p className="text-xs text-blue-700 dark:text-blue-400 font-medium">Delivery Address</p>
                             <p className="text-xs text-blue-600 dark:text-blue-300 mt-1 leading-relaxed">
@@ -1082,25 +1038,25 @@ export default function DirectSalesPage() {
                   {/* Action Buttons */}
                   <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                     <div className="flex space-x-1">
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        className="h-8 w-8 p-0 bg-white/80 hover:bg-white "
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 p-2 bg-white/80 hover:bg-white "
                         asChild
                       >
                         <Link href={`/sales/direct/${sale.id}`}>
-                          <Eye className="h-4 w-4" />
+                          View
                         </Link>
                       </Button>
                       {sale.payment_status === 'pending' && (
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          className="h-8 w-8 p-0 bg-white/80 hover:bg-white "
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 p-2 bg-white/80 hover:bg-white "
                           asChild
                         >
                           <Link href={`/sales/direct/${sale.id}/edit`}>
-                            <Edit className="h-4 w-4" />
+                            Edit
                           </Link>
                         </Button>
                       )}
@@ -1138,8 +1094,8 @@ export default function DirectSalesPage() {
             <div className="p-6">
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
                 <div className="flex items-center space-x-4 flex-1">
-                  <div className="p-3 bg-orange-500 text-white rounded-xl ">
-                    <Clock className="h-6 w-6" />
+                  <div className="p-3 bg-orange-500 text-white rounded-xl">
+                    <div className="h-6 w-6" />
                   </div>
                   <div className="flex-1">
                     <div className="flex items-center space-x-2 mb-1">
@@ -1149,12 +1105,11 @@ export default function DirectSalesPage() {
                       </Badge>
                     </div>
                     <p className="text-orange-800 dark:text-orange-200">
-                      {summaryStats.pendingSales} direct sale{summaryStats.pendingSales > 1 ? 's' : ''} require{summaryStats.pendingSales === 1 ? 's' : ''} payment follow-up. 
+                      {summaryStats.pendingSales} direct sale{summaryStats.pendingSales > 1 ? 's' : ''} require{summaryStats.pendingSales === 1 ? 's' : ''} payment follow-up.
                       Don&apos;t let potential revenue slip away.
                     </p>
                     <div className="flex items-center space-x-4 mt-2 text-sm text-orange-700 dark:text-orange-300">
                       <div className="flex items-center space-x-1">
-                        <DollarSign className="h-4 w-4" />
                         <span>Potential Revenue: {formatCurrency(
                           directSales.filter(s => s.payment_status === 'pending').reduce((sum, s) => sum + s.total_amount, 0)
                         )}</span>
@@ -1163,18 +1118,16 @@ export default function DirectSalesPage() {
                   </div>
                 </div>
                 <div className="flex space-x-3">
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     className="border-orange-400 text-orange-700 hover:bg-orange-200 dark:text-orange-300 dark:hover:bg-orange-900/50  hover: transition-all"
                     onClick={() => setPaymentStatusFilter('pending')}
                   >
-                    <Eye className="h-4 w-4 mr-2" />
                     View Pending
                   </Button>
-                  <Button 
+                  <Button
                     className="bg-orange-600 hover:bg-orange-700  hover: transition-all"
                   >
-                    <Phone className="h-4 w-4 mr-2" />
                     Follow Up
                   </Button>
                 </div>

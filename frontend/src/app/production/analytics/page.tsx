@@ -11,23 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Progress } from '@/components/ui/progress'
-import { 
-  BarChart3, 
-  Download, 
-  Filter, 
-  DollarSign, 
-  Users, 
-  Package, 
-  Truck, 
-  Clock, 
-  TrendingUp, 
-  TrendingDown,
-  Calculator,
-  PieChart,
-  LineChart,
-  Target,
-  AlertTriangle
-} from 'lucide-react'
+
 import Link from 'next/link'
 import { mockProductionAnalytics } from '@/services/production'
 import type { ProductionCostAnalysis, ProductionEfficiencyMetrics } from '@/types/production'
@@ -265,15 +249,15 @@ export default function ProductionAnalyticsPage() {
           actions={
             <div className="flex items-center space-x-3">
               <Button variant="outline" size="sm">
-                <PieChart className="h-4 w-4 mr-2" />
+                <ChartPie className="h-4 w-4 mr-2" />
                 Cost Breakdown
               </Button>
               <Button variant="outline" size="sm">
-                <LineChart className="h-4 w-4 mr-2" />
+                <ChartLine className="h-4 w-4 mr-2" />
                 Trend Analysis
               </Button>
               <Button variant="outline" size="sm">
-                <Download className="h-4 w-4 mr-2" />
+                <DownloadSimple className="h-4 w-4 mr-2" />
                 Export Report
               </Button>
             </div>
@@ -291,7 +275,7 @@ export default function ProductionAnalyticsPage() {
                 </p>
                 <p className="text-sm text-red-600 mt-1">Production costs</p>
               </div>
-              <DollarSign className="h-8 w-8 text-red-600" />
+              <CurrencyDollar className="h-8 w-8 text-red-600" />
             </div>
           </Card>
 
@@ -304,7 +288,7 @@ export default function ProductionAnalyticsPage() {
                 </p>
                 <p className="text-sm text-green-600 mt-1">Sales revenue</p>
               </div>
-              <TrendingUp className="h-8 w-8 text-green-600" />
+              <TrendUp className="h-8 w-8 text-green-600" />
             </div>
           </Card>
 
@@ -351,7 +335,7 @@ export default function ProductionAnalyticsPage() {
         {/* Filters */}
         <Card className="p-6">
           <div className="flex items-center space-x-4">
-            <Filter className="h-5 w-5 text-muted-foreground" />
+            <Funnel className="h-5 w-5 text-muted-foreground" />
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 flex-1">
               <div className="space-y-2">
                 <Label htmlFor="timeRange">Time Range</Label>
@@ -411,7 +395,7 @@ export default function ProductionAnalyticsPage() {
             size="sm"
             onClick={() => setActiveTab('cost-analysis')}
           >
-            <DollarSign className="h-4 w-4 mr-2" />
+            <CurrencyDollar className="h-4 w-4 mr-2" />
             Cost Analysis
           </Button>
           <Button
@@ -419,7 +403,7 @@ export default function ProductionAnalyticsPage() {
             size="sm"
             onClick={() => setActiveTab('efficiency')}
           >
-            <BarChart3 className="h-4 w-4 mr-2" />
+            <ChartBar className="h-4 w-4 mr-2" />
             Efficiency Metrics
           </Button>
           <Button
@@ -427,7 +411,7 @@ export default function ProductionAnalyticsPage() {
             size="sm"
             onClick={() => setActiveTab('trends')}
           >
-            <TrendingUp className="h-4 w-4 mr-2" />
+            <TrendUp className="h-4 w-4 mr-2" />
             Trend Analysis
           </Button>
         </div>
@@ -470,9 +454,9 @@ export default function ProductionAnalyticsPage() {
                       </div>
                       <div className="flex items-center space-x-2">
                         {index % 2 === 0 ? (
-                          <TrendingUp className="h-4 w-4 text-green-600" />
+                          <TrendUp className="h-4 w-4 text-green-600" />
                         ) : (
-                          <TrendingDown className="h-4 w-4 text-red-600" />
+                          <TrendDown className="h-4 w-4 text-red-600" />
                         )}
                         <span className={`text-sm ${index % 2 === 0 ? 'text-green-600' : 'text-red-600'}`}>
                           {index % 2 === 0 ? '+' : '-'}{(Math.random() * 10).toFixed(1)}%
@@ -582,15 +566,15 @@ export default function ProductionAnalyticsPage() {
                   <h4 className="font-medium mb-3 text-green-600">Positive Trends</h4>
                   <div className="space-y-2">
                     <div className="flex items-center space-x-2">
-                      <TrendingUp className="h-4 w-4 text-green-600" />
+                      <TrendUp className="h-4 w-4 text-green-600" />
                       <span className="text-sm">Material efficiency improved by 8.5% this quarter</span>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <TrendingUp className="h-4 w-4 text-green-600" />
+                      <TrendUp className="h-4 w-4 text-green-600" />
                       <span className="text-sm">Labor productivity increased by 12.3%</span>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <TrendingUp className="h-4 w-4 text-green-600" />
+                      <TrendUp className="h-4 w-4 text-green-600" />
                       <span className="text-sm">Quality scores consistently above 95%</span>
                     </div>
                   </div>
@@ -600,15 +584,15 @@ export default function ProductionAnalyticsPage() {
                   <h4 className="font-medium mb-3 text-red-600">Areas for Improvement</h4>
                   <div className="space-y-2">
                     <div className="flex items-center space-x-2">
-                      <AlertTriangle className="h-4 w-4 text-red-600" />
+                      <Warning className="h-4 w-4 text-red-600" />
                       <span className="text-sm">Logistics costs increased by 15% this month</span>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <AlertTriangle className="h-4 w-4 text-red-600" />
+                      <Warning className="h-4 w-4 text-red-600" />
                       <span className="text-sm">Overhead costs trending upward</span>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <AlertTriangle className="h-4 w-4 text-red-600" />
+                      <Warning className="h-4 w-4 text-red-600" />
                       <span className="text-sm">3 products with declining profit margins</span>
                     </div>
                   </div>

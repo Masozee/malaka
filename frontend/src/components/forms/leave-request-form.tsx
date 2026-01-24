@@ -1,5 +1,17 @@
 'use client'
 
+import { HugeiconsIcon } from "@hugeicons/react"
+import {
+  Calendar01Icon,
+  Clock01Icon,
+  UserIcon,
+  SmartSmartPhone01Icon,
+  File01Icon,
+  AlertCircleIcon,
+  CheckmarkCircle01Icon,
+  Cancel01Icon
+} from "@hugeicons/core-free-icons"
+
 import { useState, useEffect } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
@@ -11,7 +23,6 @@ import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { HRService } from '@/services/hr'
 import type { LeaveRequest, LeaveFormData, LeaveType, Employee } from '@/types/hr'
-import { Calendar, Clock, User, Phone, FileText, AlertCircle, CheckCircle, XCircle } from 'lucide-react'
 
 interface LeaveRequestFormProps {
   isOpen: boolean
@@ -200,13 +211,13 @@ export function LeaveRequestForm({ isOpen, onClose, onSubmit, initialData, mode 
     
     switch (initialData.status) {
       case 'pending':
-        return <Clock className="h-4 w-4 text-yellow-600" />
+        return <HugeiconsIcon icon={Clock01Icon} className="h-4 w-4 text-yellow-600" />
       case 'approved':
-        return <CheckCircle className="h-4 w-4 text-green-600" />
+        return <HugeiconsIcon icon={CheckmarkCircle01Icon} className="h-4 w-4 text-green-600" />
       case 'rejected':
-        return <XCircle className="h-4 w-4 text-red-600" />
+        return <HugeiconsIcon icon={Cancel01Icon} className="h-4 w-4 text-red-600" />
       case 'cancelled':
-        return <XCircle className="h-4 w-4 text-gray-600" />
+        return <HugeiconsIcon icon={Cancel01Icon} className="h-4 w-4 text-gray-600" />
       default:
         return null
     }
@@ -237,7 +248,7 @@ export function LeaveRequestForm({ isOpen, onClose, onSubmit, initialData, mode 
         <DialogHeader>
           <div className="flex items-center justify-between">
             <DialogTitle className="flex items-center space-x-2">
-              <FileText className="h-5 w-5" />
+              <HugeiconsIcon icon={File01Icon} className="h-5 w-5" />
               <span>
                 {mode === 'create' ? 'New Leave Request' : 'Edit Leave Request'}
               </span>
@@ -257,7 +268,7 @@ export function LeaveRequestForm({ isOpen, onClose, onSubmit, initialData, mode 
           {errors.general && (
             <Card className="p-4 border-red-200 bg-red-50">
               <div className="flex items-center space-x-2 text-red-800">
-                <AlertCircle className="h-4 w-4" />
+                <HugeiconsIcon icon={AlertCircleIcon} className="h-4 w-4" />
                 <span className="text-sm">{errors.general}</span>
               </div>
             </Card>
@@ -266,7 +277,7 @@ export function LeaveRequestForm({ isOpen, onClose, onSubmit, initialData, mode 
           {/* Employee Selection */}
           <div className="space-y-2">
             <Label htmlFor="employee_id" className="flex items-center space-x-2">
-              <User className="h-4 w-4" />
+              <HugeiconsIcon icon={UserIcon} className="h-4 w-4" />
               <span>Employee *</span>
             </Label>
             <Select
@@ -323,7 +334,7 @@ export function LeaveRequestForm({ isOpen, onClose, onSubmit, initialData, mode 
           {/* Leave Type */}
           <div className="space-y-2">
             <Label htmlFor="leave_type_id" className="flex items-center space-x-2">
-              <Calendar className="h-4 w-4" />
+              <HugeiconsIcon icon={Calendar01Icon} className="h-4 w-4" />
               <span>Leave Type *</span>
             </Label>
             <Select
@@ -410,7 +421,7 @@ export function LeaveRequestForm({ isOpen, onClose, onSubmit, initialData, mode 
           {totalDays > 0 && (
             <Card className="p-4 bg-purple-50">
               <div className="flex items-center space-x-2">
-                <Clock className="h-4 w-4 text-purple-600" />
+                <HugeiconsIcon icon={Clock01Icon} className="h-4 w-4 text-purple-600" />
                 <span className="font-medium text-purple-900">Total Days: {totalDays}</span>
               </div>
             </Card>
@@ -439,7 +450,7 @@ export function LeaveRequestForm({ isOpen, onClose, onSubmit, initialData, mode 
           {/* Emergency Contact */}
           <div className="space-y-2">
             <Label htmlFor="emergency_contact" className="flex items-center space-x-2">
-              <Phone className="h-4 w-4" />
+              <HugeiconsIcon icon={SmartPhone01Icon} className="h-4 w-4" />
               <span>Emergency Contact</span>
             </Label>
             <Input

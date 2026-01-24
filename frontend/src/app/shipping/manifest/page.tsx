@@ -7,18 +7,6 @@ import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { AdvancedDataTable } from '@/components/ui/advanced-data-table'
 import { Badge } from '@/components/ui/badge'
-import { 
-  ClipboardList,
-  Truck,
-  Package,
-  MapPin,
-  Calendar,
-  CheckCircle,
-  Clock,
-  AlertTriangle,
-  FileText,
-  Download
-} from 'lucide-react'
 
 interface Manifest {
   id: string
@@ -431,7 +419,7 @@ export default function ManifestPage() {
           View Details
         </Button>
         <Button size="sm" className="flex-1">
-          <Download className="h-4 w-4 mr-1" />
+          <DownloadSimple className="h-4 w-4 mr-1" />
           Download
         </Button>
       </div>
@@ -499,7 +487,7 @@ export default function ManifestPage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-red-100 rounded-lg">
-                <AlertTriangle className="h-5 w-5 text-red-600" />
+                <Warning className="h-5 w-5 text-red-600" />
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600">Delayed</p>

@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { ArrowLeft, Save, X } from 'lucide-react'
+
 import type { Employee, EmployeeFormData } from '@/types/hr'
 import { HRService } from '@/services/hr'
 import Link from 'next/link'
@@ -366,7 +366,7 @@ export default function NewEmployeePage() {
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Actions</h3>
                 <div className="space-y-3">
                   <Button type="submit" className="w-full" disabled={loading}>
-                    <Save className="h-4 w-4 mr-2" />
+                    <FloppyDisk className="h-4 w-4 mr-2" />
                     {loading ? 'Creating...' : 'Create Employee'}
                   </Button>
                   

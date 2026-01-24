@@ -9,24 +9,7 @@ import { Header } from '@/components/ui/header'
 import { AdvancedDataTable, type AdvancedColumn } from '@/components/ui/advanced-data-table'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
-import { 
-  ArrowRightLeft,
-  Plus,
-  Eye,
-  Edit,
-  Download,
-  Package,
-  Truck,
-  MapPin,
-  CheckCircle,
-  Clock,
-  AlertCircle,
-  Search,
-  Building,
-  Calendar,
-  BarChart3,
-  XCircle
-} from 'lucide-react'
+
 import Link from 'next/link'
 import { stockTransferService, StockTransfer, InventoryFilters } from '@/services/inventory'
 
@@ -390,7 +373,7 @@ export default function StockTransferPage() {
     const config = {
       warehouse_to_warehouse: { variant: 'default' as const, label: 'WH to WH', icon: Building },
       warehouse_to_store: { variant: 'secondary' as const, label: 'WH to Store', icon: Package },
-      store_to_store: { variant: 'outline' as const, label: 'Store to Store', icon: ArrowRightLeft },
+      store_to_store: { variant: 'outline' as const, label: 'Store to Store', icon: ArrowsLeftRight },
       return_to_warehouse: { variant: 'destructive' as const, label: 'Return to WH', icon: Truck }
     }
     return config[type as keyof typeof config] || { variant: 'secondary' as const, label: type, icon: Package }
@@ -455,7 +438,7 @@ export default function StockTransferPage() {
         <div className="text-sm">
           <div className="font-medium">{(value as string) || transfer.from_location}</div>
           <div className="flex items-center text-muted-foreground mt-1">
-            <ArrowRightLeft className="h-3 w-3 mr-1" />
+            <ArrowsLeftRight className="h-3 w-3 mr-1" />
             {transfer.to_location}
           </div>
         </div>
@@ -532,7 +515,7 @@ export default function StockTransferPage() {
           </Button>
           <Button variant="ghost" size="sm" asChild>
             <Link href={`/inventory/stock-transfer/${transfer.id}/edit`}>
-              <Edit className="h-4 w-4" />
+              <PencilSimple className="h-4 w-4" />
             </Link>
           </Button>
         </div>
@@ -549,7 +532,7 @@ export default function StockTransferPage() {
         actions={
           <div className="flex items-center space-x-3">
             <Button variant="outline" size="sm">
-              <Download className="h-4 w-4 mr-2" />
+              <DownloadSimple className="h-4 w-4 mr-2" />
               Export
             </Button>
             <Button size="sm" asChild>
@@ -572,7 +555,7 @@ export default function StockTransferPage() {
                 <p className="text-2xl font-bold mt-1">{summaryStats.totalTransfers}</p>
                 <p className="text-sm text-blue-600 mt-1">All transfers</p>
               </div>
-              <ArrowRightLeft className="h-8 w-8 text-blue-600" />
+              <ArrowsLeftRight className="h-8 w-8 text-blue-600" />
             </div>
           </Card>
 
@@ -614,7 +597,7 @@ export default function StockTransferPage() {
         <div className="flex items-center justify-between gap-4">
           <div className="flex-1 max-w-md">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <MagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search transfers, locations, or reasons..."
                 value={searchTerm}
@@ -627,7 +610,7 @@ export default function StockTransferPage() {
           <div className="flex items-center gap-2">
             <Select value={typeFilter} onValueChange={setTypeFilter}>
               <SelectTrigger className="w-32">
-                <Building className="h-4 w-4 mr-2" />
+                <BuildingOffice className="h-4 w-4 mr-2" />
                 <SelectValue placeholder="Type" />
               </SelectTrigger>
               <SelectContent>
@@ -665,7 +648,7 @@ export default function StockTransferPage() {
             
             <Select value={priorityFilter} onValueChange={setPriorityFilter}>
               <SelectTrigger className="w-32">
-                <AlertCircle className="h-4 w-4 mr-2" />
+                <WarningCircle className="h-4 w-4 mr-2" />
                 <SelectValue placeholder="Priority" />
               </SelectTrigger>
               <SelectContent>
@@ -704,7 +687,7 @@ export default function StockTransferPage() {
             </div>
             <Select value="transfer_date" onValueChange={() => {}}>
               <SelectTrigger className="w-44">
-                <BarChart3 className="h-4 w-4 mr-2" />
+                <ChartBar className="h-4 w-4 mr-2" />
                 <SelectValue placeholder="Sort by Date" />
               </SelectTrigger>
               <SelectContent>
@@ -743,7 +726,7 @@ export default function StockTransferPage() {
                 <Card key={transfer.id} className="p-6 hover: transition-shadow">
                   <div className="flex justify-between items-start mb-4">
                     <div className="flex items-center space-x-2">
-                      <ArrowRightLeft className="h-5 w-5 text-blue-600" />
+                      <ArrowsLeftRight className="h-5 w-5 text-blue-600" />
                       <div>
                         <Link 
                           href={`/inventory/stock-transfer/${transfer.id}`}
@@ -829,7 +812,7 @@ export default function StockTransferPage() {
                       {transfer.status !== 'completed' && transfer.status !== 'cancelled' && (
                         <Button variant="outline" size="sm" asChild>
                           <Link href={`/inventory/stock-transfer/${transfer.id}/edit`}>
-                            <Edit className="h-4 w-4" />
+                            <PencilSimple className="h-4 w-4" />
                           </Link>
                         </Button>
                       )}
@@ -860,7 +843,7 @@ export default function StockTransferPage() {
         {summaryStats.urgentTransfers > 0 && (
           <Card className="p-6 border-red-200 bg-red-50">
             <div className="flex items-center space-x-3">
-              <AlertCircle className="h-6 w-6 text-red-600" />
+              <WarningCircle className="h-6 w-6 text-red-600" />
               <div className="flex-1">
                 <h3 className="text-lg font-semibold text-red-800">Urgent Transfers</h3>
                 <p className="text-red-700 mt-1">

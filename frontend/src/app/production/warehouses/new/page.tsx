@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { ArrowLeft, Save } from 'lucide-react'
+
 import { ProductionService } from '@/services/production'
 
 export default function NewWarehousePage() {
@@ -244,7 +244,7 @@ export default function NewWarehousePage() {
                 Cancel
               </Button>
               <Button type="submit" disabled={loading}>
-                <Save className="h-4 w-4 mr-2" />
+                <FloppyDisk className="h-4 w-4 mr-2" />
                 {loading ? 'Creating...' : 'Create Warehouse'}
               </Button>
             </div>

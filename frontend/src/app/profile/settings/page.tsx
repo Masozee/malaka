@@ -1,35 +1,37 @@
 'use client'
 
+import { HugeiconsIcon } from "@hugeicons/react"
+import {
+  Settings01Icon,
+  Notification01Icon,
+  Shield01Icon,
+  PaintBrush01Icon,
+  GlobeIcon,
+  UserIcon,
+  LockIcon,
+  ViewIcon,
+  ViewOffIcon,
+  SmartPhone01Icon,
+  Mail01Icon,
+  ComputerIcon,
+  Sun01Icon,
+  Moon01Icon,
+  LaptopIcon,
+  Tick01Icon,
+  Cancel01Icon,
+  AlertCircleIcon,
+  FloppyDiskIcon,
+  RefreshIcon
+} from "@hugeicons/core-free-icons"
+
 import { useState, useEffect } from 'react'
 import { TwoLevelLayout } from '@/components/ui/two-level-layout'
 import { Header } from '@/components/ui/header'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { 
-  Settings,
-  Bell,
-  Shield,
-  Palette,
-  Globe,
-  User,
-  Lock,
-  Eye,
-  EyeOff,
-  Smartphone,
-  Mail,
-  Monitor,
-  Sun,
-  Moon,
-  Laptop,
-  Check,
-  X,
-  AlertTriangle,
-  Save,
-  RefreshCw
-} from 'lucide-react'
 
-interface NotificationSettings {
+interface NotificationGear {
   email: {
     enabled: boolean
     types: {
@@ -72,7 +74,7 @@ interface NotificationSettings {
   }
 }
 
-interface PrivacySettings {
+interface PrivacyGear {
   profileVisibility: 'public' | 'colleagues' | 'managers' | 'private'
   showContactInfo: boolean
   showSalaryInfo: boolean
@@ -90,7 +92,7 @@ interface PrivacySettings {
   }
 }
 
-interface SecuritySettings {
+interface SecurityGear {
   twoFactorAuth: {
     enabled: boolean
     method: 'sms' | 'email' | 'authenticator'
@@ -103,7 +105,7 @@ interface SecuritySettings {
     lastActive: string
     current: boolean
   }>
-  passwordSettings: {
+  passwordGear: {
     lastChanged: string
     requireChange: boolean
     strength: 'weak' | 'medium' | 'strong'
@@ -117,7 +119,7 @@ interface SecuritySettings {
   }>
 }
 
-interface AppearanceSettings {
+interface AppearanceGear {
   theme: 'light' | 'dark' | 'system'
   colorScheme: 'blue' | 'green' | 'purple' | 'orange' | 'red'
   compactMode: boolean
@@ -127,7 +129,7 @@ interface AppearanceSettings {
   highContrast: boolean
 }
 
-interface LanguageSettings {
+interface LanguageGear {
   language: string
   region: string
   timezone: string
@@ -138,13 +140,13 @@ interface LanguageSettings {
   firstDayOfWeek: 'monday' | 'sunday'
 }
 
-export default function ProfileSettingsPage() {
+export default function ProfileGearPage() {
   const [mounted, setMounted] = useState(false)
   const [activeTab, setActiveTab] = useState('notifications')
   const [hasChanges, setHasChanges] = useState(false)
 
   // Mock settings states
-  const [notifications, setNotifications] = useState<NotificationSettings>({
+  const [notifications, setNotifications] = useState<NotificationGear>({
     email: {
       enabled: true,
       types: {
@@ -187,7 +189,7 @@ export default function ProfileSettingsPage() {
     }
   })
 
-  const [privacy, setPrivacy] = useState<PrivacySettings>({
+  const [privacy, setPrivacy] = useState<PrivacyGear>({
     profileVisibility: 'colleagues',
     showContactInfo: true,
     showSalaryInfo: false,
@@ -205,7 +207,7 @@ export default function ProfileSettingsPage() {
     }
   })
 
-  const [security, setSecurity] = useState<SecuritySettings>({
+  const [security, setSecurity] = useState<SecurityGear>({
     twoFactorAuth: {
       enabled: true,
       method: 'authenticator',
@@ -227,7 +229,7 @@ export default function ProfileSettingsPage() {
         current: false
       }
     ],
-    passwordSettings: {
+    passwordGear: {
       lastChanged: '2024-05-15',
       requireChange: false,
       strength: 'strong'
@@ -250,7 +252,7 @@ export default function ProfileSettingsPage() {
     ]
   })
 
-  const [appearance, setAppearance] = useState<AppearanceSettings>({
+  const [appearance, setAppearance] = useState<AppearanceGear>({
     theme: 'light',
     colorScheme: 'blue',
     compactMode: false,
@@ -260,7 +262,7 @@ export default function ProfileSettingsPage() {
     highContrast: false
   })
 
-  const [language, setLanguage] = useState<LanguageSettings>({
+  const [language, setLanguage] = useState<LanguageGear>({
     language: 'en',
     region: 'ID',
     timezone: 'Asia/Jakarta',
@@ -278,15 +280,15 @@ export default function ProfileSettingsPage() {
   const breadcrumbs = [
     { label: 'Dashboard', href: '/dashboard' },
     { label: 'Profile', href: '/profile' },
-    { label: 'Settings' }
+    { label: 'Gear' }
   ]
 
   const tabs = [
-    { id: 'notifications', label: 'Notifications', icon: Bell },
-    { id: 'privacy', label: 'Privacy', icon: Shield },
-    { id: 'security', label: 'Security', icon: Lock },
-    { id: 'appearance', label: 'Appearance', icon: Palette },
-    { id: 'language', label: 'Language & Region', icon: Globe }
+    { id: 'notifications', label: 'Notifications', icon: Notification01Icon },
+    { id: 'privacy', label: 'Privacy', icon: Shield01Icon },
+    { id: 'security', label: 'Security', icon: LockIcon },
+    { id: 'appearance', label: 'Appearance', icon: PaintBrush01Icon },
+    { id: 'language', label: 'Language & Region', icon: GlobeIcon }
   ]
 
   const handleSave = () => {
@@ -500,7 +502,7 @@ export default function ProfileSettingsPage() {
                 <span className="text-sm text-gray-700">{label}</span>
                 <input 
                   type="checkbox" 
-                  checked={privacy[key as keyof PrivacySettings] as boolean}
+                  checked={privacy[key as keyof PrivacyGear] as boolean}
                   onChange={(e) => {
                     setPrivacy(prev => ({ ...prev, [key]: e.target.checked }))
                     setHasChanges(true)
@@ -514,7 +516,7 @@ export default function ProfileSettingsPage() {
       </Card>
 
       <Card className="p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-6">Communication Settings</h3>
+        <h3 className="text-lg font-semibold text-gray-900 mb-6">Communication Gear</h3>
         
         <div className="space-y-3">
           {[
@@ -526,7 +528,7 @@ export default function ProfileSettingsPage() {
               <span className="text-sm text-gray-700">{label}</span>
               <input 
                 type="checkbox" 
-                checked={privacy[key as keyof PrivacySettings] as boolean}
+                checked={privacy[key as keyof PrivacyGear] as boolean}
                 onChange={(e) => {
                   setPrivacy(prev => ({ ...prev, [key]: e.target.checked }))
                   setHasChanges(true)
@@ -631,19 +633,19 @@ export default function ProfileSettingsPage() {
           <div className="flex items-center justify-between">
             <div>
               <h4 className="font-medium text-gray-900">Password Strength</h4>
-              <p className="text-sm text-gray-500">Last changed: {mounted ? new Date(security.passwordSettings.lastChanged).toLocaleDateString() : ''}</p>
+              <p className="text-sm text-gray-500">Last changed: {mounted ? new Date(security.passwordGear.lastChanged).toLocaleDateString() : ''}</p>
             </div>
             <Badge className={
-              security.passwordSettings.strength === 'strong' ? 'bg-green-100 text-green-800' :
-              security.passwordSettings.strength === 'medium' ? 'bg-yellow-100 text-yellow-800' :
+              security.passwordGear.strength === 'strong' ? 'bg-green-100 text-green-800' :
+              security.passwordGear.strength === 'medium' ? 'bg-yellow-100 text-yellow-800' :
               'bg-red-100 text-red-800'
             }>
-              {security.passwordSettings.strength.charAt(0).toUpperCase() + security.passwordSettings.strength.slice(1)}
+              {security.passwordGear.strength.charAt(0).toUpperCase() + security.passwordGear.strength.slice(1)}
             </Badge>
           </div>
 
           <Button variant="outline" className="w-full">
-            <Lock className="h-4 w-4 mr-2" />
+            <HugeiconsIcon icon={LockIcon} className="h-4 w-4 mr-2" />
             Change Password
           </Button>
         </div>
@@ -656,7 +658,7 @@ export default function ProfileSettingsPage() {
           {security.loginSessions.map((session) => (
             <div key={session.id} className="flex items-center justify-between p-3 border rounded-lg">
               <div className="flex items-center space-x-3">
-                <Monitor className="h-5 w-5 text-gray-400" />
+                <HugeiconsIcon icon={ComputerIcon} className="h-5 w-5 text-gray-400" />
                 <div>
                   <h4 className="font-medium text-gray-900">{session.device}</h4>
                   <p className="text-sm text-gray-500">{session.location}</p>
@@ -668,7 +670,7 @@ export default function ProfileSettingsPage() {
                   <Badge className="bg-green-100 text-green-800">Current</Badge>
                 ) : (
                   <Button variant="outline" size="sm">
-                    <X className="h-4 w-4" />
+                    <HugeiconsIcon icon={Cancel01Icon} className="h-4 w-4" />
                   </Button>
                 )}
               </div>
@@ -689,9 +691,9 @@ export default function ProfileSettingsPage() {
             <label className="block text-sm font-medium text-gray-700 mb-3">Color Theme</label>
             <div className="grid grid-cols-3 gap-3">
               {[
-                { value: 'light', label: 'Light', icon: Sun },
-                { value: 'dark', label: 'Dark', icon: Moon },
-                { value: 'system', label: 'System', icon: Laptop }
+                { value: 'light', label: 'Light', icon: Sun01Icon },
+                { value: 'dark', label: 'Dark', icon: Moon01Icon },
+                { value: 'system', label: 'System', icon: LaptopIcon }
               ].map(({ value, label, icon: Icon }) => (
                 <button
                   key={value}
@@ -705,7 +707,7 @@ export default function ProfileSettingsPage() {
                       : 'border-gray-200 hover:border-gray-300'
                   }`}
                 >
-                  <Icon className="h-6 w-6 mb-2" />
+                  <HugeiconsIcon icon={Icon} className="h-6 w-6 mb-2" />
                   <span className="text-sm font-medium">{label}</span>
                 </button>
               ))}
@@ -739,7 +741,7 @@ export default function ProfileSettingsPage() {
       </Card>
 
       <Card className="p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-6">Display Settings</h3>
+        <h3 className="text-lg font-semibold text-gray-900 mb-6">Display Gear</h3>
         
         <div className="space-y-4">
           <div>
@@ -772,7 +774,7 @@ export default function ProfileSettingsPage() {
                 </div>
                 <input 
                   type="checkbox" 
-                  checked={appearance[key as keyof AppearanceSettings] as boolean}
+                  checked={appearance[key as keyof AppearanceGear] as boolean}
                   onChange={(e) => {
                     setAppearance(prev => ({ ...prev, [key]: e.target.checked }))
                     setHasChanges(true)
@@ -867,7 +869,7 @@ export default function ProfileSettingsPage() {
       </Card>
 
       <Card className="p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-6">Format Settings</h3>
+        <h3 className="text-lg font-semibold text-gray-900 mb-6">Format Gear</h3>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
@@ -956,7 +958,7 @@ export default function ProfileSettingsPage() {
   return (
     <TwoLevelLayout>
       <Header 
-        title="Profile Settings"
+        title="Profile Gear"
         description="Configure your account preferences and security settings"
         breadcrumbs={breadcrumbs}
         actions={
@@ -967,7 +969,7 @@ export default function ProfileSettingsPage() {
               onClick={() => setHasChanges(false)}
               disabled={!hasChanges}
             >
-              <X className="w-4 h-4 mr-2" />
+              <HugeiconsIcon icon={Cancel01Icon} className="w-4 h-4 mr-2" />
               Discard
             </Button>
             <Button 
@@ -975,7 +977,7 @@ export default function ProfileSettingsPage() {
               onClick={handleSave}
               disabled={!hasChanges}
             >
-              <Save className="w-4 h-4 mr-2" />
+              <HugeiconsIcon icon={FloppyDiskIcon} className="w-4 h-4 mr-2" />
               Save Changes
             </Button>
           </div>
@@ -987,7 +989,7 @@ export default function ProfileSettingsPage() {
         {hasChanges && (
           <div className="mb-6 p-4 border border-orange-200 bg-orange-50 rounded-lg">
             <div className="flex items-center space-x-2">
-              <AlertTriangle className="h-5 w-5 text-orange-600" />
+              <HugeiconsIcon icon={AlertCircleIcon} className="h-5 w-5 text-orange-600" />
               <span className="text-sm font-medium text-orange-800">You have unsaved changes</span>
             </div>
           </div>
@@ -1009,7 +1011,7 @@ export default function ProfileSettingsPage() {
                   }
                 `}
               >
-                <Icon className="h-4 w-4" />
+                <HugeiconsIcon icon={Icon} className="h-4 w-4" />
                 <span className="hidden sm:inline">{tab.label}</span>
               </button>
             )

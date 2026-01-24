@@ -1,4 +1,4 @@
-'use client';
+'use client'
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -9,19 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { DataTable } from '@/components/ui/data-table';
-import { 
-  Plus, 
-  Search, 
-  Filter, 
-  Download, 
-  TrendingUp,
-  CheckCircle,
-  Clock,
-  AlertCircle,
-  Eye,
-  Edit,
-  Package
-} from 'lucide-react';
+;
 import { goodsReceiptService, GoodsReceipt, InventoryFilters } from '@/services/inventory';
 
 // Use the GoodsReceipt interface directly as it now includes all display fields
@@ -41,7 +29,7 @@ const getStatusBadge = (status?: 'pending' | 'approved' | 'completed') => {
       variant: 'default' as const, 
       label: 'Approved', 
       className: 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400',
-      icon: AlertCircle
+      icon: WarningCircle
     },
     completed: { 
       variant: 'default' as const, 
@@ -202,7 +190,7 @@ export default function GoodsReceiptPage() {
               title="Process Receipt"
               onClick={() => router.push(`/inventory/goods-receipt/${item.id}/edit`)}
             >
-              <Edit className="w-4 h-4" />
+              <PencilSimple className="w-4 h-4" />
             </Button>
           )}
         </div>
@@ -252,7 +240,7 @@ export default function GoodsReceiptPage() {
                   <p className="text-sm text-gray-600 dark:text-gray-400">Total Value</p>
                   <p className="text-2xl font-bold">{mounted ? `Rp ${totalValue.toLocaleString('id-ID')}` : ''}</p>
                 </div>
-                <TrendingUp className="w-8 h-8 text-green-500" />
+                <TrendUp className="w-8 h-8 text-green-500" />
               </div>
             </CardContent>
           </Card>
@@ -288,7 +276,7 @@ export default function GoodsReceiptPage() {
             <div className="flex flex-col md:flex-row gap-4">
               <div className="flex-1">
                 <div className="relative">
-                  <Search className="w-4 h-4 absolute left-3 top-3 text-gray-400" />
+                  <MagnifyingGlass className="w-4 h-4 absolute left-3 top-3 text-gray-400" />
                   <Input
                     placeholder="Search by receipt number, supplier, or PO number..."
                     value={searchTerm}
@@ -311,12 +299,12 @@ export default function GoodsReceiptPage() {
                 </select>
                 
                 <Button variant="outline" size="sm">
-                  <Filter className="w-4 h-4 mr-2" />
+                  <Funnel className="w-4 h-4 mr-2" />
                   Filter
                 </Button>
                 
                 <Button variant="outline" size="sm">
-                  <Download className="w-4 h-4 mr-2" />
+                  <DownloadSimple className="w-4 h-4 mr-2" />
                   Export
                 </Button>
                 
@@ -392,7 +380,7 @@ export default function GoodsReceiptPage() {
           <Card className="hover: transition-shadow cursor-pointer">
             <CardContent className="p-6 text-center">
               <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/20 rounded-lg flex items-center justify-center mx-auto mb-4">
-                <Download className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+                <DownloadSimple className="w-6 h-6 text-purple-600 dark:text-purple-400" />
               </div>
               <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">Export Reports</h3>
               <p className="text-sm text-gray-600 dark:text-gray-400">Generate receipt reports and analytics</p>

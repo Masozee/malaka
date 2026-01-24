@@ -9,23 +9,6 @@ import { Input } from '@/components/ui/input'
 import { AdvancedDataTable } from '@/components/ui/advanced-data-table'
 import { Badge } from '@/components/ui/badge'
 import { HRService } from '@/services/hr'
-import { 
-  GraduationCap,
-  BookOpen,
-  Users,
-  Calendar,
-  Clock,
-  Award,
-  FileText,
-  TrendingUp,
-  CheckCircle,
-  AlertCircle,
-  Play,
-  User,
-  AlertTriangle,
-  RefreshCw,
-  Search
-} from 'lucide-react'
 
 interface TrainingProgram {
   id: string
@@ -608,7 +591,7 @@ export default function TrainingPage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-teal-100 rounded-lg">
-                <TrendingUp className="h-5 w-5 text-teal-600" />
+                <TrendUp className="h-5 w-5 text-teal-600" />
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600">Success Rate</p>
@@ -626,7 +609,7 @@ export default function TrainingPage() {
             <div className="flex flex-col sm:flex-row gap-4">
               <div className="flex-1">
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                  <MagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                   <Input
                     placeholder="Search programs, instructors, or categories..."
                     className="pl-10"
@@ -682,12 +665,12 @@ export default function TrainingPage() {
           ) : error ? (
             <Card className="p-8">
               <div className="flex flex-col items-center justify-center space-y-4 text-center">
-                <AlertTriangle className="h-8 w-8 text-red-500" />
+                <Warning className="h-8 w-8 text-red-500" />
                 <div>
                   <h3 className="font-semibold text-gray-900 mb-2">Failed to Load Training Programs</h3>
                   <p className="text-sm text-muted-foreground mb-4">{error}</p>
                   <Button onClick={retryFetch} variant="outline" size="sm">
-                    <RefreshCw className="h-4 w-4 mr-2" />
+                    <ArrowsClockwise className="h-4 w-4 mr-2" />
                     Try Again
                   </Button>
                 </div>

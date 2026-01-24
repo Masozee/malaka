@@ -11,11 +11,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { ArrowLeft, Save, X } from 'lucide-react'
+
 import type { Employee, EmployeeFormData } from '@/types/hr'
 import { HRService } from '@/services/hr'
 import { ProfileImageUpload } from '@/components/hr/profile-image-upload'
 import Link from 'next/link'
+import { HugeiconsIcon } from '@hugeicons/react'
+import { ArrowLeft01Icon, FloppyDiskIcon } from '@hugeicons/core-free-icons'
 
 export default function EditEmployeePage() {
   const params = useParams()
@@ -187,7 +189,7 @@ export default function EditEmployeePage() {
           <div className="flex items-center space-x-3">
             <Link href={`/hr/employees/${employee.id}`}>
               <Button variant="outline" size="sm">
-                <ArrowLeft className="h-4 w-4 mr-2" />
+                <HugeiconsIcon icon={ArrowLeft01Icon} className="h-4 w-4 mr-2" />
                 Cancel
               </Button>
             </Link>
@@ -196,7 +198,7 @@ export default function EditEmployeePage() {
               onClick={handleSubmit}
               disabled={saving}
             >
-              <Save className="h-4 w-4 mr-2" />
+              <HugeiconsIcon icon={FloppyDiskIcon} className="h-4 w-4 mr-2" />
               {saving ? 'Saving...' : 'Save Changes'}
             </Button>
           </div>
@@ -467,13 +469,13 @@ export default function EditEmployeePage() {
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Actions</h3>
                 <div className="space-y-3">
                   <Button type="submit" className="w-full" disabled={saving}>
-                    <Save className="h-4 w-4 mr-2" />
+                    <HugeiconsIcon icon={FloppyDiskIcon} className="h-4 w-4 mr-2" />
                     {saving ? 'Saving...' : 'Save Changes'}
                   </Button>
                   
                   <Link href={`/hr/employees/${employee.id}`} className="w-full">
                     <Button type="button" variant="outline" className="w-full">
-                      <ArrowLeft className="h-4 w-4 mr-2" />
+                      <HugeiconsIcon icon={ArrowLeft01Icon} className="h-4 w-4 mr-2" />
                       Cancel
                     </Button>
                   </Link>

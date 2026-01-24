@@ -6,17 +6,6 @@ import { GuidelinesLayout } from "@/components/ui/guidelines-layout"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { 
-  ArrowRight,
-  ArrowLeft,
-  CheckCircle,
-  User,
-  Settings,
-  Eye,
-  Shield,
-  Palette,
-  Bell
-} from "lucide-react"
 
 export default function GettingStartedPage() {
   const [completedSteps, setCompletedSteps] = React.useState<number[]>([])
@@ -128,7 +117,7 @@ export default function GettingStartedPage() {
         <Card className="mb-8">
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
-              <CheckCircle className="h-5 w-5" />
+              <div className="h-5 w-5 bg-foreground/20 rounded" />
               <span>Setup Progress</span>
             </CardTitle>
             <CardDescription>
@@ -175,7 +164,7 @@ export default function GettingStartedPage() {
                             : 'bg-primary text-primary-foreground'
                         }`}
                       >
-                        {isCompleted ? <CheckCircle className="h-4 w-4" /> : step.number}
+                        {step.number}
                       </div>
                       <div className="flex-1">
                         <CardTitle className="text-lg">{step.title}</CardTitle>
@@ -220,7 +209,7 @@ export default function GettingStartedPage() {
             <Card className="hover: transition-shadow">
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
-                  <User className="h-5 w-5 text-blue-500" />
+                  <div className="h-5 w-5 bg-blue-500/20 rounded" />
                   <span>User Profile</span>
                 </CardTitle>
               </CardHeader>
@@ -237,8 +226,8 @@ export default function GettingStartedPage() {
             <Card className="hover: transition-shadow">
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
-                  <Settings className="h-5 w-5 text-green-500" />
-                  <span>System Settings</span>
+                  <div className="h-5 w-5 bg-green-500/20 rounded" />
+                  <span>System Gear</span>
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -246,7 +235,7 @@ export default function GettingStartedPage() {
                   Configure system-wide settings and preferences.
                 </p>
                 <Button asChild size="sm" variant="outline" className="w-full">
-                  <Link href="/settings">View Settings</Link>
+                  <Link href="/settings">View Gear</Link>
                 </Button>
               </CardContent>
             </Card>
@@ -254,7 +243,7 @@ export default function GettingStartedPage() {
             <Card className="hover: transition-shadow">
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
-                  <Eye className="h-5 w-5 text-purple-500" />
+                  <div className="h-5 w-5 bg-purple-500/20 rounded" />
                   <span>Dashboard</span>
                 </CardTitle>
               </CardHeader>
@@ -278,19 +267,19 @@ export default function GettingStartedPage() {
           <CardContent>
             <ul className="space-y-3 text-blue-800 dark:text-blue-200">
               <li className="flex items-start space-x-2">
-                <Shield className="h-4 w-4 mt-1 flex-shrink-0" />
+                <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-2 flex-shrink-0" />
                 <span><strong>Start Small:</strong> Begin with essential data and gradually expand as you become more comfortable with the system.</span>
               </li>
               <li className="flex items-start space-x-2">
-                <Palette className="h-4 w-4 mt-1 flex-shrink-0" />
+                <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-2 flex-shrink-0" />
                 <span><strong>Customize Wisely:</strong> Take time to set up your dashboard and preferences to match your workflow.</span>
               </li>
               <li className="flex items-start space-x-2">
-                <Bell className="h-4 w-4 mt-1 flex-shrink-0" />
+                <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-2 flex-shrink-0" />
                 <span><strong>Set Up Notifications:</strong> Configure alerts for critical business events to stay informed.</span>
               </li>
               <li className="flex items-start space-x-2">
-                <CheckCircle className="h-4 w-4 mt-1 flex-shrink-0" />
+                <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-2 flex-shrink-0" />
                 <span><strong>Test First:</strong> Always test with sample data before processing real transactions.</span>
               </li>
             </ul>
@@ -301,14 +290,12 @@ export default function GettingStartedPage() {
         <div className="flex justify-between items-center mt-12 pt-8 border-t">
           <Button variant="outline" asChild>
             <Link href="/guidelines/overview">
-              <ArrowLeft className="h-4 w-4 mr-2" />
               System Overview
             </Link>
           </Button>
           <Button asChild>
             <Link href="/guidelines/modules">
               Module Guides
-              <ArrowRight className="h-4 w-4 ml-2" />
             </Link>
           </Button>
         </div>

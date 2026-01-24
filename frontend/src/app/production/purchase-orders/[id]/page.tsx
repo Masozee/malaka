@@ -9,21 +9,7 @@ import { Header } from '@/components/ui/header'
 import { Progress } from '@/components/ui/progress'
 import { Separator } from '@/components/ui/separator'
 import { AdvancedDataTable } from '@/components/ui/advanced-data-table'
-import { 
-  ShoppingCart, 
-  Edit, 
-  FileText, 
-  Package,
-  Truck,
-  User,
-  Calendar,
-  DollarSign,
-  CheckCircle,
-  Clock,
-  AlertTriangle,
-  Mail,
-  Phone
-} from 'lucide-react'
+
 import Link from 'next/link'
 import { mockPurchaseOrders } from '@/services/production'
 import type { PurchaseOrder, PurchaseOrderItem } from '@/types/production'
@@ -80,12 +66,12 @@ export default function PurchaseOrderDetailsPage() {
 
   const getStatusBadge = (status: PurchaseOrder['status']) => {
     const statusConfig = {
-      draft: { variant: 'secondary' as const, label: 'Draft', icon: Edit },
+      draft: { variant: 'secondary' as const, label: 'Draft', icon: PencilSimple },
       sent: { variant: 'outline' as const, label: 'Sent', icon: Clock },
       confirmed: { variant: 'default' as const, label: 'Confirmed', icon: CheckCircle },
       partial: { variant: 'default' as const, label: 'Partial', icon: Package },
       delivered: { variant: 'default' as const, label: 'Delivered', icon: Truck },
-      cancelled: { variant: 'destructive' as const, label: 'Cancelled', icon: AlertTriangle }
+      cancelled: { variant: 'destructive' as const, label: 'Cancelled', icon: Warning }
     }
     return statusConfig[status] || { variant: 'secondary' as const, label: status, icon: Clock }
   }
@@ -225,7 +211,7 @@ export default function PurchaseOrderDetailsPage() {
               </Button>
               {purchaseOrder.status === 'draft' && (
                 <Button variant="outline" size="sm">
-                  <Mail className="h-4 w-4 mr-2" />
+                  <Envelope className="h-4 w-4 mr-2" />
                   Send to Supplier
                 </Button>
               )}
@@ -237,7 +223,7 @@ export default function PurchaseOrderDetailsPage() {
               )}
               <Button size="sm" asChild>
                 <Link href={`/production/purchase-orders/${purchaseOrder.id}/edit`}>
-                  <Edit className="h-4 w-4 mr-2" />
+                  <PencilSimple className="h-4 w-4 mr-2" />
                   Edit
                 </Link>
               </Button>
@@ -419,7 +405,7 @@ export default function PurchaseOrderDetailsPage() {
                 
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
-                    <DollarSign className="h-4 w-4 text-green-600" />
+                    <CurrencyDollar className="h-4 w-4 text-green-600" />
                     <span className="text-sm text-muted-foreground">Total Value</span>
                   </div>
                   <span className="font-bold">{formatCurrency(purchaseOrder.totalAmount)}</span>
@@ -465,7 +451,7 @@ export default function PurchaseOrderDetailsPage() {
                 
                 <div className="space-y-2 text-sm">
                   <div className="flex items-center space-x-2">
-                    <Mail className="h-4 w-4 text-muted-foreground" />
+                    <Envelope className="h-4 w-4 text-muted-foreground" />
                     <span>{purchaseOrder.supplier.email}</span>
                   </div>
                   

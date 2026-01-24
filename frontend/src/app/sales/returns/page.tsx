@@ -10,24 +10,7 @@ import { AdvancedDataTable } from '@/components/ui/advanced-data-table'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { 
-  RefreshCw,
-  Plus,
-  Eye,
-  Edit,
-  Filter,
-  Download,
-  Calendar,
-  DollarSign,
-  User,
-  Package,
-  CheckCircle,
-  Clock,
-  AlertCircle,
-  Search,
-  XCircle,
-  ArrowLeft
-} from 'lucide-react'
+
 import Link from 'next/link'
 
 // Returns types
@@ -321,9 +304,9 @@ export default function ReturnsPage() {
       approved: { variant: 'default' as const, label: 'Approved', icon: CheckCircle },
       rejected: { variant: 'destructive' as const, label: 'Rejected', icon: XCircle },
       completed: { variant: 'default' as const, label: 'Completed', icon: CheckCircle },
-      cancelled: { variant: 'destructive' as const, label: 'Cancelled', icon: AlertCircle }
+      cancelled: { variant: 'destructive' as const, label: 'Cancelled', icon: WarningCircle }
     }
-    return config[status as keyof typeof config] || { variant: 'secondary' as const, label: status, icon: RefreshCw }
+    return config[status as keyof typeof config] || { variant: 'secondary' as const, label: status, icon: ArrowsClockwise }
   }
 
   const getReturnTypeBadge = (type: string) => {
@@ -457,7 +440,7 @@ export default function ReturnsPage() {
           {returnItem.status === 'pending' && (
             <Button variant="ghost" size="sm" asChild>
               <Link href={`/sales/returns/${returnItem.id}/edit`}>
-                <Edit className="h-4 w-4" />
+                <PencilSimple className="h-4 w-4" />
               </Link>
             </Button>
           )}
@@ -476,7 +459,7 @@ export default function ReturnsPage() {
           actions={
             <div className="flex items-center space-x-3">
               <Button variant="outline" size="sm">
-                <Download className="h-4 w-4 mr-2" />
+                <DownloadSimple className="h-4 w-4 mr-2" />
                 Export
               </Button>
               <Button size="sm" asChild>
@@ -498,7 +481,7 @@ export default function ReturnsPage() {
                 <p className="text-2xl font-bold mt-1">{summaryStats.todayReturns}</p>
                 <p className="text-sm text-blue-600 mt-1">New returns</p>
               </div>
-              <RefreshCw className="h-8 w-8 text-blue-600" />
+              <ArrowsClockwise className="h-8 w-8 text-blue-600" />
             </div>
           </Card>
 
@@ -533,7 +516,7 @@ export default function ReturnsPage() {
                 </p>
                 <p className="text-sm text-red-600 mt-1">Refunded amount</p>
               </div>
-              <DollarSign className="h-8 w-8 text-red-600" />
+              <CurrencyDollar className="h-8 w-8 text-red-600" />
             </div>
           </Card>
 
@@ -565,12 +548,12 @@ export default function ReturnsPage() {
         {/* Filters */}
         <Card className="p-6">
           <div className="flex items-center space-x-4">
-            <Filter className="h-5 w-5 text-muted-foreground" />
+            <Funnel className="h-5 w-5 text-muted-foreground" />
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 flex-1">
               <div className="space-y-2">
                 <Label htmlFor="search">Search</Label>
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <MagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="search"
                     placeholder="Search returns..."

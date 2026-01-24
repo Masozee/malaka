@@ -6,18 +6,6 @@ import { GuidelinesLayout } from "@/components/ui/guidelines-layout"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { 
-  ArrowRight,
-  ArrowLeft,
-  Building,
-  Users,
-  Package,
-  DollarSign,
-  BarChart,
-  Settings,
-  Shield,
-  Globe
-} from "lucide-react"
 
 export default function GuidelinesOverviewPage() {
   return (
@@ -110,13 +98,13 @@ export default function GuidelinesOverviewPage() {
               <Card className="hover: transition-shadow">
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2">
-                    <Package className="h-5 w-5 text-blue-500" />
+                    <div className="h-5 w-5 bg-blue-500/20 rounded" />
                     <span>Inventory Management</span>
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-muted-foreground">
-                    Track stock levels, manage warehouses, handle goods receipt and issue, 
+                    Track stock levels, manage warehouses, handle goods receipt and issue,
                     perform stock transfers and cycle counting.
                   </p>
                 </CardContent>
@@ -125,13 +113,13 @@ export default function GuidelinesOverviewPage() {
               <Card className="hover: transition-shadow">
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2">
-                    <DollarSign className="h-5 w-5 text-green-500" />
+                    <div className="h-5 w-5 bg-green-500/20 rounded" />
                     <span>Sales Management</span>
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-muted-foreground">
-                    Handle POS transactions, direct sales, online orders, returns, 
+                    Handle POS transactions, direct sales, online orders, returns,
                     and sales reporting with comprehensive analytics.
                   </p>
                 </CardContent>
@@ -140,13 +128,13 @@ export default function GuidelinesOverviewPage() {
               <Card className="hover: transition-shadow">
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2">
-                    <BarChart className="h-5 w-5 text-purple-500" />
+                    <div className="h-5 w-5 bg-purple-500/20 rounded" />
                     <span>Financial Management</span>
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-muted-foreground">
-                    Manage accounting, financial reporting, cost centers, 
+                    Manage accounting, financial reporting, cost centers,
                     fixed assets, and multi-currency operations.
                   </p>
                 </CardContent>
@@ -155,13 +143,13 @@ export default function GuidelinesOverviewPage() {
               <Card className="hover: transition-shadow">
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2">
-                    <Users className="h-5 w-5 text-orange-500" />
+                    <div className="h-5 w-5 bg-orange-500/20 rounded" />
                     <span>Human Resources</span>
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-muted-foreground">
-                    Employee management, attendance tracking, payroll processing, 
+                    Employee management, attendance tracking, payroll processing,
                     performance management, and training coordination.
                   </p>
                 </CardContent>
@@ -170,13 +158,13 @@ export default function GuidelinesOverviewPage() {
               <Card className="hover: transition-shadow">
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2">
-                    <Building className="h-5 w-5 text-red-500" />
+                    <div className="h-5 w-5 bg-red-500/20 rounded" />
                     <span>Production Management</span>
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-muted-foreground">
-                    Work order management, quality control, material planning, 
+                    Work order management, quality control, material planning,
                     and production analytics for manufacturing operations.
                   </p>
                 </CardContent>
@@ -185,13 +173,13 @@ export default function GuidelinesOverviewPage() {
               <Card className="hover: transition-shadow">
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2">
-                    <Globe className="h-5 w-5 text-indigo-500" />
+                    <div className="h-5 w-5 bg-indigo-500/20 rounded" />
                     <span>Master Data</span>
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-muted-foreground">
-                    Centralized management of customers, suppliers, products, 
+                    Centralized management of customers, suppliers, products,
                     users, and other foundational business data.
                   </p>
                 </CardContent>
@@ -264,7 +252,7 @@ export default function GuidelinesOverviewPage() {
             <Card className="mb-6 bg-amber-50 dark:bg-amber-950 border-amber-200 dark:border-amber-800">
               <CardContent className="p-6">
                 <div className="flex items-center space-x-3 mb-3">
-                  <Shield className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                  <div className="h-5 w-5 bg-amber-600/20 rounded" />
                   <h3 className="font-semibold text-amber-900 dark:text-amber-100">Security Features</h3>
                 </div>
                 <ul className="space-y-2 text-amber-800 dark:text-amber-200">
@@ -295,7 +283,6 @@ export default function GuidelinesOverviewPage() {
                   <Button asChild className="w-full">
                     <Link href="/guidelines/getting-started">
                       Start Setup Guide
-                      <ArrowRight className="h-4 w-4 ml-2" />
                     </Link>
                   </Button>
                 </CardContent>
@@ -310,7 +297,6 @@ export default function GuidelinesOverviewPage() {
                   <Button asChild variant="outline" className="w-full">
                     <Link href="/guidelines/modules">
                       Explore Modules
-                      <ArrowRight className="h-4 w-4 ml-2" />
                     </Link>
                   </Button>
                 </CardContent>
@@ -323,14 +309,12 @@ export default function GuidelinesOverviewPage() {
         <div className="flex justify-between items-center mt-12 pt-8 border-t">
           <Button variant="outline" asChild>
             <Link href="/guidelines">
-              <ArrowLeft className="h-4 w-4 mr-2" />
               Back to Guidelines
             </Link>
           </Button>
           <Button asChild>
             <Link href="/guidelines/getting-started">
               Getting Started
-              <ArrowRight className="h-4 w-4 ml-2" />
             </Link>
           </Button>
         </div>

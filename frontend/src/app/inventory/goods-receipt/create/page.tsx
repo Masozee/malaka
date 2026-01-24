@@ -1,4 +1,4 @@
-'use client';
+'use client'
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -10,17 +10,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { 
-  ArrowLeft,
-  Save,
-  Package,
-  Calendar,
-  MapPin,
-  User,
-  FileText,
-  Plus,
-  Trash2
-} from 'lucide-react';
+import { HugeiconsIcon } from '@hugeicons/react';
+import { Package01Icon, Calendar01Icon, UserIcon, File01Icon, ArrowLeft01Icon, FloppyDiskIcon } from '@hugeicons/core-free-icons';
 import { goodsReceiptService } from '@/services/inventory';
 
 interface GoodsReceiptFormData {
@@ -165,7 +156,7 @@ export default function CreateGoodsReceiptPage() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Package className="w-5 h-5" />
+                <HugeiconsIcon icon={Package01Icon} className="w-5 h-5" />
                 Receipt Information
               </CardTitle>
             </CardHeader>
@@ -226,7 +217,7 @@ export default function CreateGoodsReceiptPage() {
 
                 <div className="space-y-2">
                   <Label htmlFor="receipt_date" className="flex items-center gap-2">
-                    <Calendar className="w-4 h-4" />
+                    <HugeiconsIcon icon={Calendar01Icon} className="w-4 h-4" />
                     Receipt Date
                   </Label>
                   <Input
@@ -240,7 +231,7 @@ export default function CreateGoodsReceiptPage() {
 
                 <div className="space-y-2">
                   <Label htmlFor="received_by" className="flex items-center gap-2">
-                    <User className="w-4 h-4" />
+                    <HugeiconsIcon icon={UserIcon} className="w-4 h-4" />
                     Received By
                   </Label>
                   <Input
@@ -255,7 +246,7 @@ export default function CreateGoodsReceiptPage() {
 
                 <div className="md:col-span-2 space-y-2">
                   <Label htmlFor="notes" className="flex items-center gap-2">
-                    <FileText className="w-4 h-4" />
+                    <HugeiconsIcon icon={File01Icon} className="w-4 h-4" />
                     Notes
                   </Label>
                   <Textarea
@@ -320,7 +311,7 @@ export default function CreateGoodsReceiptPage() {
               onClick={handleCancel}
               disabled={loading}
             >
-              <ArrowLeft className="w-4 h-4 mr-2" />
+              <HugeiconsIcon icon={ArrowLeft01Icon} className="w-4 h-4 mr-2" />
               Cancel
             </Button>
             <Button 
@@ -330,7 +321,7 @@ export default function CreateGoodsReceiptPage() {
               {loading ? (
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
               ) : (
-                <Save className="w-4 h-4 mr-2" />
+                <HugeiconsIcon icon={FloppyDiskIcon} className="w-4 h-4 mr-2" />
               )}
               Create Receipt
             </Button>

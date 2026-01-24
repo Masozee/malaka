@@ -20,31 +20,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { 
-  FileText,
-  Plus,
-  Eye,
-  Edit,
-  Filter,
-  Download,
-  Calendar,
-  DollarSign,
-  ShoppingCart,
-  User,
-  Package,
-  CheckCircle,
-  Clock,
-  AlertCircle,
-  Search,
-  Truck,
-  Building,
-  MoreHorizontal,
-  Copy,
-  Trash2,
-  Send,
-  PrinterIcon,
-  Archive
-} from 'lucide-react'
+
 import Link from 'next/link'
 
 // Sales Order types
@@ -579,7 +555,7 @@ export default function SalesOrdersPage() {
         actions={
           <div className="flex gap-2">
             <Button variant="outline">
-              <Download className="h-4 w-4 mr-2" />
+              <DownloadSimple className="h-4 w-4 mr-2" />
               Export
             </Button>
             <Button asChild>
@@ -611,7 +587,7 @@ export default function SalesOrdersPage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
-                <DollarSign className="h-5 w-5 text-foreground" />
+                <CurrencyDollar className="h-5 w-5 text-foreground" />
               </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Total Value</p>
@@ -637,7 +613,7 @@ export default function SalesOrdersPage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
-                <AlertCircle className="h-5 w-5 text-foreground" />
+                <WarningCircle className="h-5 w-5 text-foreground" />
               </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Urgent</p>
@@ -651,7 +627,7 @@ export default function SalesOrdersPage() {
         <div className="flex items-center justify-between gap-4">
           <div className="flex-1 max-w-md">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <MagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search orders..."
                 value={searchTerm}
@@ -668,7 +644,7 @@ export default function SalesOrdersPage() {
             
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-32">
-                <Filter className="h-4 w-4 mr-2" />
+                <Funnel className="h-4 w-4 mr-2" />
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
@@ -685,7 +661,7 @@ export default function SalesOrdersPage() {
 
             <Select value={priorityFilter} onValueChange={setPriorityFilter}>
               <SelectTrigger className="w-32">
-                <AlertCircle className="h-4 w-4 mr-2" />
+                <WarningCircle className="h-4 w-4 mr-2" />
                 <SelectValue placeholder="Priority" />
               </SelectTrigger>
               <SelectContent>
@@ -807,7 +783,7 @@ export default function SalesOrdersPage() {
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                            <MoreHorizontal className="h-4 w-4" />
+                            <DotsThree className="h-4 w-4" />
                             <span className="sr-only">Open menu</span>
                           </Button>
                         </DropdownMenuTrigger>
@@ -822,7 +798,7 @@ export default function SalesOrdersPage() {
                           {(order.status === 'draft' || order.status === 'confirmed') && (
                             <DropdownMenuItem asChild>
                               <Link href={`/sales/orders/${order.id}/edit`} className="flex items-center">
-                                <Edit className="mr-2 h-4 w-4" />
+                                <PencilSimple className="mr-2 h-4 w-4" />
                                 Edit Order
                               </Link>
                             </DropdownMenuItem>
@@ -832,13 +808,13 @@ export default function SalesOrdersPage() {
                             Duplicate Order
                           </DropdownMenuItem>
                           <DropdownMenuItem>
-                            <PrinterIcon className="mr-2 h-4 w-4" />
+                            <Printer className="mr-2 h-4 w-4" />
                             Print Order
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
                           {order.status === 'confirmed' && (
                             <DropdownMenuItem>
-                              <Send className="mr-2 h-4 w-4" />
+                              <PaperPlaneTilt className="mr-2 h-4 w-4" />
                               Send to Production
                             </DropdownMenuItem>
                           )}
@@ -855,7 +831,7 @@ export default function SalesOrdersPage() {
                           </DropdownMenuItem>
                           {order.status === 'draft' && (
                             <DropdownMenuItem className="text-red-600">
-                              <Trash2 className="mr-2 h-4 w-4" />
+                              <Trash className="mr-2 h-4 w-4" />
                               Delete Order
                             </DropdownMenuItem>
                           )}
@@ -873,7 +849,7 @@ export default function SalesOrdersPage() {
         {summaryStats.urgentOrders > 0 && (
           <Card className="p-6 border-red-200 bg-red-50">
             <div className="flex items-center space-x-3">
-              <AlertCircle className="h-6 w-6 text-red-600" />
+              <WarningCircle className="h-6 w-6 text-red-600" />
               <div className="flex-1">
                 <h3 className="text-lg font-semibold text-red-800">Urgent Orders</h3>
                 <p className="text-red-700 mt-1">

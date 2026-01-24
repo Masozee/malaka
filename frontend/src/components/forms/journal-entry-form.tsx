@@ -1,7 +1,14 @@
 "use client"
 
+import { HugeiconsIcon } from "@hugeicons/react"
+import {
+  PlusSignIcon,
+  Delete01Icon,
+  Calculator01Icon
+} from "@hugeicons/core-free-icons"
+
 import * as React from "react"
-import { Plus, Trash2, Calculator } from "lucide-react"
+
 import { ModalForm } from "@/components/ui/modal-form"
 import { TextField, TextareaField, SelectField } from "@/components/ui/form-field"
 import { Button } from "@/components/ui/button"
@@ -347,7 +354,7 @@ export function JournalEntryForm({
                 onClick={addLine}
                 disabled={loading}
               >
-                <Plus className="h-4 w-4 mr-2" />
+                <HugeiconsIcon icon={PlusSignIcon} className="h-4 w-4 mr-2" />
                 Add Line
               </Button>
             </div>
@@ -365,7 +372,7 @@ export function JournalEntryForm({
                       onClick={() => removeLine(index)}
                       disabled={loading}
                     >
-                      <Trash2 className="h-4 w-4" />
+                      <HugeiconsIcon icon={Delete01Icon} className="h-4 w-4" />
                     </Button>
                   )}
                 </div>

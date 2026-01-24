@@ -10,24 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea'
 import { TwoLevelLayout } from '@/components/ui/two-level-layout'
 import { Header } from '@/components/ui/header'
-import { 
-  ShoppingCart,
-  Plus,
-  Minus,
-  Trash2,
-  Search,
-  ScanLine,
-  Calculator,
-  CreditCard,
-  DollarSign,
-  Smartphone,
-  Receipt,
-  User,
-  Package,
-  AlertCircle,
-  CheckCircle,
-  ArrowLeft
-} from 'lucide-react'
+
 import Link from 'next/link'
 
 // Product interface for selection
@@ -321,7 +304,7 @@ export default function NewPOSTransactionPage() {
             <Card className="p-4">
               <div className="space-y-4">
                 <div className="flex items-center space-x-4">
-                  <Search className="h-5 w-5 text-muted-foreground" />
+                  <MagnifyingGlass className="h-5 w-5 text-muted-foreground" />
                   <div className="flex-1">
                     <Label htmlFor="search">Search Products</Label>
                     <Input
@@ -475,7 +458,7 @@ export default function NewPOSTransactionPage() {
                             variant="ghost"
                             onClick={() => removeFromCart(item.product.id)}
                           >
-                            <Trash2 className="h-4 w-4" />
+                            <Trash className="h-4 w-4" />
                           </Button>
                         </div>
 
@@ -581,7 +564,7 @@ export default function NewPOSTransactionPage() {
                     <SelectContent>
                       <SelectItem value="cash">
                         <div className="flex items-center space-x-2">
-                          <DollarSign className="h-4 w-4" />
+                          <CurrencyDollar className="h-4 w-4" />
                           <span>Cash</span>
                         </div>
                       </SelectItem>

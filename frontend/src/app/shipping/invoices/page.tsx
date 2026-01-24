@@ -7,18 +7,6 @@ import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { AdvancedDataTable } from '@/components/ui/advanced-data-table'
 import { Badge } from '@/components/ui/badge'
-import { 
-  Receipt,
-  DollarSign,
-  Calendar,
-  Building2,
-  CheckCircle,
-  Clock,
-  AlertTriangle,
-  FileText,
-  Download,
-  Eye
-} from 'lucide-react'
 
 interface ShippingInvoice {
   id: string
@@ -463,11 +451,9 @@ export default function ShippingInvoicesPage() {
         
         <div className="flex space-x-2 mt-4">
           <Button size="sm" variant="outline" className="flex-1">
-            <Eye className="h-4 w-4 mr-1" />
             View
           </Button>
           <Button size="sm" className="flex-1">
-            <Download className="h-4 w-4 mr-1" />
             Download
           </Button>
         </div>
@@ -488,7 +474,7 @@ export default function ShippingInvoicesPage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-blue-100 rounded-lg">
-                <Receipt className="h-5 w-5 text-blue-600" />
+                <div className="h-5 w-5" />
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600">Total Invoices</p>
@@ -500,7 +486,7 @@ export default function ShippingInvoicesPage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-green-100 rounded-lg">
-                <CheckCircle className="h-5 w-5 text-green-600" />
+                <div className="h-5 w-5" />
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600">Paid</p>
@@ -512,7 +498,7 @@ export default function ShippingInvoicesPage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-yellow-100 rounded-lg">
-                <Clock className="h-5 w-5 text-yellow-600" />
+                <div className="h-5 w-5" />
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600">Pending</p>
@@ -524,7 +510,7 @@ export default function ShippingInvoicesPage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-red-100 rounded-lg">
-                <AlertTriangle className="h-5 w-5 text-red-600" />
+                <div className="h-5 w-5" />
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600">Overdue</p>
@@ -536,7 +522,7 @@ export default function ShippingInvoicesPage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-purple-100 rounded-lg">
-                <DollarSign className="h-5 w-5 text-purple-600" />
+                <div className="h-5 w-5" />
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600">Total Amount</p>
@@ -550,7 +536,7 @@ export default function ShippingInvoicesPage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-indigo-100 rounded-lg">
-                <DollarSign className="h-5 w-5 text-indigo-600" />
+                <div className="h-5 w-5" />
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600">Outstanding</p>
@@ -564,7 +550,7 @@ export default function ShippingInvoicesPage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-teal-100 rounded-lg">
-                <CheckCircle className="h-5 w-5 text-teal-600" />
+                <div className="h-5 w-5" />
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600">Payment Rate</p>
@@ -597,12 +583,10 @@ export default function ShippingInvoicesPage() {
           
           <div className="flex items-center space-x-2">
             <Button variant="outline" size="sm">
-              <Calendar className="h-4 w-4 mr-2" />
               Payment Schedule
             </Button>
             <Button variant="outline" size="sm">Export</Button>
             <Button size="sm">
-              <Receipt className="h-4 w-4 mr-2" />
               Create Invoice
             </Button>
           </div>

@@ -1,25 +1,32 @@
 "use client"
 
-import { 
-  Home, 
-  Database, 
-  ShoppingCart, 
-  Package, 
-  Users, 
-  BarChart, 
-  Settings,
-  Building2,
-  Bell,
-  User,
-  Factory,
-  Calculator,
-  Calendar
-} from "lucide-react"
+import { HugeiconsIcon } from '@hugeicons/react'
+import {
+  Home01Icon,
+  Database01Icon,
+  ShoppingCart01Icon,
+  Package01Icon,
+  UserGroupIcon,
+  ChartColumnIcon,
+  Settings01Icon,
+  Building01Icon,
+  Notification01Icon,
+  UserIcon,
+  Factory01Icon,
+  Calculator01Icon,
+  Calendar01Icon
+} from '@hugeicons/core-free-icons'
+
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 
 interface LayoutProps {
   children: React.ReactNode
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function Icon({ icon, className }: { icon: any; className?: string }) {
+  return <HugeiconsIcon icon={icon} className={className} />
 }
 
 export function Layout({ children }: LayoutProps) {
@@ -31,139 +38,139 @@ export function Layout({ children }: LayoutProps) {
         {/* Header */}
         <div className="p-3 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-center">
-            <Building2 className="h-6 w-6 text-black dark:text-white" />
+            <Icon icon={Building01Icon} className="h-6 w-6 text-black dark:text-white" />
           </div>
         </div>
-        
+
         {/* Navigation */}
         <nav className="flex-1 p-2">
           <ul className="space-y-2">
             <li>
-              <Link 
-                href="/dashboard" 
+              <Link
+                href="/dashboard"
                 className={`flex items-center justify-center p-3 rounded-lg transition-colors ${
-                  pathname === '/dashboard' 
-                    ? 'bg-gray-200 dark:bg-gray-700' 
+                  pathname === '/dashboard'
+                    ? 'bg-gray-200 dark:bg-gray-700'
                     : 'hover:bg-gray-100 dark:hover:bg-gray-800'
                 }`}
                 title="Dashboard"
               >
-                <Home className="h-5 w-5 text-black dark:text-white" />
+                <Icon icon={Home01Icon} className="h-5 w-5 text-black dark:text-white" />
               </Link>
             </li>
-            
+
             <li>
-              <Link 
-                href="/calendar" 
+              <Link
+                href="/calendar"
                 className={`flex items-center justify-center p-3 rounded-lg transition-colors ${
-                  pathname === '/calendar' 
-                    ? 'bg-gray-200 dark:bg-gray-700' 
+                  pathname === '/calendar'
+                    ? 'bg-gray-200 dark:bg-gray-700'
                     : 'hover:bg-gray-100 dark:hover:bg-gray-800'
                 }`}
                 title="Calendar"
               >
-                <Calendar className="h-5 w-5 text-black dark:text-white" />
+                <Icon icon={Calendar01Icon} className="h-5 w-5 text-black dark:text-white" />
               </Link>
             </li>
-            
+
             <li>
-              <Link 
-                href="/master-data" 
+              <Link
+                href="/master-data"
                 className={`flex items-center justify-center p-3 rounded-lg transition-colors ${
-                  pathname.startsWith('/master-data') 
-                    ? 'bg-gray-200 dark:bg-gray-700' 
+                  pathname.startsWith('/master-data')
+                    ? 'bg-gray-200 dark:bg-gray-700'
                     : 'hover:bg-gray-100 dark:hover:bg-gray-800'
                 }`}
                 title="Master Data"
               >
-                <Database className="h-5 w-5 text-black dark:text-white" />
+                <Icon icon={Database01Icon} className="h-5 w-5 text-black dark:text-white" />
               </Link>
             </li>
-            
+
             <li>
-              <button 
+              <button
                 className="w-full flex items-center justify-center p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                 title="Sales"
               >
-                <ShoppingCart className="h-5 w-5 text-black dark:text-white" />
+                <Icon icon={ShoppingCart01Icon} className="h-5 w-5 text-black dark:text-white" />
               </button>
             </li>
-            
+
             <li>
-              <button 
+              <button
                 className="w-full flex items-center justify-center p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                 title="Inventory"
               >
-                <Package className="h-5 w-5 text-black dark:text-white" />
+                <Icon icon={Package01Icon} className="h-5 w-5 text-black dark:text-white" />
               </button>
             </li>
-            
+
             <li>
-              <button 
+              <button
                 className="w-full flex items-center justify-center p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                 title="Production"
               >
-                <Factory className="h-5 w-5 text-black dark:text-white" />
+                <Icon icon={Factory01Icon} className="h-5 w-5 text-black dark:text-white" />
               </button>
             </li>
-            
+
             <li>
-              <button 
+              <button
                 className="w-full flex items-center justify-center p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                 title="Accounting"
               >
-                <Calculator className="h-5 w-5 text-black dark:text-white" />
+                <Icon icon={Calculator01Icon} className="h-5 w-5 text-black dark:text-white" />
               </button>
             </li>
-            
+
             <li>
-              <button 
+              <button
                 className="w-full flex items-center justify-center p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                 title="HR Management"
               >
-                <Users className="h-5 w-5 text-black dark:text-white" />
+                <Icon icon={UserGroupIcon} className="h-5 w-5 text-black dark:text-white" />
               </button>
             </li>
-            
+
             <li>
-              <button 
+              <button
                 className="w-full flex items-center justify-center p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                 title="Reporting"
               >
-                <BarChart className="h-5 w-5 text-black dark:text-white" />
+                <Icon icon={ChartColumnIcon} className="h-5 w-5 text-black dark:text-white" />
               </button>
             </li>
-            
+
             <li>
-              <button 
+              <button
                 className="w-full flex items-center justify-center p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                 title="Settings"
               >
-                <Settings className="h-5 w-5 text-black dark:text-white" />
+                <Icon icon={Settings01Icon} className="h-5 w-5 text-black dark:text-white" />
               </button>
             </li>
           </ul>
         </nav>
-        
-        {/* Bottom Section - Bell and User Avatar */}
+
+        {/* Bottom Section - Notification and User Avatar */}
         <div className="p-2 border-t border-gray-200 dark:border-gray-700">
           <div className="space-y-2">
-            <button 
+            <button
               className="w-full flex items-center justify-center p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
               title="Notifications"
             >
-              <Bell className="h-5 w-5 text-black dark:text-white" />
+              <Icon icon={Notification01Icon} className="h-5 w-5 text-black dark:text-white" />
             </button>
-            <button 
+            <button
               className="w-full flex items-center justify-center p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
               title="User Profile"
             >
-              <User className="h-5 w-5 text-black dark:text-white" />
+              <Icon icon={UserIcon} className="h-5 w-5 text-black dark:text-white" />
             </button>
           </div>
         </div>
       </aside>
-      
+
       {/* Main Content */}
       <main className="flex-1 flex flex-col overflow-hidden bg-gray-50 dark:bg-gray-900">
         {children}

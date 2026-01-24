@@ -1,24 +1,24 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { HugeiconsIcon } from "@hugeicons/react"
+import {
+  Sun01Icon,
+  CloudIcon,
+  SnowIcon,
+  FlashIcon,
+  ViewIcon,
+  WindPower01Icon,
+  DropletIcon,
+  Thermometer01Icon,
+  SunriseIcon,
+  Location01Icon,
+  ReloadIcon,
+  Loading01Icon
+} from "@hugeicons/core-free-icons"
 import { Card } from '@/components/ui/card'
 import { weatherService, WeatherData } from '@/services/weather'
-import { 
-  Cloud, 
-  Sun, 
-  CloudRain, 
-  CloudSnow, 
-  Zap, 
-  Eye, 
-  Wind, 
-  Droplets,
-  Thermometer,
-  Sunrise,
-  Sunset,
-  MapPin,
-  RefreshCw,
-  Loader2
-} from 'lucide-react'
+
 import { Button } from '@/components/ui/button'
 
 interface WeatherWidgetProps {
@@ -27,31 +27,35 @@ interface WeatherWidgetProps {
   className?: string
 }
 
-const getWeatherIcon = (iconCode: string, size = 'h-8 w-8') => {
-  // Map OpenWeatherMap icon codes to Lucide icons
-  const iconMap: { [key: string]: any } = {
-    '01d': Sun, // clear sky day
-    '01n': Sun, // clear sky night
-    '02d': Cloud, // few clouds day
-    '02n': Cloud, // few clouds night
-    '03d': Cloud, // scattered clouds
-    '03n': Cloud,
-    '04d': Cloud, // broken clouds
-    '04n': Cloud,
-    '09d': CloudRain, // shower rain
-    '09n': CloudRain,
-    '10d': CloudRain, // rain
-    '10n': CloudRain,
-    '11d': Zap, // thunderstorm
-    '11n': Zap,
-    '13d': CloudSnow, // snow
-    '13n': CloudSnow,
-    '50d': Cloud, // mist
-    '50n': Cloud
+const getWeatherIconData = (iconCode: string) => {
+  // Map OpenWeatherMap icon codes to Hugeicons
+  const iconMap: { [key: string]: typeof Sun01Icon } = {
+    '01d': Sun01Icon, // clear sky day
+    '01n': Sun01Icon, // clear sky night
+    '02d': CloudIcon, // few clouds day
+    '02n': CloudIcon, // few clouds night
+    '03d': CloudIcon, // scattered clouds
+    '03n': CloudIcon,
+    '04d': CloudIcon, // broken clouds
+    '04n': CloudIcon,
+    '09d': CloudIcon, // shower rain
+    '09n': CloudIcon,
+    '10d': CloudIcon, // rain
+    '10n': CloudIcon,
+    '11d': FlashIcon, // thunderstorm
+    '11n': FlashIcon,
+    '13d': SnowIcon, // snow
+    '13n': SnowIcon,
+    '50d': CloudIcon, // mist
+    '50n': CloudIcon
   }
 
-  const IconComponent = iconMap[iconCode] || Cloud
-  return <IconComponent className={size} />
+  return iconMap[iconCode] || CloudIcon
+}
+
+const getWeatherIcon = (iconCode: string, size = 'h-8 w-8') => {
+  const iconData = getWeatherIconData(iconCode)
+  return <HugeiconsIcon icon={iconData} className={size} />
 }
 
 export function WeatherWidget({ city = 'Jakarta', compact = false, className = '' }: WeatherWidgetProps) {
@@ -93,7 +97,7 @@ export function WeatherWidget({ city = 'Jakarta', compact = false, className = '
     return (
       <Card className={`p-4 ${className}`}>
         <div className="flex items-center justify-center h-24">
-          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+          <HugeiconsIcon icon={Loading01Icon} className="h-6 w-6 animate-spin text-muted-foreground" />
         </div>
       </Card>
     )
@@ -105,7 +109,7 @@ export function WeatherWidget({ city = 'Jakarta', compact = false, className = '
     return (
       <Card className={`p-4 ${className}`}>
         <div className="text-center">
-          <Cloud className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+          <HugeiconsIcon icon={CloudIcon} className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
           <p className="text-sm text-muted-foreground">
             {isApiKeyError ? 'Weather API needs setup' : 'Weather unavailable'}
           </p>
@@ -116,7 +120,7 @@ export function WeatherWidget({ city = 'Jakarta', compact = false, className = '
               onClick={fetchWeather}
               className="mt-2"
             >
-              <RefreshCw className="h-4 w-4 mr-2" />
+              <HugeiconsIcon icon={ReloadIcon} className="h-4 w-4 mr-2" />
               Retry
             </Button>
           )}
@@ -140,11 +144,11 @@ export function WeatherWidget({ city = 'Jakarta', compact = false, className = '
           </div>
           <div className="text-right">
             <div className="text-xs text-muted-foreground flex items-center">
-              <MapPin className="h-3 w-3 mr-1" />
+              <HugeiconsIcon icon={Location01Icon} className="h-3 w-3 mr-1" />
               {weather.location.split(',')[0]}
             </div>
             <div className="text-xs text-muted-foreground flex items-center mt-1">
-              <Wind className="h-3 w-3 mr-1" />
+              <HugeiconsIcon icon={WindPower01Icon} className="h-3 w-3 mr-1" />
               {weather.windSpeed} m/s
             </div>
           </div>
@@ -159,7 +163,7 @@ export function WeatherWidget({ city = 'Jakarta', compact = false, className = '
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <MapPin className="h-4 w-4 text-muted-foreground" />
+            <HugeiconsIcon icon={Location01Icon} className="h-4 w-4 text-muted-foreground" />
             <span className="font-medium">{weather.location}</span>
           </div>
           <Button 
@@ -168,7 +172,7 @@ export function WeatherWidget({ city = 'Jakarta', compact = false, className = '
             onClick={fetchWeather}
             disabled={loading}
           >
-            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+            <HugeiconsIcon icon={ReloadIcon} className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
           </Button>
         </div>
 
@@ -191,26 +195,26 @@ export function WeatherWidget({ city = 'Jakarta', compact = false, className = '
         {/* Weather Details */}
         <div className="grid grid-cols-2 gap-4 text-sm">
           <div className="flex items-center space-x-2">
-            <Droplets className="h-4 w-4 text-blue-500" />
+            <HugeiconsIcon icon={DropletIcon} className="h-4 w-4 text-blue-500" />
             <span className="text-muted-foreground">Humidity:</span>
             <span className="font-medium">{weather.humidity}%</span>
           </div>
           
           <div className="flex items-center space-x-2">
-            <Wind className="h-4 w-4 text-gray-500" />
+            <HugeiconsIcon icon={WindPower01Icon} className="h-4 w-4 text-gray-500" />
             <span className="text-muted-foreground">Wind:</span>
             <span className="font-medium">{weather.windSpeed} m/s</span>
           </div>
           
           <div className="flex items-center space-x-2">
-            <Eye className="h-4 w-4 text-green-500" />
+            <HugeiconsIcon icon={ViewIcon} className="h-4 w-4 text-green-500" />
             <span className="text-muted-foreground">Visibility:</span>
             <span className="font-medium">{weather.visibility} km</span>
           </div>
           
           {weather.sunrise && (
             <div className="flex items-center space-x-2">
-              <Sunrise className="h-4 w-4 text-yellow-500" />
+              <HugeiconsIcon icon={SunriseIcon} className="h-4 w-4 text-yellow-500" />
               <span className="text-muted-foreground">Sunrise:</span>
               <span className="font-medium">{weather.sunrise}</span>
             </div>

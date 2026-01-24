@@ -8,29 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { TwoLevelLayout } from '@/components/ui/two-level-layout'
 import { Header } from '@/components/ui/header'
 import { Separator } from '@/components/ui/separator'
-import { 
-  ArrowLeft,
-  Edit,
-  Printer,
-  Download,
-  Send,
-  ShoppingCart,
-  Archive,
-  Trash2,
-  Calendar,
-  User,
-  Phone,
-  Mail,
-  MapPin,
-  Package,
-  DollarSign,
-  Clock,
-  AlertCircle,
-  FileText,
-  Copy,
-  CheckCircle,
-  Receipt
-} from 'lucide-react'
+
 import Link from 'next/link'
 import { ConversionModal } from '@/components/quotation-conversion-modal'
 import { ConversionResult } from '@/services/quotation-conversion'
@@ -268,7 +246,7 @@ export default function QuotationDetailPage() {
               Print
             </Button>
             <Button variant="outline" size="sm">
-              <Download className="h-4 w-4 mr-2" />
+              <DownloadSimple className="h-4 w-4 mr-2" />
               Export
             </Button>
             {(quotation.status === 'approved' || quotation.status === 'sent') && !isExpired(quotation.valid_until) && (
@@ -294,7 +272,7 @@ export default function QuotationDetailPage() {
             {(quotation.status === 'draft' || quotation.status === 'sent') && (
               <Button size="sm" asChild>
                 <Link href={`/sales/quotations/${quotation.id}/edit`}>
-                  <Edit className="h-4 w-4 mr-2" />
+                  <PencilSimple className="h-4 w-4 mr-2" />
                   Edit Quotation
                 </Link>
               </Button>
@@ -308,7 +286,7 @@ export default function QuotationDetailPage() {
         {expired && (
           <Card className="p-4 border-red-200 bg-red-50">
             <div className="flex items-center space-x-3">
-              <AlertCircle className="h-5 w-5 text-red-600" />
+              <WarningCircle className="h-5 w-5 text-red-600" />
               <div>
                 <h4 className="font-medium text-red-800">Quotation Expired</h4>
                 <p className="text-sm text-red-700">This quotation expired on {formatDate(quotation.valid_until)}</p>
@@ -361,7 +339,7 @@ export default function QuotationDetailPage() {
                   <span className="font-medium">{quotation.items.length} items</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <DollarSign className="h-4 w-4 text-muted-foreground" />
+                  <CurrencyDollar className="h-4 w-4 text-muted-foreground" />
                   <span className="text-sm text-muted-foreground">Quotation Value:</span>
                   <span className="font-medium">{formatCurrency(quotation.total_amount)}</span>
                 </div>
@@ -383,7 +361,7 @@ export default function QuotationDetailPage() {
                 <h4 className="font-medium">{quotation.customer_name}</h4>
               </div>
               <div className="flex items-center gap-2">
-                <Mail className="h-4 w-4 text-muted-foreground" />
+                <Envelope className="h-4 w-4 text-muted-foreground" />
                 <span className="text-sm">{quotation.customer_email}</span>
               </div>
               <div className="flex items-center gap-2">
@@ -470,7 +448,7 @@ export default function QuotationDetailPage() {
           <div className="flex flex-wrap gap-2">
             {quotation.status === 'draft' && (
               <Button>
-                <Send className="mr-2 h-4 w-4" />
+                <PaperPlaneTilt className="mr-2 h-4 w-4" />
                 Send to Customer
               </Button>
             )}
@@ -506,7 +484,7 @@ export default function QuotationDetailPage() {
             </Button>
             {quotation.status === 'draft' && (
               <Button variant="destructive">
-                <Trash2 className="mr-2 h-4 w-4" />
+                <Trash className="mr-2 h-4 w-4" />
                 Delete Quotation
               </Button>
             )}

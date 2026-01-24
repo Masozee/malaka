@@ -3,7 +3,8 @@
 import * as React from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { TrendingUp, TrendingDown, Minus, Target } from "lucide-react"
+import { HugeiconsIcon } from "@hugeicons/react"
+import { ChartIncreaseIcon, ChartDecreaseIcon, MinusSignIcon, Target01Icon } from "@hugeicons/core-free-icons"
 import { SalesKPI, BaseMetric } from "@/types/dashboard"
 
 interface KPICardProps {
@@ -55,11 +56,11 @@ export function KPICard({
   const getTrendIcon = () => {
     switch (metric.trend) {
       case 'up':
-        return <TrendingUp className="h-4 w-4" />
+        return <HugeiconsIcon icon={ChartIncreaseIcon} className="h-4 w-4" />
       case 'down':
-        return <TrendingDown className="h-4 w-4" />
+        return <HugeiconsIcon icon={ChartDecreaseIcon} className="h-4 w-4" />
       default:
-        return <Minus className="h-4 w-4" />
+        return <HugeiconsIcon icon={MinusSignIcon} className="h-4 w-4" />
     }
   }
 
@@ -174,7 +175,7 @@ export function KPICard({
 
             {showTarget && 'target_percentage' in metric && salesKPI.target_percentage !== undefined && (
               <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 min-w-0">
-                <Target className="h-3 w-3 flex-shrink-0" />
+                <HugeiconsIcon icon={Target01Icon} className="h-3 w-3 flex-shrink-0" />
                 <span className="truncate">
                   {salesKPI.target_percentage >= 100 ? 'Target Met' : 
                    salesKPI.target_percentage >= 80 ? 'On Track' : 'Below Target'}

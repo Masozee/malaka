@@ -1,0 +1,103 @@
+# Traefik Static Configuration for Malaka ERP
+# Production-grade reverse proxy configuration
+
+# ===========================================
+# Global Configuration
+# ===========================================
+global:
+  checkNewVersion: false
+  sendAnonymousUsage: false
+
+# ===========================================
+# API and Dashboard (disabled in production)
+# ===========================================
+api:
+  dashboard: true
+  insecure: true  # Set to false in production with proper auth
+
+# ===========================================
+# Entry Points
+# ===========================================
+entryPoints:
+  web:
+    address: ":80"
+    http:
+      redirections:
+        entryPoint:
+          to: websecure
+          scheme: https
+          permanent: true
+
+  websecure:
+    address: ":443"
+    http:
+      tls:
+        certResolver: letsencrypt
+    # HTTP/2 and HTTP/3 support
+    http3: {}
+
+  # Traefik Dashboard
+  traefik:
+    address: ":8081"
+
+# ===========================================
+# Providers
+# ===========================================
+providers:
+  file:
+    directory: /Users/pro/Dev/malaka/traefik/dynamic
+    watch: true
+
+# ===========================================
+# TLS Configuration (Let's Encrypt)
+# ===========================================
+certificatesResolvers:
+  letsencrypt:
+    acme:
+      email: admin@malaka.co.id
+      storage: /Users/pro/Dev/malaka/traefik/acme.json
+      httpChallenge:
+        entryPoint: web
+
+# ===========================================
+# Logging
+# ===========================================
+log:
+  level: INFO
+  filePath: /Users/pro/Dev/malaka/traefik/logs/traefik.log
+  format: json
+
+accessLog:
+  filePath: /Users/pro/Dev/malaka/traefik/logs/access.log
+  format: json
+  bufferingSize: 100
+  filters:
+    statusCodes:
+      - "200-299"
+      - "400-499"
+      - "500-599"
+  fields:
+    defaultMode: keep
+    names:
+      ClientUsername: drop
+    headers:
+      defaultMode: keep
+      names:
+        User-Agent: keep
+        Authorization: redact
+        Cookie: redact
+
+# ===========================================
+# Metrics (Prometheus)
+# ===========================================
+metrics:
+  prometheus:
+    entryPoint: traefik
+    addEntryPointsLabels: true
+    addRoutersLabels: true
+    addServicesLabels: true
+    buckets:
+      - 0.1
+      - 0.3
+      - 1.2
+      - 5.0

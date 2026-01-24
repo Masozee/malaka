@@ -9,22 +9,7 @@ import { Header } from '@/components/ui/header'
 import { TanStackDataTable, TanStackColumn } from '@/components/ui/tanstack-data-table'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
-import {
-  Layers,
-  Plus,
-  Eye,
-  Edit,
-  Download,
-  Calendar,
-  Package,
-  CheckCircle,
-  AlertCircle,
-  Search,
-  Archive,
-  Grid3X3,
-  List,
-  Loader2
-} from 'lucide-react'
+
 import Link from 'next/link'
 import { Model } from '@/types/masterdata'
 import { ModelForm } from '@/components/forms/model-form'
@@ -131,8 +116,8 @@ export default function ProductModelsPage() {
 
   const getStatusBadge = (status: string) => {
     return status === 'active'
-      ? { variant: 'default' as const, label: 'Active', icon: CheckCircle }
-      : { variant: 'destructive' as const, label: 'Inactive', icon: AlertCircle }
+      ? { variant: 'default' as const, label: 'Active' }
+      : { variant: 'destructive' as const, label: 'Inactive' }
   }
 
   const columns: TanStackColumn<ProductModel>[] = [
@@ -166,7 +151,6 @@ export default function ProductModelsPage() {
       header: 'Products',
       cell: ({ row }) => (
         <div className="flex items-center space-x-2">
-          <Package className="h-4 w-4 text-muted-foreground" />
           <span className="font-medium">{row.original?.product_count || 0}</span>
         </div>
       )
@@ -186,10 +170,9 @@ export default function ProductModelsPage() {
       accessorKey: 'status',
       header: 'Status',
       cell: ({ row }) => {
-        const { variant, label, icon: Icon } = getStatusBadge(row.original?.status || 'inactive')
+        const { variant, label } = getStatusBadge(row.original?.status || 'inactive')
         return (
           <div className="flex items-center space-x-2">
-            <Icon className="h-4 w-4" />
             <Badge variant={variant}>{label}</Badge>
           </div>
         )
@@ -201,7 +184,6 @@ export default function ProductModelsPage() {
       header: 'Last Updated',
       cell: ({ row }) => (
         <div className="flex items-center space-x-2">
-          <Calendar className="h-4 w-4 text-muted-foreground" />
           <span className="text-sm">{formatDate(row.original?.updated_at)}</span>
         </div>
       )
@@ -214,11 +196,11 @@ export default function ProductModelsPage() {
         <div className="flex items-center space-x-2">
           <Button variant="ghost" size="sm" asChild>
             <Link href={`/products/models/${row.original?.id}`}>
-              <Eye className="h-4 w-4" />
+              View
             </Link>
           </Button>
           <Button variant="ghost" size="sm" onClick={() => handleEditModel(row.original)}>
-            <Edit className="h-4 w-4" />
+            Edit
           </Button>
         </div>
       )
@@ -234,14 +216,12 @@ export default function ProductModelsPage() {
         actions={
           <div className="flex items-center space-x-3">
             {isFetching && !isLoading && (
-              <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-muted-foreground border-t-transparent" />
             )}
             <Button variant="outline" size="sm">
-              <Download className="h-4 w-4 mr-2" />
               Export
             </Button>
             <Button size="sm" onClick={handleCreateModel}>
-              <Plus className="h-4 w-4 mr-2" />
               Add Model
             </Button>
           </div>
@@ -255,7 +235,7 @@ export default function ProductModelsPage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
-                <Layers className="h-5 w-5 text-foreground" />
+                <div className="h-5 w-5 bg-foreground/20 rounded" />
               </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Total Models</p>
@@ -267,7 +247,7 @@ export default function ProductModelsPage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
-                <CheckCircle className="h-5 w-5 text-foreground" />
+                <div className="h-5 w-5 bg-foreground/20 rounded" />
               </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Active</p>
@@ -279,7 +259,7 @@ export default function ProductModelsPage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
-                <Package className="h-5 w-5 text-foreground" />
+                <div className="h-5 w-5 bg-foreground/20 rounded" />
               </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Products</p>
@@ -291,7 +271,7 @@ export default function ProductModelsPage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
-                <Archive className="h-5 w-5 text-foreground" />
+                <div className="h-5 w-5 bg-foreground/20 rounded" />
               </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Stock</p>
@@ -307,12 +287,10 @@ export default function ProductModelsPage() {
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="flex-1">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                 <Input
                   placeholder="Search models..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
                 />
               </div>
             </div>
@@ -350,7 +328,6 @@ export default function ProductModelsPage() {
                 size="sm"
                 onClick={() => setActiveView('cards')}
               >
-                <Grid3X3 className="h-4 w-4 mr-2" />
                 Cards
               </Button>
               <Button
@@ -358,7 +335,6 @@ export default function ProductModelsPage() {
                 size="sm"
                 onClick={() => setActiveView('table')}
               >
-                <List className="h-4 w-4 mr-2" />
                 Table
               </Button>
             </div>
@@ -379,7 +355,7 @@ export default function ProductModelsPage() {
         ) : activeView === 'cards' ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredModels.map((model) => {
-              const { variant: statusVariant, label: statusLabel, icon: StatusIcon } = getStatusBadge(model?.status || 'inactive')
+              const { variant: statusVariant, label: statusLabel } = getStatusBadge(model?.status || 'inactive')
 
               return (
                 <Card key={model?.id} className="p-4 hover: transition-shadow">
@@ -397,7 +373,6 @@ export default function ProductModelsPage() {
                     </div>
                     <div className="flex flex-col items-end space-y-1">
                       <div className="flex items-center space-x-1">
-                        <StatusIcon className="h-4 w-4" />
                         <Badge variant={statusVariant}>{statusLabel}</Badge>
                       </div>
                     </div>
@@ -454,7 +429,7 @@ export default function ProductModelsPage() {
         {models.filter(m => m.status !== 'active').length > 0 && (
           <Card className="p-6 border-orange-200 bg-orange-50">
             <div className="flex items-center space-x-3">
-              <AlertCircle className="h-6 w-6 text-orange-600" />
+              <div className="h-6 w-6 rounded-full bg-orange-600/20" />
               <div className="flex-1">
                 <h3 className="text-lg font-semibold text-orange-800">Inactive Models</h3>
                 <p className="text-orange-700 mt-1">

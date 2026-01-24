@@ -1,6 +1,8 @@
 "use client"
 
 import * as React from "react"
+import { HugeiconsIcon } from "@hugeicons/react"
+import { ChartIncreaseIcon, ChartDecreaseIcon, Calendar01Icon, Dollar01Icon } from "@hugeicons/core-free-icons"
 import { TwoLevelLayout } from "@/components/ui/two-level-layout"
 import { Header } from "@/components/ui/header"
 import { AdvancedDataTable } from "@/components/ui/advanced-data-table"
@@ -20,7 +22,6 @@ import {
   FinancialPeriod,
   AccountingFilters 
 } from "@/types/accounting"
-import { Calendar, TrendingUp, TrendingDown, DollarSign } from "lucide-react"
 
 export default function GeneralLedgerPage() {
   const [entries, setEntries] = React.useState<GeneralLedgerEntry[]>([])
@@ -309,7 +310,6 @@ export default function GeneralLedgerPage() {
     }
   }
 
-
   const handleExport = async () => {
     try {
       const blob = await generalLedgerService.exportLedger({
@@ -356,7 +356,7 @@ export default function GeneralLedgerPage() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Debits</CardTitle>
-              <TrendingUp className="h-4 w-4 text-green-600" />
+              <HugeiconsIcon icon={ChartIncreaseIcon} className="h-4 w-4 text-green-600" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-green-600">
@@ -368,7 +368,7 @@ export default function GeneralLedgerPage() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Credits</CardTitle>
-              <TrendingDown className="h-4 w-4 text-red-600" />
+              <HugeiconsIcon icon={ChartDecreaseIcon} className="h-4 w-4 text-red-600" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-red-600">
@@ -380,7 +380,7 @@ export default function GeneralLedgerPage() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Opening Balance</CardTitle>
-              <Calendar className="h-4 w-4 text-blue-600" />
+              <HugeiconsIcon icon={Calendar01Icon} className="h-4 w-4 text-blue-600" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-blue-600">
@@ -392,7 +392,7 @@ export default function GeneralLedgerPage() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Closing Balance</CardTitle>
-              <DollarSign className="h-4 w-4 text-purple-600" />
+              <HugeiconsIcon icon={Dollar01Icon} className="h-4 w-4 text-purple-600" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-purple-600">

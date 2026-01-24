@@ -10,26 +10,7 @@ import { AdvancedDataTable } from '@/components/ui/advanced-data-table'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { 
-  TrendingUp,
-  Plus,
-  Eye,
-  Edit,
-  Filter,
-  Download,
-  Calendar,
-  DollarSign,
-  ShoppingCart,
-  User,
-  Package,
-  Globe,
-  CheckCircle,
-  Clock,
-  AlertCircle,
-  Search,
-  Truck,
-  MapPin
-} from 'lucide-react'
+
 import Link from 'next/link'
 
 // Online Sales types
@@ -330,7 +311,7 @@ export default function OnlineSalesPage() {
       processing: { variant: 'secondary' as const, label: 'Processing', icon: Package },
       shipped: { variant: 'default' as const, label: 'Shipped', icon: Truck },
       delivered: { variant: 'default' as const, label: 'Delivered', icon: CheckCircle },
-      cancelled: { variant: 'destructive' as const, label: 'Cancelled', icon: AlertCircle }
+      cancelled: { variant: 'destructive' as const, label: 'Cancelled', icon: WarningCircle }
     }
     return config[status as keyof typeof config] || { variant: 'secondary' as const, label: status, icon: Package }
   }
@@ -454,7 +435,7 @@ export default function OnlineSalesPage() {
           {(sale.order_status === 'pending' || sale.order_status === 'confirmed') && (
             <Button variant="ghost" size="sm" asChild>
               <Link href={`/sales/online/${sale.id}/edit`}>
-                <Edit className="h-4 w-4" />
+                <PencilSimple className="h-4 w-4" />
               </Link>
             </Button>
           )}
@@ -473,7 +454,7 @@ export default function OnlineSalesPage() {
           actions={
             <div className="flex items-center space-x-3">
               <Button variant="outline" size="sm">
-                <Download className="h-4 w-4 mr-2" />
+                <DownloadSimple className="h-4 w-4 mr-2" />
                 Export
               </Button>
               <Button size="sm" asChild>
@@ -508,7 +489,7 @@ export default function OnlineSalesPage() {
                 </p>
                 <p className="text-sm text-green-600 mt-1">Online sales</p>
               </div>
-              <DollarSign className="h-8 w-8 text-green-600" />
+              <CurrencyDollar className="h-8 w-8 text-green-600" />
             </div>
           </Card>
 
@@ -539,12 +520,12 @@ export default function OnlineSalesPage() {
         {/* Filters */}
         <Card className="p-4">
           <div className="flex items-center space-x-4">
-            <Filter className="h-5 w-5 text-muted-foreground" />
+            <Funnel className="h-5 w-5 text-muted-foreground" />
             <div className="grid grid-cols-1 md:grid-cols-4 gap-3 flex-1">
               <div className="space-y-2">
                 <Label htmlFor="search">Search</Label>
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <MagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="search"
                     placeholder="Search orders..."

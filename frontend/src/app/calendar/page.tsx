@@ -1,7 +1,6 @@
-'use client';
+'use client'
 
 import { useState, useEffect } from 'react';
-import { List, ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TwoLevelLayout } from '@/components/ui/two-level-layout';
@@ -23,7 +22,7 @@ const getDemoEvents = (): CalendarEvent[] => {
   const today = new Date();
   const currentMonth = today.getMonth();
   const currentYear = today.getFullYear();
-  
+
   return [
     {
       id: 'demo-1',
@@ -65,7 +64,7 @@ const getDemoEvents = (): CalendarEvent[] => {
 
 const getDemoHolidays = (): CalendarEvent[] => {
   const currentYear = new Date().getFullYear();
-  
+
   return [
     {
       id: 'holiday-1',
@@ -110,10 +109,10 @@ export default function CalendarPage() {
       try {
         setLoading(true);
         setError(null);
-        
+
         // Initialize authentication
         authService.initializeAuth();
-        
+
         // Auto-login for development
         const isAuthenticated = await authService.autoLogin();
         if (!isAuthenticated) {
@@ -124,20 +123,20 @@ export default function CalendarPage() {
           setError('Backend authentication failed. Using demo data.');
           return;
         }
-        
+
         console.log('Authentication successful, fetching data from backend...');
-        
+
         try {
           // Fetch holidays for current year (use 2024 data as that's what's in database)
           const yearHolidays = await calendarService.getHolidays(2024);
           setHolidays(yearHolidays);
           console.log('Successfully fetched holidays:', yearHolidays);
-          
+
           // Fetch events for current month
           const monthEvents = await calendarService.getCalendarEvents(currentYear, currentMonth + 1);
           setEvents(monthEvents);
           console.log('Successfully fetched events:', monthEvents);
-          
+
         } catch (apiError) {
           // API call failed, using demo data
           console.error('API call failed:', apiError);
@@ -145,7 +144,7 @@ export default function CalendarPage() {
           setHolidays(getDemoHolidays());
           setError('API call failed. Using demo data.');
         }
-        
+
       } catch (err) {
         // Failed to initialize calendar
         console.error('Calendar initialization failed:', err);
@@ -163,7 +162,7 @@ export default function CalendarPage() {
 
   const navigateDate = (direction: 'prev' | 'next') => {
     const newDate = new Date(currentDate);
-    
+
     if (viewMode === 'month') {
       if (direction === 'prev') {
         newDate.setMonth(currentMonth - 1);
@@ -183,7 +182,7 @@ export default function CalendarPage() {
         newDate.setDate(currentDate.getDate() + 1);
       }
     }
-    
+
     setCurrentDate(newDate);
   };
 
@@ -195,18 +194,18 @@ export default function CalendarPage() {
       startOfWeek.setDate(currentDate.getDate() - currentDate.getDay());
       const endOfWeek = new Date(startOfWeek);
       endOfWeek.setDate(startOfWeek.getDate() + 6);
-      
+
       if (startOfWeek.getMonth() === endOfWeek.getMonth()) {
         return `${months[startOfWeek.getMonth()]} ${startOfWeek.getDate()}-${endOfWeek.getDate()}, ${startOfWeek.getFullYear()}`;
       } else {
         return `${months[startOfWeek.getMonth()]} ${startOfWeek.getDate()} - ${months[endOfWeek.getMonth()]} ${endOfWeek.getDate()}, ${startOfWeek.getFullYear()}`;
       }
     } else if (viewMode === 'day') {
-      return currentDate.toLocaleDateString('en-US', { 
-        weekday: 'long', 
-        year: 'numeric', 
-        month: 'long', 
-        day: 'numeric' 
+      return currentDate.toLocaleDateString('en-US', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
       });
     } else {
       return 'Upcoming Events';
@@ -232,11 +231,11 @@ export default function CalendarPage() {
 
     try {
       await calendarService.deleteEvent(eventId);
-      
+
       // Remove event from local state
       setEvents(prev => prev.filter(e => e.id !== eventId));
       setHolidays(prev => prev.filter(e => e.id !== eventId));
-      
+
     } catch (err) {
       // Failed to delete event
       setError('Failed to delete event');
@@ -250,26 +249,26 @@ export default function CalendarPage() {
         const updateRequest = calendarService.transformFormDataToUpdateRequest(eventData);
         const updatedEvent = await calendarService.updateEvent(selectedEvent.id, updateRequest);
         const calendarEvent = calendarService.transformToCalendarEvent(updatedEvent);
-        
+
         // Update local state
         setEvents(prev => prev.map(e => e.id === selectedEvent.id ? calendarEvent : e));
         setHolidays(prev => prev.map(e => e.id === selectedEvent.id ? calendarEvent : e));
-        
+
       } else {
         // Create new event
         const createRequest = calendarService.transformFormDataToCreateRequest(eventData);
         const newEvent = await calendarService.createEvent(createRequest);
         const calendarEvent = calendarService.transformToCalendarEvent(newEvent);
-        
+
         // Update local state
         setEvents(prev => [...prev, calendarEvent]);
       }
-      
+
       // Close form and reset state
       setEventFormOpen(false);
       setSelectedDate(undefined);
       setSelectedEvent(undefined);
-      
+
     } catch (err) {
       // Failed to save event
       const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
@@ -283,16 +282,15 @@ export default function CalendarPage() {
   };
 
   const isToday = (day: number) => {
-    return today.getDate() === day && 
-           today.getMonth() === currentMonth && 
+    return today.getDate() === day &&
+           today.getMonth() === currentMonth &&
            today.getFullYear() === currentYear;
   };
-
 
   const getEventForDay = (day: number) => {
     // Combine events and holidays
     const allEvents = [...events, ...holidays];
-    return allEvents.find(event => 
+    return allEvents.find(event =>
       event.date.getDate() === day &&
       event.date.getMonth() === currentMonth &&
       event.date.getFullYear() === currentYear
@@ -301,7 +299,7 @@ export default function CalendarPage() {
 
   const renderCalendarGrid = () => {
     const days = [];
-    
+
     // Previous month's trailing days
     for (let i = firstDayWeekday - 1; i >= 0; i--) {
       const day = getDaysInPrevMonth() + i;
@@ -329,14 +327,14 @@ export default function CalendarPage() {
             {day}
           </div>
           {event && (
-            <div 
+            <div
               className={`text-xs p-1 rounded truncate cursor-pointer hover:opacity-80 ${
                 event.type === 'holiday' ? 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400' :
                 event.type === 'meeting' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400' :
                 event.type === 'task' ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400' :
                 event.type === 'reminder' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400' :
                 'bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-400'
-              }`} 
+              }`}
               title={`${event.title} - Click to edit`}
               onClick={(e) => {
                 e.stopPropagation();
@@ -351,7 +349,7 @@ export default function CalendarPage() {
     }
 
     // Next month's leading days
-    const totalCells = 42; // 6 rows × 7 days
+    const totalCells = 42; // 6 rows x 7 days
     const remainingCells = totalCells - days.length;
     for (let day = 1; day <= remainingCells; day++) {
       days.push(
@@ -367,17 +365,17 @@ export default function CalendarPage() {
   const renderWeekView = () => {
     const startOfWeek = new Date(currentDate);
     startOfWeek.setDate(currentDate.getDate() - currentDate.getDay());
-    
+
     const days = [];
     for (let i = 0; i < 7; i++) {
       const day = new Date(startOfWeek);
       day.setDate(startOfWeek.getDate() + i);
-      
+
       const allEvents = [...events, ...holidays];
-      const dayEvents = allEvents.filter(event => 
+      const dayEvents = allEvents.filter(event =>
         event.date.toDateString() === day.toDateString()
       );
-      
+
       days.push(
         <div key={i} className="border border-gray-200 dark:border-gray-700 min-h-[200px]">
           <div className={`p-2 border-b border-gray-200 dark:border-gray-700 font-medium ${
@@ -392,7 +390,7 @@ export default function CalendarPage() {
           </div>
           <div className="p-2 space-y-1">
             {dayEvents.map(event => (
-              <div 
+              <div
                 key={event.id}
                 className={`text-xs p-1 rounded cursor-pointer hover:opacity-80 ${
                   event.type === 'holiday' ? 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400' :
@@ -417,7 +415,7 @@ export default function CalendarPage() {
         </div>
       );
     }
-    
+
     return (
       <div>
         <div className="grid grid-cols-7 gap-0 mb-2">
@@ -436,31 +434,31 @@ export default function CalendarPage() {
 
   const renderDayView = () => {
     const allEvents = [...events, ...holidays];
-    const dayEvents = allEvents.filter(event => 
+    const dayEvents = allEvents.filter(event =>
       event.date.toDateString() === currentDate.toDateString()
     ).sort((a, b) => a.date.getTime() - b.date.getTime());
-    
+
     const hours = Array.from({ length: 24 }, (_, i) => i);
-    
+
     return (
       <div>
         <div className="text-center p-4 border-b border-gray-200 dark:border-gray-700">
           <h2 className="text-xl font-semibold">
-            {currentDate.toLocaleDateString('en-US', { 
-              weekday: 'long', 
-              year: 'numeric', 
-              month: 'long', 
-              day: 'numeric' 
+            {currentDate.toLocaleDateString('en-US', {
+              weekday: 'long',
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric'
             })}
           </h2>
         </div>
-        
+
         <div className="grid grid-cols-1 gap-0">
           {hours.map(hour => {
-            const hourEvents = dayEvents.filter(event => 
+            const hourEvents = dayEvents.filter(event =>
               event.date.getHours() === hour
             );
-            
+
             return (
               <div key={hour} className="border-b border-gray-100 dark:border-gray-800 min-h-[60px] flex">
                 <div className="w-16 p-2 text-xs text-gray-500 dark:text-gray-400 border-r border-gray-100 dark:border-gray-800">
@@ -468,7 +466,7 @@ export default function CalendarPage() {
                 </div>
                 <div className="flex-1 p-2">
                   {hourEvents.map(event => (
-                    <div 
+                    <div
                       key={event.id}
                       className={`text-xs p-2 rounded mb-1 cursor-pointer hover:opacity-80 ${
                         event.type === 'holiday' ? 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400' :
@@ -481,7 +479,7 @@ export default function CalendarPage() {
                       title={`${event.title} - Click to edit`}
                     >
                       <div className="font-medium">{event.title}</div>
-                      {event.location && <div className="text-xs opacity-75">📍 {event.location}</div>}
+                      {event.location && <div className="text-xs opacity-75">{event.location}</div>}
                     </div>
                   ))}
                   <button
@@ -525,16 +523,16 @@ export default function CalendarPage() {
                   <div className="flex-1">
                     <h3 className="font-medium">{event.title}</h3>
                     <p className="text-sm text-gray-500 dark:text-gray-400">
-                      {event.date.toLocaleDateString('en-US', { 
-                        weekday: 'long', 
-                        year: 'numeric', 
-                        month: 'long', 
-                        day: 'numeric' 
+                      {event.date.toLocaleDateString('en-US', {
+                        weekday: 'long',
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
                       })}
                     </p>
                     {event.location && (
                       <p className="text-sm text-gray-500 dark:text-gray-400">
-                        📍 {event.location}
+                        {event.location}
                       </p>
                     )}
                     {event.description && (
@@ -561,7 +559,7 @@ export default function CalendarPage() {
                         className="h-8 w-8 p-0"
                         title="Edit event"
                       >
-                        ✏️
+                        Edit
                       </Button>
                       {event.type !== 'holiday' && (
                         <Button
@@ -571,7 +569,7 @@ export default function CalendarPage() {
                           className="h-8 w-8 p-0 text-red-500 hover:text-red-700"
                           title="Delete event"
                         >
-                          🗑️
+                          Delete
                         </Button>
                       )}
                     </div>
@@ -589,14 +587,14 @@ export default function CalendarPage() {
     <ProtectedRoute>
       <TwoLevelLayout>
         <div className="flex-1 flex flex-col overflow-hidden">
-          <Header 
+          <Header
             title="Calendar"
             description="Manage your events and schedules"
             breadcrumbs={[
               { label: "Calendar" }
             ]}
           />
-        
+
           <div className="flex-1 overflow-hidden p-6">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-2">
@@ -627,14 +625,12 @@ export default function CalendarPage() {
                     size="sm"
                     onClick={() => setViewMode('list')}
                   >
-                    <List className="w-4 h-4 mr-2" />
                     List
                   </Button>
                 </div>
               </div>
-              
+
               <Button onClick={() => handleAddEvent()} className="bg-blue-600 hover:bg-blue-700">
-                <Plus className="w-4 h-4 mr-2" />
                 Add Event
               </Button>
             </div>
@@ -650,13 +646,13 @@ export default function CalendarPage() {
                       </CardTitle>
                       <div className="flex items-center gap-2">
                         <Button variant="outline" size="sm" onClick={() => navigateDate('prev')}>
-                          <ChevronLeft className="w-4 h-4" />
+                          Prev
                         </Button>
                         <Button variant="outline" size="sm" onClick={() => setCurrentDate(new Date())}>
                           Today
                         </Button>
                         <Button variant="outline" size="sm" onClick={() => navigateDate('next')}>
-                          <ChevronRight className="w-4 h-4" />
+                          Next
                         </Button>
                       </div>
                     </div>
@@ -664,17 +660,17 @@ export default function CalendarPage() {
                   <CardContent className="flex-1 overflow-auto">
                     {error && (
                       <div className="text-center py-6">
-                        <div className="text-red-500 mb-2">⚠️ {error}</div>
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
+                        <div className="text-red-500 mb-2">{error}</div>
+                        <Button
+                          variant="outline"
+                          size="sm"
                           onClick={() => window.location.reload()}
                         >
                           Retry
                         </Button>
                       </div>
                     )}
-                    
+
                     {loading ? (
                       <div className="text-center py-12">
                         <div className="animate-pulse text-gray-500 dark:text-gray-400">

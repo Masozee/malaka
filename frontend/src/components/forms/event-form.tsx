@@ -1,4 +1,13 @@
-'use client';
+'use client'
+
+import { HugeiconsIcon } from "@hugeicons/react"
+import {
+  Calendar01Icon,
+  Clock01Icon,
+  Location01Icon,
+  UserGroupIcon,
+  File01Icon
+} from "@hugeicons/core-free-icons"
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
@@ -7,7 +16,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Calendar, Clock, MapPin, Users, FileText } from 'lucide-react';
+;
 
 // Updated to match backend DTO structure
 export interface EventFormData {
@@ -46,10 +55,10 @@ const initialFormData: EventFormData = {
 };
 
 const eventTypes = [
-  { value: 'event', label: 'Event', icon: Calendar },
-  { value: 'meeting', label: 'Meeting', icon: Users },
-  { value: 'task', label: 'Task', icon: FileText },
-  { value: 'reminder', label: 'Reminder', icon: Clock }
+  { value: 'event', label: 'Event', icon: Calendar01Icon },
+  { value: 'meeting', label: 'Meeting', icon: UserGroupIcon },
+  { value: 'task', label: 'Task', icon: File01Icon },
+  { value: 'reminder', label: 'Reminder', icon: Clock01Icon }
 ];
 
 const priorityOptions = [
@@ -118,14 +127,14 @@ export function EventForm({ open, onOpenChange, onSubmit, initialData, selectedD
   };
 
   const selectedEventType = eventTypes.find(type => type.value === formData.type);
-  const IconComponent = selectedEventType?.icon || Calendar;
+  const IconData = selectedEventType?.icon || Calendar01Icon;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <IconComponent className="w-5 h-5" />
+            <HugeiconsIcon icon={IconData} className="w-5 h-5" />
             {initialData ? 'Edit Event' : 'Add New Event'}
           </DialogTitle>
         </DialogHeader>
@@ -153,17 +162,14 @@ export function EventForm({ open, onOpenChange, onSubmit, initialData, selectedD
                   <SelectValue placeholder="Select type" />
                 </SelectTrigger>
                 <SelectContent>
-                  {eventTypes.map((type) => {
-                    const Icon = type.icon;
-                    return (
+                  {eventTypes.map((type) => (
                       <SelectItem key={type.value} value={type.value}>
                         <div className="flex items-center gap-2">
-                          <Icon className="w-4 h-4" />
+                          <HugeiconsIcon icon={type.icon} className="w-4 h-4" />
                           {type.label}
                         </div>
                       </SelectItem>
-                    );
-                  })}
+                    ))}
                 </SelectContent>
               </Select>
             </div>
@@ -227,7 +233,7 @@ export function EventForm({ open, onOpenChange, onSubmit, initialData, selectedD
           {/* Location */}
           <div className="space-y-2">
             <Label htmlFor="location" className="flex items-center gap-2">
-              <MapPin className="w-4 h-4" />
+              <HugeiconsIcon icon={Location01Icon} className="w-4 h-4" />
               Location
             </Label>
             <Input
@@ -242,7 +248,7 @@ export function EventForm({ open, onOpenChange, onSubmit, initialData, selectedD
           {formData.type === 'meeting' && (
             <div className="space-y-2">
               <Label htmlFor="attendees" className="flex items-center gap-2">
-                <Users className="w-4 h-4" />
+                <HugeiconsIcon icon={UserGroupIcon} className="w-4 h-4" />
                 Attendees
               </Label>
               <Input

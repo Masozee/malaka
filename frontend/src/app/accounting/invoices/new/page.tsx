@@ -1,6 +1,8 @@
 'use client'
 
 import React, { useState, useEffect, useRef } from 'react'
+import { HugeiconsIcon } from "@hugeicons/react"
+import { ViewIcon, FloppyDiskIcon, SendToMobileIcon, File01Icon, UserGroupIcon, PlusSignIcon, Package01Icon, Delete01Icon, Calculator01Icon, Download01Icon, PencilEdit01Icon } from "@hugeicons/core-free-icons"
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -11,27 +13,9 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
-import { 
-  Plus,
-  Save,
-  Send,
-  Eye,
-  Download,
-  Trash2,
-  Calendar,
-  Calculator,
-  FileText,
-  Settings,
-  Users,
-  Package,
-  Percent,
-  DollarSign,
-  ArrowLeft,
-  Edit,
-  Copy
-} from 'lucide-react'
+
 import Link from 'next/link'
-import jsPDF from 'jspdf'
+// jsPDF is loaded dynamically to reduce bundle size
 import html2canvas from 'html2canvas'
 
 // Invoice data types
@@ -456,7 +440,8 @@ export default function InvoiceDesignerPage() {
       // Remove temporary container
       document.body.removeChild(tempContainer)
       
-      // Create PDF
+      // Create PDF (dynamically loaded)
+      const jsPDF = (await import('jspdf')).default
       const pdf = new jsPDF('p', 'mm', 'a4')
       const imgData = canvas.toDataURL('image/png', 0.95)
       
@@ -514,15 +499,15 @@ export default function InvoiceDesignerPage() {
         actions={
           <div className="flex items-center space-x-3">
             <Button variant="outline" size="sm" onClick={() => setShowPreview(!showPreview)}>
-              <Eye className="h-4 w-4 mr-2" />
+              <HugeiconsIcon icon={ViewIcon} className="h-4 w-4 mr-2" />
               {showPreview ? 'Edit Mode' : 'Preview Only'}
             </Button>
             <Button variant="outline" size="sm">
-              <Save className="h-4 w-4 mr-2" />
+              <HugeiconsIcon icon={FloppyDiskIcon} className="h-4 w-4 mr-2" />
               Save Draft
             </Button>
             <Button size="sm">
-              <Send className="h-4 w-4 mr-2" />
+              <HugeiconsIcon icon={SendToMobileIcon} className="h-4 w-4 mr-2" />
               Send Invoice
             </Button>
           </div>
@@ -540,7 +525,7 @@ export default function InvoiceDesignerPage() {
             <Card className="p-6">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-lg font-semibold flex items-center">
-                  <FileText className="h-5 w-5 mr-2" />
+                  <HugeiconsIcon icon={File01Icon} className="h-5 w-5 mr-2" />
                   Invoice Details
                 </h3>
                 <Select value={selectedTemplate} onValueChange={setSelectedTemplate}>
@@ -641,11 +626,11 @@ export default function InvoiceDesignerPage() {
             <Card className="p-6">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-lg font-semibold flex items-center">
-                  <Users className="h-5 w-5 mr-2" />
+                  <HugeiconsIcon icon={UserGroupIcon} className="h-5 w-5 mr-2" />
                   Customer Information
                 </h3>
                 <Button variant="outline" size="sm">
-                  <Plus className="h-4 w-4 mr-2" />
+                  <HugeiconsIcon icon={PlusSignIcon} className="h-4 w-4 mr-2" />
                   New Customer
                 </Button>
               </div>
@@ -695,11 +680,11 @@ export default function InvoiceDesignerPage() {
             <Card className="p-6">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-lg font-semibold flex items-center">
-                  <Package className="h-5 w-5 mr-2" />
+                  <HugeiconsIcon icon={Package01Icon} className="h-5 w-5 mr-2" />
                   Invoice Items
                 </h3>
                 <Button onClick={addInvoiceItem} size="sm">
-                  <Plus className="h-4 w-4 mr-2" />
+                  <HugeiconsIcon icon={PlusSignIcon} className="h-4 w-4 mr-2" />
                   Add Item
                 </Button>
               </div>
@@ -714,7 +699,7 @@ export default function InvoiceDesignerPage() {
                         size="sm" 
                         onClick={() => removeInvoiceItem(item.id)}
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <HugeiconsIcon icon={Delete01Icon} className="h-4 w-4" />
                       </Button>
                     </div>
 
@@ -800,7 +785,7 @@ export default function InvoiceDesignerPage() {
 
                 {invoiceData.items.length === 0 && (
                   <div className="text-center py-8 text-muted-foreground">
-                    <Package className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <HugeiconsIcon icon={Package01Icon} className="h-12 w-12 mx-auto mb-4 opacity-50" />
                     <p>No items added yet</p>
                     <p className="text-sm">Click "Add Item" to start building your invoice</p>
                   </div>
@@ -811,7 +796,7 @@ export default function InvoiceDesignerPage() {
             {/* Calculation Controls */}
             <Card className="p-6">
               <h3 className="text-lg font-semibold mb-6 flex items-center">
-                <Calculator className="h-5 w-5 mr-2" />
+                <HugeiconsIcon icon={Calculator01Icon} className="h-5 w-5 mr-2" />
                 Calculations
               </h3>
               
@@ -912,15 +897,15 @@ export default function InvoiceDesignerPage() {
                   onClick={generatePDF}
                   disabled={isGeneratingPDF}
                 >
-                  <Download className="h-4 w-4 mr-2" />
+                  <HugeiconsIcon icon={Download01Icon} className="h-4 w-4 mr-2" />
                   {isGeneratingPDF ? 'Generating...' : 'Download PDF'}
                 </Button>
                 <Button variant="outline" size="sm">
-                  <Send className="h-4 w-4 mr-2" />
+                  <HugeiconsIcon icon={SendToMobileIcon} className="h-4 w-4 mr-2" />
                   Send Invoice
                 </Button>
                 <Button variant="outline" size="sm">
-                  <Edit className="h-4 w-4 mr-2" />
+                  <HugeiconsIcon icon={PencilEdit01Icon} className="h-4 w-4 mr-2" />
                   Edit
                 </Button>
               </div>
@@ -1042,7 +1027,7 @@ export default function InvoiceDesignerPage() {
                       ))
                     ) : (
                       <div className="px-6 py-12 text-center">
-                        <Package className="h-12 w-12 mx-auto text-gray-300 mb-4" />
+                        <HugeiconsIcon icon={Package01Icon} className="h-12 w-12 mx-auto text-gray-300 mb-4" />
                         <p className="text-gray-500">No items added to this invoice</p>
                         <p className="text-sm text-gray-400">Add items using the form on the left</p>
                       </div>
@@ -1124,7 +1109,7 @@ export default function InvoiceDesignerPage() {
               {!showPreview && (
                 <div className="mt-8 pt-6 border-t border-gray-200 flex justify-center gap-4 print:hidden">
                   <Button variant="outline" className="flex items-center gap-2" onClick={() => setShowPreview(true)}>
-                    <Eye className="h-4 w-4" />
+                    <HugeiconsIcon icon={ViewIcon} className="h-4 w-4" />
                     Preview PDF
                   </Button>
                   <Button 
@@ -1132,11 +1117,11 @@ export default function InvoiceDesignerPage() {
                     onClick={generatePDF}
                     disabled={isGeneratingPDF}
                   >
-                    <Download className="h-4 w-4" />
+                    <HugeiconsIcon icon={Download01Icon} className="h-4 w-4" />
                     {isGeneratingPDF ? 'Generating...' : 'Download PDF'}
                   </Button>
                   <Button variant="outline" className="flex items-center gap-2">
-                    <Send className="h-4 w-4" />
+                    <HugeiconsIcon icon={SendToMobileIcon} className="h-4 w-4" />
                     Send Invoice
                   </Button>
                 </div>
@@ -1154,11 +1139,11 @@ export default function InvoiceDesignerPage() {
                       disabled={isGeneratingPDF}
                       className="flex items-center gap-2"
                     >
-                      <Download className="h-4 w-4" />
+                      <HugeiconsIcon icon={Download01Icon} className="h-4 w-4" />
                       {isGeneratingPDF ? 'Generating PDF...' : 'Download PDF'}
                     </Button>
                     <Button onClick={() => window.print()} variant="outline" className="flex items-center gap-2">
-                      <Download className="h-4 w-4" />
+                      <HugeiconsIcon icon={Download01Icon} className="h-4 w-4" />
                       Print Invoice
                     </Button>
                   </div>

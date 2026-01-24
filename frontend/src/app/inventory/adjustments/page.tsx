@@ -10,28 +10,7 @@ import { AdvancedDataTable, AdvancedColumn } from '@/components/ui/advanced-data
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { 
-  Settings,
-  Plus,
-  Eye,
-  Edit,
-  Filter,
-  Download,
-  Package,
-  TrendingUp,
-  TrendingDown,
-  Calendar,
-  CheckCircle,
-  Clock,
-  AlertCircle,
-  Search,
-  Building,
-  User,
-  BarChart3,
-  Hash,
-  Target,
-  XCircle
-} from 'lucide-react'
+
 import Link from 'next/link'
 import { stockAdjustmentService, StockAdjustment as StockAdjustmentAPI, InventoryFilters } from '@/services/inventory'
 
@@ -403,10 +382,10 @@ export default function StockAdjustmentsPage() {
 
   const getTypeBadge = (type: string) => {
     const config = {
-      increase: { variant: 'default' as const, label: 'Increase', icon: TrendingUp },
-      decrease: { variant: 'destructive' as const, label: 'Decrease', icon: TrendingDown },
-      correction: { variant: 'secondary' as const, label: 'Correction', icon: Settings },
-      damage: { variant: 'destructive' as const, label: 'Damage', icon: AlertCircle },
+      increase: { variant: 'default' as const, label: 'Increase', icon: TrendUp },
+      decrease: { variant: 'destructive' as const, label: 'Decrease', icon: TrendDown },
+      correction: { variant: 'secondary' as const, label: 'Correction', icon: Gear },
+      damage: { variant: 'destructive' as const, label: 'Damage', icon: WarningCircle },
       theft: { variant: 'destructive' as const, label: 'Theft', icon: XCircle },
       expired: { variant: 'secondary' as const, label: 'Expired', icon: Clock },
       found: { variant: 'default' as const, label: 'Found', icon: CheckCircle }
@@ -533,7 +512,7 @@ export default function StockAdjustmentsPage() {
           </Button>
           <Button variant="ghost" size="sm" asChild>
             <Link href={`/inventory/adjustments/${adjustment.id}/edit`}>
-              <Edit className="h-4 w-4" />
+              <PencilSimple className="h-4 w-4" />
             </Link>
           </Button>
         </div>
@@ -551,7 +530,7 @@ export default function StockAdjustmentsPage() {
           actions={
             <div className="flex items-center space-x-3">
               <Button variant="outline" size="sm">
-                <Download className="h-4 w-4 mr-2" />
+                <DownloadSimple className="h-4 w-4 mr-2" />
                 Export
               </Button>
               <Button size="sm" asChild>
@@ -573,7 +552,7 @@ export default function StockAdjustmentsPage() {
                 <p className="text-2xl font-bold mt-1">{summaryStats.totalAdjustments}</p>
                 <p className="text-sm text-blue-600 mt-1">All adjustments</p>
               </div>
-              <Settings className="h-8 w-8 text-blue-600" />
+              <Gear className="h-8 w-8 text-blue-600" />
             </div>
           </Card>
 
@@ -619,7 +598,7 @@ export default function StockAdjustmentsPage() {
                 </p>
                 <p className="text-sm text-purple-600 mt-1">IDR impact</p>
               </div>
-              <BarChart3 className="h-8 w-8 text-purple-600" />
+              <ChartBar className="h-8 w-8 text-purple-600" />
             </div>
           </Card>
 
@@ -643,7 +622,7 @@ export default function StockAdjustmentsPage() {
                 <p className="text-2xl font-bold mt-1 text-red-600">{summaryStats.negativeAdjustments}</p>
                 <p className="text-sm text-red-600 mt-1">Value loss</p>
               </div>
-              <TrendingDown className="h-8 w-8 text-red-600" />
+              <TrendDown className="h-8 w-8 text-red-600" />
             </div>
           </Card>
         </div>
@@ -651,12 +630,12 @@ export default function StockAdjustmentsPage() {
         {/* Filters */}
         <Card className="p-6">
           <div className="flex items-center space-x-4">
-            <Filter className="h-5 w-5 text-muted-foreground" />
+            <Funnel className="h-5 w-5 text-muted-foreground" />
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 flex-1">
               <div className="space-y-2">
                 <Label htmlFor="search">Search</Label>
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <MagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="search"
                     placeholder="Search adjustments..."
@@ -762,7 +741,7 @@ export default function StockAdjustmentsPage() {
                 <Card key={adjustment.id} className="p-6 hover: transition-shadow">
                   <div className="flex justify-between items-start mb-4">
                     <div className="flex items-center space-x-2">
-                      <Settings className="h-5 w-5 text-blue-600" />
+                      <Gear className="h-5 w-5 text-blue-600" />
                       <div>
                         <Link 
                           href={`/inventory/adjustments/${adjustment.id}`}
@@ -855,7 +834,7 @@ export default function StockAdjustmentsPage() {
                       {adjustment.status !== 'completed' && adjustment.status !== 'rejected' && (
                         <Button variant="outline" size="sm" asChild>
                           <Link href={`/inventory/adjustments/${adjustment.id}/edit`}>
-                            <Edit className="h-4 w-4" />
+                            <PencilSimple className="h-4 w-4" />
                           </Link>
                         </Button>
                       )}

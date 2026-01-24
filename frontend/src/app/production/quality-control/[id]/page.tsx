@@ -8,19 +8,7 @@ import { TwoLevelLayout } from '@/components/ui/two-level-layout'
 import { Header } from '@/components/ui/header'
 import { Progress } from '@/components/ui/progress'
 import { Separator } from '@/components/ui/separator'
-import { 
-  CheckCircle, 
-  Edit, 
-  FileText, 
-  AlertTriangle, 
-  XCircle, 
-  Eye,
-  Calendar,
-  User,
-  Package,
-  BarChart3,
-  Clock
-} from 'lucide-react'
+
 import Link from 'next/link'
 import { mockQualityControls } from '@/services/production'
 import type { QualityControl, QualityTest, QualityDefect, QualityAction } from '@/types/production'
@@ -73,10 +61,10 @@ export default function QualityControlDetailsPage() {
   const getStatusBadge = (status: QualityControl['status']) => {
     const statusConfig = {
       draft: { variant: 'secondary' as const, label: 'Draft', icon: Clock },
-      testing: { variant: 'default' as const, label: 'Testing', icon: BarChart3 },
+      testing: { variant: 'default' as const, label: 'Testing', icon: ChartBar },
       passed: { variant: 'default' as const, label: 'Passed', icon: CheckCircle },
       failed: { variant: 'destructive' as const, label: 'Failed', icon: XCircle },
-      conditional: { variant: 'outline' as const, label: 'Conditional', icon: AlertTriangle }
+      conditional: { variant: 'outline' as const, label: 'Conditional', icon: Warning }
     }
     return statusConfig[status] || { variant: 'secondary' as const, label: status, icon: Clock }
   }
@@ -129,7 +117,7 @@ export default function QualityControlDetailsPage() {
               )}
               <Button size="sm" asChild>
                 <Link href={`/production/quality-control/${qualityControl.id}/edit`}>
-                  <Edit className="h-4 w-4 mr-2" />
+                  <PencilSimple className="h-4 w-4 mr-2" />
                   Edit
                 </Link>
               </Button>

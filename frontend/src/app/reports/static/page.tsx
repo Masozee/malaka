@@ -6,7 +6,6 @@ import { Header } from "@/components/ui/header"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { FileText, Download, Calendar, CheckCircle } from "lucide-react"
 
 export default function StaticReportsPage() {
   const breadcrumbs = [
@@ -62,7 +61,6 @@ export default function StaticReportsPage() {
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <CardTitle className="flex items-center space-x-2">
-                        <FileText className="h-5 w-5" />
                         <span>{report.title}</span>
                       </CardTitle>
                       <CardDescription className="mt-2">
@@ -76,7 +74,7 @@ export default function StaticReportsPage() {
                       variant={report.status === 'ready' ? 'default' : 'secondary'}
                       className="flex items-center space-x-1"
                     >
-                      {report.status === 'ready' && <CheckCircle className="h-3 w-3" />}
+                      {report.status === 'ready' && <span className="h-3 w-3" />}
                       <span className="capitalize">{report.status}</span>
                     </Badge>
                   </div>
@@ -93,11 +91,10 @@ export default function StaticReportsPage() {
                     </div>
                     <div className="flex space-x-2 pt-2">
                       <Button size="sm" className="flex-1" disabled={report.status !== 'ready'}>
-                        <Download className="h-3 w-3 mr-2" />
                         Download
                       </Button>
                       <Button size="sm" variant="outline">
-                        <Calendar className="h-3 w-3" />
+                        Schedule
                       </Button>
                     </div>
                   </div>

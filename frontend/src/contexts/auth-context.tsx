@@ -204,26 +204,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
             await checkAuth()
           }
         } else {
-          // No valid token found - try auto-login for development
-          console.log('No valid token found, attempting auto-login...')
-          try {
-            const autoLoginSuccess = await authService.autoLogin()
-            if (autoLoginSuccess) {
-              console.log('Auto-login successful, checking auth again...')
-              await checkAuth()
-              
-              // Clear auth attempt cookie on successful auto-login
-              if (typeof window !== 'undefined') {
-                document.cookie = 'auth_attempted=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'
-              }
-            } else {
-              console.log('Auto-login failed, user remains unauthenticated')
-              setUser(null)
-            }
-          } catch (autoLoginError) {
-            console.error('Auto-login error:', autoLoginError)
-            setUser(null)
-          }
+          // No valid token found - user must login manually
+          console.log('No valid token found, user needs to login')
+          setUser(null)
         }
       } catch (error) {
         console.error('Failed to initialize auth:', error)

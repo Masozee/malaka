@@ -4,10 +4,11 @@
  */
 
 import React, { useMemo, useState, useCallback } from 'react'
+import { HugeiconsIcon } from "@hugeicons/react"
+import { Search01Icon, ArrowLeft01Icon, ArrowRight01Icon } from "@hugeicons/core-free-icons"
 import { Card } from './card'
 import { Button } from './button'
 import { Input } from './input'
-import { Search, ChevronLeft, ChevronRight } from 'lucide-react'
 
 interface Column<T> {
   key: keyof T
@@ -114,7 +115,7 @@ export function OptimizedTable<T extends Record<string, any>>({
       {searchable && (
         <div className="p-4 border-b">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+            <HugeiconsIcon icon={Search01Icon} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
             <Input
               placeholder="Search..."
               value={search}
@@ -182,7 +183,7 @@ export function OptimizedTable<T extends Record<string, any>>({
               onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
               disabled={currentPage === 1}
             >
-              <ChevronLeft className="h-4 w-4" />
+              <HugeiconsIcon icon={ArrowLeft01Icon} className="h-4 w-4" />
             </Button>
             <Button
               variant="outline"
@@ -190,7 +191,7 @@ export function OptimizedTable<T extends Record<string, any>>({
               onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
               disabled={currentPage === totalPages}
             >
-              <ChevronRight className="h-4 w-4" />
+              <HugeiconsIcon icon={ArrowRight01Icon} className="h-4 w-4" />
             </Button>
           </div>
         </div>

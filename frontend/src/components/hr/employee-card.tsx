@@ -1,10 +1,12 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { HugeiconsIcon } from "@hugeicons/react"
+import { Mail01Icon, SmartSmartPhone01Icon, Calendar01Icon, Dollar01Icon } from "@hugeicons/core-free-icons"
 import { Badge } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { Mail, Phone, Calendar, DollarSign } from 'lucide-react'
+
 import type { Employee } from '@/types/hr'
 import Link from 'next/link'
 
@@ -70,24 +72,24 @@ export function EmployeeCard({ employee }: EmployeeCardProps) {
 
           <div className="mt-4 space-y-2">
             <div className="flex items-center text-sm text-gray-600">
-              <Mail className="h-4 w-4 mr-2 text-gray-400" />
+              <HugeiconsIcon icon={Mail01Icon} className="h-4 w-4 mr-2 text-gray-400" />
               <span className="truncate">{employee.email}</span>
             </div>
             
             <div className="flex items-center text-sm text-gray-600">
-              <Phone className="h-4 w-4 mr-2 text-gray-400" />
+              <HugeiconsIcon icon={SmartPhone01Icon} className="h-4 w-4 mr-2 text-gray-400" />
               <span>{employee.phone}</span>
             </div>
 
             <div className="flex items-center text-sm text-gray-600">
-              <Calendar className="h-4 w-4 mr-2 text-gray-400" />
+              <HugeiconsIcon icon={Calendar01Icon} className="h-4 w-4 mr-2 text-gray-400" />
               <span>
                 Hired: {mounted ? new Date(employee.hire_date).toLocaleDateString('id-ID') : ''}
               </span>
             </div>
 
             <div className="flex items-center text-sm text-gray-600">
-              <DollarSign className="h-4 w-4 mr-2 text-gray-400" />
+              <HugeiconsIcon icon={Dollar01Icon} className="h-4 w-4 mr-2 text-gray-400" />
               <span>
                 {mounted ? `Rp ${employee.total_salary.toLocaleString('id-ID')}` : ''}
               </span>

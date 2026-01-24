@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { ArrowLeft, Save, Loader2 } from 'lucide-react'
+
 import { ProductionService } from '@/services/production'
 import type { Warehouse } from '@/types/production'
 
@@ -117,7 +117,7 @@ export default function EditWarehousePage() {
         <div className="flex-1 p-6">
           <Card className="max-w-4xl mx-auto">
             <div className="flex items-center justify-center p-12">
-              <Loader2 className="h-8 w-8 animate-spin" />
+              <CircleNotch className="h-8 w-8 animate-spin" />
               <span className="ml-2">Loading warehouse data...</span>
             </div>
           </Card>
@@ -306,7 +306,7 @@ export default function EditWarehousePage() {
                 Cancel
               </Button>
               <Button type="submit" disabled={loading}>
-                <Save className="h-4 w-4 mr-2" />
+                <FloppyDisk className="h-4 w-4 mr-2" />
                 {loading ? 'Updating...' : 'Update Warehouse'}
               </Button>
             </div>

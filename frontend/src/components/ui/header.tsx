@@ -1,11 +1,22 @@
 "use client"
 
 import * as React from "react"
-import { ChevronRight, Command, MapPin, Sun, Cloud, CloudRain, Snowflake } from "lucide-react"
+import { HugeiconsIcon } from '@hugeicons/react'
+import {
+  ArrowRight01Icon,
+  Search01Icon,
+  Location01Icon,
+  Sun01Icon,
+  CloudIcon,
+  RainIcon,
+  SnowIcon,
+  SidebarLeftIcon
+} from '@hugeicons/core-free-icons'
 import Link from "next/link"
 
 import { Button } from "@/components/ui/button"
 import { CommandPalette } from "@/components/ui/command"
+import { useSidebar } from "@/contexts/sidebar-context"
 
 interface BreadcrumbItem {
   label: string
@@ -27,6 +38,7 @@ interface HeaderProps {
 }
 
 export function Header({ title, description, breadcrumbs, actions }: HeaderProps) {
+  const sidebar = useSidebar()
   const [commandOpen, setCommandOpen] = React.useState(false)
   const [weather, setWeather] = React.useState<WeatherData | null>(null)
   const [loading, setLoading] = React.useState(false)
@@ -130,17 +142,17 @@ export function Header({ title, description, breadcrumbs, actions }: HeaderProps
     switch (condition.toLowerCase()) {
       case 'clear':
       case 'sunny':
-        return <Sun className="h-4 w-4 text-yellow-500" />
+        return <HugeiconsIcon icon={Sun01Icon} className="h-4 w-4 text-yellow-500" />
       case 'clouds':
       case 'cloudy':
-        return <Cloud className="h-4 w-4 text-gray-500" />
+        return <HugeiconsIcon icon={CloudIcon} className="h-4 w-4 text-gray-500" />
       case 'rain':
       case 'drizzle':
-        return <CloudRain className="h-4 w-4 text-blue-500" />
+        return <HugeiconsIcon icon={RainIcon} className="h-4 w-4 text-blue-500" />
       case 'snow':
-        return <Snowflake className="h-4 w-4 text-blue-200" />
+        return <HugeiconsIcon icon={SnowIcon} className="h-4 w-4 text-blue-200" />
       default:
-        return <Sun className="h-4 w-4 text-yellow-500" />
+        return <HugeiconsIcon icon={Sun01Icon} className="h-4 w-4 text-yellow-500" />
     }
   }
 
@@ -149,14 +161,32 @@ export function Header({ title, description, breadcrumbs, actions }: HeaderProps
       {/* Combined Navbar with Breadcrumb, Command, and Theme Toggle */}
       <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 px-6 py-3">
         <div className="flex items-center justify-between">
-          {/* Left Side - Breadcrumbs */}
-          <div className="flex-1">
+          {/* Left Side - Toggle Button and Breadcrumbs */}
+          <div className="flex-1 flex items-center space-x-3">
+            {/* Sidebar Toggle Button */}
+            {sidebar && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={sidebar.toggleSecondSidebar}
+                className="h-8 w-8 p-0"
+                aria-label="Toggle sidebar"
+              >
+                <HugeiconsIcon icon={SidebarLeftIcon} className="h-4 w-4" />
+              </Button>
+            )}
+
+            {/* Separator */}
+            {sidebar && breadcrumbs && breadcrumbs.length > 0 && (
+              <div className="h-8 w-px bg-gray-300 dark:bg-gray-600" aria-hidden="true" />
+            )}
+
             {breadcrumbs && breadcrumbs.length > 0 && (
               <nav className="flex items-center space-x-1 text-sm text-gray-500 dark:text-gray-400" aria-label="Breadcrumb">
                 <ol className="flex items-center space-x-1">
                   {breadcrumbs.map((item, index) => (
                     <li key={index} className="flex items-center">
-                      {index > 0 && <ChevronRight className="h-4 w-4 mx-1" aria-hidden="true" />}
+                      {index > 0 && <HugeiconsIcon icon={ArrowRight01Icon} className="h-4 w-4 mx-1" aria-hidden="true" />}
                       {item.href ? (
                         <Link
                           href={item.href}
@@ -175,36 +205,7 @@ export function Header({ title, description, breadcrumbs, actions }: HeaderProps
           </div>
 
           {/* Right Side - Actions */}
-          <div className="flex items-center space-x-2 ml-4">
-            {/* Weather Display */}
-            {mounted && (
-              <div
-                className="flex items-center space-x-2 px-3 py-1 rounded-md bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
-                aria-label={weather ? `Weather: ${weather.temperature}°C ${weather.condition} in ${weather.location}` : 'Loading weather'}
-              >
-                {loading ? (
-                  <div className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400" role="status">
-                    <MapPin className="h-4 w-4 animate-pulse" aria-hidden="true" />
-                    <span>Loading...</span>
-                  </div>
-                ) : weather ? (
-                  <div className="flex items-center space-x-2 text-sm">
-                    <MapPin className="h-3 w-3 text-gray-500" aria-hidden="true" />
-                    <span className="text-gray-700 dark:text-gray-300 font-medium">
-                      {weather.location}
-                    </span>
-                    <span aria-hidden="true">{getWeatherIcon(weather.condition)}</span>
-                    <span className="text-gray-900 dark:text-gray-100 font-semibold">
-                      {weather.temperature}°C
-                    </span>
-                    <span className="text-gray-500 text-xs">
-                      {weather.condition}
-                    </span>
-                  </div>
-                ) : null}
-              </div>
-            )}
-
+          <div className="flex items-center space-x-3 ml-4">
             {/* Command Palette Trigger - Wider */}
             <Button
               variant="outline"
@@ -213,12 +214,30 @@ export function Header({ title, description, breadcrumbs, actions }: HeaderProps
               className="relative h-8 w-8 p-0 xl:h-8 xl:w-64 xl:px-3 xl:py-2"
               aria-label="Open search (⌘K)"
             >
-              <Command className="h-4 w-4 xl:mr-2" aria-hidden="true" />
+              <HugeiconsIcon icon={Search01Icon} className="h-4 w-4 xl:mr-2" aria-hidden="true" />
               <span className="hidden xl:inline-flex">Search</span>
               <kbd className="pointer-events-none absolute right-1.5 top-1.5 hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 xl:flex" aria-hidden="true">
                 ⌘K
               </kbd>
             </Button>
+
+            {/* Separator */}
+            {mounted && weather && (
+              <div className="h-8 w-px bg-gray-300 dark:bg-gray-600" aria-hidden="true" />
+            )}
+
+            {/* Weather Display - Icon and Temperature only */}
+            {mounted && weather && (
+              <div
+                className="flex items-center space-x-2"
+                aria-label={`Weather: ${weather.temperature}°C ${weather.condition}`}
+              >
+                <span aria-hidden="true">{getWeatherIcon(weather.condition)}</span>
+                <span className="text-sm text-gray-900 dark:text-gray-100 font-semibold">
+                  {weather.temperature}°C
+                </span>
+              </div>
+            )}
 
           </div>
         </div>

@@ -10,26 +10,7 @@ import { AdvancedDataTable } from '@/components/ui/advanced-data-table'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { 
-  Truck,
-  Plus,
-  Eye,
-  Edit,
-  Filter,
-  Download,
-  Calendar,
-  MapPin,
-  User,
-  Phone,
-  CheckCircle,
-  Clock,
-  AlertCircle,
-  Search,
-  Package,
-  Globe,
-  Star,
-  TrendingUp
-} from 'lucide-react'
+
 import Link from 'next/link'
 
 // Courier types
@@ -395,7 +376,7 @@ export default function CouriersPage() {
   const getStatusBadge = (isActive: boolean) => {
     return isActive 
       ? { variant: 'default' as const, label: 'Active', icon: CheckCircle }
-      : { variant: 'destructive' as const, label: 'Inactive', icon: AlertCircle }
+      : { variant: 'destructive' as const, label: 'Inactive', icon: WarningCircle }
   }
 
   const getRatingStars = (rating: number) => {
@@ -524,7 +505,7 @@ export default function CouriersPage() {
           </Button>
           <Button variant="ghost" size="sm" asChild>
             <Link href={`/shipping/couriers/${courier.id}/edit`}>
-              <Edit className="h-4 w-4" />
+              <PencilSimple className="h-4 w-4" />
             </Link>
           </Button>
         </div>
@@ -542,7 +523,7 @@ export default function CouriersPage() {
           actions={
             <div className="flex items-center space-x-3">
               <Button variant="outline" size="sm">
-                <Download className="h-4 w-4 mr-2" />
+                <DownloadSimple className="h-4 w-4 mr-2" />
                 Export
               </Button>
               <Button size="sm" asChild>
@@ -606,12 +587,12 @@ export default function CouriersPage() {
         {/* Filters */}
         <Card className="p-4">
           <div className="flex items-center space-x-4">
-            <Filter className="h-5 w-5 text-muted-foreground" />
+            <Funnel className="h-5 w-5 text-muted-foreground" />
             <div className="grid grid-cols-1 md:grid-cols-4 gap-3 flex-1">
               <div className="space-y-2">
                 <Label htmlFor="search">Search</Label>
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <MagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="search"
                     placeholder="Search couriers..."
@@ -832,7 +813,7 @@ export default function CouriersPage() {
         {mockCouriers.filter(c => !c.is_active).length > 0 && (
           <Card className="p-6 border-orange-200 bg-orange-50">
             <div className="flex items-center space-x-3">
-              <AlertCircle className="h-6 w-6 text-orange-600" />
+              <WarningCircle className="h-6 w-6 text-orange-600" />
               <div className="flex-1">
                 <h3 className="text-lg font-semibold text-orange-800">Inactive Couriers</h3>
                 <p className="text-orange-700 mt-1">

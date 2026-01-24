@@ -9,20 +9,7 @@ import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { AdvancedDataTable } from '@/components/ui/advanced-data-table'
 import { Badge } from '@/components/ui/badge'
-import { 
-  Award,
-  Target,
-  Users,
-  TrendingUp,
-  TrendingDown,
-  Star,
-  Calendar,
-  BarChart3,
-  Trophy,
-  FileText,
-  AlertCircle,
-  Search
-} from 'lucide-react'
+
 import { HRService } from '@/services/hr'
 
 interface PerformanceReview {
@@ -406,7 +393,7 @@ export default function PerformancePage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-teal-100 rounded-lg">
-                <TrendingUp className="h-5 w-5 text-teal-600" />
+                <TrendUp className="h-5 w-5 text-teal-600" />
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600">Completion Rate</p>
@@ -422,7 +409,7 @@ export default function PerformancePage() {
         <div className="flex items-center justify-between gap-4">
           <div className="flex-1 max-w-md">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <MagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input 
                 placeholder="Search employees, positions, or reviewers..." 
                 className="pl-9"
@@ -484,7 +471,7 @@ export default function PerformancePage() {
             </div>
             <Select>
               <SelectTrigger className="w-44">
-                <BarChart3 className="h-4 w-4 mr-2" />
+                <ChartBar className="h-4 w-4 mr-2" />
                 <SelectValue placeholder="Sort by" />
               </SelectTrigger>
               <SelectContent>
@@ -511,7 +498,7 @@ export default function PerformancePage() {
         ) : error ? (
           <Card className="p-8">
             <div className="text-center">
-              <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+              <WarningCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
               <p className="text-red-600 mb-4">{error}</p>
               <Button onClick={fetchPerformanceData} variant="outline">
                 Try Again

@@ -49,13 +49,13 @@ type SettingPermission struct {
 
 // PublicSetting represents a setting that can be safely exposed to frontend
 type PublicSetting struct {
-	Category     string  `json:"category"`
-	SubCategory  *string `json:"sub_category,omitempty"`
-	SettingKey   string  `json:"setting_key"`
-	SettingValue *string `json:"setting_value,omitempty"`
-	DataType     string  `json:"data_type"`
-	DefaultValue *string `json:"default_value,omitempty"`
-	Description  *string `json:"description,omitempty"`
+	Category     string  `json:"category" db:"category"`
+	SubCategory  *string `json:"sub_category,omitempty" db:"sub_category"`
+	SettingKey   string  `json:"setting_key" db:"setting_key"`
+	SettingValue *string `json:"setting_value,omitempty" db:"setting_value"`
+	DataType     string  `json:"data_type" db:"data_type"`
+	DefaultValue *string `json:"default_value,omitempty" db:"default_value"`
+	Description  *string `json:"description,omitempty" db:"description"`
 }
 
 // SettingUpdate represents a setting update request

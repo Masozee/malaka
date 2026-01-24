@@ -3,7 +3,7 @@
 import * as React from "react"
 import { TwoLevelLayout } from "@/components/ui/two-level-layout"
 import { Header } from "@/components/ui/header"
-import { ModuleSettings } from "@/components/ui/module-settings"
+import { ModuleGear } from "@/components/ui/module-settings"
 
 interface SettingItem {
   id: string
@@ -15,8 +15,8 @@ interface SettingItem {
   category: string
 }
 
-export default function InventorySettingsPage() {
-  const [settings, setSettings] = React.useState<SettingItem[]>([
+export default function InventoryGearPage() {
+  const [settings, setGear] = React.useState<SettingItem[]>([
     // Stock Management
     {
       id: "auto_reorder_point",
@@ -246,7 +246,7 @@ export default function InventorySettingsPage() {
   const [isLoading, setIsLoading] = React.useState(false)
 
   const handleSettingChange = (settingId: string, value: any) => {
-    setSettings(prev => prev.map(setting => 
+    setGear(prev => prev.map(setting => 
       setting.id === settingId ? { ...setting, value } : setting
     ))
     setHasUnsavedChanges(true)
@@ -266,7 +266,7 @@ export default function InventorySettingsPage() {
   }
 
   const handleReset = () => {
-    setSettings(prev => prev.map(setting => ({
+    setGear(prev => prev.map(setting => ({
       ...setting,
       value: getDefaultValue(setting.id)
     })))
@@ -305,19 +305,19 @@ export default function InventorySettingsPage() {
 
   const breadcrumbs = [
     { label: "Inventory", href: "/inventory" },
-    { label: "Settings" }
+    { label: "Gear" }
   ]
 
   return (
     <TwoLevelLayout>
       <div className="flex-1 flex flex-col overflow-hidden">
         <Header 
-          title="Inventory Settings"
+          title="Inventory Gear"
           breadcrumbs={breadcrumbs}
         />
 
         <div className="flex-1 overflow-auto p-6">
-          <ModuleSettings
+          <ModuleGear
             moduleName="Inventory"
             moduleId="inventory"
             settings={settings}

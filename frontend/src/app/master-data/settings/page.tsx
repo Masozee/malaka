@@ -3,7 +3,7 @@
 import * as React from "react"
 import { TwoLevelLayout } from "@/components/ui/two-level-layout"
 import { Header } from "@/components/ui/header"
-import { ModuleSettings } from "@/components/ui/module-settings"
+import { ModuleGear } from "@/components/ui/module-settings"
 
 interface SettingItem {
   id: string
@@ -15,8 +15,8 @@ interface SettingItem {
   category: string
 }
 
-export default function MasterDataSettingsPage() {
-  const [settings, setSettings] = React.useState<SettingItem[]>([
+export default function MasterDataGearPage() {
+  const [settings, setGear] = React.useState<SettingItem[]>([
     // Data Management
     {
       id: "auto_generate_codes",
@@ -160,7 +160,7 @@ export default function MasterDataSettingsPage() {
   const [isLoading, setIsLoading] = React.useState(false)
 
   const handleSettingChange = (settingId: string, value: any) => {
-    setSettings(prev => prev.map(setting => 
+    setGear(prev => prev.map(setting => 
       setting.id === settingId ? { ...setting, value } : setting
     ))
     setHasUnsavedChanges(true)
@@ -182,7 +182,7 @@ export default function MasterDataSettingsPage() {
 
   const handleReset = () => {
     // Reset to default values
-    setSettings(prev => prev.map(setting => ({
+    setGear(prev => prev.map(setting => ({
       ...setting,
       value: getDefaultValue(setting.id)
     })))
@@ -213,19 +213,19 @@ export default function MasterDataSettingsPage() {
 
   const breadcrumbs = [
     { label: "Master Data", href: "/master-data" },
-    { label: "Settings" }
+    { label: "Gear" }
   ]
 
   return (
     <TwoLevelLayout>
       <div className="flex-1 flex flex-col overflow-hidden">
         <Header 
-          title="Master Data Settings"
+          title="Master Data Gear"
           breadcrumbs={breadcrumbs}
         />
 
         <div className="flex-1 overflow-auto p-6">
-          <ModuleSettings
+          <ModuleGear
             moduleName="Master Data"
             moduleId="master-data"
             settings={settings}

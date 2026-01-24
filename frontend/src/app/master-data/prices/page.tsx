@@ -1,5 +1,27 @@
 'use client'
 
+import { HugeiconsIcon } from "@hugeicons/react"
+import {
+  Dollar01Icon,
+  PlusSignIcon,
+  ViewIcon,
+  PencilEdit01Icon,
+  FilterIcon,
+  Download01Icon,
+  Package01Icon,
+  ChartIncreaseIcon,
+  ChartDecreaseIcon,
+  Calendar01Icon,
+  CheckmarkCircle01Icon,
+  Clock01Icon,
+  AlertCircleIcon,
+  Search01Icon,
+  HashtagIcon,
+  Target01Icon,
+  PercentIcon,
+  UserGroupIcon
+} from "@hugeicons/core-free-icons"
+
 import { useState, useEffect } from 'react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -10,26 +32,7 @@ import { AdvancedDataTable } from '@/components/ui/advanced-data-table'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { 
-  DollarSign,
-  Plus,
-  Eye,
-  Edit,
-  Filter,
-  Download,
-  Package,
-  TrendingUp,
-  TrendingDown,
-  Calendar,
-  CheckCircle,
-  Clock,
-  AlertCircle,
-  Search,
-  Hash,
-  Target,
-  Percent,
-  Users
-} from 'lucide-react'
+
 import Link from 'next/link'
 import { priceService } from '@/services/masterdata'
 import { Price, MasterDataFilters } from '@/types/masterdata'
@@ -459,18 +462,18 @@ export default function ProductPricesPage() {
 
   const getStatusBadge = (status: string, validUntil?: string) => {
     if (status !== 'active') {
-      return { variant: 'destructive' as const, label: 'Inactive', icon: AlertCircle }
+      return { variant: 'destructive' as const, label: 'Inactive', icon: AlertCircleIcon }
     }
     if (validUntil && new Date(validUntil) <= new Date()) {
-      return { variant: 'secondary' as const, label: 'Expired', icon: Clock }
+      return { variant: 'secondary' as const, label: 'Expired', icon: Clock01Icon }
     }
-    return { variant: 'default' as const, label: 'Active', icon: CheckCircle }
+    return { variant: 'default' as const, label: 'Active', icon: CheckmarkCircle01Icon }
   }
 
   const getDefaultBadge = (isDefault: boolean) => {
-    return isDefault 
-      ? { variant: 'default' as const, label: 'Default', icon: Target }
-      : { variant: 'outline' as const, label: 'Alternative', icon: Hash }
+    return isDefault
+      ? { variant: 'default' as const, label: 'Default', icon: Target01Icon }
+      : { variant: 'outline' as const, label: 'Alternative', icon: HashtagIcon }
   }
 
   const getMarginColor = (margin: number) => {
@@ -531,7 +534,7 @@ export default function ProductPricesPage() {
       title: 'Margin',
       render: (price: ProductPrice) => (
         <div className="flex items-center space-x-2">
-          <Percent className="h-4 w-4 text-muted-foreground" />
+          <HugeiconsIcon icon={PercentIcon} className="h-4 w-4 text-muted-foreground" />
           <span className={`font-medium ${getMarginColor(price.margin_percent)}`}>
             {mounted ? `${price.margin_percent.toFixed(1)}%` : ''}
           </span>
@@ -565,10 +568,10 @@ export default function ProductPricesPage() {
       key: 'status',
       title: 'Status',
       render: (price: ProductPrice) => {
-        const { variant, label, icon: Icon } = getStatusBadge(price.is_active, price.valid_until)
+        const { variant, label, icon: IconData } = getStatusBadge(price.is_active, price.valid_until)
         return (
           <div className="flex items-center space-x-2">
-            <Icon className="h-4 w-4" />
+            <HugeiconsIcon icon={IconData} className="h-4 w-4" />
             <Badge variant={variant}>{label}</Badge>
           </div>
         )
@@ -581,12 +584,12 @@ export default function ProductPricesPage() {
         <div className="flex items-center space-x-2">
           <Button variant="ghost" size="sm" asChild>
             <Link href={`/master-data/prices/${price.id}`}>
-              <Eye className="h-4 w-4" />
+              <HugeiconsIcon icon={ViewIcon} className="h-4 w-4" />
             </Link>
           </Button>
           <Button variant="ghost" size="sm" asChild>
             <Link href={`/master-data/prices/${price.id}/edit`}>
-              <Edit className="h-4 w-4" />
+              <HugeiconsIcon icon={PencilEdit01Icon} className="h-4 w-4" />
             </Link>
           </Button>
         </div>
@@ -603,12 +606,12 @@ export default function ProductPricesPage() {
         actions={
           <div className="flex items-center space-x-3">
             <Button variant="outline" size="sm">
-              <Download className="h-4 w-4 mr-2" />
+              <HugeiconsIcon icon={Download01Icon} className="h-4 w-4 mr-2" />
               Export
             </Button>
             <Button size="sm" asChild>
               <Link href="/master-data/prices/new">
-                <Plus className="h-4 w-4 mr-2" />
+                <HugeiconsIcon icon={PlusSignIcon} className="h-4 w-4 mr-2" />
                 New Price
               </Link>
             </Button>
@@ -627,7 +630,7 @@ export default function ProductPricesPage() {
                 <p className="text-2xl font-bold mt-1">{summaryStats.totalPrices}</p>
                 <p className="text-sm text-blue-600 mt-1">Price rules</p>
               </div>
-              <DollarSign className="h-8 w-8 text-blue-600" />
+              <HugeiconsIcon icon={Dollar01Icon} className="h-8 w-8 text-blue-600" />
             </div>
           </Card>
 
@@ -638,7 +641,7 @@ export default function ProductPricesPage() {
                 <p className="text-2xl font-bold mt-1 text-green-600">{summaryStats.activePrices}</p>
                 <p className="text-sm text-green-600 mt-1">In use</p>
               </div>
-              <CheckCircle className="h-8 w-8 text-green-600" />
+              <HugeiconsIcon icon={CheckmarkCircle01Icon} className="h-8 w-8 text-green-600" />
             </div>
           </Card>
 
@@ -649,7 +652,7 @@ export default function ProductPricesPage() {
                 <p className="text-2xl font-bold mt-1 text-orange-600">{summaryStats.defaultPrices}</p>
                 <p className="text-sm text-orange-600 mt-1">Primary prices</p>
               </div>
-              <Target className="h-8 w-8 text-orange-600" />
+              <HugeiconsIcon icon={Target01Icon} className="h-8 w-8 text-orange-600" />
             </div>
           </Card>
 
@@ -662,7 +665,7 @@ export default function ProductPricesPage() {
                 </p>
                 <p className="text-sm text-green-600 mt-1">Profit margin</p>
               </div>
-              <Percent className="h-8 w-8 text-green-600" />
+              <HugeiconsIcon icon={PercentIcon} className="h-8 w-8 text-green-600" />
             </div>
           </Card>
         </div>
@@ -671,7 +674,7 @@ export default function ProductPricesPage() {
         <div className="flex items-center justify-between gap-4">
           <div className="flex-1 max-w-md">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <HugeiconsIcon icon={Search01Icon} className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search prices..."
                 value={searchTerm}
@@ -680,11 +683,11 @@ export default function ProductPricesPage() {
               />
             </div>
           </div>
-          
+
           <div className="flex items-center gap-2">
             <Select value={typeFilter} onValueChange={setTypeFilter}>
               <SelectTrigger className="w-36">
-                <DollarSign className="h-4 w-4 mr-2" />
+                <HugeiconsIcon icon={Dollar01Icon} className="h-4 w-4 mr-2" />
                 <SelectValue placeholder="Type" />
               </SelectTrigger>
               <SelectContent>
@@ -696,10 +699,10 @@ export default function ProductPricesPage() {
                 <SelectItem value="promo">Promo</SelectItem>
               </SelectContent>
             </Select>
-            
+
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-32">
-                <CheckCircle className="h-4 w-4 mr-2" />
+                <HugeiconsIcon icon={CheckmarkCircle01Icon} className="h-4 w-4 mr-2" />
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
@@ -713,7 +716,7 @@ export default function ProductPricesPage() {
 
             <Select value={marginFilter} onValueChange={setMarginFilter}>
               <SelectTrigger className="w-36">
-                <Percent className="h-4 w-4 mr-2" />
+                <HugeiconsIcon icon={PercentIcon} className="h-4 w-4 mr-2" />
                 <SelectValue placeholder="Margin" />
               </SelectTrigger>
               <SelectContent>
@@ -762,9 +765,9 @@ export default function ProductPricesPage() {
                 <Card key={price.id} className="p-6 hover: transition-shadow">
                   <div className="flex justify-between items-start mb-4">
                     <div className="flex items-center space-x-2">
-                      <DollarSign className="h-5 w-5 text-green-600" />
+                      <HugeiconsIcon icon={Dollar01Icon} className="h-5 w-5 text-green-600" />
                       <div>
-                        <Link 
+                        <Link
                           href={`/master-data/prices/${price.id}`}
                           className="font-semibold text-blue-600 hover:text-blue-800"
                         >
@@ -777,7 +780,7 @@ export default function ProductPricesPage() {
                     </div>
                     <div className="flex flex-col items-end space-y-1">
                       <div className="flex items-center space-x-1">
-                        <StatusIcon className="h-4 w-4" />
+                        <HugeiconsIcon icon={StatusIcon} className="h-4 w-4" />
                         <Badge variant={statusVariant}>{statusLabel}</Badge>
                       </div>
                     </div>
@@ -849,13 +852,13 @@ export default function ProductPricesPage() {
                     <div className="flex space-x-2 pt-3">
                       <Button variant="outline" size="sm" className="flex-1" asChild>
                         <Link href={`/master-data/prices/${price.id}`}>
-                          <Eye className="h-4 w-4 mr-2" />
+                          <HugeiconsIcon icon={ViewIcon} className="h-4 w-4 mr-2" />
                           View
                         </Link>
                       </Button>
                       <Button variant="outline" size="sm" asChild>
                         <Link href={`/master-data/prices/${price.id}/edit`}>
-                          <Edit className="h-4 w-4" />
+                          <HugeiconsIcon icon={PencilEdit01Icon} className="h-4 w-4" />
                         </Link>
                       </Button>
                     </div>
@@ -884,7 +887,7 @@ export default function ProductPricesPage() {
         {mockPrices.filter(p => p.margin_percent < 0 && p.is_active).length > 0 && (
           <Card className="p-6 border-red-200 bg-red-50">
             <div className="flex items-center space-x-3">
-              <AlertCircle className="h-6 w-6 text-red-600" />
+              <HugeiconsIcon icon={AlertCircleIcon} className="h-6 w-6 text-red-600" />
               <div className="flex-1">
                 <h3 className="text-lg font-semibold text-red-800">Negative Margin Prices</h3>
                 <p className="text-red-700 mt-1">

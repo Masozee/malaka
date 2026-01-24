@@ -67,30 +67,13 @@ func (r *CachedUserRepository) GetByID(ctx context.Context, id string) (*entitie
 	return user, nil
 }
 
-// GetByUsername retrieves a user by username with caching.
+// GetByUsername retrieves a user by username.
+// NOTE: This method bypasses cache because it's used for authentication
+// and the password field is excluded from JSON serialization (json:"-").
+// Caching would result in empty passwords and failed login attempts.
 func (r *CachedUserRepository) GetByUsername(ctx context.Context, username string) (*entities.User, error) {
-	cacheKey := fmt.Sprintf("%susername:%s", userKeyPrefix, username)
-	
-	// Try to get from cache first
-	if cached, err := r.cache.Get(ctx, cacheKey); err == nil {
-		var user entities.User
-		if err := json.Unmarshal([]byte(cached), &user); err == nil {
-			return &user, nil
-		}
-	}
-
-	// Get from database
-	user, err := r.repo.GetByUsername(ctx, username)
-	if err != nil {
-		return nil, err
-	}
-
-	// Cache the result
-	if data, err := json.Marshal(user); err == nil {
-		r.cache.Set(ctx, cacheKey, string(data), cacheTTL)
-	}
-
-	return user, nil
+	// Always fetch from database to get the password hash for authentication
+	return r.repo.GetByUsername(ctx, username)
 }
 
 // GetAll retrieves all users with caching.

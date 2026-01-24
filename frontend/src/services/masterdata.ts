@@ -6,7 +6,7 @@
 import { apiClient } from '@/lib/api'
 import type {
   Company, User, Classification, Color, Article, Model, Size, Barcode,
-  Price, GalleryImage, Supplier, Customer, Warehouse, Courier, 
+  Price, GalleryImage, Supplier, Customer, Warehouse, Courier,
   CourierRate, Depstore, Division,
   MasterDataFilters, CreateRequest, UpdateRequest,
   CompanyListResponse, UserListResponse, ClassificationListResponse,
@@ -25,10 +25,10 @@ export abstract class BaseMasterDataService<T, ListResponseType> {
     this.endpoint = endpoint
   }
 
-  async getAll(filters?: MasterDataFilters): Promise<ListResponseType> {
+  async getAll(filters?: MasterDataFilters, token?: string): Promise<ListResponseType> {
     const response = await apiClient.get<{
-      success: boolean, 
-      message: string, 
+      success: boolean,
+      message: string,
       data: T[] | {
         data: T[],
         pagination: {
@@ -38,8 +38,8 @@ export abstract class BaseMasterDataService<T, ListResponseType> {
           total_pages: number
         }
       }
-    }>(`/api/v1/masterdata/${this.endpoint}/`, filters)
-    
+    }>(`/api/v1/masterdata/${this.endpoint}/`, filters, { token })
+
     // Handle both old format (direct array) and new paginated format
     if (Array.isArray(response.data)) {
       // Old format - direct array
@@ -70,22 +70,22 @@ export abstract class BaseMasterDataService<T, ListResponseType> {
   }
 
   async getById(id: string): Promise<T> {
-    const response = await apiClient.get<{success: boolean, message: string, data: T}>(`/api/v1/masterdata/${this.endpoint}/${id}`)
+    const response = await apiClient.get<{ success: boolean, message: string, data: T }>(`/api/v1/masterdata/${this.endpoint}/${id}`)
     return response.data
   }
 
   async create(request: CreateRequest<T>): Promise<T> {
-    const response = await apiClient.post<{success: boolean, message: string, data: T}>(`/api/v1/masterdata/${this.endpoint}/`, request.data)
+    const response = await apiClient.post<{ success: boolean, message: string, data: T }>(`/api/v1/masterdata/${this.endpoint}/`, request.data)
     return response.data
   }
 
   async update(id: string, request: UpdateRequest<T>): Promise<T> {
-    const response = await apiClient.put<{success: boolean, message: string, data: T}>(`/api/v1/masterdata/${this.endpoint}/${id}`, request.data)
+    const response = await apiClient.put<{ success: boolean, message: string, data: T }>(`/api/v1/masterdata/${this.endpoint}/${id}`, request.data)
     return response.data
   }
 
   async delete(id: string): Promise<void> {
-    await apiClient.delete<{success: boolean, message: string}>(`/api/v1/masterdata/${this.endpoint}/${id}`)
+    await apiClient.delete<{ success: boolean, message: string }>(`/api/v1/masterdata/${this.endpoint}/${id}`)
   }
 }
 
@@ -128,7 +128,7 @@ class ArticleService extends BaseMasterDataService<Article, ArticleListResponse>
   }
 
   async search(query: string): Promise<ArticleListResponse> {
-    const response = await apiClient.get<{success: boolean, message: string, data: Article[]}>(`/api/v1/masterdata/${this.endpoint}/search/`, { q: query })
+    const response = await apiClient.get<{ success: boolean, message: string, data: Article[] }>(`/api/v1/masterdata/${this.endpoint}/search/`, { q: query })
     return {
       data: response.data || [],
       total: response.data?.length || 0,
@@ -150,7 +150,7 @@ class ArticleService extends BaseMasterDataService<Article, ArticleListResponse>
     }
   }> {
     const formData = new FormData()
-    
+
     // Add each file to the form data
     Array.from(files).forEach((file, index) => {
       formData.append('images', file)

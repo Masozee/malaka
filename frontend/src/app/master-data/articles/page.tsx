@@ -1,5 +1,20 @@
 "use client"
 
+import { HugeiconsIcon } from "@hugeicons/react"
+import {
+  Search01Icon,
+  GridIcon,
+  Menu01Icon,
+  Upload01Icon,
+  Cancel01Icon,
+  Image01Icon,
+  ChartColumnIcon,
+  QrCodeIcon,
+  Package01Icon,
+  FilterIcon,
+  ChartIncreaseIcon
+} from "@hugeicons/core-free-icons"
+
 import * as React from "react"
 import { TwoLevelLayout } from "@/components/ui/two-level-layout"
 import { Header } from "@/components/ui/header"
@@ -17,7 +32,6 @@ import { articleService, classificationService } from "@/services/masterdata"
 import { barcodeService, type BarcodeFormat } from "@/services/barcode"
 import { api } from "@/lib/api"
 import { Article, Classification, MasterDataFilters } from "@/types/masterdata"
-import { Search, Grid3X3, List, Upload, X, Image as ImageIcon, BarChart3, QrCode, Package, Filter, TrendingUp } from "lucide-react"
 
 export default function ArticlesPage() {
   const [articles, setArticles] = React.useState<Article[]>([])
@@ -70,7 +84,7 @@ export default function ArticlesPage() {
             />
           ) : (
             <div className="w-12 h-12 bg-gray-100 rounded border flex items-center justify-center">
-              <ImageIcon className="w-4 h-4 text-gray-400" />
+              <HugeiconsIcon icon={Image01Icon} className="w-4 h-4 text-gray-400" />
             </div>
           )}
         </div>
@@ -627,7 +641,7 @@ export default function ArticlesPage() {
                 </>
               ) : (
                 <>
-                  <BarChart3 className="h-4 w-4" />
+                  <HugeiconsIcon icon={ChartColumnIcon} className="h-4 w-4" />
                   <span>Generate All Barcodes ({articles.length})</span>
                 </>
               )}
@@ -656,7 +670,7 @@ export default function ArticlesPage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
-                <Package className="h-5 w-5 text-foreground" />
+                <HugeiconsIcon icon={Package01Icon} className="h-5 w-5 text-foreground" />
               </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Total Articles</p>
@@ -667,7 +681,7 @@ export default function ArticlesPage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
-                <ImageIcon className="h-5 w-5 text-foreground" />
+                <HugeiconsIcon icon={Image01Icon} className="h-5 w-5 text-foreground" />
               </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">With Images</p>
@@ -680,7 +694,7 @@ export default function ArticlesPage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
-                <Filter className="h-5 w-5 text-foreground" />
+                <HugeiconsIcon icon={FilterIcon} className="h-5 w-5 text-foreground" />
               </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Filtered</p>
@@ -691,14 +705,14 @@ export default function ArticlesPage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
-                <TrendingUp className="h-5 w-5 text-foreground" />
+                <HugeiconsIcon icon={ChartIncreaseIcon} className="h-5 w-5 text-foreground" />
               </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Avg Price</p>
                 <p className="text-2xl font-bold">
-                  {mounted && articles.length > 0 ? 
-                    new Intl.NumberFormat('id-ID', { 
-                      style: 'currency', 
+                  {mounted && articles.length > 0 ?
+                    new Intl.NumberFormat('id-ID', {
+                      style: 'currency',
                       currency: 'IDR',
                       minimumFractionDigits: 0,
                       maximumFractionDigits: 0
@@ -713,7 +727,7 @@ export default function ArticlesPage() {
         <div className="flex items-center justify-between gap-4">
           <div className="flex-1 max-w-md">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <HugeiconsIcon icon={Search01Icon} className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search articles..."
                 value={searchTerm}
@@ -722,7 +736,7 @@ export default function ArticlesPage() {
               />
             </div>
           </div>
-          
+
           <div className="flex items-center gap-2">
             <div className="text-sm text-muted-foreground">
               {(() => {
@@ -731,10 +745,10 @@ export default function ArticlesPage() {
                 return `${start}-${end} of ${pagination.total} items`
               })()}
             </div>
-            
+
             <Select value={sortBy} onValueChange={setSortBy}>
               <SelectTrigger className="w-32">
-                <BarChart3 className="h-4 w-4 mr-2" />
+                <HugeiconsIcon icon={ChartColumnIcon} className="h-4 w-4 mr-2" />
                 <SelectValue placeholder="Sort by" />
               </SelectTrigger>
               <SelectContent>
@@ -743,22 +757,22 @@ export default function ArticlesPage() {
                 <SelectItem value="created_at">Created</SelectItem>
               </SelectContent>
             </Select>
-            
+
             <div className="flex space-x-1 bg-muted p-1 rounded-lg">
-              <Button 
+              <Button
                 variant={viewMode === 'cards' ? 'default' : 'ghost'}
                 size="sm"
                 onClick={() => setViewMode('cards')}
               >
-                <Grid3X3 className="h-4 w-4 mr-2" />
+                <HugeiconsIcon icon={GridIcon} className="h-4 w-4 mr-2" />
                 Cards
               </Button>
-              <Button 
+              <Button
                 variant={viewMode === 'table' ? 'default' : 'ghost'}
                 size="sm"
                 onClick={() => setViewMode('table')}
               >
-                <List className="h-4 w-4 mr-2" />
+                <HugeiconsIcon icon={Menu01Icon} className="h-4 w-4 mr-2" />
                 Table
               </Button>
             </div>
@@ -785,7 +799,7 @@ export default function ArticlesPage() {
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
-                        <ImageIcon className="w-12 h-12 text-gray-400" />
+                        <HugeiconsIcon icon={Image01Icon} className="w-12 h-12 text-gray-400" />
                       </div>
                     )}
                   </div>
@@ -814,7 +828,7 @@ export default function ArticlesPage() {
                   {/* Actions */}
                   <div className="flex gap-2 pt-2">
                     <Button size="sm" variant="outline" onClick={() => handleImageUpload(article)}>
-                      <Upload className="h-3 w-3 mr-1" />
+                      <HugeiconsIcon icon={Upload01Icon} className="h-3 w-3 mr-1" />
                       Images
                     </Button>
                     <Button size="sm" variant="outline" onClick={() => handleEdit(article)}>
@@ -987,7 +1001,7 @@ export default function ArticlesPage() {
                   onClick={handleGenerateSelectedQRCodes}
                   className="flex items-center space-x-2"
                 >
-                  <QrCode className="h-4 w-4" />
+                  <HugeiconsIcon icon={QrCodeIcon} className="h-4 w-4" />
                   <span>Generate {selectedArticlesForQR.length} QR Codes</span>
                 </Button>
               </div>

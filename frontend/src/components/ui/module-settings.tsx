@@ -1,6 +1,13 @@
 "use client"
 
 import * as React from "react"
+import { HugeiconsIcon } from "@hugeicons/react"
+import {
+  Settings01Icon,
+  FloppyDiskIcon,
+  RotateLeft01Icon,
+  AlertCircleIcon
+} from "@hugeicons/core-free-icons"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Switch } from "@/components/ui/switch"
@@ -8,7 +15,6 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
-import { Settings2, Save, RotateCcw, AlertCircle } from "lucide-react"
 
 interface SettingItem {
   id: string
@@ -20,7 +26,7 @@ interface SettingItem {
   category: string
 }
 
-interface ModuleSettingsProps {
+interface ModuleGearProps {
   moduleName: string
   moduleId: string
   settings: SettingItem[]
@@ -31,7 +37,7 @@ interface ModuleSettingsProps {
   hasUnsavedChanges?: boolean
 }
 
-export function ModuleSettings({
+export function ModuleGear({
   moduleName,
   moduleId,
   settings,
@@ -40,7 +46,7 @@ export function ModuleSettings({
   onReset,
   isLoading = false,
   hasUnsavedChanges = false
-}: ModuleSettingsProps) {
+}: ModuleGearProps) {
   // Group settings by category
   const settingsByCategory = React.useMemo(() => {
     return settings.reduce((acc, setting) => {
@@ -131,11 +137,11 @@ export function ModuleSettings({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2">
-          <Settings2 className="h-5 w-5" />
-          <h2 className="text-lg font-semibold">{moduleName} Settings</h2>
+          <HugeiconsIcon icon={Settings01Icon} className="h-5 w-5" />
+          <h2 className="text-lg font-semibold">{moduleName} Gear</h2>
           {hasUnsavedChanges && (
             <Badge variant="secondary" className="ml-2">
-              <AlertCircle className="h-3 w-3 mr-1" />
+              <HugeiconsIcon icon={AlertCircleIcon} className="h-3 w-3 mr-1" />
               Unsaved Changes
             </Badge>
           )}
@@ -148,7 +154,7 @@ export function ModuleSettings({
             disabled={isLoading || !hasUnsavedChanges}
             className="flex items-center space-x-2"
           >
-            <RotateCcw className="h-4 w-4" />
+            <HugeiconsIcon icon={RotateLeft01Icon} className="h-4 w-4" />
             <span>Reset</span>
           </Button>
           <Button
@@ -156,14 +162,14 @@ export function ModuleSettings({
             disabled={isLoading || !hasUnsavedChanges}
             className="flex items-center space-x-2"
           >
-            <Save className="h-4 w-4" />
+            <HugeiconsIcon icon={FloppyDiskIcon} className="h-4 w-4" />
             <span>{isLoading ? 'Saving...' : 'Save Changes'}</span>
           </Button>
         </div>
       </div>
 
-      {/* Settings by Category */}
-      {Object.entries(settingsByCategory).map(([category, categorySettings]) => (
+      {/* Gear by Category */}
+      {Object.entries(settingsByCategory).map(([category, categoryGear]) => (
         <Card key={category}>
           <CardHeader>
             <CardTitle className="text-base">{category}</CardTitle>
@@ -172,7 +178,7 @@ export function ModuleSettings({
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {categorySettings.map((setting, index) => (
+            {categoryGear.map((setting, index) => (
               <div key={setting.id}>
                 <div className="space-y-2">
                   {renderSettingControl(setting)}
@@ -182,7 +188,7 @@ export function ModuleSettings({
                     </p>
                   )}
                 </div>
-                {index < categorySettings.length - 1 && (
+                {index < categoryGear.length - 1 && (
                   <Separator className="mt-4" />
                 )}
               </div>

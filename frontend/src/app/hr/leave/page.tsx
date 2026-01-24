@@ -10,20 +10,6 @@ import { Badge } from '@/components/ui/badge'
 import { HRService } from '@/services/hr'
 import { LeaveRequestForm } from '@/components/forms/leave-request-form'
 import type { LeaveRequest as LeaveRequestType, LeaveFormData } from '@/types/hr'
-import { 
-  Calendar,
-  Clock,
-  Users,
-  CheckCircle,
-  XCircle,
-  AlertCircle,
-  FileText,
-  TrendingUp,
-  Plane,
-  Heart,
-  UserX,
-  Search
-} from 'lucide-react'
 
 // Use the proper LeaveRequest type from @/types/hr
 interface LeaveRequest {
@@ -62,11 +48,11 @@ const typeColors = {
 }
 
 const typeIcons = {
-  annual: Plane,
+  annual: Airplane,
   sick: Heart,
   maternity: Users,
-  personal: UserX,
-  emergency: AlertCircle,
+  personal: UserMinus,
+  emergency: WarningCircle,
   unpaid: XCircle
 }
 
@@ -501,7 +487,7 @@ export default function LeavePage() {
         <div className="flex items-center justify-between gap-4">
           <div className="flex-1 max-w-md">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <MagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <input 
                 placeholder="Search employees, leave types..."
                 className="pl-9 w-full h-9 rounded-md border border-input bg-background px-3 py-1 text-sm  transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"

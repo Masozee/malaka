@@ -32,6 +32,7 @@ import (
 	production_routes "malaka/internal/modules/production/presentation/http/routes"
 
 	"malaka/internal/shared/auth"
+	"malaka/internal/shared/cache"
 	"malaka/internal/shared/logger"
 	"malaka/internal/shared/storage"
 
@@ -172,6 +173,13 @@ func (server *Server) setupRouter() {
 	
 	// Initialize storage handler
 	storageHandler := storage.NewStorageHandler(server.container.StorageService, server.logger)
+
+	// Initialize cache health handler
+	var cacheHealthHandler *cache.CacheHealthHandler
+	if server.container.Cache != nil {
+		redisClient := server.container.Cache.(*cache.RedisCache).Client()
+		cacheHealthHandler = cache.NewCacheHealthHandler(redisClient, server.container.SafeCache)
+	}
 
 	// Initialize accounting handlers (now handled in router.go)
 	// journalEntryHandler := accounting_handlers.NewJournalEntryHandler(server.container.JournalEntryService)
@@ -463,6 +471,11 @@ func (server *Server) setupRouter() {
 		production_routes.SetupWorkOrderRoutes(production, workOrderHandler)
 	}
 
+	// Register cache health/monitoring routes (protected)
+	if cacheHealthHandler != nil {
+		cacheHealthHandler.RegisterRoutes(protectedAPI)
+	}
+
 	// Setup API documentation routes
 	SetupRouter(router, server.container)
 
@@ -472,4 +485,9 @@ func (server *Server) setupRouter() {
 // Start runs the HTTP server on a specific address.
 func (server *Server) Start(address string) error {
 	return server.router.Run(address)
+}
+
+// GetRouter returns the underlying Gin router for use with custom http.Server
+func (server *Server) GetRouter() *gin.Engine {
+	return server.router
 }

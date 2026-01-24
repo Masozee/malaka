@@ -6,35 +6,8 @@ import { Header } from '@/components/ui/header'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { 
-  Globe,
-  Monitor,
-  Smartphone,
-  Tablet,
-  Settings,
-  Palette,
-  Eye,
-  Code,
-  Zap,
-  Shield,
-  Search,
-  Mail,
-  Bell,
-  Users,
-  Building2,
-  Save,
-  RefreshCw,
-  Download,
-  Upload,
-  AlertTriangle,
-  CheckCircle,
-  X,
-  Edit,
-  Trash2,
-  Plus
-} from 'lucide-react'
 
-interface WebSettings {
+interface WebGear {
   general: {
     siteName: string
     siteDescription: string
@@ -116,11 +89,11 @@ interface WebSettings {
   }
 }
 
-export default function WebSettingsPage() {
+export default function WebGearPage() {
   const [mounted, setMounted] = useState(false)
   const [activeTab, setActiveTab] = useState('general')
   const [hasChanges, setHasChanges] = useState(false)
-  const [settings, setSettings] = useState<WebSettings>({
+  const [settings, setGear] = useState<WebGear>({
     general: {
       siteName: 'Malaka ERP System',
       siteDescription: 'Comprehensive Enterprise Resource Planning System for Manufacturing and Retail',
@@ -208,18 +181,18 @@ export default function WebSettingsPage() {
 
   const breadcrumbs = [
     { label: 'Dashboard', href: '/dashboard' },
-    { label: 'Settings', href: '/settings' },
-    { label: 'Web Settings' }
+    { label: 'Gear', href: '/settings' },
+    { label: 'Web Gear' }
   ]
 
   const tabs = [
-    { id: 'general', label: 'General', icon: Settings },
-    { id: 'appearance', label: 'Appearance', icon: Palette },
-    { id: 'performance', label: 'Performance', icon: Zap },
-    { id: 'security', label: 'Security', icon: Shield },
-    { id: 'seo', label: 'SEO & Analytics', icon: Search },
-    { id: 'email', label: 'Email Settings', icon: Mail },
-    { id: 'backup', label: 'Backup & Recovery', icon: Download }
+    { id: 'general', label: 'General' },
+    { id: 'appearance', label: 'Appearance' },
+    { id: 'performance', label: 'Performance' },
+    { id: 'security', label: 'Security' },
+    { id: 'seo', label: 'SEO & Analytics' },
+    { id: 'email', label: 'Email Gear' },
+    { id: 'backup', label: 'Backup & Recovery' }
   ]
 
   const handleSave = () => {
@@ -250,7 +223,7 @@ export default function WebSettingsPage() {
               type="text"
               value={settings.general.siteName}
               onChange={(e) => {
-                setSettings(prev => ({
+                setGear(prev => ({
                   ...prev,
                   general: { ...prev.general, siteName: e.target.value }
                 }))
@@ -266,7 +239,7 @@ export default function WebSettingsPage() {
               type="url"
               value={settings.general.siteUrl}
               onChange={(e) => {
-                setSettings(prev => ({
+                setGear(prev => ({
                   ...prev,
                   general: { ...prev.general, siteUrl: e.target.value }
                 }))
@@ -281,7 +254,7 @@ export default function WebSettingsPage() {
             <textarea
               value={settings.general.siteDescription}
               onChange={(e) => {
-                setSettings(prev => ({
+                setGear(prev => ({
                   ...prev,
                   general: { ...prev.general, siteDescription: e.target.value }
                 }))
@@ -298,7 +271,7 @@ export default function WebSettingsPage() {
               type="email"
               value={settings.general.adminEmail}
               onChange={(e) => {
-                setSettings(prev => ({
+                setGear(prev => ({
                   ...prev,
                   general: { ...prev.general, adminEmail: e.target.value }
                 }))
@@ -313,7 +286,7 @@ export default function WebSettingsPage() {
             <select
               value={settings.general.timezone}
               onChange={(e) => {
-                setSettings(prev => ({
+                setGear(prev => ({
                   ...prev,
                   general: { ...prev.general, timezone: e.target.value }
                 }))
@@ -334,7 +307,7 @@ export default function WebSettingsPage() {
             <select
               value={settings.general.language}
               onChange={(e) => {
-                setSettings(prev => ({
+                setGear(prev => ({
                   ...prev,
                   general: { ...prev.general, language: e.target.value }
                 }))
@@ -354,7 +327,7 @@ export default function WebSettingsPage() {
             <select
               value={settings.general.dateFormat}
               onChange={(e) => {
-                setSettings(prev => ({
+                setGear(prev => ({
                   ...prev,
                   general: { ...prev.general, dateFormat: e.target.value }
                 }))
@@ -371,7 +344,7 @@ export default function WebSettingsPage() {
       </Card>
 
       <Card className="p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-6">System Settings</h3>
+        <h3 className="text-lg font-semibold text-gray-900 mb-6">System Gear</h3>
         
         <div className="space-y-4">
           <div className="flex items-center justify-between">
@@ -384,7 +357,7 @@ export default function WebSettingsPage() {
                 type="checkbox" 
                 checked={settings.general.maintenanceMode}
                 onChange={(e) => {
-                  setSettings(prev => ({
+                  setGear(prev => ({
                     ...prev,
                     general: { ...prev.general, maintenanceMode: e.target.checked }
                   }))
@@ -406,7 +379,7 @@ export default function WebSettingsPage() {
                 type="checkbox" 
                 checked={settings.general.allowRegistration}
                 onChange={(e) => {
-                  setSettings(prev => ({
+                  setGear(prev => ({
                     ...prev,
                     general: { ...prev.general, allowRegistration: e.target.checked }
                   }))
@@ -428,7 +401,7 @@ export default function WebSettingsPage() {
                 type="checkbox" 
                 checked={settings.general.requireEmailVerification}
                 onChange={(e) => {
-                  setSettings(prev => ({
+                  setGear(prev => ({
                     ...prev,
                     general: { ...prev.general, requireEmailVerification: e.target.checked }
                   }))
@@ -461,7 +434,7 @@ export default function WebSettingsPage() {
                 <button
                   key={value}
                   onClick={() => {
-                    setSettings(prev => ({
+                    setGear(prev => ({
                       ...prev,
                       appearance: { ...prev.appearance, theme: value as any }
                     }))
@@ -484,7 +457,7 @@ export default function WebSettingsPage() {
             <select
               value={settings.appearance.fontFamily}
               onChange={(e) => {
-                setSettings(prev => ({
+                setGear(prev => ({
                   ...prev,
                   appearance: { ...prev.appearance, fontFamily: e.target.value }
                 }))
@@ -507,7 +480,7 @@ export default function WebSettingsPage() {
                 type="color"
                 value={settings.appearance.primaryColor}
                 onChange={(e) => {
-                  setSettings(prev => ({
+                  setGear(prev => ({
                     ...prev,
                     appearance: { ...prev.appearance, primaryColor: e.target.value }
                   }))
@@ -519,7 +492,7 @@ export default function WebSettingsPage() {
                 type="text"
                 value={settings.appearance.primaryColor}
                 onChange={(e) => {
-                  setSettings(prev => ({
+                  setGear(prev => ({
                     ...prev,
                     appearance: { ...prev.appearance, primaryColor: e.target.value }
                   }))
@@ -538,7 +511,7 @@ export default function WebSettingsPage() {
                 type="color"
                 value={settings.appearance.secondaryColor}
                 onChange={(e) => {
-                  setSettings(prev => ({
+                  setGear(prev => ({
                     ...prev,
                     appearance: { ...prev.appearance, secondaryColor: e.target.value }
                   }))
@@ -550,7 +523,7 @@ export default function WebSettingsPage() {
                 type="text"
                 value={settings.appearance.secondaryColor}
                 onChange={(e) => {
-                  setSettings(prev => ({
+                  setGear(prev => ({
                     ...prev,
                     appearance: { ...prev.appearance, secondaryColor: e.target.value }
                   }))
@@ -568,7 +541,7 @@ export default function WebSettingsPage() {
               type="url"
               value={settings.appearance.logoUrl}
               onChange={(e) => {
-                setSettings(prev => ({
+                setGear(prev => ({
                   ...prev,
                   appearance: { ...prev.appearance, logoUrl: e.target.value }
                 }))
@@ -585,7 +558,7 @@ export default function WebSettingsPage() {
               type="url"
               value={settings.appearance.faviconUrl}
               onChange={(e) => {
-                setSettings(prev => ({
+                setGear(prev => ({
                   ...prev,
                   appearance: { ...prev.appearance, faviconUrl: e.target.value }
                 }))
@@ -618,7 +591,7 @@ export default function WebSettingsPage() {
                   type="checkbox" 
                   checked={settings.appearance[key as keyof typeof settings.appearance] as boolean}
                   onChange={(e) => {
-                    setSettings(prev => ({
+                    setGear(prev => ({
                       ...prev,
                       appearance: { ...prev.appearance, [key]: e.target.checked }
                     }))
@@ -641,7 +614,7 @@ export default function WebSettingsPage() {
           <textarea
             value={settings.appearance.customCSS}
             onChange={(e) => {
-              setSettings(prev => ({
+              setGear(prev => ({
                 ...prev,
                 appearance: { ...prev.appearance, customCSS: e.target.value }
               }))
@@ -681,7 +654,7 @@ export default function WebSettingsPage() {
                   type="checkbox" 
                   checked={settings.performance[key as keyof typeof settings.performance] as boolean}
                   onChange={(e) => {
-                    setSettings(prev => ({
+                    setGear(prev => ({
                       ...prev,
                       performance: { ...prev.performance, [key]: e.target.checked }
                     }))
@@ -697,7 +670,7 @@ export default function WebSettingsPage() {
       </Card>
 
       <Card className="p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-6">Performance Settings</h3>
+        <h3 className="text-lg font-semibold text-gray-900 mb-6">Performance Gear</h3>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
@@ -706,7 +679,7 @@ export default function WebSettingsPage() {
               type="number"
               value={settings.performance.cacheDuration}
               onChange={(e) => {
-                setSettings(prev => ({
+                setGear(prev => ({
                   ...prev,
                   performance: { ...prev.performance, cacheDuration: parseInt(e.target.value) }
                 }))
@@ -722,7 +695,7 @@ export default function WebSettingsPage() {
               type="url"
               value={settings.performance.cdnUrl}
               onChange={(e) => {
-                setSettings(prev => ({
+                setGear(prev => ({
                   ...prev,
                   performance: { ...prev.performance, cdnUrl: e.target.value }
                 }))
@@ -760,7 +733,7 @@ export default function WebSettingsPage() {
                   type="checkbox" 
                   checked={settings.security[key as keyof typeof settings.security] as boolean}
                   onChange={(e) => {
-                    setSettings(prev => ({
+                    setGear(prev => ({
                       ...prev,
                       security: { ...prev.security, [key]: e.target.checked }
                     }))
@@ -785,7 +758,7 @@ export default function WebSettingsPage() {
               type="number"
               value={settings.security.rateLimitRequests}
               onChange={(e) => {
-                setSettings(prev => ({
+                setGear(prev => ({
                   ...prev,
                   security: { ...prev.security, rateLimitRequests: parseInt(e.target.value) }
                 }))
@@ -801,7 +774,7 @@ export default function WebSettingsPage() {
               type="number"
               value={settings.security.rateLimitWindow}
               onChange={(e) => {
-                setSettings(prev => ({
+                setGear(prev => ({
                   ...prev,
                   security: { ...prev.security, rateLimitWindow: parseInt(e.target.value) }
                 }))
@@ -817,7 +790,7 @@ export default function WebSettingsPage() {
               type="number"
               value={settings.security.sessionTimeout}
               onChange={(e) => {
-                setSettings(prev => ({
+                setGear(prev => ({
                   ...prev,
                   security: { ...prev.security, sessionTimeout: parseInt(e.target.value) }
                 }))
@@ -833,7 +806,7 @@ export default function WebSettingsPage() {
               type="number"
               value={settings.security.passwordMinLength}
               onChange={(e) => {
-                setSettings(prev => ({
+                setGear(prev => ({
                   ...prev,
                   security: { ...prev.security, passwordMinLength: parseInt(e.target.value) }
                 }))
@@ -857,7 +830,7 @@ export default function WebSettingsPage() {
                 onChange={(e) => {
                   const newOrigins = [...settings.security.allowedOrigins]
                   newOrigins[index] = e.target.value
-                  setSettings(prev => ({
+                  setGear(prev => ({
                     ...prev,
                     security: { ...prev.security, allowedOrigins: newOrigins }
                   }))
@@ -871,14 +844,14 @@ export default function WebSettingsPage() {
                 size="sm"
                 onClick={() => {
                   const newOrigins = settings.security.allowedOrigins.filter((_, i) => i !== index)
-                  setSettings(prev => ({
+                  setGear(prev => ({
                     ...prev,
                     security: { ...prev.security, allowedOrigins: newOrigins }
                   }))
                   setHasChanges(true)
                 }}
               >
-                <Trash2 className="h-4 w-4" />
+                Remove
               </Button>
             </div>
           ))}
@@ -886,14 +859,13 @@ export default function WebSettingsPage() {
             variant="outline"
             size="sm"
             onClick={() => {
-              setSettings(prev => ({
+              setGear(prev => ({
                 ...prev,
                 security: { ...prev.security, allowedOrigins: [...prev.security.allowedOrigins, ''] }
               }))
               setHasChanges(true)
             }}
           >
-            <Plus className="h-4 w-4 mr-2" />
             Add Origin
           </Button>
         </div>
@@ -904,7 +876,7 @@ export default function WebSettingsPage() {
   const SEOTab = () => (
     <div className="space-y-6">
       <Card className="p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-6">SEO Settings</h3>
+        <h3 className="text-lg font-semibold text-gray-900 mb-6">SEO Gear</h3>
         
         <div className="grid grid-cols-1 gap-6">
           <div>
@@ -913,7 +885,7 @@ export default function WebSettingsPage() {
               type="text"
               value={settings.seo.metaTitle}
               onChange={(e) => {
-                setSettings(prev => ({
+                setGear(prev => ({
                   ...prev,
                   seo: { ...prev.seo, metaTitle: e.target.value }
                 }))
@@ -928,7 +900,7 @@ export default function WebSettingsPage() {
             <textarea
               value={settings.seo.metaDescription}
               onChange={(e) => {
-                setSettings(prev => ({
+                setGear(prev => ({
                   ...prev,
                   seo: { ...prev.seo, metaDescription: e.target.value }
                 }))
@@ -945,7 +917,7 @@ export default function WebSettingsPage() {
               type="text"
               value={settings.seo.metaKeywords}
               onChange={(e) => {
-                setSettings(prev => ({
+                setGear(prev => ({
                   ...prev,
                   seo: { ...prev.seo, metaKeywords: e.target.value }
                 }))
@@ -961,7 +933,7 @@ export default function WebSettingsPage() {
             <textarea
               value={settings.seo.robotsTxt}
               onChange={(e) => {
-                setSettings(prev => ({
+                setGear(prev => ({
                   ...prev,
                   seo: { ...prev.seo, robotsTxt: e.target.value }
                 }))
@@ -984,7 +956,7 @@ export default function WebSettingsPage() {
               type="text"
               value={settings.seo.googleAnalyticsId}
               onChange={(e) => {
-                setSettings(prev => ({
+                setGear(prev => ({
                   ...prev,
                   seo: { ...prev.seo, googleAnalyticsId: e.target.value }
                 }))
@@ -1001,7 +973,7 @@ export default function WebSettingsPage() {
               type="text"
               value={settings.seo.googleTagManagerId}
               onChange={(e) => {
-                setSettings(prev => ({
+                setGear(prev => ({
                   ...prev,
                   seo: { ...prev.seo, googleTagManagerId: e.target.value }
                 }))
@@ -1018,7 +990,7 @@ export default function WebSettingsPage() {
               type="text"
               value={settings.seo.facebookPixelId}
               onChange={(e) => {
-                setSettings(prev => ({
+                setGear(prev => ({
                   ...prev,
                   seo: { ...prev.seo, facebookPixelId: e.target.value }
                 }))
@@ -1050,7 +1022,7 @@ export default function WebSettingsPage() {
                   type="checkbox" 
                   checked={settings.seo[key as keyof typeof settings.seo] as boolean}
                   onChange={(e) => {
-                    setSettings(prev => ({
+                    setGear(prev => ({
                       ...prev,
                       seo: { ...prev.seo, [key]: e.target.checked }
                     }))
@@ -1079,7 +1051,7 @@ export default function WebSettingsPage() {
               type="text"
               value={settings.email.smtpHost}
               onChange={(e) => {
-                setSettings(prev => ({
+                setGear(prev => ({
                   ...prev,
                   email: { ...prev.email, smtpHost: e.target.value }
                 }))
@@ -1095,7 +1067,7 @@ export default function WebSettingsPage() {
               type="number"
               value={settings.email.smtpPort}
               onChange={(e) => {
-                setSettings(prev => ({
+                setGear(prev => ({
                   ...prev,
                   email: { ...prev.email, smtpPort: parseInt(e.target.value) }
                 }))
@@ -1111,7 +1083,7 @@ export default function WebSettingsPage() {
               type="text"
               value={settings.email.smtpUsername}
               onChange={(e) => {
-                setSettings(prev => ({
+                setGear(prev => ({
                   ...prev,
                   email: { ...prev.email, smtpUsername: e.target.value }
                 }))
@@ -1127,7 +1099,7 @@ export default function WebSettingsPage() {
               type="password"
               value={settings.email.smtpPassword}
               onChange={(e) => {
-                setSettings(prev => ({
+                setGear(prev => ({
                   ...prev,
                   email: { ...prev.email, smtpPassword: e.target.value }
                 }))
@@ -1142,7 +1114,7 @@ export default function WebSettingsPage() {
             <select
               value={settings.email.smtpEncryption}
               onChange={(e) => {
-                setSettings(prev => ({
+                setGear(prev => ({
                   ...prev,
                   email: { ...prev.email, smtpEncryption: e.target.value as any }
                 }))
@@ -1162,7 +1134,7 @@ export default function WebSettingsPage() {
               type="email"
               value={settings.email.fromEmail}
               onChange={(e) => {
-                setSettings(prev => ({
+                setGear(prev => ({
                   ...prev,
                   email: { ...prev.email, fromEmail: e.target.value }
                 }))
@@ -1178,7 +1150,7 @@ export default function WebSettingsPage() {
               type="text"
               value={settings.email.fromName}
               onChange={(e) => {
-                setSettings(prev => ({
+                setGear(prev => ({
                   ...prev,
                   email: { ...prev.email, fromName: e.target.value }
                 }))
@@ -1195,7 +1167,7 @@ export default function WebSettingsPage() {
                 type="email"
                 value={settings.email.testEmail}
                 onChange={(e) => {
-                  setSettings(prev => ({
+                  setGear(prev => ({
                     ...prev,
                     email: { ...prev.email, testEmail: e.target.value }
                   }))
@@ -1204,7 +1176,6 @@ export default function WebSettingsPage() {
                 className="flex-1 border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               <Button onClick={handleTestEmail} className="whitespace-nowrap">
-                <Mail className="h-4 w-4 mr-2" />
                 Send Test
               </Button>
             </div>
@@ -1230,7 +1201,7 @@ export default function WebSettingsPage() {
                 type="checkbox" 
                 checked={settings.backup.autoBackup}
                 onChange={(e) => {
-                  setSettings(prev => ({
+                  setGear(prev => ({
                     ...prev,
                     backup: { ...prev.backup, autoBackup: e.target.checked }
                   }))
@@ -1245,7 +1216,7 @@ export default function WebSettingsPage() {
       </Card>
 
       <Card className="p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-6">Backup Settings</h3>
+        <h3 className="text-lg font-semibold text-gray-900 mb-6">Backup Gear</h3>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
@@ -1253,7 +1224,7 @@ export default function WebSettingsPage() {
             <select
               value={settings.backup.backupFrequency}
               onChange={(e) => {
-                setSettings(prev => ({
+                setGear(prev => ({
                   ...prev,
                   backup: { ...prev.backup, backupFrequency: e.target.value as any }
                 }))
@@ -1273,7 +1244,7 @@ export default function WebSettingsPage() {
               type="number"
               value={settings.backup.backupRetention}
               onChange={(e) => {
-                setSettings(prev => ({
+                setGear(prev => ({
                   ...prev,
                   backup: { ...prev.backup, backupRetention: parseInt(e.target.value) }
                 }))
@@ -1288,7 +1259,7 @@ export default function WebSettingsPage() {
             <select
               value={settings.backup.backupLocation}
               onChange={(e) => {
-                setSettings(prev => ({
+                setGear(prev => ({
                   ...prev,
                   backup: { ...prev.backup, backupLocation: e.target.value as any }
                 }))
@@ -1306,7 +1277,7 @@ export default function WebSettingsPage() {
             <select
               value={settings.backup.cloudProvider}
               onChange={(e) => {
-                setSettings(prev => ({
+                setGear(prev => ({
                   ...prev,
                   backup: { ...prev.backup, cloudProvider: e.target.value }
                 }))
@@ -1343,7 +1314,6 @@ export default function WebSettingsPage() {
           
           <div className="text-center">
             <Button onClick={handleBackupNow} className="w-full">
-              <Download className="h-4 w-4 mr-2" />
               Backup Now
             </Button>
           </div>
@@ -1376,7 +1346,7 @@ export default function WebSettingsPage() {
   return (
     <TwoLevelLayout>
       <Header 
-        title="Web Settings"
+        title="Web Gear"
         description="Configure website appearance, performance, and functionality"
         breadcrumbs={breadcrumbs}
       />
@@ -1387,16 +1357,14 @@ export default function WebSettingsPage() {
           <Card className="p-4 border-orange-200 bg-orange-50">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
-                <AlertTriangle className="h-5 w-5 text-orange-600" />
+                <div className="h-5 w-5 bg-orange-600/20 rounded" />
                 <span className="text-sm font-medium text-orange-800">You have unsaved changes</span>
               </div>
               <div className="flex space-x-2">
                 <Button variant="outline" size="sm" onClick={() => setHasChanges(false)}>
-                  <X className="h-4 w-4 mr-1" />
                   Discard
                 </Button>
                 <Button size="sm" onClick={handleSave}>
-                  <Save className="h-4 w-4 mr-1" />
                   Save Changes
                 </Button>
               </div>
@@ -1408,8 +1376,8 @@ export default function WebSettingsPage() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <Card className="p-4">
             <div className="flex items-center space-x-3">
-              <div className="p-2 bg-green-100 rounded-lg">
-                <CheckCircle className="h-5 w-5 text-green-600" />
+              <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
+                <div className="h-5 w-5 bg-green-600/20 rounded" />
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600">System Status</p>
@@ -1420,8 +1388,8 @@ export default function WebSettingsPage() {
 
           <Card className="p-4">
             <div className="flex items-center space-x-3">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <Monitor className="h-5 w-5 text-blue-600" />
+              <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
+                <div className="h-5 w-5 bg-blue-600/20 rounded" />
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600">Uptime</p>
@@ -1432,8 +1400,8 @@ export default function WebSettingsPage() {
 
           <Card className="p-4">
             <div className="flex items-center space-x-3">
-              <div className="p-2 bg-purple-100 rounded-lg">
-                <Users className="h-5 w-5 text-purple-600" />
+              <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
+                <div className="h-5 w-5 bg-purple-600/20 rounded" />
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600">Active Users</p>
@@ -1444,8 +1412,8 @@ export default function WebSettingsPage() {
 
           <Card className="p-4">
             <div className="flex items-center space-x-3">
-              <div className="p-2 bg-orange-100 rounded-lg">
-                <Globe className="h-5 w-5 text-orange-600" />
+              <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
+                <div className="h-5 w-5 bg-orange-600/20 rounded" />
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600">Version</p>
@@ -1458,23 +1426,19 @@ export default function WebSettingsPage() {
         {/* Tab Navigation */}
         <Card className="p-1">
           <div className="flex space-x-1 overflow-x-auto">
-            {tabs.map((tab) => {
-              const Icon = tab.icon
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center space-x-2 px-4 py-2 rounded-md whitespace-nowrap transition-colors ${
-                    activeTab === tab.id
-                      ? 'bg-blue-100 text-blue-700 font-medium'
-                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                  }`}
-                >
-                  <Icon className="h-4 w-4" />
-                  <span className="text-sm">{tab.label}</span>
-                </button>
-              )
-            })}
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex items-center space-x-2 px-4 py-2 rounded-md whitespace-nowrap transition-colors ${
+                  activeTab === tab.id
+                    ? 'bg-blue-100 text-blue-700 font-medium'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                }`}
+              >
+                <span className="text-sm">{tab.label}</span>
+              </button>
+            ))}
           </div>
         </Card>
 

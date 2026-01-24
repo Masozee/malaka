@@ -1,6 +1,24 @@
 "use client"
 
 import * as React from "react"
+import { HugeiconsIcon } from "@hugeicons/react"
+import {
+  ArrowLeft01Icon,
+  ArrowRight01Icon,
+  ArrowLeftDoubleIcon,
+  ArrowRightDoubleIcon,
+  ArrowUp01Icon,
+  ArrowDown01Icon,
+  Search01Icon,
+  PlusSignIcon,
+  PencilEdit01Icon,
+  Delete01Icon,
+  MoreHorizontalIcon,
+  QrCodeIcon,
+  BarCode01Icon,
+  Settings01Icon,
+  type IconSvgElement,
+} from "@hugeicons/core-free-icons"
 import {
   useReactTable,
   getCoreRowModel,
@@ -14,22 +32,7 @@ import {
   RowSelectionState,
   ColumnDef,
 } from "@tanstack/react-table"
-import {
-  ChevronLeft,
-  ChevronRight,
-  ChevronsLeft,
-  ChevronsRight,
-  ChevronUp,
-  ChevronDown,
-  Search,
-  Plus,
-  Edit,
-  Trash2,
-  MoreHorizontal,
-  QrCode,
-  BarChart3,
-  Settings2,
-} from "lucide-react"
+
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -64,6 +67,14 @@ export interface TanStackColumn<T> {
   size?: number
 }
 
+export interface CustomAction<T> {
+  label: string
+  icon?: IconSvgElement
+  onClick: (record: T) => void | Promise<void>
+  className?: string
+  separator?: boolean
+}
+
 export interface TanStackDataTableProps<T> {
   data: T[]
   columns: TanStackColumn<T>[]
@@ -92,6 +103,7 @@ export interface TanStackDataTableProps<T> {
   onDelete?: (record: T) => void
   onGenerateBarcode?: (record: T) => void
   onGenerateQRCode?: (record: T) => void
+  customActions?: CustomAction<T>[]
 
   // Batch actions
   enableRowSelection?: boolean
@@ -118,6 +130,7 @@ export function TanStackDataTable<T extends { id: string }>({
   onDelete,
   onGenerateBarcode,
   onGenerateQRCode,
+  customActions,
   enableRowSelection = false,
   onBatchDelete,
   onBatchBarcode,
@@ -159,7 +172,7 @@ export function TanStackDataTable<T extends { id: string }>({
           <Checkbox
             checked={row.getIsSelected()}
             onCheckedChange={(value) => row.toggleSelected(!!value)}
-            aria-label="Select row"
+            aria-label={`Select row ${row.original.id}`}
           />
         ),
         enableSorting: false,
@@ -178,14 +191,16 @@ export function TanStackDataTable<T extends { id: string }>({
           const canSort = col.enableSorting !== false
           if (!canSort) return col.header
 
+          const sortState = column.getIsSorted()
           return (
             <button
-              className="flex items-center space-x-1 hover:text-gray-700 dark:hover:text-gray-200"
+              className="flex items-center space-x-1 text-gray-700 hover:text-gray-900 dark:text-white dark:hover:text-gray-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-gray-500 rounded"
               onClick={() => column.toggleSorting()}
+              aria-label={`Sort by ${col.header}${sortState ? `, currently sorted ${sortState}ending` : ''}`}
             >
               <span>{col.header}</span>
-              {column.getIsSorted() === "asc" && <ChevronUp className="h-4 w-4" />}
-              {column.getIsSorted() === "desc" && <ChevronDown className="h-4 w-4" />}
+              {sortState === "asc" && <HugeiconsIcon icon={ArrowUp01Icon} className="h-4 w-4" />}
+              {sortState === "desc" && <HugeiconsIcon icon={ArrowDown01Icon} className="h-4 w-4" />}
             </button>
           )
         },
@@ -206,7 +221,7 @@ export function TanStackDataTable<T extends { id: string }>({
     })
 
     // Actions column
-    if (onEdit || onDelete || onGenerateBarcode || onGenerateQRCode) {
+    if (onEdit || onDelete || onGenerateBarcode || onGenerateQRCode || (customActions && customActions.length > 0)) {
       cols.push({
         id: "actions",
         header: "Actions",
@@ -216,14 +231,14 @@ export function TanStackDataTable<T extends { id: string }>({
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="sm" className="h-8 w-8 p-0">
-                  <MoreHorizontal className="h-4 w-4" />
+                  <HugeiconsIcon icon={MoreHorizontalIcon} className="h-4 w-4" />
                   <span className="sr-only">Open actions menu</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 {onEdit && (
                   <DropdownMenuItem onClick={() => onEdit(record)}>
-                    <Edit className="mr-2 h-4 w-4" />
+                    <HugeiconsIcon icon={PencilEdit01Icon} className="mr-2 h-4 w-4" />
                     Edit
                   </DropdownMenuItem>
                 )}
@@ -232,7 +247,7 @@ export function TanStackDataTable<T extends { id: string }>({
                     onClick={() => onDelete(record)}
                     className="text-red-600"
                   >
-                    <Trash2 className="mr-2 h-4 w-4" />
+                    <HugeiconsIcon icon={Delete01Icon} className="mr-2 h-4 w-4" />
                     Delete
                   </DropdownMenuItem>
                 )}
@@ -241,15 +256,36 @@ export function TanStackDataTable<T extends { id: string }>({
                 )}
                 {onGenerateBarcode && (
                   <DropdownMenuItem onClick={() => onGenerateBarcode(record)}>
-                    <BarChart3 className="mr-2 h-4 w-4" />
+                    <HugeiconsIcon icon={BarCode01Icon} className="mr-2 h-4 w-4" />
                     Generate Barcode
                   </DropdownMenuItem>
                 )}
                 {onGenerateQRCode && (
                   <DropdownMenuItem onClick={() => onGenerateQRCode(record)}>
-                    <QrCode className="mr-2 h-4 w-4" />
+                    <HugeiconsIcon icon={QrCodeIcon} className="mr-2 h-4 w-4" />
                     Generate QR Code
                   </DropdownMenuItem>
+                )}
+                {customActions && customActions.length > 0 && (
+                  <>
+                    {(onEdit || onDelete || onGenerateBarcode || onGenerateQRCode) && (
+                      <DropdownMenuSeparator />
+                    )}
+                    {customActions.map((action, index) => (
+                      <React.Fragment key={action.label}>
+                        {action.separator && index > 0 && <DropdownMenuSeparator />}
+                        <DropdownMenuItem
+                          onClick={() => action.onClick(record)}
+                          className={action.className}
+                        >
+                          {action.icon && (
+                            <HugeiconsIcon icon={action.icon} className="mr-2 h-4 w-4" />
+                          )}
+                          {action.label}
+                        </DropdownMenuItem>
+                      </React.Fragment>
+                    ))}
+                  </>
                 )}
               </DropdownMenuContent>
             </DropdownMenu>
@@ -262,7 +298,7 @@ export function TanStackDataTable<T extends { id: string }>({
     }
 
     return cols
-  }, [columnDefs, enableRowSelection, onEdit, onDelete, onGenerateBarcode, onGenerateQRCode])
+  }, [columnDefs, enableRowSelection, onEdit, onDelete, onGenerateBarcode, onGenerateQRCode, customActions])
 
   // Initialize table
   const table = useReactTable({
@@ -330,15 +366,15 @@ export function TanStackDataTable<T extends { id: string }>({
   // Loading state
   if (loading) {
     return (
-      <div className="w-full" role="status" aria-label="Loading data">
+      <div className="w-full" role="status" aria-label="Loading data" aria-busy="true">
         <div className="rounded-md border">
           <div className="p-4">
             <div className="space-y-3">
               {[...Array(5)].map((_, i) => (
                 <div key={i} className="flex space-x-4">
-                  <div className="h-4 bg-gray-200 rounded flex-1 animate-pulse" />
-                  <div className="h-4 bg-gray-200 rounded flex-1 animate-pulse" />
-                  <div className="h-4 bg-gray-200 rounded flex-1 animate-pulse" />
+                  <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded flex-1 animate-pulse" />
+                  <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded flex-1 animate-pulse" />
+                  <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded flex-1 animate-pulse" />
                 </div>
               ))}
             </div>
@@ -357,7 +393,7 @@ export function TanStackDataTable<T extends { id: string }>({
           {/* Batch actions */}
           {enableRowSelection && selectedRows.length > 0 && (
             <div className="flex items-center space-x-2 mr-4">
-              <span className="text-sm text-gray-600">
+              <span className="text-sm text-gray-600 dark:text-gray-400">
                 {selectedRows.length} item{selectedRows.length !== 1 ? "s" : ""} selected
               </span>
               <div className="flex items-center space-x-2">
@@ -370,19 +406,19 @@ export function TanStackDataTable<T extends { id: string }>({
                       setRowSelection({})
                     }}
                   >
-                    <Trash2 className="h-4 w-4 mr-1" />
+                    <HugeiconsIcon icon={Delete01Icon} className="h-4 w-4 mr-1" />
                     Delete
                   </Button>
                 )}
                 {onBatchBarcode && (
                   <Button variant="outline" size="sm" onClick={() => onBatchBarcode(selectedRows)}>
-                    <BarChart3 className="h-4 w-4 mr-1" />
+                    <HugeiconsIcon icon={BarCode01Icon} className="h-4 w-4 mr-1" />
                     Barcodes
                   </Button>
                 )}
                 {onBatchQRCode && (
                   <Button variant="outline" size="sm" onClick={() => onBatchQRCode(selectedRows)}>
-                    <QrCode className="h-4 w-4 mr-1" />
+                    <HugeiconsIcon icon={QrCodeIcon} className="h-4 w-4 mr-1" />
                     QR Codes
                   </Button>
                 )}
@@ -393,12 +429,12 @@ export function TanStackDataTable<T extends { id: string }>({
           {/* Search */}
           {onSearch && (
             <div className="relative">
-              <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <HugeiconsIcon icon={Search01Icon} className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
               <Input
                 placeholder={searchPlaceholder}
                 value={globalFilter}
                 onChange={(e) => handleSearchChange(e.target.value)}
-                className="pl-8 w-64"
+                className="pl-8 w-64 bg-white dark:bg-gray-900"
               />
             </div>
           )}
@@ -409,7 +445,7 @@ export function TanStackDataTable<T extends { id: string }>({
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="sm">
-                <Settings2 className="h-4 w-4 mr-1" />
+                <HugeiconsIcon icon={Settings01Icon} className="h-4 w-4 mr-1" />
                 Columns
               </Button>
             </DropdownMenuTrigger>
@@ -432,7 +468,7 @@ export function TanStackDataTable<T extends { id: string }>({
           {/* Add button */}
           {onAdd && (
             <Button onClick={onAdd}>
-              <Plus className="h-4 w-4 mr-1" />
+              <HugeiconsIcon icon={PlusSignIcon} className="h-4 w-4 mr-1" />
               {addButtonText}
             </Button>
           )}
@@ -440,17 +476,18 @@ export function TanStackDataTable<T extends { id: string }>({
       </div>
 
       {/* Table */}
-      <div className="rounded-md border">
+      <div className="rounded-lg border bg-white dark:bg-gray-900 overflow-hidden" role="region" aria-label="Data table">
         <div className="overflow-x-auto">
           <table className="w-full">
+            <caption className="sr-only">Data table with sortable columns and row actions</caption>
             <thead>
               {table.getHeaderGroups().map((headerGroup) => (
-                <tr key={headerGroup.id} className="border-b bg-gray-50 dark:bg-gray-800">
+                <tr key={headerGroup.id} className="bg-gray-200 dark:bg-gray-700">
                   {headerGroup.headers.map((header) => (
                     <th
                       key={header.id}
                       scope="col"
-                      className="px-4 py-3 text-left text-sm font-medium text-gray-900 dark:text-gray-100"
+                      className="px-4 py-3 text-left text-sm font-medium text-gray-700 dark:text-white"
                       style={
                         header.column.getSize() !== 150
                           ? { width: header.column.getSize() }
@@ -465,7 +502,7 @@ export function TanStackDataTable<T extends { id: string }>({
                 </tr>
               ))}
             </thead>
-            <tbody>
+            <tbody className="bg-white dark:bg-gray-900">
               {table.getRowModel().rows.length === 0 ? (
                 <tr>
                   <td
@@ -479,7 +516,7 @@ export function TanStackDataTable<T extends { id: string }>({
                 table.getRowModel().rows.map((row) => (
                   <tr
                     key={row.id}
-                    className="border-b hover:bg-gray-50 dark:hover:bg-gray-800"
+                    className="border-b bg-white hover:bg-gray-100 dark:bg-gray-900 dark:hover:bg-gray-800"
                     data-state={row.getIsSelected() && "selected"}
                   >
                     {row.getVisibleCells().map((cell) => (
@@ -509,7 +546,7 @@ export function TanStackDataTable<T extends { id: string }>({
             disabled={currentPage === 1}
             aria-label="Go to first page"
           >
-            <ChevronsLeft className="h-4 w-4" />
+            <HugeiconsIcon icon={ArrowLeftDoubleIcon} className="h-4 w-4" />
           </Button>
           <Button
             variant="outline"
@@ -518,9 +555,9 @@ export function TanStackDataTable<T extends { id: string }>({
             disabled={currentPage === 1}
             aria-label="Go to previous page"
           >
-            <ChevronLeft className="h-4 w-4" />
+            <HugeiconsIcon icon={ArrowLeft01Icon} className="h-4 w-4" />
           </Button>
-          <span className="text-sm">
+          <span className="text-sm" aria-live="polite" aria-atomic="true">
             Page {currentPage} of {totalPages}
           </span>
           <Button
@@ -530,7 +567,7 @@ export function TanStackDataTable<T extends { id: string }>({
             disabled={currentPage === totalPages}
             aria-label="Go to next page"
           >
-            <ChevronRight className="h-4 w-4" />
+            <HugeiconsIcon icon={ArrowRight01Icon} className="h-4 w-4" />
           </Button>
           <Button
             variant="outline"
@@ -539,7 +576,7 @@ export function TanStackDataTable<T extends { id: string }>({
             disabled={currentPage === totalPages}
             aria-label="Go to last page"
           >
-            <ChevronsRight className="h-4 w-4" />
+            <HugeiconsIcon icon={ArrowRightDoubleIcon} className="h-4 w-4" />
           </Button>
         </nav>
       </div>

@@ -6,19 +6,6 @@ import { GuidelinesLayout } from "@/components/ui/guidelines-layout"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { 
-  ArrowLeft,
-  AlertCircle,
-  CheckCircle,
-  HelpCircle,
-  Zap,
-  RefreshCw,
-  Bug,
-  Shield,
-  Database,
-  Globe,
-  Search
-} from "lucide-react"
 
 interface TroubleshootingItem {
   id: string
@@ -28,7 +15,6 @@ interface TroubleshootingItem {
   severity: "low" | "medium" | "high" | "critical"
   symptoms: string[]
   solutions: string[]
-  icon: React.ComponentType<{ className?: string }>
 }
 
 const troubleshootingItems: TroubleshootingItem[] = [
@@ -44,8 +30,7 @@ const troubleshootingItems: TroubleshootingItem[] = [
       "Check network connection stability",
       "Refresh the page (Ctrl+F5 or Cmd+Shift+R)",
       "Contact administrator if problem persists"
-    ],
-    icon: RefreshCw
+    ]
   },
   {
     id: "login-issues",
@@ -59,8 +44,7 @@ const troubleshootingItems: TroubleshootingItem[] = [
       "Check if Caps Lock is enabled",
       "Try password reset if available",
       "Contact administrator if account is locked"
-    ],
-    icon: Shield
+    ]
   },
   {
     id: "data-not-saving",
@@ -74,8 +58,7 @@ const troubleshootingItems: TroubleshootingItem[] = [
       "Ensure you have proper permissions to modify data",
       "Try refreshing the page and re-entering data",
       "Report to administrator if data corruption is suspected"
-    ],
-    icon: Database
+    ]
   },
   {
     id: "permission-denied",
@@ -89,8 +72,7 @@ const troubleshootingItems: TroubleshootingItem[] = [
       "Contact your manager or administrator",
       "Check if your account needs role updates",
       "Ensure you're not accessing restricted features"
-    ],
-    icon: Shield
+    ]
   },
   {
     id: "browser-compatibility",
@@ -104,8 +86,7 @@ const troubleshootingItems: TroubleshootingItem[] = [
       "Try using Chrome, Firefox, or Edge",
       "Disable browser extensions temporarily",
       "Clear browser cache and reload"
-    ],
-    icon: Globe
+    ]
   },
   {
     id: "search-not-working",
@@ -119,8 +100,7 @@ const troubleshootingItems: TroubleshootingItem[] = [
       "Try broader search terms",
       "Ensure you have access to the data you're searching",
       "Report search indexing issues to administrator"
-    ],
-    icon: Search
+    ]
   },
   {
     id: "report-generation-failed",
@@ -134,8 +114,7 @@ const troubleshootingItems: TroubleshootingItem[] = [
       "Check if you have permissions to generate reports",
       "Try a different report format (PDF vs Excel)",
       "Contact administrator for large dataset reports"
-    ],
-    icon: Bug
+    ]
   },
   {
     id: "integration-sync-issues",
@@ -149,8 +128,7 @@ const troubleshootingItems: TroubleshootingItem[] = [
       "Verify network connectivity to external systems",
       "Review integration logs for errors",
       "Contact administrator for integration troubleshooting"
-    ],
-    icon: Zap
+    ]
   }
 ]
 
@@ -224,13 +202,12 @@ export default function TroubleshootingPage() {
             <div className="flex flex-col md:flex-row gap-4">
               <div className="flex-1">
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                   <input
                     type="text"
                     placeholder="Search troubleshooting topics..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 border border-input rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-ring"
+                    className="w-full px-4 py-2 border border-input rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-ring"
                   />
                 </div>
               </div>
@@ -255,7 +232,7 @@ export default function TroubleshootingPage() {
         <Card className="mb-8 bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800">
           <CardContent className="p-6">
             <div className="flex items-center space-x-3 mb-4">
-              <HelpCircle className="h-6 w-6 text-green-600 dark:text-green-400" />
+              <div className="h-6 w-6 bg-green-600/20 rounded" />
               <h3 className="font-semibold text-green-900 dark:text-green-100">Before You Start</h3>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -280,7 +257,7 @@ export default function TroubleshootingPage() {
           {filteredItems.length === 0 ? (
             <Card>
               <CardContent className="p-12 text-center">
-                <Search className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                <div className="h-12 w-12 mx-auto mb-4 bg-muted rounded" />
                 <h3 className="text-lg font-semibold mb-2">No Results Found</h3>
                 <p className="text-muted-foreground">
                   Try adjusting your search terms or category filter.
@@ -289,7 +266,6 @@ export default function TroubleshootingPage() {
             </Card>
           ) : (
             filteredItems.map((item) => {
-              const Icon = item.icon
               const severityBadge = getSeverityBadge(item.severity)
 
               return (
@@ -298,7 +274,7 @@ export default function TroubleshootingPage() {
                     <div className="flex items-start justify-between">
                       <div className="flex items-center space-x-3">
                         <div className="p-2 bg-primary/10 rounded-lg">
-                          <Icon className="h-5 w-5 text-primary" />
+                          <div className="h-5 w-5 bg-primary/20 rounded" />
                         </div>
                         <div className="flex-1">
                           <CardTitle className="text-lg">{item.title}</CardTitle>
@@ -323,7 +299,7 @@ export default function TroubleshootingPage() {
                       {/* Symptoms */}
                       <div>
                         <h4 className="font-semibold mb-3 flex items-center space-x-2">
-                          <AlertCircle className="h-4 w-4 text-orange-500" />
+                          <div className="h-4 w-4 bg-orange-500/20 rounded" />
                           <span>Symptoms</span>
                         </h4>
                         <ul className="space-y-2">
@@ -339,7 +315,7 @@ export default function TroubleshootingPage() {
                       {/* Solutions */}
                       <div>
                         <h4 className="font-semibold mb-3 flex items-center space-x-2">
-                          <CheckCircle className="h-4 w-4 text-green-500" />
+                          <div className="h-4 w-4 bg-green-500/20 rounded" />
                           <span>Solutions</span>
                         </h4>
                         <ol className="space-y-2">
@@ -394,7 +370,6 @@ export default function TroubleshootingPage() {
         <div className="flex justify-between items-center mt-12 pt-8 border-t">
           <Button variant="outline" asChild>
             <Link href="/guidelines/administration">
-              <ArrowLeft className="h-4 w-4 mr-2" />
               System Administration
             </Link>
           </Button>

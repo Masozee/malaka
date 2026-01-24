@@ -1,4 +1,4 @@
-'use client';
+'use client'
 
 import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
@@ -10,16 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { 
-  ArrowLeft,
-  Save,
-  Package,
-  Calendar,
-  MapPin,
-  User,
-  FileText,
-  AlertCircle
-} from 'lucide-react';
+;
 import { goodsReceiptService, GoodsReceipt } from '@/services/inventory';
 
 interface GoodsReceiptFormData {
@@ -225,7 +216,7 @@ export default function EditGoodsReceiptPage() {
         <div className="flex-1 p-6">
           <Card>
             <CardContent className="p-12 text-center">
-              <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+              <WarningCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
                 {error || 'Goods Receipt Not Found'}
               </h3>
@@ -417,7 +408,7 @@ export default function EditGoodsReceiptPage() {
               {saving ? (
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
               ) : (
-                <Save className="w-4 h-4 mr-2" />
+                <FloppyDisk className="w-4 h-4 mr-2" />
               )}
               Update Receipt
             </Button>
