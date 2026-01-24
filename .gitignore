@@ -140,3 +140,22 @@ docs/
 !README.md
 *.sh
 *.env
+
+# Backend sensitive and build files
+backend/app.env.production
+backend/data/*.db
+backend/main
+backend/tmp/
+backend/tmp_build
+
+# Traefik SSL certificates
+traefik/acme.json
+
+# Temporary migration scripts
+frontend/migrate-icons.js
+
+# macOS app build artifacts
+macos-app/**/.build/
+macos-app/**/*.app/
+macos-app/**/*.bin
+macos-app/**/*.dSYM/

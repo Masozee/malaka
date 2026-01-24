@@ -15,7 +15,7 @@ import {
   Building01Icon,
   LocationIcon,
   Globe01Icon,
-  Crown01Icon,
+  CrownIcon,
   TrendUpIcon,
   UserMultiple01Icon,
   Star01Icon,
@@ -350,7 +350,7 @@ export default function SalesCompetitorsPage() {
 
   const getPositionBadge = (position: string) => {
     const config = {
-      leader: { variant: 'default' as const, label: 'Leader', icon: Crown01Icon },
+      leader: { variant: 'default' as const, label: 'Leader', icon: CrownIcon },
       challenger: { variant: 'secondary' as const, label: 'Challenger', icon: TrendUpIcon },
       follower: { variant: 'outline' as const, label: 'Follower', icon: UserMultiple01Icon },
       niche: { variant: 'secondary' as const, label: 'Niche', icon: Star01Icon }
@@ -553,7 +553,7 @@ export default function SalesCompetitorsPage() {
                 <p className="text-2xl font-bold mt-1 text-orange-600">{summaryStats.marketLeaders}</p>
                 <p className="text-sm text-orange-600 mt-1">Top position</p>
               </div>
-              <HugeiconsIcon icon={Crown01Icon} className="h-8 w-8 text-orange-600" />
+              <HugeiconsIcon icon={CrownIcon} className="h-8 w-8 text-orange-600" />
             </div>
           </Card>
 
