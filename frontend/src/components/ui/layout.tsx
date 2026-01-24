@@ -13,7 +13,7 @@ import {
   Notification01Icon,
   UserIcon,
   Factory01Icon,
-  Calculator01Icon,
+  CalculatorIcon,
   Calendar01Icon
 } from '@hugeicons/core-free-icons'
 
@@ -119,7 +119,7 @@ export function Layout({ children }: LayoutProps) {
                 className="w-full flex items-center justify-center p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                 title="Accounting"
               >
-                <Icon icon={Calculator01Icon} className="h-5 w-5 text-black dark:text-white" />
+                <Icon icon={CalculatorIcon} className="h-5 w-5 text-black dark:text-white" />
               </button>
             </li>
 

@@ -18,7 +18,7 @@ import { useToast } from '@/components/ui/toast'
 import type { Supplier } from '@/types/masterdata'
 import Link from 'next/link'
 import { HugeiconsIcon } from '@hugeicons/react'
-import { PlusSignIcon, Delete01Icon } from '@hugeicons/core-free-icons'
+import { PlusSignIcon, DeleteIcon } from '@hugeicons/core-free-icons'
 
 // Zod Schema for form validation
 const purchaseOrderItemSchema = z.object({
@@ -396,7 +396,7 @@ function NewPurchaseOrderContent() {
                       disabled={items.length === 1}
                       className="text-red-500 hover:text-red-700"
                     >
-                      <HugeiconsIcon icon={Delete01Icon} className="h-4 w-4 mr-1" />
+                      <HugeiconsIcon icon={DeleteIcon} className="h-4 w-4 mr-1" />
                       Remove
                     </Button>
                   </div>

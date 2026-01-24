@@ -13,7 +13,7 @@ import {
   Dollar01Icon,
   FileIcon,
   UserIcon,
-  Delete01Icon
+  DeleteIcon
 } from '@hugeicons/core-free-icons'
 import { TwoLevelLayout } from '@/components/ui/two-level-layout'
 import { Header } from '@/components/ui/header'
@@ -446,7 +446,7 @@ export default function JournalEntryDetailPage() {
                     className="w-full justify-start text-red-600 border-red-200 hover:bg-red-50"
                     onClick={handleDeleteEntry}
                   >
-                    <HugeiconsIcon icon={Delete01Icon} className="h-4 w-4 mr-2" />
+                    <HugeiconsIcon icon={DeleteIcon} className="h-4 w-4 mr-2" />
                     Delete Entry
                   </Button>
                 )}

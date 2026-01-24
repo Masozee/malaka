@@ -14,7 +14,7 @@ import {
   Building01Icon,
   Notification01Icon,
   Factory01Icon,
-  Calculator01Icon,
+  CalculatorIcon,
   // Master Data icons
   ColorsIcon,
   Shirt01Icon,
@@ -245,7 +245,7 @@ const menuData: MenuItem[] = [
   {
     id: "accounting",
     label: "Accounting",
-    icon: Calculator01Icon,
+    icon: CalculatorIcon,
     href: "/accounting",
     items: [
       { id: "general-ledger", label: "General Ledger", icon: BookOpen01Icon, href: "/accounting/general-ledger" },
@@ -284,7 +284,7 @@ const menuData: MenuItem[] = [
       { id: "dashboard", label: "BI Dashboard", icon: PieChart01Icon, href: "/reports/dashboard" },
       { id: "sales-reports", label: "Sales Reports", icon: ChartLineData01Icon, href: "/reports/sales" },
       { id: "inventory-reports", label: "Inventory Reports", icon: Package01Icon, href: "/reports/inventory" },
-      { id: "financial-reports", label: "Financial Reports", icon: Calculator01Icon, href: "/reports/financial" },
+      { id: "financial-reports", label: "Financial Reports", icon: CalculatorIcon, href: "/reports/financial" },
       { id: "production-reports", label: "Production Reports", icon: Factory01Icon, href: "/reports/production" },
       { id: "hr-reports", label: "HR Reports", icon: UserGroupIcon, href: "/reports/hr" },
       { id: "custom-reports", label: "Custom Reports", icon: Xls01Icon, href: "/reports/custom" },

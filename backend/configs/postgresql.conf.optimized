@@ -1,0 +1,84 @@
+# =============================================================================
+# PostgreSQL Optimized Configuration for Malaka ERP
+# =============================================================================
+# Target: Development/Small Production (8GB RAM, SSD storage)
+# Apply with: ALTER SYSTEM SET parameter = value; SELECT pg_reload_conf();
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# MEMORY CONFIGURATION
+# -----------------------------------------------------------------------------
+# shared_buffers: 25% of RAM for dedicated DB server, 15% for shared
+shared_buffers = 2GB
+
+# effective_cache_size: 50-75% of RAM (tells planner how much cache is available)
+effective_cache_size = 6GB
+
+# work_mem: Memory per sort/hash operation (be careful, multiplied by connections)
+# Formula: (RAM - shared_buffers) / (max_connections * 3)
+work_mem = 64MB
+
+# maintenance_work_mem: For VACUUM, CREATE INDEX, etc.
+maintenance_work_mem = 512MB
+
+# -----------------------------------------------------------------------------
+# CHECKPOINT/WAL CONFIGURATION
+# -----------------------------------------------------------------------------
+# Spread checkpoint writes over longer period (less I/O spikes)
+checkpoint_completion_target = 0.9
+checkpoint_timeout = 15min
+
+# Allow more WAL before checkpoint
+max_wal_size = 4GB
+min_wal_size = 1GB
+
+# WAL buffers (default is too small)
+wal_buffers = 64MB
+
+# -----------------------------------------------------------------------------
+# PLANNER CONFIGURATION
+# -----------------------------------------------------------------------------
+# For SSD storage, random access is nearly as fast as sequential
+random_page_cost = 1.1
+effective_io_concurrency = 200
+
+# Enable parallel queries
+max_parallel_workers_per_gather = 4
+max_parallel_workers = 8
+max_parallel_maintenance_workers = 4
+
+# -----------------------------------------------------------------------------
+# CONNECTION CONFIGURATION
+# -----------------------------------------------------------------------------
+max_connections = 200
+
+# -----------------------------------------------------------------------------
+# LOGGING (for query analysis)
+# -----------------------------------------------------------------------------
+log_min_duration_statement = 100  # Log queries taking > 100ms
+log_checkpoints = on
+log_connections = off
+log_disconnections = off
+log_lock_waits = on
+log_temp_files = 0
+
+# -----------------------------------------------------------------------------
+# AUTOVACUUM CONFIGURATION
+# -----------------------------------------------------------------------------
+autovacuum = on
+autovacuum_max_workers = 4
+autovacuum_naptime = 30s
+autovacuum_vacuum_threshold = 50
+autovacuum_analyze_threshold = 50
+autovacuum_vacuum_scale_factor = 0.05
+autovacuum_analyze_scale_factor = 0.02
+autovacuum_vacuum_cost_delay = 2ms
+autovacuum_vacuum_cost_limit = 1000
+
+# -----------------------------------------------------------------------------
+# STATISTICS
+# -----------------------------------------------------------------------------
+default_statistics_target = 100
+track_activities = on
+track_counts = on
+track_io_timing = on

@@ -17,7 +17,7 @@ import {
   Building03Icon,
   RefreshIcon,
   CancelIcon,
-  Delete01Icon,
+  DeleteIcon,
   FileIcon,
   Pdf01Icon,
   Image01Icon,
@@ -418,7 +418,7 @@ export default function ContractDetailPage() {
                       className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50"
                       onClick={handleDelete}
                     >
-                      <HugeiconsIcon icon={Delete01Icon} className="h-4 w-4 mr-2" />
+                      <HugeiconsIcon icon={DeleteIcon} className="h-4 w-4 mr-2" />
                       Delete Contract
                     </Button>
                   </>

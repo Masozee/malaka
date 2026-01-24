@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react'
 import { HugeiconsIcon } from "@hugeicons/react"
-import { ViewIcon, FloppyDiskIcon, SendToMobileIcon, FileIcon, UserGroupIcon, PlusSignIcon, Package01Icon, Delete01Icon, Calculator01Icon, Download01Icon, PencilEdit01Icon } from "@hugeicons/core-free-icons"
+import { ViewIcon, FloppyDiskIcon, SendToMobileIcon, FileIcon, UserGroupIcon, PlusSignIcon, Package01Icon, DeleteIcon, CalculatorIcon, Download01Icon, PencilEdit01Icon } from "@hugeicons/core-free-icons"
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -699,7 +699,7 @@ export default function InvoiceDesignerPage() {
                         size="sm" 
                         onClick={() => removeInvoiceItem(item.id)}
                       >
-                        <HugeiconsIcon icon={Delete01Icon} className="h-4 w-4" />
+                        <HugeiconsIcon icon={DeleteIcon} className="h-4 w-4" />
                       </Button>
                     </div>
 
@@ -796,7 +796,7 @@ export default function InvoiceDesignerPage() {
             {/* Calculation Controls */}
             <Card className="p-6">
               <h3 className="text-lg font-semibold mb-6 flex items-center">
-                <HugeiconsIcon icon={Calculator01Icon} className="h-5 w-5 mr-2" />
+                <HugeiconsIcon icon={CalculatorIcon} className="h-5 w-5 mr-2" />
                 Calculations
               </h3>
               

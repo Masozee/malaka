@@ -29,7 +29,7 @@ import {
     PencilEdit01Icon,
     FileIcon,
     SentIcon,
-    Delete01Icon
+    DeleteIcon
 } from '@hugeicons/core-free-icons'
 import { purchaseRequestService } from '@/services/procurement'
 import type { PurchaseRequest, PurchaseRequestStats } from '@/types/procurement'
@@ -246,7 +246,7 @@ export default function PurchaseRequestsList({ initialData }: PurchaseRequestsLi
                                     Submit for Approval
                                 </DropdownMenuItem>
                                 <DropdownMenuItem onClick={() => handleDelete(record)} className="text-red-600">
-                                    <HugeiconsIcon icon={Delete01Icon} className="mr-2 h-4 w-4" />
+                                    <HugeiconsIcon icon={DeleteIcon} className="mr-2 h-4 w-4" />
                                     Delete
                                 </DropdownMenuItem>
                             </>

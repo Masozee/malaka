@@ -12,7 +12,7 @@ import {
   ChartBarLineIcon,
   SettingsIcon,
   Factory01Icon,
-  Calculator01Icon,
+  CalculatorIcon,
   Dollar01Icon,
   FileIcon,
   ChartIncreaseIcon,
@@ -77,13 +77,13 @@ const commands = [
   {
     group: "Finance & Accounting",
     items: [
-      { label: "General Ledger", icon: Calculator01Icon, href: "#", keywords: ["ledger", "gl", "accounts", "journal"] },
+      { label: "General Ledger", icon: CalculatorIcon, href: "#", keywords: ["ledger", "gl", "accounts", "journal"] },
       { label: "Accounts Receivable", icon: Dollar01Icon, href: "#", keywords: ["receivable", "ar", "collections", "invoices"] },
       { label: "Accounts Payable", icon: Dollar01Icon, href: "#", keywords: ["payable", "ap", "vendors", "bills"] },
       { label: "Cash Management", icon: Dollar01Icon, href: "#", keywords: ["cash", "bank", "payments", "receipts"] },
       { label: "Financial Reports", icon: FileIcon, href: "#", keywords: ["financial", "reports", "statements", "balance"] },
-      { label: "Trial Balance", icon: Calculator01Icon, href: "#", keywords: ["trial", "balance", "accounts", "summary"] },
-      { label: "Cost Centers", icon: Calculator01Icon, href: "#", keywords: ["cost", "centers", "allocation", "budget"] },
+      { label: "Trial Balance", icon: CalculatorIcon, href: "#", keywords: ["trial", "balance", "accounts", "summary"] },
+      { label: "Cost Centers", icon: CalculatorIcon, href: "#", keywords: ["cost", "centers", "allocation", "budget"] },
     ]
   },
   {
@@ -102,7 +102,7 @@ const commands = [
       { label: "Business Intelligence", icon: ChartBarLineIcon, href: "#", keywords: ["bi", "analytics", "intelligence", "insights"] },
       { label: "Sales Reports", icon: ChartIncreaseIcon, href: "#", keywords: ["sales", "reports", "performance", "revenue"] },
       { label: "Inventory Reports", icon: Package01Icon, href: "#", keywords: ["inventory", "reports", "stock", "levels"] },
-      { label: "Financial Analysis", icon: Calculator01Icon, href: "#", keywords: ["financial", "analysis", "ratios", "performance"] },
+      { label: "Financial Analysis", icon: CalculatorIcon, href: "#", keywords: ["financial", "analysis", "ratios", "performance"] },
       { label: "Custom Reports", icon: FileIcon, href: "#", keywords: ["custom", "reports", "builder", "designer"] },
     ]
   },

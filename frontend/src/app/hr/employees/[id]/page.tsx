@@ -31,7 +31,7 @@ import {
   LocationIcon,
   UserIcon,
   CreditCardIcon,
-  Delete01Icon
+  DeleteIcon
 } from '@hugeicons/core-free-icons'
 
 const statusColors = {
@@ -494,7 +494,7 @@ export default function EmployeeDetailPage() {
                   className="w-full justify-start text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300 h-auto py-3"
                   onClick={handleDelete}
                 >
-                  <HugeiconsIcon icon={Delete01Icon} className="h-4 w-4 mr-3" />
+                  <HugeiconsIcon icon={DeleteIcon} className="h-4 w-4 mr-3" />
                   <div className="text-left">
                     <div className="font-medium">Delete Employee</div>
                     <div className="text-xs text-red-500 mt-1">Permanently remove from system</div>

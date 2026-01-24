@@ -5,7 +5,7 @@ import {
   Calendar01Icon,
   Clock01Icon,
   UserIcon,
-  SmartphoneIcon,
+  SmartPhoneIcon,
   FileIcon,
   AlertCircleIcon,
   CheckmarkCircle01Icon,
@@ -450,7 +450,7 @@ export function LeaveRequestForm({ isOpen, onClose, onSubmit, initialData, mode 
           {/* Emergency Contact */}
           <div className="space-y-2">
             <Label htmlFor="emergency_contact" className="flex items-center space-x-2">
-              <HugeiconsIcon icon={SmartphoneIcon} className="h-4 w-4" />
+              <HugeiconsIcon icon={SmartPhoneIcon} className="h-4 w-4" />
               <span>Emergency Contact</span>
             </Label>
             <Input

@@ -12,7 +12,7 @@ import {
   Search01Icon,
   PlusSignIcon,
   PencilEdit01Icon,
-  Delete01Icon,
+  DeleteIcon,
   MoreHorizontalIcon,
   QrCodeIcon,
   BarCode01Icon,
@@ -247,7 +247,7 @@ export function TanStackDataTable<T extends { id: string }>({
                     onClick={() => onDelete(record)}
                     className="text-red-600"
                   >
-                    <HugeiconsIcon icon={Delete01Icon} className="mr-2 h-4 w-4" />
+                    <HugeiconsIcon icon={DeleteIcon} className="mr-2 h-4 w-4" />
                     Delete
                   </DropdownMenuItem>
                 )}
@@ -406,7 +406,7 @@ export function TanStackDataTable<T extends { id: string }>({
                       setRowSelection({})
                     }}
                   >
-                    <HugeiconsIcon icon={Delete01Icon} className="h-4 w-4 mr-1" />
+                    <HugeiconsIcon icon={DeleteIcon} className="h-4 w-4 mr-1" />
                     Delete
                   </Button>
                 )}

@@ -11,7 +11,7 @@ import {
   LockIcon,
   ViewIcon,
   ViewOffIcon,
-  SmartphoneIcon,
+  SmartPhoneIcon,
   MailIcon,
   ComputerIcon,
   Sun01Icon,

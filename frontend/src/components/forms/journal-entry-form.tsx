@@ -3,8 +3,8 @@
 import { HugeiconsIcon } from "@hugeicons/react"
 import {
   PlusSignIcon,
-  Delete01Icon,
-  Calculator01Icon
+  DeleteIcon,
+  CalculatorIcon
 } from "@hugeicons/core-free-icons"
 
 import * as React from "react"
@@ -372,7 +372,7 @@ export function JournalEntryForm({
                       onClick={() => removeLine(index)}
                       disabled={loading}
                     >
-                      <HugeiconsIcon icon={Delete01Icon} className="h-4 w-4" />
+                      <HugeiconsIcon icon={DeleteIcon} className="h-4 w-4" />
                     </Button>
                   )}
                 </div>

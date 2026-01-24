@@ -18,7 +18,7 @@ import {
   Factory01Icon,
   ShoppingBag01Icon,
   DeliveryTruckIcon,
-  Calculator01Icon,
+  CalculatorIcon,
   ChartBarLineIcon,
   Building01Icon,
   Shirt01Icon,
@@ -125,7 +125,7 @@ const moduleSections: ModuleSection[] = [
     id: "accounting",
     title: "Accounting",
     href: "/guidelines/modules/accounting",
-    icon: Calculator01Icon
+    icon: CalculatorIcon
   },
   {
     id: "hr",

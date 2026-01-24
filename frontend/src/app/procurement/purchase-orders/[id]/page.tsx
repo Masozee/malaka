@@ -18,7 +18,7 @@ import {
   PencilEdit01Icon,
   PrinterIcon,
   Download01Icon,
-  Delete01Icon,
+  DeleteIcon,
   SentIcon,
   CheckmarkCircle01Icon,
   LoadingIcon,
@@ -446,7 +446,7 @@ export default function PurchaseOrderDetailPage() {
                   onClick={handleDelete}
                   disabled={order.status !== 'draft' || actionLoading === 'delete'}
                 >
-                  <HugeiconsIcon icon={Delete01Icon} className="h-4 w-4 mr-2" />
+                  <HugeiconsIcon icon={DeleteIcon} className="h-4 w-4 mr-2" />
                   {actionLoading === 'delete' ? 'Deleting...' : 'Delete Order'}
                 </Button>
               </div>

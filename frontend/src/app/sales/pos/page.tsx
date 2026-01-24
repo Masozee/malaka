@@ -15,7 +15,7 @@ import {
   CheckmarkCircle01Icon,
   Clock01Icon,
   AlertCircleIcon,
-  ReceiptIcon,
+  Invoice01Icon,
   Calendar01Icon,
   UserIcon,
   Package01Icon,
@@ -289,7 +289,7 @@ export default function POSPage() {
       cancelled: { variant: 'destructive' as const, label: 'Cancelled', icon: AlertCircleIcon },
       refunded: { variant: 'outline' as const, label: 'Refunded', icon: AlertCircleIcon }
     }
-    return config[status as keyof typeof config] || { variant: 'secondary' as const, label: status, icon: ReceiptIcon }
+    return config[status as keyof typeof config] || { variant: 'secondary' as const, label: status, icon: Invoice01Icon }
   }
 
   const getPaymentMethodBadge = (method: string) => {
@@ -401,7 +401,7 @@ export default function POSPage() {
             </Link>
           </Button>
           <Button variant="ghost" size="sm" aria-label="Print receipt">
-            <HugeiconsIcon icon={ReceiptIcon} className="h-4 w-4" />
+            <HugeiconsIcon icon={Invoice01Icon} className="h-4 w-4" />
             <span className="sr-only">Print receipt for {transaction.transaction_number}</span>
           </Button>
           {transaction.status === 'pending' && (

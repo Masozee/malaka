@@ -7,7 +7,7 @@ import {
   Download01Icon,
   ViewIcon,
   PencilEdit01Icon,
-  Delete01Icon,
+  DeleteIcon,
   GridIcon,
   Menu01Icon,
   CameraIcon,
