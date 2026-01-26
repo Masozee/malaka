@@ -1,3 +1,5 @@
+-- +goose Up
+-- +goose StatementBegin
 -- Migration: Add missing columns to articles table
 -- These columns are needed to match the frontend form fields
 
@@ -21,3 +23,15 @@ CREATE INDEX IF NOT EXISTS idx_articles_code ON articles(code);
 
 -- Create index on status for filtering
 CREATE INDEX IF NOT EXISTS idx_articles_status ON articles(status);
+-- +goose StatementEnd
+
+-- +goose Down
+-- +goose StatementBegin
+DROP INDEX IF EXISTS idx_articles_status;
+DROP INDEX IF EXISTS idx_articles_code;
+ALTER TABLE articles DROP COLUMN IF EXISTS status;
+ALTER TABLE articles DROP COLUMN IF EXISTS gender;
+ALTER TABLE articles DROP COLUMN IF EXISTS category;
+ALTER TABLE articles DROP COLUMN IF EXISTS brand;
+ALTER TABLE articles DROP COLUMN IF EXISTS code;
+-- +goose StatementEnd
