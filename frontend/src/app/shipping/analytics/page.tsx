@@ -88,7 +88,7 @@ export default function ShippingAnalyticsPage() {
                 return (
                     <div className="flex items-center space-x-2">
                         <Progress value={val} className="h-2 w-16" />
-                        <span className={`text-sm ${val >= 95 ? 'text-green-600' : 'text-yellow-600'}`}>{val}%</span>
+                        <span className="text-sm text-muted-foreground">{val}%</span>
                     </div>
                 )
             }
@@ -139,10 +139,10 @@ export default function ShippingAnalyticsPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     <Card className="p-6">
                         <div className="flex items-center justify-between mb-4">
-                            <div className="p-2 bg-blue-100 rounded-lg">
-                                <HugeiconsIcon icon={DeliveryTruck01Icon} className="h-6 w-6 text-blue-600" />
+                            <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
+                                <HugeiconsIcon icon={DeliveryTruck01Icon} className="h-5 w-5 text-foreground" />
                             </div>
-                            <Badge variant="outline" className="text-green-600 bg-green-50">
+                            <Badge variant="secondary">
                                 <HugeiconsIcon icon={ChartLineData01Icon} className="h-3 w-3 mr-1" />
                                 +12.5%
                             </Badge>
@@ -155,10 +155,10 @@ export default function ShippingAnalyticsPage() {
 
                     <Card className="p-6">
                         <div className="flex items-center justify-between mb-4">
-                            <div className="p-2 bg-green-100 rounded-lg">
-                                <HugeiconsIcon icon={CheckmarkCircle01Icon} className="h-6 w-6 text-green-600" />
+                            <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
+                                <HugeiconsIcon icon={CheckmarkCircle01Icon} className="h-5 w-5 text-foreground" />
                             </div>
-                            <Badge variant="outline" className="text-green-600 bg-green-50">
+                            <Badge variant="secondary">
                                 <HugeiconsIcon icon={ChartLineData01Icon} className="h-3 w-3 mr-1" />
                                 +2.1%
                             </Badge>
@@ -171,10 +171,10 @@ export default function ShippingAnalyticsPage() {
 
                     <Card className="p-6">
                         <div className="flex items-center justify-between mb-4">
-                            <div className="p-2 bg-orange-100 rounded-lg">
-                                <HugeiconsIcon icon={Time04Icon} className="h-6 w-6 text-orange-600" />
+                            <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
+                                <HugeiconsIcon icon={Time04Icon} className="h-5 w-5 text-foreground" />
                             </div>
-                            <Badge variant="outline" className="text-green-600 bg-green-50">
+                            <Badge variant="secondary">
                                 <HugeiconsIcon icon={ChartLineData01Icon} className="h-3 w-3 mr-1" />
                                 -0.3 days
                             </Badge>
@@ -187,10 +187,10 @@ export default function ShippingAnalyticsPage() {
 
                     <Card className="p-6">
                         <div className="flex items-center justify-between mb-4">
-                            <div className="p-2 bg-purple-100 rounded-lg">
-                                <HugeiconsIcon icon={Money03Icon} className="h-6 w-6 text-purple-600" />
+                            <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
+                                <HugeiconsIcon icon={Money03Icon} className="h-5 w-5 text-foreground" />
                             </div>
-                            <Badge variant="outline" className="text-red-600 bg-red-50">
+                            <Badge variant="outline">
                                 <HugeiconsIcon icon={ChartLineData01Icon} className="h-3 w-3 mr-1" />
                                 +5.4%
                             </Badge>

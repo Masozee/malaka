@@ -205,20 +205,20 @@ const mockOutboundScans: OutboundScan[] = [
   }
 ]
 
-// Status and scan type color mappings
-const statusColors = {
-  completed: 'bg-green-100 text-green-800',
-  pending: 'bg-yellow-100 text-yellow-800',
-  failed: 'bg-red-100 text-red-800',
-  exception: 'bg-orange-100 text-orange-800'
+// Status and scan type badge variants
+const statusVariants = {
+  completed: 'default' as const,
+  pending: 'secondary' as const,
+  failed: 'destructive' as const,
+  exception: 'outline' as const
 }
 
-const scanTypeColors = {
-  pickup: 'bg-blue-100 text-blue-800',
-  sorting: 'bg-purple-100 text-purple-800',
-  transit: 'bg-teal-100 text-teal-800',
-  delivery: 'bg-green-100 text-green-800',
-  exception: 'bg-red-100 text-red-800'
+const scanTypeVariants = {
+  pickup: 'default' as const,
+  sorting: 'secondary' as const,
+  transit: 'outline' as const,
+  delivery: 'default' as const,
+  exception: 'destructive' as const
 }
 
 export default function OutboundScanningPage() {
@@ -274,7 +274,7 @@ export default function OutboundScanningPage() {
       cell: ({ row }) => {
         const type = row.original.scanType
         return (
-          <Badge className={scanTypeColors[type]}>
+          <Badge variant={scanTypeVariants[type]}>
             {type.charAt(0).toUpperCase() + type.slice(1)}
           </Badge>
         )
@@ -323,7 +323,7 @@ export default function OutboundScanningPage() {
       cell: ({ row }) => {
         const status = row.original.status
         return (
-          <Badge className={statusColors[status]}>
+          <Badge variant={statusVariants[status]}>
             {status.charAt(0).toUpperCase() + status.slice(1)}
           </Badge>
         )
@@ -360,48 +360,48 @@ export default function OutboundScanningPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card className="p-4">
             <div className="flex items-center space-x-3">
-              <div className="p-2 bg-blue-50 rounded-lg">
-                <HugeiconsIcon icon={ScanIcon} className="h-5 w-5 text-blue-600" />
+              <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
+                <HugeiconsIcon icon={ScanIcon} className="h-5 w-5 text-foreground" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Scans</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{totalScans}</p>
+                <p className="text-sm font-medium text-muted-foreground">Total Scans</p>
+                <p className="text-2xl font-bold">{totalScans}</p>
               </div>
             </div>
           </Card>
 
           <Card className="p-4">
             <div className="flex items-center space-x-3">
-              <div className="p-2 bg-green-50 rounded-lg">
-                <HugeiconsIcon icon={CheckmarkCircle01Icon} className="h-5 w-5 text-green-600" />
+              <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
+                <HugeiconsIcon icon={CheckmarkCircle01Icon} className="h-5 w-5 text-foreground" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Completed</p>
-                <p className="text-2xl font-bold text-green-600">{completedScans}</p>
+                <p className="text-sm font-medium text-muted-foreground">Completed</p>
+                <p className="text-2xl font-bold">{completedScans}</p>
               </div>
             </div>
           </Card>
 
           <Card className="p-4">
             <div className="flex items-center space-x-3">
-              <div className="p-2 bg-red-50 rounded-lg">
-                <HugeiconsIcon icon={AlertCircleIcon} className="h-5 w-5 text-red-600" />
+              <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
+                <HugeiconsIcon icon={AlertCircleIcon} className="h-5 w-5 text-foreground" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Failed</p>
-                <p className="text-2xl font-bold text-red-600">{failedScans}</p>
+                <p className="text-sm font-medium text-muted-foreground">Failed</p>
+                <p className="text-2xl font-bold">{failedScans}</p>
               </div>
             </div>
           </Card>
 
           <Card className="p-4">
             <div className="flex items-center space-x-3">
-              <div className="p-2 bg-teal-50 rounded-lg">
-                <HugeiconsIcon icon={ChartBarLineIcon} className="h-5 w-5 text-teal-600" />
+              <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
+                <HugeiconsIcon icon={ChartBarLineIcon} className="h-5 w-5 text-foreground" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Success Rate</p>
-                <p className="text-2xl font-bold text-teal-600">
+                <p className="text-sm font-medium text-muted-foreground">Success Rate</p>
+                <p className="text-2xl font-bold">
                   {mounted ? successRate.toFixed(1) : ''}%
                 </p>
               </div>

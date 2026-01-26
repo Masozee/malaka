@@ -244,13 +244,13 @@ const mockManifestData: Manifest[] = [
   }
 ]
 
-// Status color mappings
-const statusColors = {
-  preparing: 'bg-gray-100 text-gray-800',
-  'in-transit': 'bg-blue-100 text-blue-800',
-  arrived: 'bg-yellow-100 text-yellow-800',
-  completed: 'bg-green-100 text-green-800',
-  delayed: 'bg-red-100 text-red-800'
+// Status badge variants
+const statusVariants = {
+  preparing: 'secondary' as const,
+  'in-transit': 'default' as const,
+  arrived: 'outline' as const,
+  completed: 'default' as const,
+  delayed: 'destructive' as const
 }
 
 export default function ManifestPage() {
@@ -349,7 +349,7 @@ export default function ManifestPage() {
       cell: ({ row }) => {
         const status = row.original.status
         return (
-          <Badge className={statusColors[status]}>
+          <Badge variant={statusVariants[status]}>
             {status.replace('-', ' ').charAt(0).toUpperCase() + status.replace('-', ' ').slice(1)}
           </Badge>
         )
@@ -386,48 +386,48 @@ export default function ManifestPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card className="p-4">
             <div className="flex items-center space-x-3">
-              <div className="p-2 bg-blue-50 rounded-lg">
-                <HugeiconsIcon icon={ClipboardIcon} className="h-5 w-5 text-blue-600" />
+              <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
+                <HugeiconsIcon icon={ClipboardIcon} className="h-5 w-5 text-foreground" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Manifests</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{totalManifests}</p>
+                <p className="text-sm font-medium text-muted-foreground">Total Manifests</p>
+                <p className="text-2xl font-bold">{totalManifests}</p>
               </div>
             </div>
           </Card>
 
           <Card className="p-4">
             <div className="flex items-center space-x-3">
-              <div className="p-2 bg-yellow-50 rounded-lg">
-                <HugeiconsIcon icon={DeliveryTruck01Icon} className="h-5 w-5 text-yellow-600" />
+              <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
+                <HugeiconsIcon icon={DeliveryTruck01Icon} className="h-5 w-5 text-foreground" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">In Transit</p>
-                <p className="text-2xl font-bold text-yellow-600">{inTransitManifests}</p>
+                <p className="text-sm font-medium text-muted-foreground">In Transit</p>
+                <p className="text-2xl font-bold">{inTransitManifests}</p>
               </div>
             </div>
           </Card>
 
           <Card className="p-4">
             <div className="flex items-center space-x-3">
-              <div className="p-2 bg-red-50 rounded-lg">
-                <HugeiconsIcon icon={AlertCircleIcon} className="h-5 w-5 text-red-600" />
+              <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
+                <HugeiconsIcon icon={AlertCircleIcon} className="h-5 w-5 text-foreground" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Delayed</p>
-                <p className="text-2xl font-bold text-red-600">{delayedManifests}</p>
+                <p className="text-sm font-medium text-muted-foreground">Delayed</p>
+                <p className="text-2xl font-bold">{delayedManifests}</p>
               </div>
             </div>
           </Card>
 
           <Card className="p-4">
             <div className="flex items-center space-x-3">
-              <div className="p-2 bg-green-50 rounded-lg">
-                <HugeiconsIcon icon={CheckmarkCircle01Icon} className="h-5 w-5 text-green-600" />
+              <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
+                <HugeiconsIcon icon={CheckmarkCircle01Icon} className="h-5 w-5 text-foreground" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Completed</p>
-                <p className="text-2xl font-bold text-green-600">{completedManifests}</p>
+                <p className="text-sm font-medium text-muted-foreground">Completed</p>
+                <p className="text-2xl font-bold">{completedManifests}</p>
               </div>
             </div>
           </Card>

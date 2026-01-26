@@ -413,7 +413,7 @@ export default function ShipmentManagementPage() {
       cell: ({ row }) => (
         <Link
           href={`/shipping/management/${row.original.id}`}
-          className="font-medium text-blue-600 hover:text-blue-800"
+          className="font-medium text-primary hover:underline"
         >
           {row.original.shipment_number}
         </Link>
@@ -481,7 +481,7 @@ export default function ShipmentManagementPage() {
         <div className="text-right">
           <div className="font-medium">{formatCurrency(row.original.total_cost)}</div>
           {row.original.cod_amount && (
-            <div className="text-sm text-orange-600">COD: {formatCurrency(row.original.cod_amount)}</div>
+            <div className="text-sm text-muted-foreground">COD: {formatCurrency(row.original.cod_amount)}</div>
           )}
         </div>
       )
@@ -514,7 +514,7 @@ export default function ShipmentManagementPage() {
         <div className="text-sm">
           <div>Est: {formatDate(row.original.estimated_delivery)}</div>
           {row.original.actual_delivery && (
-            <div className="text-green-600">Act: {formatDate(row.original.actual_delivery)}</div>
+            <div className="text-muted-foreground">Act: {formatDate(row.original.actual_delivery)}</div>
           )}
         </div>
       )
@@ -544,48 +544,48 @@ export default function ShipmentManagementPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card className="p-4">
             <div className="flex items-center space-x-3">
-              <div className="p-2 bg-blue-50 rounded-lg">
-                <HugeiconsIcon icon={PackageIcon} className="h-5 w-5 text-blue-600" />
+              <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
+                <HugeiconsIcon icon={PackageIcon} className="h-5 w-5 text-foreground" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Shipments</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{summaryStats.totalShipments}</p>
+                <p className="text-sm font-medium text-muted-foreground">Total Shipments</p>
+                <p className="text-2xl font-bold">{summaryStats.totalShipments}</p>
               </div>
             </div>
           </Card>
 
           <Card className="p-4">
             <div className="flex items-center space-x-3">
-              <div className="p-2 bg-yellow-50 rounded-lg">
-                <HugeiconsIcon icon={DeliveryTruck01Icon} className="h-5 w-5 text-yellow-600" />
+              <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
+                <HugeiconsIcon icon={DeliveryTruck01Icon} className="h-5 w-5 text-foreground" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">In Transit</p>
-                <p className="text-2xl font-bold text-yellow-600">{summaryStats.inTransitShipments}</p>
+                <p className="text-sm font-medium text-muted-foreground">In Transit</p>
+                <p className="text-2xl font-bold">{summaryStats.inTransitShipments}</p>
               </div>
             </div>
           </Card>
 
           <Card className="p-4">
             <div className="flex items-center space-x-3">
-              <div className="p-2 bg-red-50 rounded-lg">
-                <HugeiconsIcon icon={AlertCircleIcon} className="h-5 w-5 text-red-600" />
+              <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
+                <HugeiconsIcon icon={AlertCircleIcon} className="h-5 w-5 text-foreground" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Failed</p>
-                <p className="text-2xl font-bold text-red-600">{summaryStats.failedShipments}</p>
+                <p className="text-sm font-medium text-muted-foreground">Failed</p>
+                <p className="text-2xl font-bold">{summaryStats.failedShipments}</p>
               </div>
             </div>
           </Card>
 
           <Card className="p-4">
             <div className="flex items-center space-x-3">
-              <div className="p-2 bg-green-50 rounded-lg">
-                <HugeiconsIcon icon={CheckmarkCircle01Icon} className="h-5 w-5 text-green-600" />
+              <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
+                <HugeiconsIcon icon={CheckmarkCircle01Icon} className="h-5 w-5 text-foreground" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">On-Time Rate</p>
-                <p className="text-2xl font-bold text-green-600">{mounted ? `${summaryStats.onTimeDelivery.toFixed(0)}%` : '0%'}</p>
+                <p className="text-sm font-medium text-muted-foreground">On-Time Rate</p>
+                <p className="text-2xl font-bold">{mounted ? `${summaryStats.onTimeDelivery.toFixed(0)}%` : '0%'}</p>
               </div>
             </div>
           </Card>

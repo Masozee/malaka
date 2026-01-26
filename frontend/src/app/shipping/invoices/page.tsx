@@ -284,22 +284,22 @@ const mockShippingInvoices: ShippingInvoice[] = [
   }
 ]
 
-// Status color mappings
-const statusColors = {
-  draft: 'bg-gray-100 text-gray-800',
-  sent: 'bg-blue-100 text-blue-800',
-  paid: 'bg-green-100 text-green-800',
-  partial: 'bg-yellow-100 text-yellow-800',
-  overdue: 'bg-red-100 text-red-800',
-  cancelled: 'bg-gray-100 text-gray-800'
+// Status badge variants
+const statusVariants = {
+  draft: 'outline' as const,
+  sent: 'secondary' as const,
+  paid: 'default' as const,
+  partial: 'secondary' as const,
+  overdue: 'destructive' as const,
+  cancelled: 'outline' as const
 }
 
-const serviceColors = {
-  regular: 'bg-blue-100 text-blue-800',
-  express: 'bg-purple-100 text-purple-800',
-  'same-day': 'bg-orange-100 text-orange-800',
-  cargo: 'bg-teal-100 text-teal-800',
-  cod: 'bg-green-100 text-green-800'
+const serviceVariants = {
+  regular: 'default' as const,
+  express: 'secondary' as const,
+  'same-day': 'outline' as const,
+  cargo: 'secondary' as const,
+  cod: 'default' as const
 }
 
 export default function ShippingInvoicesPage() {
@@ -370,7 +370,7 @@ export default function ShippingInvoicesPage() {
       cell: ({ row }) => {
         const amount = row.original.outstandingAmount
         return (
-          <div className={`text-sm font-medium ${amount > 0 ? 'text-red-600' : 'text-green-600'}`}>
+          <div className={`text-sm font-medium ${amount > 0 ? 'text-destructive' : 'text-foreground'}`}>
             {mounted ? amount.toLocaleString('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }) : ''}
           </div>
         )
@@ -393,7 +393,7 @@ export default function ShippingInvoicesPage() {
       cell: ({ row }) => {
         const status = row.original.status
         return (
-          <Badge className={statusColors[status]}>
+          <Badge variant={statusVariants[status]}>
             {status.charAt(0).toUpperCase() + status.slice(1)}
           </Badge>
         )
@@ -428,24 +428,24 @@ export default function ShippingInvoicesPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card className="p-4">
             <div className="flex items-center space-x-3">
-              <div className="p-2 bg-blue-50 rounded-lg">
-                <HugeiconsIcon icon={Invoice01Icon} className="h-5 w-5 text-blue-600" />
+              <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
+                <HugeiconsIcon icon={Invoice01Icon} className="h-5 w-5 text-foreground" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Invoices</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{totalInvoices}</p>
+                <p className="text-sm font-medium text-muted-foreground">Total Invoices</p>
+                <p className="text-2xl font-bold">{totalInvoices}</p>
               </div>
             </div>
           </Card>
 
           <Card className="p-4">
             <div className="flex items-center space-x-3">
-              <div className="p-2 bg-indigo-50 rounded-lg">
-                <HugeiconsIcon icon={Money03Icon} className="h-5 w-5 text-indigo-600" />
+              <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
+                <HugeiconsIcon icon={Money03Icon} className="h-5 w-5 text-foreground" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Outstanding</p>
-                <p className="text-2xl font-bold text-indigo-600">
+                <p className="text-sm font-medium text-muted-foreground">Outstanding</p>
+                <p className="text-2xl font-bold">
                   {mounted ? (outstandingAmount / 1000000).toFixed(1) : ''}M
                 </p>
               </div>
@@ -454,24 +454,24 @@ export default function ShippingInvoicesPage() {
 
           <Card className="p-4">
             <div className="flex items-center space-x-3">
-              <div className="p-2 bg-red-50 rounded-lg">
-                <HugeiconsIcon icon={AlertCircleIcon} className="h-5 w-5 text-red-600" />
+              <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
+                <HugeiconsIcon icon={AlertCircleIcon} className="h-5 w-5 text-foreground" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Overdue</p>
-                <p className="text-2xl font-bold text-red-600">{overdueInvoices}</p>
+                <p className="text-sm font-medium text-muted-foreground">Overdue</p>
+                <p className="text-2xl font-bold">{overdueInvoices}</p>
               </div>
             </div>
           </Card>
 
           <Card className="p-4">
             <div className="flex items-center space-x-3">
-              <div className="p-2 bg-green-50 rounded-lg">
-                <HugeiconsIcon icon={CheckmarkCircle01Icon} className="h-5 w-5 text-green-600" />
+              <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
+                <HugeiconsIcon icon={CheckmarkCircle01Icon} className="h-5 w-5 text-foreground" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Paid Amount</p>
-                <p className="text-2xl font-bold text-green-600">
+                <p className="text-sm font-medium text-muted-foreground">Paid Amount</p>
+                <p className="text-2xl font-bold">
                   {mounted ? (paidAmount / 1000000).toFixed(1) : ''}M
                 </p>
               </div>

@@ -38,8 +38,8 @@ const mockTrackingResult = {
             status: 'Departed from Transit Facility',
             location: 'Jakarta Logistics Hub',
             icon: DeliveryTruck01Icon,
-            color: 'text-blue-600',
-            bgCallback: 'bg-blue-100'
+            color: 'text-foreground',
+            bgCallback: 'bg-muted'
         },
         {
             date: '2024-07-25',
@@ -47,8 +47,8 @@ const mockTrackingResult = {
             status: 'Arrived at Sorting Center',
             location: 'Jakarta Sorting Center',
             icon: PackageIcon,
-            color: 'text-purple-600',
-            bgCallback: 'bg-purple-100'
+            color: 'text-foreground',
+            bgCallback: 'bg-muted'
         },
         {
             date: '2024-07-24',
@@ -56,8 +56,8 @@ const mockTrackingResult = {
             status: 'Picked up by Courier',
             location: 'Malaka Store Jakarta',
             icon: UserIcon,
-            color: 'text-green-600',
-            bgCallback: 'bg-green-100'
+            color: 'text-foreground',
+            bgCallback: 'bg-muted'
         },
         {
             date: '2024-07-24',
@@ -65,8 +65,8 @@ const mockTrackingResult = {
             status: 'Shipment Created',
             location: 'System',
             icon: CheckmarkCircle01Icon,
-            color: 'text-gray-600',
-            bgCallback: 'bg-gray-100'
+            color: 'text-foreground',
+            bgCallback: 'bg-muted'
         }
     ]
 }
@@ -132,7 +132,7 @@ export default function TrackingPage() {
                                     <h2 className="text-2xl font-bold">{trackingData.trackingNumber}</h2>
                                     <p className="text-muted-foreground">{trackingData.courier} • {trackingData.service}</p>
                                 </div>
-                                <Badge className="text-lg px-4 py-1 bg-blue-100 text-blue-700 hover:bg-blue-200">
+                                <Badge variant="secondary" className="text-lg px-4 py-1">
                                     {trackingData.status}
                                 </Badge>
                             </div>

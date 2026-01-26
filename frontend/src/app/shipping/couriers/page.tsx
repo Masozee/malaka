@@ -399,7 +399,7 @@ export default function CouriersPage() {
       cell: ({ row }) => (
         <Link
           href={`/shipping/couriers/${row.original.id}`}
-          className="font-medium text-blue-600 hover:text-blue-800"
+          className="font-medium text-primary hover:underline"
         >
           {row.original.courier_code}
         </Link>
@@ -525,48 +525,48 @@ export default function CouriersPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card className="p-4">
             <div className="flex items-center space-x-3">
-              <div className="p-2 bg-blue-50 rounded-lg">
-                <HugeiconsIcon icon={DeliveryTruck01Icon} className="h-5 w-5 text-blue-600" />
+              <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
+                <HugeiconsIcon icon={DeliveryTruck01Icon} className="h-5 w-5 text-foreground" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Couriers</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{summaryStats.totalCouriers}</p>
+                <p className="text-sm font-medium text-muted-foreground">Total Couriers</p>
+                <p className="text-2xl font-bold">{summaryStats.totalCouriers}</p>
               </div>
             </div>
           </Card>
 
           <Card className="p-4">
             <div className="flex items-center space-x-3">
-              <div className="p-2 bg-green-50 rounded-lg">
-                <HugeiconsIcon icon={CheckmarkCircle01Icon} className="h-5 w-5 text-green-600" />
+              <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
+                <HugeiconsIcon icon={CheckmarkCircle01Icon} className="h-5 w-5 text-foreground" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Active</p>
-                <p className="text-2xl font-bold text-green-600">{summaryStats.activeCouriers}</p>
+                <p className="text-sm font-medium text-muted-foreground">Active</p>
+                <p className="text-2xl font-bold">{summaryStats.activeCouriers}</p>
               </div>
             </div>
           </Card>
 
           <Card className="p-4">
             <div className="flex items-center space-x-3">
-              <div className="p-2 bg-yellow-50 rounded-lg">
-                <HugeiconsIcon icon={StarIcon} className="h-5 w-5 text-yellow-600" />
+              <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
+                <HugeiconsIcon icon={StarIcon} className="h-5 w-5 text-foreground" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Preferred</p>
-                <p className="text-2xl font-bold text-yellow-600">{summaryStats.preferredCouriers}</p>
+                <p className="text-sm font-medium text-muted-foreground">Preferred</p>
+                <p className="text-2xl font-bold">{summaryStats.preferredCouriers}</p>
               </div>
             </div>
           </Card>
 
           <Card className="p-4">
             <div className="flex items-center space-x-3">
-              <div className="p-2 bg-purple-50 rounded-lg">
-                <HugeiconsIcon icon={Globe02Icon} className="h-5 w-5 text-purple-600" />
+              <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
+                <HugeiconsIcon icon={Globe02Icon} className="h-5 w-5 text-foreground" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">API Integrated</p>
-                <p className="text-2xl font-bold text-purple-600">{summaryStats.apiIntegrated}</p>
+                <p className="text-sm font-medium text-muted-foreground">API Integrated</p>
+                <p className="text-2xl font-bold">{summaryStats.apiIntegrated}</p>
               </div>
             </div>
           </Card>

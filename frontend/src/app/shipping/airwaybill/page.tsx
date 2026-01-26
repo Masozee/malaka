@@ -426,7 +426,7 @@ export default function AirwaybillPage() {
       cell: ({ row }) => (
         <Link
           href={`/shipping/airwaybill/${row.original.id}`}
-          className="font-medium text-blue-600 hover:text-blue-800"
+          className="font-medium text-primary hover:underline"
         >
           {row.original.awb_number}
         </Link>
@@ -535,7 +535,7 @@ export default function AirwaybillPage() {
         <div className="text-sm">
           <div>Est: {formatDate(row.original.estimated_delivery)}</div>
           {row.original.actual_delivery && (
-            <div className="text-green-600">Act: {formatDate(row.original.actual_delivery)}</div>
+            <div className="text-muted-foreground">Act: {formatDate(row.original.actual_delivery)}</div>
           )}
         </div>
       )
@@ -573,48 +573,48 @@ export default function AirwaybillPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card className="p-4">
             <div className="flex items-center space-x-3">
-              <div className="p-2 bg-blue-50 rounded-lg">
-                <HugeiconsIcon icon={Invoice01Icon} className="h-5 w-5 text-blue-600" />
+              <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
+                <HugeiconsIcon icon={Invoice01Icon} className="h-5 w-5 text-foreground" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total AWB</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{summaryStats.totalAirwaybills}</p>
+                <p className="text-sm font-medium text-muted-foreground">Total AWB</p>
+                <p className="text-2xl font-bold">{summaryStats.totalAirwaybills}</p>
               </div>
             </div>
           </Card>
 
           <Card className="p-4">
             <div className="flex items-center space-x-3">
-              <div className="p-2 bg-orange-50 rounded-lg">
-                <HugeiconsIcon icon={PrinterIcon} className="h-5 w-5 text-orange-600" />
+              <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
+                <HugeiconsIcon icon={PrinterIcon} className="h-5 w-5 text-foreground" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Printed</p>
-                <p className="text-2xl font-bold text-orange-600">{summaryStats.printedAirwaybills}</p>
+                <p className="text-sm font-medium text-muted-foreground">Printed</p>
+                <p className="text-2xl font-bold">{summaryStats.printedAirwaybills}</p>
               </div>
             </div>
           </Card>
 
           <Card className="p-4">
             <div className="flex items-center space-x-3">
-              <div className="p-2 bg-blue-50 rounded-lg">
-                <HugeiconsIcon icon={DeliveryTruck01Icon} className="h-5 w-5 text-blue-600" />
+              <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
+                <HugeiconsIcon icon={DeliveryTruck01Icon} className="h-5 w-5 text-foreground" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Dispatched</p>
-                <p className="text-2xl font-bold text-blue-600">{summaryStats.dispatchedAirwaybills}</p>
+                <p className="text-sm font-medium text-muted-foreground">Dispatched</p>
+                <p className="text-2xl font-bold">{summaryStats.dispatchedAirwaybills}</p>
               </div>
             </div>
           </Card>
 
           <Card className="p-4">
             <div className="flex items-center space-x-3">
-              <div className="p-2 bg-green-50 rounded-lg">
-                <HugeiconsIcon icon={CheckmarkCircle01Icon} className="h-5 w-5 text-green-600" />
+              <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
+                <HugeiconsIcon icon={CheckmarkCircle01Icon} className="h-5 w-5 text-foreground" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Delivered</p>
-                <p className="text-2xl font-bold text-green-600">{summaryStats.deliveredAirwaybills}</p>
+                <p className="text-sm font-medium text-muted-foreground">Delivered</p>
+                <p className="text-2xl font-bold">{summaryStats.deliveredAirwaybills}</p>
               </div>
             </div>
           </Card>
