@@ -26,6 +26,7 @@ type InvitationService struct {
 	userRepo       userRepositories.UserRepository
 	emailService   *email.EmailService
 	frontendURL    string
+	logoURL        string
 	expiryHours    int
 }
 
@@ -47,11 +48,18 @@ func NewInvitationService(
 		frontendURL = "http://localhost:3000"
 	}
 
+	logoURL := os.Getenv("LOGO_URL")
+	if logoURL == "" {
+		// Default to frontend logo if LOGO_URL not set
+		logoURL = frontendURL + "/logo.png"
+	}
+
 	return &InvitationService{
 		invitationRepo: invitationRepo,
 		userRepo:       userRepo,
 		emailService:   emailService,
 		frontendURL:    frontendURL,
+		logoURL:        logoURL,
 		expiryHours:    expiryHours,
 	}
 }
@@ -132,6 +140,7 @@ func (s *InvitationService) CreateInvitation(ctx context.Context, req *entities.
 		Role:           req.Role,
 		InvitationLink: invitationLink,
 		ExpiryHours:    s.expiryHours,
+		LogoURL:        s.logoURL,
 	}
 
 	if err := s.emailService.SendInvitationEmail(req.Email, emailData); err != nil {
@@ -343,6 +352,7 @@ func (s *InvitationService) ResendInvitation(ctx context.Context, id string, inv
 		Role:           invitation.Role,
 		InvitationLink: invitationLink,
 		ExpiryHours:    s.expiryHours,
+		LogoURL:        s.logoURL,
 	}
 
 	return s.emailService.SendInvitationEmail(invitation.Email, emailData)

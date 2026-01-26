@@ -149,6 +149,7 @@ type InvitationEmailData struct {
 	Role            string
 	InvitationLink  string
 	ExpiryHours     int
+	LogoURL         string
 }
 
 // SendInvitationEmail sends an invitation email to a new user
@@ -180,10 +181,14 @@ func (s *EmailService) renderInvitationTemplate(data InvitationEmailData) (strin
                 <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
                     <!-- Header -->
                     <tr>
-                        <td style="background-color: #0099ff; padding: 30px 40px; border-radius: 8px 8px 0 0;">
+                        <td style="background-color: #0099ff; padding: 30px 40px; border-radius: 8px 8px 0 0; text-align: center;">
+                            {{if .LogoURL}}
+                            <img src="{{.LogoURL}}" alt="Malaka ERP" style="max-height: 60px; max-width: 200px; margin-bottom: 15px;">
+                            {{else}}
                             <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 600;">
                                 Malaka<span style="font-weight: 400;">ERP</span>
                             </h1>
+                            {{end}}
                         </td>
                     </tr>
 
