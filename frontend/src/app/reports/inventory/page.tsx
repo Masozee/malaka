@@ -325,7 +325,7 @@ export default function InventoryReportsPage() {
           <div className="font-medium max-w-64 truncate" title={row.getValue('reportName')}>
             {row.getValue('reportName')}
           </div>
-          <div className="text-sm text-gray-500">{row.original.warehouseName}</div>
+          <div className="text-xs text-gray-500">{row.original.warehouseName}</div>
         </div>
       )
     },
@@ -345,7 +345,7 @@ export default function InventoryReportsPage() {
       accessorKey: 'period',
       header: 'Period',
       cell: ({ row }: any) => (
-        <div className="text-sm">{row.getValue('period')}</div>
+        <div className="text-xs">{row.getValue('period')}</div>
       )
     },
     {
@@ -359,7 +359,7 @@ export default function InventoryReportsPage() {
       accessorKey: 'totalValue',
       header: 'Value',
       cell: ({ row }: any) => (
-        <div className="text-sm font-medium">
+        <div className="text-xs font-medium">
           {mounted ? row.getValue('totalValue').toLocaleString('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }) : ''}
         </div>
       )
@@ -387,7 +387,7 @@ export default function InventoryReportsPage() {
       accessorKey: 'generatedDate',
       header: 'Generated',
       cell: ({ row }: any) => (
-        <div className="text-sm">
+        <div className="text-xs">
           {mounted ? new Date(row.getValue('generatedDate')).toLocaleDateString('id-ID') : ''}
         </div>
       )

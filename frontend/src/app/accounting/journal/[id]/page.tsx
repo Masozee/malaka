@@ -236,7 +236,7 @@ export default function JournalEntryDetailPage() {
                   <Badge className={`${statusColors[journalEntry.status]} text-white`}>
                     {statusLabels[journalEntry.status]}
                   </Badge>
-                  <span className="text-sm text-gray-500 dark:text-gray-400">
+                  <span className="text-xs text-gray-500 dark:text-gray-400">
                     Reference: {journalEntry.reference}
                   </span>
                 </div>
@@ -249,8 +249,8 @@ export default function JournalEntryDetailPage() {
                   <div className="flex items-center space-x-3">
                     <HugeiconsIcon icon={Calendar01Icon} className="h-5 w-5 text-gray-400 dark:text-gray-500" />
                     <div>
-                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Entry Date</p>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                      <p className="text-xs font-medium text-gray-900 dark:text-gray-100">Entry Date</p>
+                      <p className="text-xs text-gray-600 dark:text-gray-400">
                         {mounted ? new Date(journalEntry.entry_date).toLocaleDateString('id-ID', {
                           year: 'numeric',
                           month: 'long',
@@ -263,16 +263,16 @@ export default function JournalEntryDetailPage() {
                   <div className="flex items-center space-x-3">
                     <HugeiconsIcon icon={Tag01Icon} className="h-5 w-5 text-gray-400 dark:text-gray-500" />
                     <div>
-                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Period</p>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">{journalEntry.period}</p>
+                      <p className="text-xs font-medium text-gray-900 dark:text-gray-100">Period</p>
+                      <p className="text-xs text-gray-600 dark:text-gray-400">{journalEntry.period}</p>
                     </div>
                   </div>
 
                   <div className="flex items-center space-x-3">
                     <HugeiconsIcon icon={Archive01Icon} className="h-5 w-5 text-gray-400 dark:text-gray-500" />
                     <div>
-                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Fiscal Year</p>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">{journalEntry.fiscal_year}</p>
+                      <p className="text-xs font-medium text-gray-900 dark:text-gray-100">Fiscal Year</p>
+                      <p className="text-xs text-gray-600 dark:text-gray-400">{journalEntry.fiscal_year}</p>
                     </div>
                   </div>
                 </div>
@@ -281,8 +281,8 @@ export default function JournalEntryDetailPage() {
                   <div className="flex items-center space-x-3">
                     <HugeiconsIcon icon={Dollar01Icon} className="h-5 w-5 text-gray-400 dark:text-gray-500" />
                     <div>
-                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Total Amount</p>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                      <p className="text-xs font-medium text-gray-900 dark:text-gray-100">Total Amount</p>
+                      <p className="text-xs text-gray-600 dark:text-gray-400">
                         {mounted ? new Intl.NumberFormat('id-ID', {
                           style: 'currency',
                           currency: 'IDR',
@@ -296,8 +296,8 @@ export default function JournalEntryDetailPage() {
                     <div className="flex items-center space-x-3">
                       <HugeiconsIcon icon={FileIcon} className="h-5 w-5 text-gray-400 dark:text-gray-500" />
                       <div>
-                        <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Source Document</p>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">{journalEntry.source_document}</p>
+                        <p className="text-xs font-medium text-gray-900 dark:text-gray-100">Source Document</p>
+                        <p className="text-xs text-gray-600 dark:text-gray-400">{journalEntry.source_document}</p>
                       </div>
                     </div>
                   )}
@@ -305,8 +305,8 @@ export default function JournalEntryDetailPage() {
                   <div className="flex items-center space-x-3">
                     <HugeiconsIcon icon={UserIcon} className="h-5 w-5 text-gray-400 dark:text-gray-500" />
                     <div>
-                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Created By</p>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">{journalEntry.created_by}</p>
+                      <p className="text-xs font-medium text-gray-900 dark:text-gray-100">Created By</p>
+                      <p className="text-xs text-gray-600 dark:text-gray-400">{journalEntry.created_by}</p>
                     </div>
                   </div>
                 </div>
@@ -342,17 +342,17 @@ export default function JournalEntryDetailPage() {
                     {(journalEntry.journal_entry_lines || []).map((line) => (
                       <tr key={line.id}>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                          <div className="text-xs font-medium text-gray-900 dark:text-gray-100">
                             {getAccountName(line.account_id)}
                           </div>
                         </td>
                         <td className="px-6 py-4">
-                          <div className="text-sm text-gray-900 dark:text-gray-100">{line.description}</div>
+                          <div className="text-xs text-gray-900 dark:text-gray-100">{line.description}</div>
                           {line.reference && (
                             <div className="text-xs text-gray-500 dark:text-gray-400">Ref: {line.reference}</div>
                           )}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-900 dark:text-gray-100">
+                        <td className="px-6 py-4 whitespace-nowrap text-right text-xs text-gray-900 dark:text-gray-100">
                           {line.debit_amount > 0 ? (
                             mounted ? 
                               new Intl.NumberFormat('id-ID', {
@@ -363,7 +363,7 @@ export default function JournalEntryDetailPage() {
                               `Rp ${line.debit_amount.toLocaleString()}`
                           ) : '-'}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-900 dark:text-gray-100">
+                        <td className="px-6 py-4 whitespace-nowrap text-right text-xs text-gray-900 dark:text-gray-100">
                           {line.credit_amount > 0 ? (
                             mounted ?
                               new Intl.NumberFormat('id-ID', {
@@ -374,7 +374,7 @@ export default function JournalEntryDetailPage() {
                               `Rp ${line.credit_amount.toLocaleString()}`
                           ) : '-'}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                        <td className="px-6 py-4 whitespace-nowrap text-xs text-gray-500 dark:text-gray-400">
                           {getCostCenterName(line.cost_center_id) || '-'}
                         </td>
                       </tr>
@@ -382,17 +382,17 @@ export default function JournalEntryDetailPage() {
                   </tbody>
                   <tfoot className="bg-gray-50 dark:bg-gray-800">
                     <tr>
-                      <td colSpan={2} className="px-6 py-3 text-right text-sm font-medium text-gray-900 dark:text-gray-100">
+                      <td colSpan={2} className="px-6 py-3 text-right text-xs font-medium text-gray-900 dark:text-gray-100">
                         Total:
                       </td>
-                      <td className="px-6 py-3 text-right text-sm font-bold text-gray-900 dark:text-gray-100">
+                      <td className="px-6 py-3 text-right text-xs font-bold text-gray-900 dark:text-gray-100">
                         {mounted ? new Intl.NumberFormat('id-ID', {
                           style: 'currency',
                           currency: 'IDR',
                           minimumFractionDigits: 0
                         }).format(journalEntry.total_debit) : `Rp ${journalEntry.total_debit.toLocaleString()}`}
                       </td>
-                      <td className="px-6 py-3 text-right text-sm font-bold text-gray-900 dark:text-gray-100">
+                      <td className="px-6 py-3 text-right text-xs font-bold text-gray-900 dark:text-gray-100">
                         {mounted ? new Intl.NumberFormat('id-ID', {
                           style: 'currency',
                           currency: 'IDR',
@@ -461,28 +461,28 @@ export default function JournalEntryDetailPage() {
                   <div className="flex items-start space-x-3">
                     <div className="h-2 w-2 bg-green-500 rounded-full mt-2"></div>
                     <div>
-                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Entry Posted</p>
+                      <p className="text-xs font-medium text-gray-900 dark:text-gray-100">Entry Posted</p>
                       <p className="text-xs text-gray-500 dark:text-gray-400">
                         {mounted ? new Date(journalEntry.posted_at).toLocaleDateString('id-ID') : new Date(journalEntry.posted_at).toDateString()} by {journalEntry.posted_by}
                       </p>
                     </div>
                   </div>
                 )}
-                
+
                 <div className="flex items-start space-x-3">
                   <div className="h-2 w-2 bg-blue-500 rounded-full mt-2"></div>
                   <div>
-                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Entry Updated</p>
+                    <p className="text-xs font-medium text-gray-900 dark:text-gray-100">Entry Updated</p>
                     <p className="text-xs text-gray-500 dark:text-gray-400">
                       {mounted ? new Date(journalEntry.updated_at).toLocaleDateString('id-ID') : new Date(journalEntry.updated_at).toDateString()}
                     </p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-start space-x-3">
                   <div className="h-2 w-2 bg-gray-300 dark:bg-gray-600 rounded-full mt-2"></div>
                   <div>
-                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Entry Created</p>
+                    <p className="text-xs font-medium text-gray-900 dark:text-gray-100">Entry Created</p>
                     <p className="text-xs text-gray-500 dark:text-gray-400">
                       {mounted ? new Date(journalEntry.created_at).toLocaleDateString('id-ID') : new Date(journalEntry.created_at).toDateString()} by {journalEntry.created_by}
                     </p>
@@ -496,20 +496,20 @@ export default function JournalEntryDetailPage() {
               <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Entry Statistics</h3>
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600 dark:text-gray-400">Total Lines</span>
-                  <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{(journalEntry.journal_entry_lines || []).length}</span>
+                  <span className="text-xs text-gray-600 dark:text-gray-400">Total Lines</span>
+                  <span className="text-xs font-medium text-gray-900 dark:text-gray-100">{(journalEntry.journal_entry_lines || []).length}</span>
                 </div>
-                
+
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600 dark:text-gray-400">Entry Status</span>
+                  <span className="text-xs text-gray-600 dark:text-gray-400">Entry Status</span>
                   <Badge className={`${statusColors[journalEntry.status]} text-white text-xs`}>
                     {statusLabels[journalEntry.status]}
                   </Badge>
                 </div>
-                
+
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600 dark:text-gray-400">Fiscal Year</span>
-                  <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{journalEntry.fiscal_year}</span>
+                  <span className="text-xs text-gray-600 dark:text-gray-400">Fiscal Year</span>
+                  <span className="text-xs font-medium text-gray-900 dark:text-gray-100">{journalEntry.fiscal_year}</span>
                 </div>
               </div>
             </Card>

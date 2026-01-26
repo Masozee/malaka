@@ -99,7 +99,7 @@ export default function SalesReportsPage() {
           <span className="font-medium text-gray-900 dark:text-gray-100">
             {name as string}
           </span>
-          <span className="text-sm text-gray-500 dark:text-gray-400">
+          <span className="text-xs text-gray-500 dark:text-gray-400">
             {product.product_code}
           </span>
         </div>
@@ -190,7 +190,7 @@ export default function SalesReportsPage() {
             {name as string}
           </span>
           {customer.company_name && (
-            <span className="text-sm text-gray-500 dark:text-gray-400">
+            <span className="text-xs text-gray-500 dark:text-gray-400">
               {customer.company_name}
             </span>
           )}
@@ -223,7 +223,7 @@ export default function SalesReportsPage() {
       key: 'last_order_date' as keyof TopCustomer,
       title: 'Last Order',
       render: (date: unknown) => (
-        <span className="text-sm text-gray-600 dark:text-gray-400">
+        <span className="text-xs text-gray-600 dark:text-gray-400">
           {new Date(date as string).toLocaleDateString()}
         </span>
       ),

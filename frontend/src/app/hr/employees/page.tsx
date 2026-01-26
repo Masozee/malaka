@@ -172,7 +172,7 @@ export default function EmployeesPage() {
             >
               {record.employee_name}
             </Link>
-            <p className="text-sm text-gray-500">{record.employee_code}</p>
+            <p className="text-xs text-gray-500">{record.employee_code}</p>
           </div>
         </div>
       )
@@ -183,7 +183,7 @@ export default function EmployeesPage() {
       render: (value: unknown, record: Employee) => (
         <div>
           <p className="font-medium">{record.position}</p>
-          <p className="text-sm text-gray-500">{record.department}</p>
+          <p className="text-xs text-gray-500">{record.department}</p>
         </div>
       )
     },
@@ -192,8 +192,8 @@ export default function EmployeesPage() {
       title: 'Contact',
       render: (value: unknown, record: Employee) => (
         <div>
-          <p className="text-sm">{record.email}</p>
-          <p className="text-sm text-gray-500">{record.phone}</p>
+          <p className="text-xs">{record.email}</p>
+          <p className="text-xs text-gray-500">{record.phone}</p>
         </div>
       )
     },

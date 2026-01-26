@@ -510,8 +510,8 @@ export default function ProductPricesPage() {
       render: (price: ProductPrice) => (
         <div>
           <div className="font-medium">{price.product_name}</div>
-          <div className="text-sm text-muted-foreground">{price.article_code}</div>
-          <div className="text-sm text-muted-foreground">{price.size} - {price.color}</div>
+          <div className="text-xs text-muted-foreground">{price.article_code}</div>
+          <div className="text-xs text-muted-foreground">{price.size} - {price.color}</div>
         </div>
       )
     },
@@ -545,7 +545,7 @@ export default function ProductPricesPage() {
       key: 'customer_group',
       title: 'Customer Group',
       render: (price: ProductPrice) => (
-        <span className="text-sm">{price.customer_group || 'All Customers'}</span>
+        <span className="text-xs">{price.customer_group || 'All Customers'}</span>
       )
     },
     {

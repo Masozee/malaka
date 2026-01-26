@@ -88,7 +88,7 @@ export default function ShippingAnalyticsPage() {
                 return (
                     <div className="flex items-center space-x-2">
                         <Progress value={val} className="h-2 w-16" />
-                        <span className="text-sm text-muted-foreground">{val}%</span>
+                        <span className="text-xs text-muted-foreground">{val}%</span>
                     </div>
                 )
             }

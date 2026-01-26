@@ -106,7 +106,7 @@ export default function WorkOrdersPage() {
         <div className="flex flex-col">
           <Link
             href={`/production/work-orders/${row.original.id}`}
-            className="font-bold text-sm text-foreground hover:underline"
+            className="font-bold text-xs text-foreground hover:underline"
           >
             {row.original.workOrderNumber}
           </Link>
@@ -120,7 +120,7 @@ export default function WorkOrdersPage() {
       accessorKey: 'productName',
       cell: ({ row }) => (
         <div className="flex flex-col">
-          <span className="font-medium text-sm text-foreground">{row.original.productName}</span>
+          <span className="font-medium text-xs text-foreground">{row.original.productName}</span>
           <span className="text-[10px] text-muted-foreground">{row.original.productCode}</span>
         </div>
       )

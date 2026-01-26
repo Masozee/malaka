@@ -252,7 +252,7 @@ export default function OutboundScanningPage() {
       cell: ({ row }) => (
         <div>
           <div className="font-medium">{row.original.scanId}</div>
-          <div className="text-sm text-gray-500">{row.original.packageId}</div>
+          <div className="text-xs text-gray-500">{row.original.packageId}</div>
         </div>
       )
     },
@@ -263,7 +263,7 @@ export default function OutboundScanningPage() {
       cell: ({ row }) => (
         <div>
           <div className="font-medium">{row.original.airwaybill}</div>
-          <div className="text-sm text-gray-500">{row.original.courierName}</div>
+          <div className="text-xs text-gray-500">{row.original.courierName}</div>
         </div>
       )
     },
@@ -285,7 +285,7 @@ export default function OutboundScanningPage() {
       id: 'destination',
       header: 'Destination',
       cell: ({ row }) => (
-        <div className="text-sm">
+        <div className="text-xs">
           {row.original.destination}
         </div>
       )
@@ -295,7 +295,7 @@ export default function OutboundScanningPage() {
       id: 'customerName',
       header: 'Customer',
       cell: ({ row }) => (
-        <div className="text-sm">{row.original.customerName}</div>
+        <div className="text-xs">{row.original.customerName}</div>
       )
     },
     {
@@ -303,7 +303,7 @@ export default function OutboundScanningPage() {
       id: 'scanTime',
       header: 'Scan Time',
       cell: ({ row }) => (
-        <div className="text-sm">
+        <div className="text-xs">
           {row.original.scanDate} {row.original.scanTime}
         </div>
       )
@@ -313,7 +313,7 @@ export default function OutboundScanningPage() {
       id: 'location',
       header: 'Location',
       cell: ({ row }) => (
-        <div className="text-sm">{row.original.location}</div>
+        <div className="text-xs">{row.original.location}</div>
       )
     },
     {
@@ -334,7 +334,7 @@ export default function OutboundScanningPage() {
       id: 'scannedBy',
       header: 'Scanned By',
       cell: ({ row }) => (
-        <div className="text-sm">
+        <div className="text-xs">
           {row.original.scannedBy}
         </div>
       )

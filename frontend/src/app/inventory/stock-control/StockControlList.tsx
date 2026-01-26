@@ -37,7 +37,7 @@ export default function StockControlList({ data, onEdit }: StockControlListProps
             header: 'Code',
             accessorKey: 'code',
             cell: ({ row }) => (
-                <span className="font-mono text-sm">{row.original.code}</span>
+                <span className="font-mono text-xs">{row.original.code}</span>
             )
         },
         {
@@ -56,7 +56,7 @@ export default function StockControlList({ data, onEdit }: StockControlListProps
             header: 'Warehouse',
             accessorKey: 'warehouse',
             cell: ({ row }) => (
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
                     <HugeiconsIcon icon={Store01Icon} className="h-3 w-3" />
                     {row.original.warehouse}
                 </div>
@@ -68,7 +68,7 @@ export default function StockControlList({ data, onEdit }: StockControlListProps
             accessorKey: 'currentStock',
             cell: ({ row }) => (
                 <div className="text-center">
-                    <div className="font-bold text-sm bg-muted py-1 rounded-md mb-1">
+                    <div className="font-bold text-xs bg-muted py-1 rounded-md mb-1">
                         {row.original.currentStock.toLocaleString()}
                     </div>
                     <div className="text-[10px] text-muted-foreground whitespace-nowrap">
@@ -82,7 +82,7 @@ export default function StockControlList({ data, onEdit }: StockControlListProps
             header: 'Unit Cost',
             accessorKey: 'unitCost',
             cell: ({ row }) => (
-                <div className="text-right font-medium text-sm">
+                <div className="text-right font-medium text-xs">
                     {(row.original.unitCost || 0).toLocaleString('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 })}
                 </div>
             )
@@ -92,7 +92,7 @@ export default function StockControlList({ data, onEdit }: StockControlListProps
             header: 'Total Value',
             accessorKey: 'totalValue',
             cell: ({ row }) => (
-                <div className="text-right font-medium text-sm">
+                <div className="text-right font-medium text-xs">
                     {(row.original.totalValue || 0).toLocaleString('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 })}
                 </div>
             )

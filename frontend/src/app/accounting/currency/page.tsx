@@ -225,7 +225,7 @@ export default function CurrencyPage() {
             </div>
             <div>
               <div className="font-medium">{currency.code}</div>
-              <div className="text-sm text-muted-foreground">{currency.name}</div>
+              <div className="text-xs text-muted-foreground">{currency.name}</div>
             </div>
           </div>
         )
@@ -288,7 +288,7 @@ export default function CurrencyPage() {
               <div className="font-medium">
                 {currency.rate_change_24h > 0 ? '+' : ''}{formatCurrency(currency.rate_change_24h, 'IDR')}
               </div>
-              <div className="text-sm">
+              <div className="text-xs">
                 {percentage > 0 ? '+' : ''}{percentage.toFixed(2)}%
               </div>
             </div>
@@ -321,7 +321,7 @@ export default function CurrencyPage() {
       sortable: true,
       render: (value: unknown, currency: Currency) => {
         if (!currency) return null
-        return <div className="text-sm">{formatDateTime(currency.last_updated)}</div>
+        return <div className="text-xs">{formatDateTime(currency.last_updated)}</div>
       }
     }
   ]
@@ -342,7 +342,7 @@ export default function CurrencyPage() {
       sortable: true,
       render: (value: unknown, history: ExchangeRateHistory) => {
         if (!history) return null
-        return <div className="text-sm">{formatDate(history.date)}</div>
+        return <div className="text-xs">{formatDate(history.date)}</div>
       }
     },
     {
@@ -361,8 +361,8 @@ export default function CurrencyPage() {
         if (!history) return null
         return (
           <div>
-            <div className="text-sm text-green-600">H: {formatCurrency(history.high, 'IDR')}</div>
-            <div className="text-sm text-red-600">L: {formatCurrency(history.low, 'IDR')}</div>
+            <div className="text-xs text-green-600">H: {formatCurrency(history.high, 'IDR')}</div>
+            <div className="text-xs text-red-600">L: {formatCurrency(history.low, 'IDR')}</div>
           </div>
         )
       }
@@ -381,7 +381,7 @@ export default function CurrencyPage() {
               <div className="font-medium">
                 {history.change > 0 ? '+' : ''}{formatCurrency(history.change, 'IDR')}
               </div>
-              <div className="text-sm">
+              <div className="text-xs">
                 {history.change_percentage > 0 ? '+' : ''}{history.change_percentage.toFixed(2)}%
               </div>
             </div>

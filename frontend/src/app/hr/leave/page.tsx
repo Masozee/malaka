@@ -232,7 +232,7 @@ export default function LeavePage() {
       render: (value: unknown, record: LeaveRequest) => (
         <div>
           <div className="font-medium">{record.employeeName}</div>
-          <div className="text-sm text-gray-500">{record.employeeId} • {record.department}</div>
+          <div className="text-xs text-gray-500">{record.employeeId} • {record.department}</div>
         </div>
       )
     },
@@ -267,7 +267,7 @@ export default function LeavePage() {
       title: 'Start Date',
       sortable: true,
       render: (value: unknown, record: LeaveRequest) => (
-        <div className="text-sm">
+        <div className="text-xs">
           {mounted ? new Date(record.startDate).toLocaleDateString('id-ID') : ''}
         </div>
       )
@@ -277,7 +277,7 @@ export default function LeavePage() {
       title: 'End Date',
       sortable: true,
       render: (value: unknown, record: LeaveRequest) => (
-        <div className="text-sm">
+        <div className="text-xs">
           {mounted ? new Date(record.endDate).toLocaleDateString('id-ID') : ''}
         </div>
       )
@@ -317,7 +317,7 @@ export default function LeavePage() {
       title: 'Applied',
       sortable: true,
       render: (value: unknown, record: LeaveRequest) => (
-        <div className="text-sm">
+        <div className="text-xs">
           {mounted ? new Date(record.appliedDate).toLocaleDateString('id-ID') : ''}
         </div>
       )
@@ -327,7 +327,7 @@ export default function LeavePage() {
       title: 'Reason',
       searchable: true,
       render: (value: unknown, record: LeaveRequest) => (
-        <div className="text-sm max-w-48 truncate" title={record.reason}>
+        <div className="text-xs max-w-48 truncate" title={record.reason}>
           {record.reason}
         </div>
       )

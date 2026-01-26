@@ -147,7 +147,7 @@ export default function StockAdjustmentsPage() {
         <div className="flex flex-col">
           <Link
             href={`/inventory/adjustments/${row.original.id}`}
-            className="font-bold text-sm text-blue-600 dark:text-blue-400 hover:underline"
+            className="font-bold text-xs text-blue-600 dark:text-blue-400 hover:underline"
           >
             {row.original.adjustment_number}
           </Link>
@@ -178,7 +178,7 @@ export default function StockAdjustmentsPage() {
       header: 'Location',
       accessorKey: 'location',
       cell: ({ row }) => (
-        <div className="flex items-center gap-2 text-sm">
+        <div className="flex items-center gap-2 text-xs">
           <HugeiconsIcon icon={Store01Icon} className="h-4 w-4 text-muted-foreground" />
           <div className="flex flex-col">
             <span>{row.original.location}</span>
@@ -192,7 +192,7 @@ export default function StockAdjustmentsPage() {
       header: 'Items',
       accessorKey: 'totalItems',
       cell: ({ row }) => (
-        <div className="text-center text-sm">
+        <div className="text-center text-xs">
           <span className="font-medium">{row.original.totalItems}</span> items
         </div>
       )
@@ -205,7 +205,7 @@ export default function StockAdjustmentsPage() {
         const value = row.original.total_value_impact || 0
         const color = value > 0 ? 'text-green-600' : value < 0 ? 'text-red-600' : 'text-gray-600'
         return (
-          <div className={`font-medium text-sm ${color}`}>
+          <div className={`font-medium text-xs ${color}`}>
             {mounted ? value.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' }) : ''}
           </div>
         )
@@ -216,7 +216,7 @@ export default function StockAdjustmentsPage() {
       header: 'Created By',
       accessorKey: 'created_by',
       cell: ({ row }) => (
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
           <HugeiconsIcon icon={UserIcon} className="h-3 w-3" />
           <span>{row.original.created_by}</span>
         </div>

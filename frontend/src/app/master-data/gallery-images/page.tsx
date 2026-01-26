@@ -384,7 +384,7 @@ export default function GalleryImagesPage() {
           </div>
           <div>
             <div className="font-medium">{row.getValue('fileName')}</div>
-            <div className="text-sm text-gray-500">{row.original.productName}</div>
+            <div className="text-xs text-gray-500">{row.original.productName}</div>
           </div>
         </div>
       )
@@ -417,7 +417,7 @@ export default function GalleryImagesPage() {
       accessorKey: 'dimensions',
       header: 'Dimensions',
       cell: ({ row }: any) => (
-        <div className="text-sm">{row.getValue('dimensions')}</div>
+        <div className="text-xs">{row.getValue('dimensions')}</div>
       )
     },
     {
@@ -426,8 +426,8 @@ export default function GalleryImagesPage() {
       cell: ({ row }: any) => {
         const size = row.getValue('fileSize') as number
         return (
-          <div className="text-sm">
-            {size > 1048576 
+          <div className="text-xs">
+            {size > 1048576
               ? `${(size / 1048576).toFixed(1)}MB`
               : `${(size / 1024).toFixed(0)}KB`
             }
@@ -464,7 +464,7 @@ export default function GalleryImagesPage() {
       accessorKey: 'uploadDate',
       header: 'Upload Date',
       cell: ({ row }: any) => (
-        <div className="text-sm">
+        <div className="text-xs">
           {mounted ? new Date(row.getValue('uploadDate')).toLocaleDateString('id-ID') : ''}
         </div>
       )

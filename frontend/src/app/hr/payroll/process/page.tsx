@@ -107,7 +107,7 @@ export default function PayrollProcessPage() {
       render: (_value: unknown, item: PayrollItem) => (
         <div>
           <div className="font-medium">{item.employee.name}</div>
-          <div className="text-sm text-muted-foreground">{item.employee.employeeId} • {item.employee.position}</div>
+          <div className="text-xs text-muted-foreground">{item.employee.employeeId} • {item.employee.position}</div>
         </div>
       )
     },

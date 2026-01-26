@@ -153,7 +153,7 @@ export default function CashBankPage() {
       render: (value: unknown, account: CashBankAccount) => (
         <div>
           <div className="font-medium">{account.account_code}</div>
-          <div className="text-sm text-muted-foreground">{account.account_name}</div>
+          <div className="text-xs text-muted-foreground">{account.account_name}</div>
         </div>
       )
     },
@@ -173,7 +173,7 @@ export default function CashBankPage() {
         account.account_type === 'bank' ? (
           <div>
             <div className="font-medium">{account.bank_name}</div>
-            <div className="text-sm text-muted-foreground font-mono">{account.account_number}</div>
+            <div className="text-xs text-muted-foreground font-mono">{account.account_number}</div>
           </div>
         ) : (
           <span className="text-muted-foreground">-</span>
@@ -188,7 +188,7 @@ export default function CashBankPage() {
           <div className="font-medium text-lg">
             {formatCurrency(account.balance, account.currency)}
           </div>
-          <div className="text-sm text-muted-foreground">{account.currency}</div>
+          <div className="text-xs text-muted-foreground">{account.currency}</div>
         </div>
       )
     },
@@ -198,7 +198,7 @@ export default function CashBankPage() {
       render: (value: unknown, account: CashBankAccount) => (
         <div className="text-center">
           <div className="font-medium">{account.transactions_count}</div>
-          <div className="text-sm text-muted-foreground">total</div>
+          <div className="text-xs text-muted-foreground">total</div>
         </div>
       )
     },
@@ -206,7 +206,7 @@ export default function CashBankPage() {
       key: 'last_transaction_date' as keyof CashBankAccount,
       title: 'Last Activity',
       render: (value: unknown, account: CashBankAccount) => (
-        <div className="text-sm">{formatDate(account.last_transaction_date)}</div>
+        <div className="text-xs">{formatDate(account.last_transaction_date)}</div>
       )
     },
     {
@@ -254,7 +254,7 @@ export default function CashBankPage() {
       key: 'reference' as keyof CashBankTransaction,
       title: 'Reference',
       render: (value: unknown, transaction: CashBankTransaction) => (
-        <div className="font-mono text-sm font-medium">{transaction.reference}</div>
+        <div className="font-mono text-xs font-medium">{transaction.reference}</div>
       )
     },
     {

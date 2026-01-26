@@ -205,7 +205,7 @@ export default function SalesDashboardPage() {
                       <p className="font-medium text-gray-900 dark:text-gray-100">
                         {customer.customer_name}
                       </p>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
                         {customer.total_orders} orders
                       </p>
                     </div>
@@ -214,7 +214,7 @@ export default function SalesDashboardPage() {
                     <p className="font-semibold text-gray-900 dark:text-gray-100">
                       ${customer.total_revenue.toLocaleString()}
                     </p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
                       {customer.status === 'vip' ? '👑 VIP' : '✅ Active'}
                     </p>
                   </div>
@@ -247,7 +247,7 @@ export default function SalesDashboardPage() {
                   <p className="text-xl font-bold text-gray-900 dark:text-gray-100">
                     ${(region.total_revenue / 1000).toFixed(0)}K
                   </p>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
                     {region.total_orders} orders • {region.customer_count} customers
                   </p>
                 </div>

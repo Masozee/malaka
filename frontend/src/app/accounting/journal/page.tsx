@@ -179,7 +179,7 @@ export default function AccountingJournalPage() {
       key: 'reference' as keyof JournalEntry,
       title: 'Reference',
       render: (value: unknown, record: JournalEntry) => (
-        <span className="font-mono text-sm">{record.reference}</span>
+        <span className="font-mono text-xs">{record.reference}</span>
       )
     },
     {
@@ -222,7 +222,7 @@ export default function AccountingJournalPage() {
       render: (value: unknown, record: JournalEntry) => (
         record.source_document && (
           <div className="flex items-center space-x-1">
-            <span className="text-sm">{record.source_document}</span>
+            <span className="text-xs">{record.source_document}</span>
           </div>
         )
       )

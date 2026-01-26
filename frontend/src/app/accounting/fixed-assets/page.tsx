@@ -351,7 +351,7 @@ export default function FixedAssetsPage() {
       key: 'asset_code',
       title: 'Asset Code',
       render: (_: unknown, asset: FixedAsset) => (
-        <div className="font-mono text-sm font-medium">{asset.asset_code}</div>
+        <div className="font-mono text-xs font-medium">{asset.asset_code}</div>
       )
     },
     {
@@ -360,7 +360,7 @@ export default function FixedAssetsPage() {
       render: (_: unknown, asset: FixedAsset) => (
         <div>
           <div className="font-medium">{asset.asset_name}</div>
-          <div className="text-sm text-muted-foreground">{asset.description}</div>
+          <div className="text-xs text-muted-foreground">{asset.description}</div>
         </div>
       )
     },
@@ -379,7 +379,7 @@ export default function FixedAssetsPage() {
       key: 'location',
       title: 'Location',
       render: (_: unknown, asset: FixedAsset) => (
-        <div className="text-sm">{asset.location}</div>
+        <div className="text-xs">{asset.location}</div>
       )
     },
     {
@@ -387,11 +387,11 @@ export default function FixedAssetsPage() {
       title: 'Value',
       render: (_: unknown, asset: FixedAsset) => (
         <div className="space-y-1">
-          <div className="text-sm">
+          <div className="text-xs">
             <span className="text-muted-foreground">Purchase:</span>
             <span className="font-medium ml-1">{formatCurrency(asset.purchase_cost)}</span>
           </div>
-          <div className="text-sm">
+          <div className="text-xs">
             <span className="text-muted-foreground">Current:</span>
             <span className="font-medium ml-1">{formatCurrency(asset.current_book_value)}</span>
           </div>
@@ -402,11 +402,11 @@ export default function FixedAssetsPage() {
       key: 'accumulated_depreciation',
       title: 'Depreciation',
       render: (_: unknown, asset: FixedAsset) => {
-        if (!mounted) return <div className="text-sm text-gray-500">Loading...</div>
+        if (!mounted) return <div className="text-xs text-gray-500">Loading...</div>
         const depreciationRate = asset.purchase_cost > 0 ? (asset.accumulated_depreciation / asset.purchase_cost) * 100 : 0
         return (
           <div className="space-y-1">
-            <div className="flex justify-between text-sm">
+            <div className="flex justify-between text-xs">
               <span>Accumulated:</span>
               <span className="font-medium">{formatCurrency(asset.accumulated_depreciation)}</span>
             </div>
@@ -422,13 +422,13 @@ export default function FixedAssetsPage() {
       key: 'next_maintenance_date',
       title: 'Maintenance',
       render: (_: unknown, asset: FixedAsset) => {
-        if (!mounted) return <div className="text-sm text-gray-500">Loading...</div>
+        if (!mounted) return <div className="text-xs text-gray-500">Loading...</div>
         const maintenanceStatus = getMaintenanceStatus(asset)
         return (
           <div>
             {asset.next_maintenance_date ? (
               <div>
-                <div className="text-sm">{formatDate(asset.next_maintenance_date)}</div>
+                <div className="text-xs">{formatDate(asset.next_maintenance_date)}</div>
                 {maintenanceStatus && (
                   <div className={`text-xs ${maintenanceStatus.color}`}>
                     {maintenanceStatus.label}
@@ -436,7 +436,7 @@ export default function FixedAssetsPage() {
                 )}
               </div>
             ) : (
-              <span className="text-muted-foreground text-sm">No schedule</span>
+              <span className="text-muted-foreground text-xs">No schedule</span>
             )}
           </div>
         )

@@ -93,7 +93,7 @@ export default function ReturnSupplierPage() {
       header: 'Return #',
       cell: ({ row }) => (
         <div className="flex flex-col">
-          <span className="font-bold text-sm text-blue-600 dark:text-blue-400 hover:underline cursor-pointer">
+          <span className="font-bold text-xs text-blue-600 dark:text-blue-400 hover:underline cursor-pointer">
             {row.original.returnNumber}
           </span>
           <span className="text-[10px] text-muted-foreground">{row.original.supplierName}</span>
@@ -105,7 +105,7 @@ export default function ReturnSupplierPage() {
       accessorKey: 'originalPO',
       header: 'PO Reference',
       cell: ({ row }) => (
-        <span className="font-medium text-sm">{row.original.originalPO}</span>
+        <span className="font-medium text-xs">{row.original.originalPO}</span>
       )
     },
     {
@@ -126,7 +126,7 @@ export default function ReturnSupplierPage() {
       accessorKey: 'totalItems',
       header: 'Items',
       cell: ({ row }) => (
-        <div className="text-center text-sm">
+        <div className="text-center text-xs">
           <span className="font-medium">{row.original.totalItems}</span> types
           <div className="text-xs text-muted-foreground">
             {row.original.totalQuantity} qty
@@ -140,7 +140,7 @@ export default function ReturnSupplierPage() {
       header: 'Value',
       cell: ({ row }) => (
         <div className="flex flex-col text-right">
-          <span className="font-medium text-sm">
+          <span className="font-medium text-xs">
             {mounted ? row.original.totalValue.toLocaleString('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }) : ''}
           </span>
           <span className="text-[10px] text-muted-foreground">
@@ -167,7 +167,7 @@ export default function ReturnSupplierPage() {
       accessorKey: 'returnDate',
       header: 'Date',
       cell: ({ row }) => (
-        <span className="text-sm text-muted-foreground whitespace-nowrap">
+        <span className="text-xs text-muted-foreground whitespace-nowrap">
           {mounted ? new Date(row.original.returnDate).toLocaleDateString('id-ID') : ''}
         </span>
       )

@@ -286,7 +286,7 @@ export default function AttendancePage() {
       render: (value: unknown, record: AttendanceRecord) => (
         <div>
           <div className="font-medium">{record.employee?.employee_name || 'Unknown Employee'}</div>
-          <div className="text-sm text-muted-foreground">{record.employee?.employee_code || 'N/A'} • {record.employee?.department || 'N/A'}</div>
+          <div className="text-xs text-muted-foreground">{record.employee?.employee_code || 'N/A'} • {record.employee?.department || 'N/A'}</div>
         </div>
       )
     },
@@ -294,7 +294,7 @@ export default function AttendancePage() {
       key: 'attendance_date' as keyof AttendanceRecord,
       title: 'Date',
       render: (value: unknown, record: AttendanceRecord) => (
-        <div className="text-sm">
+        <div className="text-xs">
           {mounted && record.attendance_date ? new Date(record.attendance_date).toLocaleDateString('id-ID', {
             weekday: 'short',
             year: 'numeric',
@@ -308,7 +308,7 @@ export default function AttendancePage() {
       key: 'actual_in' as keyof AttendanceRecord,
       title: 'Check In',
       render: (value: unknown, record: AttendanceRecord) => (
-        <div className="text-sm font-mono">
+        <div className="text-xs font-mono">
           {record?.actual_in ? new Date(record.actual_in).toLocaleTimeString('id-ID', {
             hour: '2-digit',
             minute: '2-digit'
@@ -320,7 +320,7 @@ export default function AttendancePage() {
       key: 'actual_out' as keyof AttendanceRecord,
       title: 'Check Out',
       render: (value: unknown, record: AttendanceRecord) => (
-        <div className="text-sm font-mono">
+        <div className="text-xs font-mono">
           {record?.actual_out ? new Date(record.actual_out).toLocaleTimeString('id-ID', {
             hour: '2-digit',
             minute: '2-digit'
@@ -332,7 +332,7 @@ export default function AttendancePage() {
       key: 'work_hours' as keyof AttendanceRecord,
       title: 'Working Hours',
       render: (value: unknown, record: AttendanceRecord) => (
-        <div className="text-sm">
+        <div className="text-xs">
           {record?.work_hours ? `${record.work_hours.toFixed(1)}h` : '-'}
           {record?.overtime_hours && record.overtime_hours > 0 && (
             <span className="text-purple-600 ml-1">+{record.overtime_hours.toFixed(1)}h</span>
@@ -356,7 +356,7 @@ export default function AttendancePage() {
       key: 'remarks' as keyof AttendanceRecord,
       title: 'Remarks',
       render: (value: unknown, record: AttendanceRecord) => (
-        <div className="text-sm text-muted-foreground max-w-xs truncate">
+        <div className="text-xs text-muted-foreground max-w-xs truncate">
           {record?.remarks || '-'}
         </div>
       )

@@ -89,8 +89,8 @@ export default function ProductionAnalyticsPage() {
       title: 'Product',
       render: (item: ProductionCostAnalysis) => (
         <div>
-          <div className="font-medium">{item?.productName || ''}</div>
-          <div className="text-sm text-muted-foreground">{item?.productCode || ''}</div>
+          <div className="font-medium text-xs">{item?.productName || ''}</div>
+          <div className="text-xs text-muted-foreground">{item?.productCode || ''}</div>
         </div>
       )
     },
@@ -99,8 +99,8 @@ export default function ProductionAnalyticsPage() {
       title: 'Units Produced',
       render: (item: ProductionCostAnalysis) => (
         <div className="text-center">
-          <div className="font-medium">{item?.unitsProduced || 0}</div>
-          <div className="text-sm text-muted-foreground">units</div>
+          <div className="font-medium text-xs">{item?.unitsProduced || 0}</div>
+          <div className="text-xs text-muted-foreground">units</div>
         </div>
       )
     },
@@ -109,8 +109,8 @@ export default function ProductionAnalyticsPage() {
       title: 'Material Cost',
       render: (item: ProductionCostAnalysis) => (
         <div>
-          <div className="font-medium">{formatCurrency(item?.materialCost?.total)}</div>
-          <div className="text-sm text-muted-foreground">
+          <div className="font-medium text-xs">{formatCurrency(item?.materialCost?.total)}</div>
+          <div className="text-xs text-muted-foreground">
             {formatCurrency(item?.materialCost?.perUnit)} per unit
           </div>
         </div>
@@ -121,8 +121,8 @@ export default function ProductionAnalyticsPage() {
       title: 'Labor Cost',
       render: (item: ProductionCostAnalysis) => (
         <div>
-          <div className="font-medium">{formatCurrency(item?.laborCost?.total)}</div>
-          <div className="text-sm text-muted-foreground">
+          <div className="font-medium text-xs">{formatCurrency(item?.laborCost?.total)}</div>
+          <div className="text-xs text-muted-foreground">
             {formatCurrency(item?.laborCost?.perUnit)} per unit
           </div>
           <div className="text-xs text-muted-foreground">
@@ -136,8 +136,8 @@ export default function ProductionAnalyticsPage() {
       title: 'Overhead Cost',
       render: (item: ProductionCostAnalysis) => (
         <div>
-          <div className="font-medium">{formatCurrency(item?.overheadCost?.total)}</div>
-          <div className="text-sm text-muted-foreground">
+          <div className="font-medium text-xs">{formatCurrency(item?.overheadCost?.total)}</div>
+          <div className="text-xs text-muted-foreground">
             {formatCurrency(item?.overheadCost?.perUnit)} per unit
           </div>
         </div>
@@ -148,8 +148,8 @@ export default function ProductionAnalyticsPage() {
       title: 'Logistics Cost',
       render: (item: ProductionCostAnalysis) => (
         <div>
-          <div className="font-medium">{formatCurrency(item?.logisticsCost?.total)}</div>
-          <div className="text-sm text-muted-foreground">
+          <div className="font-medium text-xs">{formatCurrency(item?.logisticsCost?.total)}</div>
+          <div className="text-xs text-muted-foreground">
             {formatCurrency(item?.logisticsCost?.perUnit)} per unit
           </div>
         </div>
@@ -160,8 +160,8 @@ export default function ProductionAnalyticsPage() {
       title: 'Total Cost',
       render: (item: ProductionCostAnalysis) => (
         <div>
-          <div className="font-medium text-red-600">{formatCurrency(item?.totalCost)}</div>
-          <div className="text-sm text-muted-foreground">
+          <div className="font-medium text-xs text-red-600">{formatCurrency(item?.totalCost)}</div>
+          <div className="text-xs text-muted-foreground">
             {formatCurrency(item?.costPerUnit)} per unit
           </div>
         </div>
@@ -172,11 +172,11 @@ export default function ProductionAnalyticsPage() {
       title: 'Profit Analysis',
       render: (item: ProductionCostAnalysis) => (
         <div>
-          <div className="font-medium text-green-600">{formatCurrency(item?.profit)}</div>
-          <div className="text-sm text-muted-foreground">
+          <div className="font-medium text-xs text-green-600">{formatCurrency(item?.profit)}</div>
+          <div className="text-xs text-muted-foreground">
             Revenue: {formatCurrency(item?.revenue)}
           </div>
-          <div className={`text-sm font-medium ${(item?.profitMargin || 0) >= 20 ? 'text-green-600' : (item?.profitMargin || 0) >= 10 ? 'text-orange-600' : 'text-red-600'}`}>
+          <div className={`text-xs font-medium ${(item?.profitMargin || 0) >= 20 ? 'text-green-600' : (item?.profitMargin || 0) >= 10 ? 'text-orange-600' : 'text-red-600'}`}>
             Margin: {formatPercentage(item?.profitMargin)}
           </div>
         </div>
@@ -191,8 +191,8 @@ export default function ProductionAnalyticsPage() {
       title: 'Product',
       render: (item: ProductionEfficiencyMetrics) => (
         <div>
-          <div className="font-medium">{item?.productName || ''}</div>
-          <div className="text-sm text-muted-foreground">{item?.productCode || ''}</div>
+          <div className="font-medium text-xs">{item?.productName || ''}</div>
+          <div className="text-xs text-muted-foreground">{item?.productCode || ''}</div>
         </div>
       )
     },
@@ -201,7 +201,7 @@ export default function ProductionAnalyticsPage() {
       title: 'Overall Efficiency',
       render: (item: ProductionEfficiencyMetrics) => (
         <div className="space-y-1">
-          <div className="flex justify-between text-sm">
+          <div className="flex justify-between text-xs">
             <span className="font-medium">{formatPercentage(item?.overallEfficiency)}</span>
             <span className={`text-xs ${(item?.overallEfficiency || 0) >= 85 ? 'text-green-600' : 'text-orange-600'}`}>
               {(item?.overallEfficiency || 0) >= 85 ? 'Excellent' : 'Needs Improvement'}
@@ -216,13 +216,13 @@ export default function ProductionAnalyticsPage() {
       title: 'Time Efficiency',
       render: (item: ProductionEfficiencyMetrics) => (
         <div>
-          <div className="text-sm">
+          <div className="text-xs">
             Planned: {item?.timeEfficiency?.plannedHours || 0}h
           </div>
-          <div className="text-sm">
+          <div className="text-xs">
             Actual: {item?.timeEfficiency?.actualHours || 0}h
           </div>
-          <div className={`text-sm font-medium ${(item?.timeEfficiency?.efficiency || 0) >= 90 ? 'text-green-600' : 'text-orange-600'}`}>
+          <div className={`text-xs font-medium ${(item?.timeEfficiency?.efficiency || 0) >= 90 ? 'text-green-600' : 'text-orange-600'}`}>
             {formatPercentage(item?.timeEfficiency?.efficiency)}
           </div>
         </div>
@@ -233,13 +233,13 @@ export default function ProductionAnalyticsPage() {
       title: 'Material Efficiency',
       render: (item: ProductionEfficiencyMetrics) => (
         <div>
-          <div className="text-sm">
+          <div className="text-xs">
             Used: {item?.materialEfficiency?.materialsUsed || 0} units
           </div>
-          <div className="text-sm">
+          <div className="text-xs">
             Waste: {item?.materialEfficiency?.waste || 0} units
           </div>
-          <div className={`text-sm font-medium ${(item?.materialEfficiency?.efficiency || 0) >= 95 ? 'text-green-600' : 'text-orange-600'}`}>
+          <div className={`text-xs font-medium ${(item?.materialEfficiency?.efficiency || 0) >= 95 ? 'text-green-600' : 'text-orange-600'}`}>
             {formatPercentage(item?.materialEfficiency?.efficiency)}
           </div>
         </div>
@@ -250,7 +250,7 @@ export default function ProductionAnalyticsPage() {
       title: 'Quality Score',
       render: (item: ProductionEfficiencyMetrics) => (
         <div className="space-y-1">
-          <div className="flex justify-between text-sm">
+          <div className="flex justify-between text-xs">
             <span className="font-medium">{formatPercentage(item?.qualityScore)}</span>
           </div>
           <Progress value={item?.qualityScore || 0} className="h-2" />

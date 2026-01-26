@@ -158,7 +158,7 @@ export default function VendorEvaluationList({ initialData }: VendorEvaluationLi
             cell: ({ row }) => (
                 <div>
                     <div className="font-medium">{row.original.supplier_name || 'N/A'}</div>
-                    <div className="text-sm text-muted-foreground">
+                    <div className="text-xs text-muted-foreground">
                         {new Date(row.original.evaluation_period_start).toLocaleDateString('id-ID')} - {new Date(row.original.evaluation_period_end).toLocaleDateString('id-ID')}
                     </div>
                 </div>

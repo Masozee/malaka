@@ -169,7 +169,7 @@ export default function PurchaseRequestsList({ initialData }: PurchaseRequestsLi
             cell: ({ row }) => (
                 <div>
                     <div className="font-medium">{row.original.request_number}</div>
-                    <div className="text-sm text-gray-500">{row.original.requester_name || 'Unknown'} • {row.original.department}</div>
+                    <div className="text-xs text-gray-500">{row.original.requester_name || 'Unknown'} • {row.original.department}</div>
                 </div>
             )
         },
@@ -178,7 +178,7 @@ export default function PurchaseRequestsList({ initialData }: PurchaseRequestsLi
             id: 'title',
             header: 'Title',
             cell: ({ row }) => (
-                <div className="text-sm max-w-60 truncate" title={row.original.title}>
+                <div className="text-xs max-w-60 truncate" title={row.original.title}>
                     {row.original.title}
                 </div>
             )
@@ -198,7 +198,7 @@ export default function PurchaseRequestsList({ initialData }: PurchaseRequestsLi
             id: 'total_amount',
             header: 'Amount',
             cell: ({ row }) => (
-                <div className="text-sm font-medium">
+                <div className="text-xs font-medium">
                     {row.original.total_amount.toLocaleString('id-ID', { style: 'currency', currency: row.original.currency || 'IDR', maximumFractionDigits: 0 })}
                 </div>
             )

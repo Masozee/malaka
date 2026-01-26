@@ -140,7 +140,7 @@ export default function RawMaterialsPage() {
       render: (value: unknown, item: RawMaterial) => (
         <div>
           <div className="font-medium">{item.materialName}</div>
-          <div className="text-sm text-gray-500 dark:text-gray-400 capitalize">{item.category}</div>
+          <div className="text-xs text-gray-500 dark:text-gray-400 capitalize">{item.category}</div>
         </div>
       )
     },
@@ -180,7 +180,7 @@ export default function RawMaterialsPage() {
       render: (value: unknown, item: RawMaterial) => (
         <div>
           <div className="font-medium">{item.supplier}</div>
-          <div className="text-sm text-gray-500 dark:text-gray-400">
+          <div className="text-xs text-gray-500 dark:text-gray-400">
             Lead: {item.leadTime} days
           </div>
         </div>
@@ -192,7 +192,7 @@ export default function RawMaterialsPage() {
       render: (value: unknown, item: RawMaterial) => (
         <div className="flex items-center gap-2">
           <HugeiconsIcon icon={Store01Icon} className="w-4 h-4 text-gray-400" />
-          <span className="text-sm">{item.location}</span>
+          <span className="text-xs">{item.location}</span>
         </div>
       )
     },

@@ -171,7 +171,7 @@ export default function ContractsList({ initialData }: ContractsListProps) {
                     className="font-medium text-blue-600 hover:text-blue-800 dark:text-blue-400"
                 >
                     <div>{row.original.contract_number}</div>
-                    <div className="text-sm text-muted-foreground font-normal">
+                    <div className="text-xs text-muted-foreground font-normal">
                         {row.original.supplier_name || row.original.title}
                     </div>
                 </Link>
@@ -192,7 +192,7 @@ export default function ContractsList({ initialData }: ContractsListProps) {
             header: 'Value',
             accessorKey: 'value',
             cell: ({ row }) => (
-                <span className="text-sm font-medium">
+                <span className="text-xs font-medium">
                     {row.original.value.toLocaleString('id-ID', {
                         style: 'currency',
                         currency: row.original.currency || 'IDR',
@@ -206,7 +206,7 @@ export default function ContractsList({ initialData }: ContractsListProps) {
             header: 'Start Date',
             accessorKey: 'start_date',
             cell: ({ row }) => (
-                <span className="text-sm">
+                <span className="text-xs">
                     {new Date(row.original.start_date).toLocaleDateString('id-ID')}
                 </span>
             ),
@@ -216,7 +216,7 @@ export default function ContractsList({ initialData }: ContractsListProps) {
             header: 'End Date',
             accessorKey: 'end_date',
             cell: ({ row }) => (
-                <span className="text-sm">
+                <span className="text-xs">
                     {new Date(row.original.end_date).toLocaleDateString('id-ID')}
                 </span>
             ),

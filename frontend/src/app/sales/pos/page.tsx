@@ -322,7 +322,7 @@ export default function POSPage() {
         <div className="flex items-center space-x-2">
           <HugeiconsIcon icon={Calendar01Icon} className="h-4 w-4 text-muted-foreground" />
           <div>
-            <div className="text-sm font-medium">{formatDateTime(transaction.created_at)}</div>
+            <div className="text-xs font-medium">{formatDateTime(transaction.created_at)}</div>
           </div>
         </div>
       )
@@ -344,7 +344,7 @@ export default function POSPage() {
         <div>
           <div className="font-medium">{transaction.customer_name || 'Walk-in'}</div>
           {transaction.customer_phone && (
-            <div className="text-sm text-muted-foreground">{transaction.customer_phone}</div>
+            <div className="text-xs text-muted-foreground">{transaction.customer_phone}</div>
           )}
         </div>
       )

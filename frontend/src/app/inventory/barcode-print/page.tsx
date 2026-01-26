@@ -98,7 +98,7 @@ export default function BarcodePrintPage() {
       accessorKey: 'jobNumber',
       cell: ({ row }) => (
         <div className="flex flex-col">
-          <span className="font-bold text-sm text-blue-600 dark:text-blue-400 hover:underline cursor-pointer">
+          <span className="font-bold text-xs text-blue-600 dark:text-blue-400 hover:underline cursor-pointer">
             {row.original.jobNumber}
           </span>
           <span className="text-[10px] text-muted-foreground">{row.original.jobName}</span>
@@ -159,7 +159,7 @@ export default function BarcodePrintPage() {
       header: 'Printer',
       accessorKey: 'printerName',
       cell: ({ row }) => (
-        <div className="flex items-center gap-2 text-sm">
+        <div className="flex items-center gap-2 text-xs">
           <HugeiconsIcon icon={PrinterIcon} className="h-4 w-4 text-muted-foreground" />
           <span className="truncate max-w-[150px]" title={row.original.printerName}>
             {row.original.printerName}

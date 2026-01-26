@@ -110,7 +110,7 @@ export default function CostCentersPage() {
         <div>
           <div className="font-medium">{cc?.name || ''}</div>
           {cc?.description && (
-            <div className="text-sm text-gray-500">{cc.description}</div>
+            <div className="text-xs text-gray-500">{cc.description}</div>
           )}
         </div>
       )
@@ -133,19 +133,19 @@ export default function CostCentersPage() {
       key: 'budget_amount',
       title: 'Budget vs Actual',
       render: (value: unknown, cc: CostCenter) => {
-        if (!mounted || !cc) return <div className="text-sm text-gray-500">Loading...</div>
-        
+        if (!mounted || !cc) return <div className="text-xs text-gray-500">Loading...</div>
+
         const budgetAmount = cc.budget_amount || 0
         const actualAmount = cc.actual_amount || 0
         const utilization = budgetAmount > 0 ? (actualAmount / budgetAmount) * 100 : 0
-        
+
         return (
           <div className="space-y-1">
-            <div className="flex justify-between text-sm">
+            <div className="flex justify-between text-xs">
               <span>Budget:</span>
               <span className="font-medium">{formatCurrency(budgetAmount)}</span>
             </div>
-            <div className="flex justify-between text-sm">
+            <div className="flex justify-between text-xs">
               <span>Actual:</span>
               <span className="font-medium">{formatCurrency(actualAmount)}</span>
             </div>
@@ -161,8 +161,8 @@ export default function CostCentersPage() {
       key: 'variance_amount',
       title: 'Variance',
       render: (value: unknown, cc: CostCenter) => {
-        if (!mounted || !cc) return <div className="text-sm text-gray-500">Loading...</div>
-        
+        if (!mounted || !cc) return <div className="text-xs text-gray-500">Loading...</div>
+
         const variance = cc.variance_amount || 0
         const isPositive = variance > 0
         

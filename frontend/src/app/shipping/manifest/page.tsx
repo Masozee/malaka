@@ -284,7 +284,7 @@ export default function ManifestPage() {
       cell: ({ row }) => (
         <div>
           <div className="font-medium">{row.original.manifestNumber}</div>
-          <div className="text-sm text-gray-500">{row.original.courierName}</div>
+          <div className="text-xs text-gray-500">{row.original.courierName}</div>
         </div>
       )
     },
@@ -295,7 +295,7 @@ export default function ManifestPage() {
       cell: ({ row }) => (
         <div>
           <div className="font-medium">{row.original.vehicleNumber}</div>
-          <div className="text-sm text-gray-500">{row.original.driverName}</div>
+          <div className="text-xs text-gray-500">{row.original.driverName}</div>
         </div>
       )
     },
@@ -304,7 +304,7 @@ export default function ManifestPage() {
       id: 'route',
       header: 'Route',
       cell: ({ row }) => (
-        <div className="text-sm">
+        <div className="text-xs">
           <span className="max-w-32 truncate" title={row.original.route}>
             {row.original.route}
           </span>
@@ -327,7 +327,7 @@ export default function ManifestPage() {
       id: 'departureTime',
       header: 'Departure',
       cell: ({ row }) => (
-        <div className="text-sm">
+        <div className="text-xs">
           {mounted ? new Date(row.original.departureTime).toLocaleString('id-ID') : ''}
         </div>
       )
@@ -337,7 +337,7 @@ export default function ManifestPage() {
       id: 'estimatedArrival',
       header: 'Est. Arrival',
       cell: ({ row }) => (
-        <div className="text-sm">
+        <div className="text-xs">
           {mounted ? new Date(row.original.estimatedArrival).toLocaleString('id-ID') : ''}
         </div>
       )
@@ -360,7 +360,7 @@ export default function ManifestPage() {
       id: 'totalValue',
       header: 'Value',
       cell: ({ row }) => (
-        <div className="text-sm font-medium">
+        <div className="text-xs font-medium">
           {mounted ? row.original.totalValue.toLocaleString('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }) : ''}
         </div>
       )

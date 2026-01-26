@@ -241,38 +241,38 @@ export default function InvoiceDetailPage() {
             <div className="space-y-3">
               <div className="flex items-center space-x-2">
                 <div>
-                  <p className="text-sm font-medium">Invoice Date</p>
-                  <p className="text-sm text-muted-foreground">{formatDate(invoice.invoice_date)}</p>
+                  <p className="text-xs font-medium">Invoice Date</p>
+                  <p className="text-xs text-muted-foreground">{formatDate(invoice.invoice_date)}</p>
                 </div>
               </div>
 
               <div className="flex items-center space-x-2">
                 <div>
-                  <p className="text-sm font-medium">Due Date</p>
-                  <p className="text-sm text-muted-foreground">{formatDate(invoice.due_date)}</p>
+                  <p className="text-xs font-medium">Due Date</p>
+                  <p className="text-xs text-muted-foreground">{formatDate(invoice.due_date)}</p>
                 </div>
               </div>
 
               {invoice.payment_date && (
                 <div className="flex items-center space-x-2">
                   <div>
-                    <p className="text-sm font-medium">Payment Date</p>
-                    <p className="text-sm text-muted-foreground">{formatDate(invoice.payment_date)}</p>
+                    <p className="text-xs font-medium">Payment Date</p>
+                    <p className="text-xs text-muted-foreground">{formatDate(invoice.payment_date)}</p>
                   </div>
                 </div>
               )}
 
               <div className="flex items-center space-x-2">
                 <div>
-                  <p className="text-sm font-medium">Payment Terms</p>
-                  <p className="text-sm text-muted-foreground">{invoice.payment_terms}</p>
+                  <p className="text-xs font-medium">Payment Terms</p>
+                  <p className="text-xs text-muted-foreground">{invoice.payment_terms}</p>
                 </div>
               </div>
 
               <div className="flex items-center space-x-2">
                 <div>
-                  <p className="text-sm font-medium">Created By</p>
-                  <p className="text-sm text-muted-foreground">{invoice.created_by}</p>
+                  <p className="text-xs font-medium">Created By</p>
+                  <p className="text-xs text-muted-foreground">{invoice.created_by}</p>
                 </div>
               </div>
             </div>
@@ -300,9 +300,9 @@ export default function InvoiceDetailPage() {
                     <td className="py-3">
                       <div>
                         <p className="font-medium">{item.product_name}</p>
-                        <p className="text-sm text-muted-foreground">{item.product_code}</p>
+                        <p className="text-xs text-muted-foreground">{item.product_code}</p>
                         {item.description && (
-                          <p className="text-sm text-muted-foreground">{item.description}</p>
+                          <p className="text-xs text-muted-foreground">{item.description}</p>
                         )}
                       </div>
                     </td>
@@ -355,7 +355,7 @@ export default function InvoiceDetailPage() {
           {invoice.notes && (
             <Card className="p-4">
               <h3 className="font-semibold mb-4">Notes</h3>
-              <p className="text-sm">{invoice.notes}</p>
+              <p className="text-xs">{invoice.notes}</p>
             </Card>
           )}
         </div>

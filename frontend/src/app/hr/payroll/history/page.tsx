@@ -107,7 +107,7 @@ export default function PayrollHistoryPage() {
           <div className="font-medium">
             {formatPeriod(period?.month, period?.year, mounted)}
           </div>
-          <div className="text-sm text-muted-foreground">
+          <div className="text-xs text-muted-foreground">
             {formatDate(period?.startDate, mounted)} - {formatDate(period?.endDate, mounted)}
           </div>
         </div>
@@ -179,7 +179,7 @@ export default function PayrollHistoryPage() {
       render: (_value: unknown, item: PayrollItem) => (
         <div>
           <div className="font-medium">{item?.employee?.name || ''}</div>
-          <div className="text-sm text-muted-foreground">{item?.employee?.employeeId || ''} • {item?.employee?.department || ''}</div>
+          <div className="text-xs text-muted-foreground">{item?.employee?.employeeId || ''} • {item?.employee?.department || ''}</div>
         </div>
       )
     },

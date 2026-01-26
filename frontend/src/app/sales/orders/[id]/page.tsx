@@ -343,7 +343,7 @@ export default function SalesOrderDetailPage() {
               <tbody>
                 {order.items.map((item) => (
                   <tr key={item.id} className="border-b">
-                    <td className="py-3 font-mono text-sm">{item.product_code}</td>
+                    <td className="py-3 font-mono text-xs">{item.product_code}</td>
                     <td className="py-3 font-medium">{item.product_name}</td>
                     <td className="py-3">{item.size}</td>
                     <td className="py-3">{item.color}</td>

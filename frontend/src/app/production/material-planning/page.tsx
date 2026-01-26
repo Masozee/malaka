@@ -177,7 +177,7 @@ export default function MaterialPlanningPage() {
         <div className="flex flex-col">
           <Link
             href={`/production/material-planning/${row.original.id}`}
-            className="font-bold text-sm text-foreground hover:underline"
+            className="font-bold text-xs text-foreground hover:underline"
           >
             {row.original.planNumber}
           </Link>
@@ -270,7 +270,7 @@ export default function MaterialPlanningPage() {
       accessorKey: 'materialName',
       cell: ({ row }) => (
         <div className="flex flex-col">
-          <span className="font-medium text-sm text-foreground">{row.original.materialName}</span>
+          <span className="font-medium text-xs text-foreground">{row.original.materialName}</span>
           <span className="text-[10px] text-muted-foreground">{row.original.materialCode} • {row.original.category}</span>
         </div>
       )

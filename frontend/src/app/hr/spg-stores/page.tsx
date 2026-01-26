@@ -264,7 +264,7 @@ export default function SPGStoresPage() {
       render: (_value: unknown, record: SPGAssignment) => (
         <div>
           <div className="font-medium">{record.spgName}</div>
-          <div className="text-sm text-gray-500">{record.spgId}</div>
+          <div className="text-xs text-gray-500">{record.spgId}</div>
         </div>
       )
     },
@@ -273,7 +273,7 @@ export default function SPGStoresPage() {
       title: 'Store',
       render: (_value: unknown, record: SPGAssignment) => (
         <div>
-          <div className="font-medium text-sm">{record.storeName}</div>
+          <div className="font-medium text-xs">{record.storeName}</div>
           <div className="text-xs text-gray-500 flex items-center">
             <MapPin className="h-3 w-3 mr-1" />
             {record.storeLocation}
@@ -315,7 +315,7 @@ export default function SPGStoresPage() {
         const color = achievement >= 100 ? 'text-green-600' : achievement >= 90 ? 'text-yellow-600' : 'text-red-600'
 
         return (
-          <div className="text-sm">
+          <div className="text-xs">
             <div className={`font-medium ${color}`}>
               {mounted ? sales.toLocaleString('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }) : ''}
             </div>
@@ -342,7 +342,7 @@ export default function SPGStoresPage() {
       key: 'commission',
       title: 'Commission',
       render: (_value: unknown, record: SPGAssignment) => (
-        <div className="text-sm font-medium">
+        <div className="text-xs font-medium">
           {mounted ? record.commission.toLocaleString('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }) : ''}
         </div>
       )

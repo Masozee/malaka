@@ -333,7 +333,7 @@ export default function ShippingInvoicesPage() {
       cell: ({ row }) => (
         <div>
           <div className="font-medium">{row.original.invoiceNumber}</div>
-          <div className="text-sm text-gray-500">{row.original.courierName}</div>
+          <div className="text-xs text-gray-500">{row.original.courierName}</div>
         </div>
       )
     },
@@ -342,7 +342,7 @@ export default function ShippingInvoicesPage() {
       id: 'invoicePeriod',
       header: 'Period',
       cell: ({ row }) => (
-        <div className="text-sm">{row.original.invoicePeriod}</div>
+        <div className="text-xs">{row.original.invoicePeriod}</div>
       )
     },
     {
@@ -358,7 +358,7 @@ export default function ShippingInvoicesPage() {
       id: 'totalAmount',
       header: 'Total Amount',
       cell: ({ row }) => (
-        <div className="text-sm font-medium">
+        <div className="text-xs font-medium">
           {mounted ? row.original.totalAmount.toLocaleString('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }) : ''}
         </div>
       )
@@ -370,7 +370,7 @@ export default function ShippingInvoicesPage() {
       cell: ({ row }) => {
         const amount = row.original.outstandingAmount
         return (
-          <div className={`text-sm font-medium ${amount > 0 ? 'text-destructive' : 'text-foreground'}`}>
+          <div className={`text-xs font-medium ${amount > 0 ? 'text-destructive' : 'text-foreground'}`}>
             {mounted ? amount.toLocaleString('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }) : ''}
           </div>
         )
@@ -381,7 +381,7 @@ export default function ShippingInvoicesPage() {
       id: 'dueDate',
       header: 'Due Date',
       cell: ({ row }) => (
-        <div className="text-sm">
+        <div className="text-xs">
           {mounted ? new Date(row.original.dueDate).toLocaleDateString('id-ID') : ''}
         </div>
       )
@@ -404,7 +404,7 @@ export default function ShippingInvoicesPage() {
       id: 'paymentTerms',
       header: 'Terms',
       cell: ({ row }) => (
-        <div className="text-sm">{row.original.paymentTerms}</div>
+        <div className="text-xs">{row.original.paymentTerms}</div>
       )
     }
   ]

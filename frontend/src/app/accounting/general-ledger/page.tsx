@@ -78,7 +78,7 @@ export default function GeneralLedgerPage() {
           <span className="font-medium text-gray-900 dark:text-gray-100">
             {accountCode as string}
           </span>
-          <span className="text-sm text-gray-600 dark:text-gray-400 truncate max-w-32">
+          <span className="text-xs text-gray-600 dark:text-gray-400 truncate max-w-32">
             {entry.account_name}
           </span>
         </div>
@@ -96,7 +96,7 @@ export default function GeneralLedgerPage() {
       searchable: true,
       render: (description: unknown, entry: GeneralLedgerEntry) => (
         <div className="flex flex-col">
-          <span className="text-sm text-gray-900 dark:text-gray-100">
+          <span className="text-xs text-gray-900 dark:text-gray-100">
             {description as string}
           </span>
           {entry.reference && (
@@ -203,7 +203,7 @@ export default function GeneralLedgerPage() {
       title: 'Period',
       render: (period: unknown, entry: GeneralLedgerEntry) => (
         <div className="flex flex-col">
-          <span className="text-sm font-medium">{period as string}</span>
+          <span className="text-xs font-medium">{period as string}</span>
           <span className="text-xs text-gray-500">FY {entry.fiscal_year}</span>
         </div>
       ),
@@ -222,7 +222,7 @@ export default function GeneralLedgerPage() {
           {entry.journal_entry_id && (
             <button
               onClick={() => handleViewJournalEntry(entry)}
-              className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+              className="text-blue-600 hover:text-blue-800 text-xs font-medium"
             >
               View Journal Entry
             </button>

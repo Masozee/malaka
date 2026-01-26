@@ -148,7 +148,7 @@ export default function PerformancePage() {
       render: (value: unknown, record: PerformanceReview) => (
         <div>
           <div className="font-medium">{record.employee_name}</div>
-          <div className="text-sm text-muted-foreground">{record.employee_code} • {record.department}</div>
+          <div className="text-xs text-muted-foreground">{record.employee_code} • {record.department}</div>
         </div>
       )
     },
@@ -156,7 +156,7 @@ export default function PerformancePage() {
       key: 'position' as keyof PerformanceReview,
       title: 'Position',
       render: (value: unknown, record: PerformanceReview) => (
-        <div className="text-sm">{record.position}</div>
+        <div className="text-xs">{record.position}</div>
       )
     },
     {
@@ -175,7 +175,7 @@ export default function PerformancePage() {
       key: 'review_period' as keyof PerformanceReview,
       title: 'Period',
       render: (value: unknown, record: PerformanceReview) => (
-        <div className="text-sm">{record.review_period}</div>
+        <div className="text-xs">{record.review_period}</div>
       )
     },
     {
@@ -207,7 +207,7 @@ export default function PerformancePage() {
         const goals = record.goals
         const percentage = goals.total > 0 ? (goals.achieved / goals.total) * 100 : 0
         return (
-          <div className="text-sm">
+          <div className="text-xs">
             <div>{goals.achieved}/{goals.total}</div>
             <div className="text-xs text-gray-500">{percentage.toFixed(0)}%</div>
           </div>
@@ -230,7 +230,7 @@ export default function PerformancePage() {
       key: 'review_date' as keyof PerformanceReview,
       title: 'Review Date',
       render: (value: unknown, record: PerformanceReview) => (
-        <div className="text-sm">
+        <div className="text-xs">
           {mounted && record.review_date ? new Date(record.review_date).toLocaleDateString('id-ID') : '-'}
         </div>
       )
@@ -239,7 +239,7 @@ export default function PerformancePage() {
       key: 'reviewer' as keyof PerformanceReview,
       title: 'Reviewer',
       render: (value: unknown, record: PerformanceReview) => (
-        <div className="text-sm">{record.reviewer}</div>
+        <div className="text-xs">{record.reviewer}</div>
       )
     }
   ]

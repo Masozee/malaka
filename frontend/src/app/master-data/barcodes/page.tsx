@@ -194,8 +194,8 @@ export default function ProductBarcodesPage() {
       render: (barcode: ProductBarcode) => (
         <div>
           <div className="font-medium">{barcode.product_name}</div>
-          <div className="text-sm text-muted-foreground">{barcode.article_code}</div>
-          <div className="text-sm text-muted-foreground">{barcode.size} - {barcode.color}</div>
+          <div className="text-xs text-muted-foreground">{barcode.article_code}</div>
+          <div className="text-xs text-muted-foreground">{barcode.size} - {barcode.color}</div>
         </div>
       )
     },
@@ -243,7 +243,7 @@ export default function ProductBarcodesPage() {
       key: 'last_scanned',
       title: 'Last Scanned',
       render: (barcode: ProductBarcode) => (
-        <span className="text-sm">{formatDate(barcode.last_scanned)}</span>
+        <span className="text-xs">{formatDate(barcode.last_scanned)}</span>
       )
     },
     {

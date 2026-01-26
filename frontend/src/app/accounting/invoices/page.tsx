@@ -133,7 +133,7 @@ export default function InvoicesPage() {
       render: (value: unknown, invoice: Invoice) => (
         <div>
           <div className="font-medium">{invoice.customer_name}</div>
-          <div className="text-sm text-muted-foreground">{invoice.customer_email}</div>
+          <div className="text-xs text-muted-foreground">{invoice.customer_email}</div>
         </div>
       )
     },
@@ -143,7 +143,7 @@ export default function InvoicesPage() {
       render: (value: unknown, invoice: Invoice) => (
         <div className="flex items-center space-x-2">
           <div>
-            <div className="text-sm">{formatDate(invoice.invoice_date)}</div>
+            <div className="text-xs">{formatDate(invoice.invoice_date)}</div>
             <div className="text-xs text-muted-foreground">Due: {formatDate(invoice.due_date)}</div>
           </div>
         </div>
@@ -155,7 +155,7 @@ export default function InvoicesPage() {
       render: (value: unknown, invoice: Invoice) => (
         <div className="text-right">
           <div className="font-medium">{formatCurrency(invoice.total_amount)}</div>
-          <div className="text-sm text-muted-foreground">{invoice.currency}</div>
+          <div className="text-xs text-muted-foreground">{invoice.currency}</div>
         </div>
       )
     },
@@ -164,11 +164,11 @@ export default function InvoicesPage() {
       title: 'Payment',
       render: (value: unknown, invoice: Invoice) => (
         <div className="space-y-1">
-          <div className="flex justify-between text-sm">
+          <div className="flex justify-between text-xs">
             <span>Paid:</span>
             <span className="font-medium text-green-600">{formatCurrency(invoice.paid_amount)}</span>
           </div>
-          <div className="flex justify-between text-sm">
+          <div className="flex justify-between text-xs">
             <span>Due:</span>
             <span className={`font-medium ${invoice.balance_due > 0 ? 'text-red-600' : 'text-gray-500'}`}>
               {formatCurrency(invoice.balance_due)}

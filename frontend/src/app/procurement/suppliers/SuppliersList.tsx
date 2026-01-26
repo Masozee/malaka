@@ -201,7 +201,7 @@ export default function SuppliersList({ initialData }: SuppliersListProps) {
             render: (value: unknown, record: SupplierDisplay) => (
                 <div>
                     <div className="font-medium">{record.name}</div>
-                    <div className="text-sm text-gray-500">{record.code} • {record.contact_person || 'No contact'}</div>
+                    <div className="text-xs text-gray-500">{record.code} • {record.contact_person || 'No contact'}</div>
                 </div>
             )
         },
@@ -238,7 +238,7 @@ export default function SuppliersList({ initialData }: SuppliersListProps) {
             title: 'Location',
             sortable: true,
             render: (value: unknown, record: SupplierDisplay) => (
-                <div className="flex items-center text-sm">
+                <div className="flex items-center text-xs">
                     <HugeiconsIcon icon={LocationIcon} className="h-3 w-3 mr-1 text-gray-400" />
                     {record.city || 'Unknown'}, {record.country || 'Unknown'}
                 </div>
@@ -265,7 +265,7 @@ export default function SuppliersList({ initialData }: SuppliersListProps) {
             title: 'Orders',
             sortable: true,
             render: (value: unknown, record: SupplierDisplay) => (
-                <div className="text-sm">
+                <div className="text-xs">
                     <div className="font-medium">{record.totalOrders || 0}</div>
                     <div className="text-xs text-gray-500">
                         {record.totalValue ? record.totalValue.toLocaleString('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }) : 'No data'}

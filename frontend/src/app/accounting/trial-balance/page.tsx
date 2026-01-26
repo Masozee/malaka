@@ -104,7 +104,7 @@ export default function TrialBalancePage() {
       render: (value: unknown, account: TrialBalanceAccount) => {
         if (!account) return null
         return (
-          <div className="font-mono text-sm font-medium">{account.account_code}</div>
+          <div className="font-mono text-xs font-medium">{account.account_code}</div>
         )
       }
     },
@@ -116,7 +116,7 @@ export default function TrialBalancePage() {
         return (
           <div>
             <div className="font-medium">{account.account_name}</div>
-            <div className="text-sm text-muted-foreground">{account.account_type}</div>
+            <div className="text-xs text-muted-foreground">{account.account_type}</div>
           </div>
         )
       }

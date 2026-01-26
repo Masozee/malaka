@@ -83,7 +83,7 @@ export default function StockOpnameListPage() {
                 <div className="flex flex-col">
                     <Link
                         href={`/inventory/stock-opname/${row.original.id}`}
-                        className="font-bold text-sm text-blue-600 dark:text-blue-400 hover:underline"
+                        className="font-bold text-xs text-blue-600 dark:text-blue-400 hover:underline"
                     >
                         {row.original.opnameNumber}
                     </Link>
@@ -99,7 +99,7 @@ export default function StockOpnameListPage() {
             header: 'Warehouse',
             accessorKey: 'warehouseName',
             cell: ({ row }) => (
-                <span className="text-sm font-medium">{row.original.warehouseName}</span>
+                <span className="text-xs font-medium">{row.original.warehouseName}</span>
             )
         },
         {
@@ -108,7 +108,7 @@ export default function StockOpnameListPage() {
             accessorKey: 'totalItems',
             cell: ({ row }) => (
                 <div className="text-center">
-                    <span className="font-medium text-sm">{row.original.totalItems}</span>
+                    <span className="font-medium text-xs">{row.original.totalItems}</span>
                 </div>
             )
         },

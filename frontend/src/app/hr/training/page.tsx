@@ -313,7 +313,7 @@ export default function TrainingPage() {
       render: (value: unknown, record: TrainingProgram) => (
         <div>
           <div className="font-medium">{record.program_title}</div>
-          <div className="text-sm text-muted-foreground max-w-60 truncate">{record.description}</div>
+          <div className="text-xs text-muted-foreground max-w-60 truncate">{record.description}</div>
         </div>
       )
     },
@@ -345,7 +345,7 @@ export default function TrainingPage() {
       key: 'duration_hours' as keyof TrainingProgram,
       title: 'Duration',
       render: (value: unknown, record: TrainingProgram) => (
-        <div className="flex items-center text-sm">
+        <div className="flex items-center text-xs">
           <Clock className="h-3 w-3 mr-1 text-muted-foreground" />
           {record.duration_hours}h
         </div>
@@ -355,7 +355,7 @@ export default function TrainingPage() {
       key: 'enrolled_count' as keyof TrainingProgram,
       title: 'Enrollment',
       render: (value: unknown, record: TrainingProgram) => (
-        <div className="text-sm">
+        <div className="text-xs">
           <div>{record.enrolled_count}/{record.max_participants}</div>
           <div className="text-xs text-muted-foreground">
             {record.max_participants > 0 ? Math.round((record.enrolled_count / record.max_participants) * 100) : 0}% filled
@@ -369,7 +369,7 @@ export default function TrainingPage() {
       render: (value: unknown, record: TrainingProgram) => {
         const rate = record.enrolled_count > 0 ? Math.round((record.completed_count / record.enrolled_count) * 100) : 0
         return (
-          <div className="text-sm">
+          <div className="text-xs">
             <div>{record.completed_count}</div>
             <div className="text-xs text-muted-foreground">{rate}% rate</div>
           </div>
@@ -392,7 +392,7 @@ export default function TrainingPage() {
       key: 'start_date' as keyof TrainingProgram,
       title: 'Start Date',
       render: (value: unknown, record: TrainingProgram) => (
-        <div className="text-sm">
+        <div className="text-xs">
           {mounted ? new Date(record.start_date).toLocaleDateString('id-ID') : ''}
         </div>
       )
@@ -401,7 +401,7 @@ export default function TrainingPage() {
       key: 'cost_per_participant' as keyof TrainingProgram,
       title: 'Cost per Participant',
       render: (value: unknown, record: TrainingProgram) => (
-        <div className="text-sm font-medium">
+        <div className="text-xs font-medium">
           {mounted ? record.cost_per_participant.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' }) : ''}
         </div>
       )

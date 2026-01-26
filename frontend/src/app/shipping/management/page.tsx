@@ -425,7 +425,7 @@ export default function ShipmentManagementPage() {
       accessorKey: 'tracking_number',
       cell: ({ row }) => (
         <div>
-          <div className="font-mono text-sm">{row.original.tracking_number}</div>
+          <div className="font-mono text-xs">{row.original.tracking_number}</div>
           <div className="text-xs text-muted-foreground">{row.original.courier_name}</div>
         </div>
       )
@@ -451,7 +451,7 @@ export default function ShipmentManagementPage() {
       cell: ({ row }) => (
         <div>
           <div className="font-medium">{row.original.recipient_name}</div>
-          <div className="text-sm text-muted-foreground">
+          <div className="text-xs text-muted-foreground">
             {row.original.recipient_phone}
           </div>
           <div className="text-xs text-muted-foreground">
@@ -465,7 +465,7 @@ export default function ShipmentManagementPage() {
       header: 'Weight & Value',
       accessorKey: 'weight',
       cell: ({ row }) => (
-        <div className="text-sm">
+        <div className="text-xs">
           <div>
             {row.original.weight} kg
           </div>
@@ -481,7 +481,7 @@ export default function ShipmentManagementPage() {
         <div className="text-right">
           <div className="font-medium">{formatCurrency(row.original.total_cost)}</div>
           {row.original.cod_amount && (
-            <div className="text-sm text-muted-foreground">COD: {formatCurrency(row.original.cod_amount)}</div>
+            <div className="text-xs text-muted-foreground">COD: {formatCurrency(row.original.cod_amount)}</div>
           )}
         </div>
       )
@@ -511,7 +511,7 @@ export default function ShipmentManagementPage() {
       header: 'Delivery',
       accessorKey: 'estimated_delivery',
       cell: ({ row }) => (
-        <div className="text-sm">
+        <div className="text-xs">
           <div>Est: {formatDate(row.original.estimated_delivery)}</div>
           {row.original.actual_delivery && (
             <div className="text-muted-foreground">Act: {formatDate(row.original.actual_delivery)}</div>

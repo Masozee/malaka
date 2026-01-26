@@ -100,7 +100,7 @@ export default function PurchaseOrdersPage() {
         <div className="flex flex-col">
           <Link
             href={`/production/purchase-orders/${row.original.id}`}
-            className="font-bold text-sm text-foreground hover:underline"
+            className="font-bold text-xs text-foreground hover:underline"
           >
             {row.original.orderNumber}
           </Link>
@@ -116,7 +116,7 @@ export default function PurchaseOrdersPage() {
       accessorKey: 'supplier',
       cell: ({ row }) => (
         <div className="flex flex-col">
-          <span className="font-medium text-sm text-foreground">{row.original.supplier.name}</span>
+          <span className="font-medium text-xs text-foreground">{row.original.supplier.name}</span>
           <span className="text-[10px] text-muted-foreground">{row.original.supplier.code}</span>
         </div>
       )
@@ -126,7 +126,7 @@ export default function PurchaseOrdersPage() {
       header: 'Expected',
       accessorKey: 'expectedDate',
       cell: ({ row }) => (
-        <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
           <span>{new Date(row.original.expectedDate).toLocaleDateString()}</span>
         </div>
       )

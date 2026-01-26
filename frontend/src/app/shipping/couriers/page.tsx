@@ -414,7 +414,7 @@ export default function CouriersPage() {
           {row.original.is_preferred && <HugeiconsIcon icon={StarIcon} className="h-4 w-4 text-yellow-400 fill-current" />}
           <div>
             <div className="font-medium">{row.original.courier_name}</div>
-            <div className="text-sm text-muted-foreground">{row.original.company_name}</div>
+            <div className="text-xs text-muted-foreground">{row.original.company_name}</div>
           </div>
         </div>
       )
@@ -444,7 +444,7 @@ export default function CouriersPage() {
       cell: ({ row }) => (
         <div>
           <div className="font-medium">{row.original.contact_person}</div>
-          <div className="text-sm text-muted-foreground">
+          <div className="text-xs text-muted-foreground">
             {row.original.phone}
           </div>
         </div>
@@ -467,7 +467,7 @@ export default function CouriersPage() {
       header: 'Rates',
       accessorKey: 'base_rate',
       cell: ({ row }) => (
-        <div className="text-sm">
+        <div className="text-xs">
           <div>Base: {formatCurrency(row.original.base_rate)}</div>
           <div className="text-muted-foreground">Per kg: {formatCurrency(row.original.rate_per_kg)}</div>
         </div>
@@ -478,7 +478,7 @@ export default function CouriersPage() {
       header: 'Performance',
       accessorKey: 'customer_rating',
       cell: ({ row }) => (
-        <div className="text-sm">
+        <div className="text-xs">
           <div className="flex items-center space-x-1">
             <div className="flex space-x-0.5">
               {getRatingStars(row.original.customer_rating)}

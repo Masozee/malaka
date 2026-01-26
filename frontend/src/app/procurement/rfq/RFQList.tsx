@@ -107,7 +107,7 @@ export default function RFQList({ initialData }: RFQListProps) {
             render: (value: unknown, record: RFQ) => (
                 <div>
                     <div className="font-medium">{record.rfq_number}</div>
-                    <div className="text-sm text-gray-500">
+                    <div className="text-xs text-gray-500">
                         {rfqService.formatDate(record.created_at)}
                     </div>
                 </div>
@@ -121,7 +121,7 @@ export default function RFQList({ initialData }: RFQListProps) {
                     <div className="font-medium truncate" title={record.title}>
                         {record.title}
                     </div>
-                    <div className="text-sm text-gray-500 truncate">
+                    <div className="text-xs text-gray-500 truncate">
                         {record.description}
                     </div>
                 </div>
@@ -151,7 +151,7 @@ export default function RFQList({ initialData }: RFQListProps) {
             render: (value: unknown, record: RFQ) => {
                 const items = record.items || []
                 return (
-                    <div className="text-sm">
+                    <div className="text-xs">
                         <div className="font-medium">{items.length} items</div>
                         {items.length > 0 && (
                             <div className="text-gray-500">
@@ -171,7 +171,7 @@ export default function RFQList({ initialData }: RFQListProps) {
                 const suppliers = record.suppliers || []
                 const responded = suppliers.filter((s: any) => s.status === 'responded').length
                 return (
-                    <div className="text-sm">
+                    <div className="text-xs">
                         <div className="font-medium">{responded}/{suppliers.length}</div>
                         <div className="text-gray-500">
                             {suppliers.length > 0 ? Math.round((responded / suppliers.length) * 100) : 0}% response
@@ -188,7 +188,7 @@ export default function RFQList({ initialData }: RFQListProps) {
                 const daysUntil = rfqService.getDaysUntilDue(record)
 
                 return (
-                    <div className="text-sm">
+                    <div className="text-xs">
                         <div className={isOverdue ? 'text-red-600 font-medium' : ''}>
                             {rfqService.formatDate(record.due_date)}
                         </div>

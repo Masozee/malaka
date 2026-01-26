@@ -438,7 +438,7 @@ export default function AirwaybillPage() {
       accessorKey: 'booking_code',
       cell: ({ row }) => (
         <div>
-          <div className="font-mono text-sm">{row.original.booking_code}</div>
+          <div className="font-mono text-xs">{row.original.booking_code}</div>
           <div className="text-xs text-muted-foreground">{row.original.order_number}</div>
         </div>
       )
@@ -450,7 +450,7 @@ export default function AirwaybillPage() {
       cell: ({ row }) => (
         <div>
           <div className="font-medium">{row.original.courier_name}</div>
-          <div className="text-sm text-muted-foreground">{row.original.service_type}</div>
+          <div className="text-xs text-muted-foreground">{row.original.service_type}</div>
         </div>
       )
     },
@@ -458,7 +458,7 @@ export default function AirwaybillPage() {
       id: 'route',
       header: 'Route',
       cell: ({ row }) => (
-        <div className="text-sm">
+        <div className="text-xs">
           <div className="flex items-center space-x-2">
             <span>{row.original.origin_city}</span>
             <span>→</span>
@@ -474,7 +474,7 @@ export default function AirwaybillPage() {
       cell: ({ row }) => (
         <div>
           <div className="font-medium">{row.original.recipient_name}</div>
-          <div className="text-sm text-muted-foreground">
+          <div className="text-xs text-muted-foreground">
             {row.original.recipient_phone}
           </div>
         </div>
@@ -488,7 +488,7 @@ export default function AirwaybillPage() {
         return (
           <div>
             <Badge variant={variant} className="text-xs">{label}</Badge>
-            <div className="text-sm text-muted-foreground mt-1">
+            <div className="text-xs text-muted-foreground mt-1">
               {row.original.weight} kg • {row.original.pieces} pcs
             </div>
           </div>
@@ -502,7 +502,7 @@ export default function AirwaybillPage() {
       cell: ({ row }) => (
         <div className="text-right">
           <div className="font-medium">{formatCurrency(row.original.declared_value)}</div>
-          <div className="text-sm text-muted-foreground">
+          <div className="text-xs text-muted-foreground">
             Cost: {formatCurrency(row.original.shipping_cost)}
           </div>
         </div>
@@ -532,7 +532,7 @@ export default function AirwaybillPage() {
       id: 'delivery_date',
       header: 'Delivery',
       cell: ({ row }) => (
-        <div className="text-sm">
+        <div className="text-xs">
           <div>Est: {formatDate(row.original.estimated_delivery)}</div>
           {row.original.actual_delivery && (
             <div className="text-muted-foreground">Act: {formatDate(row.original.actual_delivery)}</div>

@@ -94,7 +94,7 @@ export default function SuppliersPage() {
         <div className="flex flex-col">
           <Link
             href={`/production/suppliers/${row.original.id}`}
-            className="font-bold text-sm text-foreground hover:underline"
+            className="font-bold text-xs text-foreground hover:underline"
           >
             {row.original.name}
           </Link>
@@ -108,7 +108,7 @@ export default function SuppliersPage() {
       accessorKey: 'email',
       cell: ({ row }) => (
         <div className="flex flex-col gap-1">
-          <div className="flex items-center gap-1.5 text-sm">
+          <div className="flex items-center gap-1.5 text-xs">
             <span>{row.original.email}</span>
           </div>
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
@@ -122,7 +122,7 @@ export default function SuppliersPage() {
       header: 'Location',
       accessorKey: 'city',
       cell: ({ row }) => (
-        <div className="flex items-center gap-1.5 text-sm">
+        <div className="flex items-center gap-1.5 text-xs">
           <span>{row.original.city}, {row.original.country}</span>
         </div>
       )

@@ -97,7 +97,7 @@ export default function QualityControlPage() {
         <div className="flex flex-col">
           <Link
             href={`/production/quality-control/${row.original.id}`}
-            className="font-bold text-sm text-foreground hover:underline"
+            className="font-bold text-xs text-foreground hover:underline"
           >
             {row.original.qcNumber}
           </Link>
@@ -111,7 +111,7 @@ export default function QualityControlPage() {
       accessorKey: 'productName',
       cell: ({ row }) => (
         <div className="flex flex-col">
-          <span className="font-medium text-sm text-foreground">{row.original.productName}</span>
+          <span className="font-medium text-xs text-foreground">{row.original.productName}</span>
           <span className="text-[10px] text-muted-foreground">{row.original.productCode}</span>
         </div>
       )
@@ -122,7 +122,7 @@ export default function QualityControlPage() {
       accessorKey: 'referenceNumber',
       cell: ({ row }) => (
         <div className="flex flex-col">
-          <span className="text-sm text-muted-foreground">{row.original.referenceNumber}</span>
+          <span className="text-xs text-muted-foreground">{row.original.referenceNumber}</span>
           <span className="text-[10px] text-muted-foreground capitalize">{row.original.referenceType}</span>
         </div>
       )
@@ -133,7 +133,7 @@ export default function QualityControlPage() {
       accessorKey: 'quantityTested',
       cell: ({ row }) => (
         <div className="text-center">
-          <span className="text-sm text-foreground">{row.original.quantityTested}</span>
+          <span className="text-xs text-foreground">{row.original.quantityTested}</span>
           <span className="text-muted-foreground text-xs ml-1">/ {row.original.sampleSize}</span>
         </div>
       )

@@ -97,7 +97,7 @@ export default function ColorsPage() {
                 )}
               </div>
               <div className="flex flex-col">
-                <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                <span className="text-xs font-medium text-gray-900 dark:text-gray-100">
                   {hexCode || 'N/A'}
                 </span>
                 {isValidHex && (

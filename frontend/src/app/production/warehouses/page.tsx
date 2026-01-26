@@ -101,7 +101,7 @@ export default function WarehousesPage() {
         <div className="flex flex-col">
           <Link
             href={`/production/warehouses/${row.original.id}`}
-            className="font-bold text-sm text-foreground hover:underline"
+            className="font-bold text-xs text-foreground hover:underline"
           >
             {row.original.name}
           </Link>
@@ -128,7 +128,7 @@ export default function WarehousesPage() {
       accessorKey: 'city',
       cell: ({ row }) => (
         <div className="flex flex-col">
-          <span className="text-sm font-medium text-foreground">{row.original.city}</span>
+          <span className="text-xs font-medium text-foreground">{row.original.city}</span>
           <span className="text-[10px] text-muted-foreground truncate max-w-[150px]" title={row.original.address}>
             {row.original.address}
           </span>
@@ -158,7 +158,7 @@ export default function WarehousesPage() {
       accessorKey: 'manager',
       cell: ({ row }) => (
         <div className="flex flex-col gap-0.5">
-          <div className="flex items-center gap-1.5 text-sm text-foreground">
+          <div className="flex items-center gap-1.5 text-xs text-foreground">
             <HugeiconsIcon icon={UserCircleIcon} className="h-3 w-3 text-muted-foreground" />
             <span>{row.original.manager}</span>
           </div>

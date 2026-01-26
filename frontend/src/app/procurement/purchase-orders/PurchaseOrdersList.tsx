@@ -171,7 +171,7 @@ export default function PurchaseOrdersList({ initialData, userId }: PurchaseOrde
             header: 'Supplier',
             accessorKey: 'supplier_name',
             cell: ({ row }) => (
-                <span className="text-sm">{row.original.supplier_name || '-'}</span>
+                <span className="text-xs">{row.original.supplier_name || '-'}</span>
             ),
         },
         {
@@ -179,7 +179,7 @@ export default function PurchaseOrdersList({ initialData, userId }: PurchaseOrde
             header: 'Order Date',
             accessorKey: 'order_date',
             cell: ({ row }) => (
-                <span className="text-sm">
+                <span className="text-xs">
                     {row.original.order_date
                         ? new Date(row.original.order_date).toLocaleDateString('id-ID')
                         : '-'}
@@ -191,7 +191,7 @@ export default function PurchaseOrdersList({ initialData, userId }: PurchaseOrde
             header: 'Expected Delivery',
             accessorKey: 'expected_delivery_date',
             cell: ({ row }) => (
-                <span className="text-sm">
+                <span className="text-xs">
                     {row.original.expected_delivery_date
                         ? new Date(row.original.expected_delivery_date).toLocaleDateString('id-ID')
                         : '-'}
@@ -203,7 +203,7 @@ export default function PurchaseOrdersList({ initialData, userId }: PurchaseOrde
             header: 'Total Amount',
             accessorKey: 'total_amount',
             cell: ({ row }) => (
-                <span className="text-sm font-medium">
+                <span className="text-xs font-medium">
                     {row.original.total_amount
                         ? row.original.total_amount.toLocaleString('id-ID', {
                             style: 'currency',
