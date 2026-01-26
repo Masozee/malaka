@@ -4,9 +4,9 @@ import (
 	"context"
 	"errors"
 
+	"github.com/google/uuid"
 	"malaka/internal/modules/masterdata/domain/entities"
 	"malaka/internal/modules/masterdata/domain/repositories"
-	"malaka/internal/shared/utils"
 )
 
 // ClassificationService provides business logic for classification operations.
@@ -22,7 +22,7 @@ func NewClassificationService(repo repositories.ClassificationRepository) *Class
 // CreateClassification creates a new classification.
 func (s *ClassificationService) CreateClassification(ctx context.Context, classification *entities.Classification) error {
 	if classification.ID == "" {
-		classification.ID = utils.RandomString(10) // Generate a random ID if not provided
+		classification.ID = uuid.NewString()
 	}
 	return s.repo.Create(ctx, classification)
 }

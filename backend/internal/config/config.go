@@ -29,13 +29,24 @@ type Config struct {
 	RateLimitRequestsPerSecond int64 `mapstructure:"RATE_LIMIT_RPS"`
 	RateLimitBurstSize         int64 `mapstructure:"RATE_LIMIT_BURST"`
 
-	// MinIO Configuration
+	// MinIO Configuration (legacy, kept for backward compatibility)
 	MinIOEndpoint     string `mapstructure:"MINIO_ENDPOINT"`
 	MinIOAccessKey    string `mapstructure:"MINIO_ACCESS_KEY"`
 	MinIOSecretKey    string `mapstructure:"MINIO_SECRET_KEY"`
 	MinIOUseSSL       bool   `mapstructure:"MINIO_USE_SSL"`
 	MinIORegion       string `mapstructure:"MINIO_REGION_NAME"`
 	MinIOBucketPrefix string `mapstructure:"MINIO_BUCKET_PREFIX"`
+
+	// Local Storage Configuration
+	MediaPath string `mapstructure:"MEDIA_PATH"` // Path to store media files (default: ./media)
+}
+
+// GetMediaPath returns the media storage path with default of ./media
+func (c *Config) GetMediaPath() string {
+	if c.MediaPath == "" {
+		return "./media"
+	}
+	return c.MediaPath
 }
 
 // GetCORSAllowedOrigins returns a slice of allowed CORS origins

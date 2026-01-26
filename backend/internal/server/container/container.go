@@ -110,7 +110,9 @@ type Container struct {
 	DivisionService         *masterdata_services.DivisionService
 
 	// Storage services
-	StorageService *storage.MinIOService
+	StorageService      storage.StorageService
+	LocalStorageService *storage.LocalStorageService
+	MediaHandler        *storage.MediaHandler
 
 	// Inventory services
 	PurchaseOrderService      *inventory_services.PurchaseOrderService
@@ -295,21 +297,27 @@ func NewContainer(cfg *config.Config, logger *zap.Logger, db *sql.DB, gormDB *go
 	barcodeService := masterdata_services.NewBarcodeService(barcodeRepo, articleRepo)
 
 	// Initialize storage services first (needed for barcode generator)
-	var storageService *storage.MinIOService
-	minioConfig := &upload.MinIOConfig{
-		Endpoint:     cfg.MinIOEndpoint,
-		AccessKey:    cfg.MinIOAccessKey,
-		SecretKey:    cfg.MinIOSecretKey,
-		UseSSL:       cfg.MinIOUseSSL,
-		Region:       cfg.MinIORegion,
-		BucketPrefix: cfg.MinIOBucketPrefix,
+	// Using local storage instead of MinIO
+	var storageService storage.StorageService
+	var localStorageService *storage.LocalStorageService
+	var mediaHandler *storage.MediaHandler
+
+	localStorageConfig := &upload.LocalStorageConfig{
+		BasePath: cfg.GetMediaPath(),   // e.g., "./media"
+		BaseURL:  "/api/v1/media",      // URL prefix for serving media files
 	}
-	minioStorage, err := upload.NewMinIOStorage(minioConfig, logger)
+
+	localStorage, err := upload.NewLocalStorage(localStorageConfig, logger)
 	if err != nil {
-		logger.Error("Failed to initialize MinIO storage, continuing without file storage", zap.Error(err))
-		storageService = nil // Continue without storage service for now
+		logger.Error("Failed to initialize local storage, continuing without file storage", zap.Error(err))
+		storageService = nil
+		localStorageService = nil
+		mediaHandler = nil
 	} else {
-		storageService = storage.NewMinIOService(minioStorage, redisCache.(*cache.RedisCache).Client(), logger)
+		localStorageService = storage.NewLocalStorageService(localStorage, redisCache.(*cache.RedisCache).Client(), logger)
+		storageService = localStorageService // Use local storage as the default storage service
+		mediaHandler = storage.NewMediaHandler(localStorageService, logger)
+		logger.Info("Local storage initialized successfully", zap.String("base_path", localStorageConfig.BasePath))
 	}
 
 	// Now initialize services that depend on storage
@@ -534,7 +542,9 @@ func NewContainer(cfg *config.Config, logger *zap.Logger, db *sql.DB, gormDB *go
 		DivisionService:         divisionService,
 
 		// Storage services
-		StorageService: storageService,
+		StorageService:      storageService,
+		LocalStorageService: localStorageService,
+		MediaHandler:        mediaHandler,
 
 		// Inventory services
 		PurchaseOrderService:      purchaseOrderService,

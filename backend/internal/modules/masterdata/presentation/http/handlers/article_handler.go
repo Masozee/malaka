@@ -15,11 +15,11 @@ import (
 // ArticleHandler handles HTTP requests for article operations.
 type ArticleHandler struct {
 	service        *services.ArticleService
-	storageService *storage.MinIOService
+	storageService storage.StorageService
 }
 
 // NewArticleHandler creates a new ArticleHandler.
-func NewArticleHandler(service *services.ArticleService, storageService *storage.MinIOService) *ArticleHandler {
+func NewArticleHandler(service *services.ArticleService, storageService storage.StorageService) *ArticleHandler {
 	return &ArticleHandler{
 		service:        service,
 		storageService: storageService,

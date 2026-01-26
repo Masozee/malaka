@@ -4,9 +4,9 @@ import (
 	"context"
 	"errors"
 
+	"github.com/google/uuid"
 	"malaka/internal/modules/masterdata/domain/entities"
 	"malaka/internal/modules/masterdata/domain/repositories"
-	"malaka/internal/shared/utils"
 )
 
 // SizeService provides business logic for size operations.
@@ -22,7 +22,7 @@ func NewSizeService(repo repositories.SizeRepository) *SizeService {
 // CreateSize creates a new size.
 func (s *SizeService) CreateSize(ctx context.Context, size *entities.Size) error {
 	if size.ID == "" {
-		size.ID = utils.RandomString(10) // Generate a random ID if not provided
+		size.ID = uuid.NewString()
 	}
 	return s.repo.Create(ctx, size)
 }

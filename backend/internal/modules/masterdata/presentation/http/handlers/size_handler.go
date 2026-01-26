@@ -1,9 +1,10 @@
 package handlers
 
 import (
+	"time"
+
 	"github.com/gin-gonic/gin"
 
-	"malaka/internal/modules/masterdata/domain/entities"
 	"malaka/internal/modules/masterdata/domain/services"
 	"malaka/internal/modules/masterdata/presentation/http/dto"
 	"malaka/internal/shared/response"
@@ -27,9 +28,9 @@ func (h *SizeHandler) CreateSize(c *gin.Context) {
 		return
 	}
 
-	size := &entities.Size{
-		Name: req.Name,
-	}
+	size := req.ToEntity()
+	size.CreatedAt = time.Now()
+	size.UpdatedAt = time.Now()
 
 	if err := h.service.CreateSize(c.Request.Context(), size); err != nil {
 		response.InternalServerError(c, err.Error(), nil)
@@ -69,23 +70,34 @@ func (h *SizeHandler) GetAllSizes(c *gin.Context) {
 // UpdateSize handles updating an existing size.
 func (h *SizeHandler) UpdateSize(c *gin.Context) {
 	id := c.Param("id")
+
+	// First, retrieve the existing size
+	existingSize, err := h.service.GetSizeByID(c.Request.Context(), id)
+	if err != nil {
+		response.InternalServerError(c, err.Error(), nil)
+		return
+	}
+	if existingSize == nil {
+		response.NotFound(c, "Size not found", nil)
+		return
+	}
+
 	var req dto.UpdateSizeRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		response.BadRequest(c, err.Error(), nil)
 		return
 	}
 
-	size := &entities.Size{
-		Name: req.Name,
-	}
-	size.ID = id // Set the ID from the URL parameter
+	// Apply updates to existing size
+	req.ApplyToEntity(existingSize)
+	existingSize.UpdatedAt = time.Now()
 
-	if err := h.service.UpdateSize(c.Request.Context(), size); err != nil {
+	if err := h.service.UpdateSize(c.Request.Context(), existingSize); err != nil {
 		response.InternalServerError(c, err.Error(), nil)
 		return
 	}
 
-	response.OK(c, "Size updated successfully", size)
+	response.OK(c, "Size updated successfully", existingSize)
 }
 
 // DeleteSize handles deleting a size by its ID.

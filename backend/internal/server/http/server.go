@@ -34,7 +34,6 @@ import (
 	"malaka/internal/shared/auth"
 	"malaka/internal/shared/cache"
 	"malaka/internal/shared/logger"
-	"malaka/internal/shared/storage"
 
 	// Invitations imports
 	invitations_handlers "malaka/internal/modules/invitations/presentation/http/handlers"
@@ -174,8 +173,8 @@ func (server *Server) setupRouter() {
 	depstoreHandler := masterdata_handlers.NewDepstoreHandler(server.container.DepstoreService)
 	divisionHandler := masterdata_handlers.NewDivisionHandler(server.container.DivisionService)
 	
-	// Initialize storage handler
-	storageHandler := storage.NewStorageHandler(server.container.StorageService, server.logger)
+	// Storage handler is no longer used - local storage uses MediaHandler from container
+	// Media routes are registered in router.go via SetupRouter()
 
 	// Initialize cache health handler
 	var cacheHealthHandler *cache.CacheHealthHandler
@@ -215,10 +214,13 @@ func (server *Server) setupRouter() {
 	}
 
 	// Public storage routes (downloads may need to be public for shared links)
-	publicStorage := apiV1.Group("/storage")
-	{
-		publicStorage.GET("/download/*objectKey", storageHandler.DownloadFile)
-		publicStorage.GET("/info/*objectKey", storageHandler.GetFileInfo)
+	// Using MediaHandler for local file storage
+	if server.container.MediaHandler != nil {
+		publicStorage := apiV1.Group("/storage")
+		{
+			publicStorage.GET("/download/*objectKey", server.container.MediaHandler.DownloadFile)
+			publicStorage.GET("/info/*objectKey", server.container.MediaHandler.GetFileInfo)
+		}
 	}
 
 	// ============================================================

@@ -1,9 +1,10 @@
 package handlers
 
 import (
+	"time"
+
 	"github.com/gin-gonic/gin"
 
-	"malaka/internal/modules/masterdata/domain/entities"
 	"malaka/internal/modules/masterdata/domain/services"
 	"malaka/internal/modules/masterdata/presentation/http/dto"
 	"malaka/internal/shared/response"
@@ -27,9 +28,9 @@ func (h *ClassificationHandler) CreateClassification(c *gin.Context) {
 		return
 	}
 
-	classification := &entities.Classification{
-		Name: req.Name,
-	}
+	classification := req.ToEntity()
+	classification.CreatedAt = time.Now()
+	classification.UpdatedAt = time.Now()
 
 	if err := h.service.CreateClassification(c.Request.Context(), classification); err != nil {
 		response.InternalServerError(c, err.Error(), nil)
@@ -69,23 +70,34 @@ func (h *ClassificationHandler) GetAllClassifications(c *gin.Context) {
 // UpdateClassification handles updating an existing classification.
 func (h *ClassificationHandler) UpdateClassification(c *gin.Context) {
 	id := c.Param("id")
+
+	// First, retrieve the existing classification
+	existingClassification, err := h.service.GetClassificationByID(c.Request.Context(), id)
+	if err != nil {
+		response.InternalServerError(c, err.Error(), nil)
+		return
+	}
+	if existingClassification == nil {
+		response.NotFound(c, "Classification not found", nil)
+		return
+	}
+
 	var req dto.UpdateClassificationRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		response.BadRequest(c, err.Error(), nil)
 		return
 	}
 
-	classification := &entities.Classification{
-		Name: req.Name,
-	}
-	classification.ID = id // Set the ID from the URL parameter
+	// Apply updates to existing classification
+	req.ApplyToEntity(existingClassification)
+	existingClassification.UpdatedAt = time.Now()
 
-	if err := h.service.UpdateClassification(c.Request.Context(), classification); err != nil {
+	if err := h.service.UpdateClassification(c.Request.Context(), existingClassification); err != nil {
 		response.InternalServerError(c, err.Error(), nil)
 		return
 	}
 
-	response.OK(c, "Classification updated successfully", classification)
+	response.OK(c, "Classification updated successfully", existingClassification)
 }
 
 // DeleteClassification handles deleting a classification by its ID.

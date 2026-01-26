@@ -67,15 +67,15 @@ type BarcodeGeneratorService interface {
 
 // RealBarcodeGeneratorService implements actual barcode generation
 type RealBarcodeGeneratorService struct{
-	minioService *storage.MinIOService
-	logger       *zap.Logger
+	storageService storage.StorageService
+	logger         *zap.Logger
 }
 
 // NewBarcodeGeneratorService creates a new barcode generator service
-func NewBarcodeGeneratorService(minioService *storage.MinIOService, logger *zap.Logger) BarcodeGeneratorService {
+func NewBarcodeGeneratorService(storageService storage.StorageService, logger *zap.Logger) BarcodeGeneratorService {
 	return &RealBarcodeGeneratorService{
-		minioService: minioService,
-		logger:       logger,
+		storageService: storageService,
+		logger:         logger,
 	}
 }
 
@@ -116,7 +116,7 @@ func (r *RealBarcodeGeneratorService) GenerateBarcode(ctx context.Context, reque
 	}
 
 	// Upload to MinIO if service is available
-	if r.minioService != nil {
+	if r.storageService != nil {
 		imageURL, err := r.uploadBarcodeToMinIO(ctx, pngBytes, request.ID, string(request.Format))
 		if err != nil {
 			r.logger.Warn("Failed to upload barcode to MinIO, falling back to base64", zap.Error(err))
@@ -215,7 +215,7 @@ func (r *RealBarcodeGeneratorService) generateBarcodeForBatch(ctx context.Contex
 	}
 
 	// Upload to MinIO if service is available (using batch folder structure)
-	if r.minioService != nil {
+	if r.storageService != nil {
 		imageURL, err := r.uploadBarcodeWithType(ctx, pngBytes, request.ID, string(request.Format), BarcodeTypeBatch, batchID)
 		if err != nil {
 			r.logger.Warn("Failed to upload barcode to MinIO, falling back to base64", zap.Error(err))
@@ -379,13 +379,13 @@ func (r *RealBarcodeGeneratorService) uploadBarcodeWithType(ctx context.Context,
 		folderPath, id, strings.ToLower(format), time.Now().Unix())
 	
 	// Upload bytes to MinIO using the new method
-	uploadResult, err := r.minioService.UploadBytesWithMetadata(ctx, pngBytes, filename, "image/png")
+	uploadResult, err := r.storageService.UploadBytesWithMetadata(ctx, pngBytes, filename, "image/png")
 	if err != nil {
 		return "", fmt.Errorf("failed to upload barcode to MinIO: %w", err)
 	}
 	
 	// Generate download URL (valid for 7 days)
-	downloadURL, err := r.minioService.GenerateDownloadURL(ctx, uploadResult.ObjectKey, 7*24*time.Hour)
+	downloadURL, err := r.storageService.GenerateDownloadURL(ctx, uploadResult.ObjectKey, 7*24*time.Hour)
 	if err != nil {
 		r.logger.Warn("Failed to generate download URL, returning object key", zap.Error(err))
 		return uploadResult.URL, nil

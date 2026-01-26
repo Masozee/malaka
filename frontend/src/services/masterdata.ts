@@ -151,9 +151,9 @@ class ArticleService extends BaseMasterDataService<Article, ArticleListResponse>
   }> {
     const formData = new FormData()
 
-    // Add each file to the form data
+    // Add each file to the form data - backend expects 'image_urls' field
     Array.from(files).forEach((file, index) => {
-      formData.append('images', file)
+      formData.append('image_urls', file)
     })
 
     const response = await apiClient.post(
@@ -181,8 +181,15 @@ class ArticleService extends BaseMasterDataService<Article, ArticleListResponse>
   }
 
   getImageUrl(objectKey: string): string {
-    // Return the download URL for an image
-    return `http://localhost:8084/api/v1/storage/download/${objectKey}`
+    // Return the download URL for an image from local storage
+    // Use relative URL so it works with any host/port
+    if (!objectKey) return ''
+    // If it's already a full URL, return as is
+    if (objectKey.startsWith('http://') || objectKey.startsWith('https://')) {
+      return objectKey
+    }
+    // Use the media endpoint for local storage
+    return `/api/v1/media/${objectKey}`
   }
 }
 

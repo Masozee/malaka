@@ -54,19 +54,25 @@ export interface Color extends BaseEntity {
 
 // Article (Main product entity)
 export interface Article extends BaseEntity {
+  code: string
   name: string
+  brand?: string
+  category?: string
+  gender?: string
   description?: string
   classification_id: string
-  color_id: string
-  model_id: string
-  size_id: string
-  supplier_id: string
+  color_id?: string
+  model_id?: string
+  size_id?: string
+  supplier_id?: string
   barcode?: string
-  price: number
+  barcode_url?: string
+  price?: number
   image_url?: string
   image_urls?: string[]
   thumbnail_url?: string
-  
+  status: 'active' | 'inactive' | 'discontinued'
+
   // Relations
   classification?: Classification
   colors?: Color[]

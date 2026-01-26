@@ -369,7 +369,7 @@ func (s *MinIOService) cacheMetadata(ctx context.Context, objectKey string, meta
 // getMetadataFromCache retrieves object metadata from Redis cache.
 func (s *MinIOService) getMetadataFromCache(ctx context.Context, objectKey string) (*ObjectMetadata, error) {
 	cacheKey := s.cachePrefix + objectKey
-	
+
 	val, err := s.redisClient.Get(ctx, cacheKey).Result()
 	if err != nil {
 		return nil, err
@@ -381,4 +381,10 @@ func (s *MinIOService) getMetadataFromCache(ctx context.Context, objectKey strin
 	}
 
 	return &metadata, nil
+}
+
+// GetFilePath returns an empty string for MinIO (files are not stored locally).
+// This method is part of the StorageService interface for compatibility.
+func (s *MinIOService) GetFilePath(objectKey string) string {
+	return "" // MinIO doesn't use local file paths
 }

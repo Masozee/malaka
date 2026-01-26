@@ -42,12 +42,26 @@ func SetupRouter(router *gin.Engine, c *container.Container) {
 			outboundScans.GET("/shipment/:shipment_id", outboundScanHandler.GetOutboundScansByShipmentID)
 		}
 	}
+
 	// API documentation routes
 	api := router.Group("/api")
 	{
 		docs := api.Group("/docs")
 		{
 			docs.GET("/openapi.yaml", generated.ServeDocs())
+		}
+
+		// Media serving routes (public, no auth required)
+		// This serves files from the local media folder
+		if c.MediaHandler != nil {
+			v1 := api.Group("/v1")
+			media := v1.Group("/media")
+			{
+				// Serve static media files: GET /api/v1/media/*objectKey
+				media.GET("/*objectKey", c.MediaHandler.ServeStaticMedia)
+				// Get file info: HEAD /api/v1/media/*objectKey
+				media.HEAD("/*objectKey", c.MediaHandler.GetFileInfo)
+			}
 		}
 	}
 

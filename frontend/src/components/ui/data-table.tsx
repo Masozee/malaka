@@ -311,7 +311,7 @@ export function DataTable<T extends { id: string }>({
                               </DropdownMenuItem>
                             )}
                             {onDelete && (
-                              <DropdownMenuItem 
+                              <DropdownMenuItem
                                 onClick={() => onDelete(record)}
                                 className="text-red-600"
                               >
