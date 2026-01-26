@@ -5,10 +5,42 @@ import { TwoLevelLayout } from "@/components/ui/two-level-layout"
 import { Header } from "@/components/ui/header"
 import { AdvancedDataTable } from "@/components/ui/advanced-data-table"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { UserForm } from "@/components/forms/user-form"
 import { useToast, toast } from "@/components/ui/toast"
 import { userService, companyService } from "@/services/masterdata"
+import { invitationService, Invitation } from "@/services/invitations"
 import { User, Company, MasterDataFilters } from "@/types/masterdata"
+import { HugeiconsIcon } from "@hugeicons/react"
+import {
+  Mail01Icon,
+  UserAdd01Icon,
+  RefreshIcon,
+  Delete01Icon,
+  Cancel01Icon,
+  Clock01Icon,
+  CheckmarkCircle01Icon,
+  AlertCircleIcon,
+} from "@hugeicons/core-free-icons"
 
 export default function UsersPage() {
   const [mounted, setMounted] = React.useState(false)
@@ -23,6 +55,19 @@ export default function UsersPage() {
   const [formOpen, setFormOpen] = React.useState(false)
   const [selectedUser, setSelectedUser] = React.useState<User | null>(null)
   const { addToast } = useToast()
+
+  // Invitation state
+  const [invitations, setInvitations] = React.useState<Invitation[]>([])
+  const [invitationsLoading, setInvitationsLoading] = React.useState(false)
+  const [showInviteDialog, setShowInviteDialog] = React.useState(false)
+  const [inviteForm, setInviteForm] = React.useState({
+    email: '',
+    role: 'user',
+    company_id: '',
+    message: ''
+  })
+  const [isSubmitting, setIsSubmitting] = React.useState(false)
+  const [activeTab, setActiveTab] = React.useState('users')
 
   React.useEffect(() => {
     setMounted(true)
@@ -87,7 +132,7 @@ export default function UsersPage() {
         let variant: 'default' | 'secondary' | 'destructive' = 'default'
         if (roleStr === 'user') variant = 'secondary'
         if (roleStr === 'admin') variant = 'destructive'
-        
+
         return (
           <Badge variant={variant}>
             {roleStr?.charAt(0).toUpperCase() + roleStr?.slice(1)}
@@ -165,6 +210,19 @@ export default function UsersPage() {
     }
   }, [])
 
+  // Fetch invitations
+  const fetchInvitations = React.useCallback(async () => {
+    try {
+      setInvitationsLoading(true)
+      const response = await invitationService.list()
+      setInvitations(response.invitations || [])
+    } catch (error) {
+      console.error('Error fetching invitations:', error)
+    } finally {
+      setInvitationsLoading(false)
+    }
+  }, [])
+
   // Load initial data
   React.useEffect(() => {
     fetchCompanies()
@@ -176,6 +234,12 @@ export default function UsersPage() {
       limit: pagination.pageSize
     })
   }, [pagination.current, pagination.pageSize, fetchUsers])
+
+  React.useEffect(() => {
+    if (activeTab === 'invitations') {
+      fetchInvitations()
+    }
+  }, [activeTab, fetchInvitations])
 
   // Event handlers
   const handleSearch = React.useCallback((filters: MasterDataFilters) => {
@@ -228,15 +292,13 @@ export default function UsersPage() {
     try {
       switch (action) {
         case 'activate':
-          // Implement bulk activate
-          await Promise.all(selectedIds.map(id => 
+          await Promise.all(selectedIds.map(id =>
             userService.update(id, { data: { status: 'active' } })
           ))
           addToast(toast.success("Users activated", `${selectedIds.length} users have been activated.`))
           break
         case 'deactivate':
-          // Implement bulk deactivate
-          await Promise.all(selectedIds.map(id => 
+          await Promise.all(selectedIds.map(id =>
             userService.update(id, { data: { status: 'inactive' } })
           ))
           addToast(toast.success("Users deactivated", `${selectedIds.length} users have been deactivated.`))
@@ -250,8 +312,7 @@ export default function UsersPage() {
         default:
           break
       }
-      
-      // Refresh data after bulk action
+
       fetchUsers({
         page: pagination.current,
         limit: pagination.pageSize
@@ -262,15 +323,109 @@ export default function UsersPage() {
     }
   }
 
+  // Invitation handlers
+  const handleInviteSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!inviteForm.email || !inviteForm.role || !inviteForm.company_id) {
+      addToast(toast.error("Missing fields", "Please fill in all required fields."))
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      await invitationService.create({
+        email: inviteForm.email,
+        role: inviteForm.role,
+        company_id: inviteForm.company_id,
+        message: inviteForm.message || undefined
+      })
+      addToast(toast.success("Invitation sent", `An invitation has been sent to ${inviteForm.email}`))
+      setShowInviteDialog(false)
+      setInviteForm({ email: '', role: 'user', company_id: '', message: '' })
+      fetchInvitations()
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { message?: string } }; message?: string }
+      addToast(toast.error("Failed to send invitation", err.response?.data?.message || err.message || "Please try again."))
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleResendInvitation = async (id: string) => {
+    setIsSubmitting(true)
+    try {
+      await invitationService.resend(id)
+      addToast(toast.success("Invitation resent", "The invitation email has been resent."))
+      fetchInvitations()
+    } catch (error) {
+      addToast(toast.error("Failed to resend", "Please try again."))
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleRevokeInvitation = async (id: string) => {
+    if (!confirm("Are you sure you want to revoke this invitation?")) return
+    setIsSubmitting(true)
+    try {
+      await invitationService.revoke(id)
+      addToast(toast.success("Invitation revoked", "The invitation has been revoked."))
+      fetchInvitations()
+    } catch (error) {
+      addToast(toast.error("Failed to revoke", "Please try again."))
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleDeleteInvitation = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this invitation?")) return
+    setIsSubmitting(true)
+    try {
+      await invitationService.delete(id)
+      addToast(toast.success("Invitation deleted", "The invitation has been deleted."))
+      fetchInvitations()
+    } catch (error) {
+      addToast(toast.error("Failed to delete", "Please try again."))
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
   const bulkActions = [
     { value: 'activate', label: 'Activate Selected', variant: 'default' as const },
     { value: 'deactivate', label: 'Deactivate Selected', variant: 'secondary' as const },
     { value: 'delete', label: 'Delete Selected', variant: 'destructive' as const }
   ]
 
+  const statusColors: Record<string, string> = {
+    pending: 'bg-yellow-100 text-yellow-800',
+    accepted: 'bg-green-100 text-green-800',
+    expired: 'bg-gray-100 text-gray-800',
+    revoked: 'bg-red-100 text-red-800',
+  }
+
+  const statusIcons: Record<string, typeof Clock01Icon> = {
+    pending: Clock01Icon,
+    accepted: CheckmarkCircle01Icon,
+    expired: AlertCircleIcon,
+    revoked: Cancel01Icon,
+  }
+
+  const formatDate = (dateStr: string) => {
+    if (!mounted) return ''
+    return new Date(dateStr).toLocaleDateString('id-ID', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    })
+  }
+
+  const pendingCount = invitations.filter(i => i.status === 'pending').length
+
   return (
     <TwoLevelLayout>
-      <Header 
+      <Header
         title="Users"
         description="Manage user accounts and access permissions"
         breadcrumbs={[
@@ -279,29 +434,166 @@ export default function UsersPage() {
           { label: "Users" }
         ]}
       />
-      
+
       <div className="flex-1 p-6">
-        <AdvancedDataTable
-          data={users}
-          columns={columns}
-          loading={loading}
-          pagination={{
-            current: pagination.current,
-            pageSize: pagination.pageSize,
-            total: pagination.total,
-            onChange: handlePageChange
-          }}
-          onSearch={handleSearch}
-          onAdd={handleAdd}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-          onBulkAction={handleBulkAction}
-          bulkActions={bulkActions}
-          searchPlaceholder="Search users by name, email, or username..."
-          addButtonText="Add User"
-          exportEnabled={true}
-          rowSelection={true}
-        />
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <div className="flex items-center justify-between mb-4">
+            <TabsList>
+              <TabsTrigger value="users">Users</TabsTrigger>
+              <TabsTrigger value="invitations" className="flex items-center gap-2">
+                Invitations
+                {pendingCount > 0 && (
+                  <Badge variant="secondary" className="ml-1">
+                    {pendingCount}
+                  </Badge>
+                )}
+              </TabsTrigger>
+            </TabsList>
+
+            <Button onClick={() => setShowInviteDialog(true)} variant="outline">
+              <HugeiconsIcon icon={Mail01Icon} className="h-4 w-4 mr-2" />
+              Invite User
+            </Button>
+          </div>
+
+          <TabsContent value="users" className="mt-0">
+            <AdvancedDataTable
+              data={users}
+              columns={columns}
+              loading={loading}
+              pagination={{
+                current: pagination.current,
+                pageSize: pagination.pageSize,
+                total: pagination.total,
+                onChange: handlePageChange
+              }}
+              onSearch={handleSearch}
+              onAdd={handleAdd}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+              onBulkAction={handleBulkAction}
+              bulkActions={bulkActions}
+              searchPlaceholder="Search users by name, email, or username..."
+              addButtonText="Add User"
+              exportEnabled={true}
+              rowSelection={true}
+            />
+          </TabsContent>
+
+          <TabsContent value="invitations" className="mt-0">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>Pending Invitations</CardTitle>
+                    <CardDescription>
+                      Manage user invitations sent via email
+                    </CardDescription>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={fetchInvitations}
+                    disabled={invitationsLoading}
+                  >
+                    <HugeiconsIcon icon={RefreshIcon} className={`h-4 w-4 ${invitationsLoading ? 'animate-spin' : ''}`} />
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {invitationsLoading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                  </div>
+                ) : invitations.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <HugeiconsIcon icon={Mail01Icon} className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p className="font-medium">No invitations yet</p>
+                    <p className="text-sm">Click &quot;Invite User&quot; to send your first invitation</p>
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead>
+                        <tr className="border-b bg-muted/50">
+                          <th className="text-left p-3 text-sm font-medium text-muted-foreground">Email</th>
+                          <th className="text-left p-3 text-sm font-medium text-muted-foreground">Role</th>
+                          <th className="text-left p-3 text-sm font-medium text-muted-foreground">Company</th>
+                          <th className="text-left p-3 text-sm font-medium text-muted-foreground">Status</th>
+                          <th className="text-left p-3 text-sm font-medium text-muted-foreground">Created</th>
+                          <th className="text-left p-3 text-sm font-medium text-muted-foreground">Expires</th>
+                          <th className="text-right p-3 text-sm font-medium text-muted-foreground">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {invitations.map((invitation) => {
+                          const StatusIcon = statusIcons[invitation.status] || Clock01Icon
+                          const company = companies.find(c => c.id === invitation.company_id)
+                          return (
+                            <tr key={invitation.id} className="border-b hover:bg-muted/50">
+                              <td className="p-3 font-medium">{invitation.email}</td>
+                              <td className="p-3">
+                                <Badge variant="outline" className="capitalize">
+                                  {invitation.role}
+                                </Badge>
+                              </td>
+                              <td className="p-3 text-muted-foreground">
+                                {company?.name || invitation.company_name || '-'}
+                              </td>
+                              <td className="p-3">
+                                <Badge className={statusColors[invitation.status]}>
+                                  <HugeiconsIcon icon={StatusIcon} className="h-3 w-3 mr-1" />
+                                  {invitation.status}
+                                </Badge>
+                              </td>
+                              <td className="p-3 text-muted-foreground">{formatDate(invitation.created_at)}</td>
+                              <td className="p-3 text-muted-foreground">{formatDate(invitation.expires_at)}</td>
+                              <td className="p-3 text-right">
+                                <div className="flex items-center justify-end gap-2">
+                                  {invitation.status === 'pending' && (
+                                    <>
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => handleResendInvitation(invitation.id)}
+                                        disabled={isSubmitting}
+                                        title="Resend invitation"
+                                      >
+                                        <HugeiconsIcon icon={Mail01Icon} className="h-4 w-4" />
+                                      </Button>
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => handleRevokeInvitation(invitation.id)}
+                                        disabled={isSubmitting}
+                                        title="Revoke invitation"
+                                      >
+                                        <HugeiconsIcon icon={Cancel01Icon} className="h-4 w-4" />
+                                      </Button>
+                                    </>
+                                  )}
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => handleDeleteInvitation(invitation.id)}
+                                    disabled={isSubmitting}
+                                    title="Delete invitation"
+                                  >
+                                    <HugeiconsIcon icon={Delete01Icon} className="h-4 w-4 text-red-500" />
+                                  </Button>
+                                </div>
+                              </td>
+                            </tr>
+                          )
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
 
         <UserForm
           open={formOpen}
@@ -310,6 +602,87 @@ export default function UsersPage() {
           companies={companies}
           onSuccess={handleFormSuccess}
         />
+
+        {/* Invite User Dialog */}
+        <Dialog open={showInviteDialog} onOpenChange={setShowInviteDialog}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <HugeiconsIcon icon={UserAdd01Icon} className="h-5 w-5" />
+                Invite User
+              </DialogTitle>
+              <DialogDescription>
+                Send an email invitation to a new user. They will receive a link to create their account.
+              </DialogDescription>
+            </DialogHeader>
+            <form onSubmit={handleInviteSubmit}>
+              <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email Address *</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="user@example.com"
+                    value={inviteForm.email}
+                    onChange={(e) => setInviteForm(prev => ({ ...prev, email: e.target.value }))}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="role">Role *</Label>
+                  <Select
+                    value={inviteForm.role}
+                    onValueChange={(value) => setInviteForm(prev => ({ ...prev, role: value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a role" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="user">User</SelectItem>
+                      <SelectItem value="manager">Manager</SelectItem>
+                      <SelectItem value="admin">Admin</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="company">Company *</Label>
+                  <Select
+                    value={inviteForm.company_id}
+                    onValueChange={(value) => setInviteForm(prev => ({ ...prev, company_id: value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a company" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {companies.map((company) => (
+                        <SelectItem key={company.id} value={company.id}>
+                          {company.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="message">Personal Message (Optional)</Label>
+                  <Input
+                    id="message"
+                    placeholder="Welcome to the team!"
+                    value={inviteForm.message}
+                    onChange={(e) => setInviteForm(prev => ({ ...prev, message: e.target.value }))}
+                  />
+                </div>
+              </div>
+              <DialogFooter>
+                <Button type="button" variant="outline" onClick={() => setShowInviteDialog(false)}>
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={isSubmitting}>
+                  {isSubmitting ? 'Sending...' : 'Send Invitation'}
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
     </TwoLevelLayout>
   )
