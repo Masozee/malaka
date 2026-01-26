@@ -476,8 +476,11 @@ func (server *Server) setupRouter() {
 		cacheHealthHandler.RegisterRoutes(protectedAPI)
 	}
 
-	// Setup API documentation routes
+	// Setup public routes (API documentation, etc.)
 	SetupRouter(router, server.container)
+
+	// Setup protected routes (sales, accounting, inventory, procurement)
+	SetupProtectedRoutes(protectedAPI, server.container)
 
 	server.router = router
 }

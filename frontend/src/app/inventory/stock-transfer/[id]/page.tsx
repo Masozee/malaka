@@ -1,15 +1,32 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useParams } from 'next/navigation'
-import { Card } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
+import React, { useState, useEffect, useMemo } from 'react'
+import { useParams, useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { TwoLevelLayout } from '@/components/ui/two-level-layout'
 import { Header } from '@/components/ui/header'
-import { AdvancedDataTable, type AdvancedColumn } from '@/components/ui/advanced-data-table'
-
-import Link from 'next/link'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { TanStackDataTable, TanStackColumn } from '@/components/ui/tanstack-data-table'
+import { HugeiconsIcon } from '@hugeicons/react'
+import {
+  ArrowLeft01Icon,
+  Download01Icon,
+  PencilEdit01Icon,
+  PrinterIcon,
+  ArrowRight01Icon,
+  Store01Icon,
+  Calendar01Icon,
+  TruckDeliveryIcon,
+  CheckmarkCircle01Icon,
+  Clock01Icon,
+  AlertCircleIcon,
+  UserIcon,
+  File01Icon,
+  PackageIcon,
+  InformationCircleIcon
+} from '@hugeicons/core-free-icons'
 
 // Mock transfer item interface
 interface TransferItem {
@@ -17,7 +34,7 @@ interface TransferItem {
   product_code: string
   product_name: string
   category: string
-  size: string  
+  size: string
   color: string
   quantity: number
   unit_cost: number
@@ -95,7 +112,7 @@ const mockTransferDetail: StockTransferDetail = {
       status: 'transferred'
     },
     {
-      id: '2', 
+      id: '2',
       product_code: 'CAS-002-BRN-40',
       product_name: 'Casual Leather Shoes Brown',
       category: 'Casual Shoes',
@@ -110,7 +127,7 @@ const mockTransferDetail: StockTransferDetail = {
       id: '3',
       product_code: 'FML-003-BLK-38',
       product_name: 'Formal Office Shoes Black',
-      category: 'Formal Shoes', 
+      category: 'Formal Shoes',
       size: '38',
       color: 'Black',
       quantity: 12,
@@ -145,8 +162,25 @@ const mockTransferDetail: StockTransferDetail = {
   ]
 }
 
+const statusConfig = {
+  draft: { label: 'Draft', color: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200', icon: Clock01Icon },
+  pending: { label: 'Pending', color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-200', icon: Clock01Icon },
+  approved: { label: 'Approved', color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-200', icon: CheckmarkCircle01Icon },
+  in_transit: { label: 'In Transit', color: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/40 dark:text-indigo-200', icon: TruckDeliveryIcon },
+  completed: { label: 'Completed', color: 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-200', icon: CheckmarkCircle01Icon },
+  cancelled: { label: 'Cancelled', color: 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-200', icon: AlertCircleIcon }
+}
+
+const priorityConfig = {
+  low: { label: 'Low', color: 'bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300' },
+  medium: { label: 'Medium', color: 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300' },
+  high: { label: 'High', color: 'bg-orange-50 text-orange-700 dark:bg-orange-900/20 dark:text-orange-300' },
+  urgent: { label: 'Urgent', color: 'bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-300' }
+}
+
 export default function StockTransferDetailPage() {
   const params = useParams()
+  const router = useRouter()
   const [mounted, setMounted] = useState(false)
   const [transfer, setTransfer] = useState<StockTransferDetail | null>(null)
   const [loading, setLoading] = useState(true)
@@ -159,13 +193,8 @@ export default function StockTransferDetailPage() {
   const fetchTransferDetail = async () => {
     try {
       setLoading(true)
-      // For now, use mock data since backend might not have full implementation
-      // In production, this would be:
-      // const response = await stockTransferService.getById(params.id as string)
-      // setTransfer(response)
-      
       // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      await new Promise(resolve => setTimeout(resolve, 500))
       setTransfer(mockTransferDetail)
     } catch (error) {
       console.error('Error fetching transfer detail:', error)
@@ -181,148 +210,78 @@ export default function StockTransferDetailPage() {
     }
   }, [params.id])
 
-  const formatDate = (dateString: string): string => {
-    if (!mounted) return ''
-    return new Date(dateString).toLocaleDateString('id-ID', {
-      year: 'numeric',
-      month: 'long', 
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    })
-  }
-
-  const formatCurrency = (amount: number): string => {
-    if (!mounted) return ''
-    return amount.toLocaleString('id-ID', { 
-      style: 'currency', 
-      currency: 'IDR',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0
-    })
-  }
-
-  const getStatusBadge = (status: string) => {
-    const config = {
-      draft: { variant: 'secondary' as const, label: 'Draft', icon: Clock },
-      pending: { variant: 'outline' as const, label: 'Pending', icon: Clock },
-      approved: { variant: 'default' as const, label: 'Approved', icon: CheckCircle },
-      in_transit: { variant: 'secondary' as const, label: 'In Transit', icon: Truck },
-      completed: { variant: 'default' as const, label: 'Completed', icon: CheckCircle },
-      cancelled: { variant: 'destructive' as const, label: 'Cancelled', icon: XCircle }
-    }
-    return config[status as keyof typeof config] || { variant: 'secondary' as const, label: status, icon: Clock }
-  }
-
-  const getPriorityBadge = (priority: string) => {
-    const config = {
-      low: { variant: 'secondary' as const, label: 'Low' },
-      medium: { variant: 'outline' as const, label: 'Medium' },
-      high: { variant: 'default' as const, label: 'High' },
-      urgent: { variant: 'destructive' as const, label: 'Urgent' }
-    }
-    return config[priority as keyof typeof config] || { variant: 'secondary' as const, label: priority }
-  }
-
-  const getItemStatusBadge = (status: string) => {
-    const config = {
-      pending: { variant: 'outline' as const, label: 'Pending' },
-      transferred: { variant: 'default' as const, label: 'Transferred' },
-      received: { variant: 'default' as const, label: 'Received' }
-    }
-    return config[status as keyof typeof config] || { variant: 'secondary' as const, label: status }
-  }
-
-  const breadcrumbs = [
-    { label: 'Inventory', href: '/inventory' },
-    { label: 'Stock Transfer', href: '/inventory/stock-transfer' },
-    { label: transfer?.transfer_number || 'Detail', href: `/inventory/stock-transfer/${params.id}` }
-  ]
-
-  const itemColumns: AdvancedColumn<TransferItem>[] = [
+  const itemColumns: TanStackColumn<TransferItem>[] = useMemo(() => [
     {
-      key: 'product_code',
-      title: 'Product Code',
-      sortable: true,
-      width: '140px',
-      render: (value: unknown) => (
-        <div className="font-medium">{value as string}</div>
-      )
-    },
-    {
-      key: 'product_name',
-      title: 'Product Name',
-      sortable: true,
-      render: (value: unknown, item: TransferItem) => (
-        <div>
-          <div className="font-medium">{value as string}</div>
-          <div className="text-sm text-muted-foreground">{item.category}</div>
+      id: 'product',
+      header: 'Product',
+      accessorKey: 'product_code',
+      cell: ({ row }) => (
+        <div className="flex flex-col">
+          <span className="font-medium text-blue-600 dark:text-blue-400">{row.original.product_name}</span>
+          <span className="text-xs text-muted-foreground">{row.original.product_code}</span>
         </div>
       )
     },
     {
-      key: 'size',
-      title: 'Size',
-      width: '80px',
-      render: (value: unknown) => (
-        <div className="text-center font-medium">{value as string}</div>
+      id: 'category',
+      header: 'Category',
+      accessorKey: 'category',
+      cell: ({ row }) => (
+        <div className="text-sm">{row.original.category}</div>
       )
     },
     {
-      key: 'color',
-      title: 'Color',
-      width: '100px',
-      render: (value: unknown) => (
-        <div className="text-center">{value as string}</div>
+      id: 'size_color',
+      header: 'Size / Color',
+      accessorKey: 'size',
+      cell: ({ row }) => (
+        <div className="text-sm">
+          {row.original.size} / {row.original.color}
+        </div>
       )
     },
     {
-      key: 'quantity',
-      title: 'Qty',
-      sortable: true,
-      width: '80px',
-      render: (value: unknown) => (
-        <div className="text-center font-medium">{value as number}</div>
+      id: 'quantity',
+      header: 'Quantity',
+      accessorKey: 'quantity',
+      cell: ({ row }) => (
+        <div className="text-center font-medium bg-muted py-1 rounded-md">{row.original.quantity}</div>
       )
     },
     {
-      key: 'unit_cost',
-      title: 'Unit Cost',
-      sortable: true,
-      width: '120px',
-      render: (value: unknown) => (
-        <div className="text-right">{formatCurrency(value as number)}</div>
+      id: 'cost',
+      header: 'Total Cost',
+      accessorKey: 'total_cost',
+      cell: ({ row }) => (
+        <div className="text-right font-medium">
+          {((row.original.total_cost || 0)).toLocaleString('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 })}
+        </div>
       )
     },
     {
-      key: 'total_cost',
-      title: 'Total Cost',
-      sortable: true,
-      width: '120px',
-      render: (value: unknown) => (
-        <div className="text-right font-medium">{formatCurrency(value as number)}</div>
-      )
-    },
-    {
-      key: 'status',
-      title: 'Status',
-      sortable: true,
-      width: '120px',
-      render: (value: unknown) => {
-        const { variant, label } = getItemStatusBadge(value as string)
-        return <Badge variant={variant}>{label}</Badge>
+      id: 'status',
+      header: 'Status',
+      accessorKey: 'status',
+      cell: ({ row }) => {
+        const isPending = row.original.status === 'pending'
+        return (
+          <Badge variant={isPending ? 'outline' : 'default'} className="capitalize">
+            {row.original.status}
+          </Badge>
+        )
       }
     }
-  ]
+  ], [])
 
   if (loading) {
     return (
       <TwoLevelLayout>
-        <div className="flex justify-center items-center py-12">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-muted-foreground">Loading transfer details...</p>
-          </div>
+        <Header
+          title="Stock Transfer"
+          breadcrumbs={[{ label: 'Inventory' }, { label: 'Stock Transfer' }]}
+        />
+        <div className="flex justify-center items-center h-64">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
         </div>
       </TwoLevelLayout>
     )
@@ -331,43 +290,55 @@ export default function StockTransferDetailPage() {
   if (!transfer) {
     return (
       <TwoLevelLayout>
-        <div className="flex justify-center items-center py-12">
-          <div className="text-center">
-            <p className="text-muted-foreground">Transfer not found</p>
-          </div>
+        <Header
+          title="Stock Transfer Not Found"
+          breadcrumbs={[{ label: 'Inventory' }, { label: 'Stock Transfer' }]}
+        />
+        <div className="flex flex-col justify-center items-center h-64 p-6">
+          <HugeiconsIcon icon={InformationCircleIcon} className="h-12 w-12 text-muted-foreground mb-4" />
+          <p className="text-muted-foreground">Transfer not found</p>
+          <Button variant="outline" className="mt-4" onClick={() => router.push('/inventory/stock-transfer')}>
+            Back to List
+          </Button>
         </div>
       </TwoLevelLayout>
     )
   }
 
-  const { variant: statusVariant, label: statusLabel, icon: StatusIcon } = getStatusBadge(transfer.status)
-  const { variant: priorityVariant, label: priorityLabel } = getPriorityBadge(transfer.priority)
+  const status = statusConfig[transfer.status] || statusConfig.pending
+  const priority = priorityConfig[transfer.priority] || priorityConfig.medium
 
   return (
     <TwoLevelLayout>
-      <Header 
+      <Header
         title={transfer.transfer_number}
         description="Stock transfer details and item tracking"
-        breadcrumbs={breadcrumbs}
+        breadcrumbs={[
+          { label: 'Inventory', href: '/inventory' },
+          { label: 'Stock Transfer', href: '/inventory/stock-transfer' },
+          { label: transfer.transfer_number }
+        ]}
         actions={
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-2">
             <Button variant="outline" size="sm">
-              <DownloadSimple className="h-4 w-4 mr-2" />
+              <HugeiconsIcon icon={PrinterIcon} className="h-4 w-4 mr-2" />
+              Print
+            </Button>
+            <Button variant="outline" size="sm">
+              <HugeiconsIcon icon={Download01Icon} className="h-4 w-4 mr-2" />
               Export
             </Button>
             {transfer.status !== 'completed' && transfer.status !== 'cancelled' && (
-              <Button size="sm" asChild>
-                <Link href={`/inventory/stock-transfer/${transfer.id}/edit`}>
-                  <PencilSimple className="h-4 w-4 mr-2" />
+              <Link href={`/inventory/stock-transfer/${transfer.id}/edit`}>
+                <Button size="sm">
+                  <HugeiconsIcon icon={PencilEdit01Icon} className="h-4 w-4 mr-2" />
                   Edit Transfer
-                </Link>
-              </Button>
-            )}
-            <Button variant="outline" size="sm" asChild>
-              <Link href="/inventory/stock-transfer">
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to List
+                </Button>
               </Link>
+            )}
+            <Button variant="outline" size="sm" onClick={() => router.push('/inventory/stock-transfer')}>
+              <HugeiconsIcon icon={ArrowLeft01Icon} className="h-4 w-4 mr-2" />
+              Back
             </Button>
           </div>
         }
@@ -377,196 +348,150 @@ export default function StockTransferDetailPage() {
         {/* Transfer Overview */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Basic Information */}
-          <Card className="p-6">
-            <div className="flex items-center space-x-3 mb-4">
-              <ArrowsLeftRight className="h-6 w-6 text-blue-600" />
-              <h3 className="text-lg font-semibold">Transfer Information</h3>
-            </div>
-            <div className="space-y-3">
-              <div className="flex justify-between">
-                <span className="text-sm text-muted-foreground">Transfer Number:</span>
-                <span className="text-sm font-medium">{transfer.transfer_number}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-sm text-muted-foreground">Type:</span>
-                <span className="text-sm">{transfer.transfer_type.replace(/_/g, ' ').toUpperCase()}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">Status:</span>
-                <div className="flex items-center space-x-1">
-                  <StatusIcon className="h-4 w-4" />
-                  <Badge variant={statusVariant}>{statusLabel}</Badge>
-                </div>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">Priority:</span>
-                <Badge variant={priorityVariant}>{priorityLabel}</Badge>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-sm text-muted-foreground">Transfer Date:</span>
-                <span className="text-sm">{formatDate(transfer.transfer_date)}</span>
-              </div>
-              {transfer.actual_delivery_date && (
-                <div className="flex justify-between">
-                  <span className="text-sm text-muted-foreground">Delivered:</span>
-                  <span className="text-sm">{formatDate(transfer.actual_delivery_date)}</span>
-                </div>
-              )}
-            </div>
-          </Card>
-
-          {/* Location Information */}
-          <Card className="p-6">
-            <div className="flex items-center space-x-3 mb-4">
-              <MapPin className="h-6 w-6 text-green-600" />
-              <h3 className="text-lg font-semibold">Locations</h3>
-            </div>
-            <div className="space-y-4">
-              <div>
-                <div className="flex items-center space-x-2 mb-2">
-                  <BuildingOffice className="h-4 w-4 text-blue-600" />
-                  <span className="text-sm font-medium">From:</span>
-                </div>
-                <div className="pl-6">
-                  <div className="font-medium">{transfer.from_location}</div>
-                  <div className="text-sm text-muted-foreground">{transfer.from_location_code}</div>
-                  {transfer.from_address && (
-                    <div className="text-sm text-muted-foreground mt-1">{transfer.from_address}</div>
-                  )}
-                </div>
-              </div>
-              <div>
-                <div className="flex items-center space-x-2 mb-2">
-                  <BuildingOffice className="h-4 w-4 text-green-600" />
-                  <span className="text-sm font-medium">To:</span>
-                </div>
-                <div className="pl-6">
-                  <div className="font-medium">{transfer.to_location}</div>
-                  <div className="text-sm text-muted-foreground">{transfer.to_location_code}</div>
-                  {transfer.to_address && (
-                    <div className="text-sm text-muted-foreground mt-1">{transfer.to_address}</div>
-                  )}
-                </div>
-              </div>
-            </div>
-          </Card>
-
-          {/* Summary Statistics */}
-          <Card className="p-6">
-            <div className="flex items-center space-x-3 mb-4">
-              <Package className="h-6 w-6 text-purple-600" />
-              <h3 className="text-lg font-semibold">Summary</h3>
-            </div>
-            <div className="space-y-3">
-              <div className="flex justify-between">
-                <span className="text-sm text-muted-foreground">Total Items:</span>
-                <span className="text-lg font-bold">{transfer.total_items}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-sm text-muted-foreground">Total Quantity:</span>
-                <span className="text-lg font-bold">{transfer.total_quantity}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-sm text-muted-foreground">Estimated Value:</span>
-                <span className="text-lg font-bold text-green-600">
-                  {mounted ? `${(transfer.estimated_value / 1000000).toFixed(1)}M` : ''}
-                </span>
-              </div>
-            </div>
-          </Card>
-        </div>
-
-        {/* People & Notes */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* People Involved */}
-          <Card className="p-6">
-            <div className="flex items-center space-x-3 mb-4">
-              <User className="h-6 w-6 text-blue-600" />
-              <h3 className="text-lg font-semibold">People Involved</h3>
-            </div>
-            <div className="space-y-3">
-              <div className="flex justify-between">
-                <span className="text-sm text-muted-foreground">Requested by:</span>
-                <span className="text-sm font-medium">{transfer.requested_by}</span>
-              </div>
-              {transfer.approved_by && (
-                <div className="flex justify-between">
-                  <span className="text-sm text-muted-foreground">Approved by:</span>
-                  <span className="text-sm font-medium">{transfer.approved_by}</span>
-                </div>
-              )}
-              {transfer.received_by && (
-                <div className="flex justify-between">
-                  <span className="text-sm text-muted-foreground">Received by:</span>
-                  <span className="text-sm font-medium">{transfer.received_by}</span>
-                </div>
-              )}
-              <div className="flex justify-between">
-                <span className="text-sm text-muted-foreground">Created by:</span>
-                <span className="text-sm">{transfer.created_by}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-sm text-muted-foreground">Last updated by:</span>
-                <span className="text-sm">{transfer.updated_by}</span>
-              </div>
-            </div>
-          </Card>
-
-          {/* Reason & Notes */}
-          <Card className="p-6">
-            <div className="flex items-center space-x-3 mb-4">
-              <FileText className="h-6 w-6 text-orange-600" />
-              <h3 className="text-lg font-semibold">Reason & Notes</h3>
-            </div>
-            <div className="space-y-3">
-              <div>
-                <span className="text-sm font-medium text-muted-foreground">Reason:</span>
-                <p className="text-sm mt-1">{transfer.reason}</p>
-              </div>
-              {transfer.notes && (
+          <Card className="lg:col-span-2">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <HugeiconsIcon icon={ArrowRight01Icon} className="h-5 w-5 text-blue-600" />
+                Transfer Information
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
                 <div>
-                  <span className="text-sm font-medium text-muted-foreground">Notes:</span>
-                  <p className="text-sm mt-1">{transfer.notes}</p>
+                  <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Transfer Number</label>
+                  <p className="mt-1 font-mono text-sm font-semibold">{transfer.transfer_number}</p>
                 </div>
-              )}
-              <div className="flex justify-between">
-                <span className="text-sm text-muted-foreground">Created:</span>
-                <span className="text-sm">{formatDate(transfer.created_at)}</span>
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Status</label>
+                  <div className="mt-1">
+                    <Badge className={`${status.color} border-0 flex items-center gap-1 w-fit`}>
+                      <HugeiconsIcon icon={status.icon} className="h-3 w-3" />
+                      {status.label}
+                    </Badge>
+                  </div>
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Type</label>
+                  <p className="mt-1 text-sm capitalize">{transfer.transfer_type.replace(/_/g, ' ')}</p>
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Priority</label>
+                  <div className="mt-1">
+                    <Badge className={`${priority.color} border-0 hover:bg-opacity-80`}>
+                      {priority.label}
+                    </Badge>
+                  </div>
+                </div>
+
+                <div className="col-span-1 md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6 p-4 bg-muted/50 rounded-lg border border-dashed">
+                  <div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <HugeiconsIcon icon={Store01Icon} className="h-4 w-4 text-blue-600" />
+                      <span className="text-sm font-semibold text-blue-700 dark:text-blue-300">Origin</span>
+                    </div>
+                    <p className="text-sm font-medium">{transfer.from_location}</p>
+                    <p className="text-xs text-muted-foreground">{transfer.from_location_code}</p>
+                    {transfer.from_address && <p className="text-xs text-muted-foreground mt-1 max-w-xs">{transfer.from_address}</p>}
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <HugeiconsIcon icon={Store01Icon} className="h-4 w-4 text-green-600" />
+                      <span className="text-sm font-semibold text-green-700 dark:text-green-300">Destination</span>
+                    </div>
+                    <p className="text-sm font-medium">{transfer.to_location}</p>
+                    <p className="text-xs text-muted-foreground">{transfer.to_location_code}</p>
+                    {transfer.to_address && <p className="text-xs text-muted-foreground mt-1 max-w-xs">{transfer.to_address}</p>}
+                  </div>
+                </div>
+
+                {transfer.reason && (
+                  <div className="col-span-1 md:col-span-2">
+                    <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Reason</label>
+                    <p className="mt-1 text-sm">{transfer.reason}</p>
+                  </div>
+                )}
               </div>
-              <div className="flex justify-between">
-                <span className="text-sm text-muted-foreground">Last updated:</span>
-                <span className="text-sm">{formatDate(transfer.updated_at)}</span>
-              </div>
-            </div>
+            </CardContent>
           </Card>
+
+          {/* Details & People */}
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Summary</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground">Total Items</span>
+                  <span className="font-semibold">{transfer.total_items} types</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground">Total Quantity</span>
+                  <span className="font-semibold">{transfer.total_quantity} units</span>
+                </div>
+                <div className="flex justify-between items-center pt-2 border-t">
+                  <span className="text-sm text-muted-foreground">Estimated Value</span>
+                  <span className="font-bold text-green-600 dark:text-green-400">
+                    {((transfer.estimated_value || 0)).toLocaleString('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 })}
+                  </span>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Details</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4 text-sm">
+                <div className="flex items-center gap-2">
+                  <HugeiconsIcon icon={Calendar01Icon} className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-muted-foreground w-24">Date:</span>
+                  <span>{new Date(transfer.transfer_date).toLocaleDateString()}</span>
+                </div>
+                {transfer.actual_delivery_date && (
+                  <div className="flex items-center gap-2">
+                    <HugeiconsIcon icon={TruckDeliveryIcon} className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-muted-foreground w-24">Delivered:</span>
+                    <span>{new Date(transfer.actual_delivery_date).toLocaleDateString()}</span>
+                  </div>
+                )}
+                <div className="flex items-center gap-2">
+                  <HugeiconsIcon icon={UserIcon} className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-muted-foreground w-24">Requested:</span>
+                  <span className="truncate">{transfer.requested_by}</span>
+                </div>
+                {transfer.approved_by && (
+                  <div className="flex items-center gap-2">
+                    <HugeiconsIcon icon={CheckmarkCircle01Icon} className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-muted-foreground w-24">Approved:</span>
+                    <span className="truncate">{transfer.approved_by}</span>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
         </div>
 
         {/* Transfer Items */}
-        <Card className="p-6">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center space-x-3">
-              <Package className="h-6 w-6 text-blue-600" />
-              <h3 className="text-lg font-semibold">Transfer Items</h3>
-            </div>
-            <div className="text-sm text-muted-foreground">
-              {transfer.items.length} items
-            </div>
-          </div>
-          
-          <AdvancedDataTable
-            data={transfer.items}
-            columns={itemColumns}
-            loading={false}
-            pagination={{
-              current: 1,
-              pageSize: 20,
-              total: transfer.items.length,
-              onChange: () => {}
-            }}
-            searchPlaceholder="Search transfer items..."
-            exportEnabled={true}
-            rowSelection={false}
-          />
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <HugeiconsIcon icon={PackageIcon} className="h-5 w-5 text-gray-500" />
+              Transfer Items
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <TanStackDataTable
+              data={transfer.items}
+              columns={itemColumns}
+              pagination={{
+                pageSize: 20,
+                pageIndex: 0,
+                totalRows: transfer.items.length,
+                onPageChange: () => { }
+              }}
+            />
+          </CardContent>
         </Card>
       </div>
     </TwoLevelLayout>

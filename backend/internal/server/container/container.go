@@ -62,6 +62,10 @@ import (
 	procurement_services "malaka/internal/modules/procurement/domain/services"
 	procurement_persistence "malaka/internal/modules/procurement/infrastructure/persistence"
 
+	// Notifications imports
+	notifications_services "malaka/internal/modules/notifications/domain/services"
+	notifications_persistence "malaka/internal/modules/notifications/infrastructure/persistence"
+
 	// Storage imports
 	"malaka/internal/shared/storage"
 	"malaka/internal/shared/upload"
@@ -182,6 +186,9 @@ type Container struct {
 	VendorEvaluationService         *procurement_services.VendorEvaluationService
 	ProcurementAnalyticsService     *procurement_services.AnalyticsService
 	ProcurementRFQService           *procurement_services.RFQService
+
+	// Notification services
+	NotificationService *notifications_services.NotificationService
 }
 
 // NewContainer creates a new dependency container.
@@ -475,6 +482,10 @@ func NewContainer(cfg *config.Config, logger *zap.Logger, db *sql.DB, gormDB *go
 	procurementRFQService := procurement_services.NewRFQService(procurementRFQRepo)
 	procurementRFQService.SetPurchaseOrderRepository(procurementPurchaseOrderRepo) // Enable RFQ to PO conversion
 
+	// Initialize notification repository and service
+	notificationRepo := notifications_persistence.NewPostgresNotificationRepository(sqlxDB)
+	notificationService := notifications_services.NewNotificationService(notificationRepo)
+
 	return &Container{
 		Config:              cfg,
 		Logger:              logger,
@@ -589,6 +600,9 @@ func NewContainer(cfg *config.Config, logger *zap.Logger, db *sql.DB, gormDB *go
 		VendorEvaluationService:         vendorEvaluationService,
 		ProcurementAnalyticsService:     procurementAnalyticsService,
 		ProcurementRFQService:           procurementRFQService,
+
+		// Notification services
+		NotificationService: notificationService,
 	}
 }
 

@@ -1,244 +1,148 @@
 'use client'
 
-import React, { useState, useEffect } from 'react';
-import { TwoLevelLayout } from '@/components/ui/two-level-layout';
-import { Header } from '@/components/ui/header';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { DataTable } from '@/components/ui/data-table';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
-;
-import { stockService, StockItem, InventoryFilters } from '@/services/inventory';
+import React, { useState, useEffect, useMemo } from 'react'
+import { TwoLevelLayout } from '@/components/ui/two-level-layout'
+import { Header } from '@/components/ui/header'
+import { Card, CardContent } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import { Label } from '@/components/ui/label'
+import { HugeiconsIcon } from '@hugeicons/react'
+import {
+  PackageIcon,
+  Search01Icon,
+  FilterIcon,
+  Download01Icon,
+  PlusSignIcon,
+  Store01Icon,
+  AlertCircleIcon,
+  RotateRight01Icon,
+  Cancel01Icon,
+  CheckmarkCircle01Icon,
+  Coins01Icon
+} from '@hugeicons/core-free-icons'
 
-// Extended interface for display purposes
-interface StockItemDisplay extends StockItem {
-  category: string;
-  warehouse: string;
-}
+import StockControlList, { StockItemDisplay } from './StockControlList'
+import { StockItem } from '@/services/inventory'
 
-// Mock data removed - now using real API data from backend
-
-const getStatusBadge = (status: StockItem['status']) => {
-  const variants = {
-    in_stock: { variant: 'default' as const, label: 'In Stock', className: 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400' },
-    low_stock: { variant: 'secondary' as const, label: 'Low Stock', className: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400' },
-    out_of_stock: { variant: 'destructive' as const, label: 'Out of Stock', className: '' },
-    overstock: { variant: 'default' as const, label: 'Overstock', className: 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400' }
-  };
-  
-  const config = variants[status];
-  return (
-    <Badge variant={config.variant} className={config.className}>
-      {config.label}
-    </Badge>
-  );
-};
+// Mock Data
+const mockStockData: StockItemDisplay[] = [
+  {
+    id: '1',
+    code: 'SPT-001-BLK-42',
+    name: 'Sport Running Shoes Black',
+    category: 'Sports Shoes',
+    warehouse: 'Main Warehouse Jakarta',
+    currentStock: 154,
+    minStock: 50,
+    maxStock: 500,
+    unitCost: 450000,
+    totalValue: 69300000,
+    status: 'in_stock'
+  },
+  {
+    id: '2',
+    code: 'CAS-002-BRN-40',
+    name: 'Casual Leather Shoes Brown',
+    category: 'Casual Shoes',
+    warehouse: 'Main Warehouse Jakarta',
+    currentStock: 24,
+    minStock: 30,
+    maxStock: 200,
+    unitCost: 650000,
+    totalValue: 15600000,
+    status: 'low_stock'
+  },
+  {
+    id: '3',
+    code: 'FML-003-BLK-38',
+    name: 'Formal Office Shoes Black',
+    category: 'Formal Shoes',
+    warehouse: 'Store Plaza Indonesia',
+    currentStock: 0,
+    minStock: 20,
+    maxStock: 100,
+    unitCost: 750000,
+    totalValue: 0,
+    status: 'out_of_stock'
+  },
+  {
+    id: '4',
+    code: 'BOT-005-BLK-43',
+    name: 'Work Boots Black',
+    category: 'Boots',
+    warehouse: 'Regional Warehouse Surabaya',
+    currentStock: 320,
+    minStock: 50,
+    maxStock: 300,
+    unitCost: 850000,
+    totalValue: 272000000,
+    status: 'overstock'
+  }
+]
 
 export default function StockControlPage() {
-  const [mounted, setMounted] = useState(false);
-  const [stockData, setStockData] = useState<StockItemDisplay[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filteredData, setFilteredData] = useState<StockItemDisplay[]>([]);
-  const [selectedWarehouse, setSelectedWarehouse] = useState('all');
-  const [selectedStatus, setSelectedStatus] = useState('all');
-  const [selectedCategory, setSelectedCategory] = useState('all');
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [editingItem, setEditingItem] = useState<StockItemDisplay | null>(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [mounted, setMounted] = useState(false)
+  const [stockData, setStockData] = useState<StockItemDisplay[]>(mockStockData) // Use mock data initially
+  const [loading, setLoading] = useState(false)
+
+  const [searchTerm, setSearchTerm] = useState('')
+  const [selectedWarehouse, setSelectedWarehouse] = useState('all')
+  const [selectedStatus, setSelectedStatus] = useState('all')
+  const [selectedCategory, setSelectedCategory] = useState('all')
+
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const [editingItem, setEditingItem] = useState<StockItemDisplay | null>(null)
 
   useEffect(() => {
-    setMounted(true);
-  }, []);
+    setMounted(true)
+  }, [])
 
-  // Fetch stock data from API
-  const fetchStockData = async () => {
-    try {
-      setLoading(true);
-      const response = await stockService.getAll();
-      console.log('Stock data response:', response);
-      // Transform data to include display fields
-      const transformedData: StockItemDisplay[] = response.data.map(item => ({
-        ...item,
-        category: item.category || 'General',
-        warehouse: item.warehouse || 'Main Warehouse'
-      }));
-      setStockData(transformedData);
-    } catch (error) {
-      console.error('Error fetching stock data:', error);
-      setStockData([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchStockData();
-  }, []);
-
-  useEffect(() => {
-    let filtered = stockData;
-
-    if (searchTerm) {
-      filtered = filtered.filter(item =>
+  const filteredData = useMemo(() => {
+    return stockData.filter(item => {
+      const matchesSearch =
         item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         item.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.warehouse.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
+        item.category.toLowerCase().includes(searchTerm.toLowerCase())
 
-    if (selectedWarehouse !== 'all') {
-      filtered = filtered.filter(item => item.warehouse === selectedWarehouse);
-    }
+      const matchesWarehouse = selectedWarehouse === 'all' || item.warehouse === selectedWarehouse
+      const matchesStatus = selectedStatus === 'all' || item.status === selectedStatus
+      const matchesCategory = selectedCategory === 'all' || item.category === selectedCategory
 
-    if (selectedStatus !== 'all') {
-      filtered = filtered.filter(item => item.status === selectedStatus);
-    }
+      return matchesSearch && matchesWarehouse && matchesStatus && matchesCategory
+    })
+  }, [stockData, searchTerm, selectedWarehouse, selectedStatus, selectedCategory])
 
-    if (selectedCategory !== 'all') {
-      filtered = filtered.filter(item => item.category === selectedCategory);
-    }
+  // Aggregate values for filters
+  const uniqueWarehouses = useMemo(() => Array.from(new Set(stockData.map(i => i.warehouse))), [stockData])
+  const uniqueCategories = useMemo(() => Array.from(new Set(stockData.map(i => i.category))), [stockData])
 
-    setFilteredData(filtered);
-    // Reset to first page when filters change
-    setCurrentPage(1);
-  }, [searchTerm, selectedWarehouse, selectedStatus, selectedCategory, stockData]);
-
-  const columns = [
-    {
-      key: 'code' as keyof StockItemDisplay,
-      title: 'Product Code',
-      render: (value: unknown, item: StockItemDisplay) => (
-        <div className="font-medium">{item.code}</div>
-      )
-    },
-    {
-      key: 'name' as keyof StockItemDisplay,
-      title: 'Product Name',
-      render: (value: unknown, item: StockItemDisplay) => (
-        <div>
-          <div className="font-medium">{item.name}</div>
-          <div className="text-sm text-gray-500 dark:text-gray-400">{item.category}</div>
-        </div>
-      )
-    },
-    {
-      key: 'warehouse' as keyof StockItem,
-      title: 'Warehouse',
-      render: (value: unknown, item: StockItem) => (
-        <div className="flex items-center gap-2">
-          <Warehouse className="w-4 h-4 text-gray-400" />
-          <span className="text-sm">{item.warehouse}</span>
-        </div>
-      )
-    },
-    {
-      key: 'currentStock' as keyof StockItem,
-      title: 'Current Stock',
-      render: (value: unknown, item: StockItem) => (
-        <div className="text-center">
-          <div className="font-medium">{item.currentStock.toLocaleString()}</div>
-          <div className="text-xs text-gray-500 dark:text-gray-400">
-            Min: {item.minStock || 0} | Max: {item.maxStock || 0}
-          </div>
-        </div>
-      )
-    },
-    {
-      key: 'unitCost' as keyof StockItem,
-      title: 'Unit Cost',
-      render: (value: unknown, item: StockItem) => (
-        <div className="text-right font-medium">
-          {mounted ? `Rp ${(item.unitCost || 0).toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : ''}
-        </div>
-      )
-    },
-    {
-      key: 'totalValue' as keyof StockItem,
-      title: 'Total Value',
-      render: (value: unknown, item: StockItem) => (
-        <div className="text-right font-medium">
-          {mounted ? `Rp ${(item.totalValue || 0).toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : ''}
-        </div>
-      )
-    },
-    {
-      key: 'status' as keyof StockItem,
-      title: 'Status',
-      render: (value: unknown, item: StockItem) => getStatusBadge(item.status)
-    },
-    {
-      key: 'id' as keyof StockItem,
-      title: 'Actions',
-      render: (value: unknown, item: StockItem) => (
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" size="sm">
-            <Eye className="w-4 h-4" />
-          </Button>
-          <Button variant="ghost" size="sm" onClick={() => handleEditStock(item as StockItemDisplay)}>
-            <PencilSimple className="w-4 h-4" />
-          </Button>
-        </div>
-      )
-    }
-  ];
-
-  // Calculate summary statistics from real data
-  const totalValue = filteredData.reduce((sum, item) => sum + (item.totalValue || 0), 0);
-  const lowStockItems = filteredData.filter(item => item.status === 'low_stock' || item.status === 'out_of_stock').length;
-  const warehouses = Array.from(new Set(stockData.map(item => item.warehouse))).length;
-
-  // Pagination logic
-  const totalItems = filteredData.length;
-  const startIndex = (currentPage - 1) * pageSize;
-  const endIndex = startIndex + pageSize;
-  const paginatedData = filteredData.slice(startIndex, endIndex);
-
-  // Pagination handler
-  const handlePageChange = (page: number, newPageSize: number) => {
-    setCurrentPage(page);
-    if (newPageSize !== pageSize) {
-      setPageSize(newPageSize);
-      setCurrentPage(1); // Reset to first page when page size changes
-    }
-  };
-  
-  // Get unique values for filters
-  const uniqueWarehouses = Array.from(new Set(stockData.map(item => item.warehouse))).sort();
-  const uniqueCategories = Array.from(new Set(stockData.map(item => item.category))).sort();
-  const statusOptions = [
-    { value: 'in_stock', label: 'In Stock' },
-    { value: 'low_stock', label: 'Low Stock' },
-    { value: 'out_of_stock', label: 'Out of Stock' },
-    { value: 'overstock', label: 'Overstock' }
-  ];
-
-  // Form handlers
-  const handleCreateStock = () => {
-    setIsCreateModalOpen(true);
-  };
+  // Stats
+  const stats = useMemo(() => {
+    const totalItems = filteredData.length
+    const totalValue = filteredData.reduce((acc, curr) => acc + (curr.totalValue || 0), 0)
+    const lowStock = filteredData.filter(i => i.status === 'low_stock' || i.status === 'out_of_stock').length
+    const warehouses = uniqueWarehouses.length
+    return { totalItems, totalValue, lowStock, warehouses }
+  }, [filteredData, uniqueWarehouses])
 
   const handleEditStock = (item: StockItemDisplay) => {
-    setEditingItem(item);
-    setIsEditModalOpen(true);
-  };
+    setEditingItem(item)
+    setIsEditModalOpen(true)
+  }
 
   const handleCloseModals = () => {
-    setIsCreateModalOpen(false);
-    setIsEditModalOpen(false);
-    setEditingItem(null);
-  };
+    setIsCreateModalOpen(false)
+    setIsEditModalOpen(false)
+    setEditingItem(null)
+  }
 
   return (
     <TwoLevelLayout>
-      <Header 
+      <Header
         title="Stock Control"
         description="Monitor and manage inventory levels across all locations"
         breadcrumbs={[
@@ -247,260 +151,167 @@ export default function StockControlPage() {
         ]}
         actions={
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={fetchStockData}>
-              <ArrowsClockwise className="w-4 h-4 mr-2" />
+            <Button variant="outline" size="sm" onClick={() => { }}>
+              <HugeiconsIcon icon={RotateRight01Icon} className="w-4 h-4 mr-2" />
               Refresh
             </Button>
-            <Button size="sm" onClick={handleCreateStock}>
-              <Plus className="w-4 h-4 mr-2" />
+            <Button size="sm" onClick={() => setIsCreateModalOpen(true)}>
+              <HugeiconsIcon icon={PlusSignIcon} className="w-4 h-4 mr-2" />
               Add Stock
             </Button>
           </div>
         }
       />
-      
-      <div className="flex-1 p-6">
+
+      <div className="flex-1 p-6 space-y-6">
         {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <Card>
-            <CardContent className="p-3">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Total Items</p>
-                  <p className="text-2xl font-bold">{filteredData.length}</p>
-                </div>
-                <Package className="w-8 h-8 text-blue-500" />
+            <CardContent className="p-4 flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Total Items</p>
+                <p className="text-2xl font-bold">{stats.totalItems}</p>
+              </div>
+              <div className="h-10 w-10 bg-blue-100 dark:bg-blue-900/20 rounded-lg flex items-center justify-center text-blue-600">
+                <HugeiconsIcon icon={PackageIcon} className="h-6 w-6" />
               </div>
             </CardContent>
           </Card>
-          
+
           <Card>
-            <CardContent className="p-3">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Total Value</p>
-                  <p className="text-2xl font-bold">
-                    {mounted ? `Rp ${totalValue.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : ''}
-                  </p>
-                </div>
-                <Package className="w-8 h-8 text-green-500" />
+            <CardContent className="p-4 flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Total Value</p>
+                <p className="text-2xl font-bold">
+                  {mounted ? `Rp ${(stats.totalValue / 1000000).toFixed(1)}M` : '-'}
+                </p>
+              </div>
+              <div className="h-10 w-10 bg-green-100 dark:bg-green-900/20 rounded-lg flex items-center justify-center text-green-600">
+                <HugeiconsIcon icon={Coins01Icon} className="h-6 w-6" />
               </div>
             </CardContent>
           </Card>
-          
+
           <Card>
-            <CardContent className="p-3">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Low Stock Alerts</p>
-                  <p className="text-2xl font-bold text-red-600">{lowStockItems}</p>
-                </div>
-                <Warning className="w-8 h-8 text-red-500" />
+            <CardContent className="p-4 flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Low Stock Alerts</p>
+                <p className="text-2xl font-bold text-red-600">{stats.lowStock}</p>
+              </div>
+              <div className="h-10 w-10 bg-red-100 dark:bg-red-900/20 rounded-lg flex items-center justify-center text-red-600">
+                <HugeiconsIcon icon={AlertCircleIcon} className="h-6 w-6" />
               </div>
             </CardContent>
           </Card>
-          
+
           <Card>
-            <CardContent className="p-3">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Warehouses</p>
-                  <p className="text-2xl font-bold">{warehouses || 0}</p>
-                </div>
-                <Warehouse className="w-8 h-8 text-purple-500" />
+            <CardContent className="p-4 flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Warehouses</p>
+                <p className="text-2xl font-bold">{stats.warehouses}</p>
+              </div>
+              <div className="h-10 w-10 bg-purple-100 dark:bg-purple-900/20 rounded-lg flex items-center justify-center text-purple-600">
+                <HugeiconsIcon icon={Store01Icon} className="h-6 w-6" />
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Filters and Actions */}
-        <div className="flex items-center justify-between gap-4 mb-6">
-          <div className="flex-1 max-w-md">
-            <div className="relative">
-              <MagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search by product name, code, category, or warehouse..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-9"
-              />
-            </div>
-          </div>
-          
+        {/* Filters */}
+        {/* Filters */}
+        <div className="flex flex-col md:flex-row items-center justify-end gap-2">
           <div className="flex items-center gap-2">
             <Select value={selectedWarehouse} onValueChange={setSelectedWarehouse}>
-              <SelectTrigger className="w-48">
-                <Warehouse className="h-4 w-4 mr-2" />
-                <SelectValue placeholder="All Warehouses" />
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Warehouse" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Warehouses</SelectItem>
-                {uniqueWarehouses.map(warehouse => (
-                  <SelectItem key={warehouse} value={warehouse}>
-                    {warehouse}
-                  </SelectItem>
-                ))}
+                {uniqueWarehouses.map(w => <SelectItem key={w} value={w}>{w}</SelectItem>)}
               </SelectContent>
             </Select>
 
             <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-              <SelectTrigger className="w-36">
-                <Warning className="h-4 w-4 mr-2" />
-                <SelectValue placeholder="All Status" />
+              <SelectTrigger className="w-[150px]">
+                <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Status</SelectItem>
-                {statusOptions.map(status => (
-                  <SelectItem key={status.value} value={status.value}>
-                    {status.label}
-                  </SelectItem>
-                ))}
+                <SelectItem value="in_stock">In Stock</SelectItem>
+                <SelectItem value="low_stock">Low Stock</SelectItem>
+                <SelectItem value="out_of_stock">Out of Stock</SelectItem>
+                <SelectItem value="overstock">Overstock</SelectItem>
               </SelectContent>
             </Select>
-
-            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-              <SelectTrigger className="w-36">
-                <Package className="h-4 w-4 mr-2" />
-                <SelectValue placeholder="All Categories" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Categories</SelectItem>
-                {uniqueCategories.map(category => (
-                  <SelectItem key={category} value={category}>
-                    {category}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            {(searchTerm || selectedWarehouse !== 'all' || selectedStatus !== 'all' || selectedCategory !== 'all') && (
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => {
-                  setSearchTerm('');
-                  setSelectedWarehouse('all');
-                  setSelectedStatus('all');
-                  setSelectedCategory('all');
-                }}
-              >
-                <X className="w-4 h-4 mr-2" />
-                Clear
-              </Button>
-            )}
-            
-            <Button variant="outline" size="sm">
-              <DownloadSimple className="w-4 h-4 mr-2" />
-              Export
-            </Button>
           </div>
+
+          <div className="relative">
+            <HugeiconsIcon icon={Search01Icon} className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-9 w-64"
+            />
+          </div>
+
+          <Button variant="outline" size="sm">
+            <HugeiconsIcon icon={FilterIcon} className="h-4 w-4 mr-2" />
+            Filters
+          </Button>
+          <Button variant="outline" size="sm">
+            <HugeiconsIcon icon={Download01Icon} className="h-4 w-4 mr-2" />
+            Export
+          </Button>
         </div>
 
         {/* Stock Data Table */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Stock Inventory</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {loading ? (
-              <div className="flex justify-center items-center py-12">
-                <div className="text-center">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                  <p className="text-muted-foreground">Loading stock data...</p>
-                </div>
-              </div>
-            ) : (
-              <DataTable
-                data={paginatedData}
-                columns={columns}
-                pagination={{
-                  current: currentPage,
-                  pageSize: pageSize,
-                  total: totalItems,
-                  onChange: handlePageChange
-                }}
-              />
-            )}
-          </CardContent>
-        </Card>
+        <StockControlList data={filteredData} onEdit={handleEditStock} />
       </div>
 
-      {/* Create Stock Modal */}
+      {/* Create Stock Modal - Keeping simulated dialog for now but styled properly */}
       <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>Add New Stock</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="article">Article</Label>
-              <Select>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select article" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="nike-air-max-39">Nike Air Max 39</SelectItem>
-                  <SelectItem value="nike-air-max-40">Nike Air Max 40</SelectItem>
-                  <SelectItem value="casual-walker-40">Casual Walker 40</SelectItem>
-                </SelectContent>
-              </Select>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="article" className="text-right">Article</Label>
+              <div className="col-span-3">
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select article" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="nike-air-max-39">Nike Air Max 39</SelectItem>
+                    <SelectItem value="casual-walker-40">Casual Walker 40</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="warehouse">Warehouse</Label>
-              <Select>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select warehouse" />
-                </SelectTrigger>
-                <SelectContent>
-                  {uniqueWarehouses.map(warehouse => (
-                    <SelectItem key={warehouse} value={warehouse}>
-                      {warehouse}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="warehouse" className="text-right">Warehouse</Label>
+              <div className="col-span-3">
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select warehouse" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {uniqueWarehouses.map(w => <SelectItem key={w} value={w}>{w}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="quantity">Quantity</Label>
-              <Input
-                id="quantity"
-                type="number"
-                placeholder="Enter quantity"
-                min="0"
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="minStock">Minimum Stock</Label>
-              <Input
-                id="minStock"
-                type="number"
-                placeholder="Enter minimum stock level"
-                min="0"
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="maxStock">Maximum Stock</Label>
-              <Input
-                id="maxStock"
-                type="number"
-                placeholder="Enter maximum stock level"
-                min="0"
-              />
-            </div>
-            
-            <div className="flex justify-end gap-2 pt-4">
-              <Button variant="outline" onClick={handleCloseModals}>
-                Cancel
-              </Button>
-              <Button onClick={handleCloseModals}>
-                Add Stock
-              </Button>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="quantity" className="text-right">Quantity</Label>
+              <Input id="quantity" type="number" className="col-span-3" />
             </div>
           </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={handleCloseModals}>Cancel</Button>
+            <Button onClick={handleCloseModals}>Add Stock</Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 
@@ -508,70 +319,36 @@ export default function StockControlPage() {
       <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Edit Stock - {editingItem?.name}</DialogTitle>
+            <DialogTitle>Edit Stock - {editingItem?.code}</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="edit-article">Article</Label>
-              <Input
-                id="edit-article"
-                value={editingItem?.name || ''}
-                disabled
-                className="bg-gray-100 dark:bg-gray-800"
-              />
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="edit-name" className="text-right">Name</Label>
+              <Input id="edit-name" value={editingItem?.name} disabled className="col-span-3 bg-muted" />
             </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="edit-warehouse">Warehouse</Label>
-              <Input
-                id="edit-warehouse"
-                value={editingItem?.warehouse || ''}
-                disabled
-                className="bg-gray-100 dark:bg-gray-800"
-              />
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="edit-wh" className="text-right">Warehouse</Label>
+              <Input id="edit-wh" value={editingItem?.warehouse} disabled className="col-span-3 bg-muted" />
             </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="edit-quantity">Current Stock</Label>
-              <Input
-                id="edit-quantity"
-                type="number"
-                defaultValue={editingItem?.currentStock || 0}
-                min="0"
-              />
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="edit-qty" className="text-right">Current</Label>
+              <Input id="edit-qty" type="number" defaultValue={editingItem?.currentStock} className="col-span-3" />
             </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="edit-minStock">Minimum Stock</Label>
-              <Input
-                id="edit-minStock"
-                type="number"
-                defaultValue={editingItem?.minStock || 0}
-                min="0"
-              />
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="edit-min" className="text-right">Min</Label>
+              <Input id="edit-min" type="number" defaultValue={editingItem?.minStock} className="col-span-3" />
             </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="edit-maxStock">Maximum Stock</Label>
-              <Input
-                id="edit-maxStock"
-                type="number"
-                defaultValue={editingItem?.maxStock || 0}
-                min="0"
-              />
-            </div>
-            
-            <div className="flex justify-end gap-2 pt-4">
-              <Button variant="outline" onClick={handleCloseModals}>
-                Cancel
-              </Button>
-              <Button onClick={handleCloseModals}>
-                Update Stock
-              </Button>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="edit-max" className="text-right">Max</Label>
+              <Input id="edit-max" type="number" defaultValue={editingItem?.maxStock} className="col-span-3" />
             </div>
           </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={handleCloseModals}>Cancel</Button>
+            <Button onClick={handleCloseModals}>Save Changes</Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </TwoLevelLayout>
-  );
+  )
 }

@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { Card } from '@/components/ui/card'
+import React, { useState, useEffect } from 'react'
+import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { TwoLevelLayout } from '@/components/ui/two-level-layout'
@@ -10,7 +10,8 @@ import { Progress } from '@/components/ui/progress'
 
 import Link from 'next/link'
 import { mockProductionSummary, mockWorkOrders, mockQualityControls, mockPurchaseOrders } from '@/services/production'
-import type { WorkOrder, QualityControl, PurchaseOrder } from '@/types/production'
+import { HugeiconsIcon } from '@hugeicons/react'
+import { PlusSignIcon, Settings01Icon, ChartIncreaseIcon } from '@hugeicons/core-free-icons'
 
 export default function ProductionDashboard() {
   const [mounted, setMounted] = useState(false)
@@ -18,10 +19,6 @@ export default function ProductionDashboard() {
   useEffect(() => {
     setMounted(true)
   }, [])
-
-  const breadcrumbs = [
-    { label: 'Production', href: '/production' }
-  ]
 
   const formatCurrency = (amount?: number): string => {
     if (!mounted || typeof amount !== 'number' || isNaN(amount)) return ''
@@ -39,32 +36,33 @@ export default function ProductionDashboard() {
   const recentPurchaseOrders = mockPurchaseOrders.slice(0, 3)
 
   const getStatusBadge = (status: string, type: 'work_order' | 'quality' | 'purchase') => {
-    const configs = {
+    const configs: any = {
       work_order: {
-        draft: { variant: 'secondary' as const, label: 'Draft' },
-        scheduled: { variant: 'default' as const, label: 'Scheduled' },
-        in_progress: { variant: 'default' as const, label: 'In Progress' },
-        paused: { variant: 'outline' as const, label: 'Paused' },
-        completed: { variant: 'default' as const, label: 'Completed' },
-        cancelled: { variant: 'destructive' as const, label: 'Cancelled' }
+        draft: { color: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200' },
+        scheduled: { color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-200' },
+        in_progress: { color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-200' },
+        paused: { color: 'bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-200' },
+        completed: { color: 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-200' },
+        cancelled: { color: 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-200' }
       },
       quality: {
-        draft: { variant: 'secondary' as const, label: 'Draft' },
-        testing: { variant: 'default' as const, label: 'Testing' },
-        passed: { variant: 'default' as const, label: 'Passed' },
-        failed: { variant: 'destructive' as const, label: 'Failed' },
-        conditional: { variant: 'outline' as const, label: 'Conditional' }
+        draft: { color: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200' },
+        testing: { color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-200' },
+        passed: { color: 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-200' },
+        failed: { color: 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-200' },
+        conditional: { color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-200' }
       },
       purchase: {
-        draft: { variant: 'secondary' as const, label: 'Draft' },
-        sent: { variant: 'outline' as const, label: 'Sent' },
-        confirmed: { variant: 'default' as const, label: 'Confirmed' },
-        partial: { variant: 'default' as const, label: 'Partial' },
-        delivered: { variant: 'default' as const, label: 'Delivered' },
-        cancelled: { variant: 'destructive' as const, label: 'Cancelled' }
+        draft: { color: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200' },
+        sent: { color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-200' },
+        confirmed: { color: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/40 dark:text-indigo-200' },
+        partial: { color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-200' },
+        delivered: { color: 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-200' },
+        cancelled: { color: 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-200' }
       }
     }
-    return configs[type][status as keyof typeof configs[typeof type]] || { variant: 'secondary' as const, label: status }
+    const config = configs[type][status] || { color: 'bg-gray-100 text-gray-800' }
+    return { className: `${config.color} border-0 capitalize` }
   }
 
   return (
@@ -73,24 +71,23 @@ export default function ProductionDashboard() {
         <Header
           title="Production Dashboard"
           description="Monitor and manage all production activities"
-          breadcrumbs={breadcrumbs}
+          breadcrumbs={[{ label: 'Production', href: '/production' }]}
           actions={
-            <div className="flex items-center space-x-3">
-              <Button variant="outline" size="sm" asChild>
-                <Link href="/production/reports">
-                  Reports
-                </Link>
+            <div className="flex items-center gap-2">
+              <Button variant="outline">
+                <HugeiconsIcon icon={ChartIncreaseIcon} className="h-4 w-4 mr-2" />
+                Reports
               </Button>
-              <Button variant="outline" size="sm" asChild>
-                <Link href="/production/settings">
-                  Settings
-                </Link>
+              <Button variant="outline">
+                <HugeiconsIcon icon={Settings01Icon} className="h-4 w-4 mr-2" />
+                Settings
               </Button>
-              <Button size="sm" asChild>
-                <Link href="/production/work-orders/new">
+              <Link href="/production/work-orders/new">
+                <Button>
+                  <HugeiconsIcon icon={PlusSignIcon} className="h-4 w-4 mr-2" />
                   New Work Order
-                </Link>
-              </Button>
+                </Button>
+              </Link>
             </div>
           }
         />
@@ -99,278 +96,269 @@ export default function ProductionDashboard() {
         <div className="flex-1 overflow-auto p-6 space-y-6">
           {/* Key Performance Indicators */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
+            <Card>
+              <CardContent className="p-6">
                 <p className="text-sm font-medium text-muted-foreground">Total Work Orders</p>
-                <p className="text-2xl font-bold mt-1">{mockProductionSummary.totalWorkOrders}</p>
+                <p className="text-2xl font-bold mt-1 text-foreground">{mockProductionSummary.totalWorkOrders}</p>
                 <p className="text-sm text-blue-600 mt-1">
                   {mockProductionSummary.activeWorkOrders} active
                 </p>
-              </div>
-            </div>
-          </Card>
+              </CardContent>
+            </Card>
 
-          <Card className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
+            <Card>
+              <CardContent className="p-6">
                 <p className="text-sm font-medium text-muted-foreground">Production Output</p>
-                <p className="text-2xl font-bold mt-1">{mockProductionSummary.totalProduction.toLocaleString()}</p>
+                <p className="text-2xl font-bold mt-1 text-foreground">{mockProductionSummary.totalProduction.toLocaleString()}</p>
                 <p className="text-sm text-green-600 mt-1">Units this month</p>
-              </div>
-            </div>
-          </Card>
+              </CardContent>
+            </Card>
 
-          <Card className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
+            <Card>
+              <CardContent className="p-6">
                 <p className="text-sm font-medium text-muted-foreground">Efficiency Rate</p>
-                <p className="text-2xl font-bold mt-1">{mockProductionSummary.averageEfficiency}%</p>
+                <p className="text-2xl font-bold mt-1 text-foreground">{mockProductionSummary.averageEfficiency}%</p>
                 <div className="mt-2">
                   <Progress value={mockProductionSummary.averageEfficiency} className="h-2" />
                 </div>
-              </div>
-            </div>
-          </Card>
+              </CardContent>
+            </Card>
 
-          <Card className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
+            <Card>
+              <CardContent className="p-6">
                 <p className="text-sm font-medium text-muted-foreground">Quality Score</p>
-                <p className="text-2xl font-bold mt-1">{mockProductionSummary.qualityScore}%</p>
+                <p className="text-2xl font-bold mt-1 text-foreground">{mockProductionSummary.qualityScore}%</p>
                 <div className="mt-2">
                   <Progress value={mockProductionSummary.qualityScore} className="h-2" />
                 </div>
-              </div>
-            </div>
-          </Card>
+              </CardContent>
+            </Card>
           </div>
 
           {/* Quick Access Menu */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <Card className="p-6 hover: transition-shadow cursor-pointer" asChild>
-            <Link href="/production/work-orders">
-              <div className="flex items-center space-x-4">
-                <div className="p-3 bg-blue-100 rounded-lg">
-                </div>
-                <div>
-                  <h3 className="font-semibold">Work Orders</h3>
-                  <p className="text-sm text-muted-foreground">Manage production work orders</p>
-                  <p className="text-sm font-medium text-blue-600 mt-1">
-                    {mockProductionSummary.activeWorkOrders} active orders
-                  </p>
-                </div>
-              </div>
-            </Link>
-          </Card>
+            <Card className="hover:shadow-md transition-shadow cursor-pointer">
+              <Link href="/production/work-orders">
+                <CardContent className="p-6 flex items-center space-x-4">
+                  <div>
+                    <h3 className="font-semibold text-foreground">Work Orders</h3>
+                    <p className="text-sm text-muted-foreground">Manage production work orders</p>
+                    <p className="text-sm font-medium text-blue-600 mt-1">
+                      {mockProductionSummary.activeWorkOrders} active orders
+                    </p>
+                  </div>
+                </CardContent>
+              </Link>
+            </Card>
 
-          <Card className="p-6 hover: transition-shadow cursor-pointer" asChild>
-            <Link href="/production/quality-control">
-              <div className="flex items-center space-x-4">
-                <div className="p-3 bg-green-100 rounded-lg">
-                </div>
-                <div>
-                  <h3 className="font-semibold">Quality Control</h3>
-                  <p className="text-sm text-muted-foreground">Monitor quality inspections</p>
-                  <p className="text-sm font-medium text-green-600 mt-1">
-                    {mockProductionSummary.qualityScore}% quality score
-                  </p>
-                </div>
-              </div>
-            </Link>
-          </Card>
+            <Card className="hover:shadow-md transition-shadow cursor-pointer">
+              <Link href="/production/quality-control">
+                <CardContent className="p-6 flex items-center space-x-4">
+                  <div>
+                    <h3 className="font-semibold text-foreground">Quality Control</h3>
+                    <p className="text-sm text-muted-foreground">Monitor quality inspections</p>
+                    <p className="text-sm font-medium text-green-600 mt-1">
+                      {mockProductionSummary.qualityScore}% quality score
+                    </p>
+                  </div>
+                </CardContent>
+              </Link>
+            </Card>
 
-          <Card className="p-6 hover: transition-shadow cursor-pointer" asChild>
-            <Link href="/production/material-planning">
-              <div className="flex items-center space-x-4">
-                <div className="p-3 bg-purple-100 rounded-lg">
-                </div>
-                <div>
-                  <h3 className="font-semibold">Material Planning</h3>
-                  <p className="text-sm text-muted-foreground">Plan material requirements</p>
-                  <p className="text-sm font-medium text-purple-600 mt-1">MRP & scheduling</p>
-                </div>
-              </div>
-            </Link>
-          </Card>
+            <Card className="hover:shadow-md transition-shadow cursor-pointer">
+              <Link href="/production/material-planning">
+                <CardContent className="p-6 flex items-center space-x-4">
+                  <div>
+                    <h3 className="font-semibold text-foreground">Material Planning</h3>
+                    <p className="text-sm text-muted-foreground">Plan material requirements</p>
+                    <p className="text-sm font-medium text-purple-600 mt-1">MRP & scheduling</p>
+                  </div>
+                </CardContent>
+              </Link>
+            </Card>
 
-          <Card className="p-6 hover: transition-shadow cursor-pointer" asChild>
-            <Link href="/production/suppliers">
-              <div className="flex items-center space-x-4">
-                <div className="p-3 bg-orange-100 rounded-lg">
-                </div>
-                <div>
-                  <h3 className="font-semibold">Suppliers</h3>
-                  <p className="text-sm text-muted-foreground">Manage supplier relationships</p>
-                  <p className="text-sm font-medium text-orange-600 mt-1">67 active suppliers</p>
-                </div>
-              </div>
-            </Link>
-          </Card>
+            <Card className="hover:shadow-md transition-shadow cursor-pointer">
+              <Link href="/production/suppliers">
+                <CardContent className="p-6 flex items-center space-x-4">
+                  <div>
+                    <h3 className="font-semibold text-foreground">Suppliers</h3>
+                    <p className="text-sm text-muted-foreground">Manage supplier relationships</p>
+                    <p className="text-sm font-medium text-orange-600 mt-1">67 active suppliers</p>
+                  </div>
+                </CardContent>
+              </Link>
+            </Card>
 
-          <Card className="p-6 hover: transition-shadow cursor-pointer" asChild>
-            <Link href="/production/warehouses">
-              <div className="flex items-center space-x-4">
-                <div className="p-3 bg-gray-100 rounded-lg">
-                </div>
-                <div>
-                  <h3 className="font-semibold">Warehouses</h3>
-                  <p className="text-sm text-muted-foreground">Warehouse management</p>
-                  <p className="text-sm font-medium text-gray-600 mt-1">8 warehouses</p>
-                </div>
-              </div>
-            </Link>
-          </Card>
+            <Card className="hover:shadow-md transition-shadow cursor-pointer">
+              <Link href="/production/warehouses">
+                <CardContent className="p-6 flex items-center space-x-4">
+                  <div>
+                    <h3 className="font-semibold text-foreground">Warehouses</h3>
+                    <p className="text-sm text-muted-foreground">Warehouse management</p>
+                    <p className="text-sm font-medium text-gray-600 mt-1">8 warehouses</p>
+                  </div>
+                </CardContent>
+              </Link>
+            </Card>
 
-          <Card className="p-6 hover: transition-shadow cursor-pointer" asChild>
-            <Link href="/production/purchase-orders">
-              <div className="flex items-center space-x-4">
-                <div className="p-3 bg-red-100 rounded-lg">
-                </div>
-                <div>
-                  <h3 className="font-semibold">Purchase Orders</h3>
-                  <p className="text-sm text-muted-foreground">Procurement management</p>
-                  <p className="text-sm font-medium text-red-600 mt-1">89 pending orders</p>
-                </div>
-              </div>
-            </Link>
-          </Card>
+            <Card className="hover:shadow-md transition-shadow cursor-pointer">
+              <Link href="/production/purchase-orders">
+                <CardContent className="p-6 flex items-center space-x-4">
+                  <div>
+                    <h3 className="font-semibold text-foreground">Purchase Orders</h3>
+                    <p className="text-sm text-muted-foreground">Procurement management</p>
+                    <p className="text-sm font-medium text-red-600 mt-1">89 pending orders</p>
+                  </div>
+                </CardContent>
+              </Link>
+            </Card>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Recent Work Orders */}
-          <Card className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold">Recent Work Orders</h3>
-              <Button variant="ghost" size="sm" asChild>
-                <Link href="/production/work-orders">
-                  View All
-                </Link>
-              </Button>
-            </div>
+            {/* Recent Work Orders */}
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-foreground">Recent Work Orders</h3>
+                  <Link href="/production/work-orders">
+                    <Button variant="ghost" size="sm">
+                      View All
+                    </Button>
+                  </Link>
+                </div>
 
-            <div className="space-y-3">
-              {recentWorkOrders.map((order) => (
-                <div key={order.id} className="flex items-center justify-between p-3 border rounded-lg">
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-2">
-                      <span className="font-medium">{order.workOrderNumber}</span>
-                      <Badge {...getStatusBadge(order.status, 'work_order')} />
+                <div className="space-y-3">
+                  {recentWorkOrders.map((order) => (
+                    <div key={order.id} className="flex items-center justify-between p-3 border rounded-lg">
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-2">
+                          <span className="font-medium text-foreground">{order.workOrderNumber}</span>
+                          <Badge {...getStatusBadge(order.status, 'work_order')}>{order.status}</Badge>
+                        </div>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          {order.productName} • {order.quantity} units
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          Due: {formatDate(order.plannedEndDate)}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm font-medium text-foreground">{order.efficiency}%</p>
+                        <Progress value={order.efficiency} className="h-1 w-16 mt-1" />
+                      </div>
                     </div>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      {order.productName} • {order.quantity} units
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      Due: {formatDate(order.plannedEndDate)}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-sm font-medium">{order.efficiency}%</p>
-                    <Progress value={order.efficiency} className="h-1 w-16 mt-1" />
-                  </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-          </Card>
+              </CardContent>
+            </Card>
 
-          {/* Recent Quality Controls */}
-          <Card className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold">Quality Control</h3>
-              <Button variant="ghost" size="sm" asChild>
-                <Link href="/production/quality-control">
-                  View All
-                </Link>
-              </Button>
-            </div>
+            {/* Recent Quality Controls */}
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-foreground">Quality Control</h3>
+                  <Link href="/production/quality-control">
+                    <Button variant="ghost" size="sm">
+                      View All
+                    </Button>
+                  </Link>
+                </div>
 
-            <div className="space-y-3">
-              {recentQualityControls.map((qc) => (
-                <div key={qc.id} className="flex items-center justify-between p-3 border rounded-lg">
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-2">
-                      <span className="font-medium">{qc.qcNumber}</span>
-                      <Badge {...getStatusBadge(qc.status, 'quality')} />
+                <div className="space-y-3">
+                  {recentQualityControls.map((qc) => (
+                    <div key={qc.id} className="flex items-center justify-between p-3 border rounded-lg">
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-2">
+                          <span className="font-medium text-foreground">{qc.qcNumber}</span>
+                          <Badge {...getStatusBadge(qc.status, 'quality')}>{qc.status}</Badge>
+                        </div>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          {qc.productName} • {qc.quantityTested} tested
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {formatDate(qc.testDate)} • {qc.inspector}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm font-medium text-foreground">{qc.overallScore || 'N/A'}</p>
+                        {qc.overallScore > 0 && (
+                          <Progress value={qc.overallScore * 10} className="h-1 w-16 mt-1" />
+                        )}
+                      </div>
                     </div>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      {qc.productName} • {qc.quantityTested} tested
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {formatDate(qc.testDate)} • {qc.inspector}
-                    </p>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Recent Purchase Orders & Alerts */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-foreground">Recent Purchase Orders</h3>
+                  <Link href="/production/purchase-orders">
+                    <Button variant="ghost" size="sm">
+                      View All
+                    </Button>
+                  </Link>
+                </div>
+
+                <div className="grid grid-cols-1 gap-4">
+                  {recentPurchaseOrders.map((po) => (
+                    <div key={po.id} className="p-4 border rounded-lg flex items-center justify-between">
+                      <div>
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="font-medium text-foreground">{po.orderNumber}</span>
+                          <Badge {...getStatusBadge(po.status, 'purchase')}>{po.status}</Badge>
+                        </div>
+                        <p className="text-sm text-muted-foreground">{po.supplier.name}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm font-medium text-foreground">
+                          {formatCurrency(po.totalAmount)}
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Due: {formatDate(po.expectedDate)}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center space-x-2 mb-4">
+                  <h3 className="text-lg font-semibold text-foreground">Production Alerts</h3>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-900 rounded-lg">
+                    <div className="flex justify-between items-start mb-2">
+                      <p className="font-medium text-yellow-800 dark:text-yellow-200">Material Shortage Alert</p>
+                      <Link href="/production/material-planning">
+                        <Button variant="outline" size="sm" className="h-7 text-xs bg-yellow-100 hover:bg-yellow-200 text-yellow-800 border-yellow-300">View</Button>
+                      </Link>
+                    </div>
+                    <p className="text-sm text-yellow-700 dark:text-yellow-300">Premium Leather Black is running low (12 units remaining)</p>
                   </div>
-                  <div className="text-right">
-                    <p className="text-sm font-medium">{qc.overallScore || 'N/A'}</p>
-                    {qc.overallScore > 0 && (
-                      <Progress value={qc.overallScore * 10} className="h-1 w-16 mt-1" />
-                    )}
+
+                  <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-900 rounded-lg">
+                    <div className="flex justify-between items-start mb-2">
+                      <p className="font-medium text-red-800 dark:text-red-200">Delayed Work Orders</p>
+                      <Link href="/production/work-orders?status=delayed">
+                        <Button variant="outline" size="sm" className="h-7 text-xs bg-red-100 hover:bg-red-200 text-red-800 border-red-300">Review</Button>
+                      </Link>
+                    </div>
+                    <p className="text-sm text-red-700 dark:text-red-300">{mockProductionSummary.delayedWorkOrders} work orders are behind schedule</p>
                   </div>
                 </div>
-              ))}
-            </div>
-          </Card>
+              </CardContent>
+            </Card>
           </div>
-
-          {/* Recent Purchase Orders */}
-          <Card className="p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold">Recent Purchase Orders</h3>
-            <Button variant="ghost" size="sm" asChild>
-              <Link href="/production/purchase-orders">
-                View All
-              </Link>
-            </Button>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {recentPurchaseOrders.map((po) => (
-              <div key={po.id} className="p-4 border rounded-lg">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="font-medium">{po.orderNumber}</span>
-                  <Badge {...getStatusBadge(po.status, 'purchase')} />
-                </div>
-                <p className="text-sm text-muted-foreground mb-1">
-                  {po.supplier.name}
-                </p>
-                <p className="text-sm font-medium">
-                  {formatCurrency(po.totalAmount)}
-                </p>
-                <p className="text-xs text-muted-foreground mt-2">
-                  Due: {formatDate(po.expectedDate)}
-                </p>
-              </div>
-            ))}
-          </div>
-          </Card>
-
-          {/* Production Alerts */}
-          <Card className="p-6">
-          <div className="flex items-center space-x-2 mb-4">
-            <h3 className="text-lg font-semibold">Production Alerts</h3>
-          </div>
-
-          <div className="space-y-3">
-            <div className="flex items-center space-x-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-              <div className="flex-1">
-                <p className="font-medium text-yellow-800">Material Shortage Alert</p>
-                <p className="text-sm text-yellow-700">Premium Leather Black is running low (12 units remaining)</p>
-              </div>
-              <Button variant="outline" size="sm">
-                <Link href="/production/materials">View Details</Link>
-              </Button>
-            </div>
-
-            <div className="flex items-center space-x-3 p-3 bg-red-50 border border-red-200 rounded-lg">
-              <div className="flex-1">
-                <p className="font-medium text-red-800">Delayed Work Orders</p>
-                <p className="text-sm text-red-700">{mockProductionSummary.delayedWorkOrders} work orders are behind schedule</p>
-              </div>
-              <Button variant="outline" size="sm">
-                <Link href="/production/work-orders?status=delayed">Review Orders</Link>
-              </Button>
-            </div>
-          </div>
-          </Card>
         </div>
       </div>
     </TwoLevelLayout>

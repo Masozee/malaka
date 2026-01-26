@@ -1,657 +1,302 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
+import Link from 'next/link'
 import { TwoLevelLayout } from '@/components/ui/two-level-layout'
 import { Header } from '@/components/ui/header'
-import { Card } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { AdvancedDataTable } from '@/components/ui/advanced-data-table'
 import { Badge } from '@/components/ui/badge'
+import { Input } from '@/components/ui/input'
+import { TanStackDataTable, TanStackColumn } from '@/components/ui/tanstack-data-table'
+import { barcodeService, BarcodePrintJob } from '@/services/inventory'
+import { HugeiconsIcon } from '@hugeicons/react'
+import {
+  PrinterIcon,
+  Search01Icon,
+  FilterIcon,
+  Download01Icon,
+  PlusSignIcon,
+  File01Icon,
+  Clock01Icon,
+  CheckmarkCircle01Icon,
+  AlertCircleIcon,
+  Settings01Icon,
+  QrCodeIcon,
+  EyeIcon
+} from '@hugeicons/core-free-icons'
 
-interface BarcodePrintJob {
-  id: string
-  jobNumber: string
-  jobName: string
-  barcodeType: 'ean13' | 'code128' | 'qr' | 'datamatrix' | 'code39'
-  template: string
-  status: 'queued' | 'printing' | 'completed' | 'failed' | 'paused'
-  priority: 'low' | 'normal' | 'high' | 'urgent'
-  totalLabels: number
-  printedLabels: number
-  failedLabels: number
-  createdDate: string
-  startTime?: string
-  completedTime?: string
-  printerName: string
-  requestedBy: string
-  paperSize: string
-  labelDimensions: string
-  items: BarcodePrintItem[]
-  notes?: string
+const statusColors: Record<string, string> = {
+  queued: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200',
+  printing: 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-200',
+  completed: 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-200',
+  failed: 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-200',
+  paused: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-200'
 }
 
-interface BarcodePrintItem {
-  id: string
-  itemCode: string
-  itemName: string
-  barcode: string
-  quantity: number
-  category: string
-  size?: string
-  color?: string
-  price?: number
+const priorityColors: Record<string, string> = {
+  low: 'bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300',
+  normal: 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300',
+  high: 'bg-orange-50 text-orange-700 dark:bg-orange-900/20 dark:text-orange-300',
+  urgent: 'bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-300'
 }
 
-// Mock barcode print jobs data
-const mockBarcodePrintJobs: BarcodePrintJob[] = [
-  {
-    id: '1',
-    jobNumber: 'BPJ-2024-001',
-    jobName: 'Summer Collection - Running Shoes',
-    barcodeType: 'ean13',
-    template: 'Product Label Template A',
-    status: 'completed',
-    priority: 'normal',
-    totalLabels: 500,
-    printedLabels: 500,
-    failedLabels: 0,
-    createdDate: '2024-07-25',
-    startTime: '2024-07-25 08:00',
-    completedTime: '2024-07-25 09:15',
-    printerName: 'Zebra ZT230 - Production Floor',
-    requestedBy: 'Production Manager',
-    paperSize: 'A4',
-    labelDimensions: '50x30mm',
-    items: [
-      {
-        id: '1',
-        itemCode: 'RS-SUM-001',
-        itemName: 'Air Runner Pro',
-        barcode: '8901234567890',
-        quantity: 100,
-        category: 'Running Shoes',
-        size: '42',
-        color: 'Black',
-        price: 850000
-      },
-      {
-        id: '2',
-        itemCode: 'RS-SUM-002',
-        itemName: 'Sprint Master',
-        barcode: '8901234567891',
-        quantity: 200,
-        category: 'Running Shoes',
-        size: '41',
-        color: 'White',
-        price: 750000
-      },
-      {
-        id: '3',
-        itemCode: 'RS-SUM-003',
-        itemName: 'Urban Runner',
-        barcode: '8901234567892',
-        quantity: 200,
-        category: 'Running Shoes',
-        size: '43',
-        color: 'Navy',
-        price: 680000
-      }
-    ]
-  },
-  {
-    id: '2',
-    jobNumber: 'BPJ-2024-002',
-    jobName: 'Casual Collection - Canvas Shoes',
-    barcodeType: 'code128',
-    template: 'Retail Label Template B',
-    status: 'printing',
-    priority: 'high',
-    totalLabels: 300,
-    printedLabels: 180,
-    failedLabels: 5,
-    createdDate: '2024-07-25',
-    startTime: '2024-07-25 10:30',
-    printerName: 'Datamax H-4212 - Warehouse',
-    requestedBy: 'Warehouse Supervisor',
-    paperSize: 'Roll',
-    labelDimensions: '40x25mm',
-    items: [
-      {
-        id: '4',
-        itemCode: 'CS-CAS-001',
-        itemName: 'Classic Canvas Low',
-        barcode: 'CC001424250',
-        quantity: 150,
-        category: 'Canvas Shoes',
-        size: '40',
-        color: 'Beige',
-        price: 320000
-      },
-      {
-        id: '5',
-        itemCode: 'CS-CAS-002',
-        itemName: 'Vintage Canvas High',
-        barcode: 'CC002414351',
-        quantity: 150,
-        category: 'Canvas Shoes',
-        size: '39',
-        color: 'Brown',
-        price: 380000
-      }
-    ]
-  },
-  {
-    id: '3',
-    jobNumber: 'BPJ-2024-003',
-    jobName: 'Inventory Tracking - QR Codes',
-    barcodeType: 'qr',
-    template: 'Asset Tracking Template',
-    status: 'queued',
-    priority: 'normal',
-    totalLabels: 1000,
-    printedLabels: 0,
-    failedLabels: 0,
-    createdDate: '2024-07-25',
-    printerName: 'Brother QL-820NWB - Office',
-    requestedBy: 'IT Administrator',
-    paperSize: 'Label Roll',
-    labelDimensions: '29x90mm',
-    notes: 'Asset tracking labels for warehouse equipment',
-    items: [
-      {
-        id: '6',
-        itemCode: 'ASSET-001',
-        itemName: 'Warehouse Rack A1',
-        barcode: 'QR:RACK-A1-2024',
-        quantity: 50,
-        category: 'Equipment'
-      },
-      {
-        id: '7',
-        itemCode: 'ASSET-002',
-        itemName: 'Conveyor Belt B2',
-        barcode: 'QR:CONV-B2-2024',
-        quantity: 25,
-        category: 'Equipment'
-      }
-    ]
-  },
-  {
-    id: '4',
-    jobNumber: 'BPJ-2024-004',
-    jobName: 'Winter Collection - Boots',
-    barcodeType: 'ean13',
-    template: 'Premium Product Template',
-    status: 'failed',
-    priority: 'high',
-    totalLabels: 250,
-    printedLabels: 45,
-    failedLabels: 205,
-    createdDate: '2024-07-24',
-    startTime: '2024-07-24 14:00',
-    printerName: 'Zebra ZT230 - Production Floor',
-    requestedBy: 'Quality Control',
-    paperSize: 'A4',
-    labelDimensions: '60x40mm',
-    notes: 'Printer jam occurred, needs maintenance',
-    items: [
-      {
-        id: '8',
-        itemCode: 'BT-WIN-001',
-        itemName: 'Alpine Winter Boot',
-        barcode: '8901234567893',
-        quantity: 125,
-        category: 'Winter Boots',
-        size: '42',
-        color: 'Black',
-        price: 1250000
-      },
-      {
-        id: '9',
-        itemCode: 'BT-WIN-002',
-        itemName: 'Urban Winter Boot',
-        barcode: '8901234567894',
-        quantity: 125,
-        category: 'Winter Boots',
-        size: '41',
-        color: 'Brown',
-        price: 980000
-      }
-    ]
-  },
-  {
-    id: '5',
-    jobNumber: 'BPJ-2024-005',
-    jobName: 'Raw Materials - Components',
-    barcodeType: 'code39',
-    template: 'Material Label Template',
-    status: 'paused',
-    priority: 'low',
-    totalLabels: 150,
-    printedLabels: 60,
-    failedLabels: 2,
-    createdDate: '2024-07-24',
-    startTime: '2024-07-24 16:00',
-    printerName: 'Honeywell PC42t - Materials',
-    requestedBy: 'Materials Manager',
-    paperSize: 'Roll',
-    labelDimensions: '35x20mm',
-    notes: 'Paused for material restocking',
-    items: [
-      {
-        id: '10',
-        itemCode: 'MTL-001',
-        itemName: 'Leather Sheet A Grade',
-        barcode: 'MTL001A',
-        quantity: 50,
-        category: 'Raw Materials'
-      },
-      {
-        id: '11',
-        itemCode: 'MTL-002',
-        itemName: 'Rubber Sole Type B',
-        barcode: 'MTL002B',
-        quantity: 100,
-        category: 'Components'
-      }
-    ]
-  }
-]
-
-// Status and priority color mappings
-const statusColors = {
-  queued: 'bg-gray-100 text-gray-800',
-  printing: 'bg-blue-100 text-blue-800',
-  completed: 'bg-green-100 text-green-800',
-  failed: 'bg-red-100 text-red-800',
-  paused: 'bg-yellow-100 text-yellow-800'
-}
-
-const priorityColors = {
-  low: 'bg-gray-100 text-gray-800',
-  normal: 'bg-blue-100 text-blue-800',
-  high: 'bg-orange-100 text-orange-800',
-  urgent: 'bg-red-100 text-red-800'
-}
-
-const barcodeTypeColors = {
-  ean13: 'bg-blue-100 text-blue-800',
-  code128: 'bg-green-100 text-green-800',
-  qr: 'bg-purple-100 text-purple-800',
-  datamatrix: 'bg-teal-100 text-teal-800',
-  code39: 'bg-orange-100 text-orange-800'
+const barcodeTypeColors: Record<string, string> = {
+  ean13: 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-200',
+  code128: 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-200',
+  qr: 'bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-200',
+  datamatrix: 'bg-teal-100 text-teal-800 dark:bg-teal-900/40 dark:text-teal-200',
+  code39: 'bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-200'
 }
 
 export default function BarcodePrintPage() {
   const [mounted, setMounted] = useState(false)
-  const [viewMode, setViewMode] = useState<'cards' | 'table'>('table')
+  const [searchQuery, setSearchQuery] = useState('')
+  const [data, setData] = useState<BarcodePrintJob[]>([])
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     setMounted(true)
+    fetchData()
   }, [])
 
-  const breadcrumbs = [
-    { label: 'Inventory', href: '/inventory' },
-    { label: 'Barcode Print', href: '/inventory/barcode-print' }
-  ]
+  const fetchData = async () => {
+    try {
+      setLoading(true)
+      const response = await barcodeService.getAll()
+      setData(response.data)
+    } catch (error) {
+      console.error('Failed to fetch barcode jobs:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
 
-  // Calculate statistics
-  const totalJobs = mockBarcodePrintJobs.length
-  const queuedJobs = mockBarcodePrintJobs.filter(job => job.status === 'queued').length
-  const printingJobs = mockBarcodePrintJobs.filter(job => job.status === 'printing').length
-  const completedJobs = mockBarcodePrintJobs.filter(job => job.status === 'completed').length
-  const failedJobs = mockBarcodePrintJobs.filter(job => job.status === 'failed').length
-  const totalLabels = mockBarcodePrintJobs.reduce((sum, job) => sum + job.totalLabels, 0)
-  const printedLabels = mockBarcodePrintJobs.reduce((sum, job) => sum + job.printedLabels, 0)
-  const successRate = totalLabels > 0 ? (printedLabels / totalLabels) * 100 : 0
+  const filteredData = useMemo(() => {
+    if (!searchQuery) return data
+    const lower = searchQuery.toLowerCase()
+    return data.filter(item =>
+      item.jobNumber.toLowerCase().includes(lower) ||
+      item.jobName.toLowerCase().includes(lower) ||
+      item.printerName.toLowerCase().includes(lower)
+    )
+  }, [data, searchQuery])
 
-  const columns = [
+  // Stats
+  const stats = useMemo(() => {
+    const total = data.length
+    const printing = data.filter(job => job.status === 'printing').length
+    const completed = data.filter(job => job.status === 'completed').length
+    const failed = data.filter(job => job.status === 'failed').length
+    return { total, printing, completed, failed }
+  }, [data])
+
+  const columns: TanStackColumn<BarcodePrintJob>[] = useMemo(() => [
     {
+      id: 'jobInfo',
+      header: 'Job Information',
       accessorKey: 'jobNumber',
-      header: 'Job Number',
-      cell: ({ row }: any) => (
-        <div>
-          <div className="font-medium">{row.getValue('jobNumber')}</div>
-          <div className="text-sm text-gray-500">{row.original.jobName}</div>
+      cell: ({ row }) => (
+        <div className="flex flex-col">
+          <span className="font-bold text-sm text-blue-600 dark:text-blue-400 hover:underline cursor-pointer">
+            {row.original.jobNumber}
+          </span>
+          <span className="text-[10px] text-muted-foreground">{row.original.jobName}</span>
         </div>
       )
     },
     {
-      accessorKey: 'barcodeType',
+      id: 'type',
       header: 'Type',
-      cell: ({ row }: any) => {
-        const type = row.getValue('barcodeType') as keyof typeof barcodeTypeColors
+      accessorKey: 'barcodeType',
+      cell: ({ row }) => {
+        const type = row.original.barcodeType
         return (
-          <Badge className={barcodeTypeColors[type]}>
-            {type.toUpperCase()}
+          <Badge className={`${barcodeTypeColors[type]} border-0 uppercase`}>
+            {type}
           </Badge>
         )
       }
     },
     {
-      accessorKey: 'priority',
+      id: 'priority',
       header: 'Priority',
-      cell: ({ row }: any) => {
-        const priority = row.getValue('priority') as keyof typeof priorityColors
+      accessorKey: 'priority',
+      cell: ({ row }) => {
+        const priority = row.original.priority
         return (
-          <Badge className={priorityColors[priority]}>
-            {priority.charAt(0).toUpperCase() + priority.slice(1)}
+          <Badge className={`${priorityColors[priority]} border-0 capitalize`}>
+            {priority}
           </Badge>
         )
       }
     },
     {
-      accessorKey: 'totalLabels',
-      header: 'Labels',
-      cell: ({ row }: any) => (
-        <div className="text-center">
-          <div className="font-medium">{row.getValue('totalLabels')}</div>
-          <div className="text-xs text-gray-500">
-            {row.original.printedLabels} printed
-          </div>
-        </div>
-      )
-    },
-    {
-      accessorKey: 'progress',
+      id: 'progress',
       header: 'Progress',
-      cell: ({ row }: any) => {
+      accessorKey: 'printedLabels',
+      cell: ({ row }) => {
         const progress = (row.original.printedLabels / row.original.totalLabels) * 100
+        const color = row.original.status === 'failed' ? 'bg-red-600' : 'bg-blue-600'
         return (
-          <div className="text-sm">
-            <div className="flex justify-between mb-1">
+          <div className="w-full min-w-[100px] flex flex-col gap-1">
+            <div className="flex justify-between text-[10px]">
+              <span>{row.original.printedLabels} / {row.original.totalLabels}</span>
               <span>{progress.toFixed(0)}%</span>
             </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
-              <div 
-                className="bg-blue-600 h-2 rounded-full" 
+            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
+              <div
+                className={`${color} h-1.5 rounded-full transition-all duration-300`}
                 style={{ width: `${progress}%` }}
-              ></div>
+              />
             </div>
           </div>
         )
       }
     },
     {
-      accessorKey: 'printerName',
+      id: 'printer',
       header: 'Printer',
-      cell: ({ row }: any) => (
-        <div className="text-sm">{row.getValue('printerName')}</div>
+      accessorKey: 'printerName',
+      cell: ({ row }) => (
+        <div className="flex items-center gap-2 text-sm">
+          <HugeiconsIcon icon={PrinterIcon} className="h-4 w-4 text-muted-foreground" />
+          <span className="truncate max-w-[150px]" title={row.original.printerName}>
+            {row.original.printerName}
+          </span>
+        </div>
       )
     },
     {
-      accessorKey: 'status',
+      id: 'status',
       header: 'Status',
-      cell: ({ row }: any) => {
-        const status = row.getValue('status') as keyof typeof statusColors
+      accessorKey: 'status',
+      cell: ({ row }) => {
+        const status = row.original.status
         return (
-          <Badge className={statusColors[status]}>
-            {status.charAt(0).toUpperCase() + status.slice(1)}
+          <Badge className={`${statusColors[status]} border-0 capitalize`}>
+            {status}
           </Badge>
         )
       }
     },
     {
-      accessorKey: 'requestedBy',
-      header: 'Requested By',
-      cell: ({ row }: any) => (
-        <div className="text-sm">{row.getValue('requestedBy')}</div>
+      id: 'actions',
+      header: '',
+      cell: ({ row }) => (
+        <div className="flex gap-2">
+          <Button variant="ghost" size="sm">
+            <HugeiconsIcon icon={EyeIcon} className="h-4 w-4" />
+          </Button>
+        </div>
+
       )
     }
-  ]
 
-  const JobCard = ({ job }: { job: BarcodePrintJob }) => {
-    const progress = (job.printedLabels / job.totalLabels) * 100
-    
-    return (
-      <Card className="p-4">
-        <div className="flex items-start justify-between mb-3">
-          <div>
-            <h3 className="font-semibold text-gray-900">{job.jobNumber}</h3>
-            <p className="text-sm text-gray-500">{job.jobName}</p>
-          </div>
-          <div className="text-right">
-            <Badge className={statusColors[job.status]}>
-              {job.status.charAt(0).toUpperCase() + job.status.slice(1)}
-            </Badge>
-            <div className="mt-1">
-              <Badge className={priorityColors[job.priority]}>
-                {job.priority.charAt(0).toUpperCase() + job.priority.slice(1)}
-              </Badge>
-            </div>
-          </div>
-        </div>
-        
-        <div className="space-y-2 text-sm">
-          <div className="flex justify-between">
-            <span className="text-gray-500">Barcode Type:</span>
-            <Badge className={barcodeTypeColors[job.barcodeType]}>
-              {job.barcodeType.toUpperCase()}
-            </Badge>
-          </div>
-          
-          <div className="flex justify-between">
-            <span className="text-gray-500">Labels:</span>
-            <span>{job.printedLabels} / {job.totalLabels}</span>
-          </div>
-          
-          <div className="space-y-1">
-            <div className="flex justify-between">
-              <span className="text-gray-500">Progress:</span>
-              <span className="font-medium">{progress.toFixed(0)}%</span>
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
-              <div 
-                className="bg-blue-600 h-2 rounded-full transition-all duration-300" 
-                style={{ width: `${progress}%` }}
-              ></div>
-            </div>
-          </div>
-          
-          <div className="flex justify-between">
-            <span className="text-gray-500">Printer:</span>
-            <span className="text-right max-w-32 truncate" title={job.printerName}>
-              {job.printerName}
-            </span>
-          </div>
-          
-          <div className="flex justify-between">
-            <span className="text-gray-500">Template:</span>
-            <span className="text-right max-w-32 truncate" title={job.template}>
-              {job.template}
-            </span>
-          </div>
-          
-          <div className="flex justify-between">
-            <span className="text-gray-500">Label Size:</span>
-            <span>{job.labelDimensions}</span>
-          </div>
-          
-          <div className="flex justify-between">
-            <span className="text-gray-500">Created:</span>
-            <span>{mounted ? new Date(job.createdDate).toLocaleDateString('id-ID') : ''}</span>
-          </div>
-          
-          {job.failedLabels > 0 && (
-            <div className="flex justify-between">
-              <span className="text-gray-500">Failed:</span>
-              <span className="text-red-600 font-medium">{job.failedLabels}</span>
-            </div>
-          )}
-          
-          {job.notes && (
-            <div className="mt-2 p-2 bg-yellow-50 rounded text-xs">
-              <span className="font-medium text-yellow-800">Notes: </span>
-              <span className="text-yellow-700">{job.notes}</span>
-            </div>
-          )}
-        </div>
-        
-        <div className="flex space-x-2 mt-4">
-          <Button size="sm" variant="outline" className="flex-1">
-            <Eye className="h-4 w-4 mr-1" />
-            View
-          </Button>
-          <Button size="sm" className="flex-1" disabled={job.status === 'completed'}>
-            <Printer className="h-4 w-4 mr-1" />
-            {job.status === 'printing' ? 'Resume' : 'Print'}
-          </Button>
-        </div>
-      </Card>
-    )
-  }
+  ], [])
 
   return (
     <TwoLevelLayout>
-      <div className="flex-1 space-y-6">
-        <Header 
-          title="Barcode Print Management"
-          breadcrumbs={breadcrumbs}
-        />
+      <Header
+        title="Barcode Print Management"
+        description="Manage print jobs and printer configurations"
+        breadcrumbs={[
+          { label: 'Inventory', href: '/inventory' },
+          { label: 'Barcode Print' }
+        ]}
+        actions={
+          <Button>
+            <HugeiconsIcon icon={PlusSignIcon} className="h-4 w-4 mr-2" />
+            New Print Job
+          </Button>
+        }
+      />
 
-        {/* Statistics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-7 gap-4">
-          <Card className="p-4">
-            <div className="flex items-center space-x-3">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <FileText className="h-5 w-5 text-blue-600" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-600">Total Jobs</p>
-                <p className="text-2xl font-bold text-gray-900">{totalJobs}</p>
-              </div>
-            </div>
-          </Card>
-
-          <Card className="p-4">
-            <div className="flex items-center space-x-3">
-              <div className="p-2 bg-gray-100 rounded-lg">
-                <Clock className="h-5 w-5 text-gray-600" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-600">Queued</p>
-                <p className="text-2xl font-bold text-gray-600">{queuedJobs}</p>
-              </div>
-            </div>
-          </Card>
-
-          <Card className="p-4">
-            <div className="flex items-center space-x-3">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <Printer className="h-5 w-5 text-blue-600" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-600">Printing</p>
-                <p className="text-2xl font-bold text-blue-600">{printingJobs}</p>
-              </div>
-            </div>
-          </Card>
-
-          <Card className="p-4">
-            <div className="flex items-center space-x-3">
-              <div className="p-2 bg-green-100 rounded-lg">
-                <CheckCircle className="h-5 w-5 text-green-600" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-600">Completed</p>
-                <p className="text-2xl font-bold text-green-600">{completedJobs}</p>
-              </div>
-            </div>
-          </Card>
-
-          <Card className="p-4">
-            <div className="flex items-center space-x-3">
-              <div className="p-2 bg-red-100 rounded-lg">
-                <ArrowsClockwise className="h-5 w-5 text-red-600" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-600">Failed</p>
-                <p className="text-2xl font-bold text-red-600">{failedJobs}</p>
-              </div>
-            </div>
-          </Card>
-
-          <Card className="p-4">
-            <div className="flex items-center space-x-3">
-              <div className="p-2 bg-purple-100 rounded-lg">
-                <ScanLine className="h-5 w-5 text-purple-600" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-600">Total Labels</p>
-                <p className="text-2xl font-bold text-purple-600">
-                  {(totalLabels / 1000).toFixed(1)}K
-                </p>
-              </div>
-            </div>
-          </Card>
-
-          <Card className="p-4">
-            <div className="flex items-center space-x-3">
-              <div className="p-2 bg-teal-100 rounded-lg">
-                <ChartBar className="h-5 w-5 text-teal-600" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-600">Success Rate</p>
-                <p className="text-2xl font-bold text-teal-600">
-                  {mounted ? successRate.toFixed(1) : ''}%
-                </p>
-              </div>
-            </div>
-          </Card>
-        </div>
-
-        {/* View Toggle and Actions */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <Button
-              variant={viewMode === 'cards' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setViewMode('cards')}
-            >
-              Cards
-            </Button>
-            <Button
-              variant={viewMode === 'table' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setViewMode('table')}
-            >
-              Table
-            </Button>
-          </div>
-          
-          <div className="flex items-center space-x-2">
-            <Button variant="outline" size="sm">
-              <Gear className="h-4 w-4 mr-2" />
-              Printer Gear
-            </Button>
-            <Button variant="outline" size="sm">
-              <QrCode className="h-4 w-4 mr-2" />
-              Templates
-            </Button>
-            <Button size="sm">
-              <Printer className="h-4 w-4 mr-2" />
-              New Print Job
-            </Button>
-          </div>
-        </div>
-
-        {/* Data Display */}
-        {viewMode === 'cards' ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {mockBarcodePrintJobs.map((job) => (
-              <JobCard key={job.id} job={job} />
-            ))}
-          </div>
-        ) : (
+      <div className="flex-1 p-6 space-y-6">
+        {/* Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <Card>
-            <AdvancedDataTable
-              data={mockBarcodePrintJobs}
-              columns={columns}
-              searchPlaceholder="Search job numbers, names, or printers..."
-              showFilters={true}
-            />
+            <CardContent className="p-4 flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Total Jobs</p>
+                <p className="text-2xl font-bold">{stats.total}</p>
+              </div>
+              <div className="h-10 w-10 bg-blue-100 dark:bg-blue-900/20 rounded-lg flex items-center justify-center text-blue-600">
+                <HugeiconsIcon icon={File01Icon} className="h-6 w-6" />
+              </div>
+            </CardContent>
           </Card>
-        )}
+          <Card>
+            <CardContent className="p-4 flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Printing</p>
+                <p className="text-2xl font-bold text-blue-600">{stats.printing}</p>
+              </div>
+              <div className="h-10 w-10 bg-blue-100 dark:bg-blue-900/20 rounded-lg flex items-center justify-center text-blue-600">
+                <HugeiconsIcon icon={PrinterIcon} className="h-6 w-6" />
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4 flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Completed</p>
+                <p className="text-2xl font-bold text-green-600">{stats.completed}</p>
+              </div>
+              <div className="h-10 w-10 bg-green-100 dark:bg-green-900/20 rounded-lg flex items-center justify-center text-green-600">
+                <HugeiconsIcon icon={CheckmarkCircle01Icon} className="h-6 w-6" />
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4 flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Failed</p>
+                <p className="text-2xl font-bold text-red-600">{stats.failed}</p>
+              </div>
+              <div className="h-10 w-10 bg-red-100 dark:bg-red-900/20 rounded-lg flex items-center justify-center text-red-600">
+                <HugeiconsIcon icon={AlertCircleIcon} className="h-6 w-6" />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Filters */}
+        <div className="flex items-center justify-end gap-2">
+          <div className="relative">
+            <HugeiconsIcon icon={Search01Icon} className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search print jobs..."
+              className="pl-9 w-64"
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+            />
+          </div>
+          <Button variant="outline" size="sm">
+            <HugeiconsIcon icon={Settings01Icon} className="h-4 w-4 mr-2" />
+            Printers
+          </Button>
+          <Button variant="outline" size="sm">
+            <HugeiconsIcon icon={QrCodeIcon} className="h-4 w-4 mr-2" />
+            Templates
+          </Button>
+          <Button variant="outline" size="sm">
+            <HugeiconsIcon icon={FilterIcon} className="h-4 w-4 mr-2" />
+            Filters
+          </Button>
+        </div>
+
+        {/* Table */}
+        <TanStackDataTable
+          data={filteredData}
+          columns={columns}
+          pagination={{
+            pageSize: 10,
+            pageIndex: 0,
+            totalRows: filteredData.length,
+            onPageChange: () => { }
+          }}
+        />
       </div>
     </TwoLevelLayout>
   )

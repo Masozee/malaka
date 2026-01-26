@@ -79,9 +79,9 @@ func (s *UserService) DeleteUser(ctx context.Context, id string) error {
 	return s.repo.Delete(ctx, id)
 }
 
-// AuthenticateUser authenticates a user by username and password and returns a JWT token.
-func (s *UserService) AuthenticateUser(ctx context.Context, username, password string) (string, error) {
-	user, err := s.repo.GetByUsername(ctx, username)
+// AuthenticateUser authenticates a user by email and password and returns a JWT token.
+func (s *UserService) AuthenticateUser(ctx context.Context, email, password string) (string, error) {
+	user, err := s.repo.GetByEmail(ctx, email)
 	if err != nil {
 		return "", err
 	}

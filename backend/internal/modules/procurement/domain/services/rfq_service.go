@@ -487,14 +487,51 @@ func (s *RFQService) ConvertToPO(ctx context.Context, responseID, createdBy, del
 	po.PaymentTerms = paymentTerms
 
 	// Create PO items from RFQ items
-	for _, rfqItem := range rfq.Items {
+	// If response items have detailed pricing, use them
+	// Otherwise, distribute the response total amount across items
+	hasResponseItems := len(response.ResponseItems) > 0
+	itemCount := len(rfq.Items)
+
+	for i, rfqItem := range rfq.Items {
 		// Find corresponding response item for pricing
 		var unitPrice, lineTotal float64
-		for _, respItem := range response.ResponseItems {
-			if respItem.RFQItemID == rfqItem.ID {
-				unitPrice = respItem.UnitPrice
-				lineTotal = respItem.TotalPrice
-				break
+		foundPricing := false
+
+		if hasResponseItems {
+			for _, respItem := range response.ResponseItems {
+				if respItem.RFQItemID == rfqItem.ID {
+					unitPrice = respItem.UnitPrice
+					lineTotal = respItem.TotalPrice
+					foundPricing = true
+					break
+				}
+			}
+		}
+
+		// If no pricing found in response items but response has total,
+		// distribute the total across items based on quantity
+		if !foundPricing && response.TotalAmount > 0 && itemCount > 0 {
+			// Simple distribution: equal share per item
+			lineTotal = response.TotalAmount / float64(itemCount)
+			if rfqItem.Quantity > 0 {
+				unitPrice = lineTotal / float64(rfqItem.Quantity)
+			} else {
+				unitPrice = lineTotal
+			}
+			// Round to avoid floating point issues
+			unitPrice = float64(int64(unitPrice*100)) / 100
+			lineTotal = float64(int64(lineTotal*100)) / 100
+
+			// Last item gets remainder to ensure total matches
+			if i == itemCount-1 {
+				var otherItemsTotal float64
+				for j := 0; j < i; j++ {
+					otherItemsTotal += po.Items[j].LineTotal
+				}
+				lineTotal = response.TotalAmount - otherItemsTotal
+				if rfqItem.Quantity > 0 {
+					unitPrice = lineTotal / float64(rfqItem.Quantity)
+				}
 			}
 		}
 
@@ -511,8 +548,15 @@ func (s *RFQService) ConvertToPO(ctx context.Context, responseID, createdBy, del
 		po.Items = append(po.Items, *poItem)
 	}
 
-	// Calculate totals
+	// Calculate totals from items
 	po.CalculateTotals()
+
+	// If calculated total is 0 but response had a total, use response total
+	// This handles cases where response items didn't have individual pricing
+	if po.TotalAmount == 0 && response.TotalAmount > 0 {
+		po.Subtotal = response.TotalAmount
+		po.TotalAmount = response.TotalAmount
+	}
 
 	// Create the PO
 	if err := s.poRepo.Create(ctx, po); err != nil {

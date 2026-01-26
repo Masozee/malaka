@@ -58,11 +58,11 @@ export class ProductionService {
   // Warehouse methods - using masterdata endpoint since warehouses are master data
   static async getWarehouses(
     params: PaginationParams & WarehouseFilters = {}
-  ): Promise<{success: boolean, message: string, data: Warehouse[]}> {
+  ): Promise<{ success: boolean, message: string, data: Warehouse[] }> {
     const filteredParams = Object.fromEntries(
       Object.entries(params).filter(([, value]) => value !== undefined && value !== '')
     )
-    return apiClient.get<{success: boolean, message: string, data: Warehouse[]}>(`/api/v1/masterdata/warehouses/`, filteredParams)
+    return apiClient.get<{ success: boolean, message: string, data: Warehouse[] }>(`/api/v1/masterdata/warehouses/`, filteredParams)
   }
 
   static async getWarehouseById(id: string): Promise<Warehouse> {
@@ -110,11 +110,11 @@ export class ProductionService {
   // Work Order methods
   static async getWorkOrders(
     params: PaginationParams & WorkOrderFilters = {}
-  ): Promise<{success: boolean, message: string, data: WorkOrder[]}> {
+  ): Promise<{ success: boolean, message: string, data: WorkOrder[] }> {
     const filteredParams = Object.fromEntries(
       Object.entries(params).filter(([, value]) => value !== undefined && value !== '')
     )
-    return apiClient.get<{success: boolean, message: string, data: WorkOrder[]}>(`${this.BASE_URL}/work-orders/`, filteredParams)
+    return apiClient.get<{ success: boolean, message: string, data: WorkOrder[] }>(`${this.BASE_URL}/work-orders/`, filteredParams)
   }
 
   static async getWorkOrderById(id: string): Promise<WorkOrder> {
@@ -175,6 +175,10 @@ export class ProductionService {
 
   static async getProductionSummary(): Promise<ProductionSummary> {
     return apiClient.get<ProductionSummary>(`${this.BASE_URL}/summary`)
+  }
+
+  static async getProductionAnalytics(params: any = {}): Promise<ProductionAnalytics> {
+    return apiClient.get<ProductionAnalytics>(`${this.BASE_URL}/analytics`, params)
   }
 }
 

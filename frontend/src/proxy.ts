@@ -21,7 +21,7 @@ function isValidToken(token: string): boolean {
   }
 }
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
   const token = request.cookies.get('malaka_auth_token')?.value
   const isAuthenticated = token && isValidToken(token)
@@ -63,6 +63,7 @@ export const config = {
     '/settings/:path*',
     '/guidelines/:path*',
     '/products/:path*',
+    '/notifications/:path*',
     // Login page (for redirect when authenticated)
     '/login',
   ],

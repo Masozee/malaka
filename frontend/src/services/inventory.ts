@@ -146,6 +146,30 @@ export interface PurchaseOrderItem {
   }
 }
 
+export interface StockOpname {
+  id: string
+  opnameNumber: string
+  date: string
+  warehouseId: string
+  warehouseName: string
+  status: 'planned' | 'in_progress' | 'completed' | 'cancelled'
+  notes?: string
+  totalItems: number
+  totalVariance: number
+  items?: StockOpnameItem[]
+  createdBy?: string
+}
+
+export interface StockOpnameItem {
+  id: string
+  productCode: string
+  productName: string
+  systemStock: number
+  actualStock: number
+  variance: number
+  notes?: string
+}
+
 export interface InventoryFilters {
   page?: number
   limit?: number
@@ -153,6 +177,46 @@ export interface InventoryFilters {
   warehouse?: string
   status?: string
   category?: string
+  [key: string]: any
+}
+
+export interface BarcodePrintJob {
+  id: string
+  jobNumber: string
+  jobName: string
+  barcodeType: 'ean13' | 'code128' | 'qr' | 'datamatrix' | 'code39'
+  template: string
+  status: 'queued' | 'printing' | 'completed' | 'failed' | 'paused'
+  priority: 'low' | 'normal' | 'high' | 'urgent'
+  totalLabels: number
+  printedLabels: number
+  failedLabels: number
+  createdDate: string
+  startTime?: string
+  completedTime?: string
+  printerName: string
+  requestedBy: string
+  paperSize: string
+  labelDimensions: string
+  notes?: string
+}
+
+export interface ReturnSupplier {
+  id: string
+  returnNumber: string
+  supplierName: string
+  supplierCode: string
+  originalPO: string
+  returnDate: string
+  returnReason: 'defective' | 'wrong-specification' | 'overshipped' | 'damaged' | 'expired' | 'quality-issue'
+  status: 'initiated' | 'approved' | 'shipped' | 'received' | 'processed' | 'rejected'
+  totalItems: number
+  totalQuantity: number
+  totalValue: number
+  returnedBy: string
+  notes?: string
+  expectedRefund: number
+  refundStatus: 'pending' | 'partial' | 'completed' | 'disputed'
 }
 
 // Base CRUD service class for inventory
@@ -163,8 +227,8 @@ abstract class BaseInventoryService<T> {
     this.endpoint = endpoint
   }
 
-  async getAll(filters?: InventoryFilters): Promise<{data: T[], total: number, page: number, limit: number}> {
-    const response = await apiClient.get<{success: boolean, message: string, data: T[]}>(`/api/v1/inventory/${this.endpoint}`, filters)
+  async getAll(filters?: InventoryFilters): Promise<{ data: T[], total: number, page: number, limit: number }> {
+    const response = await apiClient.get<{ success: boolean, message: string, data: T[] }>(`/api/v1/inventory/${this.endpoint}`, filters)
     return {
       data: response.data || [],
       total: response.data?.length || 0,
@@ -174,17 +238,17 @@ abstract class BaseInventoryService<T> {
   }
 
   async getById(id: string): Promise<T> {
-    const response = await apiClient.get<{success: boolean, message: string, data: T}>(`/api/v1/inventory/${this.endpoint}/${id}`)
+    const response = await apiClient.get<{ success: boolean, message: string, data: T }>(`/api/v1/inventory/${this.endpoint}/${id}`)
     return response.data
   }
 
   async create(data: Partial<T>): Promise<T> {
-    const response = await apiClient.post<{success: boolean, message: string, data: T}>(`/api/v1/inventory/${this.endpoint}`, data)
+    const response = await apiClient.post<{ success: boolean, message: string, data: T }>(`/api/v1/inventory/${this.endpoint}`, data)
     return response.data
   }
 
   async update(id: string, data: Partial<T>): Promise<T> {
-    const response = await apiClient.put<{success: boolean, message: string, data: T}>(`/api/v1/inventory/${this.endpoint}/${id}`, data)
+    const response = await apiClient.put<{ success: boolean, message: string, data: T }>(`/api/v1/inventory/${this.endpoint}/${id}`, data)
     return response.data
   }
 
@@ -200,8 +264,8 @@ class StockService extends BaseInventoryService<StockItem> {
   }
 
   // Override getAll to use the stock control endpoint
-  async getAll(filters?: InventoryFilters): Promise<{data: StockItem[], total: number, page: number, limit: number}> {
-    const backendResponse = await apiClient.get<{success: boolean, message: string, data: StockItem[]}>(`/api/v1/inventory/stock/control`, filters)
+  async getAll(filters?: InventoryFilters): Promise<{ data: StockItem[], total: number, page: number, limit: number }> {
+    const backendResponse = await apiClient.get<{ success: boolean, message: string, data: StockItem[] }>(`/api/v1/inventory/stock/control`, filters)
     const stockItems = backendResponse.data || []
     return {
       data: stockItems,
@@ -212,7 +276,7 @@ class StockService extends BaseInventoryService<StockItem> {
   }
 
   async getStockMovements(filters?: InventoryFilters) {
-    const response = await apiClient.get<{success: boolean, message: string, data: any[]}>('/api/v1/inventory/stock/movements', filters)
+    const response = await apiClient.get<{ success: boolean, message: string, data: any[] }>('/api/v1/inventory/stock/movements', filters)
     return {
       data: response.data || [],
       total: response.data?.length || 0,
@@ -222,7 +286,7 @@ class StockService extends BaseInventoryService<StockItem> {
   }
 
   async recordStockMovement(movement: any) {
-    const response = await apiClient.post<{success: boolean, message: string, data: any}>('/api/v1/inventory/stock/movements', movement)
+    const response = await apiClient.post<{ success: boolean, message: string, data: any }>('/api/v1/inventory/stock/movements', movement)
     return response.data
   }
 }
@@ -233,10 +297,10 @@ class GoodsReceiptService extends BaseInventoryService<GoodsReceipt> {
   }
 
   // Override getAll to match backend API response
-  async getAll(filters?: InventoryFilters): Promise<{data: GoodsReceipt[], total: number, page: number, limit: number}> {
-    const response = await apiClient.get<{success: boolean, message: string, data: GoodsReceipt[]}>(`/api/v1/inventory/goods-receipts/`, filters)
+  async getAll(filters?: InventoryFilters): Promise<{ data: GoodsReceipt[], total: number, page: number, limit: number }> {
+    const response = await apiClient.get<{ success: boolean, message: string, data: GoodsReceipt[] }>(`/api/v1/inventory/goods-receipts/`, filters)
     const receipts = response.data || []
-    
+
     // Transform the data to add calculated fields
     const transformedReceipts = receipts.map(receipt => ({
       ...receipt,
@@ -251,7 +315,7 @@ class GoodsReceiptService extends BaseInventoryService<GoodsReceipt> {
       receivedBy: receipt.receivedBy || '',
       notes: receipt.notes || ''
     }))
-    
+
     return {
       data: transformedReceipts,
       total: transformedReceipts.length,
@@ -285,10 +349,10 @@ class PurchaseOrderService extends BaseInventoryService<PurchaseOrder> {
   }
 
   // Override getAll to handle the enhanced purchase order data structure
-  async getAll(filters?: InventoryFilters): Promise<{data: PurchaseOrder[], total: number, page: number, limit: number}> {
-    const response = await apiClient.get<{success: boolean, message: string, data: PurchaseOrder[]}>(`/api/v1/inventory/purchase-orders/`, filters)
+  async getAll(filters?: InventoryFilters): Promise<{ data: PurchaseOrder[], total: number, page: number, limit: number }> {
+    const response = await apiClient.get<{ success: boolean, message: string, data: PurchaseOrder[] }>(`/api/v1/inventory/purchase-orders/`, filters)
     const purchaseOrders = response.data || []
-    
+
     return {
       data: purchaseOrders,
       total: purchaseOrders.length,
@@ -298,13 +362,34 @@ class PurchaseOrderService extends BaseInventoryService<PurchaseOrder> {
   }
 }
 
+class BarcodeService extends BaseInventoryService<BarcodePrintJob> {
+  constructor() {
+    super('barcode-jobs')
+  }
+}
+
+class ReturnSupplierService extends BaseInventoryService<ReturnSupplier> {
+  constructor() {
+    super('return-suppliers')
+  }
+}
+
+class StockOpnameService extends BaseInventoryService<StockOpname> {
+  constructor() {
+    super('stock-opname')
+  }
+}
+
 // Export service instances
 export const stockService = new StockService()
 export const goodsReceiptService = new GoodsReceiptService()
 export const goodsIssueService = new GoodsIssueService()
-export const stockTransferService = new StockTransferService()  
+export const stockTransferService = new StockTransferService()
 export const stockAdjustmentService = new StockAdjustmentService()
 export const purchaseOrderService = new PurchaseOrderService()
+export const barcodeService = new BarcodeService()
+export const returnSupplierService = new ReturnSupplierService()
+export const stockOpnameService = new StockOpnameService()
 
 // Export services object for easy import
 export const inventoryServices = {
@@ -313,5 +398,8 @@ export const inventoryServices = {
   goodsIssue: goodsIssueService,
   stockTransfer: stockTransferService,
   stockAdjustment: stockAdjustmentService,
-  purchaseOrder: purchaseOrderService
+  purchaseOrder: purchaseOrderService,
+  barcode: barcodeService,
+  returnSupplier: returnSupplierService,
+  stockOpname: stockOpnameService
 }

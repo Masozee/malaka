@@ -1,7 +1,7 @@
 import { apiClient } from '@/lib/api'
 
 export interface LoginRequest {
-  username: string
+  email: string
   password: string
 }
 
@@ -114,7 +114,7 @@ class AuthService {
 
       // Try to login with dev credentials
       await this.login({
-        username: 'dev',
+        email: 'dev@malaka.co.id',
         password: '687654'
       })
 

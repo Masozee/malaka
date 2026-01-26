@@ -262,9 +262,9 @@ export default function POSPage() {
 
   // Filter transactions
   const filteredTransactions = mockPOSTransactions.filter(transaction => {
-    if (searchTerm && !transaction.transaction_number.toLowerCase().includes(searchTerm.toLowerCase()) && 
-        !transaction.cashier_name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-        !transaction.customer_name?.toLowerCase().includes(searchTerm.toLowerCase())) return false
+    if (searchTerm && !transaction.transaction_number.toLowerCase().includes(searchTerm.toLowerCase()) &&
+      !transaction.cashier_name.toLowerCase().includes(searchTerm.toLowerCase()) &&
+      !transaction.customer_name?.toLowerCase().includes(searchTerm.toLowerCase())) return false
     if (statusFilter !== 'all' && transaction.status !== statusFilter) return false
     if (paymentMethodFilter !== 'all' && transaction.payment_method !== paymentMethodFilter) return false
     return true
@@ -277,8 +277,8 @@ export default function POSPage() {
     totalSales: mockPOSTransactions.filter(t => t.status === 'completed').reduce((sum, t) => sum + t.total_amount, 0),
     pendingTransactions: mockPOSTransactions.filter(t => t.status === 'pending').length,
     completedTransactions: mockPOSTransactions.filter(t => t.status === 'completed').length,
-    averageTransaction: mockPOSTransactions.length > 0 ? 
-      mockPOSTransactions.filter(t => t.status === 'completed').reduce((sum, t) => sum + t.total_amount, 0) / 
+    averageTransaction: mockPOSTransactions.length > 0 ?
+      mockPOSTransactions.filter(t => t.status === 'completed').reduce((sum, t) => sum + t.total_amount, 0) /
       mockPOSTransactions.filter(t => t.status === 'completed').length : 0
   }
 
@@ -307,7 +307,7 @@ export default function POSPage() {
       key: 'transaction_number',
       title: 'Transaction',
       render: (value: unknown, transaction: POSTransaction) => (
-        <Link 
+        <Link
           href={`/sales/pos/${transaction.id}`}
           className="font-medium text-blue-600 hover:text-blue-800"
         >
@@ -328,7 +328,7 @@ export default function POSPage() {
       )
     },
     {
-      key: 'cashier',
+      key: 'cashier_name',
       title: 'Cashier',
       render: (value: unknown, transaction: POSTransaction) => (
         <div className="flex items-center space-x-2">
@@ -338,7 +338,7 @@ export default function POSPage() {
       )
     },
     {
-      key: 'customer',
+      key: 'customer_name',
       title: 'Customer',
       render: (value: unknown, transaction: POSTransaction) => (
         <div>
@@ -371,7 +371,7 @@ export default function POSPage() {
     {
       key: 'payment_method',
       title: 'Payment',
-      render: (transaction: POSTransaction) => {
+      render: (_: unknown, transaction: POSTransaction) => {
         const { variant, label } = getPaymentMethodBadge(transaction.payment_method)
         return <Badge variant={variant}>{label}</Badge>
       }
@@ -379,7 +379,7 @@ export default function POSPage() {
     {
       key: 'status',
       title: 'Status',
-      render: (transaction: POSTransaction) => {
+      render: (_: unknown, transaction: POSTransaction) => {
         const { variant, label, icon: IconData } = getStatusBadge(transaction.status)
         return (
           <div className="flex items-center space-x-2">
@@ -390,7 +390,7 @@ export default function POSPage() {
       }
     },
     {
-      key: 'actions',
+      key: 'id',
       title: 'Actions',
       render: (value: unknown, transaction: POSTransaction) => (
         <div className="flex items-center space-x-2">
@@ -420,7 +420,7 @@ export default function POSPage() {
   return (
     <TwoLevelLayout>
       <div className="flex-1 space-y-6">
-        <Header 
+        <Header
           title="Point of Sale (POS)"
           description="Manage retail transactions and sales"
           breadcrumbs={breadcrumbs}
@@ -507,7 +507,7 @@ export default function POSPage() {
               />
             </div>
           </div>
-          
+
           {/* Filters on the right */}
           <div className="flex items-center gap-2">
             <Select value={statusFilter} onValueChange={setStatusFilter}>
@@ -523,7 +523,7 @@ export default function POSPage() {
                 <SelectItem value="refunded">Refunded</SelectItem>
               </SelectContent>
             </Select>
-            
+
             <Select value={paymentMethodFilter} onValueChange={setPaymentMethodFilter}>
               <SelectTrigger className="w-36">
                 <HugeiconsIcon icon={CreditCardIcon} className="h-4 w-4 mr-2" />
@@ -537,7 +537,7 @@ export default function POSPage() {
                 <SelectItem value="mixed">Mixed</SelectItem>
               </SelectContent>
             </Select>
-            
+
             <Select value={dateFilter} onValueChange={setDateFilter}>
               <SelectTrigger className="w-32">
                 <HugeiconsIcon icon={Calendar01Icon} className="h-4 w-4 mr-2" />
@@ -566,14 +566,14 @@ export default function POSPage() {
               </Button>
               <Button
                 variant={activeView === 'table' ? 'default' : 'ghost'}
-                size="sm"  
+                size="sm"
                 onClick={() => setActiveView('table')}
               >
                 Table
               </Button>
             </div>
           </div>
-          
+
           <div className="text-sm text-muted-foreground">
             {filteredTransactions.length} of {mockPOSTransactions.length} transactions
           </div>
@@ -611,7 +611,7 @@ export default function POSPage() {
                       <span className="text-sm text-muted-foreground">Cashier:</span>
                       <span className="text-sm font-medium">{transaction.cashier_name}</span>
                     </div>
-                    
+
                     <div className="flex justify-between">
                       <span className="text-sm text-muted-foreground">Customer:</span>
                       <span className="text-sm font-medium">{transaction.customer_name || 'Walk-in'}</span>
@@ -654,7 +654,7 @@ export default function POSPage() {
               current: 1,
               pageSize: 10,
               total: filteredTransactions.length,
-              onChange: () => {}
+              onChange: () => { }
             }}
           />
         )}

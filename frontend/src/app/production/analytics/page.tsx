@@ -1,23 +1,27 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { TwoLevelLayout } from '@/components/ui/two-level-layout'
 import { Header } from '@/components/ui/header'
 import { AdvancedDataTable } from '@/components/ui/advanced-data-table'
+import { PieChartIcon, ChartLineData02Icon, Download01Icon, FilterIcon, Alert02Icon, Calculator01Icon, Target01Icon } from '@hugeicons/core-free-icons'
+import { HugeiconsIcon } from '@hugeicons/react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Progress } from '@/components/ui/progress'
 
 import Link from 'next/link'
-import { mockProductionAnalytics } from '@/services/production'
-import type { ProductionCostAnalysis, ProductionEfficiencyMetrics } from '@/types/production'
+import { ProductionService } from '@/services/production'
+import type { ProductionCostAnalysis, ProductionEfficiencyMetrics, ProductionAnalytics } from '@/types/production'
 
 export default function ProductionAnalyticsPage() {
   const [mounted, setMounted] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [analyticsData, setAnalyticsData] = useState<ProductionAnalytics | null>(null)
   const [timeRange, setTimeRange] = useState<string>('month')
   const [productFilter, setProductFilter] = useState<string>('all')
   const [costTypeFilter, setCostTypeFilter] = useState<string>('all')
@@ -25,7 +29,21 @@ export default function ProductionAnalyticsPage() {
 
   useEffect(() => {
     setMounted(true)
-  }, [])
+    const fetchData = async () => {
+      try {
+        setLoading(true)
+        const response = await ProductionService.getProductionAnalytics({ timeRange })
+        // Determine if response is the data object itself or has a data property
+        const data = (response as any).data || response
+        setAnalyticsData(data)
+      } catch (error) {
+        console.error('Failed to fetch analytics data:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchData()
+  }, [timeRange])
 
   const breadcrumbs = [
     { label: 'Production', href: '/production' },
@@ -43,21 +61,26 @@ export default function ProductionAnalyticsPage() {
   }
 
   // Filter analytics data
-  const filteredAnalytics = (mockProductionAnalytics?.costAnalysis || []).filter(item => {
-    if (productFilter !== 'all' && item?.productId !== productFilter) return false
-    return true
-  })
+  const filteredCostAnalysis = useMemo(() => {
+    return (analyticsData?.costAnalysis || []).filter(item => {
+      if (productFilter !== 'all' && item?.productId !== productFilter) return false
+      return true
+    })
+  }, [analyticsData, productFilter])
 
   // Summary metrics
-  const summaryMetrics = {
-    totalCost: filteredAnalytics.reduce((sum, item) => sum + (item?.totalCost || 0), 0),
-    totalRevenue: filteredAnalytics.reduce((sum, item) => sum + (item?.revenue || 0), 0),
-    totalProfit: filteredAnalytics.reduce((sum, item) => sum + (item?.profit || 0), 0),
-    averageMargin: filteredAnalytics.length > 0 
-      ? filteredAnalytics.reduce((sum, item) => sum + (item?.profitMargin || 0), 0) / filteredAnalytics.length
-      : 0,
-    totalUnits: filteredAnalytics.reduce((sum, item) => sum + (item?.unitsProduced || 0), 0)
-  }
+  const summaryMetrics = useMemo(() => {
+    const data = filteredCostAnalysis
+    return {
+      totalCost: data.reduce((sum, item) => sum + (item?.totalCost || 0), 0),
+      totalRevenue: data.reduce((sum, item) => sum + (item?.revenue || 0), 0),
+      totalProfit: data.reduce((sum, item) => sum + (item?.profit || 0), 0),
+      averageMargin: data.length > 0
+        ? data.reduce((sum, item) => sum + (item?.profitMargin || 0), 0) / data.length
+        : 0,
+      totalUnits: data.reduce((sum, item) => sum + (item?.unitsProduced || 0), 0)
+    }
+  }, [filteredCostAnalysis])
 
   // Cost breakdown columns
   const costAnalysisColumns = [
@@ -239,28 +262,40 @@ export default function ProductionAnalyticsPage() {
     }
   ]
 
+  if (!mounted || loading) {
+    return (
+      <TwoLevelLayout>
+        <div className="flex-1 p-6 flex items-center justify-center h-full">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-muted-foreground">Loading analytics data...</p>
+          </div>
+        </div>
+      </TwoLevelLayout>
+    )
+  }
+
   return (
     <TwoLevelLayout>
       <div className="flex-1 space-y-6">
-        <Header 
+        <Header
           title="Production Analytics"
           description="Deep analysis of production costs, efficiency, and performance metrics"
           breadcrumbs={breadcrumbs}
           actions={
             <div className="flex items-center space-x-3">
               <Button variant="outline" size="sm">
-                <ChartPie className="h-4 w-4 mr-2" />
                 Cost Breakdown
               </Button>
               <Button variant="outline" size="sm">
-                <ChartLine className="h-4 w-4 mr-2" />
                 Trend Analysis
               </Button>
               <Button variant="outline" size="sm">
-                <DownloadSimple className="h-4 w-4 mr-2" />
+                <HugeiconsIcon icon={Download01Icon} className="h-4 w-4 mr-2" />
                 Export Report
               </Button>
             </div>
+
           }
         />
 
@@ -271,11 +306,10 @@ export default function ProductionAnalyticsPage() {
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Total Cost</p>
                 <p className="text-2xl font-bold mt-1">
-                  {mounted ? `Rp ${(summaryMetrics.totalCost / 1000000).toFixed(1)}M` : ''}
+                  {`Rp ${(summaryMetrics.totalCost / 1000000).toFixed(1)}M`}
                 </p>
                 <p className="text-sm text-red-600 mt-1">Production costs</p>
               </div>
-              <CurrencyDollar className="h-8 w-8 text-red-600" />
             </div>
           </Card>
 
@@ -284,11 +318,10 @@ export default function ProductionAnalyticsPage() {
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Total Revenue</p>
                 <p className="text-2xl font-bold mt-1">
-                  {mounted ? `Rp ${(summaryMetrics.totalRevenue / 1000000).toFixed(1)}M` : ''}
+                  {`Rp ${(summaryMetrics.totalRevenue / 1000000).toFixed(1)}M`}
                 </p>
                 <p className="text-sm text-green-600 mt-1">Sales revenue</p>
               </div>
-              <TrendUp className="h-8 w-8 text-green-600" />
             </div>
           </Card>
 
@@ -297,13 +330,13 @@ export default function ProductionAnalyticsPage() {
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Total Profit</p>
                 <p className="text-2xl font-bold mt-1">
-                  {mounted ? `Rp ${(summaryMetrics.totalProfit / 1000000).toFixed(1)}M` : ''}
+                  {`Rp ${(summaryMetrics.totalProfit / 1000000).toFixed(1)}M`}
                 </p>
                 <p className={`text-sm mt-1 ${summaryMetrics.totalProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                   {summaryMetrics.totalProfit >= 0 ? 'Profitable' : 'Loss'}
                 </p>
               </div>
-              <Calculator className="h-8 w-8 text-blue-600" />
+              <HugeiconsIcon icon={Calculator01Icon} className="h-8 w-8 text-blue-600" />
             </div>
           </Card>
 
@@ -316,7 +349,7 @@ export default function ProductionAnalyticsPage() {
                   <Progress value={summaryMetrics.averageMargin} className="h-2" />
                 </div>
               </div>
-              <Target className="h-8 w-8 text-purple-600" />
+              <HugeiconsIcon icon={Target01Icon} className="h-8 w-8 text-purple-600" />
             </div>
           </Card>
 
@@ -327,7 +360,6 @@ export default function ProductionAnalyticsPage() {
                 <p className="text-2xl font-bold mt-1">{summaryMetrics.totalUnits.toLocaleString()}</p>
                 <p className="text-sm text-blue-600 mt-1">Total output</p>
               </div>
-              <Package className="h-8 w-8 text-orange-600" />
             </div>
           </Card>
         </div>
@@ -335,7 +367,7 @@ export default function ProductionAnalyticsPage() {
         {/* Filters */}
         <Card className="p-6">
           <div className="flex items-center space-x-4">
-            <Funnel className="h-5 w-5 text-muted-foreground" />
+            <HugeiconsIcon icon={FilterIcon} className="h-5 w-5 text-muted-foreground" />
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 flex-1">
               <div className="space-y-2">
                 <Label htmlFor="timeRange">Time Range</Label>
@@ -360,7 +392,7 @@ export default function ProductionAnalyticsPage() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Products</SelectItem>
-                    {mounted && filteredAnalytics.map((item) => (
+                    {filteredCostAnalysis.map((item) => (
                       <SelectItem key={item?.productId} value={item?.productId || ''}>
                         {item?.productName}
                       </SelectItem>
@@ -395,7 +427,6 @@ export default function ProductionAnalyticsPage() {
             size="sm"
             onClick={() => setActiveTab('cost-analysis')}
           >
-            <CurrencyDollar className="h-4 w-4 mr-2" />
             Cost Analysis
           </Button>
           <Button
@@ -403,7 +434,6 @@ export default function ProductionAnalyticsPage() {
             size="sm"
             onClick={() => setActiveTab('efficiency')}
           >
-            <ChartBar className="h-4 w-4 mr-2" />
             Efficiency Metrics
           </Button>
           <Button
@@ -411,7 +441,6 @@ export default function ProductionAnalyticsPage() {
             size="sm"
             onClick={() => setActiveTab('trends')}
           >
-            <TrendUp className="h-4 w-4 mr-2" />
             Trend Analysis
           </Button>
         </div>
@@ -446,18 +475,13 @@ export default function ProductionAnalyticsPage() {
               <Card className="p-6">
                 <h3 className="text-lg font-semibold mb-4">Cost per Unit Trends</h3>
                 <div className="space-y-4">
-                  {filteredAnalytics.slice(0, 5).map((item, index) => (
+                  {filteredCostAnalysis.slice(0, 5).map((item, index) => (
                     <div key={item?.productId} className="flex items-center justify-between">
                       <div>
                         <p className="font-medium">{item?.productName}</p>
                         <p className="text-sm text-muted-foreground">{formatCurrency(item?.costPerUnit)}</p>
                       </div>
                       <div className="flex items-center space-x-2">
-                        {index % 2 === 0 ? (
-                          <TrendUp className="h-4 w-4 text-green-600" />
-                        ) : (
-                          <TrendDown className="h-4 w-4 text-red-600" />
-                        )}
                         <span className={`text-sm ${index % 2 === 0 ? 'text-green-600' : 'text-red-600'}`}>
                           {index % 2 === 0 ? '+' : '-'}{(Math.random() * 10).toFixed(1)}%
                         </span>
@@ -475,16 +499,13 @@ export default function ProductionAnalyticsPage() {
                 <p className="text-sm text-muted-foreground">Complete breakdown of production costs per product</p>
               </div>
               <AdvancedDataTable
-                data={filteredAnalytics}
-                columns={costAnalysisColumns}
-                searchable={false}
-                filterable={false}
+                data={filteredCostAnalysis}
+                columns={costAnalysisColumns as any}
                 pagination={{
                   pageSize: 10,
-                  currentPage: 1,
-                  totalPages: Math.ceil(filteredAnalytics.length / 10),
-                  totalItems: filteredAnalytics.length,
-                  onChange: () => {}
+                  current: 1,
+                  total: filteredCostAnalysis.length,
+                  onChange: () => { }
                 }}
               />
             </Card>
@@ -498,7 +519,6 @@ export default function ProductionAnalyticsPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <Card className="p-6">
                 <div className="flex items-center space-x-2 mb-4">
-                  <Clock className="h-5 w-5 text-blue-600" />
                   <h3 className="text-lg font-semibold">Time Efficiency</h3>
                 </div>
                 <div className="text-center">
@@ -510,7 +530,6 @@ export default function ProductionAnalyticsPage() {
 
               <Card className="p-6">
                 <div className="flex items-center space-x-2 mb-4">
-                  <Package className="h-5 w-5 text-green-600" />
                   <h3 className="text-lg font-semibold">Material Efficiency</h3>
                 </div>
                 <div className="text-center">
@@ -522,7 +541,6 @@ export default function ProductionAnalyticsPage() {
 
               <Card className="p-6">
                 <div className="flex items-center space-x-2 mb-4">
-                  <Target className="h-5 w-5 text-purple-600" />
                   <h3 className="text-lg font-semibold">Quality Score</h3>
                 </div>
                 <div className="text-center">
@@ -540,16 +558,13 @@ export default function ProductionAnalyticsPage() {
                 <p className="text-sm text-muted-foreground">Detailed efficiency analysis per product</p>
               </div>
               <AdvancedDataTable
-                data={mockProductionAnalytics?.efficiencyMetrics || []}
-                columns={efficiencyColumns}
-                searchable={false}
-                filterable={false}
+                data={analyticsData?.efficiencyMetrics || []}
+                columns={efficiencyColumns as any}
                 pagination={{
                   pageSize: 10,
-                  currentPage: 1,
-                  totalPages: Math.ceil((mockProductionAnalytics?.efficiencyMetrics?.length || 0) / 10),
-                  totalItems: mockProductionAnalytics?.efficiencyMetrics?.length || 0,
-                  onChange: () => {}
+                  current: 1,
+                  total: analyticsData?.efficiencyMetrics?.length || 0,
+                  onChange: () => { }
                 }}
               />
             </Card>
@@ -566,33 +581,30 @@ export default function ProductionAnalyticsPage() {
                   <h4 className="font-medium mb-3 text-green-600">Positive Trends</h4>
                   <div className="space-y-2">
                     <div className="flex items-center space-x-2">
-                      <TrendUp className="h-4 w-4 text-green-600" />
                       <span className="text-sm">Material efficiency improved by 8.5% this quarter</span>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <TrendUp className="h-4 w-4 text-green-600" />
                       <span className="text-sm">Labor productivity increased by 12.3%</span>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <TrendUp className="h-4 w-4 text-green-600" />
                       <span className="text-sm">Quality scores consistently above 95%</span>
                     </div>
                   </div>
                 </div>
-                
+
                 <div>
                   <h4 className="font-medium mb-3 text-red-600">Areas for Improvement</h4>
                   <div className="space-y-2">
                     <div className="flex items-center space-x-2">
-                      <Warning className="h-4 w-4 text-red-600" />
+                      <HugeiconsIcon icon={Alert02Icon} className="h-4 w-4 text-red-600" />
                       <span className="text-sm">Logistics costs increased by 15% this month</span>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <Warning className="h-4 w-4 text-red-600" />
+                      <HugeiconsIcon icon={Alert02Icon} className="h-4 w-4 text-red-600" />
                       <span className="text-sm">Overhead costs trending upward</span>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <Warning className="h-4 w-4 text-red-600" />
+                      <HugeiconsIcon icon={Alert02Icon} className="h-4 w-4 text-red-600" />
                       <span className="text-sm">3 products with declining profit margins</span>
                     </div>
                   </div>
@@ -605,7 +617,7 @@ export default function ProductionAnalyticsPage() {
         {/* Cost Optimization Recommendations */}
         <Card className="p-6 border-orange-200 bg-orange-50">
           <div className="flex items-center space-x-2 mb-4">
-            <Target className="h-5 w-5 text-orange-600" />
+            <HugeiconsIcon icon={Target01Icon} className="h-5 w-5 text-orange-600" />
             <h3 className="text-lg font-semibold text-orange-800">Cost Optimization Recommendations</h3>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

@@ -20,11 +20,17 @@ import (
 	// Procurement imports
 	procurement_handlers "malaka/internal/modules/procurement/presentation/http/handlers"
 	procurement_routes "malaka/internal/modules/procurement/presentation/http/routes"
+
+	// Notifications imports
+	notifications_handlers "malaka/internal/modules/notifications/presentation/http/handlers"
+	notifications_routes "malaka/internal/modules/notifications/presentation/http/routes"
 )
 
+// SetupRouter configures routes that don't require authentication
+// and sets up API documentation endpoints
 func SetupRouter(router *gin.Engine, c *container.Container) {
 	// Note: Prometheus middleware and metrics endpoint are handled in server.go
-	
+
 	outboundScanHandler := http.NewOutboundScanHandler(c.OutboundScanService)
 
 	shipping := router.Group("/shipping")
@@ -44,14 +50,14 @@ func SetupRouter(router *gin.Engine, c *container.Container) {
 			docs.GET("/openapi.yaml", generated.ServeDocs())
 		}
 	}
-	
-	// API v1 routes for consistent versioning
-	apiV1 := router.Group("/api/v1")
-	
-	// Redoc documentation page
-			// Redoc documentation page
-	router.GET("/docs", generated.ServeRedoc())
 
+	// Redoc documentation page
+	router.GET("/docs", generated.ServeRedoc())
+}
+
+// SetupProtectedRoutes configures routes that require authentication
+// This function receives a router group that already has auth middleware applied
+func SetupProtectedRoutes(protectedAPI *gin.RouterGroup, c *container.Container) {
 	// Initialize sales handlers
 	salesOrderHandler := sales_handlers.NewSalesOrderHandler(c.SalesOrderService)
 	salesInvoiceHandler := sales_handlers.NewSalesInvoiceHandler(c.SalesInvoiceService)
@@ -65,8 +71,8 @@ func SetupRouter(router *gin.Engine, c *container.Container) {
 		prosesMarginHandler := sales_handlers.NewProsesMarginHandler(c.ProsesMarginService)
 	salesRekonsiliasiHandler := sales_handlers.NewSalesRekonsiliasiHandler(c.SalesRekonsiliasiService)
 
-	// Register sales routes under v1 API
-	sales_routes.RegisterSalesRoutes(apiV1, salesOrderHandler, salesInvoiceHandler, posTransactionHandler, onlineOrderHandler, consignmentSalesHandler, salesReturnHandler, promotionHandler, salesTargetHandler, salesKompetitorHandler, prosesMarginHandler, salesRekonsiliasiHandler)
+	// Register sales routes under v1 API (protected)
+	sales_routes.RegisterSalesRoutes(protectedAPI, salesOrderHandler, salesInvoiceHandler, posTransactionHandler, onlineOrderHandler, consignmentSalesHandler, salesReturnHandler, promotionHandler, salesTargetHandler, salesKompetitorHandler, prosesMarginHandler, salesRekonsiliasiHandler)
 	
 	// Initialize accounting handlers
 	generalLedgerHandler := accounting_handlers.NewGeneralLedgerHandler(c.GeneralLedgerService)
@@ -85,8 +91,8 @@ func SetupRouter(router *gin.Engine, c *container.Container) {
 	// TODO: Add trial balance handler when TrialBalanceService is added to container
 	// trialBalanceHandler := accounting_handlers.NewTrialBalanceHandler(c.TrialBalanceService)
 	
-	// Register accounting routes under v1 API
-	accounting_routes.RegisterAccountingRoutes(apiV1, generalLedgerHandler, journalEntryHandler, nil, costCenterHandler, nil, autoJournalHandler, exchangeRateHandler)
+	// Register accounting routes under v1 API (protected)
+	accounting_routes.RegisterAccountingRoutes(protectedAPI, generalLedgerHandler, journalEntryHandler, nil, costCenterHandler, nil, autoJournalHandler, exchangeRateHandler)
 	
 	// Initialize inventory handlers
 	purchaseOrderHandler := inventory_handlers.NewPurchaseOrderHandler(c.PurchaseOrderService)
@@ -100,8 +106,8 @@ func SetupRouter(router *gin.Engine, c *container.Container) {
 	simpleGoodsIssueHandler := inventory_handlers.NewSimpleGoodsIssueHandler(c.SimpleGoodsIssueService)
 	rfqHandler := inventory_handlers.NewRFQHandler(c.RFQService)
 	
-	// Register inventory routes under v1 API
-	inventory_routes.RegisterInventoryRoutes(apiV1, purchaseOrderHandler, goodsReceiptHandler, stockHandler, transferHandler, draftOrderHandler, stockAdjustmentHandler, stockOpnameHandler, returnSupplierHandler, simpleGoodsIssueHandler, rfqHandler)
+	// Register inventory routes under v1 API (protected)
+	inventory_routes.RegisterInventoryRoutes(protectedAPI, purchaseOrderHandler, goodsReceiptHandler, stockHandler, transferHandler, draftOrderHandler, stockAdjustmentHandler, stockOpnameHandler, returnSupplierHandler, simpleGoodsIssueHandler, rfqHandler)
 
 	// Initialize procurement handlers
 	purchaseRequestHandler := procurement_handlers.NewPurchaseRequestHandler(c.PurchaseRequestService, c.SqlxDB)
@@ -111,6 +117,12 @@ func SetupRouter(router *gin.Engine, c *container.Container) {
 	analyticsHandler := procurement_handlers.NewAnalyticsHandler(c.ProcurementAnalyticsService)
 	procurementRFQHandler := procurement_handlers.NewRFQHandler(c.ProcurementRFQService, c.SqlxDB)
 
-	// Register procurement routes under v1 API
-	procurement_routes.RegisterProcurementRoutes(apiV1, purchaseRequestHandler, procurementPurchaseOrderHandler, contractHandler, vendorEvaluationHandler, analyticsHandler, procurementRFQHandler)
+	// Register procurement routes under v1 API (protected)
+	procurement_routes.RegisterProcurementRoutes(protectedAPI, purchaseRequestHandler, procurementPurchaseOrderHandler, contractHandler, vendorEvaluationHandler, analyticsHandler, procurementRFQHandler)
+
+	// Initialize notification handlers
+	notificationHandler := notifications_handlers.NewNotificationHandler(c.NotificationService)
+
+	// Register notification routes under v1 API (protected)
+	notifications_routes.RegisterNotificationRoutes(protectedAPI, notificationHandler)
 }

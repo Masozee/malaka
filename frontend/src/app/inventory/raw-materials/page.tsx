@@ -12,7 +12,18 @@ import { DataTable } from '@/components/ui/data-table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-;
+import { HugeiconsIcon } from '@hugeicons/react';
+import {
+  Store01Icon,
+  EyeIcon,
+  PencilEdit01Icon,
+  ReloadIcon,
+  PlusSignIcon,
+  Search01Icon,
+  DeliveryTruck01Icon,
+  Cancel01Icon,
+  Download01Icon
+} from '@hugeicons/core-free-icons';
 import { rawMaterialService, RawMaterial, RawMaterialFilters, RawMaterialListResponse } from '@/services/raw-materials';
 import type { RawMaterialCategory, RawMaterialStatus } from '@/types/raw-materials';
 
@@ -25,7 +36,7 @@ const getStatusBadge = (status: RawMaterialStatus) => {
     expired: { variant: 'destructive' as const, label: 'Expired', className: 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400' },
     quality_hold: { variant: 'secondary' as const, label: 'Quality Hold', className: 'bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-400' }
   };
-  
+
   const config = variants[status];
   return (
     <Badge variant={config.variant} className={config.className}>
@@ -180,7 +191,7 @@ export default function RawMaterialsPage() {
       title: 'Location',
       render: (value: unknown, item: RawMaterial) => (
         <div className="flex items-center gap-2">
-          <Warehouse className="w-4 h-4 text-gray-400" />
+          <HugeiconsIcon icon={Store01Icon} className="w-4 h-4 text-gray-400" />
           <span className="text-sm">{item.location}</span>
         </div>
       )
@@ -196,17 +207,17 @@ export default function RawMaterialsPage() {
       render: (value: unknown, item: RawMaterial) => (
         <div className="flex items-center gap-2">
           <Button variant="ghost" size="sm">
-            <Eye className="w-4 h-4" />
+            <HugeiconsIcon icon={EyeIcon} className="w-4 h-4" />
           </Button>
           <Button variant="ghost" size="sm" onClick={() => handleEditMaterial(item)}>
-            <PencilSimple className="w-4 h-4" />
+            <HugeiconsIcon icon={PencilEdit01Icon} className="w-4 h-4" />
           </Button>
         </div>
       )
     }
   ];
 
-  
+
   // Get unique values for filters
   const suppliers = Array.from(new Set(materialsData.map(item => item.supplier))).sort();
   const categories = [
@@ -247,7 +258,7 @@ export default function RawMaterialsPage() {
 
   return (
     <TwoLevelLayout>
-      <Header 
+      <Header
         title="Raw Materials"
         description="Manage raw materials inventory for shoe production"
         breadcrumbs={[
@@ -257,23 +268,23 @@ export default function RawMaterialsPage() {
         actions={
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" onClick={fetchRawMaterials}>
-              <ArrowsClockwise className="w-4 h-4 mr-2" />
+              <HugeiconsIcon icon={ReloadIcon} className="w-4 h-4 mr-2" />
               Refresh
             </Button>
             <Button size="sm" onClick={handleCreateMaterial}>
-              <Plus className="w-4 h-4 mr-2" />
+              <HugeiconsIcon icon={PlusSignIcon} className="w-4 h-4 mr-2" />
               Add Material
             </Button>
           </div>
         }
       />
-      
+
       <div className="flex-1 p-6 space-y-6">
         {/* Filters and Actions */}
         <div className="flex items-center justify-between gap-4">
           <div className="flex-1 max-w-md">
             <div className="relative">
-              <MagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <HugeiconsIcon icon={Search01Icon} className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search by material name, code, or supplier..."
                 value={searchTerm}
@@ -282,7 +293,7 @@ export default function RawMaterialsPage() {
               />
             </div>
           </div>
-          
+
           <div className="flex items-center gap-2">
             <Select value={selectedCategory} onValueChange={setSelectedCategory}>
               <SelectTrigger className="w-36">
@@ -314,7 +325,7 @@ export default function RawMaterialsPage() {
 
             <Select value={selectedSupplier} onValueChange={setSelectedSupplier}>
               <SelectTrigger className="w-48">
-                <Truck className="h-4 w-4 mr-2" />
+                <HugeiconsIcon icon={DeliveryTruck01Icon} className="h-4 w-4 mr-2" />
                 <SelectValue placeholder="All Suppliers" />
               </SelectTrigger>
               <SelectContent>
@@ -328,9 +339,9 @@ export default function RawMaterialsPage() {
             </Select>
 
             {(searchTerm || selectedCategory !== 'all' || selectedStatus !== 'all' || selectedSupplier !== 'all') && (
-              <Button 
-                variant="outline" 
-                size="sm" 
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={() => {
                   setSearchTerm('');
                   setSelectedCategory('all');
@@ -338,13 +349,13 @@ export default function RawMaterialsPage() {
                   setSelectedSupplier('all');
                 }}
               >
-                <X className="w-4 h-4 mr-2" />
+                <HugeiconsIcon icon={Cancel01Icon} className="w-4 h-4 mr-2" />
                 Clear
               </Button>
             )}
-            
+
             <Button variant="outline" size="sm">
-              <DownloadSimple className="w-4 h-4 mr-2" />
+              <HugeiconsIcon icon={Download01Icon} className="w-4 h-4 mr-2" />
               Export
             </Button>
           </div>

@@ -87,3 +87,16 @@ func (r *UserRepositoryImpl) GetByUsername(ctx context.Context, username string)
 	}
 	return user, err
 }
+
+// GetByEmail retrieves a user by its email from the database.
+func (r *UserRepositoryImpl) GetByEmail(ctx context.Context, email string) (*entities.User, error) {
+	query := `SELECT id, username, password, email, full_name, phone, company_id, role, status, last_login, created_at, updated_at FROM users WHERE email = $1`
+	row := r.db.QueryRowContext(ctx, query, email)
+
+	user := &entities.User{}
+	err := row.Scan(&user.ID, &user.Username, &user.Password, &user.Email, &user.FullName, &user.Phone, &user.CompanyID, &user.Role, &user.Status, &user.LastLogin, &user.CreatedAt, &user.UpdatedAt)
+	if err == sql.ErrNoRows {
+		return nil, nil // User not found
+	}
+	return user, err
+}

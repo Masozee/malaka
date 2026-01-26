@@ -17,7 +17,6 @@ import {
   QrCodeIcon,
   BarCode01Icon,
   SettingsIcon,
-  type IconSvgElement,
 } from "@hugeicons/core-free-icons"
 import {
   useReactTable,
@@ -58,7 +57,7 @@ import {
 
 export interface TanStackColumn<T> {
   id: string
-  header: string
+  header: string | ((context: any) => React.ReactNode)
   accessorKey?: keyof T
   accessorFn?: (row: T) => unknown
   cell?: (info: { getValue: () => unknown; row: { original: T } }) => React.ReactNode
@@ -69,7 +68,7 @@ export interface TanStackColumn<T> {
 
 export interface CustomAction<T> {
   label: string
-  icon?: IconSvgElement
+  icon?: any
   onClick: (record: T) => void | Promise<void>
   className?: string
   separator?: boolean
@@ -187,18 +186,23 @@ export function TanStackDataTable<T extends { id: string }>({
         id: col.id,
         accessorKey: col.accessorKey as string,
         accessorFn: col.accessorFn,
-        header: ({ column }) => {
-          const canSort = col.enableSorting !== false
-          if (!canSort) return col.header
+        header: (context) => {
+          // Resolve header content if it's a function
+          const renderedHeader = typeof col.header === 'function'
+            ? col.header(context)
+            : col.header
 
-          const sortState = column.getIsSorted()
+          const canSort = col.enableSorting !== false
+          if (!canSort) return renderedHeader
+
+          const sortState = context.column.getIsSorted()
           return (
             <button
               className="flex items-center space-x-1 text-gray-700 hover:text-gray-900 dark:text-white dark:hover:text-gray-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-gray-500 rounded"
-              onClick={() => column.toggleSorting()}
-              aria-label={`Sort by ${col.header}${sortState ? `, currently sorted ${sortState}ending` : ''}`}
+              onClick={() => context.column.toggleSorting()}
+              aria-label={`Sort by ${typeof renderedHeader === 'string' ? renderedHeader : 'column'}${sortState ? `, currently sorted ${sortState}ending` : ''}`}
             >
-              <span>{col.header}</span>
+              <span>{renderedHeader}</span>
               {sortState === "asc" && <HugeiconsIcon icon={ArrowUpIcon} className="h-4 w-4" />}
               {sortState === "desc" && <HugeiconsIcon icon={ArrowDownIcon} className="h-4 w-4" />}
             </button>
@@ -206,14 +210,14 @@ export function TanStackDataTable<T extends { id: string }>({
         },
         cell: col.cell
           ? (info) =>
-              col.cell!({
-                getValue: info.getValue,
-                row: { original: info.row.original },
-              })
+            col.cell!({
+              getValue: info.getValue,
+              row: { original: info.row.original },
+            })
           : (info) => {
-              const value = info.getValue()
-              return value != null ? String(value) : "-"
-            },
+            const value = info.getValue()
+            return value != null ? String(value) : "-"
+          },
         enableSorting: col.enableSorting !== false,
         enableHiding: col.enableHiding !== false,
         size: col.size,

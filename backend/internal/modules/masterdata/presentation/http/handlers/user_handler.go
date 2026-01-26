@@ -24,7 +24,7 @@ func NewUserHandler(service *services.UserService) *UserHandler {
 // Login authenticates a user and returns a JWT token.
 func (h *UserHandler) Login(c *gin.Context) {
 	var req struct {
-		Username string `json:"username"`
+		Email    string `json:"email"`
 		Password string `json:"password"`
 	}
 
@@ -33,7 +33,7 @@ func (h *UserHandler) Login(c *gin.Context) {
 		return
 	}
 
-	token, err := h.service.AuthenticateUser(c.Request.Context(), req.Username, req.Password)
+	token, err := h.service.AuthenticateUser(c.Request.Context(), req.Email, req.Password)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
 		return

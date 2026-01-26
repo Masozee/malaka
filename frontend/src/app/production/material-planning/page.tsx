@@ -1,23 +1,60 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { Card } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
+import React, { useState, useEffect, useMemo } from 'react'
+import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { TwoLevelLayout } from '@/components/ui/two-level-layout'
 import { Header } from '@/components/ui/header'
-import { AdvancedDataTable } from '@/components/ui/advanced-data-table'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Card, CardContent } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { Progress } from '@/components/ui/progress'
+import { TanStackDataTable, TanStackColumn } from '@/components/ui/tanstack-data-table'
+import { HugeiconsIcon } from '@hugeicons/react'
+import {
+  Search01Icon,
+  FilterIcon,
+  Download01Icon,
+  PlusSignIcon,
+  EyeIcon,
+  PencilEdit01Icon,
+  MoreVerticalIcon,
+  Calendar01Icon,
+  Coins01Icon,
+  TruckIcon,
+  AlertCircleIcon,
+  CheckmarkCircle01Icon,
+  Delete02Icon
+} from '@hugeicons/core-free-icons'
+import { ProductionService, mockProductionPlans } from '@/services/production'
+import { ProductionPlan } from '@/types/production'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator
+} from '@/components/ui/dropdown-menu'
 
-import Link from 'next/link'
-import { mockProductionPlans } from '@/services/production'
-import type { ProductionPlan, ProductionPlanFilters } from '@/types/production'
+// Mock types for requirements (since they are mocked in the original file)
+interface MaterialRequirement {
+  id: string
+  materialCode: string
+  materialName: string
+  currentStock: number
+  requiredQuantity: number
+  shortfall: number
+  unitCost: number
+  totalCost: number
+  supplier: string
+  leadTime: number
+  status: 'sufficient' | 'shortage' | 'critical'
+  category: string
+}
 
-// Mock data for material requirements
-const mockMaterialRequirements = [
+// Mock data (copied from original)
+const mockMaterialRequirements: MaterialRequirement[] = [
   {
     id: '1',
     materialCode: 'LEATHER-001',
@@ -29,7 +66,7 @@ const mockMaterialRequirements = [
     totalCost: 11250000,
     supplier: 'PT Bahan Baku Indonesia',
     leadTime: 7,
-    status: 'shortage' as const,
+    status: 'shortage',
     category: 'Raw Material'
   },
   {
@@ -43,7 +80,7 @@ const mockMaterialRequirements = [
     totalCost: 0,
     supplier: 'Sole & Rubber Co',
     leadTime: 5,
-    status: 'sufficient' as const,
+    status: 'sufficient',
     category: 'Components'
   },
   {
@@ -57,461 +94,384 @@ const mockMaterialRequirements = [
     totalCost: 2475000,
     supplier: 'Thread Supplies Ltd',
     leadTime: 3,
-    status: 'shortage' as const,
+    status: 'shortage',
     category: 'Consumables'
   }
 ]
 
+const statusConfig: Record<string, { label: string, color: string }> = {
+  draft: { label: 'Draft', color: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200' },
+  approved: { label: 'Approved', color: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/40 dark:text-indigo-200' },
+  active: { label: 'Active', color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-200' },
+  completed: { label: 'Completed', color: 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-200' },
+  cancelled: { label: 'Cancelled', color: 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-200' }
+}
+
+const reqStatusConfig: Record<string, { label: string, color: string }> = {
+  sufficient: { label: 'Sufficient', color: 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-200' },
+  shortage: { label: 'Shortage', color: 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-200' },
+  critical: { label: 'Critical', color: 'bg-red-200 text-red-900 dark:bg-red-900/60 dark:text-red-100' }
+}
+
 export default function MaterialPlanningPage() {
-  const [mounted, setMounted] = useState(false)
-  const [searchTerm, setSearchTerm] = useState('')
-  const [statusFilter, setStatusFilter] = useState<string>('all')
-  const [planTypeFilter, setPlanTypeFilter] = useState<string>('all')
+  const router = useRouter()
   const [activeTab, setActiveTab] = useState<'plans' | 'requirements'>('plans')
+  const [plans, setPlans] = useState<ProductionPlan[]>([])
+  const [requirements, setRequirements] = useState<MaterialRequirement[]>([])
+  const [loading, setLoading] = useState(true)
+  const [searchQuery, setSearchQuery] = useState('')
 
   useEffect(() => {
-    setMounted(true)
+    const fetchData = async () => {
+      try {
+        setLoading(true)
+        // Use imported mock data for now as per original file
+        const response = await ProductionService.getProductionPlans()
+        const items = (response.data as any)?.data || (response as any).data || []
+        setPlans(Array.isArray(items) ? items : mockProductionPlans)
+        setRequirements(mockMaterialRequirements)
+      } catch (error) {
+        console.error('Failed to fetch planning data:', error)
+        setPlans(mockProductionPlans)
+        setRequirements(mockMaterialRequirements)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchData()
   }, [])
 
-  const breadcrumbs = [
-    { label: 'Production', href: '/production' },
-    { label: 'Material Planning', href: '/production/material-planning' }
-  ]
+  const filteredPlans = useMemo(() => {
+    if (!searchQuery) return plans
+    const lower = searchQuery.toLowerCase()
+    return plans.filter(item =>
+      item.planNumber.toLowerCase().includes(lower) ||
+      item.planName.toLowerCase().includes(lower)
+    )
+  }, [plans, searchQuery])
 
-  const formatCurrency = (amount?: number): string => {
-    if (!mounted || typeof amount !== 'number' || isNaN(amount)) return ''
-    return `Rp ${amount.toLocaleString('id-ID')}`
-  }
+  const filteredReqs = useMemo(() => {
+    if (!searchQuery) return requirements
+    const lower = searchQuery.toLowerCase()
+    return requirements.filter(item =>
+      item.materialName.toLowerCase().includes(lower) ||
+      item.materialCode.toLowerCase().includes(lower)
+    )
+  }, [requirements, searchQuery])
 
-  const formatDate = (dateString?: string): string => {
-    if (!mounted || !dateString) return ''
-    return new Date(dateString).toLocaleDateString('id-ID')
-  }
+  // Stats
+  const stats = useMemo(() => {
+    const totalPlans = plans.length
+    const totalValue = plans.reduce((sum, i) => sum + (i.totalValue || 0), 0)
+    const shortages = requirements.filter(i => ['shortage', 'critical'].includes(i.status)).length
+    const shortfallValue = requirements.reduce((sum, i) => sum + (i.totalCost || 0), 0)
+    return { totalPlans, totalValue, shortages, shortfallValue }
+  }, [plans, requirements])
 
-  // Filter production plans
-  const filteredPlans = (mockProductionPlans || []).filter(plan => {
-    if (searchTerm && !plan?.planName?.toLowerCase().includes(searchTerm.toLowerCase()) && 
-        !plan?.planNumber?.toLowerCase().includes(searchTerm.toLowerCase())) return false
-    if (statusFilter !== 'all' && plan?.status !== statusFilter) return false
-    if (planTypeFilter !== 'all' && plan?.planType !== planTypeFilter) return false
-    return true
-  })
-
-  // Filter material requirements
-  const filteredRequirements = (mockMaterialRequirements || []).filter(req => {
-    if (searchTerm && !req?.materialName?.toLowerCase().includes(searchTerm.toLowerCase()) && 
-        !req?.materialCode?.toLowerCase().includes(searchTerm.toLowerCase())) return false
-    return true
-  })
-
-  // Get unique values for filters
-  const statuses = Array.from(new Set((mockProductionPlans || []).map(plan => plan?.status).filter(Boolean)))
-  const planTypes = Array.from(new Set((mockProductionPlans || []).map(plan => plan?.planType).filter(Boolean)))
-
-  const getStatusBadge = (status: ProductionPlan['status']) => {
-    const statusConfig = {
-      draft: { variant: 'secondary' as const, label: 'Draft' },
-      approved: { variant: 'outline' as const, label: 'Approved' },
-      active: { variant: 'default' as const, label: 'Active' },
-      completed: { variant: 'default' as const, label: 'Completed' },
-      cancelled: { variant: 'destructive' as const, label: 'Cancelled' }
-    }
-    return statusConfig[status] || { variant: 'secondary' as const, label: status }
-  }
-
-  const getMaterialStatusBadge = (status: string) => {
-    const statusConfig = {
-      sufficient: { variant: 'default' as const, label: 'Sufficient', color: 'text-green-600' },
-      shortage: { variant: 'destructive' as const, label: 'Shortage', color: 'text-red-600' },
-      critical: { variant: 'destructive' as const, label: 'Critical', color: 'text-red-700' }
-    }
-    return statusConfig[status as keyof typeof statusConfig] || { variant: 'secondary' as const, label: status, color: 'text-muted-foreground' }
-  }
-
-  // Summary statistics for plans
-  const planStats = {
-    total: filteredPlans.length,
-    active: filteredPlans.filter(p => p?.status === 'active').length,
-    completed: filteredPlans.filter(p => p?.status === 'completed').length,
-    totalValue: filteredPlans.reduce((sum, plan) => sum + (plan?.totalValue || 0), 0)
-  }
-
-  // Summary statistics for materials
-  const materialStats = {
-    total: filteredRequirements.length,
-    shortage: filteredRequirements.filter(m => m?.status === 'shortage').length,
-    sufficient: filteredRequirements.filter(m => m?.status === 'sufficient').length,
-    totalShortfallCost: filteredRequirements.reduce((sum, req) => sum + (req?.totalCost || 0), 0)
-  }
-
-  const planColumns = [
+  const planColumns: TanStackColumn<ProductionPlan>[] = useMemo(() => [
     {
-      key: 'planNumber' as keyof ProductionPlan,
-      title: 'Plan',
-      render: (plan: ProductionPlan) => (
-        <div>
-          <div className="font-medium">{plan?.planNumber || ''}</div>
-          <div className="text-sm text-muted-foreground">{plan?.planName || ''}</div>
+      id: 'info',
+      header: 'Plan',
+      accessorKey: 'planNumber',
+      cell: ({ row }) => (
+        <div className="flex flex-col">
+          <Link
+            href={`/production/material-planning/${row.original.id}`}
+            className="font-bold text-sm text-foreground hover:underline"
+          >
+            {row.original.planNumber}
+          </Link>
+          <span className="text-[10px] text-muted-foreground">{row.original.planName}</span>
         </div>
       )
     },
     {
-      key: 'planType' as keyof ProductionPlan,
-      title: 'Type',
-      render: (plan: ProductionPlan) => (
-        <span className="capitalize">{plan?.planType || ''}</span>
+      id: 'date',
+      header: 'Period',
+      accessorKey: 'startDate',
+      cell: ({ row }) => (
+        <div className="flex flex-col text-[10px] text-muted-foreground">
+          <span>{new Date(row.original.startDate).toLocaleDateString()}</span>
+          <span>to {new Date(row.original.endDate).toLocaleDateString()}</span>
+        </div>
       )
     },
     {
-      key: 'status' as keyof ProductionPlan,
-      title: 'Status',
-      render: (plan: ProductionPlan) => {
-        if (!plan?.status) return ''
-        const { variant, label } = getStatusBadge(plan.status)
-        return <Badge variant={variant}>{label}</Badge>
+      id: 'products',
+      header: 'Target',
+      accessorKey: 'totalQuantity',
+      cell: ({ row }) => (
+        <div className="text-center">
+          <span className="font-medium text-foreground">{row.original.totalQuantity}</span>
+          <span className="text-[10px] text-muted-foreground block">{row.original.totalProducts} items</span>
+        </div>
+      )
+    },
+    {
+      id: 'value',
+      header: 'Value',
+      accessorKey: 'totalValue',
+      cell: ({ row }) => (
+        <div className="font-medium text-xs text-foreground">
+          {row.original.totalValue.toLocaleString('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 })}
+        </div>
+      )
+    },
+    {
+      id: 'status',
+      header: 'Status',
+      accessorKey: 'status',
+      cell: ({ row }) => {
+        const config = statusConfig[row.original.status]
+        return (
+          <Badge className={`${config.color} border-0 capitalize`}>
+            {config.label}
+          </Badge>
+        )
       }
     },
     {
-      key: 'dates' as keyof ProductionPlan,
-      title: 'Period',
-      render: (plan: ProductionPlan) => (
-        <div>
-          <div className="text-sm">{formatDate(plan?.startDate)}</div>
-          <div className="text-sm text-muted-foreground">to {formatDate(plan?.endDate)}</div>
-        </div>
-      )
-    },
-    {
-      key: 'totalProducts' as keyof ProductionPlan,
-      title: 'Products',
-      render: (plan: ProductionPlan) => (
-        <div className="text-center">
-          <div className="font-medium">{plan?.totalProducts || 0}</div>
-          <div className="text-sm text-muted-foreground">products</div>
-        </div>
-      )
-    },
-    {
-      key: 'totalQuantity' as keyof ProductionPlan,
-      title: 'Quantity',
-      render: (plan: ProductionPlan) => (
-        <div className="text-center">
-          <div className="font-medium">{plan?.totalQuantity || 0}</div>
-          <div className="text-sm text-muted-foreground">units</div>
-        </div>
-      )
-    },
-    {
-      key: 'totalValue' as keyof ProductionPlan,
-      title: 'Value',
-      render: (plan: ProductionPlan) => (
-        <div className="font-medium">{formatCurrency(plan?.totalValue)}</div>
-      )
-    },
-    {
-      key: 'actions' as keyof ProductionPlan,
-      title: 'Actions',
-      render: (plan: ProductionPlan) => (
-        <div className="flex items-center space-x-2">
-          <Button variant="ghost" size="sm" asChild>
-            <Link href={`/production/material-planning/${plan?.id || ''}`}>
-              <Eye className="h-4 w-4" />
-            </Link>
-          </Button>
-          <Button variant="ghost" size="sm" asChild>
-            <Link href={`/production/material-planning/${plan?.id || ''}/edit`}>
-              <PencilSimple className="h-4 w-4" />
-            </Link>
-          </Button>
-          <Button variant="ghost" size="sm">
-            <Trash className="h-4 w-4" />
-          </Button>
+      id: 'actions',
+      header: '',
+      cell: ({ row }) => (
+        <div className="flex justify-end">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" className="h-8 w-8 p-0">
+                <span className="sr-only">Open menu</span>
+                <HugeiconsIcon icon={MoreVerticalIcon} className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => router.push(`/production/material-planning/${row.original.id}`)}>
+                <HugeiconsIcon icon={EyeIcon} className="mr-2 h-4 w-4" />
+                View Details
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => router.push(`/production/material-planning/${row.original.id}/edit`)}>
+                <HugeiconsIcon icon={PencilEdit01Icon} className="mr-2 h-4 w-4" />
+                Edit Plan
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem className="text-red-600 focus:text-red-600" onClick={() => { }}>
+                <HugeiconsIcon icon={Delete02Icon} className="mr-2 h-4 w-4" />
+                Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       )
     }
-  ]
+  ], [router])
 
-  const requirementColumns = [
+  const reqColumns: TanStackColumn<MaterialRequirement>[] = useMemo(() => [
     {
-      key: 'material',
-      title: 'Material',
-      render: (req: typeof mockMaterialRequirements[0]) => (
-        <div>
-          <div className="font-medium">{req?.materialName || ''}</div>
-          <div className="text-sm text-muted-foreground">{req?.materialCode || ''} • {req?.category || ''}</div>
+      id: 'material',
+      header: 'Material',
+      accessorKey: 'materialName',
+      cell: ({ row }) => (
+        <div className="flex flex-col">
+          <span className="font-medium text-sm text-foreground">{row.original.materialName}</span>
+          <span className="text-[10px] text-muted-foreground">{row.original.materialCode} • {row.original.category}</span>
         </div>
       )
     },
     {
-      key: 'stock',
-      title: 'Stock Status',
-      render: (req: typeof mockMaterialRequirements[0]) => (
-        <div>
-          <div className="flex items-center space-x-2 mb-1">
-            <span className="text-sm">Current: {req?.currentStock || 0}</span>
-            <span className="text-sm text-muted-foreground">Required: {req?.requiredQuantity || 0}</span>
+      id: 'stock',
+      header: 'Stock / Required',
+      accessorKey: 'currentStock',
+      cell: ({ row }) => {
+        const percent = row.original.requiredQuantity > 0 ? (row.original.currentStock / row.original.requiredQuantity) * 100 : 0
+        return (
+          <div className="w-full min-w-[120px] flex flex-col gap-1">
+            <div className="flex justify-between text-[10px] text-muted-foreground">
+              <span>{row.original.currentStock} / {row.original.requiredQuantity}</span>
+            </div>
+            <Progress value={percent} className="h-1.5" />
           </div>
-          <Progress 
-            value={req?.requiredQuantity > 0 ? ((req?.currentStock || 0) / req.requiredQuantity) * 100 : 0} 
-            className="h-2" 
-          />
-        </div>
-      )
-    },
-    {
-      key: 'shortfall',
-      title: 'Shortfall',
-      render: (req: typeof mockMaterialRequirements[0]) => (
-        <div>
-          {(req?.shortfall || 0) > 0 ? (
-            <>
-              <div className="font-medium text-red-600">{req?.shortfall || 0} units</div>
-              <div className="text-sm text-muted-foreground">{formatCurrency(req?.totalCost)}</div>
-            </>
-          ) : (
-            <div className="text-green-600 font-medium">Sufficient</div>
-          )}
-        </div>
-      )
-    },
-    {
-      key: 'supplier',
-      title: 'Supplier',
-      render: (req: typeof mockMaterialRequirements[0]) => (
-        <div>
-          <div className="font-medium">{req?.supplier || ''}</div>
-          <div className="text-sm text-muted-foreground">{req?.leadTime || 0} days lead time</div>
-        </div>
-      )
-    },
-    {
-      key: 'status',
-      title: 'Status',
-      render: (req: typeof mockMaterialRequirements[0]) => {
-        const { variant, label } = getMaterialStatusBadge(req?.status || 'sufficient')
-        return <Badge variant={variant}>{label}</Badge>
+        )
       }
     },
     {
-      key: 'actions',
-      title: 'Actions',
-      render: (req: typeof mockMaterialRequirements[0]) => (
-        <div className="flex items-center space-x-2">
-          {(req?.shortfall || 0) > 0 && (
-            <Button variant="outline" size="sm">
-              <Truck className="h-4 w-4 mr-1" />
+      id: 'shortfall',
+      header: 'Shortfall',
+      accessorKey: 'shortfall',
+      cell: ({ row }) => (
+        <div className={`font-medium text-center ${row.original.shortfall > 0 ? 'text-destructive' : 'text-green-600'}`}>
+          {row.original.shortfall > 0 ? `-${row.original.shortfall}` : 'OK'}
+        </div>
+      )
+    },
+    {
+      id: 'cost',
+      header: 'Est. Cost',
+      accessorKey: 'totalCost',
+      cell: ({ row }) => (
+        <div className="text-xs text-muted-foreground">
+          {row.original.totalCost > 0 ? row.original.totalCost.toLocaleString('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }) : '-'}
+        </div>
+      )
+    },
+    {
+      id: 'status',
+      header: 'Status',
+      accessorKey: 'status',
+      cell: ({ row }) => {
+        const config = reqStatusConfig[row.original.status]
+        return (
+          <Badge className={`${config.color} border-0 capitalize`}>
+            {config.label}
+          </Badge>
+        )
+      }
+    },
+    {
+      id: 'actions',
+      header: '',
+      cell: ({ row }) => (
+        <div className="flex justify-end gap-2">
+          {row.original.shortfall > 0 && (
+            <Button size="sm" variant="outline" className="h-8 gap-2">
               Order
             </Button>
           )}
-          <Button variant="ghost" size="sm">
-            <Eye className="h-4 w-4" />
-          </Button>
         </div>
       )
     }
-  ]
+  ], [router])
+
 
   return (
     <TwoLevelLayout>
-      <div className="flex-1 space-y-6">
-        <Header 
-          title="Material Planning"
-          description="Plan material requirements and manage production schedules"
-          breadcrumbs={breadcrumbs}
-          actions={
-            <div className="flex items-center space-x-3">
-              <Button variant="outline" size="sm">
-                <ChartBar className="h-4 w-4 mr-2" />
-                MRP Report
+      <Header
+        title="Material Planning"
+        description="Plan material requirements and manage production schedules"
+        breadcrumbs={[
+          { label: 'Production', href: '/production' },
+          { label: 'Material Planning' }
+        ]}
+        actions={
+          <div className="flex gap-2">
+            <Button variant="outline">
+              MRP Report
+            </Button>
+            <Link href="/production/material-planning/new">
+              <Button>
+                <HugeiconsIcon icon={PlusSignIcon} className="h-4 w-4 mr-2" />
+                New Plan
               </Button>
-              <Button variant="outline" size="sm">
-                <DownloadSimple className="h-4 w-4 mr-2" />
-                Export
-              </Button>
-              <Button size="sm" asChild>
-                <Link href="/production/material-planning/new">
-                  <Plus className="h-4 w-4 mr-2" />
-                  New Plan
-                </Link>
-              </Button>
-            </div>
-          }
-        />
+            </Link>
+          </div>
+        }
+      />
 
-        {/* Summary Statistics */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card className="p-6">
-            <div className="flex items-center justify-between">
+      <div className="flex-1 p-6 space-y-6">
+        {/* Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <Card>
+            <CardContent className="p-4 flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Active Plans</p>
-                <p className="text-2xl font-bold mt-1">{planStats.active}</p>
-                <p className="text-sm text-blue-600 mt-1">of {planStats.total} total</p>
+                <p className="text-2xl font-bold text-foreground">{stats.totalPlans}</p>
               </div>
-              <Calendar className="h-8 w-8 text-blue-600" />
-            </div>
+            </CardContent>
           </Card>
-
-          <Card className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Material Shortages</p>
-                <p className="text-2xl font-bold mt-1 text-red-600">{materialStats.shortage}</p>
-                <p className="text-sm text-red-600 mt-1">Need attention</p>
-              </div>
-              <Warning className="h-8 w-8 text-red-600" />
-            </div>
-          </Card>
-
-          <Card className="p-6">
-            <div className="flex items-center justify-between">
+          <Card>
+            <CardContent className="p-4 flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Plan Value</p>
-                <p className="text-2xl font-bold mt-1">{mounted ? `Rp ${(planStats.totalValue / 1000000).toFixed(1)}M` : ''}</p>
-                <p className="text-sm text-green-600 mt-1">Total production</p>
-              </div>
-              <TrendUp className="h-8 w-8 text-green-600" />
-            </div>
-          </Card>
-
-          <Card className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Purchase Required</p>
-                <p className="text-2xl font-bold mt-1">{mounted ? `Rp ${(materialStats.totalShortfallCost / 1000000).toFixed(1)}M` : ''}</p>
-                <p className="text-sm text-orange-600 mt-1">For shortfalls</p>
-              </div>
-              <Truck className="h-8 w-8 text-orange-600" />
-            </div>
-          </Card>
-        </div>
-
-        {/* Filters */}
-        <Card className="p-6">
-          <div className="flex items-center space-x-4">
-            <Funnel className="h-5 w-5 text-muted-foreground" />
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 flex-1">
-              <div className="space-y-2">
-                <Label htmlFor="search">Search</Label>
-                <Input
-                  id="search"
-                  placeholder="Search plans or materials..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
-
-              {activeTab === 'plans' && (
-                <>
-                  <div className="space-y-2">
-                    <Label htmlFor="status">Status</Label>
-                    <Select value={statusFilter} onValueChange={setStatusFilter}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="All statuses" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All statuses</SelectItem>
-                        {mounted && statuses.map((status) => (
-                          <SelectItem key={status} value={status}>{status}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="planType">Plan Type</Label>
-                    <Select value={planTypeFilter} onValueChange={setPlanTypeFilter}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="All types" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All types</SelectItem>
-                        {mounted && planTypes.map((type) => (
-                          <SelectItem key={type} value={type}>{type}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </>
-              )}
-            </div>
-          </div>
-        </Card>
-
-        {/* Tabs */}
-        <div className="flex space-x-1 bg-muted p-1 rounded-lg w-fit">
-          <Button
-            variant={activeTab === 'plans' ? 'default' : 'ghost'}
-            size="sm"
-            onClick={() => setActiveTab('plans')}
-          >
-            <Calendar className="h-4 w-4 mr-2" />
-            Production Plans
-          </Button>
-          <Button
-            variant={activeTab === 'requirements' ? 'default' : 'ghost'}
-            size="sm"
-            onClick={() => setActiveTab('requirements')}
-          >
-            <Package className="h-4 w-4 mr-2" />
-            Material Requirements
-          </Button>
-        </div>
-
-        {/* Data Tables */}
-        {activeTab === 'plans' && (
-          <Card>
-            <AdvancedDataTable
-              data={filteredPlans}
-              columns={planColumns}
-              searchable={false}
-              filterable={false}
-              pagination={{
-                pageSize: 10,
-                currentPage: 1,
-                totalPages: Math.ceil(filteredPlans.length / 10),
-                totalItems: filteredPlans.length,
-                onChange: () => {}
-              }}
-            />
-          </Card>
-        )}
-
-        {activeTab === 'requirements' && (
-          <Card>
-            <AdvancedDataTable
-              data={filteredRequirements}
-              columns={requirementColumns}
-              searchable={false}
-              filterable={false}
-              pagination={{
-                pageSize: 10,
-                currentPage: 1,
-                totalPages: Math.ceil(filteredRequirements.length / 10),
-                totalItems: filteredRequirements.length,
-                onChange: () => {}
-              }}
-            />
-          </Card>
-        )}
-
-        {/* Material Shortage Alert */}
-        {materialStats.shortage > 0 && (
-          <Card className="p-6 border-red-200 bg-red-50">
-            <div className="flex items-center space-x-3">
-              <Warning className="h-6 w-6 text-red-600" />
-              <div className="flex-1">
-                <h3 className="text-lg font-semibold text-red-800">Material Shortage Alert</h3>
-                <p className="text-red-700 mt-1">
-                  {materialStats.shortage} materials are in shortage and require immediate procurement. 
-                  Total purchase value needed: {formatCurrency(materialStats.totalShortfallCost)}
+                <p className="text-2xl font-bold truncate text-foreground" title={stats.totalValue.toLocaleString()}>
+                  {stats.totalValue > 1000000000
+                    ? `${(stats.totalValue / 1000000000).toFixed(1)}B`
+                    : `${(stats.totalValue / 1000000).toFixed(1)}M`}
                 </p>
               </div>
-              <Button variant="outline" className="border-red-300 text-red-700 hover:bg-red-100">
-                <Truck className="h-4 w-4 mr-2" />
-                Create Purchase Orders
-              </Button>
-            </div>
+            </CardContent>
           </Card>
+          <Card>
+            <CardContent className="p-4 flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Shortages</p>
+                <p className="text-2xl font-bold text-destructive">{stats.shortages}</p>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4 flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Est. Cost</p>
+                <p className="text-2xl font-bold truncate text-foreground" title={stats.shortfallValue.toLocaleString()}>
+                  {stats.shortfallValue > 1000000000
+                    ? `${(stats.shortfallValue / 1000000000).toFixed(1)}B`
+                    : `${(stats.shortfallValue / 1000000).toFixed(1)}M`}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Tabs & Filters */}
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="flex bg-muted p-1 rounded-lg">
+            <Button
+              variant={activeTab === 'plans' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => setActiveTab('plans')}
+            >
+              Production Plans
+            </Button>
+            <Button
+              variant={activeTab === 'requirements' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => setActiveTab('requirements')}
+            >
+              Requirements
+            </Button>
+          </div>
+
+          <div className="flex items-center gap-2 w-full md:w-auto">
+            <div className="relative flex-1 md:flex-initial">
+              <HugeiconsIcon icon={Search01Icon} className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search..."
+                className="pl-9 w-full md:w-64"
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+              />
+            </div>
+            <Button variant="outline" size="sm">
+              <HugeiconsIcon icon={FilterIcon} className="h-4 w-4 mr-2" />
+              Filters
+            </Button>
+            <Button variant="outline" size="sm">
+              <HugeiconsIcon icon={Download01Icon} className="h-4 w-4 mr-2" />
+              Export
+            </Button>
+          </div>
+        </div>
+
+        {/* Table */}
+        {activeTab === 'plans' ? (
+          <TanStackDataTable
+            data={filteredPlans}
+            columns={planColumns}
+            pagination={{
+              pageSize: 10,
+              pageIndex: 0,
+              totalRows: filteredPlans.length,
+              onPageChange: () => { }
+            }}
+          />
+        ) : (
+          <TanStackDataTable
+            data={filteredReqs}
+            columns={reqColumns}
+            pagination={{
+              pageSize: 10,
+              pageIndex: 0,
+              totalRows: filteredReqs.length,
+              onPageChange: () => { }
+            }}
+          />
         )}
       </div>
     </TwoLevelLayout>

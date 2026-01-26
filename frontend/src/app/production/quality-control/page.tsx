@@ -1,381 +1,298 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { Card } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
+import React, { useState, useEffect, useMemo } from 'react'
+import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { TwoLevelLayout } from '@/components/ui/two-level-layout'
 import { Header } from '@/components/ui/header'
-import { AdvancedDataTable } from '@/components/ui/advanced-data-table'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Card, CardContent } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { Progress } from '@/components/ui/progress'
+import { TanStackDataTable, TanStackColumn } from '@/components/ui/tanstack-data-table'
+import { HugeiconsIcon } from '@hugeicons/react'
+import {
+  Search01Icon,
+  FilterIcon,
+  Download01Icon,
+  PlusSignIcon,
+  EyeIcon,
+  PencilEdit01Icon,
+  MoreVerticalIcon,
+  Calendar01Icon,
+  Delete02Icon
+} from '@hugeicons/core-free-icons'
+import { ProductionService } from '@/services/production'
+import { QualityControl } from '@/types/production'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator
+} from '@/components/ui/dropdown-menu'
 
-import Link from 'next/link'
-import { mockQualityControls } from '@/services/production'
-import type { QualityControl, QualityControlFilters } from '@/types/production'
+const statusConfig: Record<string, { label: string, color: string }> = {
+  draft: { label: 'Draft', color: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200' },
+  testing: { label: 'Testing', color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-200' },
+  passed: { label: 'Passed', color: 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-200' },
+  failed: { label: 'Failed', color: 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-200' },
+  conditional: { label: 'Conditional', color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-200' }
+}
 
 export default function QualityControlPage() {
-  const [mounted, setMounted] = useState(false)
-  const [searchTerm, setSearchTerm] = useState('')
-  const [statusFilter, setStatusFilter] = useState<string>('all')
-  const [typeFilter, setTypeFilter] = useState<string>('all')
-  const [referenceTypeFilter, setReferenceTypeFilter] = useState<string>('all')
+  const router = useRouter()
+  const [data, setData] = useState<QualityControl[]>([])
+  const [loading, setLoading] = useState(true)
+  const [searchQuery, setSearchQuery] = useState('')
 
   useEffect(() => {
-    setMounted(true)
+    const fetchData = async () => {
+      try {
+        setLoading(true)
+        const response = await ProductionService.getQualityControls()
+        // Handle paginated response structure
+        const items = (response.data as any)?.data || (response as any).data || []
+        setData(Array.isArray(items) ? items : [])
+      } catch (error) {
+        console.error('Failed to fetch QC data:', error)
+        // Fallback to mock data
+        const { mockQualityControls } = await import('@/services/production')
+        setData(mockQualityControls)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchData()
   }, [])
 
-  const breadcrumbs = [
-    { label: 'Production', href: '/production' },
-    { label: 'Quality Control', href: '/production/quality-control' }
-  ]
+  const filteredData = useMemo(() => {
+    if (!searchQuery) return data
+    const lower = searchQuery.toLowerCase()
+    return data.filter(item =>
+      item.qcNumber.toLowerCase().includes(lower) ||
+      item.productName.toLowerCase().includes(lower) ||
+      item.referenceNumber.toLowerCase().includes(lower)
+    )
+  }, [data, searchQuery])
 
-  const formatDate = (dateString?: string): string => {
-    if (!mounted || !dateString) return ''
-    return new Date(dateString).toLocaleDateString('id-ID')
-  }
+  // Stats
+  const stats = useMemo(() => {
+    const total = data.length
+    const passed = data.filter(i => i.status === 'passed').length
+    const failed = data.filter(i => i.status === 'failed').length
+    const active = data.filter(i => i.status === 'testing').length
+    const avgScore = total > 0 ? data.reduce((sum, i) => sum + (i.overallScore || 0), 0) / total : 0
 
-  // Filter quality controls
-  const filteredQualityControls = mockQualityControls.filter(qc => {
-    if (searchTerm && !qc?.qcNumber?.toLowerCase().includes(searchTerm.toLowerCase()) && 
-        !qc?.productName?.toLowerCase().includes(searchTerm.toLowerCase())) return false
-    if (statusFilter !== 'all' && qc?.status !== statusFilter) return false
-    if (typeFilter !== 'all' && qc?.type !== typeFilter) return false
-    if (referenceTypeFilter !== 'all' && qc?.referenceType !== referenceTypeFilter) return false
-    return true
-  })
+    return { total, passed, failed, active, avgScore }
+  }, [data])
 
-  // Get unique values for filters
-  const statuses = Array.from(new Set(mockQualityControls.map(qc => qc?.status).filter(Boolean)))
-  const types = Array.from(new Set(mockQualityControls.map(qc => qc?.type).filter(Boolean)))
-  const referenceTypes = Array.from(new Set(mockQualityControls.map(qc => qc?.referenceType).filter(Boolean)))
-
-  const getStatusBadge = (status: QualityControl['status']) => {
-    const statusConfig = {
-      draft: { variant: 'secondary' as const, label: 'Draft', icon: Clock },
-      testing: { variant: 'default' as const, label: 'Testing', icon: ChartBar },
-      passed: { variant: 'default' as const, label: 'Passed', icon: CheckCircle },
-      failed: { variant: 'destructive' as const, label: 'Failed', icon: XCircle },
-      conditional: { variant: 'outline' as const, label: 'Conditional', icon: Warning }
-    }
-    return statusConfig[status] || { variant: 'secondary' as const, label: status, icon: Clock }
-  }
-
-  const getTestResultColor = (result: string) => {
-    switch (result) {
-      case 'pass': return 'text-green-600'
-      case 'fail': return 'text-red-600'
-      case 'marginal': return 'text-yellow-600'
-      default: return 'text-muted-foreground'
-    }
-  }
-
-  // Summary statistics
-  const summaryStats = {
-    total: filteredQualityControls.length,
-    testing: filteredQualityControls.filter(qc => qc?.status === 'testing').length,
-    passed: filteredQualityControls.filter(qc => qc?.status === 'passed').length,
-    failed: filteredQualityControls.filter(qc => qc?.status === 'failed').length,
-    conditional: filteredQualityControls.filter(qc => qc?.status === 'conditional').length,
-    averageScore: filteredQualityControls.reduce((sum, qc) => sum + (qc?.overallScore || 0), 0) / filteredQualityControls.length || 0
-  }
-
-  const columns = [
+  const columns: TanStackColumn<QualityControl>[] = useMemo(() => [
     {
-      key: 'qcNumber' as keyof QualityControl,
-      title: 'QC Number',
-      render: (qc: QualityControl) => (
-        <div>
-          <div className="font-medium">{qc?.qcNumber || ''}</div>
-          <div className="text-sm text-muted-foreground capitalize">{qc?.type || ''}</div>
+      id: 'info',
+      header: 'QC Number',
+      accessorKey: 'qcNumber',
+      cell: ({ row }) => (
+        <div className="flex flex-col">
+          <Link
+            href={`/production/quality-control/${row.original.id}`}
+            className="font-bold text-sm text-foreground hover:underline"
+          >
+            {row.original.qcNumber}
+          </Link>
+          <span className="text-[10px] text-muted-foreground capitalize">{row.original.type}</span>
         </div>
       )
     },
     {
-      key: 'product' as keyof QualityControl,
-      title: 'Product',
-      render: (qc: QualityControl) => (
-        <div>
-          <div className="font-medium">{qc?.productName || ''}</div>
-          <div className="text-sm text-muted-foreground">{qc?.productCode || ''}</div>
+      id: 'product',
+      header: 'Product',
+      accessorKey: 'productName',
+      cell: ({ row }) => (
+        <div className="flex flex-col">
+          <span className="font-medium text-sm text-foreground">{row.original.productName}</span>
+          <span className="text-[10px] text-muted-foreground">{row.original.productCode}</span>
         </div>
       )
     },
     {
-      key: 'reference' as keyof QualityControl,
-      title: 'Reference',
-      render: (qc: QualityControl) => (
-        <div>
-          <div className="font-medium">{qc?.referenceNumber || ''}</div>
-          <div className="text-sm text-muted-foreground capitalize">{qc?.referenceType || ''}</div>
+      id: 'reference',
+      header: 'Reference',
+      accessorKey: 'referenceNumber',
+      cell: ({ row }) => (
+        <div className="flex flex-col">
+          <span className="text-sm text-muted-foreground">{row.original.referenceNumber}</span>
+          <span className="text-[10px] text-muted-foreground capitalize">{row.original.referenceType}</span>
         </div>
       )
     },
     {
-      key: 'testInfo' as keyof QualityControl,
-      title: 'Test Information',
-      render: (qc: QualityControl) => (
-        <div>
-          <div className="text-sm">Batch: {qc?.batchNumber || ''}</div>
-          <div className="text-sm text-muted-foreground">
-            {qc?.quantityTested || 0} of {qc?.sampleSize || 0} tested
-          </div>
+      id: 'inspection',
+      header: 'Tested',
+      accessorKey: 'quantityTested',
+      cell: ({ row }) => (
+        <div className="text-center">
+          <span className="text-sm text-foreground">{row.original.quantityTested}</span>
+          <span className="text-muted-foreground text-xs ml-1">/ {row.original.sampleSize}</span>
         </div>
       )
     },
     {
-      key: 'status' as keyof QualityControl,
-      title: 'Status',
-      render: (qc: QualityControl) => {
-        if (!qc?.status) return ''
-        const { variant, label, icon: Icon } = getStatusBadge(qc.status)
+      id: 'score',
+      header: 'Score',
+      accessorKey: 'overallScore',
+      cell: ({ row }) => {
+        const score = row.original.overallScore || 0
         return (
-          <div className="flex items-center space-x-2">
-            <Icon className="h-4 w-4" />
-            <Badge variant={variant}>{label}</Badge>
+          <div className="w-full min-w-[80px] flex flex-col gap-1">
+            <div className="flex justify-between text-[10px] text-muted-foreground">
+              <span>{score.toFixed(1)}/10</span>
+            </div>
+            <Progress value={score * 10} className="h-1.5" />
           </div>
         )
       }
     },
     {
-      key: 'score' as keyof QualityControl,
-      title: 'Quality Score',
-      render: (qc: QualityControl) => {
-        if (!qc?.overallScore || qc.overallScore === 0) {
-          return <span className="text-muted-foreground">Pending</span>
-        }
+      id: 'status',
+      header: 'Status',
+      accessorKey: 'status',
+      cell: ({ row }) => {
+        const config = statusConfig[row.original.status]
         return (
-          <div className="space-y-1">
-            <div className="flex justify-between text-sm">
-              <span className="font-medium">{qc.overallScore.toFixed(1)}/10</span>
-              <span className="text-muted-foreground">{(qc.overallScore * 10).toFixed(0)}%</span>
-            </div>
-            <Progress value={qc.overallScore * 10} className="h-2" />
-          </div>
+          <Badge className={`${config.color} border-0 capitalize`}>
+            {config.label}
+          </Badge>
         )
       }
     },
     {
-      key: 'testDate' as keyof QualityControl,
-      title: 'Test Date',
-      render: (qc: QualityControl) => (
-        <div>
-          <div className="text-sm">{formatDate(qc?.testDate)}</div>
-          <div className="text-sm text-muted-foreground">{qc?.inspector || ''}</div>
-        </div>
-      )
-    },
-    {
-      key: 'tests' as keyof QualityControl,
-      title: 'Test Results',
-      render: (qc: QualityControl) => (
-        <div className="space-y-1">
-          {qc?.tests?.slice(0, 2).map((test) => (
-            <div key={test.id} className="text-xs">
-              <span className="font-medium">{test.testName}:</span>
-              <span className={`ml-1 ${getTestResultColor(test.result)}`}>
-                {test.result}
-              </span>
-            </div>
-          ))}
-          {qc?.tests && qc.tests.length > 2 && (
-            <div className="text-xs text-muted-foreground">
-              +{qc.tests.length - 2} more tests
-            </div>
-          )}
-        </div>
-      )
-    },
-    {
-      key: 'actions' as keyof QualityControl,
-      title: 'Actions',
-      render: (qc: QualityControl) => (
-        <div className="flex items-center space-x-2">
-          <Button variant="ghost" size="sm" asChild>
-            <Link href={`/production/quality-control/${qc?.id || ''}`}>
-              <Eye className="h-4 w-4" />
-            </Link>
-          </Button>
-          <Button variant="ghost" size="sm" asChild>
-            <Link href={`/production/quality-control/${qc?.id || ''}/edit`}>
-              <PencilSimple className="h-4 w-4" />
-            </Link>
-          </Button>
-          <Button variant="ghost" size="sm">
-            <Trash className="h-4 w-4" />
-          </Button>
+      id: 'actions',
+      header: '',
+      cell: ({ row }) => (
+        <div className="flex justify-end">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" className="h-8 w-8 p-0">
+                <span className="sr-only">Open menu</span>
+                <HugeiconsIcon icon={MoreVerticalIcon} className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => router.push(`/production/quality-control/${row.original.id}`)}>
+                <HugeiconsIcon icon={EyeIcon} className="mr-2 h-4 w-4" />
+                View Details
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => router.push(`/production/quality-control/${row.original.id}/edit`)}>
+                <HugeiconsIcon icon={PencilEdit01Icon} className="mr-2 h-4 w-4" />
+                Edit Inspection
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem className="text-red-600 focus:text-red-600" onClick={() => { }}>
+                <HugeiconsIcon icon={Delete02Icon} className="mr-2 h-4 w-4" />
+                Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       )
     }
-  ]
+  ], [router])
 
   return (
     <TwoLevelLayout>
-      <div className="flex-1 space-y-6">
-        <Header 
-          title="Quality Control"
-          description="Manage quality inspections and test results"
-          breadcrumbs={breadcrumbs}
-          actions={
-            <div className="flex items-center space-x-3">
-              <Button variant="outline" size="sm">
-                <Calendar className="h-4 w-4 mr-2" />
-                Schedule Inspection
+      <Header
+        title="Quality Control"
+        description="Manage quality inspections and test results"
+        breadcrumbs={[
+          { label: 'Production', href: '/production' },
+          { label: 'Quality Control' }
+        ]}
+        actions={
+          <div className="flex gap-2">
+            <Button variant="outline">
+              Schedule
+            </Button>
+            <Link href="/production/quality-control/new">
+              <Button>
+                <HugeiconsIcon icon={PlusSignIcon} className="h-4 w-4 mr-2" />
+                New Inspection
               </Button>
-              <Button variant="outline" size="sm">
-                <DownloadSimple className="h-4 w-4 mr-2" />
-                Export Report
-              </Button>
-              <Button size="sm" asChild>
-                <Link href="/production/quality-control/new">
-                  <Plus className="h-4 w-4 mr-2" />
-                  New QC Inspection
-                </Link>
-              </Button>
-            </div>
-          }
-        />
+            </Link>
+          </div>
+        }
+      />
 
-        {/* Summary Statistics */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
-          <Card className="p-6">
-            <div className="flex items-center justify-between">
+      <div className="flex-1 p-6 space-y-6">
+        {/* Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <Card>
+            <CardContent className="p-4 flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Total Inspections</p>
-                <p className="text-2xl font-bold mt-1">{summaryStats.total}</p>
+                <p className="text-2xl font-bold text-foreground">{stats.total}</p>
               </div>
-              <ChartBar className="h-8 w-8 text-blue-600" />
-            </div>
+            </CardContent>
           </Card>
-
-          <Card className="p-6">
-            <div className="flex items-center justify-between">
+          <Card>
+            <CardContent className="p-4 flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Testing</p>
-                <p className="text-2xl font-bold mt-1">{summaryStats.testing}</p>
-                <p className="text-sm text-blue-600 mt-1">In progress</p>
+                <p className="text-sm font-medium text-muted-foreground">Active Testing</p>
+                <p className="text-2xl font-bold text-yellow-600">{stats.active}</p>
               </div>
-              <Clock className="h-8 w-8 text-orange-600" />
-            </div>
+            </CardContent>
           </Card>
-
-          <Card className="p-6">
-            <div className="flex items-center justify-between">
+          <Card>
+            <CardContent className="p-4 flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Passed</p>
-                <p className="text-2xl font-bold mt-1">{summaryStats.passed}</p>
-                <p className="text-sm text-green-600 mt-1">Quality approved</p>
+                <p className="text-2xl font-bold text-green-600">{stats.passed}</p>
               </div>
-              <CheckCircle className="h-8 w-8 text-green-600" />
-            </div>
+            </CardContent>
           </Card>
-
-          <Card className="p-6">
-            <div className="flex items-center justify-between">
+          <Card>
+            <CardContent className="p-4 flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Failed</p>
-                <p className="text-2xl font-bold mt-1 text-red-600">{summaryStats.failed}</p>
-                <p className="text-sm text-red-600 mt-1">Need attention</p>
+                <p className="text-sm font-medium text-muted-foreground">Avg Score</p>
+                <p className="text-2xl font-bold text-indigo-600">{stats.avgScore.toFixed(1)}</p>
               </div>
-              <XCircle className="h-8 w-8 text-red-600" />
-            </div>
-          </Card>
-
-          <Card className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Average Score</p>
-                <p className="text-2xl font-bold mt-1">{summaryStats.averageScore.toFixed(1)}/10</p>
-                <div className="mt-2">
-                  <Progress value={summaryStats.averageScore * 10} className="h-2" />
-                </div>
-              </div>
-              <Warning className="h-8 w-8 text-purple-600" />
-            </div>
+            </CardContent>
           </Card>
         </div>
 
         {/* Filters */}
-        <Card className="p-6">
-          <div className="flex items-center space-x-4">
-            <Funnel className="h-5 w-5 text-muted-foreground" />
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 flex-1">
-              <div className="space-y-2">
-                <Label htmlFor="search">Search</Label>
-                <Input
-                  id="search"
-                  placeholder="Search QC inspections..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="status">Status</Label>
-                <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="All statuses" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All statuses</SelectItem>
-                    {mounted && statuses.map((status) => (
-                      <SelectItem key={status} value={status}>{status}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="type">Type</Label>
-                <Select value={typeFilter} onValueChange={setTypeFilter}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="All types" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All types</SelectItem>
-                    {mounted && types.map((type) => (
-                      <SelectItem key={type} value={type}>{type}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="referenceType">Reference Type</Label>
-                <Select value={referenceTypeFilter} onValueChange={setReferenceTypeFilter}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="All references" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All references</SelectItem>
-                    {mounted && referenceTypes.map((refType) => (
-                      <SelectItem key={refType} value={refType}>{refType.replace('_', ' ')}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
+        <div className="flex items-center justify-end gap-2">
+          <div className="relative">
+            <HugeiconsIcon icon={Search01Icon} className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search inspections..."
+              className="pl-9 w-64"
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+            />
           </div>
-        </Card>
+          <Button variant="outline" size="sm">
+            <HugeiconsIcon icon={FilterIcon} className="h-4 w-4 mr-2" />
+            Filters
+          </Button>
+          <Button variant="outline" size="sm">
+            <HugeiconsIcon icon={Download01Icon} className="h-4 w-4 mr-2" />
+            Export
+          </Button>
+        </div>
 
-        {/* Quality Control Table */}
-        <Card>
-          <AdvancedDataTable
-            data={filteredQualityControls}
-            columns={columns}
-            searchable={false}
-            filterable={false}
-            pagination={{
-              pageSize: 10,
-              currentPage: 1,
-              totalPages: Math.ceil(filteredQualityControls.length / 10),
-              totalItems: filteredQualityControls.length,
-              onChange: () => {}
-            }}
-          />
-        </Card>
+        {/* Table */}
+        <TanStackDataTable
+          data={filteredData}
+          columns={columns}
+          pagination={{
+            pageSize: 10,
+            pageIndex: 0,
+            totalRows: filteredData.length,
+            onPageChange: () => { }
+          }}
+        />
       </div>
     </TwoLevelLayout>
   )

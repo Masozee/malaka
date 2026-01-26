@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -11,6 +11,18 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { TwoLevelLayout } from '@/components/ui/two-level-layout'
 import { Header } from '@/components/ui/header'
 import { Separator } from '@/components/ui/separator'
+import { HugeiconsIcon } from '@hugeicons/react'
+import {
+  ArrowLeft01Icon,
+  Factory02Icon,
+  Calendar01Icon,
+  UserCircleIcon,
+  PackageIcon,
+  PlusSignIcon,
+  MinusSignIcon,
+  Clock01Icon,
+  FloppyDiskIcon
+} from '@hugeicons/core-free-icons'
 
 import Link from 'next/link'
 import { mockWarehouses } from '@/services/production'
@@ -108,12 +120,6 @@ export default function NewWorkOrderPage() {
     setFormData(prev => ({ ...prev, workOrderNumber: `WO-${year}-${randomNum}` }))
   }, [])
 
-  const breadcrumbs = [
-    { label: 'Production', href: '/production' },
-    { label: 'Work Orders', href: '/production/work-orders' },
-    { label: 'New Work Order', href: '/production/work-orders/new' }
-  ]
-
   const formatCurrency = (amount?: number): string => {
     if (!mounted || typeof amount !== 'number' || isNaN(amount)) return ''
     return `Rp ${amount.toLocaleString('id-ID')}`
@@ -161,7 +167,7 @@ export default function NewWorkOrderPage() {
       materials: prev.materials.map(m => {
         if (m.id === id) {
           const updated = { ...m, [field]: value }
-          
+
           if (field === 'articleId') {
             const article = mockMaterials.find(a => a.id === value)
             if (article) {
@@ -170,11 +176,11 @@ export default function NewWorkOrderPage() {
               updated.unitCost = article.unitCost
             }
           }
-          
+
           if (field === 'requiredQuantity' || field === 'unitCost') {
             updated.totalCost = updated.requiredQuantity * updated.unitCost
           }
-          
+
           return updated
         }
         return m
@@ -212,7 +218,7 @@ export default function NewWorkOrderPage() {
   const updateOperation = (id: string, field: keyof OperationItem, value: any) => {
     setFormData(prev => ({
       ...prev,
-      operations: prev.operations.map(o => 
+      operations: prev.operations.map(o =>
         o.id === id ? { ...o, [field]: value } : o
       )
     }))
@@ -221,14 +227,14 @@ export default function NewWorkOrderPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
-    
+
     try {
       // Here you would normally make an API call
       console.log('Creating work order:', formData)
-      
+
       // Simulate API delay
       await new Promise(resolve => setTimeout(resolve, 1000))
-      
+
       // Redirect to work orders list
       router.push('/production/work-orders')
     } catch (error) {
@@ -246,25 +252,29 @@ export default function NewWorkOrderPage() {
 
   return (
     <TwoLevelLayout>
-      <Header 
+      <Header
         title="New Work Order"
         description="Create a new production work order"
-        breadcrumbs={breadcrumbs}
+        breadcrumbs={[
+          { label: 'Production', href: '/production' },
+          { label: 'Work Orders', href: '/production/work-orders' },
+          { label: 'New Work Order' }
+        ]}
         actions={
           <div className="flex items-center space-x-3">
-            <Button variant="outline" size="sm" asChild>
-              <Link href="/production/work-orders">
-                <ArrowLeft className="h-4 w-4 mr-2" />
+            <Link href="/production/work-orders">
+              <Button variant="outline" size="sm">
+                <HugeiconsIcon icon={ArrowLeft01Icon} className="h-4 w-4 mr-2" />
                 Cancel
-              </Link>
-            </Button>
-            <Button 
-              size="sm" 
+              </Button>
+            </Link>
+            <Button
+              size="sm"
               form="work-order-form"
               type="submit"
               disabled={isSubmitting}
             >
-              <FloppyDisk className="h-4 w-4 mr-2" />
+              <HugeiconsIcon icon={FloppyDiskIcon} className="h-4 w-4 mr-2" />
               {isSubmitting ? 'Creating...' : 'Create Work Order'}
             </Button>
           </div>
@@ -276,10 +286,10 @@ export default function NewWorkOrderPage() {
           {/* Basic Information */}
           <Card className="p-6">
             <h3 className="text-lg font-semibold mb-4 flex items-center">
-              <Factory className="h-5 w-5 mr-2" />
+              <HugeiconsIcon icon={Factory02Icon} className="h-5 w-5 mr-2" />
               Basic Information
             </h3>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               <div className="space-y-2">
                 <Label htmlFor="workOrderNumber">Work Order Number</Label>
@@ -294,8 +304,8 @@ export default function NewWorkOrderPage() {
 
               <div className="space-y-2">
                 <Label htmlFor="type">Type</Label>
-                <Select 
-                  value={formData.type} 
+                <Select
+                  value={formData.type}
                   onValueChange={(value: any) => setFormData(prev => ({ ...prev, type: value }))}
                 >
                   <SelectTrigger>
@@ -313,8 +323,8 @@ export default function NewWorkOrderPage() {
 
               <div className="space-y-2">
                 <Label htmlFor="priority">Priority</Label>
-                <Select 
-                  value={formData.priority} 
+                <Select
+                  value={formData.priority}
                   onValueChange={(value: any) => setFormData(prev => ({ ...prev, priority: value }))}
                 >
                   <SelectTrigger>
@@ -331,8 +341,8 @@ export default function NewWorkOrderPage() {
 
               <div className="space-y-2">
                 <Label htmlFor="product">Product</Label>
-                <Select 
-                  value={formData.productId} 
+                <Select
+                  value={formData.productId}
                   onValueChange={handleProductChange}
                 >
                   <SelectTrigger>
@@ -362,8 +372,8 @@ export default function NewWorkOrderPage() {
 
               <div className="space-y-2">
                 <Label htmlFor="warehouse">Warehouse</Label>
-                <Select 
-                  value={formData.warehouseId} 
+                <Select
+                  value={formData.warehouseId}
                   onValueChange={(value) => setFormData(prev => ({ ...prev, warehouseId: value }))}
                 >
                   <SelectTrigger>
@@ -384,10 +394,10 @@ export default function NewWorkOrderPage() {
           {/* Schedule */}
           <Card className="p-6">
             <h3 className="text-lg font-semibold mb-4 flex items-center">
-              <Calendar className="h-5 w-5 mr-2" />
+              <HugeiconsIcon icon={Calendar01Icon} className="h-5 w-5 mr-2" />
               Schedule
             </h3>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <Label htmlFor="plannedStartDate">Planned Start Date</Label>
@@ -416,15 +426,15 @@ export default function NewWorkOrderPage() {
           {/* Team Assignment */}
           <Card className="p-6">
             <h3 className="text-lg font-semibold mb-4 flex items-center">
-              <User className="h-5 w-5 mr-2" />
+              <HugeiconsIcon icon={UserCircleIcon} className="h-5 w-5 mr-2" />
               Team Assignment
             </h3>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <Label htmlFor="supervisor">Supervisor</Label>
-                <Select 
-                  value={formData.supervisor} 
+                <Select
+                  value={formData.supervisor}
                   onValueChange={(value) => setFormData(prev => ({ ...prev, supervisor: value }))}
                 >
                   <SelectTrigger>
@@ -468,35 +478,35 @@ export default function NewWorkOrderPage() {
           <Card className="p-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold flex items-center">
-                <Package className="h-5 w-5 mr-2" />
+                <HugeiconsIcon icon={PackageIcon} className="h-5 w-5 mr-2" />
                 Materials
               </h3>
               <Button type="button" variant="outline" size="sm" onClick={addMaterial}>
-                <Plus className="h-4 w-4 mr-2" />
+                <HugeiconsIcon icon={PlusSignIcon} className="h-4 w-4 mr-2" />
                 Add Material
               </Button>
             </div>
-            
+
             <div className="space-y-4">
               {formData.materials.map((material, index) => (
                 <div key={material.id} className="border rounded-lg p-4">
                   <div className="flex items-center justify-between mb-3">
                     <span className="font-medium">Material {index + 1}</span>
-                    <Button 
-                      type="button" 
-                      variant="ghost" 
-                      size="sm" 
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
                       onClick={() => removeMaterial(material.id)}
                     >
-                      <Minus className="h-4 w-4" />
+                      <HugeiconsIcon icon={MinusSignIcon} className="h-4 w-4" />
                     </Button>
                   </div>
-                  
+
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     <div className="space-y-2">
                       <Label>Article</Label>
-                      <Select 
-                        value={material.articleId} 
+                      <Select
+                        value={material.articleId}
                         onValueChange={(value) => updateMaterial(material.id, 'articleId', value)}
                       >
                         <SelectTrigger>
@@ -541,10 +551,10 @@ export default function NewWorkOrderPage() {
                   </div>
                 </div>
               ))}
-              
+
               {formData.materials.length === 0 && (
                 <div className="text-center py-8 text-muted-foreground">
-                  <Package className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                  <HugeiconsIcon icon={PackageIcon} className="h-12 w-12 mx-auto mb-3 opacity-50" />
                   <p>No materials added yet. Click "Add Material" to get started.</p>
                 </div>
               )}
@@ -564,30 +574,30 @@ export default function NewWorkOrderPage() {
           <Card className="p-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold flex items-center">
-                <Clock className="h-5 w-5 mr-2" />
+                <HugeiconsIcon icon={Clock01Icon} className="h-5 w-5 mr-2" />
                 Operations
               </h3>
               <Button type="button" variant="outline" size="sm" onClick={addOperation}>
-                <Plus className="h-4 w-4 mr-2" />
+                <HugeiconsIcon icon={PlusSignIcon} className="h-4 w-4 mr-2" />
                 Add Operation
               </Button>
             </div>
-            
+
             <div className="space-y-4">
               {formData.operations.map((operation, index) => (
                 <div key={operation.id} className="border rounded-lg p-4">
                   <div className="flex items-center justify-between mb-3">
                     <span className="font-medium">Operation {operation.operationNumber}</span>
-                    <Button 
-                      type="button" 
-                      variant="ghost" 
-                      size="sm" 
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
                       onClick={() => removeOperation(operation.id)}
                     >
-                      <Minus className="h-4 w-4" />
+                      <HugeiconsIcon icon={MinusSignIcon} className="h-4 w-4" />
                     </Button>
                   </div>
-                  
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label>Operation Name</Label>
@@ -610,8 +620,8 @@ export default function NewWorkOrderPage() {
 
                     <div className="space-y-2">
                       <Label>Assigned To</Label>
-                      <Select 
-                        value={operation.assignedTo} 
+                      <Select
+                        value={operation.assignedTo}
                         onValueChange={(value) => updateOperation(operation.id, 'assignedTo', value)}
                       >
                         <SelectTrigger>
@@ -647,10 +657,10 @@ export default function NewWorkOrderPage() {
                   </div>
                 </div>
               ))}
-              
+
               {formData.operations.length === 0 && (
                 <div className="text-center py-8 text-muted-foreground">
-                  <Clock className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                  <HugeiconsIcon icon={Clock01Icon} className="h-12 w-12 mx-auto mb-3 opacity-50" />
                   <p>No operations added yet. Click "Add Operation" to get started.</p>
                 </div>
               )}

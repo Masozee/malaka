@@ -11,6 +11,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { TextField } from "@/components/ui/form-field"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { HugeiconsIcon } from '@hugeicons/react'
+import {
+  Download01Icon,
+  ChartHistogramIcon,
+  ShoppingCart01Icon,
+  AnalyticsUpIcon,
+  UserMultiple02Icon
+} from '@hugeicons/core-free-icons'
 
 import { generateDashboardData, generateRevenueTimeSeries } from "@/lib/dashboard-data"
 import { DashboardResponse, SalesReport, ProductSales, TopCustomer } from "@/types/dashboard"
@@ -22,7 +30,7 @@ export default function SalesReportsPage() {
   const [selectedReport, setSelectedReport] = React.useState("overview")
   const [dateRange, setDateRange] = React.useState("30d")
   const [searchTerm, setSearchTerm] = React.useState("")
-  
+
   // Load dashboard data
   React.useEffect(() => {
     const loadData = async () => {
@@ -46,7 +54,7 @@ export default function SalesReportsPage() {
   if (loading || !dashboardData) {
     return (
       <TwoLevelLayout>
-        <Header 
+        <Header
           title="Sales Reports"
           description="Detailed sales analytics and reporting"
           breadcrumbs={[
@@ -142,11 +150,10 @@ export default function SalesReportsPage() {
       render: (margin: unknown) => {
         const marginPercent = margin as number
         return (
-          <span className={`font-medium ${
-            marginPercent > 30 ? 'text-green-600 dark:text-green-400' :
-            marginPercent > 20 ? 'text-blue-600 dark:text-blue-400' :
-            'text-red-600 dark:text-red-400'
-          }`}>
+          <span className={`font-medium ${marginPercent > 30 ? 'text-green-600 dark:text-green-400' :
+              marginPercent > 20 ? 'text-blue-600 dark:text-blue-400' :
+                'text-red-600 dark:text-red-400'
+            }`}>
             {marginPercent.toFixed(1)}%
           </span>
         )
@@ -160,10 +167,9 @@ export default function SalesReportsPage() {
       render: (growth: unknown) => {
         const growthRate = growth as number
         return (
-          <span className={`font-medium ${
-            growthRate > 0 ? 'text-green-600 dark:text-green-400' :
-            'text-red-600 dark:text-red-400'
-          }`}>
+          <span className={`font-medium ${growthRate > 0 ? 'text-green-600 dark:text-green-400' :
+              'text-red-600 dark:text-red-400'
+            }`}>
             {growthRate > 0 ? '+' : ''}{growthRate.toFixed(1)}%
           </span>
         )
@@ -229,7 +235,7 @@ export default function SalesReportsPage() {
       render: (status: unknown) => {
         const statusStr = status as string
         return (
-          <Badge 
+          <Badge
             variant={statusStr === 'vip' ? 'default' : 'secondary'}
             className="text-xs"
           >
@@ -249,7 +255,7 @@ export default function SalesReportsPage() {
 
   return (
     <TwoLevelLayout>
-      <Header 
+      <Header
         title="Sales Reports"
         description="Detailed sales analytics and reporting"
         breadcrumbs={[
@@ -258,7 +264,7 @@ export default function SalesReportsPage() {
           { label: "Reports" }
         ]}
       />
-      
+
       <div className="flex-1 p-6 space-y-6">
         {/* Report Controls */}
         <div className="flex items-center justify-between">
@@ -289,12 +295,12 @@ export default function SalesReportsPage() {
           </div>
 
           <div className="flex items-center gap-2">
-            <Button 
-              variant="outline" 
-              size="sm" 
+            <Button
+              variant="outline"
+              size="sm"
               onClick={() => handleExport(selectedReport)}
             >
-              <DownloadSimple className="h-4 w-4 mr-2" />
+              <HugeiconsIcon icon={Download01Icon} className="h-4 w-4 mr-2" />
               Export
             </Button>
           </div>
@@ -305,7 +311,7 @@ export default function SalesReportsPage() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-              <ChartBar className="h-4 w-4 text-muted-foreground" />
+              <HugeiconsIcon icon={ChartHistogramIcon} className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-green-600">
@@ -320,7 +326,7 @@ export default function SalesReportsPage() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Orders</CardTitle>
-              <ShoppingCart className="h-4 w-4 text-muted-foreground" />
+              <HugeiconsIcon icon={ShoppingCart01Icon} className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-blue-600">
@@ -335,7 +341,7 @@ export default function SalesReportsPage() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Avg Order Value</CardTitle>
-              <TrendUp className="h-4 w-4 text-muted-foreground" />
+              <HugeiconsIcon icon={AnalyticsUpIcon} className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-purple-600">
@@ -350,7 +356,7 @@ export default function SalesReportsPage() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Active Customers</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
+              <HugeiconsIcon icon={UserMultiple02Icon} className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-orange-600">
@@ -366,12 +372,12 @@ export default function SalesReportsPage() {
         {/* Report Content Based on Selection */}
         {selectedReport === 'overview' && (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <RevenueChart 
+            <RevenueChart
               data={charts.revenue_trend}
               title="Revenue Trend Analysis"
               height={400}
             />
-            <TopProductsChart 
+            <TopProductsChart
               data={tables.top_products}
               title="Top Performing Products"
               height={400}
@@ -409,7 +415,7 @@ export default function SalesReportsPage() {
         {selectedReport === 'trends' && (
           <div className="space-y-6">
             <div className="grid grid-cols-1 gap-6">
-              <RevenueChart 
+              <RevenueChart
                 data={charts.revenue_trend}
                 title="30-Day Revenue Trend"
                 height={400}
@@ -421,7 +427,7 @@ export default function SalesReportsPage() {
                 }))}
               />
             </div>
-            
+
             {/* Trend Analysis Table */}
             <Card>
               <CardHeader>
@@ -438,7 +444,7 @@ export default function SalesReportsPage() {
                       {format(new Date(charts.revenue_trend.find(d => d.value === Math.max(...charts.revenue_trend.map(d => d.value)))?.date || ''), 'MMM dd')}
                     </p>
                   </div>
-                  
+
                   <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
                     <h4 className="font-medium text-blue-800 dark:text-blue-200">Average Daily Revenue</h4>
                     <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
@@ -448,7 +454,7 @@ export default function SalesReportsPage() {
                       Last 30 days
                     </p>
                   </div>
-                  
+
                   <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
                     <h4 className="font-medium text-purple-800 dark:text-purple-200">Growth Rate</h4>
                     <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">
@@ -458,7 +464,7 @@ export default function SalesReportsPage() {
                       Period over period
                     </p>
                   </div>
-                  
+
                   <div className="p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
                     <h4 className="font-medium text-orange-800 dark:text-orange-200">Volatility</h4>
                     <p className="text-2xl font-bold text-orange-600 dark:text-orange-400">

@@ -1,475 +1,299 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { Card } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
+import React, { useState, useEffect, useMemo } from 'react'
+import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { TwoLevelLayout } from '@/components/ui/two-level-layout'
 import { Header } from '@/components/ui/header'
-import { AdvancedDataTable, type AdvancedColumn } from '@/components/ui/advanced-data-table'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Card, CardContent } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Progress } from '@/components/ui/progress'
+import { TanStackDataTable, TanStackColumn } from '@/components/ui/tanstack-data-table'
+import { HugeiconsIcon } from '@hugeicons/react'
+import {
+  Search01Icon,
+  FilterIcon,
+  Download01Icon,
+  PlusSignIcon,
+  EyeIcon,
+  PencilEdit01Icon,
+  MoreVerticalIcon,
+  Calendar01Icon,
+  Delete02Icon
+} from '@hugeicons/core-free-icons'
+import { ProductionService } from '@/services/production'
+import { PurchaseOrder } from '@/types/production'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator
+} from '@/components/ui/dropdown-menu'
 
-import Link from 'next/link'
-import { mockPurchaseOrders, mockWarehouses, mockSuppliers } from '@/services/production'
-import type { PurchaseOrder, PurchaseOrderFilters } from '@/types/production'
+const statusConfig: Record<string, { label: string, color: string }> = {
+  draft: { label: 'Draft', color: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200' },
+  sent: { label: 'Sent', color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-200' },
+  confirmed: { label: 'Confirmed', color: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/40 dark:text-indigo-200' },
+  partial: { label: 'Partial', color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-200' },
+  delivered: { label: 'Delivered', color: 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-200' },
+  cancelled: { label: 'Cancelled', color: 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-200' }
+}
+
+const priorityConfig: Record<string, { label: string, color: string }> = {
+  low: { label: 'Low', color: 'bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300' },
+  normal: { label: 'Normal', color: 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300' },
+  high: { label: 'High', color: 'bg-orange-50 text-orange-700 dark:bg-orange-900/20 dark:text-orange-300' },
+  urgent: { label: 'Urgent', color: 'bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-300' }
+}
 
 export default function PurchaseOrdersPage() {
-  const [mounted, setMounted] = useState(false)
-  const [searchTerm, setSearchTerm] = useState('')
-  const [statusFilter, setStatusFilter] = useState<string>('all')
-  const [supplierFilter, setSupplierFilter] = useState<string>('all')
-  const [priorityFilter, setPriorityFilter] = useState<string>('all')
-  const [warehouseFilter, setWarehouseFilter] = useState<string>('all')
+  const router = useRouter()
+  const [data, setData] = useState<PurchaseOrder[]>([])
+  const [loading, setLoading] = useState(true)
+  const [searchQuery, setSearchQuery] = useState('')
 
   useEffect(() => {
-    setMounted(true)
+    const fetchData = async () => {
+      try {
+        setLoading(true)
+        const response = await ProductionService.getPurchaseOrders()
+        const items = (response.data as any)?.data || (response as any).data || []
+        setData(Array.isArray(items) ? items : [])
+      } catch (error) {
+        console.error('Failed to fetch purchase orders:', error)
+        // Fallback to mock data
+        const { mockPurchaseOrders } = await import('@/services/production')
+        setData(mockPurchaseOrders)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchData()
   }, [])
 
-  const breadcrumbs = [
-    { label: 'Production', href: '/production' },
-    { label: 'Purchase Orders', href: '/production/purchase-orders' }
-  ]
+  const filteredData = useMemo(() => {
+    if (!searchQuery) return data
+    const lower = searchQuery.toLowerCase()
+    return data.filter(item =>
+      item.orderNumber.toLowerCase().includes(lower) ||
+      item.supplier.name.toLowerCase().includes(lower)
+    )
+  }, [data, searchQuery])
 
-  const formatCurrency = (amount?: number): string => {
-    if (!mounted || typeof amount !== 'number' || isNaN(amount)) return ''
-    return `Rp ${amount.toLocaleString('id-ID')}`
-  }
+  // Stats
+  const stats = useMemo(() => {
+    const total = data.length
+    const totalValue = data.reduce((sum, i) => sum + (i.totalAmount || 0), 0)
+    const pending = data.filter(i => ['draft', 'sent', 'confirmed', 'partial'].includes(i.status)).length
+    const delivered = data.filter(i => i.status === 'delivered').length
+    return { total, totalValue, pending, delivered }
+  }, [data])
 
-  const formatDate = (dateString?: string): string => {
-    if (!mounted || !dateString) return ''
-    return new Date(dateString).toLocaleDateString('id-ID')
-  }
-
-  // Filter purchase orders
-  const filteredPurchaseOrders = mockPurchaseOrders.filter(po => {
-    if (searchTerm && !po?.orderNumber?.toLowerCase().includes(searchTerm.toLowerCase()) && 
-        !po?.supplier?.name?.toLowerCase().includes(searchTerm.toLowerCase())) return false
-    if (statusFilter !== 'all' && po?.status !== statusFilter) return false
-    if (supplierFilter !== 'all' && po?.supplierId !== supplierFilter) return false
-    if (priorityFilter !== 'all' && po?.priority !== priorityFilter) return false
-    if (warehouseFilter !== 'all' && po?.warehouseId !== warehouseFilter) return false
-    return true
-  })
-
-  // Get unique values for filters
-  const statuses = Array.from(new Set(mockPurchaseOrders.map(po => po?.status).filter(Boolean)))
-  const priorities = Array.from(new Set(mockPurchaseOrders.map(po => po?.priority).filter(Boolean)))
-
-  const getStatusBadge = (status: PurchaseOrder['status']) => {
-    const statusConfig = {
-      draft: { variant: 'secondary' as const, label: 'Draft', icon: PencilSimple },
-      sent: { variant: 'outline' as const, label: 'Sent', icon: Clock },
-      confirmed: { variant: 'default' as const, label: 'Confirmed', icon: CheckCircle },
-      partial: { variant: 'default' as const, label: 'Partial', icon: Package },
-      delivered: { variant: 'default' as const, label: 'Delivered', icon: Truck },
-      cancelled: { variant: 'destructive' as const, label: 'Cancelled', icon: Warning }
-    }
-    return statusConfig[status] || { variant: 'secondary' as const, label: status, icon: Clock }
-  }
-
-  const getPriorityBadge = (priority: PurchaseOrder['priority']) => {
-    const priorityConfig = {
-      low: { variant: 'secondary' as const, label: 'Low' },
-      normal: { variant: 'outline' as const, label: 'Normal' },
-      high: { variant: 'default' as const, label: 'High' },
-      urgent: { variant: 'destructive' as const, label: 'Urgent' }
-    }
-    return priorityConfig[priority] || { variant: 'secondary' as const, label: priority }
-  }
-
-  // Summary statistics
-  const summaryStats = {
-    total: filteredPurchaseOrders.length,
-    confirmed: filteredPurchaseOrders.filter(po => po?.status === 'confirmed').length,
-    delivered: filteredPurchaseOrders.filter(po => po?.status === 'delivered').length,
-    pending: filteredPurchaseOrders.filter(po => ['draft', 'sent'].includes(po?.status || '')).length,
-    totalValue: filteredPurchaseOrders.reduce((sum, po) => sum + (po?.totalAmount || 0), 0),
-    urgent: filteredPurchaseOrders.filter(po => po?.priority === 'urgent').length
-  }
-
-  const columns: AdvancedColumn<PurchaseOrder>[] = [
+  const columns: TanStackColumn<PurchaseOrder>[] = useMemo(() => [
     {
-      key: 'orderNumber',
-      title: 'Order Number',
-      sortable: true,
-      width: '140px',
-      render: (value: unknown, po: PurchaseOrder) => (
-        <Link 
-          href={`/production/purchase-orders/${po?.id || ''}`}
-          className="font-medium text-blue-600 hover:text-blue-800"
-        >
-          <div>{(value as string) || po?.orderNumber || ''}</div>
-          <div className="text-sm text-muted-foreground">{formatDate(po?.orderDate)}</div>
-        </Link>
-      )
-    },
-    {
-      key: 'supplier',
-      title: 'Supplier',
-      sortable: true,
-      render: (value: unknown, po: PurchaseOrder) => (
-        <div>
-          <div className="font-medium">{po?.supplier?.name || ''}</div>
-          <div className="text-sm text-muted-foreground">{po?.supplier?.code || ''}</div>
+      id: 'info',
+      header: 'Order #',
+      accessorKey: 'orderNumber',
+      cell: ({ row }) => (
+        <div className="flex flex-col">
+          <Link
+            href={`/production/purchase-orders/${row.original.id}`}
+            className="font-bold text-sm text-foreground hover:underline"
+          >
+            {row.original.orderNumber}
+          </Link>
+          <span className="text-[10px] text-muted-foreground">
+            {new Date(row.original.orderDate).toLocaleDateString()}
+          </span>
         </div>
       )
     },
     {
-      key: 'warehouse',
-      title: 'Warehouse',
-      width: '140px',
-      render: (value: unknown, po: PurchaseOrder) => (
-        <div className="flex items-center space-x-2">
-          <Package className="h-4 w-4 text-muted-foreground" />
-          <div>
-            <div className="font-medium">{po?.warehouse?.name || ''}</div>
-            <div className="text-sm text-muted-foreground">{po?.warehouse?.code || ''}</div>
-          </div>
+      id: 'supplier',
+      header: 'Supplier',
+      accessorKey: 'supplier',
+      cell: ({ row }) => (
+        <div className="flex flex-col">
+          <span className="font-medium text-sm text-foreground">{row.original.supplier.name}</span>
+          <span className="text-[10px] text-muted-foreground">{row.original.supplier.code}</span>
         </div>
       )
     },
     {
-      key: 'status',
-      title: 'Status',
-      sortable: true,
-      width: '120px',
-      render: (value: unknown, po: PurchaseOrder) => {
-        if (!po?.status) return ''
-        const { variant, label, icon: Icon } = getStatusBadge(po.status)
+      id: 'expectedDate',
+      header: 'Expected',
+      accessorKey: 'expectedDate',
+      cell: ({ row }) => (
+        <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+          <span>{new Date(row.original.expectedDate).toLocaleDateString()}</span>
+        </div>
+      )
+    },
+    {
+      id: 'amount',
+      header: 'Amount',
+      accessorKey: 'totalAmount',
+      cell: ({ row }) => (
+        <div className="font-medium text-right text-foreground">
+          {row.original.totalAmount.toLocaleString('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 })}
+        </div>
+      )
+    },
+    {
+      id: 'priority',
+      header: 'Priority',
+      accessorKey: 'priority',
+      cell: ({ row }) => {
+        const config = priorityConfig[row.original.priority]
         return (
-          <div className="flex items-center space-x-2">
-            <Icon className="h-4 w-4" />
-            <Badge variant={variant}>{label}</Badge>
-          </div>
+          <Badge className={`${config.color} border-0 capitalize`}>
+            {config.label}
+          </Badge>
         )
       }
     },
     {
-      key: 'priority',
-      title: 'Priority',
-      sortable: true,
-      width: '100px',
-      render: (value: unknown, po: PurchaseOrder) => {
-        if (!po?.priority) return ''
-        const { variant, label } = getPriorityBadge(po.priority)
-        return <Badge variant={variant}>{label}</Badge>
-      }
-    },
-    {
-      key: 'items',
-      title: 'Items',
-      sortable: true,
-      width: '80px',
-      render: (value: unknown, po: PurchaseOrder) => (
-        <div className="text-center">
-          <div className="font-medium">{po?.items?.length || 0}</div>
-          <div className="text-sm text-muted-foreground">items</div>
-        </div>
-      )
-    },
-    {
-      key: 'totalAmount',
-      title: 'Total Amount',
-      sortable: true,
-      width: '120px',
-      render: (value: unknown, po: PurchaseOrder) => (
-        <div className="font-medium text-right">{formatCurrency(po?.totalAmount)}</div>
-      )
-    },
-    {
-      key: 'expectedDate',
-      title: 'Expected Date',
-      sortable: true,
-      width: '120px',
-      render: (value: unknown, po: PurchaseOrder) => {
-        const isOverdue = po?.expectedDate && new Date(po.expectedDate) < new Date() && po.status !== 'delivered'
+      id: 'status',
+      header: 'Status',
+      accessorKey: 'status',
+      cell: ({ row }) => {
+        const config = statusConfig[row.original.status]
         return (
-          <div className={isOverdue ? 'text-red-600' : ''}>
-            <div className="text-sm">{formatDate(po?.expectedDate)}</div>
-            {isOverdue && (
-              <div className="text-xs text-red-600">Overdue</div>
-            )}
-          </div>
+          <Badge className={`${config.color} border-0 capitalize`}>
+            {config.label}
+          </Badge>
         )
       }
     },
     {
-      key: 'progress',
-      title: 'Progress',
-      width: '120px',
-      render: (value: unknown, po: PurchaseOrder) => {
-        const totalQuantity = po?.items?.reduce((sum, item) => sum + item.quantity, 0) || 0
-        const receivedQuantity = po?.items?.reduce((sum, item) => sum + item.receivedQuantity, 0) || 0
-        const progress = totalQuantity > 0 ? (receivedQuantity / totalQuantity) * 100 : 0
-        
-        return (
-          <div className="space-y-1">
-            <div className="flex justify-between text-sm">
-              <span>{receivedQuantity}</span>
-              <span className="text-muted-foreground">/ {totalQuantity}</span>
-            </div>
-            <Progress value={progress} className="h-2" />
-            <div className="text-xs text-muted-foreground">
-              {progress.toFixed(0)}% received
-            </div>
-          </div>
-        )
-      }
-    },
-    {
-      key: 'id',
-      title: 'Actions',
-      width: '100px',
-      render: (_, po: PurchaseOrder) => (
-        <div className="flex items-center space-x-2">
-          <Button variant="ghost" size="sm" asChild>
-            <Link href={`/production/purchase-orders/${po?.id || ''}`}>
-              <Eye className="h-4 w-4" />
-            </Link>
-          </Button>
-          <Button variant="ghost" size="sm" asChild>
-            <Link href={`/production/purchase-orders/${po?.id || ''}/edit`}>
-              <PencilSimple className="h-4 w-4" />
-            </Link>
-          </Button>
+      id: 'actions',
+      header: '',
+      cell: ({ row }) => (
+        <div className="flex justify-end">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" className="h-8 w-8 p-0">
+                <span className="sr-only">Open menu</span>
+                <HugeiconsIcon icon={MoreVerticalIcon} className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => router.push(`/production/purchase-orders/${row.original.id}`)}>
+                <HugeiconsIcon icon={EyeIcon} className="mr-2 h-4 w-4" />
+                View Details
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => router.push(`/production/purchase-orders/${row.original.id}/edit`)}>
+                <HugeiconsIcon icon={PencilEdit01Icon} className="mr-2 h-4 w-4" />
+                Edit Order
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem className="text-red-600 focus:text-red-600" onClick={() => { }}>
+                <HugeiconsIcon icon={Delete02Icon} className="mr-2 h-4 w-4" />
+                Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       )
     }
-  ]
+  ], [router])
 
   return (
     <TwoLevelLayout>
-      <Header 
+      <Header
         title="Purchase Orders"
-        description="Manage procurement and purchase orders from suppliers"
-        breadcrumbs={breadcrumbs}
+        description="Manage procurement and raw material orders"
+        breadcrumbs={[
+          { label: 'Production', href: '/production' },
+          { label: 'Purchase Orders' }
+        ]}
         actions={
-          <div className="flex items-center space-x-3">
-            <Button variant="outline" size="sm">
-              <Calendar className="h-4 w-4 mr-2" />
-              Schedule
-            </Button>
-            <Button variant="outline" size="sm">
-              <DownloadSimple className="h-4 w-4 mr-2" />
-              Export
-            </Button>
-            <Button size="sm" asChild>
-              <Link href="/production/purchase-orders/new">
-                <Plus className="h-4 w-4 mr-2" />
-                New Purchase Order
-              </Link>
-            </Button>
+          <div className="flex gap-2">
+            <Link href="/production/purchase-orders/new">
+              <Button>
+                <HugeiconsIcon icon={PlusSignIcon} className="h-4 w-4 mr-2" />
+                New Order
+              </Button>
+            </Link>
           </div>
         }
       />
 
       <div className="flex-1 p-6 space-y-6">
-        {/* Summary Statistics */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card className="p-4">
-            <div className="flex items-center justify-between">
+        {/* Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <Card>
+            <CardContent className="p-4 flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Total Orders</p>
-                <p className="text-2xl font-bold mt-1">{summaryStats.total}</p>
+                <p className="text-2xl font-bold text-foreground">{stats.total}</p>
               </div>
-              <ShoppingCart className="h-8 w-8 text-blue-600" />
-            </div>
+            </CardContent>
           </Card>
-
-          <Card className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Confirmed</p>
-                <p className="text-2xl font-bold mt-1">{summaryStats.confirmed}</p>
-                <p className="text-sm text-green-600 mt-1">Ready to ship</p>
-              </div>
-              <CheckCircle className="h-8 w-8 text-green-600" />
-            </div>
-          </Card>
-
-          <Card className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Delivered</p>
-                <p className="text-2xl font-bold mt-1">{summaryStats.delivered}</p>
-                <p className="text-sm text-blue-600 mt-1">Completed</p>
-              </div>
-              <Truck className="h-8 w-8 text-purple-600" />
-            </div>
-          </Card>
-
-          <Card className="p-4">
-            <div className="flex items-center justify-between">
+          <Card>
+            <CardContent className="p-4 flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Total Value</p>
-                <p className="text-2xl font-bold mt-1">
-                  {mounted ? `Rp ${(summaryStats.totalValue / 1000000).toFixed(1)}M` : ''}
+                <p className="text-2xl font-bold truncate text-foreground" title={stats.totalValue.toLocaleString()}>
+                  {stats.totalValue > 1000000000
+                    ? `${(stats.totalValue / 1000000000).toFixed(1)}B`
+                    : `${(stats.totalValue / 1000000).toFixed(1)}M`}
                 </p>
-                <p className="text-sm text-green-600 mt-1">This period</p>
               </div>
-              <CurrencyDollar className="h-8 w-8 text-green-600" />
-            </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4 flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Pending</p>
+                <p className="text-2xl font-bold text-yellow-600">{stats.pending}</p>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4 flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Delivered</p>
+                <p className="text-2xl font-bold text-green-600">{stats.delivered}</p>
+              </div>
+            </CardContent>
           </Card>
         </div>
 
         {/* Filters */}
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex-1 max-w-md">
-            <div className="relative">
-              <MagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input 
-                placeholder="Search orders..." 
-                className="pl-9"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
+        <div className="flex items-center justify-end gap-2">
+          <div className="relative">
+            <HugeiconsIcon icon={Search01Icon} className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search orders..."
+              className="pl-9 w-64"
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+            />
           </div>
-          
-          <div className="flex items-center gap-2">
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-40">
-                <CheckCircle className="h-4 w-4 mr-2" />
-                <SelectValue placeholder="All Statuses" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Statuses</SelectItem>
-                {statuses.map((status) => (
-                  <SelectItem key={status} value={status}>{status}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            
-            <Select value={priorityFilter} onValueChange={setPriorityFilter}>
-              <SelectTrigger className="w-36">
-                <Warning className="h-4 w-4 mr-2" />
-                <SelectValue placeholder="Priority" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Priorities</SelectItem>
-                {priorities.map((priority) => (
-                  <SelectItem key={priority} value={priority}>{priority}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            
-            <Select value={supplierFilter} onValueChange={setSupplierFilter}>
-              <SelectTrigger className="w-44">
-                <BuildingOffice className="h-4 w-4 mr-2" />
-                <SelectValue placeholder="All Suppliers" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Suppliers</SelectItem>
-                {mockSuppliers.map((supplier) => (
-                  <SelectItem key={supplier.id} value={supplier.id}>{supplier.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          <Button variant="outline" size="sm">
+            <HugeiconsIcon icon={FilterIcon} className="h-4 w-4 mr-2" />
+            Filters
+          </Button>
+          <Button variant="outline" size="sm">
+            <HugeiconsIcon icon={Download01Icon} className="h-4 w-4 mr-2" />
+            Export
+          </Button>
         </div>
 
-        <AdvancedDataTable
-          data={filteredPurchaseOrders}
+        {/* Table */}
+        <TanStackDataTable
+          data={filteredData}
           columns={columns}
-          searchable={false}
-          filterable={false}
           pagination={{
             pageSize: 10,
-            currentPage: 1,
-            totalPages: Math.ceil(filteredPurchaseOrders.length / 10),
-            totalItems: filteredPurchaseOrders.length,
-            onChange: () => {}
+            pageIndex: 0,
+            totalRows: filteredData.length,
+            onPageChange: () => { }
           }}
         />
-
-        {/* Urgent Orders Alert */}
-        {summaryStats.urgent > 0 && (
-          <Card className="p-6 border-red-200 bg-red-50">
-            <div className="flex items-center space-x-3">
-              <Warning className="h-6 w-6 text-red-600" />
-              <div className="flex-1">
-                <h3 className="text-lg font-semibold text-red-800">Urgent Orders Alert</h3>
-                <p className="text-red-700 mt-1">
-                  {summaryStats.urgent} purchase orders are marked as urgent and require immediate attention.
-                </p>
-              </div>
-              <Button variant="outline" className="border-red-300 text-red-700 hover:bg-red-100">
-                <Warning className="h-4 w-4 mr-2" />
-                Review Urgent Orders
-              </Button>
-            </div>
-          </Card>
-        )}
-
-        {/* Quick Statistics */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card className="p-6">
-            <h3 className="text-lg font-semibold mb-4">Orders by Status</h3>
-            <div className="space-y-3">
-              {statuses.map((status) => {
-                const count = filteredPurchaseOrders.filter(po => po.status === status).length
-                const percentage = filteredPurchaseOrders.length > 0 ? (count / filteredPurchaseOrders.length) * 100 : 0
-                const { variant, label } = getStatusBadge(status as PurchaseOrder['status'])
-                
-                return (
-                  <div key={status} className="space-y-2">
-                    <div className="flex justify-between items-center">
-                      <div className="flex items-center space-x-2">
-                        <Badge variant={variant}>{label}</Badge>
-                        <span className="text-sm text-muted-foreground">({count})</span>
-                      </div>
-                      <span className="text-sm font-medium">{percentage.toFixed(1)}%</span>
-                    </div>
-                    <Progress value={percentage} className="h-2" />
-                  </div>
-                )
-              })}
-            </div>
-          </Card>
-
-          <Card className="p-6">
-            <h3 className="text-lg font-semibold mb-4">Top Suppliers</h3>
-            <div className="space-y-3">
-              {mockPurchaseOrders
-                .reduce((acc, po) => {
-                  const existing = acc.find(item => item.supplierId === po.supplierId)
-                  if (existing) {
-                    existing.count += 1
-                    existing.totalValue += po.totalAmount
-                  } else {
-                    acc.push({
-                      supplierId: po.supplierId,
-                      name: po.supplier.name,
-                      count: 1,
-                      totalValue: po.totalAmount
-                    })
-                  }
-                  return acc
-                }, [] as Array<{supplierId: string, name: string, count: number, totalValue: number}>)
-                .sort((a, b) => b.totalValue - a.totalValue)
-                .slice(0, 5)
-                .map((supplier, index) => (
-                  <div key={supplier.supplierId} className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-sm font-medium">
-                        {index + 1}
-                      </div>
-                      <div>
-                        <p className="font-medium">{supplier.name}</p>
-                        <p className="text-sm text-muted-foreground">{supplier.count} orders</p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-medium">{formatCurrency(supplier.totalValue)}</p>
-                    </div>
-                  </div>
-                ))}
-            </div>
-          </Card>
-        </div>
       </div>
     </TwoLevelLayout>
   )

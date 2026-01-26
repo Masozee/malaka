@@ -1,5 +1,3 @@
-"use client"
-
 import * as React from "react"
 import { TwoLevelLayout } from "@/components/ui/two-level-layout"
 import { Header } from "@/components/ui/header"
@@ -9,6 +7,17 @@ import { TopProductsChart } from "@/components/charts/top-products-chart"
 import { SalesDistributionChart } from "@/components/charts/sales-distribution-chart"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { HugeiconsIcon } from '@hugeicons/react'
+import {
+  Dollar01Icon,
+  ShoppingCart01Icon,
+  AnalyticsUpIcon,
+  UserMultiple02Icon,
+  Target01Icon,
+  Calendar01Icon,
+  Download01Icon,
+  Loading01Icon
+} from '@hugeicons/core-free-icons'
 
 import { generateDashboardData } from "@/lib/dashboard-data"
 import { DashboardResponse } from "@/types/dashboard"
@@ -52,7 +61,7 @@ export default function SalesDashboardPage() {
   if (loading || !dashboardData) {
     return (
       <TwoLevelLayout>
-        <Header 
+        <Header
           title="Sales Dashboard"
           description="Comprehensive overview of sales performance and key metrics"
           breadcrumbs={[
@@ -82,7 +91,7 @@ export default function SalesDashboardPage() {
 
   return (
     <TwoLevelLayout>
-      <Header 
+      <Header
         title="Sales Dashboard"
         description="Comprehensive overview of sales performance and key metrics"
         breadcrumbs={[
@@ -91,7 +100,7 @@ export default function SalesDashboardPage() {
           { label: "Dashboard" }
         ]}
       />
-      
+
       <div className="flex-1 p-6 space-y-6">
         {/* Dashboard Controls */}
         <div className="flex items-center justify-between">
@@ -107,21 +116,21 @@ export default function SalesDashboardPage() {
                 <SelectItem value="1y">Last year</SelectItem>
               </SelectContent>
             </Select>
-            
-            <Button 
-              variant="outline" 
-              size="sm" 
+
+            <Button
+              variant="outline"
+              size="sm"
               onClick={handleRefresh}
               disabled={refreshing}
             >
-              <ArrowsClockwise className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+              <HugeiconsIcon icon={Loading01Icon} className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
               Refresh
             </Button>
           </div>
 
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" onClick={handleExport}>
-              <DownloadSimple className="h-4 w-4 mr-2" />
+              <HugeiconsIcon icon={Download01Icon} className="h-4 w-4 mr-2" />
               Export
             </Button>
           </div>
@@ -129,42 +138,42 @@ export default function SalesDashboardPage() {
 
         {/* KPI Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6 gap-4">
-          <KPICard 
-            metric={metrics.total_revenue} 
-            icon={<CurrencyDollar className="h-5 w-5 text-green-600" />}
+          <KPICard
+            metric={metrics.total_revenue}
+            icon={<HugeiconsIcon icon={Dollar01Icon} className="h-5 w-5 text-green-600" />}
             showTarget={true}
           />
-          <KPICard 
-            metric={metrics.total_orders} 
-            icon={<ShoppingCart className="h-5 w-5 text-blue-600" />}
+          <KPICard
+            metric={metrics.total_orders}
+            icon={<HugeiconsIcon icon={ShoppingCart01Icon} className="h-5 w-5 text-blue-600" />}
           />
-          <KPICard 
-            metric={metrics.average_order_value} 
-            icon={<TrendUp className="h-5 w-5 text-purple-600" />}
+          <KPICard
+            metric={metrics.average_order_value}
+            icon={<HugeiconsIcon icon={AnalyticsUpIcon} className="h-5 w-5 text-purple-600" />}
             showTarget={true}
           />
-          <KPICard 
-            metric={metrics.customer_count} 
-            icon={<Users className="h-5 w-5 text-orange-600" />}
+          <KPICard
+            metric={metrics.customer_count}
+            icon={<HugeiconsIcon icon={UserMultiple02Icon} className="h-5 w-5 text-orange-600" />}
           />
-          <KPICard 
-            metric={metrics.conversion_rate} 
-            icon={<Target className="h-5 w-5 text-pink-600" />}
+          <KPICard
+            metric={metrics.conversion_rate}
+            icon={<HugeiconsIcon icon={Target01Icon} className="h-5 w-5 text-pink-600" />}
           />
-          <KPICard 
-            metric={metrics.gross_margin} 
-            icon={<Calendar className="h-5 w-5 text-teal-600" />}
+          <KPICard
+            metric={metrics.gross_margin}
+            icon={<HugeiconsIcon icon={Calendar01Icon} className="h-5 w-5 text-teal-600" />}
           />
         </div>
 
         {/* Main Charts Row */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <RevenueChart 
+          <RevenueChart
             data={charts.revenue_trend}
             title="Revenue Trend (Last 30 Days)"
             height={400}
           />
-          <TopProductsChart 
+          <TopProductsChart
             data={tables.top_products}
             title="Top Products by Revenue"
             height={400}
@@ -174,12 +183,12 @@ export default function SalesDashboardPage() {
 
         {/* Secondary Charts Row */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <SalesDistributionChart 
+          <SalesDistributionChart
             data={tables.category_performance}
             title="Sales Distribution by Category"
             height={400}
           />
-          
+
           {/* Customer Performance Table */}
           <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
@@ -227,11 +236,10 @@ export default function SalesDashboardPage() {
                   <h4 className="font-medium text-gray-900 dark:text-gray-100">
                     {region.region_name}
                   </h4>
-                  <span className={`text-sm font-medium ${
-                    region.growth_rate > 0 
-                      ? 'text-green-600 dark:text-green-400' 
+                  <span className={`text-sm font-medium ${region.growth_rate > 0
+                      ? 'text-green-600 dark:text-green-400'
                       : 'text-red-600 dark:text-red-400'
-                  }`}>
+                    }`}>
                     {region.growth_rate > 0 ? '+' : ''}{region.growth_rate.toFixed(1)}%
                   </span>
                 </div>
@@ -290,13 +298,12 @@ export default function SalesDashboardPage() {
                       ${(rep.target / 1000).toFixed(0)}K
                     </td>
                     <td className="py-3 px-4 text-right">
-                      <span className={`font-medium ${
-                        rep.achievement_percentage >= 100 
-                          ? 'text-green-600 dark:text-green-400' 
-                          : rep.achievement_percentage >= 80 
-                          ? 'text-blue-600 dark:text-blue-400'
-                          : 'text-red-600 dark:text-red-400'
-                      }`}>
+                      <span className={`font-medium ${rep.achievement_percentage >= 100
+                          ? 'text-green-600 dark:text-green-400'
+                          : rep.achievement_percentage >= 80
+                            ? 'text-blue-600 dark:text-blue-400'
+                            : 'text-red-600 dark:text-red-400'
+                        }`}>
                         {rep.achievement_percentage.toFixed(0)}%
                       </span>
                     </td>

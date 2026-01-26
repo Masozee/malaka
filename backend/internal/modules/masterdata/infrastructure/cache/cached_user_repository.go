@@ -76,6 +76,15 @@ func (r *CachedUserRepository) GetByUsername(ctx context.Context, username strin
 	return r.repo.GetByUsername(ctx, username)
 }
 
+// GetByEmail retrieves a user by email.
+// NOTE: This method bypasses cache because it's used for authentication
+// and the password field is excluded from JSON serialization (json:"-").
+// Caching would result in empty passwords and failed login attempts.
+func (r *CachedUserRepository) GetByEmail(ctx context.Context, email string) (*entities.User, error) {
+	// Always fetch from database to get the password hash for authentication
+	return r.repo.GetByEmail(ctx, email)
+}
+
 // GetAll retrieves all users with caching.
 func (r *CachedUserRepository) GetAll(ctx context.Context) ([]*entities.User, error) {
 	// Try to get from cache first

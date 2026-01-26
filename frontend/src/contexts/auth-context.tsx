@@ -16,7 +16,7 @@ interface AuthContextType {
   user: User | null
   isAuthenticated: boolean
   isLoading: boolean
-  login: (username: string, password: string) => Promise<void>
+  login: (email: string, password: string) => Promise<void>
   logout: () => void
   checkAuth: () => Promise<boolean>
   refreshSession: () => Promise<boolean>
@@ -92,28 +92,28 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   }
 
-  const login = async (username: string, password: string) => {
+  const login = async (email: string, password: string) => {
     try {
       setIsLoading(true)
-      const response = await authService.login({ username, password })
-      
+      const response = await authService.login({ email, password })
+
       // Set user immediately after successful login without additional API call
       const token = authService.getToken()
       if (token) {
         try {
           const payload = JSON.parse(atob(token.split('.')[1]))
           console.log('Login token payload:', payload) // Debug log
-          
+
           const userData = {
             id: payload.sub || payload.user_id || payload.id || 'unknown',
-            username: payload.username || payload.name || payload.preferred_username || username,
-            email: payload.email || `${username}@malaka.com`,
+            username: payload.username || payload.name || payload.preferred_username || email.split('@')[0],
+            email: payload.email || email,
             role: payload.role || payload.roles?.[0] || 'user'
           }
-          
+
           console.log('Setting user data after login:', userData) // Debug log
           setUser(userData)
-          
+
           // Clear auth attempt cookie on successful login
           if (typeof window !== 'undefined') {
             document.cookie = 'auth_attempted=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'
@@ -123,7 +123,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           await checkAuth()
         }
       }
-      
+
       return response
     } catch (error) {
       setUser(null)

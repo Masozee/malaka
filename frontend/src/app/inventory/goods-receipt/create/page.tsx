@@ -11,7 +11,14 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { HugeiconsIcon } from '@hugeicons/react';
-import { Package01Icon, Calendar01Icon, UserIcon, FileIcon, ArrowLeft01Icon, FloppyDiskIcon } from '@hugeicons/core-free-icons';
+import {
+  PackageIcon,
+  Calendar01Icon,
+  UserIcon,
+  File01Icon,
+  ArrowLeft01Icon,
+  FloppyDiskIcon
+} from '@hugeicons/core-free-icons';
 import { goodsReceiptService } from '@/services/inventory';
 
 interface GoodsReceiptFormData {
@@ -104,7 +111,7 @@ export default function CreateGoodsReceiptPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.purchase_order_id || !formData.warehouse_id) {
       alert('Please fill in all required fields');
       return;
@@ -112,7 +119,7 @@ export default function CreateGoodsReceiptPage() {
 
     try {
       setLoading(true);
-      
+
       const submitData = {
         purchase_order_id: formData.purchase_order_id,
         warehouse_id: formData.warehouse_id
@@ -120,8 +127,9 @@ export default function CreateGoodsReceiptPage() {
 
       console.log('Creating goods receipt with data:', submitData);
       await goodsReceiptService.create(submitData);
-      
-      alert('Goods receipt created successfully!');
+
+      // Navigate using text/toast instead of alert in production
+      // alert('Goods receipt created successfully!'); 
       router.push('/inventory/goods-receipt');
     } catch (error) {
       console.error('Error creating goods receipt:', error);
@@ -140,7 +148,7 @@ export default function CreateGoodsReceiptPage() {
 
   return (
     <TwoLevelLayout>
-      <Header 
+      <Header
         title="Create Goods Receipt"
         description="Record a new goods receipt from supplier delivery"
         breadcrumbs={[
@@ -149,14 +157,14 @@ export default function CreateGoodsReceiptPage() {
           { label: "Create" }
         ]}
       />
-      
+
       <div className="flex-1 p-6">
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Basic Information */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <HugeiconsIcon icon={Package01Icon} className="w-5 h-5" />
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <HugeiconsIcon icon={PackageIcon} className="w-5 h-5 text-gray-500" />
                 Receipt Information
               </CardTitle>
             </CardHeader>
@@ -166,8 +174,8 @@ export default function CreateGoodsReceiptPage() {
                   <Label htmlFor="purchase_order_id">
                     Purchase Order <span className="text-red-500">*</span>
                   </Label>
-                  <Select 
-                    value={formData.purchase_order_id} 
+                  <Select
+                    value={formData.purchase_order_id}
                     onValueChange={(value) => handleInputChange('purchase_order_id', value)}
                   >
                     <SelectTrigger>
@@ -176,14 +184,14 @@ export default function CreateGoodsReceiptPage() {
                     <SelectContent>
                       {mounted && purchaseOrders.map((po) => (
                         <SelectItem key={po.id} value={po.id}>
-                          {po.supplier_name} - {mounted ? new Date(po.order_date).toLocaleDateString('id-ID') : ''} 
+                          {po.supplier_name} - {mounted ? new Date(po.order_date).toLocaleDateString('id-ID') : ''}
                           ({mounted ? `Rp ${po.total_amount.toLocaleString('id-ID')}` : ''})
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                   {selectedPO && (
-                    <div className="text-sm text-gray-600 dark:text-gray-400">
+                    <div className="text-sm text-muted-foreground mt-1">
                       Supplier: {selectedPO.supplier_name} • Status: {selectedPO.status}
                     </div>
                   )}
@@ -193,8 +201,8 @@ export default function CreateGoodsReceiptPage() {
                   <Label htmlFor="warehouse_id">
                     Warehouse <span className="text-red-500">*</span>
                   </Label>
-                  <Select 
-                    value={formData.warehouse_id} 
+                  <Select
+                    value={formData.warehouse_id}
                     onValueChange={(value) => handleInputChange('warehouse_id', value)}
                   >
                     <SelectTrigger>
@@ -209,7 +217,7 @@ export default function CreateGoodsReceiptPage() {
                     </SelectContent>
                   </Select>
                   {selectedWarehouse && (
-                    <div className="text-sm text-gray-600 dark:text-gray-400">
+                    <div className="text-sm text-gray-500 mt-1">
                       {selectedWarehouse.address}
                     </div>
                   )}
@@ -217,7 +225,7 @@ export default function CreateGoodsReceiptPage() {
 
                 <div className="space-y-2">
                   <Label htmlFor="receipt_date" className="flex items-center gap-2">
-                    <HugeiconsIcon icon={Calendar01Icon} className="w-4 h-4" />
+                    <HugeiconsIcon icon={Calendar01Icon} className="w-4 h-4 text-gray-500" />
                     Receipt Date
                   </Label>
                   <Input
@@ -231,7 +239,7 @@ export default function CreateGoodsReceiptPage() {
 
                 <div className="space-y-2">
                   <Label htmlFor="received_by" className="flex items-center gap-2">
-                    <HugeiconsIcon icon={UserIcon} className="w-4 h-4" />
+                    <HugeiconsIcon icon={UserIcon} className="w-4 h-4 text-gray-500" />
                     Received By
                   </Label>
                   <Input
@@ -246,7 +254,7 @@ export default function CreateGoodsReceiptPage() {
 
                 <div className="md:col-span-2 space-y-2">
                   <Label htmlFor="notes" className="flex items-center gap-2">
-                    <HugeiconsIcon icon={FileIcon} className="w-4 h-4" />
+                    <HugeiconsIcon icon={File01Icon} className="w-4 h-4 text-gray-500" />
                     Notes
                   </Label>
                   <Textarea
@@ -254,7 +262,7 @@ export default function CreateGoodsReceiptPage() {
                     placeholder="Enter any additional notes or comments..."
                     value={formData.notes}
                     onChange={(e) => handleInputChange('notes', e.target.value)}
-                    className="w-full"
+                    className="w-full min-h-[80px]"
                     rows={3}
                   />
                 </div>
@@ -266,34 +274,34 @@ export default function CreateGoodsReceiptPage() {
           {(formData.purchase_order_id || formData.warehouse_id) && (
             <Card>
               <CardHeader>
-                <CardTitle>Receipt Preview</CardTitle>
+                <CardTitle className="text-lg">Receipt Preview</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                   {selectedPO && (
-                    <div className="space-y-1">
-                      <div className="font-medium text-gray-900 dark:text-gray-100">Purchase Order Details</div>
-                      <div className="text-gray-600 dark:text-gray-400">
+                    <div className="space-y-1 p-4 bg-muted rounded-lg">
+                      <div className="font-semibold text-foreground">Purchase Order Details</div>
+                      <div className="text-muted-foreground">
                         Supplier: {selectedPO.supplier_name}
                       </div>
-                      <div className="text-gray-600 dark:text-gray-400">
+                      <div className="text-muted-foreground">
                         Order Date: {mounted ? new Date(selectedPO.order_date).toLocaleDateString('id-ID') : ''}
                       </div>
-                      <div className="text-gray-600 dark:text-gray-400">
+                      <div className="text-muted-foreground">
                         Amount: {mounted ? `Rp ${selectedPO.total_amount.toLocaleString('id-ID')}` : ''}
                       </div>
-                      <div className="text-gray-600 dark:text-gray-400">
+                      <div className="text-muted-foreground">
                         Status: <span className="capitalize">{selectedPO.status}</span>
                       </div>
                     </div>
                   )}
                   {selectedWarehouse && (
-                    <div className="space-y-1">
-                      <div className="font-medium text-gray-900 dark:text-gray-100">Warehouse Details</div>
-                      <div className="text-gray-600 dark:text-gray-400">
+                    <div className="space-y-1 p-4 bg-muted rounded-lg">
+                      <div className="font-semibold text-foreground">Warehouse Details</div>
+                      <div className="text-muted-foreground">
                         Name: {selectedWarehouse.name}
                       </div>
-                      <div className="text-gray-600 dark:text-gray-400">
+                      <div className="text-muted-foreground">
                         Address: {selectedWarehouse.address}
                       </div>
                     </div>
@@ -304,18 +312,18 @@ export default function CreateGoodsReceiptPage() {
           )}
 
           {/* Form Actions */}
-          <div className="flex justify-end gap-4">
-            <Button 
-              type="button" 
-              variant="outline" 
+          <div className="flex justify-end gap-3">
+            <Button
+              type="button"
+              variant="outline"
               onClick={handleCancel}
               disabled={loading}
             >
               <HugeiconsIcon icon={ArrowLeft01Icon} className="w-4 h-4 mr-2" />
               Cancel
             </Button>
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               disabled={loading || !formData.purchase_order_id || !formData.warehouse_id}
             >
               {loading ? (

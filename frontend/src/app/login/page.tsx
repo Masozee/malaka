@@ -7,7 +7,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 
 export default function LoginPage() {
-  const [username, setUsername] = useState('')
+  const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
@@ -27,12 +27,12 @@ export default function LoginPage() {
     setError(null)
 
     try {
-      await login(username, password)
+      await login(email, password)
       // Immediate redirect without waiting
       const redirectUrl = searchParams.get('redirect') || '/dashboard'
       window.location.href = redirectUrl // Use window.location for instant redirect
     } catch (err) {
-      setError('Invalid username or password')
+      setError('Invalid email or password')
       console.error('Login failed:', err)
     }
   }
@@ -94,19 +94,19 @@ export default function LoginPage() {
           {/* Login Form */}
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div>
-              <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-2">
-                Username
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                Email
               </label>
               <input
-                id="username"
-                name="username"
-                type="text"
+                id="email"
+                name="email"
+                type="email"
                 required
-                autoComplete="username"
+                autoComplete="email"
                 className="w-full px-4 py-3 border border-gray-200 focus:border-[#09f] focus:outline-none transition-colors"
-                placeholder="Enter your username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                placeholder="Enter your email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
               />
             </div>
 
