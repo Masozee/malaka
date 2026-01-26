@@ -419,26 +419,27 @@ export default function POSPage() {
 
   return (
     <TwoLevelLayout>
-      <div className="flex-1 space-y-6">
-        <Header
-          title="Point of Sale (POS)"
-          description="Manage retail transactions and sales"
-          breadcrumbs={breadcrumbs}
-          actions={
-            <div className="flex items-center space-x-3">
-              <Button variant="outline" size="sm">
-                <HugeiconsIcon icon={Download01Icon} className="h-4 w-4 mr-2" />
-                Export
-              </Button>
-              <Button size="sm" asChild>
-                <Link href="/sales/pos/new">
-                  <HugeiconsIcon icon={PlusSignIcon} className="h-4 w-4 mr-2" />
-                  New Sale
-                </Link>
-              </Button>
-            </div>
-          }
-        />
+      <Header
+        title="Point of Sale (POS)"
+        description="Manage retail transactions and sales"
+        breadcrumbs={breadcrumbs}
+        actions={
+          <div className="flex items-center space-x-3">
+            <Button variant="outline" size="sm">
+              <HugeiconsIcon icon={Download01Icon} className="h-4 w-4 mr-2" />
+              Export
+            </Button>
+            <Button size="sm" asChild>
+              <Link href="/sales/pos/new">
+                <HugeiconsIcon icon={PlusSignIcon} className="h-4 w-4 mr-2" />
+                New Sale
+              </Link>
+            </Button>
+          </div>
+        }
+      />
+
+      <div className="flex-1 overflow-auto p-6 space-y-6">
 
         {/* Summary Statistics */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
