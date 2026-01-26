@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { TwoLevelLayout } from '@/components/ui/two-level-layout'
 import { Header } from '@/components/ui/header'
-import { AdvancedDataTable } from '@/components/ui/advanced-data-table'
+import { TanStackDataTable, TanStackColumn } from '@/components/ui/tanstack-data-table'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -297,9 +297,24 @@ const mockCouriers: Courier[] = [
   }
 ]
 
+import { HugeiconsIcon } from '@hugeicons/react'
+import {
+  DeliveryTruck01Icon,
+  CheckmarkCircle01Icon,
+  AlertCircleIcon,
+  StarIcon,
+  Globe02Icon,
+  FilterHorizontalIcon,
+  Search01Icon,
+  Call02Icon,
+  ViewIcon,
+  PencilEdit01Icon,
+  Download01Icon,
+  Add01Icon
+} from '@hugeicons/core-free-icons'
+
 export default function CouriersPage() {
   const [mounted, setMounted] = useState(false)
-  const [activeView, setActiveView] = useState<'cards' | 'table'>('cards')
   const [searchTerm, setSearchTerm] = useState('')
   const [serviceTypeFilter, setServiceTypeFilter] = useState<string>('all')
   const [coverageFilter, setCoverageFilter] = useState<string>('all')
@@ -314,11 +329,6 @@ export default function CouriersPage() {
     return `Rp ${amount.toLocaleString('id-ID')}`
   }
 
-  const formatDate = (dateString?: string): string => {
-    if (!mounted || !dateString) return ''
-    return new Date(dateString).toLocaleDateString('id-ID')
-  }
-
   const breadcrumbs = [
     { label: 'Shipping', href: '/shipping' },
     { label: 'Couriers', href: '/shipping/couriers' }
@@ -326,9 +336,9 @@ export default function CouriersPage() {
 
   // Filter couriers
   const filteredCouriers = mockCouriers.filter(courier => {
-    if (searchTerm && !courier.courier_name.toLowerCase().includes(searchTerm.toLowerCase()) && 
-        !courier.company_name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-        !courier.courier_code.toLowerCase().includes(searchTerm.toLowerCase())) return false
+    if (searchTerm && !courier.courier_name.toLowerCase().includes(searchTerm.toLowerCase()) &&
+      !courier.company_name.toLowerCase().includes(searchTerm.toLowerCase()) &&
+      !courier.courier_code.toLowerCase().includes(searchTerm.toLowerCase())) return false
     if (serviceTypeFilter !== 'all' && courier.service_type !== serviceTypeFilter) return false
     if (coverageFilter !== 'all' && courier.coverage_area !== coverageFilter) return false
     if (statusFilter !== 'all') {
@@ -347,9 +357,9 @@ export default function CouriersPage() {
     preferredCouriers: mockCouriers.filter(c => c.is_preferred).length,
     apiIntegrated: mockCouriers.filter(c => c.api_integration).length,
     totalShipments: mockCouriers.reduce((sum, c) => sum + c.total_shipments, 0),
-    avgDeliveryTime: mockCouriers.length > 0 ? 
+    avgDeliveryTime: mockCouriers.length > 0 ?
       mockCouriers.reduce((sum, c) => sum + c.avg_delivery_days, 0) / mockCouriers.length : 0,
-    avgOnTimeDelivery: mockCouriers.length > 0 ? 
+    avgOnTimeDelivery: mockCouriers.length > 0 ?
       mockCouriers.reduce((sum, c) => sum + c.on_time_delivery, 0) / mockCouriers.length : 0
   }
 
@@ -374,138 +384,143 @@ export default function CouriersPage() {
   }
 
   const getStatusBadge = (isActive: boolean) => {
-    return isActive 
-      ? { variant: 'default' as const, label: 'Active', icon: CheckCircle }
-      : { variant: 'destructive' as const, label: 'Inactive', icon: WarningCircle }
+    return isActive
+      ? { variant: 'default' as const, label: 'Active', icon: CheckmarkCircle01Icon }
+      : { variant: 'destructive' as const, label: 'Inactive', icon: AlertCircleIcon }
   }
 
   const getRatingStars = (rating: number) => {
     return Array.from({ length: 5 }, (_, i) => (
-      <Star 
-        key={i} 
-        className={`h-3 w-3 ${i < Math.floor(rating) ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} 
+      <HugeiconsIcon
+        icon={StarIcon}
+        key={i}
+        className={`h-3 w-3 ${i < Math.floor(rating) ? 'text-yellow-400 fill-current' : 'text-gray-300'}`}
       />
     ))
   }
 
-  const columns = [
+  const columns: TanStackColumn<Courier>[] = [
     {
-      key: 'courier_code',
-      title: 'Code',
-      render: (courier: Courier) => (
-        <Link 
-          href={`/shipping/couriers/${courier.id}`}
+      id: 'courier_code',
+      header: 'Code',
+      accessorKey: 'courier_code',
+      cell: ({ row }) => (
+        <Link
+          href={`/shipping/couriers/${row.original.id}`}
           className="font-medium text-blue-600 hover:text-blue-800"
         >
-          {courier.courier_code}
+          {row.original.courier_code}
         </Link>
       )
     },
     {
-      key: 'courier_info',
-      title: 'Courier Info',
-      render: (courier: Courier) => (
+      id: 'courier_info',
+      header: 'Courier Info',
+      accessorKey: 'courier_name',
+      cell: ({ row }) => (
         <div className="flex items-center space-x-2">
-          {courier.is_preferred && <Star className="h-4 w-4 text-yellow-400 fill-current" />}
+          {row.original.is_preferred && <HugeiconsIcon icon={StarIcon} className="h-4 w-4 text-yellow-400 fill-current" />}
           <div>
-            <div className="font-medium">{courier.courier_name}</div>
-            <div className="text-sm text-muted-foreground">{courier.company_name}</div>
+            <div className="font-medium">{row.original.courier_name}</div>
+            <div className="text-sm text-muted-foreground">{row.original.company_name}</div>
           </div>
         </div>
       )
     },
     {
-      key: 'service_type',
-      title: 'Service Type',
-      render: (courier: Courier) => {
-        const { variant, label } = getServiceTypeBadge(courier.service_type)
+      id: 'service_type',
+      header: 'Service Type',
+      accessorKey: 'service_type',
+      cell: ({ row }) => {
+        const { variant, label } = getServiceTypeBadge(row.original.service_type)
         return <Badge variant={variant}>{label}</Badge>
       }
     },
     {
-      key: 'coverage_area',
-      title: 'Coverage',
-      render: (courier: Courier) => {
-        const { variant, label } = getCoverageBadge(courier.coverage_area)
+      id: 'coverage_area',
+      header: 'Coverage',
+      accessorKey: 'coverage_area',
+      cell: ({ row }) => {
+        const { variant, label } = getCoverageBadge(row.original.coverage_area)
         return <Badge variant={variant}>{label}</Badge>
       }
     },
     {
-      key: 'contact_info',
-      title: 'Contact',
-      render: (courier: Courier) => (
+      id: 'contact_info',
+      header: 'Contact',
+      accessorKey: 'contact_person',
+      cell: ({ row }) => (
         <div>
-          <div className="font-medium">{courier.contact_person}</div>
-          <div className="text-sm text-muted-foreground flex items-center space-x-1">
-            <Phone className="h-3 w-3" />
-            <span>{courier.phone}</span>
+          <div className="font-medium">{row.original.contact_person}</div>
+          <div className="text-sm text-muted-foreground">
+            {row.original.phone}
           </div>
         </div>
       )
     },
     {
-      key: 'features',
-      title: 'Features',
-      render: (courier: Courier) => (
+      id: 'features',
+      header: 'Features',
+      cell: ({ row }) => (
         <div className="flex flex-wrap gap-1">
-          {courier.api_integration && <Badge variant="outline" className="text-xs">API</Badge>}
-          {courier.tracking_available && <Badge variant="outline" className="text-xs">Track</Badge>}
-          {courier.cod_available && <Badge variant="outline" className="text-xs">COD</Badge>}
-          {courier.insurance_available && <Badge variant="outline" className="text-xs">Insurance</Badge>}
+          {row.original.api_integration && <Badge variant="outline" className="text-xs">API</Badge>}
+          {row.original.tracking_available && <Badge variant="outline" className="text-xs">Track</Badge>}
+          {row.original.cod_available && <Badge variant="outline" className="text-xs">COD</Badge>}
+          {row.original.insurance_available && <Badge variant="outline" className="text-xs">Insurance</Badge>}
         </div>
       )
     },
     {
-      key: 'rates',
-      title: 'Rates',
-      render: (courier: Courier) => (
+      id: 'rates',
+      header: 'Rates',
+      accessorKey: 'base_rate',
+      cell: ({ row }) => (
         <div className="text-sm">
-          <div>Base: {formatCurrency(courier.base_rate)}</div>
-          <div className="text-muted-foreground">Per kg: {formatCurrency(courier.rate_per_kg)}</div>
+          <div>Base: {formatCurrency(row.original.base_rate)}</div>
+          <div className="text-muted-foreground">Per kg: {formatCurrency(row.original.rate_per_kg)}</div>
         </div>
       )
     },
     {
-      key: 'performance',
-      title: 'Performance',
-      render: (courier: Courier) => (
+      id: 'performance',
+      header: 'Performance',
+      accessorKey: 'customer_rating',
+      cell: ({ row }) => (
         <div className="text-sm">
           <div className="flex items-center space-x-1">
             <div className="flex space-x-0.5">
-              {getRatingStars(courier.customer_rating)}
+              {getRatingStars(row.original.customer_rating)}
             </div>
-            <span className="font-medium">{courier.customer_rating.toFixed(1)}</span>
+            <span className="font-medium">{row.original.customer_rating.toFixed(1)}</span>
           </div>
-          <div className="text-muted-foreground">{courier.on_time_delivery.toFixed(1)}% on-time</div>
+          <div className="text-muted-foreground">{row.original.on_time_delivery.toFixed(1)}% on-time</div>
         </div>
       )
     },
     {
-      key: 'status',
-      title: 'Status',
-      render: (courier: Courier) => {
-        const { variant, label, icon: Icon } = getStatusBadge(courier.is_active)
+      id: 'status',
+      header: 'Status',
+      accessorKey: 'is_active',
+      cell: ({ row }) => {
+        const { variant, label } = getStatusBadge(row.original.is_active)
         return (
-          <div className="flex items-center space-x-2">
-            <Icon className="h-4 w-4" />
-            <Badge variant={variant}>{label}</Badge>
-          </div>
+          <Badge variant={variant}>{label}</Badge>
         )
       }
     },
     {
-      key: 'actions',
-      title: 'Actions',
-      render: (courier: Courier) => (
+      id: 'actions',
+      header: 'Actions',
+      cell: ({ row }) => (
         <div className="flex items-center space-x-2">
           <Button variant="ghost" size="sm" asChild>
-            <Link href={`/shipping/couriers/${courier.id}`}>
-              <Eye className="h-4 w-4" />
+            <Link href={`/shipping/couriers/${row.original.id}`}>
+              <HugeiconsIcon icon={ViewIcon} className="h-4 w-4" />
             </Link>
           </Button>
           <Button variant="ghost" size="sm" asChild>
-            <Link href={`/shipping/couriers/${courier.id}/edit`}>
-              <PencilSimple className="h-4 w-4" />
+            <Link href={`/shipping/couriers/${row.original.id}/edit`}>
+              <HugeiconsIcon icon={PencilEdit01Icon} className="h-4 w-4" />
             </Link>
           </Button>
         </div>
@@ -516,19 +531,15 @@ export default function CouriersPage() {
   return (
     <TwoLevelLayout>
       <div className="flex-1 space-y-6">
-        <Header 
+        <Header
           title="Courier Management"
           description="Manage shipping couriers and delivery partners"
           breadcrumbs={breadcrumbs}
           actions={
             <div className="flex items-center space-x-3">
-              <Button variant="outline" size="sm">
-                <DownloadSimple className="h-4 w-4 mr-2" />
-                Export
-              </Button>
               <Button size="sm" asChild>
                 <Link href="/shipping/couriers/new">
-                  <Plus className="h-4 w-4 mr-2" />
+                  <HugeiconsIcon icon={Add01Icon} className="h-4 w-4 mr-2" />
                   Add Courier
                 </Link>
               </Button>
@@ -545,7 +556,7 @@ export default function CouriersPage() {
                 <p className="text-2xl font-bold mt-1">{summaryStats.totalCouriers}</p>
                 <p className="text-sm text-blue-600 mt-1">Partners</p>
               </div>
-              <Truck className="h-8 w-8 text-blue-600" />
+              <HugeiconsIcon icon={DeliveryTruck01Icon} className="h-8 w-8 text-blue-600" />
             </div>
           </Card>
 
@@ -556,7 +567,7 @@ export default function CouriersPage() {
                 <p className="text-2xl font-bold mt-1 text-green-600">{summaryStats.activeCouriers}</p>
                 <p className="text-sm text-green-600 mt-1">Available</p>
               </div>
-              <CheckCircle className="h-8 w-8 text-green-600" />
+              <HugeiconsIcon icon={CheckmarkCircle01Icon} className="h-8 w-8 text-green-600" />
             </div>
           </Card>
 
@@ -567,7 +578,7 @@ export default function CouriersPage() {
                 <p className="text-2xl font-bold mt-1 text-yellow-600">{summaryStats.preferredCouriers}</p>
                 <p className="text-sm text-yellow-600 mt-1">Partners</p>
               </div>
-              <Star className="h-8 w-8 text-yellow-600" />
+              <HugeiconsIcon icon={StarIcon} className="h-8 w-8 text-yellow-600" />
             </div>
           </Card>
 
@@ -578,7 +589,7 @@ export default function CouriersPage() {
                 <p className="text-2xl font-bold mt-1 text-purple-600">{summaryStats.apiIntegrated}</p>
                 <p className="text-sm text-purple-600 mt-1">Connected</p>
               </div>
-              <Globe className="h-8 w-8 text-purple-600" />
+              <HugeiconsIcon icon={Globe02Icon} className="h-8 w-8 text-purple-600" />
             </div>
           </Card>
 
@@ -587,12 +598,12 @@ export default function CouriersPage() {
         {/* Filters */}
         <Card className="p-4">
           <div className="flex items-center space-x-4">
-            <Funnel className="h-5 w-5 text-muted-foreground" />
+            <HugeiconsIcon icon={FilterHorizontalIcon} className="h-5 w-5 text-muted-foreground" />
             <div className="grid grid-cols-1 md:grid-cols-4 gap-3 flex-1">
               <div className="space-y-2">
                 <Label htmlFor="search">Search</Label>
                 <div className="relative">
-                  <MagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <HugeiconsIcon icon={Search01Icon} className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="search"
                     placeholder="Search couriers..."
@@ -651,169 +662,40 @@ export default function CouriersPage() {
                 </Select>
               </div>
             </div>
+
+            <div className="flex items-end space-x-2 pt-8">
+              <Button variant="outline" size="sm">
+                <HugeiconsIcon icon={Download01Icon} className="h-4 w-4 mr-2" />
+                Export
+              </Button>
+            </div>
           </div>
         </Card>
 
-        {/* View Toggle */}
-        <div className="flex justify-between items-center">
-          <div className="flex space-x-1 bg-muted p-1 rounded-lg">
-            <Button
-              variant={activeView === 'cards' ? 'default' : 'ghost'}
-              size="sm"
-              onClick={() => setActiveView('cards')}
-            >
-              Cards
-            </Button>
-            <Button
-              variant={activeView === 'table' ? 'default' : 'ghost'}
-              size="sm"
-              onClick={() => setActiveView('table')}
-            >
-              Table
-            </Button>
-          </div>
-          <div className="text-sm text-muted-foreground">
-            {filteredCouriers.length} of {mockCouriers.length} couriers
-          </div>
-        </div>
-
         {/* Content */}
-        {activeView === 'cards' ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredCouriers.map((courier) => {
-              const { variant: serviceVariant, label: serviceLabel } = getServiceTypeBadge(courier.service_type)
-              const { variant: coverageVariant, label: coverageLabel } = getCoverageBadge(courier.coverage_area)
-              const { variant: statusVariant, label: statusLabel, icon: StatusIcon } = getStatusBadge(courier.is_active)
-              
-              return (
-                <Card key={courier.id} className="p-6 hover: transition-shadow">
-                  <div className="flex justify-between items-start mb-4">
-                    <div className="flex items-center space-x-2">
-                      {courier.is_preferred && <Star className="h-4 w-4 text-yellow-400 fill-current" />}
-                      <div>
-                        <Link 
-                          href={`/shipping/couriers/${courier.id}`}
-                          className="font-semibold text-blue-600 hover:text-blue-800"
-                        >
-                          {courier.courier_name}
-                        </Link>
-                        <p className="text-sm text-muted-foreground mt-1">
-                          {courier.company_name}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex flex-col items-end space-y-1">
-                      <div className="flex items-center space-x-1">
-                        <StatusIcon className="h-4 w-4" />
-                        <Badge variant={statusVariant}>{statusLabel}</Badge>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="space-y-3">
-                    <div className="flex justify-between">
-                      <span className="text-sm text-muted-foreground">Code:</span>
-                      <span className="text-sm font-mono">{courier.courier_code}</span>
-                    </div>
-                    
-                    <div className="flex justify-between">
-                      <span className="text-sm text-muted-foreground">Service:</span>
-                      <Badge variant={serviceVariant}>{serviceLabel}</Badge>
-                    </div>
-
-                    <div className="flex justify-between">
-                      <span className="text-sm text-muted-foreground">Coverage:</span>
-                      <Badge variant={coverageVariant}>{coverageLabel}</Badge>
-                    </div>
-
-                    <div className="flex justify-between">
-                      <span className="text-sm text-muted-foreground">Contact:</span>
-                      <span className="text-sm font-medium">{courier.contact_person}</span>
-                    </div>
-
-                    <div className="flex justify-between">
-                      <span className="text-sm text-muted-foreground">Phone:</span>
-                      <span className="text-sm font-medium">{courier.phone}</span>
-                    </div>
-
-                    <div className="flex flex-wrap gap-1">
-                      {courier.api_integration && <Badge variant="outline" className="text-xs">API Integration</Badge>}
-                      {courier.tracking_available && <Badge variant="outline" className="text-xs">Tracking</Badge>}
-                      {courier.cod_available && <Badge variant="outline" className="text-xs">COD</Badge>}
-                      {courier.insurance_available && <Badge variant="outline" className="text-xs">Insurance</Badge>}
-                    </div>
-
-                    <div className="border-t pt-3">
-                      <div className="flex justify-between mb-2">
-                        <span className="text-sm text-muted-foreground">Base Rate:</span>
-                        <span className="text-sm font-medium">{formatCurrency(courier.base_rate)}</span>
-                      </div>
-                      <div className="flex justify-between mb-2">
-                        <span className="text-sm text-muted-foreground">Per Kg:</span>
-                        <span className="text-sm font-medium">{formatCurrency(courier.rate_per_kg)}</span>
-                      </div>
-                      <div className="flex justify-between mb-2">
-                        <span className="text-sm text-muted-foreground">Weight Range:</span>
-                        <span className="text-sm">{courier.min_weight} - {courier.max_weight} kg</span>
-                      </div>
-                      
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm text-muted-foreground">Rating:</span>
-                        <div className="flex items-center space-x-1">
-                          <div className="flex space-x-0.5">
-                            {mounted && getRatingStars(courier.customer_rating)}
-                          </div>
-                          <span className="text-sm font-medium">{courier.customer_rating.toFixed(1)}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="bg-muted p-2 rounded text-sm">
-                      <div className="flex justify-between">
-                        <span>Shipments:</span>
-                        <span className="font-medium">{courier.total_shipments.toLocaleString()}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>On-time:</span>
-                        <span className="font-medium text-green-600">{courier.on_time_delivery.toFixed(1)}%</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Avg delivery:</span>
-                        <span className="font-medium">{courier.avg_delivery_days.toFixed(1)} days</span>
-                      </div>
-                    </div>
-                  </div>
-                </Card>
-              )
-            })}
+        <Card>
+          <div className="p-6 border-b">
+            <h3 className="text-lg font-semibold">Courier Partners</h3>
+            <p className="text-sm text-muted-foreground">Manage all shipping couriers and delivery partners</p>
           </div>
-        ) : (
-          <Card>
-            <div className="p-6 border-b">
-              <h3 className="text-lg font-semibold">Courier Partners</h3>
-              <p className="text-sm text-muted-foreground">Manage all shipping couriers and delivery partners</p>
-            </div>
-            <AdvancedDataTable
-              data={filteredCouriers}
-              columns={columns}
-              searchable={false}
-              filterable={false}
-              pagination={{
-                pageSize: 10,
-                currentPage: 1,
-                totalPages: Math.ceil(filteredCouriers.length / 10),
-                totalItems: filteredCouriers.length,
-                onChange: () => {}
-              }}
-            />
-          </Card>
-        )}
+          <TanStackDataTable
+            data={filteredCouriers}
+            columns={columns}
+            pagination={{
+              pageIndex: 0,
+              pageSize: 10,
+              totalRows: filteredCouriers.length,
+              onPageChange: () => { }
+            }}
+            onEdit={(courier) => window.location.href = `/shipping/couriers/${courier.id}/edit`}
+          />
+        </Card>
 
         {/* Inactive Couriers Alert */}
         {mockCouriers.filter(c => !c.is_active).length > 0 && (
           <Card className="p-6 border-orange-200 bg-orange-50">
             <div className="flex items-center space-x-3">
-              <WarningCircle className="h-6 w-6 text-orange-600" />
+              <HugeiconsIcon icon={AlertCircleIcon} className="h-6 w-6 text-orange-600" />
               <div className="flex-1">
                 <h3 className="text-lg font-semibold text-orange-800">Inactive Couriers</h3>
                 <p className="text-orange-700 mt-1">

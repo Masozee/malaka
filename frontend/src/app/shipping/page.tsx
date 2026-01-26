@@ -5,6 +5,25 @@ import { Header } from '@/components/ui/header'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { HugeiconsIcon } from '@hugeicons/react'
+import {
+  PackageIcon,
+  DeliveryTruck01Icon,
+  CheckmarkCircle01Icon,
+  Time04Icon,
+  DeliveryBox01Icon,
+  Invoice01Icon,
+  ClipboardIcon,
+  Money03Icon,
+  Location01Icon,
+  Add01Icon,
+  Search01Icon,
+  File01Icon,
+  AlertCircleIcon,
+  Alert02Icon,
+  ChartLineData01Icon,
+  ArrowRight01Icon
+} from '@hugeicons/core-free-icons'
 
 import Link from 'next/link'
 
@@ -14,42 +33,48 @@ const shippingModules = [
     description: 'Manage outgoing shipments and delivery tracking',
     href: '/shipping/outbound',
     stats: '234 active shipments',
-    color: 'bg-blue-100 text-blue-600'
+    color: 'bg-blue-100 text-blue-600',
+    icon: DeliveryBox01Icon
   },
   {
     title: 'Airwaybill Management',
     description: 'Generate and track airwaybills for shipments',
     href: '/shipping/airwaybill',
     stats: '89 AWBs today',
-    color: 'bg-green-100 text-green-600'
+    color: 'bg-green-100 text-green-600',
+    icon: Invoice01Icon
   },
   {
     title: 'Manifest Control',
     description: 'Create and manage shipping manifests',
     href: '/shipping/manifest',
     stats: '12 manifests pending',
-    color: 'bg-yellow-100 text-yellow-600'
+    color: 'bg-yellow-100 text-yellow-600',
+    icon: ClipboardIcon
   },
   {
     title: 'Courier Management',
     description: 'Manage courier partners and delivery services',
     href: '/shipping/couriers',
     stats: '15 active couriers',
-    color: 'bg-purple-100 text-purple-600'
+    color: 'bg-purple-100 text-purple-600',
+    icon: DeliveryTruck01Icon
   },
   {
     title: 'Shipping Invoices',
     description: 'Handle shipping costs and billing management',
     href: '/shipping/invoices',
     stats: '45 invoices pending',
-    color: 'bg-red-100 text-red-600'
+    color: 'bg-red-100 text-red-600',
+    icon: Money03Icon
   },
   {
     title: 'Route Management',
     description: 'Optimize delivery routes and logistics planning',
     href: '/shipping/management',
     stats: '8 routes optimized',
-    color: 'bg-indigo-100 text-indigo-600'
+    color: 'bg-indigo-100 text-indigo-600',
+    icon: Location01Icon
   }
 ]
 
@@ -69,6 +94,7 @@ export default function ShippingPage() {
             <div className="flex items-center space-x-3">
               <Button variant="outline" size="sm" asChild>
                 <Link href="/shipping/analytics">
+                  <HugeiconsIcon icon={ChartLineData01Icon} className="h-4 w-4 mr-2" />
                   Analytics
                 </Link>
               </Button>
@@ -79,6 +105,7 @@ export default function ShippingPage() {
               </Button>
               <Button size="sm" asChild>
                 <Link href="/shipping/outbound/new">
+                  <HugeiconsIcon icon={Add01Icon} className="h-4 w-4 mr-2" />
                   New Shipment
                 </Link>
               </Button>
@@ -97,6 +124,7 @@ export default function ShippingPage() {
                   <p className="text-3xl font-bold text-gray-900">1,247</p>
                 </div>
                 <div className="h-12 w-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <HugeiconsIcon icon={PackageIcon} className="h-6 w-6 text-blue-600" />
                 </div>
               </div>
               <div className="mt-2">
@@ -112,6 +140,7 @@ export default function ShippingPage() {
                   <p className="text-3xl font-bold text-green-600">234</p>
                 </div>
                 <div className="h-12 w-12 bg-green-100 rounded-lg flex items-center justify-center">
+                  <HugeiconsIcon icon={DeliveryTruck01Icon} className="h-6 w-6 text-green-600" />
                 </div>
               </div>
               <div className="mt-2">
@@ -127,6 +156,7 @@ export default function ShippingPage() {
                   <p className="text-3xl font-bold text-yellow-600">956</p>
                 </div>
                 <div className="h-12 w-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+                  <HugeiconsIcon icon={CheckmarkCircle01Icon} className="h-6 w-6 text-yellow-600" />
                 </div>
               </div>
               <div className="mt-2">
@@ -142,6 +172,7 @@ export default function ShippingPage() {
                   <p className="text-3xl font-bold text-purple-600">2.4</p>
                 </div>
                 <div className="h-12 w-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                  <HugeiconsIcon icon={Time04Icon} className="h-6 w-6 text-purple-600" />
                 </div>
               </div>
               <div className="mt-2">
@@ -160,9 +191,11 @@ export default function ShippingPage() {
                   <Card key={module.title} className="p-6 hover: transition-shadow duration-200">
                     <div className="flex items-start justify-between mb-4">
                       <div className={`h-12 w-12 rounded-lg flex items-center justify-center ${module.color}`}>
+                        <HugeiconsIcon icon={module.icon} className="h-6 w-6" />
                       </div>
                       <Link href={module.href}>
                         <Button variant="ghost" size="sm">
+                          <HugeiconsIcon icon={ArrowRight01Icon} className="h-4 w-4" />
                         </Button>
                       </Link>
                     </div>
@@ -193,6 +226,7 @@ export default function ShippingPage() {
               <Card className="p-4">
                 <div className="flex items-center space-x-3">
                   <div className="h-10 w-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <HugeiconsIcon icon={Add01Icon} className="h-5 w-5 text-blue-600" />
                   </div>
                   <div className="flex-1">
                     <p className="font-medium text-gray-900">New Shipment</p>
@@ -207,6 +241,7 @@ export default function ShippingPage() {
               <Card className="p-4">
                 <div className="flex items-center space-x-3">
                   <div className="h-10 w-10 bg-green-100 rounded-lg flex items-center justify-center">
+                    <HugeiconsIcon icon={Search01Icon} className="h-5 w-5 text-green-600" />
                   </div>
                   <div className="flex-1">
                     <p className="font-medium text-gray-900">Track Package</p>
@@ -221,6 +256,7 @@ export default function ShippingPage() {
               <Card className="p-4">
                 <div className="flex items-center space-x-3">
                   <div className="h-10 w-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                    <HugeiconsIcon icon={File01Icon} className="h-5 w-5 text-purple-600" />
                   </div>
                   <div className="flex-1">
                     <p className="font-medium text-gray-900">Generate AWB</p>
@@ -235,6 +271,7 @@ export default function ShippingPage() {
               <Card className="p-4">
                 <div className="flex items-center space-x-3">
                   <div className="h-10 w-10 bg-orange-100 rounded-lg flex items-center justify-center">
+                    <HugeiconsIcon icon={Location01Icon} className="h-5 w-5 text-orange-600" />
                   </div>
                   <div className="flex-1">
                     <p className="font-medium text-gray-900">Route Planning</p>
@@ -264,6 +301,7 @@ export default function ShippingPage() {
                 <div className="flex items-center justify-between py-3 border-b border-gray-100">
                   <div className="flex items-center space-x-3">
                     <div className="h-8 w-8 bg-green-100 rounded-full flex items-center justify-center">
+                      <HugeiconsIcon icon={CheckmarkCircle01Icon} className="h-4 w-4 text-green-600" />
                     </div>
                     <div>
                       <p className="font-medium text-gray-900">AWB-2024-089234</p>
@@ -276,6 +314,7 @@ export default function ShippingPage() {
                 <div className="flex items-center justify-between py-3 border-b border-gray-100">
                   <div className="flex items-center space-x-3">
                     <div className="h-8 w-8 bg-blue-100 rounded-full flex items-center justify-center">
+                      <HugeiconsIcon icon={DeliveryTruck01Icon} className="h-4 w-4 text-blue-600" />
                     </div>
                     <div>
                       <p className="font-medium text-gray-900">AWB-2024-089235</p>
@@ -288,6 +327,7 @@ export default function ShippingPage() {
                 <div className="flex items-center justify-between py-3 border-b border-gray-100">
                   <div className="flex items-center space-x-3">
                     <div className="h-8 w-8 bg-yellow-100 rounded-full flex items-center justify-center">
+                      <HugeiconsIcon icon={PackageIcon} className="h-4 w-4 text-yellow-600" />
                     </div>
                     <div>
                       <p className="font-medium text-gray-900">AWB-2024-089236</p>
@@ -300,6 +340,7 @@ export default function ShippingPage() {
                 <div className="flex items-center justify-between py-3">
                   <div className="flex items-center space-x-3">
                     <div className="h-8 w-8 bg-purple-100 rounded-full flex items-center justify-center">
+                      <HugeiconsIcon icon={Time04Icon} className="h-4 w-4 text-purple-600" />
                     </div>
                     <div>
                       <p className="font-medium text-gray-900">AWB-2024-089237</p>
@@ -325,6 +366,7 @@ export default function ShippingPage() {
                 <div className="flex items-center justify-between py-3 border-b border-gray-100">
                   <div className="flex items-center space-x-3">
                     <div className="h-8 w-8 bg-green-100 rounded-full flex items-center justify-center">
+                      <HugeiconsIcon icon={CheckmarkCircle01Icon} className="h-4 w-4 text-green-600" />
                     </div>
                     <div>
                       <p className="font-medium text-gray-900">JNE Express</p>
@@ -340,6 +382,7 @@ export default function ShippingPage() {
                 <div className="flex items-center justify-between py-3 border-b border-gray-100">
                   <div className="flex items-center space-x-3">
                     <div className="h-8 w-8 bg-blue-100 rounded-full flex items-center justify-center">
+                      <HugeiconsIcon icon={CheckmarkCircle01Icon} className="h-4 w-4 text-blue-600" />
                     </div>
                     <div>
                       <p className="font-medium text-gray-900">J&T Express</p>
@@ -355,6 +398,7 @@ export default function ShippingPage() {
                 <div className="flex items-center justify-between py-3 border-b border-gray-100">
                   <div className="flex items-center space-x-3">
                     <div className="h-8 w-8 bg-purple-100 rounded-full flex items-center justify-center">
+                      <HugeiconsIcon icon={CheckmarkCircle01Icon} className="h-4 w-4 text-purple-600" />
                     </div>
                     <div>
                       <p className="font-medium text-gray-900">SiCepat</p>
@@ -370,6 +414,7 @@ export default function ShippingPage() {
                 <div className="flex items-center justify-between py-3">
                   <div className="flex items-center space-x-3">
                     <div className="h-8 w-8 bg-orange-100 rounded-full flex items-center justify-center">
+                      <HugeiconsIcon icon={CheckmarkCircle01Icon} className="h-4 w-4 text-orange-600" />
                     </div>
                     <div>
                       <p className="font-medium text-gray-900">Pos Indonesia</p>
@@ -388,6 +433,7 @@ export default function ShippingPage() {
           {/* Shipping Alerts */}
           <Card className="p-6">
             <div className="flex items-center space-x-2 mb-4">
+              <HugeiconsIcon icon={AlertCircleIcon} className="h-5 w-5 text-red-600" />
               <h3 className="text-lg font-semibold text-gray-900">Shipping Alerts</h3>
             </div>
 

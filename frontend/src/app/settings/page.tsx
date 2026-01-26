@@ -167,11 +167,11 @@ export default function SettingsPage() {
       setError(null);
 
       // Load public settings for initial display
-      const publicSettings = await settingsService.getPublicGear();
+      const publicSettings = await settingsService.getPublicSettings();
 
       // Try to load user-specific settings if authenticated
       try {
-        const userSettings = await settingsService.getUserGear();
+        const userSettings = await settingsService.getUserSettings();
         // Merge user settings with public settings
         const mergedSettings = { ...publicSettings };
 
@@ -226,7 +226,7 @@ export default function SettingsPage() {
         }
       });
 
-      await settingsService.updateBulkGear({
+      await settingsService.updateBulkSettings({
         settings: settingsToUpdate,
         change_reason: 'Settings page bulk update'
       });

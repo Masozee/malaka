@@ -66,9 +66,16 @@ import (
 	notifications_services "malaka/internal/modules/notifications/domain/services"
 	notifications_persistence "malaka/internal/modules/notifications/infrastructure/persistence"
 
+	// Invitations imports
+	invitations_services "malaka/internal/modules/invitations/domain/services"
+	invitations_persistence "malaka/internal/modules/invitations/infrastructure/persistence"
+
 	// Storage imports
 	"malaka/internal/shared/storage"
 	"malaka/internal/shared/upload"
+
+	// Email imports
+	"malaka/internal/shared/email"
 )
 
 // Container holds the application's dependencies.
@@ -189,6 +196,9 @@ type Container struct {
 
 	// Notification services
 	NotificationService *notifications_services.NotificationService
+
+	// Invitation services
+	InvitationService *invitations_services.InvitationService
 }
 
 // NewContainer creates a new dependency container.
@@ -486,6 +496,13 @@ func NewContainer(cfg *config.Config, logger *zap.Logger, db *sql.DB, gormDB *go
 	notificationRepo := notifications_persistence.NewPostgresNotificationRepository(sqlxDB)
 	notificationService := notifications_services.NewNotificationService(notificationRepo)
 
+	// Initialize email service
+	emailService := email.NewEmailServiceFromEnv()
+
+	// Initialize invitation repository and service
+	invitationRepo := invitations_persistence.NewInvitationRepository(sqlxDB)
+	invitationService := invitations_services.NewInvitationService(invitationRepo, userRepo, emailService)
+
 	return &Container{
 		Config:              cfg,
 		Logger:              logger,
@@ -603,6 +620,9 @@ func NewContainer(cfg *config.Config, logger *zap.Logger, db *sql.DB, gormDB *go
 
 		// Notification services
 		NotificationService: notificationService,
+
+		// Invitation services
+		InvitationService: invitationService,
 	}
 }
 

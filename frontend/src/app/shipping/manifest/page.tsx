@@ -5,8 +5,19 @@ import { TwoLevelLayout } from '@/components/ui/two-level-layout'
 import { Header } from '@/components/ui/header'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { AdvancedDataTable } from '@/components/ui/advanced-data-table'
+import { TanStackDataTable, TanStackColumn } from '@/components/ui/tanstack-data-table'
 import { Badge } from '@/components/ui/badge'
+import { HugeiconsIcon } from '@hugeicons/react'
+import {
+  Location01Icon,
+  File01Icon,
+  Download01Icon,
+  ClipboardIcon,
+  PackageIcon,
+  DeliveryTruck01Icon,
+  CheckmarkCircle01Icon,
+  AlertCircleIcon
+} from '@hugeicons/core-free-icons'
 
 interface Manifest {
   id: string
@@ -236,7 +247,6 @@ const statusColors = {
 
 export default function ManifestPage() {
   const [mounted, setMounted] = useState(false)
-  const [viewMode, setViewMode] = useState<'cards' | 'table'>('table')
 
   useEffect(() => {
     setMounted(true)
@@ -257,72 +267,78 @@ export default function ManifestPage() {
   const totalWeight = mockManifestData.reduce((sum, m) => sum + m.totalWeight, 0)
   const totalValue = mockManifestData.reduce((sum, m) => sum + m.totalValue, 0)
 
-  const columns = [
+  const columns: TanStackColumn<Manifest>[] = [
     {
       accessorKey: 'manifestNumber',
+      id: 'manifestNumber',
       header: 'Manifest',
-      cell: ({ row }: any) => (
+      cell: ({ row }) => (
         <div>
-          <div className="font-medium">{row.getValue('manifestNumber')}</div>
+          <div className="font-medium">{row.original.manifestNumber}</div>
           <div className="text-sm text-gray-500">{row.original.courierName}</div>
         </div>
       )
     },
     {
       accessorKey: 'vehicleNumber',
+      id: 'vehicleNumber',
       header: 'Vehicle',
-      cell: ({ row }: any) => (
+      cell: ({ row }) => (
         <div>
-          <div className="font-medium">{row.getValue('vehicleNumber')}</div>
+          <div className="font-medium">{row.original.vehicleNumber}</div>
           <div className="text-sm text-gray-500">{row.original.driverName}</div>
         </div>
       )
     },
     {
       accessorKey: 'route',
+      id: 'route',
       header: 'Route',
-      cell: ({ row }: any) => (
-        <div className="flex items-center text-sm">
-          <MapPin className="h-3 w-3 mr-1 text-gray-400" />
-          <span className="max-w-32 truncate" title={row.getValue('route')}>
-            {row.getValue('route')}
+      cell: ({ row }) => (
+        <div className="text-sm">
+          <span className="max-w-32 truncate" title={row.original.route}>
+            {row.original.route}
           </span>
         </div>
       )
     },
     {
       accessorKey: 'totalPackages',
+      id: 'totalPackages',
       header: 'Packages',
-      cell: ({ row }: any) => (
+      cell: ({ row }) => (
         <div className="text-center">
-          <div className="font-medium">{row.getValue('totalPackages')}</div>
+          <div className="font-medium">{row.original.totalPackages}</div>
           <div className="text-xs text-gray-500">{row.original.totalWeight.toFixed(1)}kg</div>
         </div>
       )
     },
     {
       accessorKey: 'departureTime',
+      id: 'departureTime',
       header: 'Departure',
-      cell: ({ row }: any) => (
+      cell: ({ row }) => (
         <div className="text-sm">
-          {mounted ? new Date(row.getValue('departureTime')).toLocaleString('id-ID') : ''}
+          {mounted ? new Date(row.original.departureTime).toLocaleString('id-ID') : ''}
         </div>
       )
     },
     {
       accessorKey: 'estimatedArrival',
+      id: 'estimatedArrival',
       header: 'Est. Arrival',
-      cell: ({ row }: any) => (
+      cell: ({ row }) => (
         <div className="text-sm">
-          {mounted ? new Date(row.getValue('estimatedArrival')).toLocaleString('id-ID') : ''}
+          {mounted ? new Date(row.original.estimatedArrival).toLocaleString('id-ID') : ''}
         </div>
       )
     },
     {
       accessorKey: 'status',
+      id: 'status',
       header: 'Status',
-      cell: ({ row }: any) => {
-        const status = row.getValue('status') as keyof typeof statusColors
+      cell: ({ row }) => {
+        const status = row.original.status
         return (
           <Badge className={statusColors[status]}>
             {status.replace('-', ' ').charAt(0).toUpperCase() + status.replace('-', ' ').slice(1)}
@@ -332,104 +348,20 @@ export default function ManifestPage() {
     },
     {
       accessorKey: 'totalValue',
+      id: 'totalValue',
       header: 'Value',
-      cell: ({ row }: any) => (
+      cell: ({ row }) => (
         <div className="text-sm font-medium">
-          {mounted ? row.getValue('totalValue').toLocaleString('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }) : ''}
+          {mounted ? row.original.totalValue.toLocaleString('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }) : ''}
         </div>
       )
     }
   ]
 
-  const ManifestCard = ({ manifest }: { manifest: Manifest }) => (
-    <Card className="p-4">
-      <div className="flex items-start justify-between mb-3">
-        <div>
-          <h3 className="font-semibold text-gray-900">{manifest.manifestNumber}</h3>
-          <p className="text-sm text-gray-500">{manifest.courierName}</p>
-        </div>
-        <Badge className={statusColors[manifest.status]}>
-          {manifest.status.replace('-', ' ').charAt(0).toUpperCase() + manifest.status.replace('-', ' ').slice(1)}
-        </Badge>
-      </div>
-      
-      <div className="space-y-2 text-sm">
-        <div className="flex justify-between">
-          <span className="text-gray-500">Vehicle:</span>
-          <span>{manifest.vehicleNumber}</span>
-        </div>
-        
-        <div className="flex justify-between">
-          <span className="text-gray-500">Driver:</span>
-          <span>{manifest.driverName}</span>
-        </div>
-        
-        <div className="flex justify-between">
-          <span className="text-gray-500">Route:</span>
-          <span className="flex items-center">
-            <MapPin className="h-3 w-3 mr-1 text-gray-400" />
-            <span className="truncate max-w-32" title={manifest.route}>
-              {manifest.route}
-            </span>
-          </span>
-        </div>
-        
-        <div className="flex justify-between">
-          <span className="text-gray-500">Packages:</span>
-          <span>{manifest.totalPackages} packages ({manifest.totalWeight.toFixed(1)}kg)</span>
-        </div>
-        
-        <div className="flex justify-between">
-          <span className="text-gray-500">Departure:</span>
-          <span>{mounted ? new Date(manifest.departureTime).toLocaleString('id-ID') : ''}</span>
-        </div>
-        
-        <div className="flex justify-between">
-          <span className="text-gray-500">Est. Arrival:</span>
-          <span>{mounted ? new Date(manifest.estimatedArrival).toLocaleString('id-ID') : ''}</span>
-        </div>
-        
-        {manifest.actualArrival && (
-          <div className="flex justify-between">
-            <span className="text-gray-500">Actual Arrival:</span>
-            <span className="text-green-600 font-medium">
-              {mounted ? new Date(manifest.actualArrival).toLocaleString('id-ID') : ''}
-            </span>
-          </div>
-        )}
-        
-        <div className="flex justify-between">
-          <span className="text-gray-500">Total Value:</span>
-          <span className="font-medium">
-            {mounted ? manifest.totalValue.toLocaleString('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }) : ''}
-          </span>
-        </div>
-        
-        {manifest.notes && (
-          <div className="mt-2 p-2 bg-yellow-50 rounded text-xs">
-            <span className="font-medium text-yellow-800">Notes: </span>
-            <span className="text-yellow-700">{manifest.notes}</span>
-          </div>
-        )}
-      </div>
-      
-      <div className="flex space-x-2 mt-4">
-        <Button size="sm" variant="outline" className="flex-1">
-          <FileText className="h-4 w-4 mr-1" />
-          View Details
-        </Button>
-        <Button size="sm" className="flex-1">
-          <DownloadSimple className="h-4 w-4 mr-1" />
-          Download
-        </Button>
-      </div>
-    </Card>
-  )
-
   return (
     <TwoLevelLayout>
       <div className="flex-1 space-y-6">
-        <Header 
+        <Header
           title="Manifest Management"
           breadcrumbs={breadcrumbs}
         />
@@ -439,7 +371,7 @@ export default function ManifestPage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-blue-100 rounded-lg">
-                <ClipboardList className="h-5 w-5 text-blue-600" />
+                <HugeiconsIcon icon={ClipboardIcon} className="h-5 w-5 text-blue-600" />
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600">Total Manifests</p>
@@ -451,7 +383,7 @@ export default function ManifestPage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-gray-100 rounded-lg">
-                <Package className="h-5 w-5 text-gray-600" />
+                <HugeiconsIcon icon={PackageIcon} className="h-5 w-5 text-gray-600" />
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600">Preparing</p>
@@ -463,7 +395,7 @@ export default function ManifestPage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-blue-100 rounded-lg">
-                <Truck className="h-5 w-5 text-blue-600" />
+                <HugeiconsIcon icon={DeliveryTruck01Icon} className="h-5 w-5 text-blue-600" />
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600">In Transit</p>
@@ -475,7 +407,7 @@ export default function ManifestPage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-green-100 rounded-lg">
-                <CheckCircle className="h-5 w-5 text-green-600" />
+                <HugeiconsIcon icon={CheckmarkCircle01Icon} className="h-5 w-5 text-green-600" />
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600">Completed</p>
@@ -487,7 +419,7 @@ export default function ManifestPage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-red-100 rounded-lg">
-                <Warning className="h-5 w-5 text-red-600" />
+                <HugeiconsIcon icon={AlertCircleIcon} className="h-5 w-5 text-red-600" />
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600">Delayed</p>
@@ -499,7 +431,7 @@ export default function ManifestPage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-purple-100 rounded-lg">
-                <Package className="h-5 w-5 text-purple-600" />
+                <HugeiconsIcon icon={PackageIcon} className="h-5 w-5 text-purple-600" />
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600">Total Packages</p>
@@ -511,7 +443,7 @@ export default function ManifestPage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-indigo-100 rounded-lg">
-                <Package className="h-5 w-5 text-indigo-600" />
+                <HugeiconsIcon icon={PackageIcon} className="h-5 w-5 text-indigo-600" />
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600">Total Weight</p>
@@ -525,7 +457,7 @@ export default function ManifestPage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-teal-100 rounded-lg">
-                <FileText className="h-5 w-5 text-teal-600" />
+                <HugeiconsIcon icon={File01Icon} className="h-5 w-5 text-teal-600" />
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600">Total Value</p>
@@ -537,55 +469,35 @@ export default function ManifestPage() {
           </Card>
         </div>
 
-        {/* View Toggle and Actions */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <Button
-              variant={viewMode === 'cards' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setViewMode('cards')}
-            >
-              Cards
-            </Button>
-            <Button
-              variant={viewMode === 'table' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setViewMode('table')}
-            >
-              Table
-            </Button>
-          </div>
-          
-          <div className="flex items-center space-x-2">
-            <Button variant="outline" size="sm">
-              <MapPin className="h-4 w-4 mr-2" />
-              Track Route
-            </Button>
-            <Button variant="outline" size="sm">Export</Button>
-            <Button size="sm">
-              <ClipboardList className="h-4 w-4 mr-2" />
-              Create Manifest
-            </Button>
-          </div>
+        {/* Action Bar */}
+        <div className="flex items-center justify-end space-x-2">
+          <Button variant="outline" size="sm">
+            <HugeiconsIcon icon={Location01Icon} className="h-4 w-4 mr-2" />
+            Track Route
+          </Button>
+          <Button variant="outline" size="sm">Export</Button>
+          <Button size="sm">
+            <HugeiconsIcon icon={ClipboardIcon} className="h-4 w-4 mr-2" />
+            Create Manifest
+          </Button>
         </div>
 
-        {/* Data Display */}
-        {viewMode === 'cards' ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {mockManifestData.map((manifest) => (
-              <ManifestCard key={manifest.id} manifest={manifest} />
-            ))}
+        <Card>
+          <div className="p-6 border-b">
+            <h3 className="text-lg font-semibold">Manifests</h3>
+            <p className="text-sm text-muted-foreground">Manage shipping manifests and routes</p>
           </div>
-        ) : (
-          <Card>
-            <AdvancedDataTable
-              data={mockManifestData}
-              columns={columns}
-              searchPlaceholder="Search manifest numbers, couriers, or routes..."
-              showFilters={true}
-            />
-          </Card>
-        )}
+          <TanStackDataTable
+            data={mockManifestData}
+            columns={columns}
+            pagination={{
+              pageIndex: 0,
+              pageSize: 10,
+              totalRows: mockManifestData.length,
+              onPageChange: () => { }
+            }}
+          />
+        </Card>
       </div>
     </TwoLevelLayout>
   )

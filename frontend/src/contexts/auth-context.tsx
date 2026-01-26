@@ -10,6 +10,7 @@ interface User {
   username: string
   email: string
   role: string
+  company_id?: string
 }
 
 interface AuthContextType {
@@ -70,9 +71,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
           id: payload.sub || payload.user_id || payload.id || 'unknown',
           username: payload.username || payload.name || payload.preferred_username || payload.sub || 'testuser',
           email: payload.email || 'testuser@malaka.com',
-          role: payload.role || payload.roles?.[0] || 'user'
+          role: payload.role || payload.roles?.[0] || 'user',
+          company_id: payload.company_id || payload.companyId || undefined
         }
-        
+
         console.log('Setting user data:', userData) // Debug log
         setUser(userData)
         return true
@@ -108,7 +110,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
             id: payload.sub || payload.user_id || payload.id || 'unknown',
             username: payload.username || payload.name || payload.preferred_username || email.split('@')[0],
             email: payload.email || email,
-            role: payload.role || payload.roles?.[0] || 'user'
+            role: payload.role || payload.roles?.[0] || 'user',
+            company_id: payload.company_id || payload.companyId || undefined
           }
 
           console.log('Setting user data after login:', userData) // Debug log
@@ -192,9 +195,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
               id: payload.sub || payload.user_id || payload.id || 'unknown',
               username: payload.username || payload.name || payload.preferred_username || payload.sub || 'testuser',
               email: payload.email || 'testuser@malaka.com',
-              role: payload.role || payload.roles?.[0] || 'user'
+              role: payload.role || payload.roles?.[0] || 'user',
+              company_id: payload.company_id || payload.companyId || undefined
             }
-            
+
             console.log('Setting user data on init:', userData) // Debug log
             setUser(userData)
             apiClient.setToken(token)

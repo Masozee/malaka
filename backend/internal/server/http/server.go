@@ -36,6 +36,9 @@ import (
 	"malaka/internal/shared/logger"
 	"malaka/internal/shared/storage"
 
+	// Invitations imports
+	invitations_handlers "malaka/internal/modules/invitations/presentation/http/handlers"
+
 	// Accounting imports (handlers now initialized in router.go)
 	// accounting_handlers "malaka/internal/modules/accounting/presentation/http/handlers"
 	// accounting_routes "malaka/internal/modules/accounting/presentation/http/routes"
@@ -199,6 +202,16 @@ func (server *Server) setupRouter() {
 	publicUsers := apiV1.Group("/masterdata/users")
 	{
 		publicUsers.POST("/login", userHandler.Login)
+	}
+
+	// Initialize invitation handler
+	invitationHandler := invitations_handlers.NewInvitationHandler(server.container.InvitationService)
+
+	// Public invitation routes (for signup flow)
+	publicInvitations := apiV1.Group("/invitations")
+	{
+		publicInvitations.GET("/validate/:token", invitationHandler.ValidateInvitation)
+		publicInvitations.POST("/accept", invitationHandler.AcceptInvitation)
 	}
 
 	// Public storage routes (downloads may need to be public for shared links)
@@ -474,6 +487,17 @@ func (server *Server) setupRouter() {
 	// Register cache health/monitoring routes (protected)
 	if cacheHealthHandler != nil {
 		cacheHealthHandler.RegisterRoutes(protectedAPI)
+	}
+
+	// Register protected invitation routes (admin management)
+	protectedInvitations := protectedAPI.Group("/invitations")
+	{
+		protectedInvitations.POST("", invitationHandler.CreateInvitation)
+		protectedInvitations.GET("", invitationHandler.ListInvitations)
+		protectedInvitations.GET("/:id", invitationHandler.GetInvitation)
+		protectedInvitations.POST("/:id/revoke", invitationHandler.RevokeInvitation)
+		protectedInvitations.POST("/:id/resend", invitationHandler.ResendInvitation)
+		protectedInvitations.DELETE("/:id", invitationHandler.DeleteInvitation)
 	}
 
 	// Setup public routes (API documentation, etc.)

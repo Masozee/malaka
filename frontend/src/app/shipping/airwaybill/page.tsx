@@ -6,10 +6,29 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { TwoLevelLayout } from '@/components/ui/two-level-layout'
 import { Header } from '@/components/ui/header'
-import { AdvancedDataTable } from '@/components/ui/advanced-data-table'
+import { TanStackDataTable, TanStackColumn } from '@/components/ui/tanstack-data-table'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { HugeiconsIcon } from '@hugeicons/react'
+import {
+  Invoice01Icon,
+  CheckmarkCircle01Icon,
+  PrinterIcon,
+  DeliveryTruck01Icon,
+  AlertCircleIcon,
+  Money03Icon,
+  ChartBarLineIcon,
+  ChartLineData01Icon,
+  FilterHorizontalIcon,
+  Search01Icon,
+  Call02Icon,
+  ViewIcon,
+  PencilEdit01Icon,
+  Download01Icon,
+  ScanIcon,
+  Add01Icon
+} from '@hugeicons/core-free-icons'
 
 import Link from 'next/link'
 
@@ -315,7 +334,6 @@ const mockAirwaybills: Airwaybill[] = [
 
 export default function AirwaybillPage() {
   const [mounted, setMounted] = useState(false)
-  const [activeView, setActiveView] = useState<'cards' | 'table'>('cards')
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [courierFilter, setCourierFilter] = useState<string>('all')
@@ -335,11 +353,6 @@ export default function AirwaybillPage() {
     return new Date(dateString).toLocaleDateString('id-ID')
   }
 
-  const formatDateTime = (dateString?: string): string => {
-    if (!mounted || !dateString) return ''
-    return new Date(dateString).toLocaleString('id-ID')
-  }
-
   const breadcrumbs = [
     { label: 'Shipping', href: '/shipping' },
     { label: 'Airwaybill', href: '/shipping/airwaybill' }
@@ -347,10 +360,10 @@ export default function AirwaybillPage() {
 
   // Filter airwaybills
   const filteredAirwaybills = mockAirwaybills.filter(awb => {
-    if (searchTerm && !awb.awb_number.toLowerCase().includes(searchTerm.toLowerCase()) && 
-        !awb.booking_code.toLowerCase().includes(searchTerm.toLowerCase()) &&
-        !awb.order_number.toLowerCase().includes(searchTerm.toLowerCase()) &&
-        !awb.recipient_name.toLowerCase().includes(searchTerm.toLowerCase())) return false
+    if (searchTerm && !awb.awb_number.toLowerCase().includes(searchTerm.toLowerCase()) &&
+      !awb.booking_code.toLowerCase().includes(searchTerm.toLowerCase()) &&
+      !awb.order_number.toLowerCase().includes(searchTerm.toLowerCase()) &&
+      !awb.recipient_name.toLowerCase().includes(searchTerm.toLowerCase())) return false
     if (statusFilter !== 'all' && awb.status !== statusFilter) return false
     if (courierFilter !== 'all' && awb.courier_name !== courierFilter) return false
     if (packageTypeFilter !== 'all' && awb.package_type !== packageTypeFilter) return false
@@ -377,14 +390,14 @@ export default function AirwaybillPage() {
 
   const getStatusBadge = (status: string) => {
     const config = {
-      draft: { variant: 'outline' as const, label: 'Draft', icon: FileText },
-      confirmed: { variant: 'default' as const, label: 'Confirmed', icon: CheckCircle },
-      printed: { variant: 'secondary' as const, label: 'Printed', icon: Printer },
-      dispatched: { variant: 'default' as const, label: 'Dispatched', icon: Truck },
-      delivered: { variant: 'default' as const, label: 'Delivered', icon: CheckCircle },
-      cancelled: { variant: 'destructive' as const, label: 'Cancelled', icon: WarningCircle }
+      draft: { variant: 'outline' as const, label: 'Draft', icon: Invoice01Icon },
+      confirmed: { variant: 'default' as const, label: 'Confirmed', icon: CheckmarkCircle01Icon },
+      printed: { variant: 'secondary' as const, label: 'Printed', icon: PrinterIcon },
+      dispatched: { variant: 'default' as const, label: 'Dispatched', icon: DeliveryTruck01Icon },
+      delivered: { variant: 'default' as const, label: 'Delivered', icon: CheckmarkCircle01Icon },
+      cancelled: { variant: 'destructive' as const, label: 'Cancelled', icon: AlertCircleIcon }
     }
-    return config[status as keyof typeof config] || { variant: 'secondary' as const, label: status, icon: FileText }
+    return config[status as keyof typeof config] || { variant: 'secondary' as const, label: status, icon: Invoice01Icon }
   }
 
   const getPackageTypeBadge = (type: string) => {
@@ -410,144 +423,147 @@ export default function AirwaybillPage() {
   // Get unique couriers for filter
   const couriers = Array.from(new Set(mockAirwaybills.map(awb => awb.courier_name)))
 
-  const columns = [
+  const columns: TanStackColumn<Airwaybill>[] = [
     {
-      key: 'awb_number',
-      title: 'AWB Number',
-      render: (awb: Airwaybill) => (
-        <Link 
-          href={`/shipping/airwaybill/${awb.id}`}
+      id: 'awb_number',
+      header: 'AWB Number',
+      accessorKey: 'awb_number',
+      cell: ({ row }) => (
+        <Link
+          href={`/shipping/airwaybill/${row.original.id}`}
           className="font-medium text-blue-600 hover:text-blue-800"
         >
-          {awb.awb_number}
+          {row.original.awb_number}
         </Link>
       )
     },
     {
-      key: 'booking_code',
-      title: 'Booking',
-      render: (awb: Airwaybill) => (
+      id: 'booking_code',
+      header: 'Booking',
+      accessorKey: 'booking_code',
+      cell: ({ row }) => (
         <div>
-          <div className="font-mono text-sm">{awb.booking_code}</div>
-          <div className="text-xs text-muted-foreground">{awb.order_number}</div>
+          <div className="font-mono text-sm">{row.original.booking_code}</div>
+          <div className="text-xs text-muted-foreground">{row.original.order_number}</div>
         </div>
       )
     },
     {
-      key: 'courier_info',
-      title: 'Courier',
-      render: (awb: Airwaybill) => (
+      id: 'courier_info',
+      header: 'Courier',
+      accessorKey: 'courier_name',
+      cell: ({ row }) => (
         <div>
-          <div className="font-medium">{awb.courier_name}</div>
-          <div className="text-sm text-muted-foreground">{awb.service_type}</div>
+          <div className="font-medium">{row.original.courier_name}</div>
+          <div className="text-sm text-muted-foreground">{row.original.service_type}</div>
         </div>
       )
     },
     {
-      key: 'route',
-      title: 'Route',
-      render: (awb: Airwaybill) => (
+      id: 'route',
+      header: 'Route',
+      cell: ({ row }) => (
         <div className="text-sm">
           <div className="flex items-center space-x-2">
-            <span>{awb.origin_city}</span>
+            <span>{row.original.origin_city}</span>
             <span>→</span>
-            <span>{awb.destination_city}</span>
+            <span>{row.original.destination_city}</span>
           </div>
         </div>
       )
     },
     {
-      key: 'recipient',
-      title: 'Recipient',
-      render: (awb: Airwaybill) => (
+      id: 'recipient',
+      header: 'Recipient',
+      accessorKey: 'recipient_name',
+      cell: ({ row }) => (
         <div>
-          <div className="font-medium">{awb.recipient_name}</div>
-          <div className="text-sm text-muted-foreground flex items-center space-x-1">
-            <Phone className="h-3 w-3" />
-            <span>{awb.recipient_phone}</span>
+          <div className="font-medium">{row.original.recipient_name}</div>
+          <div className="text-sm text-muted-foreground">
+            {row.original.recipient_phone}
           </div>
         </div>
       )
     },
     {
-      key: 'package_info',
-      title: 'Package',
-      render: (awb: Airwaybill) => {
-        const { variant, label } = getPackageTypeBadge(awb.package_type)
+      id: 'package_info',
+      header: 'Package',
+      cell: ({ row }) => {
+        const { variant, label } = getPackageTypeBadge(row.original.package_type)
         return (
           <div>
             <Badge variant={variant} className="text-xs">{label}</Badge>
             <div className="text-sm text-muted-foreground mt-1">
-              {awb.weight} kg • {awb.pieces} pcs
+              {row.original.weight} kg • {row.original.pieces} pcs
             </div>
           </div>
         )
       }
     },
     {
-      key: 'declared_value',
-      title: 'Value',
-      render: (awb: Airwaybill) => (
+      id: 'declared_value',
+      header: 'Value',
+      accessorKey: 'declared_value',
+      cell: ({ row }) => (
         <div className="text-right">
-          <div className="font-medium">{formatCurrency(awb.declared_value)}</div>
+          <div className="font-medium">{formatCurrency(row.original.declared_value)}</div>
           <div className="text-sm text-muted-foreground">
-            Cost: {formatCurrency(awb.shipping_cost)}
+            Cost: {formatCurrency(row.original.shipping_cost)}
           </div>
         </div>
       )
     },
     {
-      key: 'payment_method',
-      title: 'Payment',
-      render: (awb: Airwaybill) => {
-        const { variant, label } = getPaymentMethodBadge(awb.payment_method)
+      id: 'payment_method',
+      header: 'Payment',
+      accessorKey: 'payment_method',
+      cell: ({ row }) => {
+        const { variant, label } = getPaymentMethodBadge(row.original.payment_method)
         return <Badge variant={variant}>{label}</Badge>
       }
     },
     {
-      key: 'status',
-      title: 'Status',
-      render: (awb: Airwaybill) => {
-        const { variant, label, icon: Icon } = getStatusBadge(awb.status)
+      id: 'status',
+      header: 'Status',
+      accessorKey: 'status',
+      cell: ({ row }) => {
+        const { variant, label } = getStatusBadge(row.original.status)
         return (
-          <div className="flex items-center space-x-2">
-            <Icon className="h-4 w-4" />
-            <Badge variant={variant}>{label}</Badge>
-          </div>
+          <Badge variant={variant}>{label}</Badge>
         )
       }
     },
     {
-      key: 'delivery_date',
-      title: 'Delivery',
-      render: (awb: Airwaybill) => (
+      id: 'delivery_date',
+      header: 'Delivery',
+      cell: ({ row }) => (
         <div className="text-sm">
-          <div>Est: {formatDate(awb.estimated_delivery)}</div>
-          {awb.actual_delivery && (
-            <div className="text-green-600">Act: {formatDate(awb.actual_delivery)}</div>
+          <div>Est: {formatDate(row.original.estimated_delivery)}</div>
+          {row.original.actual_delivery && (
+            <div className="text-green-600">Act: {formatDate(row.original.actual_delivery)}</div>
           )}
         </div>
       )
     },
     {
-      key: 'actions',
-      title: 'Actions',
-      render: (awb: Airwaybill) => (
+      id: 'actions',
+      header: 'Actions',
+      cell: ({ row }) => (
         <div className="flex items-center space-x-2">
           <Button variant="ghost" size="sm" asChild>
-            <Link href={`/shipping/airwaybill/${awb.id}`}>
-              <Eye className="h-4 w-4" />
+            <Link href={`/shipping/airwaybill/${row.original.id}`}>
+              <HugeiconsIcon icon={ViewIcon} className="h-4 w-4" />
             </Link>
           </Button>
-          {(awb.status === 'confirmed' || awb.status === 'printed') && (
+          {(row.original.status === 'confirmed' || row.original.status === 'printed') && (
             <Button variant="ghost" size="sm">
-              <Printer className="h-4 w-4" />
+              <HugeiconsIcon icon={PrinterIcon} className="h-4 w-4" />
             </Button>
           )}
-          {awb.status === 'draft' && (
+          {row.original.status === 'draft' && (
             <Button variant="ghost" size="sm" asChild>
-              <Link href={`/shipping/airwaybill/${awb.id}/edit`}>
-                <PencilSimple className="h-4 w-4" />
+              <Link href={`/shipping/airwaybill/${row.original.id}/edit`}>
+                <HugeiconsIcon icon={PencilEdit01Icon} className="h-4 w-4" />
               </Link>
             </Button>
           )}
@@ -559,23 +575,23 @@ export default function AirwaybillPage() {
   return (
     <TwoLevelLayout>
       <div className="flex-1 space-y-6">
-        <Header 
+        <Header
           title="Airwaybill Management"
           description="Create and manage shipping airwaybills and documentation"
           breadcrumbs={breadcrumbs}
           actions={
             <div className="flex items-center space-x-3">
               <Button variant="outline" size="sm">
-                <DownloadSimple className="h-4 w-4 mr-2" />
+                <HugeiconsIcon icon={Download01Icon} className="h-4 w-4 mr-2" />
                 Export
               </Button>
               <Button variant="outline" size="sm">
-                <QrCode className="h-4 w-4 mr-2" />
+                <HugeiconsIcon icon={ScanIcon} className="h-4 w-4 mr-2" />
                 Bulk Print
               </Button>
               <Button size="sm" asChild>
                 <Link href="/shipping/airwaybill/new">
-                  <Plus className="h-4 w-4 mr-2" />
+                  <HugeiconsIcon icon={Add01Icon} className="h-4 w-4 mr-2" />
                   Create AWB
                 </Link>
               </Button>
@@ -592,7 +608,7 @@ export default function AirwaybillPage() {
                 <p className="text-2xl font-bold mt-1">{summaryStats.totalAirwaybills}</p>
                 <p className="text-sm text-blue-600 mt-1">Created</p>
               </div>
-              <FileText className="h-8 w-8 text-blue-600" />
+              <HugeiconsIcon icon={Invoice01Icon} className="h-8 w-8 text-blue-600" />
             </div>
           </Card>
 
@@ -603,7 +619,7 @@ export default function AirwaybillPage() {
                 <p className="text-2xl font-bold mt-1 text-gray-600">{summaryStats.draftAirwaybills}</p>
                 <p className="text-sm text-gray-600 mt-1">Pending</p>
               </div>
-              <FileText className="h-8 w-8 text-gray-600" />
+              <HugeiconsIcon icon={Invoice01Icon} className="h-8 w-8 text-gray-600" />
             </div>
           </Card>
 
@@ -614,7 +630,7 @@ export default function AirwaybillPage() {
                 <p className="text-2xl font-bold mt-1 text-orange-600">{summaryStats.printedAirwaybills}</p>
                 <p className="text-sm text-orange-600 mt-1">Ready</p>
               </div>
-              <Printer className="h-8 w-8 text-orange-600" />
+              <HugeiconsIcon icon={PrinterIcon} className="h-8 w-8 text-orange-600" />
             </div>
           </Card>
 
@@ -625,7 +641,7 @@ export default function AirwaybillPage() {
                 <p className="text-2xl font-bold mt-1 text-blue-600">{summaryStats.dispatchedAirwaybills}</p>
                 <p className="text-sm text-blue-600 mt-1">In transit</p>
               </div>
-              <Truck className="h-8 w-8 text-blue-600" />
+              <HugeiconsIcon icon={DeliveryTruck01Icon} className="h-8 w-8 text-blue-600" />
             </div>
           </Card>
 
@@ -636,7 +652,7 @@ export default function AirwaybillPage() {
                 <p className="text-2xl font-bold mt-1 text-green-600">{summaryStats.deliveredAirwaybills}</p>
                 <p className="text-sm text-green-600 mt-1">Completed</p>
               </div>
-              <CheckCircle className="h-8 w-8 text-green-600" />
+              <HugeiconsIcon icon={CheckmarkCircle01Icon} className="h-8 w-8 text-green-600" />
             </div>
           </Card>
 
@@ -649,7 +665,7 @@ export default function AirwaybillPage() {
                 </p>
                 <p className="text-sm text-green-600 mt-1">Declared</p>
               </div>
-              <CurrencyDollar className="h-8 w-8 text-green-600" />
+              <HugeiconsIcon icon={Money03Icon} className="h-8 w-8 text-green-600" />
             </div>
           </Card>
 
@@ -662,7 +678,7 @@ export default function AirwaybillPage() {
                 </p>
                 <p className="text-sm text-purple-600 mt-1">Collected</p>
               </div>
-              <ChartBar className="h-8 w-8 text-purple-600" />
+              <HugeiconsIcon icon={ChartBarLineIcon} className="h-8 w-8 text-purple-600" />
             </div>
           </Card>
 
@@ -675,7 +691,7 @@ export default function AirwaybillPage() {
                 </p>
                 <p className="text-sm text-gray-600 mt-1">Days</p>
               </div>
-              <TrendUp className="h-8 w-8 text-gray-600" />
+              <HugeiconsIcon icon={ChartLineData01Icon} className="h-8 w-8 text-gray-600" />
             </div>
           </Card>
         </div>
@@ -683,12 +699,12 @@ export default function AirwaybillPage() {
         {/* Filters */}
         <Card className="p-6">
           <div className="flex items-center space-x-4">
-            <Funnel className="h-5 w-5 text-muted-foreground" />
+            <HugeiconsIcon icon={FilterHorizontalIcon} className="h-5 w-5 text-muted-foreground" />
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 flex-1">
               <div className="space-y-2">
                 <Label htmlFor="search">Search</Label>
                 <div className="relative">
-                  <MagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <HugeiconsIcon icon={Search01Icon} className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="search"
                     placeholder="Search AWB..."
@@ -752,177 +768,30 @@ export default function AirwaybillPage() {
           </div>
         </Card>
 
-        {/* View Toggle */}
-        <div className="flex justify-between items-center">
-          <div className="flex space-x-1 bg-muted p-1 rounded-lg">
-            <Button
-              variant={activeView === 'cards' ? 'default' : 'ghost'}
-              size="sm"
-              onClick={() => setActiveView('cards')}
-            >
-              Cards
-            </Button>
-            <Button
-              variant={activeView === 'table' ? 'default' : 'ghost'}
-              size="sm"
-              onClick={() => setActiveView('table')}
-            >
-              Table
-            </Button>
-          </div>
-          <div className="text-sm text-muted-foreground">
-            {filteredAirwaybills.length} of {mockAirwaybills.length} airwaybills
-          </div>
-        </div>
-
         {/* Content */}
-        {activeView === 'cards' ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredAirwaybills.map((awb) => {
-              const { variant: statusVariant, label: statusLabel, icon: StatusIcon } = getStatusBadge(awb.status)
-              const { variant: packageVariant, label: packageLabel } = getPackageTypeBadge(awb.package_type)
-              const { variant: paymentVariant, label: paymentLabel } = getPaymentMethodBadge(awb.payment_method)
-              
-              return (
-                <Card key={awb.id} className="p-6 hover: transition-shadow">
-                  <div className="flex justify-between items-start mb-4">
-                    <div>
-                      <Link 
-                        href={`/shipping/airwaybill/${awb.id}`}
-                        className="font-semibold text-blue-600 hover:text-blue-800"
-                      >
-                        {awb.awb_number}
-                      </Link>
-                      <p className="text-sm text-muted-foreground mt-1 font-mono">
-                        {awb.booking_code}
-                      </p>
-                    </div>
-                    <div className="flex flex-col items-end space-y-1">
-                      <div className="flex items-center space-x-1">
-                        <StatusIcon className="h-4 w-4" />
-                        <Badge variant={statusVariant}>{statusLabel}</Badge>
-                      </div>
-                      {awb.status === 'confirmed' && (
-                        <Button variant="outline" size="sm">
-                          <Printer className="h-4 w-4 mr-1" />
-                          Print
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="space-y-3">
-                    <div className="flex justify-between">
-                      <span className="text-sm text-muted-foreground">Order:</span>
-                      <span className="text-sm font-medium">{awb.order_number}</span>
-                    </div>
-                    
-                    <div className="flex justify-between">
-                      <span className="text-sm text-muted-foreground">Courier:</span>
-                      <span className="text-sm font-medium">{awb.courier_name}</span>
-                    </div>
-
-                    <div className="flex justify-between">
-                      <span className="text-sm text-muted-foreground">Route:</span>
-                      <span className="text-sm font-medium">{awb.origin_city} → {awb.destination_city}</span>
-                    </div>
-
-                    <div className="flex justify-between">
-                      <span className="text-sm text-muted-foreground">Recipient:</span>
-                      <span className="text-sm font-medium">{awb.recipient_name}</span>
-                    </div>
-
-                    <div className="flex justify-between">
-                      <span className="text-sm text-muted-foreground">Package:</span>
-                      <Badge variant={packageVariant}>{packageLabel}</Badge>
-                    </div>
-
-                    <div className="flex justify-between">
-                      <span className="text-sm text-muted-foreground">Weight:</span>
-                      <span className="text-sm font-medium">{awb.weight} kg • {awb.pieces} pcs</span>
-                    </div>
-
-                    <div className="flex justify-between">
-                      <span className="text-sm text-muted-foreground">Payment:</span>
-                      <Badge variant={paymentVariant}>{paymentLabel}</Badge>
-                    </div>
-
-                    <div className="border-t pt-3">
-                      <div className="flex justify-between mb-2">
-                        <span className="text-sm text-muted-foreground">Declared Value:</span>
-                        <span className="text-sm font-medium">{formatCurrency(awb.declared_value)}</span>
-                      </div>
-                      <div className="flex justify-between mb-2">
-                        <span className="text-sm text-muted-foreground">Shipping Cost:</span>
-                        <span className="text-lg font-bold text-green-600">
-                          {formatCurrency(awb.shipping_cost)}
-                        </span>
-                      </div>
-                      
-                      <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">Est. Delivery:</span>
-                        <span>{formatDate(awb.estimated_delivery)}</span>
-                      </div>
-                      
-                      {awb.actual_delivery && (
-                        <div className="flex justify-between text-sm">
-                          <span className="text-muted-foreground">Actual:</span>
-                          <span className="text-green-600">{formatDate(awb.actual_delivery)}</span>
-                        </div>
-                      )}
-                    </div>
-
-                    {awb.additional_services.length > 0 && (
-                      <div className="bg-blue-50 p-2 rounded text-sm">
-                        <div className="font-medium text-blue-700 mb-1">Services:</div>
-                        <div className="flex flex-wrap gap-1">
-                          {awb.additional_services.map((service, index) => (
-                            <Badge key={index} variant="outline" className="text-xs">
-                              {service}
-                            </Badge>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {awb.special_instructions && (
-                      <div className="bg-orange-50 p-2 rounded text-sm">
-                        <div className="font-medium text-orange-700 mb-1">Instructions:</div>
-                        {awb.special_instructions}
-                      </div>
-                    )}
-                  </div>
-                </Card>
-              )
-            })}
+        <Card>
+          <div className="p-6 border-b">
+            <h3 className="text-lg font-semibold">All Airwaybills</h3>
+            <p className="text-sm text-muted-foreground">Manage all shipping airwaybills and documentation</p>
           </div>
-        ) : (
-          <Card>
-            <div className="p-6 border-b">
-              <h3 className="text-lg font-semibold">All Airwaybills</h3>
-              <p className="text-sm text-muted-foreground">Manage all shipping airwaybills and documentation</p>
-            </div>
-            <AdvancedDataTable
-              data={filteredAirwaybills}
-              columns={columns}
-              searchable={false}
-              filterable={false}
-              pagination={{
-                pageSize: 10,
-                currentPage: 1,
-                totalPages: Math.ceil(filteredAirwaybills.length / 10),
-                totalItems: filteredAirwaybills.length,
-                onChange: () => {}
-              }}
-            />
-          </Card>
-        )}
+          <TanStackDataTable
+            data={filteredAirwaybills}
+            columns={columns}
+            pagination={{
+              pageIndex: 0,
+              pageSize: 10,
+              totalRows: filteredAirwaybills.length,
+              onPageChange: () => { }
+            }}
+            onEdit={(awb) => window.location.href = `/shipping/airwaybill/${awb.id}/edit`}
+          />
+        </Card>
 
         {/* Draft Airwaybills Alert */}
         {summaryStats.draftAirwaybills > 0 && (
           <Card className="p-6 border-gray-200 bg-gray-50">
             <div className="flex items-center space-x-3">
-              <FileText className="h-6 w-6 text-gray-600" />
+              <HugeiconsIcon icon={Invoice01Icon} className="h-6 w-6 text-gray-600" />
               <div className="flex-1">
                 <h3 className="text-lg font-semibold text-gray-800">Draft Airwaybills</h3>
                 <p className="text-gray-700 mt-1">

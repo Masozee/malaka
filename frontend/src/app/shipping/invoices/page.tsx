@@ -5,8 +5,18 @@ import { TwoLevelLayout } from '@/components/ui/two-level-layout'
 import { Header } from '@/components/ui/header'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { AdvancedDataTable } from '@/components/ui/advanced-data-table'
+import { TanStackDataTable, TanStackColumn } from '@/components/ui/tanstack-data-table'
 import { Badge } from '@/components/ui/badge'
+import { HugeiconsIcon } from '@hugeicons/react'
+import {
+  Invoice01Icon,
+  CheckmarkCircle01Icon,
+  Time04Icon,
+  AlertCircleIcon,
+  Money03Icon,
+  ChartBarLineIcon,
+  PercentCircleIcon
+} from '@hugeicons/core-free-icons'
 
 interface ShippingInvoice {
   id: string
@@ -287,7 +297,6 @@ const serviceColors = {
 
 export default function ShippingInvoicesPage() {
   const [mounted, setMounted] = useState(false)
-  const [viewMode, setViewMode] = useState<'cards' | 'table'>('table')
 
   useEffect(() => {
     setMounted(true)
@@ -306,47 +315,52 @@ export default function ShippingInvoicesPage() {
   const totalAmount = mockShippingInvoices.reduce((sum, inv) => sum + inv.totalAmount, 0)
   const paidAmount = mockShippingInvoices.reduce((sum, inv) => sum + inv.paidAmount, 0)
   const outstandingAmount = mockShippingInvoices.reduce((sum, inv) => sum + inv.outstandingAmount, 0)
-  const paymentRate = (paidAmount / totalAmount) * 100
+  const paymentRate = totalAmount > 0 ? (paidAmount / totalAmount) * 100 : 0
 
-  const columns = [
+  const columns: TanStackColumn<ShippingInvoice>[] = [
     {
       accessorKey: 'invoiceNumber',
+      id: 'invoiceNumber',
       header: 'Invoice',
-      cell: ({ row }: any) => (
+      cell: ({ row }) => (
         <div>
-          <div className="font-medium">{row.getValue('invoiceNumber')}</div>
+          <div className="font-medium">{row.original.invoiceNumber}</div>
           <div className="text-sm text-gray-500">{row.original.courierName}</div>
         </div>
       )
     },
     {
       accessorKey: 'invoicePeriod',
+      id: 'invoicePeriod',
       header: 'Period',
-      cell: ({ row }: any) => (
-        <div className="text-sm">{row.getValue('invoicePeriod')}</div>
+      cell: ({ row }) => (
+        <div className="text-sm">{row.original.invoicePeriod}</div>
       )
     },
     {
       accessorKey: 'totalShipments',
+      id: 'totalShipments',
       header: 'Shipments',
-      cell: ({ row }: any) => (
-        <div className="text-center font-medium">{row.getValue('totalShipments')}</div>
+      cell: ({ row }) => (
+        <div className="text-center font-medium">{row.original.totalShipments}</div>
       )
     },
     {
       accessorKey: 'totalAmount',
+      id: 'totalAmount',
       header: 'Total Amount',
-      cell: ({ row }: any) => (
+      cell: ({ row }) => (
         <div className="text-sm font-medium">
-          {mounted ? row.getValue('totalAmount').toLocaleString('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }) : ''}
+          {mounted ? row.original.totalAmount.toLocaleString('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }) : ''}
         </div>
       )
     },
     {
       accessorKey: 'outstandingAmount',
+      id: 'outstandingAmount',
       header: 'Outstanding',
-      cell: ({ row }: any) => {
-        const amount = row.getValue('outstandingAmount') as number
+      cell: ({ row }) => {
+        const amount = row.original.outstandingAmount
         return (
           <div className={`text-sm font-medium ${amount > 0 ? 'text-red-600' : 'text-green-600'}`}>
             {mounted ? amount.toLocaleString('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }) : ''}
@@ -356,18 +370,20 @@ export default function ShippingInvoicesPage() {
     },
     {
       accessorKey: 'dueDate',
+      id: 'dueDate',
       header: 'Due Date',
-      cell: ({ row }: any) => (
+      cell: ({ row }) => (
         <div className="text-sm">
-          {mounted ? new Date(row.getValue('dueDate')).toLocaleDateString('id-ID') : ''}
+          {mounted ? new Date(row.original.dueDate).toLocaleDateString('id-ID') : ''}
         </div>
       )
     },
     {
       accessorKey: 'status',
+      id: 'status',
       header: 'Status',
-      cell: ({ row }: any) => {
-        const status = row.getValue('status') as keyof typeof statusColors
+      cell: ({ row }) => {
+        const status = row.original.status
         return (
           <Badge className={statusColors[status]}>
             {status.charAt(0).toUpperCase() + status.slice(1)}
@@ -377,94 +393,18 @@ export default function ShippingInvoicesPage() {
     },
     {
       accessorKey: 'paymentTerms',
+      id: 'paymentTerms',
       header: 'Terms',
-      cell: ({ row }: any) => (
-        <div className="text-sm">{row.getValue('paymentTerms')}</div>
+      cell: ({ row }) => (
+        <div className="text-sm">{row.original.paymentTerms}</div>
       )
     }
   ]
 
-  const InvoiceCard = ({ invoice }: { invoice: ShippingInvoice }) => {
-    const paymentProgress = (invoice.paidAmount / invoice.totalAmount) * 100
-    
-    return (
-      <Card className="p-4">
-        <div className="flex items-start justify-between mb-3">
-          <div>
-            <h3 className="font-semibold text-gray-900">{invoice.invoiceNumber}</h3>
-            <p className="text-sm text-gray-500">{invoice.courierName}</p>
-          </div>
-          <Badge className={statusColors[invoice.status]}>
-            {invoice.status.charAt(0).toUpperCase() + invoice.status.slice(1)}
-          </Badge>
-        </div>
-        
-        <div className="space-y-2 text-sm">
-          <div className="flex justify-between">
-            <span className="text-gray-500">Period:</span>
-            <span>{invoice.invoicePeriod}</span>
-          </div>
-          
-          <div className="flex justify-between">
-            <span className="text-gray-500">Shipments:</span>
-            <span className="font-medium">{invoice.totalShipments}</span>
-          </div>
-          
-          <div className="flex justify-between">
-            <span className="text-gray-500">Total Amount:</span>
-            <span className="font-medium">
-              {mounted ? invoice.totalAmount.toLocaleString('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }) : ''}
-            </span>
-          </div>
-          
-          <div className="flex justify-between">
-            <span className="text-gray-500">Paid Amount:</span>
-            <span className="text-green-600 font-medium">
-              {mounted ? invoice.paidAmount.toLocaleString('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }) : ''}
-            </span>
-          </div>
-          
-          <div className="flex justify-between">
-            <span className="text-gray-500">Outstanding:</span>
-            <span className={`font-medium ${invoice.outstandingAmount > 0 ? 'text-red-600' : 'text-green-600'}`}>
-              {mounted ? invoice.outstandingAmount.toLocaleString('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }) : ''}
-            </span>
-          </div>
-          
-          <div className="flex justify-between">
-            <span className="text-gray-500">Due Date:</span>
-            <span>{mounted ? new Date(invoice.dueDate).toLocaleDateString('id-ID') : ''}</span>
-          </div>
-          
-          <div className="flex justify-between">
-            <span className="text-gray-500">Payment Progress:</span>
-            <span className="font-medium">{paymentProgress.toFixed(1)}%</span>
-          </div>
-          
-          {invoice.notes && (
-            <div className="mt-2 p-2 bg-yellow-50 rounded text-xs">
-              <span className="font-medium text-yellow-800">Notes: </span>
-              <span className="text-yellow-700">{invoice.notes}</span>
-            </div>
-          )}
-        </div>
-        
-        <div className="flex space-x-2 mt-4">
-          <Button size="sm" variant="outline" className="flex-1">
-            View
-          </Button>
-          <Button size="sm" className="flex-1">
-            Download
-          </Button>
-        </div>
-      </Card>
-    )
-  }
-
   return (
     <TwoLevelLayout>
       <div className="flex-1 space-y-6">
-        <Header 
+        <Header
           title="Shipping Invoices"
           breadcrumbs={breadcrumbs}
         />
@@ -474,7 +414,7 @@ export default function ShippingInvoicesPage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-blue-100 rounded-lg">
-                <div className="h-5 w-5" />
+                <HugeiconsIcon icon={Invoice01Icon} className="h-5 w-5 text-blue-600" />
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600">Total Invoices</p>
@@ -486,7 +426,7 @@ export default function ShippingInvoicesPage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-green-100 rounded-lg">
-                <div className="h-5 w-5" />
+                <HugeiconsIcon icon={CheckmarkCircle01Icon} className="h-5 w-5 text-green-600" />
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600">Paid</p>
@@ -498,7 +438,7 @@ export default function ShippingInvoicesPage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-yellow-100 rounded-lg">
-                <div className="h-5 w-5" />
+                <HugeiconsIcon icon={Time04Icon} className="h-5 w-5 text-yellow-600" />
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600">Pending</p>
@@ -510,7 +450,7 @@ export default function ShippingInvoicesPage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-red-100 rounded-lg">
-                <div className="h-5 w-5" />
+                <HugeiconsIcon icon={AlertCircleIcon} className="h-5 w-5 text-red-600" />
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600">Overdue</p>
@@ -522,7 +462,7 @@ export default function ShippingInvoicesPage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-purple-100 rounded-lg">
-                <div className="h-5 w-5" />
+                <HugeiconsIcon icon={Money03Icon} className="h-5 w-5 text-purple-600" />
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600">Total Amount</p>
@@ -536,7 +476,7 @@ export default function ShippingInvoicesPage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-indigo-100 rounded-lg">
-                <div className="h-5 w-5" />
+                <HugeiconsIcon icon={ChartBarLineIcon} className="h-5 w-5 text-indigo-600" />
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600">Outstanding</p>
@@ -550,7 +490,7 @@ export default function ShippingInvoicesPage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-teal-100 rounded-lg">
-                <div className="h-5 w-5" />
+                <HugeiconsIcon icon={PercentCircleIcon} className="h-5 w-5 text-teal-600" />
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600">Payment Rate</p>
@@ -562,53 +502,33 @@ export default function ShippingInvoicesPage() {
           </Card>
         </div>
 
-        {/* View Toggle and Actions */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <Button
-              variant={viewMode === 'cards' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setViewMode('cards')}
-            >
-              Cards
-            </Button>
-            <Button
-              variant={viewMode === 'table' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setViewMode('table')}
-            >
-              Table
-            </Button>
-          </div>
-          
-          <div className="flex items-center space-x-2">
-            <Button variant="outline" size="sm">
-              Payment Schedule
-            </Button>
-            <Button variant="outline" size="sm">Export</Button>
-            <Button size="sm">
-              Create Invoice
-            </Button>
-          </div>
+        {/* Action Bar */}
+        <div className="flex items-center justify-end space-x-2">
+          <Button variant="outline" size="sm">
+            Payment Schedule
+          </Button>
+          <Button variant="outline" size="sm">Export</Button>
+          <Button size="sm">
+            Create Invoice
+          </Button>
         </div>
 
-        {/* Data Display */}
-        {viewMode === 'cards' ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {mockShippingInvoices.map((invoice) => (
-              <InvoiceCard key={invoice.id} invoice={invoice} />
-            ))}
+        <Card>
+          <div className="p-6 border-b">
+            <h3 className="text-lg font-semibold">Invoices</h3>
+            <p className="text-sm text-muted-foreground">Manage shipping invoices and payments</p>
           </div>
-        ) : (
-          <Card>
-            <AdvancedDataTable
-              data={mockShippingInvoices}
-              columns={columns}
-              searchPlaceholder="Search invoice numbers, couriers, or periods..."
-              showFilters={true}
-            />
-          </Card>
-        )}
+          <TanStackDataTable
+            data={mockShippingInvoices}
+            columns={columns}
+            pagination={{
+              pageIndex: 0,
+              pageSize: 10,
+              totalRows: mockShippingInvoices.length,
+              onPageChange: () => { }
+            }}
+          />
+        </Card>
       </div>
     </TwoLevelLayout>
   )

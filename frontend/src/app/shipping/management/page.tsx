@@ -6,11 +6,31 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { TwoLevelLayout } from '@/components/ui/two-level-layout'
 import { Header } from '@/components/ui/header'
-import { AdvancedDataTable } from '@/components/ui/advanced-data-table'
+import { TanStackDataTable, TanStackColumn } from '@/components/ui/tanstack-data-table'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Progress } from '@/components/ui/progress'
+import { HugeiconsIcon } from '@hugeicons/react'
+import {
+  Time04Icon,
+  DeliveryTruck01Icon,
+  DeliveryTruck02Icon,
+  CheckmarkCircle01Icon,
+  AlertCircleIcon,
+  PackageIcon,
+  Call02Icon,
+  Location01Icon,
+  ViewIcon,
+  PencilEdit01Icon,
+  Download01Icon,
+  Add01Icon,
+  Money03Icon,
+  ChartBarLineIcon,
+  ChartLineData01Icon,
+  FilterHorizontalIcon,
+  Search01Icon
+} from '@hugeicons/core-free-icons'
 
 import Link from 'next/link'
 
@@ -301,7 +321,6 @@ const mockShipments: Shipment[] = [
 
 export default function ShipmentManagementPage() {
   const [mounted, setMounted] = useState(false)
-  const [activeView, setActiveView] = useState<'cards' | 'table'>('cards')
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [orderTypeFilter, setOrderTypeFilter] = useState<string>('all')
@@ -321,11 +340,6 @@ export default function ShipmentManagementPage() {
     return new Date(dateString).toLocaleDateString('id-ID')
   }
 
-  const formatDateTime = (dateString?: string): string => {
-    if (!mounted || !dateString) return ''
-    return new Date(dateString).toLocaleString('id-ID')
-  }
-
   const breadcrumbs = [
     { label: 'Shipping', href: '/shipping' },
     { label: 'Shipment Management', href: '/shipping/management' }
@@ -333,10 +347,10 @@ export default function ShipmentManagementPage() {
 
   // Filter shipments
   const filteredShipments = mockShipments.filter(shipment => {
-    if (searchTerm && !shipment.shipment_number.toLowerCase().includes(searchTerm.toLowerCase()) && 
-        !shipment.tracking_number.toLowerCase().includes(searchTerm.toLowerCase()) &&
-        !shipment.order_number.toLowerCase().includes(searchTerm.toLowerCase()) &&
-        !shipment.recipient_name.toLowerCase().includes(searchTerm.toLowerCase())) return false
+    if (searchTerm && !shipment.shipment_number.toLowerCase().includes(searchTerm.toLowerCase()) &&
+      !shipment.tracking_number.toLowerCase().includes(searchTerm.toLowerCase()) &&
+      !shipment.order_number.toLowerCase().includes(searchTerm.toLowerCase()) &&
+      !shipment.recipient_name.toLowerCase().includes(searchTerm.toLowerCase())) return false
     if (statusFilter !== 'all' && shipment.status !== statusFilter) return false
     if (orderTypeFilter !== 'all' && shipment.order_type !== orderTypeFilter) return false
     if (paymentMethodFilter !== 'all' && shipment.payment_method !== paymentMethodFilter) return false
@@ -359,22 +373,22 @@ export default function ShipmentManagementPage() {
           return sum + ((delivery.getTime() - pickup.getTime()) / (1000 * 60 * 60 * 24))
         }, 0) / mockShipments.filter(s => s.actual_delivery && s.pickup_date).length : 0,
     onTimeDelivery: mockShipments.filter(s => s.status === 'delivered').length > 0 ?
-      (mockShipments.filter(s => s.status === 'delivered' && s.actual_delivery && s.estimated_delivery && 
-        new Date(s.actual_delivery) <= new Date(s.estimated_delivery)).length / 
-       mockShipments.filter(s => s.status === 'delivered').length) * 100 : 0
+      (mockShipments.filter(s => s.status === 'delivered' && s.actual_delivery && s.estimated_delivery &&
+        new Date(s.actual_delivery) <= new Date(s.estimated_delivery)).length /
+        mockShipments.filter(s => s.status === 'delivered').length) * 100 : 0
   }
 
   const getStatusBadge = (status: string) => {
     const config = {
-      pending: { variant: 'secondary' as const, label: 'Pending', icon: Clock, progress: 0 },
-      picked_up: { variant: 'default' as const, label: 'Picked Up', icon: Truck, progress: 25 },
-      in_transit: { variant: 'default' as const, label: 'In Transit', icon: Ship, progress: 50 },
-      out_for_delivery: { variant: 'default' as const, label: 'Out for Delivery', icon: Truck, progress: 75 },
-      delivered: { variant: 'default' as const, label: 'Delivered', icon: CheckCircle, progress: 100 },
-      failed: { variant: 'destructive' as const, label: 'Failed', icon: WarningCircle, progress: 0 },
-      returned: { variant: 'destructive' as const, label: 'Returned', icon: WarningCircle, progress: 0 }
+      pending: { variant: 'secondary' as const, label: 'Pending', icon: Time04Icon },
+      picked_up: { variant: 'default' as const, label: 'Picked Up', icon: DeliveryTruck01Icon },
+      in_transit: { variant: 'default' as const, label: 'In Transit', icon: DeliveryTruck02Icon },
+      out_for_delivery: { variant: 'default' as const, label: 'Out for Delivery', icon: DeliveryTruck01Icon },
+      delivered: { variant: 'default' as const, label: 'Delivered', icon: CheckmarkCircle01Icon },
+      failed: { variant: 'destructive' as const, label: 'Failed', icon: AlertCircleIcon },
+      returned: { variant: 'destructive' as const, label: 'Returned', icon: AlertCircleIcon }
     }
-    return config[status as keyof typeof config] || { variant: 'secondary' as const, label: status, icon: Package, progress: 0 }
+    return config[status as keyof typeof config] || { variant: 'secondary' as const, label: status, icon: PackageIcon }
   }
 
   const getOrderTypeBadge = (type: string) => {
@@ -396,133 +410,116 @@ export default function ShipmentManagementPage() {
     return config[method as keyof typeof config] || { variant: 'secondary' as const, label: method }
   }
 
-  const columns = [
+  const columns: TanStackColumn<Shipment>[] = [
     {
-      key: 'shipment_number',
-      title: 'Shipment',
-      render: (shipment: Shipment) => (
-        <Link 
-          href={`/shipping/management/${shipment.id}`}
+      id: 'shipment_number',
+      header: 'Shipment',
+      accessorKey: 'shipment_number',
+      cell: ({ row }) => (
+        <Link
+          href={`/shipping/management/${row.original.id}`}
           className="font-medium text-blue-600 hover:text-blue-800"
         >
-          {shipment.shipment_number}
+          {row.original.shipment_number}
         </Link>
       )
     },
     {
-      key: 'tracking_number',
-      title: 'Tracking',
-      render: (shipment: Shipment) => (
+      id: 'tracking_number',
+      header: 'Tracking',
+      accessorKey: 'tracking_number',
+      cell: ({ row }) => (
         <div>
-          <div className="font-mono text-sm">{shipment.tracking_number}</div>
-          <div className="text-xs text-muted-foreground">{shipment.courier_name}</div>
+          <div className="font-mono text-sm">{row.original.tracking_number}</div>
+          <div className="text-xs text-muted-foreground">{row.original.courier_name}</div>
         </div>
       )
     },
     {
-      key: 'order_info',
-      title: 'Order Info',
-      render: (shipment: Shipment) => {
-        const { variant: orderVariant, label: orderLabel } = getOrderTypeBadge(shipment.order_type)
+      id: 'order_info',
+      header: 'Order Info',
+      accessorKey: 'order_number',
+      cell: ({ row }) => {
+        const { variant: orderVariant, label: orderLabel } = getOrderTypeBadge(row.original.order_type)
         return (
           <div>
-            <div className="font-medium">{shipment.order_number}</div>
+            <div className="font-medium">{row.original.order_number}</div>
             <Badge variant={orderVariant} className="text-xs">{orderLabel}</Badge>
           </div>
         )
       }
     },
     {
-      key: 'recipient',
-      title: 'Recipient',
-      render: (shipment: Shipment) => (
+      id: 'recipient',
+      header: 'Recipient',
+      accessorKey: 'recipient_name',
+      cell: ({ row }) => (
         <div>
-          <div className="font-medium">{shipment.recipient_name}</div>
-          <div className="text-sm text-muted-foreground flex items-center space-x-1">
-            <Phone className="h-3 w-3" />
-            <span>{shipment.recipient_phone}</span>
+          <div className="font-medium">{row.original.recipient_name}</div>
+          <div className="text-sm text-muted-foreground">
+            {row.original.recipient_phone}
           </div>
-          <div className="text-xs text-muted-foreground flex items-center space-x-1">
-            <MapPin className="h-3 w-3" />
-            <span>{shipment.recipient_city}</span>
+          <div className="text-xs text-muted-foreground">
+            {row.original.recipient_city}
           </div>
         </div>
       )
     },
     {
-      key: 'weight_value',
-      title: 'Weight & Value',
-      render: (shipment: Shipment) => (
+      id: 'weight_value',
+      header: 'Weight & Value',
+      accessorKey: 'weight',
+      cell: ({ row }) => (
         <div className="text-sm">
-          <div className="flex items-center space-x-1">
-            <Package className="h-3 w-3 text-muted-foreground" />
-            <span>{shipment.weight} kg</span>
+          <div>
+            {row.original.weight} kg
           </div>
-          <div className="text-muted-foreground">{formatCurrency(shipment.declared_value)}</div>
+          <div className="text-muted-foreground">{formatCurrency(row.original.declared_value)}</div>
         </div>
       )
     },
     {
-      key: 'shipping_cost',
-      title: 'Cost',
-      render: (shipment: Shipment) => (
+      id: 'shipping_cost',
+      header: 'Cost',
+      accessorKey: 'total_cost',
+      cell: ({ row }) => (
         <div className="text-right">
-          <div className="font-medium">{formatCurrency(shipment.total_cost)}</div>
-          {shipment.cod_amount && (
-            <div className="text-sm text-orange-600">COD: {formatCurrency(shipment.cod_amount)}</div>
+          <div className="font-medium">{formatCurrency(row.original.total_cost)}</div>
+          {row.original.cod_amount && (
+            <div className="text-sm text-orange-600">COD: {formatCurrency(row.original.cod_amount)}</div>
           )}
         </div>
       )
     },
     {
-      key: 'payment_method',
-      title: 'Payment',
-      render: (shipment: Shipment) => {
-        const { variant, label } = getPaymentMethodBadge(shipment.payment_method)
+      id: 'payment_method',
+      header: 'Payment',
+      accessorKey: 'payment_method',
+      cell: ({ row }) => {
+        const { variant, label } = getPaymentMethodBadge(row.original.payment_method)
         return <Badge variant={variant}>{label}</Badge>
       }
     },
     {
-      key: 'status',
-      title: 'Status',
-      render: (shipment: Shipment) => {
-        const { variant, label, icon: Icon } = getStatusBadge(shipment.status)
+      id: 'status',
+      header: 'Status',
+      accessorKey: 'status',
+      cell: ({ row }) => {
+        const { variant, label } = getStatusBadge(row.original.status)
         return (
-          <div className="flex items-center space-x-2">
-            <Icon className="h-4 w-4" />
-            <Badge variant={variant}>{label}</Badge>
-          </div>
+          <Badge variant={variant}>{label}</Badge>
         )
       }
     },
     {
-      key: 'delivery_date',
-      title: 'Delivery',
-      render: (shipment: Shipment) => (
+      id: 'delivery_date',
+      header: 'Delivery',
+      accessorKey: 'estimated_delivery',
+      cell: ({ row }) => (
         <div className="text-sm">
-          <div>Est: {formatDate(shipment.estimated_delivery)}</div>
-          {shipment.actual_delivery && (
-            <div className="text-green-600">Act: {formatDate(shipment.actual_delivery)}</div>
-          )}
-        </div>
-      )
-    },
-    {
-      key: 'actions',
-      title: 'Actions',
-      render: (shipment: Shipment) => (
-        <div className="flex items-center space-x-2">
-          <Button variant="ghost" size="sm" asChild>
-            <Link href={`/shipping/management/${shipment.id}`}>
-              <Eye className="h-4 w-4" />
-            </Link>
-          </Button>
-          {shipment.status === 'pending' && (
-            <Button variant="ghost" size="sm" asChild>
-              <Link href={`/shipping/management/${shipment.id}/edit`}>
-                <PencilSimple className="h-4 w-4" />
-              </Link>
-            </Button>
+          <div>Est: {formatDate(row.original.estimated_delivery)}</div>
+          {row.original.actual_delivery && (
+            <div className="text-green-600">Act: {formatDate(row.original.actual_delivery)}</div>
           )}
         </div>
       )
@@ -532,19 +529,15 @@ export default function ShipmentManagementPage() {
   return (
     <TwoLevelLayout>
       <div className="flex-1 space-y-6">
-        <Header 
+        <Header
           title="Shipment Management"
           description="Track and manage all shipments and deliveries"
           breadcrumbs={breadcrumbs}
           actions={
             <div className="flex items-center space-x-3">
-              <Button variant="outline" size="sm">
-                <DownloadSimple className="h-4 w-4 mr-2" />
-                Export
-              </Button>
               <Button size="sm" asChild>
                 <Link href="/shipping/management/new">
-                  <Plus className="h-4 w-4 mr-2" />
+                  <HugeiconsIcon icon={Add01Icon} className="h-4 w-4 mr-2" />
                   New Shipment
                 </Link>
               </Button>
@@ -561,7 +554,7 @@ export default function ShipmentManagementPage() {
                 <p className="text-2xl font-bold mt-1">{summaryStats.totalShipments}</p>
                 <p className="text-sm text-blue-600 mt-1">Shipments</p>
               </div>
-              <Package className="h-8 w-8 text-blue-600" />
+              <HugeiconsIcon icon={PackageIcon} className="h-8 w-8 text-blue-600" />
             </div>
           </Card>
 
@@ -572,7 +565,7 @@ export default function ShipmentManagementPage() {
                 <p className="text-2xl font-bold mt-1 text-orange-600">{summaryStats.pendingShipments}</p>
                 <p className="text-sm text-orange-600 mt-1">Awaiting pickup</p>
               </div>
-              <Clock className="h-8 w-8 text-orange-600" />
+              <HugeiconsIcon icon={Time04Icon} className="h-8 w-8 text-orange-600" />
             </div>
           </Card>
 
@@ -583,7 +576,7 @@ export default function ShipmentManagementPage() {
                 <p className="text-2xl font-bold mt-1 text-blue-600">{summaryStats.inTransitShipments}</p>
                 <p className="text-sm text-blue-600 mt-1">On the way</p>
               </div>
-              <Truck className="h-8 w-8 text-blue-600" />
+              <HugeiconsIcon icon={DeliveryTruck01Icon} className="h-8 w-8 text-blue-600" />
             </div>
           </Card>
 
@@ -594,7 +587,7 @@ export default function ShipmentManagementPage() {
                 <p className="text-2xl font-bold mt-1 text-green-600">{summaryStats.deliveredShipments}</p>
                 <p className="text-sm text-green-600 mt-1">Completed</p>
               </div>
-              <CheckCircle className="h-8 w-8 text-green-600" />
+              <HugeiconsIcon icon={CheckmarkCircle01Icon} className="h-8 w-8 text-green-600" />
             </div>
           </Card>
 
@@ -605,7 +598,7 @@ export default function ShipmentManagementPage() {
                 <p className="text-2xl font-bold mt-1 text-red-600">{summaryStats.failedShipments}</p>
                 <p className="text-sm text-red-600 mt-1">Need action</p>
               </div>
-              <WarningCircle className="h-8 w-8 text-red-600" />
+              <HugeiconsIcon icon={AlertCircleIcon} className="h-8 w-8 text-red-600" />
             </div>
           </Card>
 
@@ -618,7 +611,7 @@ export default function ShipmentManagementPage() {
                 </p>
                 <p className="text-sm text-green-600 mt-1">Shipping fees</p>
               </div>
-              <CurrencyDollar className="h-8 w-8 text-green-600" />
+              <HugeiconsIcon icon={Money03Icon} className="h-8 w-8 text-green-600" />
             </div>
           </Card>
 
@@ -631,7 +624,7 @@ export default function ShipmentManagementPage() {
                 </p>
                 <p className="text-sm text-gray-600 mt-1">Days</p>
               </div>
-              <ChartBar className="h-8 w-8 text-gray-600" />
+              <HugeiconsIcon icon={ChartBarLineIcon} className="h-8 w-8 text-gray-600" />
             </div>
           </Card>
 
@@ -644,7 +637,7 @@ export default function ShipmentManagementPage() {
                 </p>
                 <p className="text-sm text-green-600 mt-1">Delivery rate</p>
               </div>
-              <TrendUp className="h-8 w-8 text-green-600" />
+              <HugeiconsIcon icon={ChartLineData01Icon} className="h-8 w-8 text-green-600" />
             </div>
           </Card>
         </div>
@@ -652,12 +645,12 @@ export default function ShipmentManagementPage() {
         {/* Filters */}
         <Card className="p-6">
           <div className="flex items-center space-x-4">
-            <Funnel className="h-5 w-5 text-muted-foreground" />
+            <HugeiconsIcon icon={FilterHorizontalIcon} className="h-5 w-5 text-muted-foreground" />
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 flex-1">
               <div className="space-y-2">
                 <Label htmlFor="search">Search</Label>
                 <div className="relative">
-                  <MagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <HugeiconsIcon icon={Search01Icon} className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="search"
                     placeholder="Search shipments..."
@@ -718,171 +711,42 @@ export default function ShipmentManagementPage() {
                 </Select>
               </div>
             </div>
+
+            <div className="flex items-end space-x-2 pt-8">
+              <Button variant="outline" size="sm">
+                <HugeiconsIcon icon={Download01Icon} className="h-4 w-4 mr-2" />
+                Export
+              </Button>
+            </div>
           </div>
         </Card>
 
-        {/* View Toggle */}
-        <div className="flex justify-between items-center">
-          <div className="flex space-x-1 bg-muted p-1 rounded-lg">
-            <Button
-              variant={activeView === 'cards' ? 'default' : 'ghost'}
-              size="sm"
-              onClick={() => setActiveView('cards')}
-            >
-              Cards
-            </Button>
-            <Button
-              variant={activeView === 'table' ? 'default' : 'ghost'}
-              size="sm"
-              onClick={() => setActiveView('table')}
-            >
-              Table
-            </Button>
-          </div>
-          <div className="text-sm text-muted-foreground">
-            {filteredShipments.length} of {mockShipments.length} shipments
-          </div>
-        </div>
-
         {/* Content */}
-        {activeView === 'cards' ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredShipments.map((shipment) => {
-              const { variant: statusVariant, label: statusLabel, icon: StatusIcon, progress } = getStatusBadge(shipment.status)
-              const { variant: orderVariant, label: orderLabel } = getOrderTypeBadge(shipment.order_type)
-              const { variant: paymentVariant, label: paymentLabel } = getPaymentMethodBadge(shipment.payment_method)
-              
-              return (
-                <Card key={shipment.id} className="p-6 hover: transition-shadow">
-                  <div className="flex justify-between items-start mb-4">
-                    <div>
-                      <Link 
-                        href={`/shipping/management/${shipment.id}`}
-                        className="font-semibold text-blue-600 hover:text-blue-800"
-                      >
-                        {shipment.shipment_number}
-                      </Link>
-                      <p className="text-sm text-muted-foreground mt-1 font-mono">
-                        {shipment.tracking_number}
-                      </p>
-                    </div>
-                    <div className="flex flex-col items-end space-y-1">
-                      <div className="flex items-center space-x-1">
-                        <StatusIcon className="h-4 w-4" />
-                        <Badge variant={statusVariant}>{statusLabel}</Badge>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="space-y-3">
-                    <div className="flex justify-between">
-                      <span className="text-sm text-muted-foreground">Order:</span>
-                      <div className="flex items-center space-x-2">
-                        <span className="text-sm font-medium">{shipment.order_number}</span>
-                        <Badge variant={orderVariant}>{orderLabel}</Badge>
-                      </div>
-                    </div>
-                    
-                    <div className="flex justify-between">
-                      <span className="text-sm text-muted-foreground">Courier:</span>
-                      <span className="text-sm font-medium">{shipment.courier_name}</span>
-                    </div>
-
-                    <div className="flex justify-between">
-                      <span className="text-sm text-muted-foreground">Recipient:</span>
-                      <span className="text-sm font-medium">{shipment.recipient_name}</span>
-                    </div>
-
-                    <div className="flex justify-between">
-                      <span className="text-sm text-muted-foreground">Destination:</span>
-                      <span className="text-sm font-medium">{shipment.recipient_city}</span>
-                    </div>
-
-                    <div className="flex justify-between">
-                      <span className="text-sm text-muted-foreground">Weight:</span>
-                      <span className="text-sm font-medium">{shipment.weight} kg</span>
-                    </div>
-
-                    <div className="flex justify-between">
-                      <span className="text-sm text-muted-foreground">Payment:</span>
-                      <Badge variant={paymentVariant}>{paymentLabel}</Badge>
-                    </div>
-
-                    {shipment.cod_amount && (
-                      <div className="flex justify-between">
-                        <span className="text-sm text-muted-foreground">COD Amount:</span>
-                        <span className="text-sm font-medium text-orange-600">{formatCurrency(shipment.cod_amount)}</span>
-                      </div>
-                    )}
-
-                    {progress > 0 && (
-                      <div className="space-y-2">
-                        <div className="flex justify-between text-sm">
-                          <span>Progress:</span>
-                          <span>{progress}%</span>
-                        </div>
-                        <Progress value={progress} className="h-2" />
-                      </div>
-                    )}
-
-                    <div className="border-t pt-3">
-                      <div className="flex justify-between items-center mb-2">
-                        <span className="text-sm text-muted-foreground">Shipping Cost:</span>
-                        <span className="text-lg font-bold text-green-600">
-                          {formatCurrency(shipment.total_cost)}
-                        </span>
-                      </div>
-                      
-                      <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">Est. Delivery:</span>
-                        <span>{formatDate(shipment.estimated_delivery)}</span>
-                      </div>
-                      
-                      {shipment.actual_delivery && (
-                        <div className="flex justify-between text-sm">
-                          <span className="text-muted-foreground">Actual:</span>
-                          <span className="text-green-600">{formatDate(shipment.actual_delivery)}</span>
-                        </div>
-                      )}
-                    </div>
-
-                    {shipment.notes && (
-                      <div className="bg-muted p-2 rounded text-sm">
-                        {shipment.notes}
-                      </div>
-                    )}
-                  </div>
-                </Card>
-              )
-            })}
-          </div>
-        ) : (
-          <Card>
-            <div className="p-6 border-b">
+        <Card>
+          <div className="p-6">
+            <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold">All Shipments</h3>
               <p className="text-sm text-muted-foreground">Track and manage all shipments and deliveries</p>
             </div>
-            <AdvancedDataTable
+            <TanStackDataTable
               data={filteredShipments}
               columns={columns}
-              searchable={false}
-              filterable={false}
               pagination={{
+                pageIndex: 0,
                 pageSize: 10,
-                currentPage: 1,
-                totalPages: Math.ceil(filteredShipments.length / 10),
-                totalItems: filteredShipments.length,
-                onChange: () => {}
+                totalRows: filteredShipments.length,
+                onPageChange: () => { }
               }}
+              onEdit={(shipment) => window.location.href = `/shipping/management/${shipment.id}/edit`}
             />
-          </Card>
-        )}
+          </div>
+        </Card>
 
         {/* Failed Shipments Alert */}
         {summaryStats.failedShipments > 0 && (
           <Card className="p-6 border-red-200 bg-red-50">
             <div className="flex items-center space-x-3">
-              <WarningCircle className="h-6 w-6 text-red-600" />
+              <HugeiconsIcon icon={AlertCircleIcon} className="h-6 w-6 text-red-600" />
               <div className="flex-1">
                 <h3 className="text-lg font-semibold text-red-800">Failed Deliveries</h3>
                 <p className="text-red-700 mt-1">
