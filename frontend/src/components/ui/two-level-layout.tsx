@@ -123,7 +123,7 @@ const menuData: MenuItem[] = [
     label: "Dashboard",
     icon: Home01Icon,
     items: [
-      { id: "overview", label: "Overview", icon: Home01Icon, href: "/" },
+      { id: "overview", label: "Overview", icon: Home01Icon, href: "/dashboard" },
       { id: "analytics", label: "Analytics", icon: ChartColumnIcon, href: "/dashboard/analytics" },
       { id: "sales-dashboard", label: "Sales Dashboard", icon: ChartIncreaseIcon, href: "/sales/dashboard" },
       { id: "reports-dashboard", label: "Reports Dashboard", icon: PieChart01Icon, href: "/reports/dashboard" }
@@ -365,8 +365,8 @@ export function TwoLevelLayout({ children }: LayoutProps) {
   // Auto-set active menu based on pathname
   React.useEffect(() => {
     const currentMenu = menuData.find(menu => {
-      // Special case for home page - always show dashboard
-      if (pathname === '/' && menu.id === 'dashboard') return true
+      // Special case for home page and dashboard - always show dashboard menu
+      if ((pathname === '/' || pathname === '/dashboard') && menu.id === 'dashboard') return true
       if (menu.href && pathname === menu.href) return true
       if (menu.items) {
         return menu.items.some(item => pathname === item.href || pathname.startsWith(item.href + '/'))
