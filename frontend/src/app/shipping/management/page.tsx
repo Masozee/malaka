@@ -19,18 +19,16 @@ import {
   CheckmarkCircle01Icon,
   AlertCircleIcon,
   PackageIcon,
-  Call02Icon,
   Location01Icon,
   ViewIcon,
   PencilEdit01Icon,
   Download01Icon,
   Add01Icon,
-  Money03Icon,
-  ChartBarLineIcon,
-  ChartLineData01Icon,
   FilterHorizontalIcon,
-  Search01Icon
+  Search01Icon,
+  DeleteIcon
 } from '@hugeicons/core-free-icons'
+import { useRouter } from 'next/navigation'
 
 import Link from 'next/link'
 
@@ -320,11 +318,11 @@ const mockShipments: Shipment[] = [
 ]
 
 export default function ShipmentManagementPage() {
+  const router = useRouter()
   const [mounted, setMounted] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
-  const [statusFilter, setStatusFilter] = useState<string>('all')
-  const [orderTypeFilter, setOrderTypeFilter] = useState<string>('all')
-  const [paymentMethodFilter, setPaymentMethodFilter] = useState<string>('all')
+  // Simplified filters state - complex filters removed from UI to match standard
+  // In a real app these might be in a "Filter" drawer/popover
 
   useEffect(() => {
     setMounted(true)
@@ -351,9 +349,6 @@ export default function ShipmentManagementPage() {
       !shipment.tracking_number.toLowerCase().includes(searchTerm.toLowerCase()) &&
       !shipment.order_number.toLowerCase().includes(searchTerm.toLowerCase()) &&
       !shipment.recipient_name.toLowerCase().includes(searchTerm.toLowerCase())) return false
-    if (statusFilter !== 'all' && shipment.status !== statusFilter) return false
-    if (orderTypeFilter !== 'all' && shipment.order_type !== orderTypeFilter) return false
-    if (paymentMethodFilter !== 'all' && shipment.payment_method !== paymentMethodFilter) return false
     return true
   })
 
@@ -528,237 +523,125 @@ export default function ShipmentManagementPage() {
 
   return (
     <TwoLevelLayout>
-      <div className="flex-1 space-y-6">
-        <Header
-          title="Shipment Management"
-          description="Track and manage all shipments and deliveries"
-          breadcrumbs={breadcrumbs}
-          actions={
-            <div className="flex items-center space-x-3">
-              <Button size="sm" asChild>
-                <Link href="/shipping/management/new">
-                  <HugeiconsIcon icon={Add01Icon} className="h-4 w-4 mr-2" />
-                  New Shipment
-                </Link>
-              </Button>
-            </div>
-          }
-        />
+      <Header
+        title="Shipment Management"
+        description="Track and manage all shipments and deliveries"
+        breadcrumbs={breadcrumbs}
+        actions={
+          <div className="flex items-center space-x-3">
+            <Button size="sm" asChild>
+              <Link href="/shipping/management/new">
+                <HugeiconsIcon icon={Add01Icon} className="h-4 w-4 mr-2" />
+                New Shipment
+              </Link>
+            </Button>
+          </div>
+        }
+      />
 
+      <div className="flex-1 overflow-auto p-6 space-y-6">
         {/* Summary Statistics */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-8 gap-6">
-          <Card className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Total</p>
-                <p className="text-2xl font-bold mt-1">{summaryStats.totalShipments}</p>
-                <p className="text-sm text-blue-600 mt-1">Shipments</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card className="p-4">
+            <div className="flex items-center space-x-3">
+              <div className="p-2 bg-blue-50 rounded-lg">
+                <HugeiconsIcon icon={PackageIcon} className="h-5 w-5 text-blue-600" />
               </div>
-              <HugeiconsIcon icon={PackageIcon} className="h-8 w-8 text-blue-600" />
+              <div>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Shipments</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{summaryStats.totalShipments}</p>
+              </div>
             </div>
           </Card>
 
-          <Card className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Pending</p>
-                <p className="text-2xl font-bold mt-1 text-orange-600">{summaryStats.pendingShipments}</p>
-                <p className="text-sm text-orange-600 mt-1">Awaiting pickup</p>
+          <Card className="p-4">
+            <div className="flex items-center space-x-3">
+              <div className="p-2 bg-yellow-50 rounded-lg">
+                <HugeiconsIcon icon={DeliveryTruck01Icon} className="h-5 w-5 text-yellow-600" />
               </div>
-              <HugeiconsIcon icon={Time04Icon} className="h-8 w-8 text-orange-600" />
+              <div>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">In Transit</p>
+                <p className="text-2xl font-bold text-yellow-600">{summaryStats.inTransitShipments}</p>
+              </div>
             </div>
           </Card>
 
-          <Card className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">In Transit</p>
-                <p className="text-2xl font-bold mt-1 text-blue-600">{summaryStats.inTransitShipments}</p>
-                <p className="text-sm text-blue-600 mt-1">On the way</p>
+          <Card className="p-4">
+            <div className="flex items-center space-x-3">
+              <div className="p-2 bg-red-50 rounded-lg">
+                <HugeiconsIcon icon={AlertCircleIcon} className="h-5 w-5 text-red-600" />
               </div>
-              <HugeiconsIcon icon={DeliveryTruck01Icon} className="h-8 w-8 text-blue-600" />
+              <div>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Failed</p>
+                <p className="text-2xl font-bold text-red-600">{summaryStats.failedShipments}</p>
+              </div>
             </div>
           </Card>
 
-          <Card className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Delivered</p>
-                <p className="text-2xl font-bold mt-1 text-green-600">{summaryStats.deliveredShipments}</p>
-                <p className="text-sm text-green-600 mt-1">Completed</p>
+          <Card className="p-4">
+            <div className="flex items-center space-x-3">
+              <div className="p-2 bg-green-50 rounded-lg">
+                <HugeiconsIcon icon={CheckmarkCircle01Icon} className="h-5 w-5 text-green-600" />
               </div>
-              <HugeiconsIcon icon={CheckmarkCircle01Icon} className="h-8 w-8 text-green-600" />
-            </div>
-          </Card>
-
-          <Card className="p-6">
-            <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Failed</p>
-                <p className="text-2xl font-bold mt-1 text-red-600">{summaryStats.failedShipments}</p>
-                <p className="text-sm text-red-600 mt-1">Need action</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">On-Time Rate</p>
+                <p className="text-2xl font-bold text-green-600">{mounted ? `${summaryStats.onTimeDelivery.toFixed(0)}%` : '0%'}</p>
               </div>
-              <HugeiconsIcon icon={AlertCircleIcon} className="h-8 w-8 text-red-600" />
-            </div>
-          </Card>
-
-          <Card className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Revenue</p>
-                <p className="text-2xl font-bold mt-1">
-                  {mounted ? `Rp ${(summaryStats.totalShippingRevenue / 1000000).toFixed(1)}M` : ''}
-                </p>
-                <p className="text-sm text-green-600 mt-1">Shipping fees</p>
-              </div>
-              <HugeiconsIcon icon={Money03Icon} className="h-8 w-8 text-green-600" />
-            </div>
-          </Card>
-
-          <Card className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Avg Delivery</p>
-                <p className="text-2xl font-bold mt-1">
-                  {mounted ? `${summaryStats.avgDeliveryTime.toFixed(1)}` : ''}
-                </p>
-                <p className="text-sm text-gray-600 mt-1">Days</p>
-              </div>
-              <HugeiconsIcon icon={ChartBarLineIcon} className="h-8 w-8 text-gray-600" />
-            </div>
-          </Card>
-
-          <Card className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">On-Time</p>
-                <p className="text-2xl font-bold mt-1">
-                  {mounted ? `${summaryStats.onTimeDelivery.toFixed(1)}%` : ''}
-                </p>
-                <p className="text-sm text-green-600 mt-1">Delivery rate</p>
-              </div>
-              <HugeiconsIcon icon={ChartLineData01Icon} className="h-8 w-8 text-green-600" />
             </div>
           </Card>
         </div>
 
-        {/* Filters */}
-        <Card className="p-6">
-          <div className="flex items-center space-x-4">
-            <HugeiconsIcon icon={FilterHorizontalIcon} className="h-5 w-5 text-muted-foreground" />
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 flex-1">
-              <div className="space-y-2">
-                <Label htmlFor="search">Search</Label>
-                <div className="relative">
-                  <HugeiconsIcon icon={Search01Icon} className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="search"
-                    placeholder="Search shipments..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-9"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="status">Status</Label>
-                <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="All statuses" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All statuses</SelectItem>
-                    <SelectItem value="pending">Pending</SelectItem>
-                    <SelectItem value="picked_up">Picked Up</SelectItem>
-                    <SelectItem value="in_transit">In Transit</SelectItem>
-                    <SelectItem value="out_for_delivery">Out for Delivery</SelectItem>
-                    <SelectItem value="delivered">Delivered</SelectItem>
-                    <SelectItem value="failed">Failed</SelectItem>
-                    <SelectItem value="returned">Returned</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="orderType">Order Type</Label>
-                <Select value={orderTypeFilter} onValueChange={setOrderTypeFilter}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="All types" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All types</SelectItem>
-                    <SelectItem value="pos">POS</SelectItem>
-                    <SelectItem value="online">Online</SelectItem>
-                    <SelectItem value="direct">Direct</SelectItem>
-                    <SelectItem value="wholesale">Wholesale</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="paymentMethod">Payment</Label>
-                <Select value={paymentMethodFilter} onValueChange={setPaymentMethodFilter}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="All payments" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All payments</SelectItem>
-                    <SelectItem value="prepaid">Prepaid</SelectItem>
-                    <SelectItem value="cod">COD</SelectItem>
-                    <SelectItem value="postpaid">Postpaid</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <div className="flex items-end space-x-2 pt-8">
-              <Button variant="outline" size="sm">
-                <HugeiconsIcon icon={Download01Icon} className="h-4 w-4 mr-2" />
-                Export
-              </Button>
-            </div>
-          </div>
-        </Card>
-
-        {/* Content */}
-        <Card>
-          <div className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold">All Shipments</h3>
-              <p className="text-sm text-muted-foreground">Track and manage all shipments and deliveries</p>
-            </div>
-            <TanStackDataTable
-              data={filteredShipments}
-              columns={columns}
-              pagination={{
-                pageIndex: 0,
-                pageSize: 10,
-                totalRows: filteredShipments.length,
-                onPageChange: () => { }
-              }}
-              onEdit={(shipment) => window.location.href = `/shipping/management/${shipment.id}/edit`}
+        {/* Filters and Actions */}
+        <div className="flex items-center justify-end gap-2">
+          <div className="relative">
+            <HugeiconsIcon icon={Search01Icon} className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search shipments..."
+              className="pl-9 w-64"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              aria-label="Search shipments"
             />
           </div>
-        </Card>
+          <Button variant="outline" size="sm">
+            <HugeiconsIcon icon={FilterHorizontalIcon} className="h-4 w-4 mr-2" />
+            Filters
+          </Button>
+          <Button variant="outline" size="sm">
+            <HugeiconsIcon icon={Download01Icon} className="h-4 w-4 mr-2" />
+            Export
+          </Button>
+        </div>
 
-        {/* Failed Shipments Alert */}
-        {summaryStats.failedShipments > 0 && (
-          <Card className="p-6 border-red-200 bg-red-50">
-            <div className="flex items-center space-x-3">
-              <HugeiconsIcon icon={AlertCircleIcon} className="h-6 w-6 text-red-600" />
-              <div className="flex-1">
-                <h3 className="text-lg font-semibold text-red-800">Failed Deliveries</h3>
-                <p className="text-red-700 mt-1">
-                  {summaryStats.failedShipments} shipments have failed delivery and need immediate attention.
-                </p>
-              </div>
-              <Button variant="outline" className="border-red-300 text-red-700 hover:bg-red-100">
-                Review Failed
-              </Button>
-            </div>
-          </Card>
-        )}
+        {/* Content */}
+        <TanStackDataTable
+          data={filteredShipments}
+          columns={columns}
+          pagination={{
+            pageIndex: 0,
+            pageSize: 10,
+            totalRows: filteredShipments.length,
+            onPageChange: () => { }
+          }}
+          onEdit={(shipment) => router.push(`/shipping/management/${shipment.id}/edit`)}
+          onDelete={(shipment) => {
+            if (confirm('Are you sure you want to delete this shipment?')) {
+              console.log('Delete shipment', shipment.id)
+            }
+          }}
+          customActions={[
+            {
+              label: 'Track',
+              icon: Location01Icon,
+              onClick: (shipment) => router.push(`/shipping/management/${shipment.id}/track`)
+            },
+            {
+              label: 'View Details',
+              icon: ViewIcon,
+              onClick: (shipment) => router.push(`/shipping/management/${shipment.id}`)
+            }
+          ]}
+        />
       </div>
     </TwoLevelLayout>
   )

@@ -17,7 +17,7 @@ interface AuthContextType {
   user: User | null
   isAuthenticated: boolean
   isLoading: boolean
-  login: (email: string, password: string) => Promise<void>
+  login: (email: string, password: string) => Promise<any>
   logout: () => void
   checkAuth: () => Promise<boolean>
   refreshSession: () => Promise<boolean>
@@ -66,11 +66,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
       try {
         const payload = JSON.parse(atob(token.split('.')[1]))
         console.log('Token payload:', payload) // Debug log
-        
+
+        // Try to get email from storage if not in payload
+        const storedEmail = typeof window !== 'undefined' ? localStorage.getItem('user_email') : null
+
+        const derivedUsername = payload.username || payload.name || payload.preferred_username || payload.sub || 'User'
+
         const userData = {
           id: payload.sub || payload.user_id || payload.id || 'unknown',
-          username: payload.username || payload.name || payload.preferred_username || payload.sub || 'testuser',
-          email: payload.email || 'testuser@malaka.com',
+          username: derivedUsername,
+          email: payload.email || storedEmail || (derivedUsername.includes('@') ? derivedUsername : null) || (payload.sub && payload.sub.includes('@') ? payload.sub : 'dev@malaka.co.id'),
           role: payload.role || payload.roles?.[0] || 'user',
           company_id: payload.company_id || payload.companyId || undefined
         }
@@ -103,6 +108,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
       const token = authService.getToken()
       if (token) {
         try {
+          // Store email for persistence across sessions
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('user_email', email)
+          }
+
           const payload = JSON.parse(atob(token.split('.')[1]))
           console.log('Login token payload:', payload) // Debug log
 
@@ -149,7 +159,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         const expirationTime = payload.exp * 1000 // Convert to milliseconds
         const currentTime = Date.now()
         const timeUntilExpiry = expirationTime - currentTime
-        
+
         // Refresh if token expires within 5 minutes
         if (timeUntilExpiry < 5 * 60 * 1000) {
           console.log('Token expiring soon, refreshing session...')
@@ -158,7 +168,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           authService.initializeAuth()
         }
       }
-      
+
       return true
     } catch (error) {
       console.error('Session refresh failed:', error)
@@ -170,12 +180,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
     authService.logout()
     setUser(null)
     apiClient.setToken('')
-    
+
+    // Clear stored email
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('user_email')
+    }
+
     // Clear auth attempt cookie on logout
     if (typeof window !== 'undefined') {
       document.cookie = 'auth_attempted=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'
     }
-    
+
     router.push('/login')
   }
 
@@ -190,11 +205,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
           try {
             const payload = JSON.parse(atob(token.split('.')[1]))
             console.log('Init token payload:', payload) // Debug log
-            
+
+            // Try to get email from storage if not in payload
+            const storedEmail = typeof window !== 'undefined' ? localStorage.getItem('user_email') : null
+
+            const derivedUsername = payload.username || payload.name || payload.preferred_username || payload.sub || 'User'
+
             const userData = {
               id: payload.sub || payload.user_id || payload.id || 'unknown',
-              username: payload.username || payload.name || payload.preferred_username || payload.sub || 'testuser',
-              email: payload.email || 'testuser@malaka.com',
+              username: derivedUsername,
+              email: payload.email || storedEmail || (derivedUsername.includes('@') ? derivedUsername : null) || (payload.sub && payload.sub.includes('@') ? payload.sub : 'dev@malaka.co.id'),
               role: payload.role || payload.roles?.[0] || 'user',
               company_id: payload.company_id || payload.companyId || undefined
             }

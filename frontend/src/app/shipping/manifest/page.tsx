@@ -7,6 +7,7 @@ import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { TanStackDataTable, TanStackColumn } from '@/components/ui/tanstack-data-table'
 import { Badge } from '@/components/ui/badge'
+import { Input } from '@/components/ui/input'
 import { HugeiconsIcon } from '@hugeicons/react'
 import {
   Location01Icon,
@@ -16,8 +17,15 @@ import {
   PackageIcon,
   DeliveryTruck01Icon,
   CheckmarkCircle01Icon,
-  AlertCircleIcon
+  AlertCircleIcon,
+  ViewIcon,
+  PencilEdit01Icon,
+  Add01Icon,
+  DeleteIcon,
+  Search01Icon,
+  FilterHorizontalIcon
 } from '@hugeicons/core-free-icons'
+import { useRouter } from 'next/navigation'
 
 interface Manifest {
   id: string
@@ -246,6 +254,7 @@ const statusColors = {
 }
 
 export default function ManifestPage() {
+  const router = useRouter()
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
@@ -360,69 +369,52 @@ export default function ManifestPage() {
 
   return (
     <TwoLevelLayout>
-      <div className="flex-1 space-y-6">
-        <Header
-          title="Manifest Management"
-          breadcrumbs={breadcrumbs}
-        />
+      <Header
+        title="Manifest Management"
+        description="Manage shipping manifests and routes"
+        breadcrumbs={breadcrumbs}
+        actions={
+          <Button size="sm" onClick={() => router.push('/shipping/manifest/new')}>
+            <HugeiconsIcon icon={Add01Icon} className="h-4 w-4 mr-2" />
+            Create Manifest
+          </Button>
+        }
+      />
 
+      <div className="flex-1 overflow-auto p-6 space-y-6">
         {/* Statistics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-8 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card className="p-4">
             <div className="flex items-center space-x-3">
-              <div className="p-2 bg-blue-100 rounded-lg">
+              <div className="p-2 bg-blue-50 rounded-lg">
                 <HugeiconsIcon icon={ClipboardIcon} className="h-5 w-5 text-blue-600" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-600">Total Manifests</p>
-                <p className="text-2xl font-bold text-gray-900">{totalManifests}</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Manifests</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{totalManifests}</p>
               </div>
             </div>
           </Card>
 
           <Card className="p-4">
             <div className="flex items-center space-x-3">
-              <div className="p-2 bg-gray-100 rounded-lg">
-                <HugeiconsIcon icon={PackageIcon} className="h-5 w-5 text-gray-600" />
+              <div className="p-2 bg-yellow-50 rounded-lg">
+                <HugeiconsIcon icon={DeliveryTruck01Icon} className="h-5 w-5 text-yellow-600" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-600">Preparing</p>
-                <p className="text-2xl font-bold text-gray-600">{preparingManifests}</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">In Transit</p>
+                <p className="text-2xl font-bold text-yellow-600">{inTransitManifests}</p>
               </div>
             </div>
           </Card>
 
           <Card className="p-4">
             <div className="flex items-center space-x-3">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <HugeiconsIcon icon={DeliveryTruck01Icon} className="h-5 w-5 text-blue-600" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-600">In Transit</p>
-                <p className="text-2xl font-bold text-blue-600">{inTransitManifests}</p>
-              </div>
-            </div>
-          </Card>
-
-          <Card className="p-4">
-            <div className="flex items-center space-x-3">
-              <div className="p-2 bg-green-100 rounded-lg">
-                <HugeiconsIcon icon={CheckmarkCircle01Icon} className="h-5 w-5 text-green-600" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-600">Completed</p>
-                <p className="text-2xl font-bold text-green-600">{completedManifests}</p>
-              </div>
-            </div>
-          </Card>
-
-          <Card className="p-4">
-            <div className="flex items-center space-x-3">
-              <div className="p-2 bg-red-100 rounded-lg">
+              <div className="p-2 bg-red-50 rounded-lg">
                 <HugeiconsIcon icon={AlertCircleIcon} className="h-5 w-5 text-red-600" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-600">Delayed</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Delayed</p>
                 <p className="text-2xl font-bold text-red-600">{delayedManifests}</p>
               </div>
             </div>
@@ -430,74 +422,66 @@ export default function ManifestPage() {
 
           <Card className="p-4">
             <div className="flex items-center space-x-3">
-              <div className="p-2 bg-purple-100 rounded-lg">
-                <HugeiconsIcon icon={PackageIcon} className="h-5 w-5 text-purple-600" />
+              <div className="p-2 bg-green-50 rounded-lg">
+                <HugeiconsIcon icon={CheckmarkCircle01Icon} className="h-5 w-5 text-green-600" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-600">Total Packages</p>
-                <p className="text-2xl font-bold text-purple-600">{totalPackages}</p>
-              </div>
-            </div>
-          </Card>
-
-          <Card className="p-4">
-            <div className="flex items-center space-x-3">
-              <div className="p-2 bg-indigo-100 rounded-lg">
-                <HugeiconsIcon icon={PackageIcon} className="h-5 w-5 text-indigo-600" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-600">Total Weight</p>
-                <p className="text-2xl font-bold text-indigo-600">
-                  {totalWeight.toFixed(0)}kg
-                </p>
-              </div>
-            </div>
-          </Card>
-
-          <Card className="p-4">
-            <div className="flex items-center space-x-3">
-              <div className="p-2 bg-teal-100 rounded-lg">
-                <HugeiconsIcon icon={File01Icon} className="h-5 w-5 text-teal-600" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-600">Total Value</p>
-                <p className="text-2xl font-bold text-teal-600">
-                  {mounted ? (totalValue / 1000000).toFixed(0) : ''}M
-                </p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Completed</p>
+                <p className="text-2xl font-bold text-green-600">{completedManifests}</p>
               </div>
             </div>
           </Card>
         </div>
 
-        {/* Action Bar */}
-        <div className="flex items-center justify-end space-x-2">
-          <Button variant="outline" size="sm">
-            <HugeiconsIcon icon={Location01Icon} className="h-4 w-4 mr-2" />
-            Track Route
-          </Button>
-          <Button variant="outline" size="sm">Export</Button>
-          <Button size="sm">
-            <HugeiconsIcon icon={ClipboardIcon} className="h-4 w-4 mr-2" />
-            Create Manifest
-          </Button>
-        </div>
-
-        <Card>
-          <div className="p-6 border-b">
-            <h3 className="text-lg font-semibold">Manifests</h3>
-            <p className="text-sm text-muted-foreground">Manage shipping manifests and routes</p>
+        {/* Filters and Actions */}
+        <div className="flex items-center justify-end gap-2">
+          {/* Note: Search and filter functionality to be implemented */}
+          <div className="relative">
+            <HugeiconsIcon icon={Search01Icon} className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search manifests..."
+              className="pl-9 w-64"
+              aria-label="Search manifests"
+            />
           </div>
-          <TanStackDataTable
-            data={mockManifestData}
-            columns={columns}
-            pagination={{
-              pageIndex: 0,
-              pageSize: 10,
-              totalRows: mockManifestData.length,
-              onPageChange: () => { }
-            }}
-          />
-        </Card>
+          <Button variant="outline" size="sm">
+            <HugeiconsIcon icon={FilterHorizontalIcon} className="h-4 w-4 mr-2" />
+            Filters
+          </Button>
+          <Button variant="outline" size="sm">
+            <HugeiconsIcon icon={Download01Icon} className="h-4 w-4 mr-2" />
+            Export
+          </Button>
+        </div>
+
+        <TanStackDataTable
+          data={mockManifestData}
+          columns={columns}
+          pagination={{
+            pageIndex: 0,
+            pageSize: 10,
+            totalRows: mockManifestData.length,
+            onPageChange: () => { }
+          }}
+          onEdit={(manifest) => router.push(`/shipping/manifest/${manifest.id}/edit`)}
+          onDelete={(manifest) => {
+            if (confirm('Are you sure you want to delete this manifest?')) {
+              console.log('Delete manifest', manifest.id)
+            }
+          }}
+          customActions={[
+            {
+              label: 'Track Route',
+              icon: Location01Icon,
+              onClick: (manifest) => router.push(`/shipping/manifest/${manifest.id}/track`)
+            },
+            {
+              label: 'View Details',
+              icon: ViewIcon,
+              onClick: (manifest) => router.push(`/shipping/manifest/${manifest.id}`)
+            }
+          ]}
+        />
       </div>
     </TwoLevelLayout>
   )

@@ -75,6 +75,7 @@ interface AdvancedDataTableProps<T> {
   addButtonText?: string
   exportEnabled?: boolean
   rowSelection?: boolean
+  showToolbar?: boolean
 }
 
 export function AdvancedDataTable<T extends { id: string }>({
@@ -91,7 +92,8 @@ export function AdvancedDataTable<T extends { id: string }>({
   searchPlaceholder = "Search...",
   addButtonText = "Add New",
   exportEnabled = false,
-  rowSelection = false
+  rowSelection = false,
+  showToolbar = true
 }: AdvancedDataTableProps<T>) {
   const [searchTerm, setSearchTerm] = React.useState("")
   const [sortField, setSortField] = React.useState<keyof T | null>(null)
@@ -207,116 +209,118 @@ export function AdvancedDataTable<T extends { id: string }>({
   return (
     <div className="space-y-4">
       {/* Header with Search and Actions */}
-      <div className="flex items-center justify-between space-x-4">
-        {/* Search */}
-        <div className="flex items-center space-x-2 flex-1 max-w-md">
-          <div className="relative flex-1">
-            <HugeiconsIcon icon={Search01Icon} className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <Input
-              placeholder={searchPlaceholder}
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-          
-          {/* Filters */}
-          <Dialog open={filterOpen} onOpenChange={setFilterOpen}>
-            <DialogTrigger asChild>
-              <Button variant="outline" size="sm" className="relative">
-                <HugeiconsIcon icon={FilterIcon} className="h-4 w-4 mr-2" />
-                Filters
-                {activeFiltersCount > 0 && (
-                  <Badge variant="secondary" className="ml-2 h-5 w-5 p-0 text-xs">
-                    {activeFiltersCount}
-                  </Badge>
-                )}
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-md">
-              <DialogHeader>
-                <DialogTitle>Filter Options</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4">
-                {columns
-                  .filter(col => col.filterType && col.filterOptions)
-                  .map(col => (
-                    <div key={String(col.key)} className="space-y-2">
-                      <label className="text-sm font-medium">{col.title}</label>
-                      <Select 
-                        value={filters[String(col.key)] || ""} 
-                        onValueChange={(value) => handleFilterChange(String(col.key), value)}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder={`All ${col.title}`} />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">All {col.title}</SelectItem>
-                          {col.filterOptions?.map(option => (
-                            <SelectItem key={option.value} value={option.value}>
-                              {option.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  ))}
-                
-                {activeFiltersCount > 0 && (
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={() => setFilters({})}
-                    className="w-full"
-                  >
-                    Clear All Filters
-                  </Button>
-                )}
-              </div>
-            </DialogContent>
-          </Dialog>
-        </div>
+      {showToolbar && (
+        <div className="flex items-center justify-between space-x-4">
+          {/* Search */}
+          <div className="flex items-center space-x-2 flex-1 max-w-md">
+            <div className="relative flex-1">
+              <HugeiconsIcon icon={Search01Icon} className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Input
+                placeholder={searchPlaceholder}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
 
-        {/* Actions */}
-        <div className="flex items-center space-x-2">
-          {/* Bulk Actions */}
-          {rowSelection && selectedRows.size > 0 && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm">
-                  {selectedRows.size} selected
+            {/* Filters */}
+            <Dialog open={filterOpen} onOpenChange={setFilterOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline" size="sm" className="relative">
+                  <HugeiconsIcon icon={FilterIcon} className="h-4 w-4 mr-2" />
+                  Filters
+                  {activeFiltersCount > 0 && (
+                    <Badge variant="secondary" className="ml-2 h-5 w-5 p-0 text-xs">
+                      {activeFiltersCount}
+                    </Badge>
+                  )}
                 </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                {bulkActions.map(action => (
-                  <DropdownMenuItem 
-                    key={action.value}
-                    onClick={() => handleBulkAction(action.value)}
-                    className={action.variant === 'destructive' ? 'text-red-600' : ''}
-                  >
-                    {action.label}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          )}
-          
-          {/* Export */}
-          {exportEnabled && (
-            <Button variant="outline" size="sm" onClick={handleExport}>
-              <HugeiconsIcon icon={Download01Icon} className="h-4 w-4 mr-2" />
-              Export
-            </Button>
-          )}
-          
-          {/* Add Button */}
-          {onAdd && (
-            <Button onClick={onAdd} size="sm">
-              {addButtonText}
-            </Button>
-          )}
+              </DialogTrigger>
+              <DialogContent className="max-w-md">
+                <DialogHeader>
+                  <DialogTitle>Filter Options</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
+                  {columns
+                    .filter(col => col.filterType && col.filterOptions)
+                    .map(col => (
+                      <div key={String(col.key)} className="space-y-2">
+                        <label className="text-sm font-medium">{col.title}</label>
+                        <Select
+                          value={filters[String(col.key)] || ""}
+                          onValueChange={(value) => handleFilterChange(String(col.key), value)}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder={`All ${col.title}`} />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">All {col.title}</SelectItem>
+                            {col.filterOptions?.map(option => (
+                              <SelectItem key={option.value} value={option.value}>
+                                {option.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    ))}
+
+                  {activeFiltersCount > 0 && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setFilters({})}
+                      className="w-full"
+                    >
+                      Clear All Filters
+                    </Button>
+                  )}
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
+
+          {/* Actions */}
+          <div className="flex items-center space-x-2">
+            {/* Bulk Actions */}
+            {rowSelection && selectedRows.size > 0 && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm">
+                    {selectedRows.size} selected
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  {bulkActions.map(action => (
+                    <DropdownMenuItem
+                      key={action.value}
+                      onClick={() => handleBulkAction(action.value)}
+                      className={action.variant === 'destructive' ? 'text-red-600' : ''}
+                    >
+                      {action.label}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+
+            {/* Export */}
+            {exportEnabled && (
+              <Button variant="outline" size="sm" onClick={handleExport}>
+                <HugeiconsIcon icon={Download01Icon} className="h-4 w-4 mr-2" />
+                Export
+              </Button>
+            )}
+
+            {/* Add Button */}
+            {onAdd && (
+              <Button onClick={onAdd} size="sm">
+                {addButtonText}
+              </Button>
+            )}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Table */}
       <div className="border rounded-lg bg-white dark:bg-gray-800">

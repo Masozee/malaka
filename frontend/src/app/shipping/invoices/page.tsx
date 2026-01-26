@@ -14,9 +14,16 @@ import {
   Time04Icon,
   AlertCircleIcon,
   Money03Icon,
-  ChartBarLineIcon,
-  PercentCircleIcon
+  ViewIcon,
+  PencilEdit01Icon,
+  Add01Icon,
+  DeleteIcon,
+  Search01Icon,
+  FilterHorizontalIcon,
+  Download01Icon
 } from '@hugeicons/core-free-icons'
+import { useRouter } from 'next/navigation'
+import { Input } from '@/components/ui/input'
 
 interface ShippingInvoice {
   id: string
@@ -296,6 +303,7 @@ const serviceColors = {
 }
 
 export default function ShippingInvoicesPage() {
+  const router = useRouter()
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
@@ -403,57 +411,54 @@ export default function ShippingInvoicesPage() {
 
   return (
     <TwoLevelLayout>
-      <div className="flex-1 space-y-6">
-        <Header
-          title="Shipping Invoices"
-          breadcrumbs={breadcrumbs}
-        />
+      <Header
+        title="Shipping Invoices"
+        description="Manage shipping invoices and payments"
+        breadcrumbs={breadcrumbs}
+        actions={
+          <Button size="sm" onClick={() => router.push('/shipping/invoices/new')}>
+            <HugeiconsIcon icon={Add01Icon} className="h-4 w-4 mr-2" />
+            Create Invoice
+          </Button>
+        }
+      />
 
+      <div className="flex-1 overflow-auto p-6 space-y-6">
         {/* Statistics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-7 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card className="p-4">
             <div className="flex items-center space-x-3">
-              <div className="p-2 bg-blue-100 rounded-lg">
+              <div className="p-2 bg-blue-50 rounded-lg">
                 <HugeiconsIcon icon={Invoice01Icon} className="h-5 w-5 text-blue-600" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-600">Total Invoices</p>
-                <p className="text-2xl font-bold text-gray-900">{totalInvoices}</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Invoices</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{totalInvoices}</p>
               </div>
             </div>
           </Card>
 
           <Card className="p-4">
             <div className="flex items-center space-x-3">
-              <div className="p-2 bg-green-100 rounded-lg">
-                <HugeiconsIcon icon={CheckmarkCircle01Icon} className="h-5 w-5 text-green-600" />
+              <div className="p-2 bg-indigo-50 rounded-lg">
+                <HugeiconsIcon icon={Money03Icon} className="h-5 w-5 text-indigo-600" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-600">Paid</p>
-                <p className="text-2xl font-bold text-green-600">{paidInvoices}</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Outstanding</p>
+                <p className="text-2xl font-bold text-indigo-600">
+                  {mounted ? (outstandingAmount / 1000000).toFixed(1) : ''}M
+                </p>
               </div>
             </div>
           </Card>
 
           <Card className="p-4">
             <div className="flex items-center space-x-3">
-              <div className="p-2 bg-yellow-100 rounded-lg">
-                <HugeiconsIcon icon={Time04Icon} className="h-5 w-5 text-yellow-600" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-600">Pending</p>
-                <p className="text-2xl font-bold text-yellow-600">{pendingInvoices}</p>
-              </div>
-            </div>
-          </Card>
-
-          <Card className="p-4">
-            <div className="flex items-center space-x-3">
-              <div className="p-2 bg-red-100 rounded-lg">
+              <div className="p-2 bg-red-50 rounded-lg">
                 <HugeiconsIcon icon={AlertCircleIcon} className="h-5 w-5 text-red-600" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-600">Overdue</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Overdue</p>
                 <p className="text-2xl font-bold text-red-600">{overdueInvoices}</p>
               </div>
             </div>
@@ -461,74 +466,63 @@ export default function ShippingInvoicesPage() {
 
           <Card className="p-4">
             <div className="flex items-center space-x-3">
-              <div className="p-2 bg-purple-100 rounded-lg">
-                <HugeiconsIcon icon={Money03Icon} className="h-5 w-5 text-purple-600" />
+              <div className="p-2 bg-green-50 rounded-lg">
+                <HugeiconsIcon icon={CheckmarkCircle01Icon} className="h-5 w-5 text-green-600" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-600">Total Amount</p>
-                <p className="text-2xl font-bold text-purple-600">
-                  {mounted ? (totalAmount / 1000000).toFixed(0) : ''}M
-                </p>
-              </div>
-            </div>
-          </Card>
-
-          <Card className="p-4">
-            <div className="flex items-center space-x-3">
-              <div className="p-2 bg-indigo-100 rounded-lg">
-                <HugeiconsIcon icon={ChartBarLineIcon} className="h-5 w-5 text-indigo-600" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-600">Outstanding</p>
-                <p className="text-2xl font-bold text-indigo-600">
-                  {mounted ? (outstandingAmount / 1000000).toFixed(0) : ''}M
-                </p>
-              </div>
-            </div>
-          </Card>
-
-          <Card className="p-4">
-            <div className="flex items-center space-x-3">
-              <div className="p-2 bg-teal-100 rounded-lg">
-                <HugeiconsIcon icon={PercentCircleIcon} className="h-5 w-5 text-teal-600" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-600">Payment Rate</p>
-                <p className="text-2xl font-bold text-teal-600">
-                  {mounted ? paymentRate.toFixed(1) : ''}%
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Paid Amount</p>
+                <p className="text-2xl font-bold text-green-600">
+                  {mounted ? (paidAmount / 1000000).toFixed(1) : ''}M
                 </p>
               </div>
             </div>
           </Card>
         </div>
 
-        {/* Action Bar */}
-        <div className="flex items-center justify-end space-x-2">
-          <Button variant="outline" size="sm">
-            Payment Schedule
-          </Button>
-          <Button variant="outline" size="sm">Export</Button>
-          <Button size="sm">
-            Create Invoice
-          </Button>
-        </div>
-
-        <Card>
-          <div className="p-6 border-b">
-            <h3 className="text-lg font-semibold">Invoices</h3>
-            <p className="text-sm text-muted-foreground">Manage shipping invoices and payments</p>
+        {/* Filters and Actions */}
+        <div className="flex items-center justify-end gap-2">
+          {/* Note: Search and filter functionality to be implemented */}
+          <div className="relative">
+            <HugeiconsIcon icon={Search01Icon} className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search invoices..."
+              className="pl-9 w-64"
+              aria-label="Search invoices"
+            />
           </div>
-          <TanStackDataTable
-            data={mockShippingInvoices}
-            columns={columns}
-            pagination={{
-              pageIndex: 0,
-              pageSize: 10,
-              totalRows: mockShippingInvoices.length,
-              onPageChange: () => { }
-            }}
-          />
-        </Card>
+          <Button variant="outline" size="sm">
+            <HugeiconsIcon icon={FilterHorizontalIcon} className="h-4 w-4 mr-2" />
+            Filters
+          </Button>
+          <Button variant="outline" size="sm">
+            <HugeiconsIcon icon={Download01Icon} className="h-4 w-4 mr-2" />
+            Export
+          </Button>
+        </div>
+
+        <TanStackDataTable
+          data={mockShippingInvoices}
+          columns={columns}
+          pagination={{
+            pageIndex: 0,
+            pageSize: 10,
+            totalRows: mockShippingInvoices.length,
+            onPageChange: () => { }
+          }}
+          onEdit={(invoice) => router.push(`/shipping/invoices/${invoice.id}/edit`)}
+          onDelete={(invoice) => {
+            if (confirm('Are you sure you want to delete this invoice?')) {
+              console.log('Delete invoice', invoice.id)
+            }
+          }}
+          customActions={[
+            {
+              label: 'View Invoice',
+              icon: ViewIcon,
+              onClick: (invoice) => router.push(`/shipping/invoices/${invoice.id}`)
+            }
+          ]}
+        />
       </div>
     </TwoLevelLayout>
   )

@@ -12,7 +12,6 @@ import {
   ChartColumnIcon,
   SettingsIcon,
   Building01Icon,
-  Notification01Icon,
   Factory01Icon,
   CalculatorIcon,
   // Master Data icons
@@ -69,7 +68,6 @@ import {
   // Help icons
   HelpCircleIcon,
   Share01Icon,
-  LogoutIcon,
   ArrowRightIcon,
   QuotesIcon,
   MoreVerticalIcon
@@ -86,7 +84,6 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { useAuth } from "@/contexts/auth-context"
 import { useSessionActivity } from "@/hooks/useSessionActivity"
-import { notificationService, Notification } from "@/services/notifications"
 
 interface LayoutProps {
   children: React.ReactNode
@@ -298,69 +295,15 @@ const menuData: MenuItem[] = [
 
 export function TwoLevelLayout({ children }: LayoutProps) {
   const pathname = usePathname()
-  const { user, logout } = useAuth()
+  useAuth() // Keep auth context active for session management
   const [activeMenu, setActiveMenu] = React.useState<string | null>(null)
   const [isSecondSidebarCollapsed, setIsSecondSidebarCollapsed] = React.useState(false)
-  const [showNotifications, setShowNotifications] = React.useState(false)
-  const [notifications, setNotifications] = React.useState<Notification[]>([])
-  const [unreadCount, setUnreadCount] = React.useState(0)
-  const [isLoadingNotifications, setIsLoadingNotifications] = React.useState(false)
 
   // Initialize session activity tracking
   useSessionActivity({
     inactivityTimeout: 30 * 60 * 1000, // 30 minutes
     sessionWarningTime: 5 * 60 * 1000   // 5 minutes
   })
-
-  // Fetch notifications
-  const fetchNotifications = React.useCallback(async () => {
-    if (!user) return
-
-    setIsLoadingNotifications(true)
-    try {
-      const response = await notificationService.listNotifications({
-        limit: 10,
-        include_read: true
-      })
-      setNotifications(response.notifications || [])
-      setUnreadCount(response.unread_count || 0)
-    } catch (error) {
-      console.error('Failed to fetch notifications:', error)
-    } finally {
-      setIsLoadingNotifications(false)
-    }
-  }, [user])
-
-  // Load notifications on mount and periodically
-  React.useEffect(() => {
-    fetchNotifications()
-
-    // Refresh notifications every 30 seconds
-    const interval = setInterval(fetchNotifications, 30000)
-    return () => clearInterval(interval)
-  }, [fetchNotifications])
-
-  // Handle marking notification as read
-  const handleMarkAsRead = async (id: string) => {
-    const success = await notificationService.markAsRead(id)
-    if (success) {
-      setNotifications(prev =>
-        prev.map(n => n.id === id ? { ...n, status: 'read' as const } : n)
-      )
-      setUnreadCount(prev => Math.max(0, prev - 1))
-    }
-  }
-
-  // Handle marking all as read
-  const handleMarkAllAsRead = async () => {
-    const success = await notificationService.markAllAsRead()
-    if (success) {
-      setNotifications(prev =>
-        prev.map(n => ({ ...n, status: 'read' as const }))
-      )
-      setUnreadCount(0)
-    }
-  }
 
   // Auto-set active menu based on pathname
   React.useEffect(() => {
@@ -488,128 +431,6 @@ export function TwoLevelLayout({ children }: LayoutProps) {
             >
               <Icon icon={SettingsIcon} className={`h-4 w-4 ${pathname === '/settings' ? 'text-black' : 'text-gray-600 dark:text-gray-300'}`} strokeWidth={2} />
             </Link>
-
-            {/* Notifications Button with Badge */}
-            <div className="relative">
-              <button
-                onClick={() => {
-                  setShowNotifications(!showNotifications)
-                  if (!showNotifications) {
-                    fetchNotifications()
-                  }
-                }}
-                className="w-full flex items-center justify-center p-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-                title="Notifications"
-              >
-                <Icon icon={Notification01Icon} className="h-4 w-4 text-gray-600 dark:text-gray-300" strokeWidth={2} />
-                {unreadCount > 0 && (
-                  <span className="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full flex items-center justify-center">
-                    <span className="text-[8px] text-white font-bold">
-                      {unreadCount > 9 ? '9+' : unreadCount}
-                    </span>
-                  </span>
-                )}
-              </button>
-
-              {/* Notifications Dropdown */}
-              {showNotifications && (
-                <div className="absolute bottom-full left-12 mb-2 w-80 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 z-50 animate-in slide-in-from-bottom-2 fade-in-0 duration-200">
-                  <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-                    <div className="flex items-center justify-between">
-                      <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100">Notifications</h3>
-                      <div className="flex items-center space-x-2">
-                        <span className="text-xs text-gray-500 dark:text-gray-400">
-                          {unreadCount} unread
-                        </span>
-                        {unreadCount > 0 && (
-                          <button
-                            onClick={handleMarkAllAsRead}
-                            className="text-xs text-blue-600 dark:text-blue-400 hover:underline"
-                          >
-                            Mark all read
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="max-h-96 overflow-y-auto">
-                    {isLoadingNotifications ? (
-                      <div className="p-4 text-center text-sm text-gray-500">
-                        Loading...
-                      </div>
-                    ) : notifications.length === 0 ? (
-                      <div className="p-8 text-center">
-                        <Icon icon={Notification01Icon} className="h-8 w-8 text-gray-300 dark:text-gray-600 mx-auto mb-2" />
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
-                          No notifications yet
-                        </p>
-                      </div>
-                    ) : (
-                      notifications.map((notification) => {
-                        const isUnread = notification.status === 'unread'
-                        return (
-                          <div
-                            key={notification.id}
-                            onClick={() => {
-                              if (isUnread) {
-                                handleMarkAsRead(notification.id)
-                              }
-                              if (notification.action_url) {
-                                window.location.href = notification.action_url
-                              }
-                            }}
-                            className={`p-4 border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer ${
-                              isUnread ? 'bg-blue-50 dark:bg-blue-900/20' : ''
-                            }`}
-                          >
-                            <div className="flex items-start space-x-3">
-                              <div className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${
-                                isUnread ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-600'
-                              }`} />
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center justify-between">
-                                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
-                                    {notification.title}
-                                  </p>
-                                  {notification.priority === 'urgent' && (
-                                    <span className="ml-2 px-1.5 py-0.5 text-[10px] font-medium bg-red-100 text-red-600 rounded">
-                                      Urgent
-                                    </span>
-                                  )}
-                                </div>
-                                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">
-                                  {notification.message}
-                                </p>
-                                <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                                  {notificationService.formatTimeAgo(notification.created_at)}
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                        )
-                      })
-                    )}
-                  </div>
-                  <div className="p-3 bg-gray-50 dark:bg-gray-700 rounded-b-lg">
-                    <Link
-                      href="/notifications"
-                      className="w-full text-xs text-center text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 block"
-                    >
-                      View all notifications
-                    </Link>
-                  </div>
-                </div>
-              )}
-            </div>
-            
-            {/* Logout Button */}
-            <button
-              onClick={() => logout()}
-              className="w-full flex items-center justify-center p-2 rounded-md hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
-              title="Logout"
-            >
-              <Icon icon={LogoutIcon} className="h-4 w-4 text-gray-600 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400" strokeWidth={2} />
-            </button>
           </div>
         </div>
       </aside>
@@ -749,16 +570,6 @@ export function TwoLevelLayout({ children }: LayoutProps) {
           {children}
         </SidebarProvider>
       </main>
-
-      {/* Click outside handler for notifications */}
-      {showNotifications && (
-        <div
-          className="fixed inset-0 z-40"
-          onClick={() => {
-            setShowNotifications(false)
-          }}
-        />
-      )}
     </div>
   )
 }

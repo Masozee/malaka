@@ -22,17 +22,18 @@ class AuthService {
 
   async login(credentials: LoginRequest): Promise<LoginResponse> {
     const response = await apiClient.post<LoginResponse>('/api/v1/masterdata/users/login', credentials)
-    
+
     // Store token in both localStorage and cookies (browser only)
     if (response.token && typeof window !== 'undefined') {
       localStorage.setItem(this.TOKEN_KEY, response.token)
-      
+      localStorage.setItem('user_email', credentials.email)
+
       // Store in cookies for middleware access
       this.setTokenCookie(response.token)
-      
+
       apiClient.setToken(response.token)
     }
-    
+
     return response
   }
 
@@ -40,7 +41,8 @@ class AuthService {
     if (typeof window !== 'undefined') {
       localStorage.removeItem(this.TOKEN_KEY)
       localStorage.removeItem(this.USER_KEY)
-      
+      localStorage.removeItem('user_email')
+
       // Remove token from cookies
       this.removeTokenCookie()
     }
@@ -82,10 +84,10 @@ class AuthService {
   isAuthenticated(): boolean {
     // Server-side rendering safety check
     if (typeof window === 'undefined') return false
-    
+
     const token = this.getToken()
     if (!token) return false
-    
+
     try {
       // Basic JWT expiration check
       const payload = JSON.parse(atob(token.split('.')[1]))

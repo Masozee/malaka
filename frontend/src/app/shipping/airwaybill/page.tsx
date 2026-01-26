@@ -18,17 +18,16 @@ import {
   DeliveryTruck01Icon,
   AlertCircleIcon,
   Money03Icon,
-  ChartBarLineIcon,
-  ChartLineData01Icon,
-  FilterHorizontalIcon,
-  Search01Icon,
-  Call02Icon,
   ViewIcon,
   PencilEdit01Icon,
   Download01Icon,
   ScanIcon,
-  Add01Icon
+  Add01Icon,
+  FilterHorizontalIcon,
+  Search01Icon,
+  DeleteIcon
 } from '@hugeicons/core-free-icons'
+import { useRouter } from 'next/navigation'
 
 import Link from 'next/link'
 
@@ -333,11 +332,10 @@ const mockAirwaybills: Airwaybill[] = [
 ]
 
 export default function AirwaybillPage() {
+  const router = useRouter()
   const [mounted, setMounted] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
-  const [statusFilter, setStatusFilter] = useState<string>('all')
-  const [courierFilter, setCourierFilter] = useState<string>('all')
-  const [packageTypeFilter, setPackageTypeFilter] = useState<string>('all')
+  // Simplified filters state
 
   useEffect(() => {
     setMounted(true)
@@ -364,9 +362,6 @@ export default function AirwaybillPage() {
       !awb.booking_code.toLowerCase().includes(searchTerm.toLowerCase()) &&
       !awb.order_number.toLowerCase().includes(searchTerm.toLowerCase()) &&
       !awb.recipient_name.toLowerCase().includes(searchTerm.toLowerCase())) return false
-    if (statusFilter !== 'all' && awb.status !== statusFilter) return false
-    if (courierFilter !== 'all' && awb.courier_name !== courierFilter) return false
-    if (packageTypeFilter !== 'all' && awb.package_type !== packageTypeFilter) return false
     return true
   })
 
@@ -545,247 +540,137 @@ export default function AirwaybillPage() {
         </div>
       )
     },
-    {
-      id: 'actions',
-      header: 'Actions',
-      cell: ({ row }) => (
-        <div className="flex items-center space-x-2">
-          <Button variant="ghost" size="sm" asChild>
-            <Link href={`/shipping/airwaybill/${row.original.id}`}>
-              <HugeiconsIcon icon={ViewIcon} className="h-4 w-4" />
-            </Link>
-          </Button>
-          {(row.original.status === 'confirmed' || row.original.status === 'printed') && (
-            <Button variant="ghost" size="sm">
-              <HugeiconsIcon icon={PrinterIcon} className="h-4 w-4" />
-            </Button>
-          )}
-          {row.original.status === 'draft' && (
-            <Button variant="ghost" size="sm" asChild>
-              <Link href={`/shipping/airwaybill/${row.original.id}/edit`}>
-                <HugeiconsIcon icon={PencilEdit01Icon} className="h-4 w-4" />
-              </Link>
-            </Button>
-          )}
-        </div>
-      )
-    }
   ]
 
   return (
     <TwoLevelLayout>
-      <div className="flex-1 space-y-6">
-        <Header
-          title="Airwaybill Management"
-          description="Create and manage shipping airwaybills and documentation"
-          breadcrumbs={breadcrumbs}
-          actions={
-            <div className="flex items-center space-x-3">
-              <Button variant="outline" size="sm">
-                <HugeiconsIcon icon={Download01Icon} className="h-4 w-4 mr-2" />
-                Export
-              </Button>
-              <Button variant="outline" size="sm">
-                <HugeiconsIcon icon={ScanIcon} className="h-4 w-4 mr-2" />
-                Bulk Print
-              </Button>
-              <Button size="sm" asChild>
-                <Link href="/shipping/airwaybill/new">
-                  <HugeiconsIcon icon={Add01Icon} className="h-4 w-4 mr-2" />
-                  Create AWB
-                </Link>
-              </Button>
-            </div>
-          }
-        />
+      <Header
+        title="Airwaybill Management"
+        description="Create and manage shipping airwaybills and documentation"
+        breadcrumbs={breadcrumbs}
+        actions={
+          <div className="flex items-center space-x-3">
+            <Button variant="outline" size="sm">
+              <HugeiconsIcon icon={Download01Icon} className="h-4 w-4 mr-2" />
+              Export
+            </Button>
+            <Button variant="outline" size="sm">
+              <HugeiconsIcon icon={ScanIcon} className="h-4 w-4 mr-2" />
+              Bulk Print
+            </Button>
+            <Button size="sm" asChild>
+              <Link href="/shipping/airwaybill/new">
+                <HugeiconsIcon icon={Add01Icon} className="h-4 w-4 mr-2" />
+                Create AWB
+              </Link>
+            </Button>
+          </div>
+        }
+      />
 
+      <div className="flex-1 overflow-auto p-6 space-y-6">
         {/* Summary Statistics */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-8 gap-6">
-          <Card className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Total AWB</p>
-                <p className="text-2xl font-bold mt-1">{summaryStats.totalAirwaybills}</p>
-                <p className="text-sm text-blue-600 mt-1">Created</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card className="p-4">
+            <div className="flex items-center space-x-3">
+              <div className="p-2 bg-blue-50 rounded-lg">
+                <HugeiconsIcon icon={Invoice01Icon} className="h-5 w-5 text-blue-600" />
               </div>
-              <HugeiconsIcon icon={Invoice01Icon} className="h-8 w-8 text-blue-600" />
+              <div>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total AWB</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{summaryStats.totalAirwaybills}</p>
+              </div>
             </div>
           </Card>
 
-          <Card className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Draft</p>
-                <p className="text-2xl font-bold mt-1 text-gray-600">{summaryStats.draftAirwaybills}</p>
-                <p className="text-sm text-gray-600 mt-1">Pending</p>
+          <Card className="p-4">
+            <div className="flex items-center space-x-3">
+              <div className="p-2 bg-orange-50 rounded-lg">
+                <HugeiconsIcon icon={PrinterIcon} className="h-5 w-5 text-orange-600" />
               </div>
-              <HugeiconsIcon icon={Invoice01Icon} className="h-8 w-8 text-gray-600" />
+              <div>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Printed</p>
+                <p className="text-2xl font-bold text-orange-600">{summaryStats.printedAirwaybills}</p>
+              </div>
             </div>
           </Card>
 
-          <Card className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Printed</p>
-                <p className="text-2xl font-bold mt-1 text-orange-600">{summaryStats.printedAirwaybills}</p>
-                <p className="text-sm text-orange-600 mt-1">Ready</p>
+          <Card className="p-4">
+            <div className="flex items-center space-x-3">
+              <div className="p-2 bg-blue-50 rounded-lg">
+                <HugeiconsIcon icon={DeliveryTruck01Icon} className="h-5 w-5 text-blue-600" />
               </div>
-              <HugeiconsIcon icon={PrinterIcon} className="h-8 w-8 text-orange-600" />
+              <div>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Dispatched</p>
+                <p className="text-2xl font-bold text-blue-600">{summaryStats.dispatchedAirwaybills}</p>
+              </div>
             </div>
           </Card>
 
-          <Card className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Dispatched</p>
-                <p className="text-2xl font-bold mt-1 text-blue-600">{summaryStats.dispatchedAirwaybills}</p>
-                <p className="text-sm text-blue-600 mt-1">In transit</p>
+          <Card className="p-4">
+            <div className="flex items-center space-x-3">
+              <div className="p-2 bg-green-50 rounded-lg">
+                <HugeiconsIcon icon={CheckmarkCircle01Icon} className="h-5 w-5 text-green-600" />
               </div>
-              <HugeiconsIcon icon={DeliveryTruck01Icon} className="h-8 w-8 text-blue-600" />
-            </div>
-          </Card>
-
-          <Card className="p-6">
-            <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Delivered</p>
-                <p className="text-2xl font-bold mt-1 text-green-600">{summaryStats.deliveredAirwaybills}</p>
-                <p className="text-sm text-green-600 mt-1">Completed</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Delivered</p>
+                <p className="text-2xl font-bold text-green-600">{summaryStats.deliveredAirwaybills}</p>
               </div>
-              <HugeiconsIcon icon={CheckmarkCircle01Icon} className="h-8 w-8 text-green-600" />
-            </div>
-          </Card>
-
-          <Card className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Total Value</p>
-                <p className="text-2xl font-bold mt-1">
-                  {mounted ? `Rp ${(summaryStats.totalDeclaredValue / 1000000000).toFixed(1)}B` : ''}
-                </p>
-                <p className="text-sm text-green-600 mt-1">Declared</p>
-              </div>
-              <HugeiconsIcon icon={Money03Icon} className="h-8 w-8 text-green-600" />
-            </div>
-          </Card>
-
-          <Card className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Shipping Revenue</p>
-                <p className="text-2xl font-bold mt-1">
-                  {mounted ? `Rp ${(summaryStats.totalShippingCost / 1000000).toFixed(1)}M` : ''}
-                </p>
-                <p className="text-sm text-purple-600 mt-1">Collected</p>
-              </div>
-              <HugeiconsIcon icon={ChartBarLineIcon} className="h-8 w-8 text-purple-600" />
-            </div>
-          </Card>
-
-          <Card className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Avg Delivery</p>
-                <p className="text-2xl font-bold mt-1">
-                  {mounted ? `${summaryStats.avgDeliveryTime.toFixed(1)}` : ''}
-                </p>
-                <p className="text-sm text-gray-600 mt-1">Days</p>
-              </div>
-              <HugeiconsIcon icon={ChartLineData01Icon} className="h-8 w-8 text-gray-600" />
             </div>
           </Card>
         </div>
 
-        {/* Filters */}
-        <Card className="p-6">
-          <div className="flex items-center space-x-4">
-            <HugeiconsIcon icon={FilterHorizontalIcon} className="h-5 w-5 text-muted-foreground" />
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 flex-1">
-              <div className="space-y-2">
-                <Label htmlFor="search">Search</Label>
-                <div className="relative">
-                  <HugeiconsIcon icon={Search01Icon} className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="search"
-                    placeholder="Search AWB..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-9"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="status">Status</Label>
-                <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="All statuses" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All statuses</SelectItem>
-                    <SelectItem value="draft">Draft</SelectItem>
-                    <SelectItem value="confirmed">Confirmed</SelectItem>
-                    <SelectItem value="printed">Printed</SelectItem>
-                    <SelectItem value="dispatched">Dispatched</SelectItem>
-                    <SelectItem value="delivered">Delivered</SelectItem>
-                    <SelectItem value="cancelled">Cancelled</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="courier">Courier</Label>
-                <Select value={courierFilter} onValueChange={setCourierFilter}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="All couriers" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All couriers</SelectItem>
-                    {couriers.map(courier => (
-                      <SelectItem key={courier} value={courier}>{courier}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="packageType">Package Type</Label>
-                <Select value={packageTypeFilter} onValueChange={setPackageTypeFilter}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="All types" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All types</SelectItem>
-                    <SelectItem value="document">Document</SelectItem>
-                    <SelectItem value="package">Package</SelectItem>
-                    <SelectItem value="fragile">Fragile</SelectItem>
-                    <SelectItem value="liquid">Liquid</SelectItem>
-                    <SelectItem value="special">Special</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
+        {/* Filters and Actions */}
+        <div className="flex items-center justify-end gap-2">
+          <div className="relative">
+            <HugeiconsIcon icon={Search01Icon} className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search AWB..."
+              className="pl-9 w-64"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              aria-label="Search airwaybills"
+            />
           </div>
-        </Card>
+          <Button variant="outline" size="sm">
+            <HugeiconsIcon icon={FilterHorizontalIcon} className="h-4 w-4 mr-2" />
+            Filters
+          </Button>
+          <Button variant="outline" size="sm">
+            <HugeiconsIcon icon={Download01Icon} className="h-4 w-4 mr-2" />
+            Export
+          </Button>
+        </div>
 
         {/* Content */}
-        <Card>
-          <div className="p-6 border-b">
-            <h3 className="text-lg font-semibold">All Airwaybills</h3>
-            <p className="text-sm text-muted-foreground">Manage all shipping airwaybills and documentation</p>
-          </div>
-          <TanStackDataTable
-            data={filteredAirwaybills}
-            columns={columns}
-            pagination={{
-              pageIndex: 0,
-              pageSize: 10,
-              totalRows: filteredAirwaybills.length,
-              onPageChange: () => { }
-            }}
-            onEdit={(awb) => window.location.href = `/shipping/airwaybill/${awb.id}/edit`}
-          />
-        </Card>
+        <TanStackDataTable
+          data={filteredAirwaybills}
+          columns={columns}
+          pagination={{
+            pageIndex: 0,
+            pageSize: 10,
+            totalRows: filteredAirwaybills.length,
+            onPageChange: () => { }
+          }}
+          onEdit={(awb) => router.push(`/shipping/airwaybill/${awb.id}/edit`)}
+          onDelete={(awb) => {
+            if (confirm('Are you sure you want to delete this airwaybill?')) {
+              console.log('Delete airwaybill', awb.id)
+            }
+          }}
+          customActions={[
+            {
+              label: 'View Details',
+              icon: ViewIcon,
+              onClick: (awb) => router.push(`/shipping/airwaybill/${awb.id}`)
+            },
+            {
+              label: 'Print AWB',
+              icon: PrinterIcon,
+              onClick: (awb) => console.log('Print', awb.id)
+            }
+          ]}
+        />
 
         {/* Draft Airwaybills Alert */}
         {summaryStats.draftAirwaybills > 0 && (

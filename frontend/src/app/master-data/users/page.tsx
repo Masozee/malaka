@@ -22,6 +22,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/dialog"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { UserForm } from "@/components/forms/user-form"
@@ -33,13 +34,15 @@ import { HugeiconsIcon } from "@hugeicons/react"
 import {
   Mail01Icon,
   UserAdd01Icon,
-  RefreshIcon,
   Delete01Icon,
   Cancel01Icon,
   Clock01Icon,
   CheckmarkCircle01Icon,
   AlertCircleIcon,
   MoreVerticalIcon,
+  Search01Icon,
+  FilterIcon,
+  Download01Icon,
 } from "@hugeicons/core-free-icons"
 import {
   DropdownMenu,
@@ -262,11 +265,6 @@ export default function UsersPage() {
     setPagination(prev => ({ ...prev, current: page, pageSize }))
   }, [])
 
-  const handleAdd = () => {
-    setSelectedUser(null)
-    setFormOpen(true)
-  }
-
   const handleEdit = (user: User) => {
     setSelectedUser(user)
     setFormOpen(true)
@@ -430,6 +428,65 @@ export default function UsersPage() {
 
   const pendingCount = invitations.filter(i => i.status === 'pending').length
 
+  // Search and filter state for custom toolbar
+  const [searchTerm, setSearchTerm] = React.useState("")
+  const [filterOpen, setFilterOpen] = React.useState(false)
+  const [filters, setFilters] = React.useState<Record<string, string>>({})
+
+  // Handle search with debounce
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      handleSearch({
+        search: searchTerm,
+        ...filters,
+        page: 1,
+        limit: pagination.pageSize
+      })
+    }, 300)
+    return () => clearTimeout(timer)
+  }, [searchTerm])
+
+  // Handle filter changes
+  const handleFilterChange = (key: string, value: string) => {
+    const newFilters = { ...filters }
+    if (value && value !== 'all') {
+      newFilters[key] = value
+    } else {
+      delete newFilters[key]
+    }
+    setFilters(newFilters)
+    handleSearch({
+      search: searchTerm,
+      ...newFilters,
+      page: 1,
+      limit: pagination.pageSize
+    })
+  }
+
+  // Export functionality
+  const handleExport = () => {
+    const visibleColumns = columns.filter(col => !col.hidden)
+    const csvContent = [
+      visibleColumns.map(col => col.title).join(','),
+      ...users.map(row =>
+        visibleColumns.map(col => {
+          const value = row[col.key as keyof User]
+          return `"${String(value || '').replace(/"/g, '""')}"`
+        }).join(',')
+      )
+    ].join('\n')
+
+    const blob = new Blob([csvContent], { type: 'text/csv' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'users-export.csv'
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
+  const activeFiltersCount = Object.keys(filters).length
+
   return (
     <TwoLevelLayout>
       <Header
@@ -440,27 +497,141 @@ export default function UsersPage() {
           { label: "Master Data", href: "/master-data" },
           { label: "Users" }
         ]}
+        actions={
+          <Button onClick={() => setShowInviteDialog(true)}>
+            <HugeiconsIcon icon={Mail01Icon} className="h-4 w-4 mr-2" />
+            Invite User
+          </Button>
+        }
       />
 
       <div className="flex-1 p-6">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
+          {/* Custom toolbar with tabs on left, search/filter/export on right */}
           <div className="flex items-center justify-between mb-4">
-            <TabsList>
-              <TabsTrigger value="users">Users</TabsTrigger>
-              <TabsTrigger value="invitations" className="flex items-center gap-2">
-                Invitations
-                {pendingCount > 0 && (
-                  <Badge variant="secondary" className="ml-1">
-                    {pendingCount}
-                  </Badge>
-                )}
-              </TabsTrigger>
-            </TabsList>
+            <div className="flex items-center gap-4">
+              <TabsList>
+                <TabsTrigger value="users">Users</TabsTrigger>
+                <TabsTrigger value="invitations" className="flex items-center gap-2">
+                  Invitations
+                  {pendingCount > 0 && (
+                    <Badge variant="secondary" className="ml-1">
+                      {pendingCount}
+                    </Badge>
+                  )}
+                </TabsTrigger>
+              </TabsList>
+            </div>
 
-            <Button onClick={() => setShowInviteDialog(true)} variant="outline">
-              <HugeiconsIcon icon={Mail01Icon} className="h-4 w-4 mr-2" />
-              Invite User
-            </Button>
+            <div className="flex items-center gap-2">
+              {/* Search */}
+              <div className="relative">
+                <HugeiconsIcon icon={Search01Icon} className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Input
+                  placeholder="Search users..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10 w-64"
+                />
+              </div>
+
+              {/* Filters */}
+              <Dialog open={filterOpen} onOpenChange={setFilterOpen}>
+                <DialogTrigger asChild>
+                  <Button variant="outline" size="sm" className="relative">
+                    <HugeiconsIcon icon={FilterIcon} className="h-4 w-4 mr-2" />
+                    Filters
+                    {activeFiltersCount > 0 && (
+                      <Badge variant="secondary" className="ml-2 h-5 w-5 p-0 text-xs">
+                        {activeFiltersCount}
+                      </Badge>
+                    )}
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-md">
+                  <DialogHeader>
+                    <DialogTitle>Filter Options</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Company</label>
+                      <Select
+                        value={filters['company_id'] || ""}
+                        onValueChange={(value) => handleFilterChange('company_id', value)}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="All Companies" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">All Companies</SelectItem>
+                          {companies.map(company => (
+                            <SelectItem key={company.id} value={company.id}>
+                              {company.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Role</label>
+                      <Select
+                        value={filters['role'] || ""}
+                        onValueChange={(value) => handleFilterChange('role', value)}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="All Roles" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">All Roles</SelectItem>
+                          <SelectItem value="admin">Admin</SelectItem>
+                          <SelectItem value="manager">Manager</SelectItem>
+                          <SelectItem value="user">User</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Status</label>
+                      <Select
+                        value={filters['status'] || ""}
+                        onValueChange={(value) => handleFilterChange('status', value)}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="All Status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">All Status</SelectItem>
+                          <SelectItem value="active">Active</SelectItem>
+                          <SelectItem value="inactive">Inactive</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    {activeFiltersCount > 0 && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setFilters({})
+                          handleSearch({
+                            search: searchTerm,
+                            page: 1,
+                            limit: pagination.pageSize
+                          })
+                        }}
+                        className="w-full"
+                      >
+                        Clear All Filters
+                      </Button>
+                    )}
+                  </div>
+                </DialogContent>
+              </Dialog>
+
+              {/* Export */}
+              <Button variant="outline" size="sm" onClick={handleExport}>
+                <HugeiconsIcon icon={Download01Icon} className="h-4 w-4 mr-2" />
+                Export
+              </Button>
+            </div>
           </div>
 
           <TabsContent value="users" className="mt-0">
@@ -474,16 +645,12 @@ export default function UsersPage() {
                 total: pagination.total,
                 onChange: handlePageChange
               }}
-              onSearch={handleSearch}
-              onAdd={handleAdd}
               onEdit={handleEdit}
               onDelete={handleDelete}
               onBulkAction={handleBulkAction}
               bulkActions={bulkActions}
-              searchPlaceholder="Search users by name, email, or username..."
-              addButtonText="Add User"
-              exportEnabled={true}
               rowSelection={true}
+              showToolbar={false}
             />
           </TabsContent>
 

@@ -7,11 +7,25 @@ import { Badge } from '@/components/ui/badge'
 import { TwoLevelLayout } from '@/components/ui/two-level-layout'
 import { Header } from '@/components/ui/header'
 import { TanStackDataTable, TanStackColumn } from '@/components/ui/tanstack-data-table'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import { useRouter } from 'next/navigation'
 
 import Link from 'next/link'
+import { HugeiconsIcon } from '@hugeicons/react'
+import {
+  DeliveryTruck01Icon,
+  CheckmarkCircle01Icon,
+  AlertCircleIcon,
+  StarIcon,
+  Globe02Icon,
+  FilterHorizontalIcon,
+  Search01Icon,
+  ViewIcon,
+  PencilEdit01Icon,
+  Download01Icon,
+  Add01Icon,
+  DeleteIcon
+} from '@hugeicons/core-free-icons'
 
 // Courier types
 interface Courier {
@@ -297,28 +311,14 @@ const mockCouriers: Courier[] = [
   }
 ]
 
-import { HugeiconsIcon } from '@hugeicons/react'
-import {
-  DeliveryTruck01Icon,
-  CheckmarkCircle01Icon,
-  AlertCircleIcon,
-  StarIcon,
-  Globe02Icon,
-  FilterHorizontalIcon,
-  Search01Icon,
-  Call02Icon,
-  ViewIcon,
-  PencilEdit01Icon,
-  Download01Icon,
-  Add01Icon
-} from '@hugeicons/core-free-icons'
+
 
 export default function CouriersPage() {
+  const router = useRouter()
   const [mounted, setMounted] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
-  const [serviceTypeFilter, setServiceTypeFilter] = useState<string>('all')
-  const [coverageFilter, setCoverageFilter] = useState<string>('all')
-  const [statusFilter, setStatusFilter] = useState<string>('all')
+  // Simplified filters state - complex filters removed from UI to match standard
+  // In a real app these might be in a "Filter" drawer/popover
 
   useEffect(() => {
     setMounted(true)
@@ -339,14 +339,6 @@ export default function CouriersPage() {
     if (searchTerm && !courier.courier_name.toLowerCase().includes(searchTerm.toLowerCase()) &&
       !courier.company_name.toLowerCase().includes(searchTerm.toLowerCase()) &&
       !courier.courier_code.toLowerCase().includes(searchTerm.toLowerCase())) return false
-    if (serviceTypeFilter !== 'all' && courier.service_type !== serviceTypeFilter) return false
-    if (coverageFilter !== 'all' && courier.coverage_area !== coverageFilter) return false
-    if (statusFilter !== 'all') {
-      if (statusFilter === 'active' && !courier.is_active) return false
-      if (statusFilter === 'inactive' && courier.is_active) return false
-      if (statusFilter === 'preferred' && !courier.is_preferred) return false
-      if (statusFilter === 'api_integrated' && !courier.api_integration) return false
-    }
     return true
   })
 
@@ -507,207 +499,125 @@ export default function CouriersPage() {
           <Badge variant={variant}>{label}</Badge>
         )
       }
-    },
-    {
-      id: 'actions',
-      header: 'Actions',
-      cell: ({ row }) => (
-        <div className="flex items-center space-x-2">
-          <Button variant="ghost" size="sm" asChild>
-            <Link href={`/shipping/couriers/${row.original.id}`}>
-              <HugeiconsIcon icon={ViewIcon} className="h-4 w-4" />
-            </Link>
-          </Button>
-          <Button variant="ghost" size="sm" asChild>
-            <Link href={`/shipping/couriers/${row.original.id}/edit`}>
-              <HugeiconsIcon icon={PencilEdit01Icon} className="h-4 w-4" />
-            </Link>
-          </Button>
-        </div>
-      )
     }
   ]
 
   return (
     <TwoLevelLayout>
-      <div className="flex-1 space-y-6">
-        <Header
-          title="Courier Management"
-          description="Manage shipping couriers and delivery partners"
-          breadcrumbs={breadcrumbs}
-          actions={
-            <div className="flex items-center space-x-3">
-              <Button size="sm" asChild>
-                <Link href="/shipping/couriers/new">
-                  <HugeiconsIcon icon={Add01Icon} className="h-4 w-4 mr-2" />
-                  Add Courier
-                </Link>
-              </Button>
-            </div>
-          }
-        />
+      <Header
+        title="Courier Management"
+        description="Manage shipping couriers and delivery partners"
+        breadcrumbs={breadcrumbs}
+        actions={
+          <div className="flex items-center space-x-3">
+            <Button size="sm" asChild>
+              <Link href="/shipping/couriers/new">
+                <HugeiconsIcon icon={Add01Icon} className="h-4 w-4 mr-2" />
+                Add Courier
+              </Link>
+            </Button>
+          </div>
+        }
+      />
 
-        {/* Summary Statistics */}
+      <div className="flex-1 overflow-auto p-6 space-y-6">
+        {/* Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Total Couriers</p>
-                <p className="text-2xl font-bold mt-1">{summaryStats.totalCouriers}</p>
-                <p className="text-sm text-blue-600 mt-1">Partners</p>
+            <div className="flex items-center space-x-3">
+              <div className="p-2 bg-blue-50 rounded-lg">
+                <HugeiconsIcon icon={DeliveryTruck01Icon} className="h-5 w-5 text-blue-600" />
               </div>
-              <HugeiconsIcon icon={DeliveryTruck01Icon} className="h-8 w-8 text-blue-600" />
+              <div>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Couriers</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{summaryStats.totalCouriers}</p>
+              </div>
             </div>
           </Card>
 
           <Card className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Active</p>
-                <p className="text-2xl font-bold mt-1 text-green-600">{summaryStats.activeCouriers}</p>
-                <p className="text-sm text-green-600 mt-1">Available</p>
+            <div className="flex items-center space-x-3">
+              <div className="p-2 bg-green-50 rounded-lg">
+                <HugeiconsIcon icon={CheckmarkCircle01Icon} className="h-5 w-5 text-green-600" />
               </div>
-              <HugeiconsIcon icon={CheckmarkCircle01Icon} className="h-8 w-8 text-green-600" />
+              <div>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Active</p>
+                <p className="text-2xl font-bold text-green-600">{summaryStats.activeCouriers}</p>
+              </div>
             </div>
           </Card>
 
           <Card className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Preferred</p>
-                <p className="text-2xl font-bold mt-1 text-yellow-600">{summaryStats.preferredCouriers}</p>
-                <p className="text-sm text-yellow-600 mt-1">Partners</p>
+            <div className="flex items-center space-x-3">
+              <div className="p-2 bg-yellow-50 rounded-lg">
+                <HugeiconsIcon icon={StarIcon} className="h-5 w-5 text-yellow-600" />
               </div>
-              <HugeiconsIcon icon={StarIcon} className="h-8 w-8 text-yellow-600" />
+              <div>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Preferred</p>
+                <p className="text-2xl font-bold text-yellow-600">{summaryStats.preferredCouriers}</p>
+              </div>
             </div>
           </Card>
 
           <Card className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">API Integrated</p>
-                <p className="text-2xl font-bold mt-1 text-purple-600">{summaryStats.apiIntegrated}</p>
-                <p className="text-sm text-purple-600 mt-1">Connected</p>
+            <div className="flex items-center space-x-3">
+              <div className="p-2 bg-purple-50 rounded-lg">
+                <HugeiconsIcon icon={Globe02Icon} className="h-5 w-5 text-purple-600" />
               </div>
-              <HugeiconsIcon icon={Globe02Icon} className="h-8 w-8 text-purple-600" />
+              <div>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">API Integrated</p>
+                <p className="text-2xl font-bold text-purple-600">{summaryStats.apiIntegrated}</p>
+              </div>
             </div>
           </Card>
-
         </div>
 
-        {/* Filters */}
-        <Card className="p-4">
-          <div className="flex items-center space-x-4">
-            <HugeiconsIcon icon={FilterHorizontalIcon} className="h-5 w-5 text-muted-foreground" />
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-3 flex-1">
-              <div className="space-y-2">
-                <Label htmlFor="search">Search</Label>
-                <div className="relative">
-                  <HugeiconsIcon icon={Search01Icon} className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="search"
-                    placeholder="Search couriers..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-9"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="serviceType">Service Type</Label>
-                <Select value={serviceTypeFilter} onValueChange={setServiceTypeFilter}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="All services" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All services</SelectItem>
-                    <SelectItem value="regular">Regular</SelectItem>
-                    <SelectItem value="express">Express</SelectItem>
-                    <SelectItem value="same_day">Same Day</SelectItem>
-                    <SelectItem value="economy">Economy</SelectItem>
-                    <SelectItem value="international">International</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="coverage">Coverage</Label>
-                <Select value={coverageFilter} onValueChange={setCoverageFilter}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="All coverage" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All coverage</SelectItem>
-                    <SelectItem value="local">Local</SelectItem>
-                    <SelectItem value="national">National</SelectItem>
-                    <SelectItem value="international">International</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="status">Status</Label>
-                <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="All statuses" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All statuses</SelectItem>
-                    <SelectItem value="active">Active</SelectItem>
-                    <SelectItem value="inactive">Inactive</SelectItem>
-                    <SelectItem value="preferred">Preferred</SelectItem>
-                    <SelectItem value="api_integrated">API Integrated</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <div className="flex items-end space-x-2 pt-8">
-              <Button variant="outline" size="sm">
-                <HugeiconsIcon icon={Download01Icon} className="h-4 w-4 mr-2" />
-                Export
-              </Button>
-            </div>
+        {/* Filters and Actions */}
+        <div className="flex items-center justify-end gap-2">
+          <div className="relative">
+            <HugeiconsIcon icon={Search01Icon} className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search couriers..."
+              className="pl-9 w-64"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              aria-label="Search couriers"
+            />
           </div>
-        </Card>
+          <Button variant="outline" size="sm">
+            <HugeiconsIcon icon={FilterHorizontalIcon} className="h-4 w-4 mr-2" />
+            Filters
+          </Button>
+          <Button variant="outline" size="sm">
+            <HugeiconsIcon icon={Download01Icon} className="h-4 w-4 mr-2" />
+            Export
+          </Button>
+        </div>
 
         {/* Content */}
-        <Card>
-          <div className="p-6 border-b">
-            <h3 className="text-lg font-semibold">Courier Partners</h3>
-            <p className="text-sm text-muted-foreground">Manage all shipping couriers and delivery partners</p>
-          </div>
-          <TanStackDataTable
-            data={filteredCouriers}
-            columns={columns}
-            pagination={{
-              pageIndex: 0,
-              pageSize: 10,
-              totalRows: filteredCouriers.length,
-              onPageChange: () => { }
-            }}
-            onEdit={(courier) => window.location.href = `/shipping/couriers/${courier.id}/edit`}
-          />
-        </Card>
-
-        {/* Inactive Couriers Alert */}
-        {mockCouriers.filter(c => !c.is_active).length > 0 && (
-          <Card className="p-6 border-orange-200 bg-orange-50">
-            <div className="flex items-center space-x-3">
-              <HugeiconsIcon icon={AlertCircleIcon} className="h-6 w-6 text-orange-600" />
-              <div className="flex-1">
-                <h3 className="text-lg font-semibold text-orange-800">Inactive Couriers</h3>
-                <p className="text-orange-700 mt-1">
-                  {mockCouriers.filter(c => !c.is_active).length} couriers are currently inactive and may need review or contract renewal.
-                </p>
-              </div>
-              <Button variant="outline" className="border-orange-300 text-orange-700 hover:bg-orange-100">
-                Review Couriers
-              </Button>
-            </div>
-          </Card>
-        )}
+        <TanStackDataTable
+          data={filteredCouriers}
+          columns={columns}
+          pagination={{
+            pageIndex: 0,
+            pageSize: 10,
+            totalRows: filteredCouriers.length,
+            onPageChange: () => { }
+          }}
+          onEdit={(courier) => router.push(`/shipping/couriers/${courier.id}/edit`)}
+          onDelete={(courier) => {
+            if (confirm('Are you sure you want to delete this courier?')) {
+              console.log('Delete courier', courier.id)
+            }
+          }}
+          customActions={[
+            {
+              label: 'View Details',
+              icon: ViewIcon,
+              onClick: (courier) => router.push(`/shipping/couriers/${courier.id}`)
+            }
+          ]}
+        />
       </div>
     </TwoLevelLayout>
   )

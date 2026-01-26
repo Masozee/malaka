@@ -5,29 +5,47 @@ import { HugeiconsIcon } from '@hugeicons/react'
 import {
   ArrowRightIcon,
   Search01Icon,
-  LocationIcon,
-  Sun01Icon,
-  CloudIcon,
-  RainIcon,
-  SnowIcon,
-  SidebarLeftIcon
+  SidebarLeftIcon,
+  Notification01Icon,
+  UserIcon,
+  Settings01Icon,
+  Logout01Icon,
+  UserCircleIcon,
 } from '@hugeicons/core-free-icons'
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 
 import { Button } from "@/components/ui/button"
 import { CommandPalette } from "@/components/ui/command"
 import { useSidebar } from "@/contexts/sidebar-context"
+import { useAuth } from "@/contexts/auth-context"
+import { Badge } from "@/components/ui/badge"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
 
 interface BreadcrumbItem {
   label: string
   href?: string
 }
 
-interface WeatherData {
-  location: string
-  temperature: number
-  condition: string
-  humidity: number
+interface Notification {
+  id: string
+  title: string
+  message: string
+  time: string
+  read: boolean
+  type: 'info' | 'warning' | 'success' | 'error'
 }
 
 interface HeaderProps {
@@ -39,126 +57,63 @@ interface HeaderProps {
 
 export function Header({ title, description, breadcrumbs, actions }: HeaderProps) {
   const sidebar = useSidebar()
+  const { user, logout } = useAuth()
+  const router = useRouter()
   const [commandOpen, setCommandOpen] = React.useState(false)
-  const [weather, setWeather] = React.useState<WeatherData | null>(null)
-  const [loading, setLoading] = React.useState(false)
   const [mounted, setMounted] = React.useState(false)
+
+  // Mock notifications - in production, fetch from API
+  const [notifications] = React.useState<Notification[]>([
+    {
+      id: '1',
+      title: 'New Order Received',
+      message: 'Order #12345 has been placed',
+      time: '5 min ago',
+      read: false,
+      type: 'info'
+    },
+    {
+      id: '2',
+      title: 'Low Stock Alert',
+      message: 'Product SKU-001 is running low',
+      time: '1 hour ago',
+      read: false,
+      type: 'warning'
+    },
+    {
+      id: '3',
+      title: 'Payment Received',
+      message: 'Invoice #INV-2024-001 paid',
+      time: '2 hours ago',
+      read: true,
+      type: 'success'
+    },
+  ])
+
+  const unreadCount = notifications.filter(n => !n.read).length
 
   React.useEffect(() => {
     setMounted(true)
-    fetchLocationAndWeather()
   }, [])
 
-  const fetchLocationAndWeather = async () => {
-    try {
-      setLoading(true)
-      
-      // Check if we have a weather API key, if not, use mock data
-      const API_KEY = process.env.NEXT_PUBLIC_WEATHER_API_KEY
-      if (!API_KEY || API_KEY === 'demo_key') {
-        // Use mock data for Jakarta
-        setWeather({
-          location: 'Jakarta',
-          temperature: 28,
-          condition: 'Clear',
-          humidity: 65
-        })
-        return
-      }
-
-      // Check if geolocation is available
-      if (!navigator.geolocation) {
-        setWeather({
-          location: 'Jakarta',
-          temperature: 28,
-          condition: 'Clear',
-          humidity: 65
-        })
-        return
-      }
-      
-      // Get user's location with timeout
-      const position = await new Promise<GeolocationPosition>((resolve, reject) => {
-        navigator.geolocation.getCurrentPosition(resolve, reject, {
-          timeout: 5000,
-          enableHighAccuracy: false,
-          maximumAge: 600000 // 10 minutes cache
-        })
-      })
-
-      const { latitude, longitude } = position.coords
-      
-      // Fetch weather data from OpenWeatherMap API with timeout
-      const controller = new AbortController()
-      const timeoutId = setTimeout(() => controller.abort(), 5000)
-      
-      const response = await fetch(
-        `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${API_KEY}&units=metric`,
-        { 
-          method: 'GET',
-          headers: {
-            'Accept': 'application/json',
-          },
-          signal: controller.signal
-        }
-      )
-      
-      clearTimeout(timeoutId)
-      
-      if (response.ok) {
-        const data = await response.json()
-        setWeather({
-          location: data.name,
-          temperature: Math.round(data.main.temp),
-          condition: data.weather[0].main,
-          humidity: data.main.humidity
-        })
-      } else {
-        // Fallback to mock data if API fails
-        setWeather({
-          location: 'Jakarta',
-          temperature: 28,
-          condition: 'Clear',
-          humidity: 65
-        })
-      }
-    } catch (error) {
-      // Silently fall back to mock data - don't log errors in production
-      if (process.env.NODE_ENV === 'development') {
-        console.warn('Weather fetch failed, using mock data:', error)
-      }
-      setWeather({
-        location: 'Jakarta',
-        temperature: 28,
-        condition: 'Clear',
-        humidity: 65
-      })
-    } finally {
-      setLoading(false)
-    }
+  const handleLogout = async () => {
+    await logout()
+    router.push('/login')
   }
 
-  const getWeatherIcon = (condition: string) => {
-    switch (condition.toLowerCase()) {
-      case 'clear':
-      case 'sunny':
-        return <HugeiconsIcon icon={Sun01Icon} className="h-4 w-4 text-yellow-500" />
-      case 'clouds':
-      case 'cloudy':
-        return <HugeiconsIcon icon={CloudIcon} className="h-4 w-4 text-gray-500" />
-      case 'rain':
-      case 'drizzle':
-        return <HugeiconsIcon icon={RainIcon} className="h-4 w-4 text-blue-500" />
-      case 'snow':
-        return <HugeiconsIcon icon={SnowIcon} className="h-4 w-4 text-blue-200" />
-      default:
-        return <HugeiconsIcon icon={Sun01Icon} className="h-4 w-4 text-yellow-500" />
+  const getNotificationColor = (type: Notification['type']) => {
+    switch (type) {
+      case 'info': return 'bg-blue-100 text-blue-800'
+      case 'warning': return 'bg-yellow-100 text-yellow-800'
+      case 'success': return 'bg-green-100 text-green-800'
+      case 'error': return 'bg-red-100 text-red-800'
+      default: return 'bg-gray-100 text-gray-800'
     }
   }
 
   return (
     <div>
-      {/* Combined Navbar with Breadcrumb, Command, and Theme Toggle */}
+      {/* Combined Navbar with Breadcrumb, Command, and Profile */}
       <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 px-6 py-3">
         <div className="flex items-center justify-between">
           {/* Left Side - Toggle Button and Breadcrumbs */}
@@ -204,9 +159,9 @@ export function Header({ title, description, breadcrumbs, actions }: HeaderProps
             )}
           </div>
 
-          {/* Right Side - Actions */}
-          <div className="flex items-center space-x-3 ml-4">
-            {/* Command Palette Trigger - Wider */}
+          {/* Right Side - Search, Notifications, Profile */}
+          <div className="flex items-center space-x-2 ml-4">
+            {/* Command Palette Trigger */}
             <Button
               variant="outline"
               size="sm"
@@ -222,28 +177,123 @@ export function Header({ title, description, breadcrumbs, actions }: HeaderProps
             </Button>
 
             {/* Separator */}
-            {mounted && weather && (
-              <div className="h-8 w-px bg-gray-300 dark:bg-gray-600" aria-hidden="true" />
+            <div className="h-8 w-px bg-gray-300 dark:bg-gray-600" aria-hidden="true" />
+
+            {/* Notifications */}
+            {mounted && (
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="relative h-8 w-8 p-0"
+                    aria-label="Notifications"
+                  >
+                    <HugeiconsIcon icon={Notification01Icon} className="h-4 w-4" />
+                    {unreadCount > 0 && (
+                      <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-red-500 text-[10px] font-medium text-white flex items-center justify-center">
+                        {unreadCount}
+                      </span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-80 p-0" align="end">
+                  <div className="p-3 border-b">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-semibold text-sm">Notifications</h4>
+                      {unreadCount > 0 && (
+                        <Badge variant="secondary" className="text-xs">
+                          {unreadCount} new
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                  <div className="max-h-80 overflow-y-auto">
+                    {notifications.length === 0 ? (
+                      <div className="p-4 text-center text-sm text-muted-foreground">
+                        No notifications
+                      </div>
+                    ) : (
+                      notifications.map((notification) => (
+                        <div
+                          key={notification.id}
+                          className={`p-3 border-b last:border-0 hover:bg-muted/50 cursor-pointer ${!notification.read ? 'bg-muted/30' : ''
+                            }`}
+                        >
+                          <div className="flex items-start gap-2">
+                            <Badge className={`${getNotificationColor(notification.type)} text-[10px] px-1.5 py-0`}>
+                              {notification.type}
+                            </Badge>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium truncate">{notification.title}</p>
+                              <p className="text-xs text-muted-foreground truncate">{notification.message}</p>
+                              <p className="text-xs text-muted-foreground mt-1">{notification.time}</p>
+                            </div>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                  <div className="p-2 border-t">
+                    <Button variant="ghost" size="sm" className="w-full text-xs">
+                      View all notifications
+                    </Button>
+                  </div>
+                </PopoverContent>
+              </Popover>
             )}
 
-            {/* Weather Display - Icon and Temperature only */}
-            {mounted && weather && (
-              <div
-                className="flex items-center space-x-2"
-                aria-label={`Weather: ${weather.temperature}°C ${weather.condition}`}
-              >
-                <span aria-hidden="true">{getWeatherIcon(weather.condition)}</span>
-                <span className="text-sm text-gray-900 dark:text-gray-100 font-semibold">
-                  {weather.temperature}°C
-                </span>
-              </div>
-            )}
+            {/* Separator */}
+            <div className="h-8 w-px bg-gray-300 dark:bg-gray-600" aria-hidden="true" />
 
+            {/* Profile Dropdown */}
+            {mounted && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 w-8 rounded-full p-0"
+                    title={user?.username || 'User'}
+                  >
+                    <div className="h-full w-full rounded-full bg-primary/10 flex items-center justify-center">
+                      <HugeiconsIcon icon={UserIcon} className="h-4 w-4 text-primary" />
+                    </div>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuLabel className="font-normal">
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-sm font-medium">{user?.username || 'User'}</p>
+                      <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link href="/settings" className="cursor-pointer">
+                      <HugeiconsIcon icon={UserCircleIcon} className="h-4 w-4 mr-2" />
+                      Profile
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/settings" className="cursor-pointer">
+                      <HugeiconsIcon icon={Settings01Icon} className="h-4 w-4 mr-2" />
+                      Settings
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-red-600">
+                    <HugeiconsIcon icon={Logout01Icon} className="h-4 w-4 mr-2" />
+                    Log out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
           </div>
         </div>
       </div>
 
-      {/* Page Title Section with More Gap */}
+      {/* Page Title Section */}
       <header className="bg-white dark:bg-gray-900 px-6 py-6">
         <div className="flex items-start justify-between">
           <div>
