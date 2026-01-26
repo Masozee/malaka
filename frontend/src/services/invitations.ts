@@ -37,11 +37,15 @@ export interface Invitation {
   id: string
   email: string
   role: string
-  company_name: string
-  inviter_name: string
+  company_id: string
+  company_name?: string
+  invited_by: string
+  inviter_name?: string
   status: 'pending' | 'accepted' | 'expired' | 'revoked'
   expires_at: string
   created_at: string
+  updated_at: string
+  metadata?: Record<string, unknown>
 }
 
 export interface ListInvitationsResponse {
@@ -147,6 +151,13 @@ class InvitationService {
   async deleteInvitation(id: string): Promise<void> {
     await apiClient.delete(`/api/v1/invitations/${id}`)
   }
+
+  // Alias methods for easier access
+  list = this.listInvitations.bind(this)
+  create = (data: CreateInvitationRequest) => this.createInvitation(data)
+  resend = (id: string) => this.resendInvitation(id)
+  revoke = (id: string) => this.revokeInvitation(id)
+  delete = (id: string) => this.deleteInvitation(id)
 }
 
 export const invitationService = new InvitationService()
