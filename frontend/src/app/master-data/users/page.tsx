@@ -6,7 +6,6 @@ import { Header } from "@/components/ui/header"
 import { AdvancedDataTable } from "@/components/ui/advanced-data-table"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import {
@@ -40,7 +39,15 @@ import {
   Clock01Icon,
   CheckmarkCircle01Icon,
   AlertCircleIcon,
+  MoreVerticalIcon,
 } from "@hugeicons/core-free-icons"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 export default function UsersPage() {
   const [mounted, setMounted] = React.useState(false)
@@ -481,117 +488,91 @@ export default function UsersPage() {
           </TabsContent>
 
           <TabsContent value="invitations" className="mt-0">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle>Pending Invitations</CardTitle>
-                    <CardDescription>
-                      Manage user invitations sent via email
-                    </CardDescription>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={fetchInvitations}
-                    disabled={invitationsLoading}
-                  >
-                    <HugeiconsIcon icon={RefreshIcon} className={`h-4 w-4 ${invitationsLoading ? 'animate-spin' : ''}`} />
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent>
-                {invitationsLoading ? (
-                  <div className="flex items-center justify-center py-8">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                  </div>
-                ) : invitations.length === 0 ? (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <HugeiconsIcon icon={Mail01Icon} className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                    <p className="font-medium">No invitations yet</p>
-                    <p className="text-sm">Click &quot;Invite User&quot; to send your first invitation</p>
-                  </div>
-                ) : (
-                  <div className="overflow-x-auto">
-                    <table className="w-full">
-                      <thead>
-                        <tr className="border-b bg-muted/50">
-                          <th className="text-left p-3 text-sm font-medium text-muted-foreground">Email</th>
-                          <th className="text-left p-3 text-sm font-medium text-muted-foreground">Role</th>
-                          <th className="text-left p-3 text-sm font-medium text-muted-foreground">Company</th>
-                          <th className="text-left p-3 text-sm font-medium text-muted-foreground">Status</th>
-                          <th className="text-left p-3 text-sm font-medium text-muted-foreground">Created</th>
-                          <th className="text-left p-3 text-sm font-medium text-muted-foreground">Expires</th>
-                          <th className="text-right p-3 text-sm font-medium text-muted-foreground">Actions</th>
+            {invitationsLoading ? (
+              <div className="flex items-center justify-center py-16">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+              </div>
+            ) : invitations.length === 0 ? (
+              <div className="text-center py-16 text-muted-foreground">
+                <HugeiconsIcon icon={Mail01Icon} className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                <p className="font-medium">No invitations yet</p>
+                <p className="text-sm">Click &quot;Invite User&quot; to send your first invitation</p>
+              </div>
+            ) : (
+              <div className="rounded-md border">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b bg-muted/50">
+                      <th className="text-left p-3 text-sm font-medium text-muted-foreground">Email</th>
+                      <th className="text-left p-3 text-sm font-medium text-muted-foreground">Role</th>
+                      <th className="text-left p-3 text-sm font-medium text-muted-foreground">Company</th>
+                      <th className="text-left p-3 text-sm font-medium text-muted-foreground">Status</th>
+                      <th className="text-left p-3 text-sm font-medium text-muted-foreground">Created</th>
+                      <th className="text-left p-3 text-sm font-medium text-muted-foreground">Expires</th>
+                      <th className="text-right p-3 text-sm font-medium text-muted-foreground"></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {invitations.map((invitation) => {
+                      const StatusIcon = statusIcons[invitation.status] || Clock01Icon
+                      const company = companies.find(c => c.id === invitation.company_id)
+                      return (
+                        <tr key={invitation.id} className="border-b last:border-0 hover:bg-muted/50">
+                          <td className="p-3 font-medium">{invitation.email}</td>
+                          <td className="p-3">
+                            <Badge variant="outline" className="capitalize">
+                              {invitation.role}
+                            </Badge>
+                          </td>
+                          <td className="p-3 text-muted-foreground">
+                            {company?.name || invitation.company_name || '-'}
+                          </td>
+                          <td className="p-3">
+                            <Badge className={statusColors[invitation.status]}>
+                              <HugeiconsIcon icon={StatusIcon} className="h-3 w-3 mr-1" />
+                              {invitation.status}
+                            </Badge>
+                          </td>
+                          <td className="p-3 text-muted-foreground">{formatDate(invitation.created_at)}</td>
+                          <td className="p-3 text-muted-foreground">{formatDate(invitation.expires_at)}</td>
+                          <td className="p-3 text-right">
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="sm" disabled={isSubmitting}>
+                                  <HugeiconsIcon icon={MoreVerticalIcon} className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                {invitation.status === 'pending' && (
+                                  <>
+                                    <DropdownMenuItem onClick={() => handleResendInvitation(invitation.id)}>
+                                      <HugeiconsIcon icon={Mail01Icon} className="h-4 w-4 mr-2" />
+                                      Resend Invitation
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => handleRevokeInvitation(invitation.id)}>
+                                      <HugeiconsIcon icon={Cancel01Icon} className="h-4 w-4 mr-2" />
+                                      Revoke Invitation
+                                    </DropdownMenuItem>
+                                    <DropdownMenuSeparator />
+                                  </>
+                                )}
+                                <DropdownMenuItem
+                                  onClick={() => handleDeleteInvitation(invitation.id)}
+                                  className="text-red-600"
+                                >
+                                  <HugeiconsIcon icon={Delete01Icon} className="h-4 w-4 mr-2" />
+                                  Delete
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </td>
                         </tr>
-                      </thead>
-                      <tbody>
-                        {invitations.map((invitation) => {
-                          const StatusIcon = statusIcons[invitation.status] || Clock01Icon
-                          const company = companies.find(c => c.id === invitation.company_id)
-                          return (
-                            <tr key={invitation.id} className="border-b hover:bg-muted/50">
-                              <td className="p-3 font-medium">{invitation.email}</td>
-                              <td className="p-3">
-                                <Badge variant="outline" className="capitalize">
-                                  {invitation.role}
-                                </Badge>
-                              </td>
-                              <td className="p-3 text-muted-foreground">
-                                {company?.name || invitation.company_name || '-'}
-                              </td>
-                              <td className="p-3">
-                                <Badge className={statusColors[invitation.status]}>
-                                  <HugeiconsIcon icon={StatusIcon} className="h-3 w-3 mr-1" />
-                                  {invitation.status}
-                                </Badge>
-                              </td>
-                              <td className="p-3 text-muted-foreground">{formatDate(invitation.created_at)}</td>
-                              <td className="p-3 text-muted-foreground">{formatDate(invitation.expires_at)}</td>
-                              <td className="p-3 text-right">
-                                <div className="flex items-center justify-end gap-2">
-                                  {invitation.status === 'pending' && (
-                                    <>
-                                      <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        onClick={() => handleResendInvitation(invitation.id)}
-                                        disabled={isSubmitting}
-                                        title="Resend invitation"
-                                      >
-                                        <HugeiconsIcon icon={Mail01Icon} className="h-4 w-4" />
-                                      </Button>
-                                      <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        onClick={() => handleRevokeInvitation(invitation.id)}
-                                        disabled={isSubmitting}
-                                        title="Revoke invitation"
-                                      >
-                                        <HugeiconsIcon icon={Cancel01Icon} className="h-4 w-4" />
-                                      </Button>
-                                    </>
-                                  )}
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => handleDeleteInvitation(invitation.id)}
-                                    disabled={isSubmitting}
-                                    title="Delete invitation"
-                                  >
-                                    <HugeiconsIcon icon={Delete01Icon} className="h-4 w-4 text-red-500" />
-                                  </Button>
-                                </div>
-                              </td>
-                            </tr>
-                          )
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+                      )
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </TabsContent>
         </Tabs>
 
