@@ -33,10 +33,10 @@ export default function CostCentersPage() {
     try {
       setLoading(true)
       setError(null)
-      
+
       console.log('Fetching cost centers from /api/v1/accounting/cost-centers/')
-      const response = await apiClient.get<{success: boolean, message: string, data: CostCenter[]}>('/api/v1/accounting/cost-centers/')
-      
+      const response = await apiClient.get<{ success: boolean, message: string, data: CostCenter[] }>('/api/v1/accounting/cost-centers/')
+
       if (response.success && Array.isArray(response.data)) {
         setCostCenters(response.data)
         console.log(`Loaded ${response.data.length} cost centers successfully`)
@@ -58,7 +58,7 @@ export default function CostCentersPage() {
   }
 
   const getStatusBadge = (isActive: boolean) => {
-    return isActive 
+    return isActive
       ? <Badge variant="default" className="bg-green-100 text-green-800">Active</Badge>
       : <Badge variant="secondary" className="bg-red-100 text-red-800">Inactive</Badge>
   }
@@ -76,8 +76,8 @@ export default function CostCentersPage() {
   // Filter cost centers with null safety
   const filteredCostCenters = costCenters.filter(cc => {
     if (!cc) return false
-    if (searchTerm && !cc.name?.toLowerCase().includes(searchTerm.toLowerCase()) && 
-        !cc.code?.toLowerCase().includes(searchTerm.toLowerCase())) {
+    if (searchTerm && !cc.name?.toLowerCase().includes(searchTerm.toLowerCase()) &&
+      !cc.code?.toLowerCase().includes(searchTerm.toLowerCase())) {
       return false
     }
     if (statusFilter !== 'all') {
@@ -165,7 +165,7 @@ export default function CostCentersPage() {
 
         const variance = cc.variance_amount || 0
         const isPositive = variance > 0
-        
+
         return (
           <div className={`text-center ${isPositive ? 'text-red-600' : 'text-green-600'}`}>
             <div className="font-medium">
@@ -189,7 +189,7 @@ export default function CostCentersPage() {
       render: (_: unknown, cc: CostCenter) => (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="sm">
+            <Button variant="ghost" size="sm" aria-label={`Actions for cost center ${cc.name}`}>
               ...
             </Button>
           </DropdownMenuTrigger>
@@ -228,7 +228,7 @@ export default function CostCentersPage() {
 
   return (
     <TwoLevelLayout>
-      <Header 
+      <Header
         title="Cost Centers"
         description="Manage cost centers and departmental budgets"
         breadcrumbs={breadcrumbs}
@@ -248,7 +248,7 @@ export default function CostCentersPage() {
           </div>
         }
       />
-      
+
       <div className="flex-1 p-6 space-y-6">
         {/* Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -318,13 +318,14 @@ export default function CostCentersPage() {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-3"
+                aria-label="Search cost centers"
               />
             </div>
           </div>
 
           <div className="flex items-center gap-2">
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-32">
+              <SelectTrigger className="w-32" aria-label="Filter by status">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
@@ -340,9 +341,9 @@ export default function CostCentersPage() {
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-4">
             <div className="text-sm text-muted-foreground">
-              {loading ? 'Loading cost centers from API...' : 
-               error ? 'Error loading cost centers from API' : 
-               `Loaded ${costCenters.length} cost centers from backend API`}
+              {loading ? 'Loading cost centers from API...' :
+                error ? 'Error loading cost centers from API' :
+                  `Loaded ${costCenters.length} cost centers from backend API`}
             </div>
           </div>
           <div className="text-sm text-muted-foreground">

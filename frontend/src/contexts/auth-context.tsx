@@ -13,6 +13,9 @@ interface User {
   company_id?: string
 }
 
+// Roles that can approve/reject purchase requests and orders
+const APPROVER_ROLES = ['admin', 'approver', 'manager']
+
 interface AuthContextType {
   user: User | null
   isAuthenticated: boolean
@@ -21,6 +24,8 @@ interface AuthContextType {
   logout: () => void
   checkAuth: () => Promise<boolean>
   refreshSession: () => Promise<boolean>
+  canApprove: () => boolean
+  hasRole: (roles: string[]) => boolean
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -243,6 +248,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
     initializeAuth()
   }, [])
 
+  // Check if current user has one of the specified roles
+  const hasRole = (roles: string[]): boolean => {
+    if (!user?.role) return false
+    return roles.includes(user.role)
+  }
+
+  // Check if current user can approve/reject
+  const canApprove = (): boolean => {
+    return hasRole(APPROVER_ROLES)
+  }
+
   const value = {
     user,
     isAuthenticated,
@@ -250,7 +266,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
     login,
     logout,
     checkAuth,
-    refreshSession
+    refreshSession,
+    canApprove,
+    hasRole
   }
 
   // Set up automatic session refresh for authenticated users

@@ -5,6 +5,17 @@ import (
 	"malaka/internal/shared/types"
 )
 
+// DEPRECATED: RFQ in the Inventory module is deprecated.
+// All RFQ operations should use the Procurement module's RFQ entity.
+// RFQ (Request for Quotation) is a procurement function, not an inventory function.
+//
+// Migration path:
+// 1. Use malaka/internal/modules/procurement/domain/entities.RFQ instead
+// 2. All RFQ-related routes should be under /api/v1/procurement/rfqs
+// 3. This entity will be removed in a future version
+//
+// See: malaka/internal/modules/procurement/domain/entities/rfq.go
+//
 // RFQ represents a Request for Quotation entity
 type RFQ struct {
 	types.BaseModel

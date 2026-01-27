@@ -22,6 +22,7 @@ import {
   Store01Icon
 } from '@hugeicons/core-free-icons';
 import { goodsReceiptService, GoodsReceipt } from '@/services/inventory';
+import { useToast } from '@/components/ui/toast';
 
 interface GoodsReceiptFormData {
   purchase_order_id: string;
@@ -48,6 +49,7 @@ interface Warehouse {
 export default function EditGoodsReceiptPage() {
   const params = useParams();
   const router = useRouter();
+  const { addToast } = useToast();
   const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -131,6 +133,13 @@ export default function EditGoodsReceiptPage() {
 
       // In real scenario:
       // const receiptData = await goodsReceiptService.getById(receiptId);
+
+      // Status guard: Only pending receipts can be edited
+      if (receiptData.status !== 'pending') {
+        addToast({ type: 'error', title: 'Only pending receipts can be edited' });
+        router.replace(`/inventory/goods-receipt/${receiptId}`);
+        return;
+      }
 
       setReceipt(receiptData);
 

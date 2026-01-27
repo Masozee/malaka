@@ -110,7 +110,7 @@ export default function AccountingPage() {
                   <p className="text-sm font-medium text-gray-600">Total Assets</p>
                   <p className="text-3xl font-bold text-gray-900">Rp 15.2B</p>
                 </div>
-                <div className="h-12 w-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                <div className="h-12 w-12 bg-blue-100 rounded-lg flex items-center justify-center" aria-hidden="true">
                 </div>
               </div>
               <div className="mt-2">
@@ -125,7 +125,7 @@ export default function AccountingPage() {
                   <p className="text-sm font-medium text-gray-600">Monthly Revenue</p>
                   <p className="text-3xl font-bold text-green-600">Rp 2.8B</p>
                 </div>
-                <div className="h-12 w-12 bg-green-100 rounded-lg flex items-center justify-center">
+                <div className="h-12 w-12 bg-green-100 rounded-lg flex items-center justify-center" aria-hidden="true">
                 </div>
               </div>
               <div className="mt-2">
@@ -140,7 +140,7 @@ export default function AccountingPage() {
                   <p className="text-sm font-medium text-gray-600">Cash Flow</p>
                   <p className="text-3xl font-bold text-yellow-600">Rp 890M</p>
                 </div>
-                <div className="h-12 w-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+                <div className="h-12 w-12 bg-yellow-100 rounded-lg flex items-center justify-center" aria-hidden="true">
                 </div>
               </div>
               <div className="mt-2">
@@ -155,7 +155,7 @@ export default function AccountingPage() {
                   <p className="text-sm font-medium text-gray-600">Profit Margin</p>
                   <p className="text-3xl font-bold text-purple-600">18.5%</p>
                 </div>
-                <div className="h-12 w-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                <div className="h-12 w-12 bg-purple-100 rounded-lg flex items-center justify-center" aria-hidden="true">
                 </div>
               </div>
               <div className="mt-2">
@@ -173,11 +173,10 @@ export default function AccountingPage() {
                 return (
                   <Card key={module.title} className="p-6 hover: transition-shadow duration-200">
                     <div className="flex items-start justify-between mb-4">
-                      <div className={`h-12 w-12 rounded-lg flex items-center justify-center ${module.color}`}>
+                      <div className={`h-12 w-12 rounded-lg flex items-center justify-center ${module.color}`} aria-hidden="true">
                       </div>
                       <Link href={module.href}>
-                        <Button variant="ghost" size="sm">
-                        </Button>
+
                       </Link>
                     </div>
 

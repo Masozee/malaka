@@ -484,6 +484,8 @@ import type {
   CostCenter,
   AccountBalance,
   TrialBalance,
+  TrialBalanceAccount,
+  TrialBalanceSummary,
   FinancialPeriod,
   Budget,
   AccountingFilters,
@@ -549,13 +551,52 @@ class GeneralLedgerService extends BaseAccountingService<GeneralLedgerEntry, Gen
       }
       
       // Get account mapping for displaying account codes and names
+      // This mapping corresponds to chart_of_accounts.sql seed data
       const accountMap: Record<string, {code: string, name: string}> = {
+        // Cash and Bank accounts
         '11111111-1111-1111-1111-111111111111': { code: '1101', name: 'Kas' },
         '22222222-2222-2222-2222-222222222222': { code: '1102', name: 'Bank BCA' },
+        '33333333-3333-3333-3333-333333333333': { code: '1103', name: 'Bank Mandiri' },
+        // Receivables
+        '12111111-1111-1111-1111-111111111111': { code: '1201', name: 'Piutang Dagang' },
+        '12222222-1111-1111-1111-111111111111': { code: '1202', name: 'Piutang Karyawan' },
+        // Inventory
         '44444444-4444-4444-4444-444444444444': { code: '1301', name: 'Persediaan Barang Dagangan' },
+        '13111111-1111-1111-1111-111111111111': { code: '1302', name: 'Persediaan Bahan Baku' },
+        // Fixed Assets
+        '14111111-1111-1111-1111-111111111111': { code: '1401', name: 'Tanah' },
+        '14222222-1111-1111-1111-111111111111': { code: '1402', name: 'Bangunan' },
+        '14333333-1111-1111-1111-111111111111': { code: '1403', name: 'Kendaraan' },
+        '14444444-1111-1111-1111-111111111111': { code: '1404', name: 'Peralatan Kantor' },
+        // Current Liabilities
         '55555555-5555-5555-5555-555555555555': { code: '2101', name: 'Utang Dagang' },
+        '21111111-1111-1111-1111-111111111111': { code: '2102', name: 'Utang Pajak' },
+        '22111111-1111-1111-1111-111111111111': { code: '2201', name: 'Utang Bank' },
         '77777777-7777-7777-7777-777777777777': { code: '2301', name: 'Utang Gaji' },
-        '99999999-9999-9999-9999-999999999999': { code: '4101', name: 'Pendapatan Penjualan' }
+        '23111111-1111-1111-1111-111111111111': { code: '2302', name: 'Utang Lain-lain' },
+        // Capital/Equity
+        '31111111-1111-1111-1111-111111111111': { code: '3101', name: 'Modal Saham' },
+        '31222222-1111-1111-1111-111111111111': { code: '3102', name: 'Agio Saham' },
+        '32111111-1111-1111-1111-111111111111': { code: '3201', name: 'Laba Tahun Berjalan' },
+        '32222222-1111-1111-1111-111111111111': { code: '3202', name: 'Laba Tahun Lalu' },
+        // Revenue
+        '99999999-9999-9999-9999-999999999999': { code: '4101', name: 'Pendapatan Penjualan' },
+        '41111111-1111-1111-1111-111111111111': { code: '4102', name: 'Diskon Penjualan' },
+        '41222222-1111-1111-1111-111111111111': { code: '4103', name: 'Retur Penjualan' },
+        '42111111-1111-1111-1111-111111111111': { code: '4201', name: 'Pendapatan Bunga' },
+        '42222222-1111-1111-1111-111111111111': { code: '4202', name: 'Pendapatan Lain-lain' },
+        // COGS
+        '51111111-1111-1111-1111-111111111111': { code: '5101', name: 'HPP Sepatu' },
+        '51222222-1111-1111-1111-111111111111': { code: '5102', name: 'HPP Sandal' },
+        // Operating Expenses
+        '88888888-8888-8888-8888-888888888888': { code: '5201', name: 'Biaya Gaji' },
+        '52111111-1111-1111-1111-111111111111': { code: '5202', name: 'Biaya Sewa' },
+        '52222222-1111-1111-1111-111111111111': { code: '5203', name: 'Biaya Listrik' },
+        '52333333-1111-1111-1111-111111111111': { code: '5204', name: 'Biaya Transportasi' },
+        '52444444-1111-1111-1111-111111111111': { code: '5205', name: 'Biaya Telepon' },
+        // Administrative Expenses
+        '53111111-1111-1111-1111-111111111111': { code: '5301', name: 'Biaya ATK' },
+        '53222222-1111-1111-1111-111111111111': { code: '5302', name: 'Biaya Penyusutan' }
       }
 
       // Transform backend response to match expected frontend structure
@@ -852,87 +893,52 @@ class ChartOfAccountsService extends BaseAccountingService<ChartOfAccount, Chart
   // Override getAll to get chart of accounts from database
   async getAll(filters?: AccountingFilters): Promise<ChartOfAccountListResponse> {
     try {
-      // For now, create mock data from the accounts we know exist in the database
-      // TODO: Create proper backend API for chart of accounts
+      // Complete list of accounts matching chart_of_accounts.sql seed data
       const accountsFromDB = [
-        {
-          id: '11111111-1111-1111-1111-111111111111',
-          account_code: '1101',
-          account_name: 'Kas',
-          account_type: 'ASSET',
-          account_subtype: 'Current Assets',
-          is_active: true,
-          normal_balance: 'DEBIT',
-          description: 'Kas perusahaan',
-          created_at: '2024-01-01T00:00:00Z',
-          updated_at: '2024-01-01T00:00:00Z',
-          journal_entries: []
-        },
-        {
-          id: '22222222-2222-2222-2222-222222222222',
-          account_code: '1102',
-          account_name: 'Bank BCA',
-          account_type: 'ASSET',
-          account_subtype: 'Current Assets',
-          is_active: true,
-          normal_balance: 'DEBIT',
-          description: 'Rekening Bank BCA',
-          created_at: '2024-01-01T00:00:00Z',
-          updated_at: '2024-01-01T00:00:00Z',
-          journal_entries: []
-        },
-        {
-          id: '44444444-4444-4444-4444-444444444444',
-          account_code: '1301',
-          account_name: 'Persediaan Barang Dagangan',
-          account_type: 'ASSET',
-          account_subtype: 'Current Assets',
-          is_active: true,
-          normal_balance: 'DEBIT',
-          description: 'Persediaan sepatu dan produk',
-          created_at: '2024-01-01T00:00:00Z',
-          updated_at: '2024-01-01T00:00:00Z',
-          journal_entries: []
-        },
-        {
-          id: '55555555-5555-5555-5555-555555555555',
-          account_code: '2101',
-          account_name: 'Utang Dagang',
-          account_type: 'LIABILITY',
-          account_subtype: 'Current Liabilities',
-          is_active: true,
-          normal_balance: 'CREDIT',
-          description: 'Utang kepada supplier',
-          created_at: '2024-01-01T00:00:00Z',
-          updated_at: '2024-01-01T00:00:00Z',
-          journal_entries: []
-        },
-        {
-          id: '77777777-7777-7777-7777-777777777777',
-          account_code: '2301',
-          account_name: 'Utang Gaji',
-          account_type: 'LIABILITY',
-          account_subtype: 'Current Liabilities',
-          is_active: true,
-          normal_balance: 'CREDIT',
-          description: 'Utang gaji karyawan',
-          created_at: '2024-01-01T00:00:00Z',
-          updated_at: '2024-01-01T00:00:00Z',
-          journal_entries: []
-        },
-        {
-          id: '99999999-9999-9999-9999-999999999999',
-          account_code: '4101',
-          account_name: 'Pendapatan Penjualan',
-          account_type: 'REVENUE',
-          account_subtype: 'Sales Revenue',
-          is_active: true,
-          normal_balance: 'CREDIT',
-          description: 'Pendapatan dari penjualan',
-          created_at: '2024-01-01T00:00:00Z',
-          updated_at: '2024-01-01T00:00:00Z',
-          journal_entries: []
-        }
+        // Cash and Bank accounts
+        { id: '11111111-1111-1111-1111-111111111111', account_code: '1101', account_name: 'Kas', account_type: 'ASSET', account_subtype: 'Current Assets', is_active: true, normal_balance: 'DEBIT', description: 'Kas perusahaan', created_at: '2024-01-01T00:00:00Z', updated_at: '2024-01-01T00:00:00Z', journal_entries: [] },
+        { id: '22222222-2222-2222-2222-222222222222', account_code: '1102', account_name: 'Bank BCA', account_type: 'ASSET', account_subtype: 'Current Assets', is_active: true, normal_balance: 'DEBIT', description: 'Rekening Bank BCA', created_at: '2024-01-01T00:00:00Z', updated_at: '2024-01-01T00:00:00Z', journal_entries: [] },
+        { id: '33333333-3333-3333-3333-333333333333', account_code: '1103', account_name: 'Bank Mandiri', account_type: 'ASSET', account_subtype: 'Current Assets', is_active: true, normal_balance: 'DEBIT', description: 'Rekening Bank Mandiri', created_at: '2024-01-01T00:00:00Z', updated_at: '2024-01-01T00:00:00Z', journal_entries: [] },
+        // Receivables
+        { id: '12111111-1111-1111-1111-111111111111', account_code: '1201', account_name: 'Piutang Dagang', account_type: 'ASSET', account_subtype: 'Current Assets', is_active: true, normal_balance: 'DEBIT', description: 'Piutang dari pelanggan', created_at: '2024-01-01T00:00:00Z', updated_at: '2024-01-01T00:00:00Z', journal_entries: [] },
+        { id: '12222222-1111-1111-1111-111111111111', account_code: '1202', account_name: 'Piutang Karyawan', account_type: 'ASSET', account_subtype: 'Current Assets', is_active: true, normal_balance: 'DEBIT', description: 'Piutang dari karyawan', created_at: '2024-01-01T00:00:00Z', updated_at: '2024-01-01T00:00:00Z', journal_entries: [] },
+        // Inventory
+        { id: '44444444-4444-4444-4444-444444444444', account_code: '1301', account_name: 'Persediaan Barang Dagangan', account_type: 'ASSET', account_subtype: 'Current Assets', is_active: true, normal_balance: 'DEBIT', description: 'Persediaan sepatu dan produk', created_at: '2024-01-01T00:00:00Z', updated_at: '2024-01-01T00:00:00Z', journal_entries: [] },
+        { id: '13111111-1111-1111-1111-111111111111', account_code: '1302', account_name: 'Persediaan Bahan Baku', account_type: 'ASSET', account_subtype: 'Current Assets', is_active: true, normal_balance: 'DEBIT', description: 'Bahan baku produksi', created_at: '2024-01-01T00:00:00Z', updated_at: '2024-01-01T00:00:00Z', journal_entries: [] },
+        // Fixed Assets
+        { id: '14111111-1111-1111-1111-111111111111', account_code: '1401', account_name: 'Tanah', account_type: 'ASSET', account_subtype: 'Fixed Assets', is_active: true, normal_balance: 'DEBIT', description: 'Tanah perusahaan', created_at: '2024-01-01T00:00:00Z', updated_at: '2024-01-01T00:00:00Z', journal_entries: [] },
+        { id: '14222222-1111-1111-1111-111111111111', account_code: '1402', account_name: 'Bangunan', account_type: 'ASSET', account_subtype: 'Fixed Assets', is_active: true, normal_balance: 'DEBIT', description: 'Bangunan pabrik dan kantor', created_at: '2024-01-01T00:00:00Z', updated_at: '2024-01-01T00:00:00Z', journal_entries: [] },
+        { id: '14333333-1111-1111-1111-111111111111', account_code: '1403', account_name: 'Kendaraan', account_type: 'ASSET', account_subtype: 'Fixed Assets', is_active: true, normal_balance: 'DEBIT', description: 'Kendaraan operasional', created_at: '2024-01-01T00:00:00Z', updated_at: '2024-01-01T00:00:00Z', journal_entries: [] },
+        { id: '14444444-1111-1111-1111-111111111111', account_code: '1404', account_name: 'Peralatan Kantor', account_type: 'ASSET', account_subtype: 'Fixed Assets', is_active: true, normal_balance: 'DEBIT', description: 'Peralatan dan perlengkapan kantor', created_at: '2024-01-01T00:00:00Z', updated_at: '2024-01-01T00:00:00Z', journal_entries: [] },
+        // Current Liabilities
+        { id: '55555555-5555-5555-5555-555555555555', account_code: '2101', account_name: 'Utang Dagang', account_type: 'LIABILITY', account_subtype: 'Current Liabilities', is_active: true, normal_balance: 'CREDIT', description: 'Utang kepada supplier', created_at: '2024-01-01T00:00:00Z', updated_at: '2024-01-01T00:00:00Z', journal_entries: [] },
+        { id: '21111111-1111-1111-1111-111111111111', account_code: '2102', account_name: 'Utang Pajak', account_type: 'LIABILITY', account_subtype: 'Current Liabilities', is_active: true, normal_balance: 'CREDIT', description: 'Utang pajak terutang', created_at: '2024-01-01T00:00:00Z', updated_at: '2024-01-01T00:00:00Z', journal_entries: [] },
+        { id: '22111111-1111-1111-1111-111111111111', account_code: '2201', account_name: 'Utang Bank', account_type: 'LIABILITY', account_subtype: 'Long-term Liabilities', is_active: true, normal_balance: 'CREDIT', description: 'Pinjaman bank jangka panjang', created_at: '2024-01-01T00:00:00Z', updated_at: '2024-01-01T00:00:00Z', journal_entries: [] },
+        { id: '77777777-7777-7777-7777-777777777777', account_code: '2301', account_name: 'Utang Gaji', account_type: 'LIABILITY', account_subtype: 'Current Liabilities', is_active: true, normal_balance: 'CREDIT', description: 'Utang gaji karyawan', created_at: '2024-01-01T00:00:00Z', updated_at: '2024-01-01T00:00:00Z', journal_entries: [] },
+        { id: '23111111-1111-1111-1111-111111111111', account_code: '2302', account_name: 'Utang Lain-lain', account_type: 'LIABILITY', account_subtype: 'Current Liabilities', is_active: true, normal_balance: 'CREDIT', description: 'Utang lainnya', created_at: '2024-01-01T00:00:00Z', updated_at: '2024-01-01T00:00:00Z', journal_entries: [] },
+        // Capital/Equity
+        { id: '31111111-1111-1111-1111-111111111111', account_code: '3101', account_name: 'Modal Saham', account_type: 'EQUITY', account_subtype: 'Equity', is_active: true, normal_balance: 'CREDIT', description: 'Modal pemegang saham', created_at: '2024-01-01T00:00:00Z', updated_at: '2024-01-01T00:00:00Z', journal_entries: [] },
+        { id: '31222222-1111-1111-1111-111111111111', account_code: '3102', account_name: 'Agio Saham', account_type: 'EQUITY', account_subtype: 'Equity', is_active: true, normal_balance: 'CREDIT', description: 'Premium atas modal saham', created_at: '2024-01-01T00:00:00Z', updated_at: '2024-01-01T00:00:00Z', journal_entries: [] },
+        { id: '32111111-1111-1111-1111-111111111111', account_code: '3201', account_name: 'Laba Tahun Berjalan', account_type: 'EQUITY', account_subtype: 'Retained Earnings', is_active: true, normal_balance: 'CREDIT', description: 'Laba berjalan tahun ini', created_at: '2024-01-01T00:00:00Z', updated_at: '2024-01-01T00:00:00Z', journal_entries: [] },
+        { id: '32222222-1111-1111-1111-111111111111', account_code: '3202', account_name: 'Laba Tahun Lalu', account_type: 'EQUITY', account_subtype: 'Retained Earnings', is_active: true, normal_balance: 'CREDIT', description: 'Laba ditahan tahun lalu', created_at: '2024-01-01T00:00:00Z', updated_at: '2024-01-01T00:00:00Z', journal_entries: [] },
+        // Revenue
+        { id: '99999999-9999-9999-9999-999999999999', account_code: '4101', account_name: 'Pendapatan Penjualan', account_type: 'REVENUE', account_subtype: 'Sales Revenue', is_active: true, normal_balance: 'CREDIT', description: 'Pendapatan dari penjualan', created_at: '2024-01-01T00:00:00Z', updated_at: '2024-01-01T00:00:00Z', journal_entries: [] },
+        { id: '41111111-1111-1111-1111-111111111111', account_code: '4102', account_name: 'Diskon Penjualan', account_type: 'REVENUE', account_subtype: 'Sales Revenue', is_active: true, normal_balance: 'DEBIT', description: 'Diskon yang diberikan', created_at: '2024-01-01T00:00:00Z', updated_at: '2024-01-01T00:00:00Z', journal_entries: [] },
+        { id: '41222222-1111-1111-1111-111111111111', account_code: '4103', account_name: 'Retur Penjualan', account_type: 'REVENUE', account_subtype: 'Sales Revenue', is_active: true, normal_balance: 'DEBIT', description: 'Retur dari pelanggan', created_at: '2024-01-01T00:00:00Z', updated_at: '2024-01-01T00:00:00Z', journal_entries: [] },
+        { id: '42111111-1111-1111-1111-111111111111', account_code: '4201', account_name: 'Pendapatan Bunga', account_type: 'REVENUE', account_subtype: 'Other Revenue', is_active: true, normal_balance: 'CREDIT', description: 'Pendapatan bunga bank', created_at: '2024-01-01T00:00:00Z', updated_at: '2024-01-01T00:00:00Z', journal_entries: [] },
+        { id: '42222222-1111-1111-1111-111111111111', account_code: '4202', account_name: 'Pendapatan Lain-lain', account_type: 'REVENUE', account_subtype: 'Other Revenue', is_active: true, normal_balance: 'CREDIT', description: 'Pendapatan lainnya', created_at: '2024-01-01T00:00:00Z', updated_at: '2024-01-01T00:00:00Z', journal_entries: [] },
+        // COGS
+        { id: '51111111-1111-1111-1111-111111111111', account_code: '5101', account_name: 'HPP Sepatu', account_type: 'EXPENSE', account_subtype: 'Cost of Goods Sold', is_active: true, normal_balance: 'DEBIT', description: 'Harga pokok penjualan sepatu', created_at: '2024-01-01T00:00:00Z', updated_at: '2024-01-01T00:00:00Z', journal_entries: [] },
+        { id: '51222222-1111-1111-1111-111111111111', account_code: '5102', account_name: 'HPP Sandal', account_type: 'EXPENSE', account_subtype: 'Cost of Goods Sold', is_active: true, normal_balance: 'DEBIT', description: 'Harga pokok penjualan sandal', created_at: '2024-01-01T00:00:00Z', updated_at: '2024-01-01T00:00:00Z', journal_entries: [] },
+        // Operating Expenses
+        { id: '88888888-8888-8888-8888-888888888888', account_code: '5201', account_name: 'Biaya Gaji', account_type: 'EXPENSE', account_subtype: 'Operating Expenses', is_active: true, normal_balance: 'DEBIT', description: 'Beban gaji karyawan', created_at: '2024-01-01T00:00:00Z', updated_at: '2024-01-01T00:00:00Z', journal_entries: [] },
+        { id: '52111111-1111-1111-1111-111111111111', account_code: '5202', account_name: 'Biaya Sewa', account_type: 'EXPENSE', account_subtype: 'Operating Expenses', is_active: true, normal_balance: 'DEBIT', description: 'Beban sewa gedung', created_at: '2024-01-01T00:00:00Z', updated_at: '2024-01-01T00:00:00Z', journal_entries: [] },
+        { id: '52222222-1111-1111-1111-111111111111', account_code: '5203', account_name: 'Biaya Listrik', account_type: 'EXPENSE', account_subtype: 'Operating Expenses', is_active: true, normal_balance: 'DEBIT', description: 'Beban listrik', created_at: '2024-01-01T00:00:00Z', updated_at: '2024-01-01T00:00:00Z', journal_entries: [] },
+        { id: '52333333-1111-1111-1111-111111111111', account_code: '5204', account_name: 'Biaya Transportasi', account_type: 'EXPENSE', account_subtype: 'Operating Expenses', is_active: true, normal_balance: 'DEBIT', description: 'Beban transportasi', created_at: '2024-01-01T00:00:00Z', updated_at: '2024-01-01T00:00:00Z', journal_entries: [] },
+        { id: '52444444-1111-1111-1111-111111111111', account_code: '5205', account_name: 'Biaya Telepon', account_type: 'EXPENSE', account_subtype: 'Operating Expenses', is_active: true, normal_balance: 'DEBIT', description: 'Beban telepon dan internet', created_at: '2024-01-01T00:00:00Z', updated_at: '2024-01-01T00:00:00Z', journal_entries: [] },
+        // Administrative Expenses
+        { id: '53111111-1111-1111-1111-111111111111', account_code: '5301', account_name: 'Biaya ATK', account_type: 'EXPENSE', account_subtype: 'Administrative Expenses', is_active: true, normal_balance: 'DEBIT', description: 'Beban alat tulis kantor', created_at: '2024-01-01T00:00:00Z', updated_at: '2024-01-01T00:00:00Z', journal_entries: [] },
+        { id: '53222222-1111-1111-1111-111111111111', account_code: '5302', account_name: 'Biaya Penyusutan', account_type: 'EXPENSE', account_subtype: 'Administrative Expenses', is_active: true, normal_balance: 'DEBIT', description: 'Beban penyusutan aset', created_at: '2024-01-01T00:00:00Z', updated_at: '2024-01-01T00:00:00Z', journal_entries: [] }
       ]
 
       let filteredAccounts = [...accountsFromDB]
@@ -1302,96 +1308,75 @@ class CostCenterService extends BaseAccountingService<CostCenter, CostCenterList
 
 // Trial Balance Service
 class TrialBalanceService {
+  // Fetch chart of accounts from backend
+  private async fetchChartOfAccounts(): Promise<any[]> {
+    try {
+      const response = await apiClient.get<{success: boolean, message: string, data: any[]}>(`/api/v1/accounting/chart-of-accounts/`)
+      if (response.success && response.data) {
+        return response.data
+      }
+      return []
+    } catch (error) {
+      console.error('Failed to fetch chart of accounts:', error)
+      return []
+    }
+  }
+
+  // Fetch general ledger entries from backend
+  private async fetchLedgerEntries(companyId: string = "1"): Promise<any[]> {
+    try {
+      const response = await apiClient.get<{success: boolean, message: string, data: any[]}>(`/api/v1/accounting/general-ledger/`)
+      if (response.success && response.data) {
+        return response.data
+      }
+      return []
+    } catch (error) {
+      console.error('Failed to fetch general ledger entries:', error)
+      return []
+    }
+  }
+
   // Generate trial balance with proper backend API structure
   async generate(period: string, fiscalYear: number): Promise<TrialBalance> {
-    try {
-      const startDate = `${fiscalYear}-${period.split('-')[1]}-01`
-      const endDate = `${fiscalYear}-${period.split('-')[1]}-31`
-
-      // Use the correct backend endpoint for generating trial balance
-      const response = await apiClient.post<{success: boolean, message: string, data: any[]}>(`/api/v1/accounting/trial-balance/generate?company_id=1`, {
-        period_start: startDate,
-        period_end: endDate,
-        fiscal_year: fiscalYear,
-        created_by: "user" // TODO: get from auth context
-      })
-
-      console.log('Generate Trial Balance API Response:', response) // Debug log
-
-      if (!response.success || !response.data) {
-        throw new Error(`API Error: ${response.message || 'Invalid response structure'}`)
-      }
-
-      // Transform general ledger entries into trial balance format
-      return this.transformToTrialBalance(response.data, startDate, endDate)
-    } catch (error) {
-      console.error('Failed to generate trial balance:', error)
-      throw error
-    }
+    const startDate = `${fiscalYear}-${period.split('-')[1]}-01`
+    const endDate = `${fiscalYear}-${period.split('-')[1]}-31`
+    return this.buildTrialBalance(startDate, endDate)
   }
 
   async getLatest(): Promise<TrialBalance> {
-    try {
-      const response = await apiClient.get<{success: boolean, message: string, data: any[]}>(`/api/v1/accounting/trial-balance/latest?company_id=1`)
-      
-      console.log('Latest Trial Balance API Response:', response) // Debug log
-
-      if (!response.success || !response.data) {
-        throw new Error(`API Error: ${response.message || 'Invalid response structure'}`)
-      }
-
-      // Use current month as default period for latest
-      const now = new Date()
-      const startDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`
-      const endDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-31`
-
-      // Transform general ledger entries into trial balance format
-      return this.transformToTrialBalance(response.data, startDate, endDate)
-    } catch (error) {
-      console.error('Failed to get latest trial balance:', error)
-      throw error
-    }
+    const now = new Date()
+    const startDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`
+    const endDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-31`
+    return this.buildTrialBalance(startDate, endDate)
   }
 
   async getByPeriod(period: string, fiscalYear: number): Promise<TrialBalance> {
-    try {
-      // Backend uses date range format, convert period to date range
-      const startDate = `${fiscalYear}-${period.split('-')[1]}-01`
-      const endDate = `${fiscalYear}-${period.split('-')[1]}-31`
-      
-      // Get general ledger data from backend
-      const response = await apiClient.get<{success: boolean, message: string, data: any[]}>(`/api/v1/accounting/trial-balance/period`, {
-        company_id: "1",
-        period_start: startDate,
-        period_end: endDate
-      })
-
-      console.log('Trial Balance API Response:', response) // Debug log
-
-      if (!response.success || !response.data) {
-        throw new Error(`API Error: ${response.message || 'Invalid response structure'}`)
-      }
-
-      // Transform general ledger entries into trial balance format
-      return this.transformToTrialBalance(response.data, startDate, endDate)
-    } catch (error) {
-      console.error('Failed to get trial balance by period:', error)
-      throw error
-    }
+    const startDate = `${fiscalYear}-${period.split('-')[1]}-01`
+    const endDate = `${fiscalYear}-${period.split('-')[1]}-31`
+    return this.buildTrialBalance(startDate, endDate)
   }
 
-  private transformToTrialBalance(ledgerEntries: any[], periodStart: string, periodEnd: string): TrialBalance {
-    // Get account mapping for proper account names and types
-    const accountMap: Record<string, {code: string, name: string, type: string}> = {
-      '11111111-1111-1111-1111-111111111111': { code: '1101', name: 'Kas', type: 'ASSET' },
-      '22222222-2222-2222-2222-222222222222': { code: '1102', name: 'Bank BCA', type: 'ASSET' },
-      '44444444-4444-4444-4444-444444444444': { code: '1301', name: 'Persediaan Barang Dagangan', type: 'ASSET' },
-      '55555555-5555-5555-5555-555555555555': { code: '2101', name: 'Utang Dagang', type: 'LIABILITY' },
-      '77777777-7777-7777-7777-777777777777': { code: '2301', name: 'Utang Gaji', type: 'LIABILITY' },
-      '99999999-9999-9999-9999-999999999999': { code: '4101', name: 'Pendapatan Penjualan', type: 'REVENUE' }
-    }
+  private async buildTrialBalance(periodStart: string, periodEnd: string): Promise<TrialBalance> {
+    // Fetch chart of accounts and ledger entries in parallel
+    const [chartOfAccounts, ledgerEntries] = await Promise.all([
+      this.fetchChartOfAccounts(),
+      this.fetchLedgerEntries()
+    ])
 
-    // Group entries by account
+    console.log('Chart of Accounts:', chartOfAccounts.length, 'accounts')
+    console.log('Ledger Entries:', ledgerEntries.length, 'entries')
+
+    // Build account map from chart of accounts
+    const accountMap: Record<string, {code: string, name: string, type: string}> = {}
+    chartOfAccounts.forEach(acc => {
+      accountMap[acc.id] = {
+        code: acc.account_code,
+        name: acc.account_name,
+        type: acc.account_type
+      }
+    })
+
+    // Group ledger entries by account
     const accountGroups: Record<string, any[]> = {}
     ledgerEntries.forEach(entry => {
       if (!accountGroups[entry.account_id]) {
@@ -1400,10 +1385,10 @@ class TrialBalanceService {
       accountGroups[entry.account_id].push(entry)
     })
 
-    // Transform to trial balance accounts
-    const accounts: TrialBalanceAccount[] = Object.entries(accountGroups).map(([accountId, entries]) => {
-      const accountInfo = accountMap[accountId] || { code: 'N/A', name: 'Unknown Account', type: 'OTHER' }
-      
+    // Create trial balance accounts from chart of accounts
+    const accounts: TrialBalanceAccount[] = chartOfAccounts.map(acc => {
+      const entries = accountGroups[acc.id] || []
+
       // Calculate totals for this account
       const debitTotal = entries.reduce((sum, entry) => sum + (entry.debit_amount || 0), 0)
       const creditTotal = entries.reduce((sum, entry) => sum + (entry.credit_amount || 0), 0)
@@ -1413,7 +1398,7 @@ class TrialBalanceService {
       let trialBalanceDebit = 0
       let trialBalanceCredit = 0
 
-      if (accountInfo.type === 'ASSET' || accountInfo.type === 'EXPENSE') {
+      if (acc.account_type === 'ASSET' || acc.account_type === 'EXPENSE') {
         // Normal debit accounts
         if (closingBalance >= 0) {
           trialBalanceDebit = closingBalance
@@ -1430,11 +1415,11 @@ class TrialBalanceService {
       }
 
       return {
-        account_id: accountId,
-        account_code: accountInfo.code,
-        account_name: accountInfo.name,
-        account_type: accountInfo.type,
-        opening_balance: 0, // We don't have opening balance data
+        account_id: acc.id,
+        account_code: acc.account_code,
+        account_name: acc.account_name,
+        account_type: acc.account_type,
+        opening_balance: 0,
         debit_total: debitTotal,
         credit_total: creditTotal,
         closing_balance: closingBalance,
@@ -1447,9 +1432,12 @@ class TrialBalanceService {
       }
     })
 
+    // Sort accounts by code
+    accounts.sort((a, b) => a.account_code.localeCompare(b.account_code))
+
     // Calculate summary
-    const totalDebits = accounts.reduce((sum, acc) => sum + acc.trial_balance_debit, 0)
-    const totalCredits = accounts.reduce((sum, acc) => sum + acc.trial_balance_credit, 0)
+    const totalDebits = accounts.reduce((sum, account) => sum + account.trial_balance_debit, 0)
+    const totalCredits = accounts.reduce((sum, account) => sum + account.trial_balance_credit, 0)
     const difference = Math.abs(totalDebits - totalCredits)
     const isBalanced = difference < 1 // Allow for small rounding differences
 
@@ -1506,20 +1494,20 @@ class TrialBalanceService {
 
 // Financial Period Service
 class FinancialPeriodService {
-  async getAll(): Promise<FinancialPeriod[]> {
-    return apiClient.get<FinancialPeriod[]>(`/api/v1/accounting/financial-periods`)
+  async getAll(): Promise<{success: boolean, data: FinancialPeriod[]}> {
+    return apiClient.get<{success: boolean, data: FinancialPeriod[]}>(`/api/v1/accounting/financial-periods/`)
   }
 
-  async getCurrent(): Promise<FinancialPeriod> {
-    return apiClient.get<FinancialPeriod>(`/api/v1/accounting/financial-periods/current`)
+  async getCurrent(): Promise<{success: boolean, data: FinancialPeriod}> {
+    return apiClient.get<{success: boolean, data: FinancialPeriod}>(`/api/v1/accounting/financial-periods/current`)
   }
 
-  async closePeriod(id: string): Promise<FinancialPeriod> {
-    return apiClient.post<FinancialPeriod>(`/api/v1/accounting/financial-periods/${id}/close`, {})
+  async closePeriod(id: string): Promise<{success: boolean, data: FinancialPeriod}> {
+    return apiClient.post<{success: boolean, data: FinancialPeriod}>(`/api/v1/accounting/financial-periods/${id}/close`, {})
   }
 
-  async reopenPeriod(id: string): Promise<FinancialPeriod> {
-    return apiClient.post<FinancialPeriod>(`/api/v1/accounting/financial-periods/${id}/reopen`, {})
+  async reopenPeriod(id: string): Promise<{success: boolean, data: FinancialPeriod}> {
+    return apiClient.post<{success: boolean, data: FinancialPeriod}>(`/api/v1/accounting/financial-periods/${id}/reopen`, {})
   }
 }
 
@@ -1976,6 +1964,243 @@ class InvoiceService {
 
 export const invoiceService = new InvoiceService()
 
+// Fixed Asset Types
+export interface FixedAsset {
+  id: string
+  asset_code: string
+  asset_name: string
+  category: string
+  status: 'ACTIVE' | 'DISPOSED' | 'SOLD' | 'LOST' | 'DAMAGED'
+  acquisition_date: string
+  cost: number
+  salvage_value: number
+  useful_life: number
+  depreciation_method: 'STRAIGHT_LINE' | 'DECLINING_BALANCE' | 'UNITS_OF_PRODUCTION' | 'SUM_OF_YEARS_DIGITS'
+  accumulated_depreciation: number
+  book_value: number
+  current_location: string
+  serial_number: string
+  description: string
+  company_id: string
+  created_at: string
+  updated_at: string
+}
+
+export interface FixedAssetSummary {
+  total_assets: number
+  total_cost: number
+  total_book_value: number
+  total_depreciation: number
+  active_assets: number
+  disposed_assets: number
+}
+
+// Fixed Asset Service
+class FixedAssetService {
+  async getAll(): Promise<{success: boolean, data: FixedAsset[]}> {
+    try {
+      const response = await apiClient.get<{success: boolean, message: string, data: any[]}>(`/api/v1/accounting/fixed-assets/`)
+
+      console.log('Fixed Assets API Response:', response) // Debug log
+
+      if (!response.success || !response.data) {
+        throw new Error(`API Error: ${response.message || 'Invalid response structure'}`)
+      }
+
+      return {
+        success: true,
+        data: response.data
+      }
+    } catch (error) {
+      console.error('Failed to get fixed assets:', error)
+      throw error
+    }
+  }
+
+  async getById(id: string): Promise<FixedAsset> {
+    try {
+      const response = await apiClient.get<{success: boolean, message: string, data: FixedAsset}>(`/api/v1/accounting/fixed-assets/${id}`)
+
+      if (!response.success || !response.data) {
+        throw new Error(`API Error: ${response.message || 'Invalid response structure'}`)
+      }
+
+      return response.data
+    } catch (error) {
+      console.error('Failed to get fixed asset:', error)
+      throw error
+    }
+  }
+
+  async create(asset: Partial<FixedAsset>): Promise<FixedAsset> {
+    try {
+      const response = await apiClient.post<{success: boolean, message: string, data: FixedAsset}>(`/api/v1/accounting/fixed-assets/`, asset)
+
+      if (!response.success || !response.data) {
+        throw new Error(`API Error: ${response.message || 'Invalid response structure'}`)
+      }
+
+      return response.data
+    } catch (error) {
+      console.error('Failed to create fixed asset:', error)
+      throw error
+    }
+  }
+
+  async update(id: string, asset: Partial<FixedAsset>): Promise<FixedAsset> {
+    try {
+      const response = await apiClient.put<{success: boolean, message: string, data: FixedAsset}>(`/api/v1/accounting/fixed-assets/${id}`, asset)
+
+      if (!response.success || !response.data) {
+        throw new Error(`API Error: ${response.message || 'Invalid response structure'}`)
+      }
+
+      return response.data
+    } catch (error) {
+      console.error('Failed to update fixed asset:', error)
+      throw error
+    }
+  }
+
+  async delete(id: string): Promise<void> {
+    try {
+      const response = await apiClient.delete<{success: boolean, message: string}>(`/api/v1/accounting/fixed-assets/${id}`)
+
+      if (!response.success) {
+        throw new Error(`API Error: ${response.message || 'Failed to delete asset'}`)
+      }
+    } catch (error) {
+      console.error('Failed to delete fixed asset:', error)
+      throw error
+    }
+  }
+
+  async getByCategory(category: string): Promise<{success: boolean, data: FixedAsset[]}> {
+    try {
+      const response = await apiClient.get<{success: boolean, message: string, data: FixedAsset[]}>(`/api/v1/accounting/fixed-assets/category/${category}`)
+
+      if (!response.success || !response.data) {
+        throw new Error(`API Error: ${response.message || 'Invalid response structure'}`)
+      }
+
+      return {
+        success: true,
+        data: response.data
+      }
+    } catch (error) {
+      console.error('Failed to get fixed assets by category:', error)
+      throw error
+    }
+  }
+
+  async getByStatus(status: string): Promise<{success: boolean, data: FixedAsset[]}> {
+    try {
+      const response = await apiClient.get<{success: boolean, message: string, data: FixedAsset[]}>(`/api/v1/accounting/fixed-assets/status/${status}`)
+
+      if (!response.success || !response.data) {
+        throw new Error(`API Error: ${response.message || 'Invalid response structure'}`)
+      }
+
+      return {
+        success: true,
+        data: response.data
+      }
+    } catch (error) {
+      console.error('Failed to get fixed assets by status:', error)
+      throw error
+    }
+  }
+
+  async getSummary(): Promise<FixedAssetSummary> {
+    try {
+      const response = await apiClient.get<{success: boolean, message: string, data: FixedAssetSummary}>(`/api/v1/accounting/fixed-assets/summary`)
+
+      if (!response.success || !response.data) {
+        throw new Error(`API Error: ${response.message || 'Invalid response structure'}`)
+      }
+
+      return response.data
+    } catch (error) {
+      console.error('Failed to get fixed asset summary:', error)
+      throw error
+    }
+  }
+
+  async processDepreciation(id: string): Promise<any> {
+    try {
+      const response = await apiClient.post<{success: boolean, message: string, data: any}>(`/api/v1/accounting/fixed-assets/${id}/depreciate`, {})
+
+      if (!response.success) {
+        throw new Error(`API Error: ${response.message || 'Failed to process depreciation'}`)
+      }
+
+      return response.data
+    } catch (error) {
+      console.error('Failed to process depreciation:', error)
+      throw error
+    }
+  }
+
+  async getDepreciationSchedule(id: string): Promise<any[]> {
+    try {
+      const response = await apiClient.get<{success: boolean, message: string, data: any[]}>(`/api/v1/accounting/fixed-assets/${id}/depreciation-schedule`)
+
+      if (!response.success || !response.data) {
+        throw new Error(`API Error: ${response.message || 'Invalid response structure'}`)
+      }
+
+      return response.data
+    } catch (error) {
+      console.error('Failed to get depreciation schedule:', error)
+      throw error
+    }
+  }
+
+  async disposeAsset(id: string, disposalData: {
+    disposal_date: string
+    disposal_method: string
+    disposal_price: number
+    reason: string
+    authorized_by?: string
+  }): Promise<any> {
+    try {
+      const response = await apiClient.post<{success: boolean, message: string, data: any}>(`/api/v1/accounting/fixed-assets/${id}/dispose`, disposalData)
+
+      if (!response.success) {
+        throw new Error(`API Error: ${response.message || 'Failed to dispose asset'}`)
+      }
+
+      return response.data
+    } catch (error) {
+      console.error('Failed to dispose asset:', error)
+      throw error
+    }
+  }
+
+  async search(searchTerm: string, companyId?: string): Promise<{success: boolean, data: FixedAsset[]}> {
+    try {
+      const params: Record<string, string> = { q: searchTerm }
+      if (companyId) params.company_id = companyId
+
+      const response = await apiClient.get<{success: boolean, message: string, data: FixedAsset[]}>(`/api/v1/accounting/fixed-assets/search`, params)
+
+      if (!response.success || !response.data) {
+        throw new Error(`API Error: ${response.message || 'Invalid response structure'}`)
+      }
+
+      return {
+        success: true,
+        data: response.data
+      }
+    } catch (error) {
+      console.error('Failed to search fixed assets:', error)
+      throw error
+    }
+  }
+}
+
+export const fixedAssetService = new FixedAssetService()
+
 export const accountingServices = {
   generalLedger: generalLedgerService,
   journalEntry: journalEntryService,
@@ -1985,5 +2210,6 @@ export const accountingServices = {
   financialPeriod: financialPeriodService,
   budget: budgetService,
   cashBank: cashBankService,
-  invoice: invoiceService
+  invoice: invoiceService,
+  fixedAsset: fixedAssetService
 }

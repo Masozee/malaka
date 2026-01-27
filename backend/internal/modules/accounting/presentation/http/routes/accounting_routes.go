@@ -6,9 +6,14 @@ import (
 )
 
 // RegisterAccountingRoutes registers all accounting-related routes
-func RegisterAccountingRoutes(router *gin.RouterGroup, glHandler *handlers.GeneralLedgerHandler, jeHandler *handlers.JournalEntryHandler, budgetHandler interface{}, costCenterHandler interface{}, trialBalanceHandler interface{}, autoJournalHandler *handlers.AutoJournalHandler, exchangeRateHandler *handlers.ExchangeRateHandler) {
+func RegisterAccountingRoutes(router *gin.RouterGroup, glHandler *handlers.GeneralLedgerHandler, jeHandler *handlers.JournalEntryHandler, budgetHandler interface{}, costCenterHandler interface{}, trialBalanceHandler interface{}, autoJournalHandler *handlers.AutoJournalHandler, exchangeRateHandler *handlers.ExchangeRateHandler, chartOfAccountHandler *handlers.ChartOfAccountHandler) {
 	accounting := router.Group("/accounting")
 	{
+		// Chart of Accounts routes
+		if chartOfAccountHandler != nil {
+			RegisterChartOfAccountRoutes(accounting, chartOfAccountHandler)
+		}
+
 		// Exchange rates routes
 		if exchangeRateHandler != nil {
 			RegisterExchangeRateRoutes(accounting, exchangeRateHandler)
@@ -77,5 +82,21 @@ func RegisterTrialBalanceRoutes(router *gin.RouterGroup, handler *handlers.Gener
 		trialBalance.POST("/generate", handler.GetTrialBalance)
 		trialBalance.GET("/latest", handler.GetTrialBalance)
 		trialBalance.GET("/export", handler.GetTrialBalance)
+	}
+}
+
+// RegisterChartOfAccountRoutes registers chart of accounts routes
+func RegisterChartOfAccountRoutes(router *gin.RouterGroup, handler *handlers.ChartOfAccountHandler) {
+	coa := router.Group("/chart-of-accounts")
+	{
+		coa.GET("/", handler.GetAllChartOfAccounts)
+		coa.GET("/:id", handler.GetChartOfAccountByID)
+		coa.POST("/", handler.CreateChartOfAccount)
+		coa.PUT("/:id", handler.UpdateChartOfAccount)
+		coa.DELETE("/:id", handler.DeleteChartOfAccount)
+		coa.GET("/hierarchy", handler.GetAccountHierarchy)
+		coa.GET("/type/:type", handler.GetAccountsByType)
+		coa.GET("/code/:code", handler.GetChartOfAccountByCode)
+		coa.GET("/search", handler.SearchAccounts)
 	}
 }

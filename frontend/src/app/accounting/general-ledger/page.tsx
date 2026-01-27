@@ -7,20 +7,22 @@ import { TwoLevelLayout } from "@/components/ui/two-level-layout"
 import { Header } from "@/components/ui/header"
 import { AdvancedDataTable } from "@/components/ui/advanced-data-table"
 import { Badge } from "@/components/ui/badge"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useToast, toast } from "@/components/ui/toast"
-import { 
-  generalLedgerService, 
-  chartOfAccountsService, 
+import {
+  generalLedgerService,
+  chartOfAccountsService,
   costCenterService,
-  financialPeriodService 
+  financialPeriodService
 } from "@/services/accounting"
-import { 
-  GeneralLedgerEntry, 
-  ChartOfAccount, 
-  CostCenter, 
+import {
+  GeneralLedgerEntry,
+  ChartOfAccount,
+  CostCenter,
   FinancialPeriod,
-  AccountingFilters 
+  AccountingFilters
 } from "@/types/accounting"
 
 export default function GeneralLedgerPage() {
@@ -147,11 +149,10 @@ export default function GeneralLedgerPage() {
         const runningBalance = balance as number
         const isNegative = runningBalance < 0
         return (
-          <span className={`font-medium ${
-            isNegative 
-              ? 'text-red-600 dark:text-red-400' 
-              : 'text-green-600 dark:text-green-400'
-          }`}>
+          <span className={`font-medium ${isNegative
+            ? 'text-red-600 dark:text-red-400'
+            : 'text-green-600 dark:text-green-400'
+            }`}>
             Rp {Math.abs(runningBalance).toLocaleString('id-ID')}
             {isNegative && ' CR'}
           </span>
@@ -182,7 +183,7 @@ export default function GeneralLedgerPage() {
         let variant: 'default' | 'secondary' | 'destructive' = 'default'
         if (statusStr === 'DRAFT') variant = 'secondary'
         if (statusStr === 'CANCELLED') variant = 'destructive'
-        
+
         return (
           <Badge variant={variant}>
             {statusStr}
@@ -220,12 +221,14 @@ export default function GeneralLedgerPage() {
       render: (journalEntryId: unknown, entry: GeneralLedgerEntry) => (
         <div className="flex space-x-2">
           {entry.journal_entry_id && (
-            <button
+            <Button
+              variant="link"
+              size="sm"
               onClick={() => handleViewJournalEntry(entry)}
-              className="text-blue-600 hover:text-blue-800 text-xs font-medium"
+              className="text-blue-600 hover:text-blue-800 text-xs font-medium p-0 h-auto"
             >
               View Journal Entry
-            </button>
+            </Button>
           )}
         </div>
       ),
@@ -243,7 +246,7 @@ export default function GeneralLedgerPage() {
         ...prev,
         total: response.total
       }))
-      
+
       // Update summary if available
       if (response.summary) {
         setSummary(response.summary)
@@ -264,10 +267,10 @@ export default function GeneralLedgerPage() {
         costCenterService.getAll(),
         financialPeriodService.getAll()
       ])
-      
+
       setAccounts(accountsResponse.data)
       setCostCenters(costCentersResponse.data)
-      setPeriods(periodsResponse)
+      setPeriods(periodsResponse.data || [])
     } catch (error) {
       console.error('Error fetching reference data:', error)
     }
@@ -315,14 +318,14 @@ export default function GeneralLedgerPage() {
       const blob = await generalLedgerService.exportLedger({
         // Current filters would be applied here
       })
-      
+
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
       a.download = `general-ledger-${new Date().toISOString().split('T')[0]}.xlsx`
       a.click()
       URL.revokeObjectURL(url)
-      
+
       addToast(toast.success("Export completed", "General ledger has been exported successfully."))
     } catch (error) {
       console.error('Error exporting general ledger:', error)
@@ -340,85 +343,124 @@ export default function GeneralLedgerPage() {
 
   return (
     <TwoLevelLayout>
-      <Header 
-        title="General Ledger"
-        description="View all financial transactions and account balances. Click 'View Journal Entry' to edit transactions."
-        breadcrumbs={[
-          { label: "Dashboard", href: "/dashboard" },
-          { label: "Accounting", href: "/accounting" },
-          { label: "General Ledger" }
-        ]}
-      />
-      
-      <div className="flex-1 p-6 space-y-6">
-        {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Debits</CardTitle>
-              <HugeiconsIcon icon={ChartIncreaseIcon} className="h-4 w-4 text-green-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-green-600">
-                {formatCurrency(summary.total_debits)}
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Credits</CardTitle>
-              <HugeiconsIcon icon={ChartDecreaseIcon} className="h-4 w-4 text-red-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-red-600">
-                {formatCurrency(summary.total_credits)}
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Opening Balance</CardTitle>
-              <HugeiconsIcon icon={Calendar01Icon} className="h-4 w-4 text-blue-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-blue-600">
-                {formatCurrency(summary.opening_balance)}
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Closing Balance</CardTitle>
-              <HugeiconsIcon icon={Dollar01Icon} className="h-4 w-4 text-purple-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-purple-600">
-                {formatCurrency(summary.closing_balance)}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Advanced Data Table */}
-        <AdvancedDataTable
-          data={entries}
-          columns={columns}
-          loading={loading}
-          pagination={{
-            current: pagination.current,
-            pageSize: pagination.pageSize,
-            total: pagination.total,
-            onChange: handlePageChange
-          }}
-          onSearch={handleSearch}
-          searchPlaceholder="Search by entry number, account, or description..."
-          exportEnabled={true}
-          rowSelection={false}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <Header
+          title="General Ledger"
+          description="View all financial transactions and account balances"
+          breadcrumbs={[
+            { label: "Accounting", href: "/accounting" },
+            { label: "General Ledger" }
+          ]}
+          actions={
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" onClick={handleExport}>
+                Export
+              </Button>
+            </div>
+          }
         />
 
+        <div className="flex-1 overflow-auto p-6 space-y-6">
+          {/* Summary Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="p-4 bg-white dark:bg-zinc-900 rounded-lg">
+              <div className="flex items-center space-x-3">
+                <div className="h-10 w-10 bg-zinc-100 dark:bg-zinc-800 rounded-lg flex items-center justify-center">
+                  <HugeiconsIcon icon={ChartIncreaseIcon} className="h-5 w-5 text-foreground" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Total Debits</p>
+                  <p className="text-2xl font-bold">{formatCurrency(summary.total_debits)}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-4 bg-white dark:bg-zinc-900 rounded-lg">
+              <div className="flex items-center space-x-3">
+                <div className="h-10 w-10 bg-zinc-100 dark:bg-zinc-800 rounded-lg flex items-center justify-center">
+                  <HugeiconsIcon icon={ChartDecreaseIcon} className="h-5 w-5 text-foreground" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Total Credits</p>
+                  <p className="text-2xl font-bold">{formatCurrency(summary.total_credits)}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-4 bg-white dark:bg-zinc-900 rounded-lg">
+              <div className="flex items-center space-x-3">
+                <div className="h-10 w-10 bg-zinc-100 dark:bg-zinc-800 rounded-lg flex items-center justify-center">
+                  <HugeiconsIcon icon={Calendar01Icon} className="h-5 w-5 text-foreground" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Opening Balance</p>
+                  <p className="text-2xl font-bold">{formatCurrency(summary.opening_balance)}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-4 bg-white dark:bg-zinc-900 rounded-lg">
+              <div className="flex items-center space-x-3">
+                <div className="h-10 w-10 bg-zinc-100 dark:bg-zinc-800 rounded-lg flex items-center justify-center">
+                  <HugeiconsIcon icon={Dollar01Icon} className="h-5 w-5 text-foreground" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Closing Balance</p>
+                  <p className="text-2xl font-bold">{formatCurrency(summary.closing_balance)}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Filters */}
+          <div className="flex flex-col md:flex-row items-center justify-between gap-2">
+            <div className="relative">
+              <Input
+                placeholder="Search entries..."
+                className="pl-3 w-64 bg-white dark:bg-zinc-900"
+                onChange={(e) => handleSearch({ search: e.target.value })}
+              />
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Select onValueChange={(value) => handleSearch({ account_id: value === 'all' ? undefined : value })}>
+                <SelectTrigger className="w-[180px] bg-white dark:bg-zinc-900">
+                  <SelectValue placeholder="All Accounts" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Accounts</SelectItem>
+                  {accounts.map(account => (
+                    <SelectItem key={account.id} value={account.id}>
+                      {account.account_code} - {account.account_name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <Select onValueChange={(value) => handleSearch({ period: value === 'all' ? undefined : value })}>
+                <SelectTrigger className="w-[150px] bg-white dark:bg-zinc-900">
+                  <SelectValue placeholder="All Periods" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Periods</SelectItem>
+                  {periods.map(period => (
+                    <SelectItem key={period.id} value={period.period_name}>
+                      {period.period_name} {period.fiscal_year}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          {/* Data Table */}
+          <AdvancedDataTable
+            data={entries}
+            columns={columns}
+            loading={loading}
+            pageSize={25}
+          />
+        </div>
       </div>
     </TwoLevelLayout>
   )

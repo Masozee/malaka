@@ -1,3 +1,5 @@
+"use client"
+
 import * as React from "react"
 import { TwoLevelLayout } from "@/components/ui/two-level-layout"
 import { Header } from "@/components/ui/header"
@@ -237,8 +239,8 @@ export default function SalesDashboardPage() {
                     {region.region_name}
                   </h4>
                   <span className={`text-sm font-medium ${region.growth_rate > 0
-                      ? 'text-green-600 dark:text-green-400'
-                      : 'text-red-600 dark:text-red-400'
+                    ? 'text-green-600 dark:text-green-400'
+                    : 'text-red-600 dark:text-red-400'
                     }`}>
                     {region.growth_rate > 0 ? '+' : ''}{region.growth_rate.toFixed(1)}%
                   </span>
@@ -299,10 +301,10 @@ export default function SalesDashboardPage() {
                     </td>
                     <td className="py-3 px-4 text-right">
                       <span className={`font-medium ${rep.achievement_percentage >= 100
-                          ? 'text-green-600 dark:text-green-400'
-                          : rep.achievement_percentage >= 80
-                            ? 'text-blue-600 dark:text-blue-400'
-                            : 'text-red-600 dark:text-red-400'
+                        ? 'text-green-600 dark:text-green-400'
+                        : rep.achievement_percentage >= 80
+                          ? 'text-blue-600 dark:text-blue-400'
+                          : 'text-red-600 dark:text-red-400'
                         }`}>
                         {rep.achievement_percentage.toFixed(0)}%
                       </span>

@@ -6,6 +6,17 @@ import (
 	"malaka/internal/shared/types"
 )
 
+// DEPRECATED: PurchaseOrder in the Inventory module is deprecated.
+// All Purchase Order operations should use the Procurement module's PurchaseOrder entity.
+// This entity remains for backwards compatibility with existing Goods Receipt flows.
+//
+// Migration path:
+// 1. Inventory should use integration.ProcurementReader to access PO data
+// 2. GoodsReceipt.PurchaseOrderID should reference procurement_purchase_orders
+// 3. This entity will be removed in a future version
+//
+// See: malaka/internal/shared/integration/procurement_integration.go
+//
 // PurchaseOrder represents a purchase order entity.
 type PurchaseOrder struct {
 	types.BaseModel

@@ -93,24 +93,44 @@ func SetupProtectedRoutes(protectedAPI *gin.RouterGroup, c *container.Container)
 	journalEntryHandler := accounting_handlers.NewJournalEntryHandler(c.JournalEntryService)
 	autoJournalHandler := accounting_handlers.NewAutoJournalHandler(c.AutoJournalService)
 	costCenterHandler := accounting_handlers.NewCostCenterHandler(c.CostCenterService)
-	
+	chartOfAccountHandler := accounting_handlers.NewChartOfAccountHandler(c.ChartOfAccountService)
+
 	// Initialize exchange rate handler
 	var exchangeRateHandler *accounting_handlers.ExchangeRateHandler
 	if c.ExchangeRateService != nil {
 		exchangeRateHandler = accounting_handlers.NewExchangeRateHandler(c.ExchangeRateService)
 	}
-	
-	// TODO: Add budget handler when BudgetService is added to container
-	// budgetHandler := accounting_handlers.NewBudgetHandler(c.BudgetService)
+
+	// Initialize budget handler
+	budgetHandler := accounting_handlers.NewBudgetHandler(c.BudgetService)
+
 	// TODO: Add trial balance handler when TrialBalanceService is added to container
 	// trialBalanceHandler := accounting_handlers.NewTrialBalanceHandler(c.TrialBalanceService)
-	
+
 	// Register accounting routes under v1 API (protected)
-	accounting_routes.RegisterAccountingRoutes(protectedAPI, generalLedgerHandler, journalEntryHandler, nil, costCenterHandler, nil, autoJournalHandler, exchangeRateHandler)
-	
+	accounting_routes.RegisterAccountingRoutes(protectedAPI, generalLedgerHandler, journalEntryHandler, nil, costCenterHandler, nil, autoJournalHandler, exchangeRateHandler, chartOfAccountHandler)
+
+	// Register budget routes under accounting
+	accountingGroup := protectedAPI.Group("/accounting")
+	accounting_routes.RegisterBudgetRoutes(accountingGroup, budgetHandler)
+
+	// Initialize financial period handler and register routes
+	financialPeriodHandler := accounting_handlers.NewFinancialPeriodHandler(c.FinancialPeriodService)
+	accounting_routes.RegisterFinancialPeriodRoutes(accountingGroup, financialPeriodHandler)
+
+	// Initialize fixed asset handler and register routes
+	fixedAssetHandler := accounting_handlers.NewFixedAssetHandler(c.FixedAssetService)
+	accounting_routes.RegisterFixedAssetRoutes(accountingGroup, fixedAssetHandler)
+
 	// Initialize inventory handlers
 	purchaseOrderHandler := inventory_handlers.NewPurchaseOrderHandler(c.PurchaseOrderService)
 	goodsReceiptHandler := inventory_handlers.NewGoodsReceiptHandler(c.GoodsReceiptService)
+	// Wire up JournalEntryService for GR auto-posting
+	goodsReceiptHandler.SetJournalEntryService(c.JournalEntryService)
+	// Wire up StockService for stock updates on GR posting
+	goodsReceiptHandler.SetStockService(c.StockService)
+	// Wire up BudgetService for budget realization on GR posting
+	goodsReceiptHandler.SetBudgetService(c.BudgetService)
 	stockHandler := inventory_handlers.NewStockHandler(c.StockService)
 	transferHandler := inventory_handlers.NewTransferHandler(c.TransferService)
 	draftOrderHandler := inventory_handlers.NewDraftOrderHandler(c.DraftOrderService)
@@ -119,7 +139,7 @@ func SetupProtectedRoutes(protectedAPI *gin.RouterGroup, c *container.Container)
 	returnSupplierHandler := inventory_handlers.NewReturnSupplierHandler(c.ReturnSupplierService)
 	simpleGoodsIssueHandler := inventory_handlers.NewSimpleGoodsIssueHandler(c.SimpleGoodsIssueService)
 	rfqHandler := inventory_handlers.NewRFQHandler(c.RFQService)
-	
+
 	// Register inventory routes under v1 API (protected)
 	inventory_routes.RegisterInventoryRoutes(protectedAPI, purchaseOrderHandler, goodsReceiptHandler, stockHandler, transferHandler, draftOrderHandler, stockAdjustmentHandler, stockOpnameHandler, returnSupplierHandler, simpleGoodsIssueHandler, rfqHandler)
 

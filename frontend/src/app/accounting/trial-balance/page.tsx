@@ -161,7 +161,7 @@ export default function TrialBalancePage() {
 
   return (
     <TwoLevelLayout>
-      <Header 
+      <Header
         title="Trial Balance"
         description="View trial balance and account balances for financial periods"
         breadcrumbs={breadcrumbs}
@@ -176,7 +176,7 @@ export default function TrialBalancePage() {
           </div>
         }
       />
-      
+
       <div className="flex-1 p-6 space-y-6">
         {/* Summary Cards (max 4 cards) */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -243,7 +243,7 @@ export default function TrialBalancePage() {
 
           <div className="flex items-center gap-2">
             <Select value={selectedFiscalYear.toString()} onValueChange={(value) => setSelectedFiscalYear(parseInt(value))}>
-              <SelectTrigger className="w-32">
+              <SelectTrigger className="w-32" aria-label="Select fiscal year">
                 <SelectValue placeholder="Year" />
               </SelectTrigger>
               <SelectContent>
@@ -254,16 +254,16 @@ export default function TrialBalancePage() {
             </Select>
 
             <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
-              <SelectTrigger className="w-44">
+              <SelectTrigger className="w-44" aria-label="Select period">
                 <SelectValue placeholder="Select period" />
               </SelectTrigger>
               <SelectContent>
                 {mounted && Array.from({ length: 12 }, (_, i) => {
                   const month = String(i + 1).padStart(2, '0')
                   const value = `${selectedFiscalYear}-${month}`
-                  const label = new Date(selectedFiscalYear, i, 1).toLocaleDateString('id-ID', { 
-                    month: 'long', 
-                    year: 'numeric' 
+                  const label = new Date(selectedFiscalYear, i, 1).toLocaleDateString('id-ID', {
+                    month: 'long',
+                    year: 'numeric'
                   })
                   return (
                     <SelectItem key={value} value={value}>{label}</SelectItem>
@@ -302,7 +302,7 @@ export default function TrialBalancePage() {
                 const totalDebit = accounts.reduce((sum, acc) => sum + acc.trial_balance_debit, 0)
                 const totalCredit = accounts.reduce((sum, acc) => sum + acc.trial_balance_credit, 0)
                 const netBalance = totalDebit - totalCredit
-                
+
                 return (
                   <div key={type} className="space-y-2">
                     <div className="flex justify-between items-center">
@@ -314,9 +314,9 @@ export default function TrialBalancePage() {
                         {formatCurrency(Math.abs(netBalance))} {netBalance < 0 ? 'CR' : 'DR'}
                       </span>
                     </div>
-                    <Progress 
-                      value={Math.abs(netBalance) / Math.max(summaryStats.totalDebits, summaryStats.totalCredits) * 100} 
-                      className="h-2" 
+                    <Progress
+                      value={Math.abs(netBalance) / Math.max(summaryStats.totalDebits, summaryStats.totalCredits) * 100}
+                      className="h-2"
                     />
                   </div>
                 )
@@ -335,17 +335,14 @@ export default function TrialBalancePage() {
                 <span className="font-medium text-red-800">Total Credit Balances</span>
                 <span className="text-lg font-bold text-red-600">{formatCurrency(summaryStats.totalCredits)}</span>
               </div>
-              <div className={`flex justify-between items-center p-3 rounded-lg ${
-                summaryStats.isBalanced ? 'bg-blue-50' : 'bg-yellow-50'
-              }`}>
-                <span className={`font-medium ${
-                  summaryStats.isBalanced ? 'text-blue-800' : 'text-yellow-800'
+              <div className={`flex justify-between items-center p-3 rounded-lg ${summaryStats.isBalanced ? 'bg-blue-50' : 'bg-yellow-50'
                 }`}>
+                <span className={`font-medium ${summaryStats.isBalanced ? 'text-blue-800' : 'text-yellow-800'
+                  }`}>
                   Difference
                 </span>
-                <span className={`text-lg font-bold ${
-                  summaryStats.isBalanced ? 'text-blue-600' : 'text-yellow-600'
-                }`}>
+                <span className={`text-lg font-bold ${summaryStats.isBalanced ? 'text-blue-600' : 'text-yellow-600'
+                  }`}>
                   {formatCurrency(summaryStats.balanceDifference)}
                 </span>
               </div>
@@ -362,7 +359,7 @@ export default function TrialBalancePage() {
             current: 1,
             pageSize: 25,
             total: trialBalance?.accounts?.length || 0,
-            onChange: () => {}
+            onChange: () => { }
           }}
           searchPlaceholder="Search accounts..."
         />

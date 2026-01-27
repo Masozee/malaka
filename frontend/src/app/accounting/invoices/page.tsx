@@ -119,7 +119,7 @@ export default function InvoicesPage() {
       key: 'invoice_number' as keyof Invoice,
       title: 'Invoice Number',
       render: (value: unknown, invoice: Invoice) => (
-        <Link 
+        <Link
           href={`/accounting/invoices/${invoice.id}`}
           className="font-medium text-blue-600 hover:text-blue-800"
         >
@@ -175,8 +175,8 @@ export default function InvoicesPage() {
             </span>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-2">
-            <div 
-              className="bg-green-600 h-2 rounded-full" 
+            <div
+              className="bg-green-600 h-2 rounded-full"
               style={{ width: `${invoice.total_amount > 0 ? (invoice.paid_amount / invoice.total_amount) * 100 : 0}%` }}
             ></div>
           </div>
@@ -209,7 +209,7 @@ export default function InvoicesPage() {
       render: (value: unknown, invoice: Invoice) => (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="sm">
+            <Button variant="ghost" size="sm" aria-label={`Actions for invoice ${invoice.invoice_number}`}>
               ...
             </Button>
           </DropdownMenuTrigger>
@@ -245,7 +245,7 @@ export default function InvoicesPage() {
 
   return (
     <TwoLevelLayout>
-      <Header 
+      <Header
         title="Invoices"
         description="Manage customer invoices and track payments"
         breadcrumbs={breadcrumbs}
@@ -262,7 +262,7 @@ export default function InvoicesPage() {
           </div>
         }
       />
-      
+
       <div className="flex-1 p-6 space-y-6">
 
         {/* Invoices Table */}
@@ -276,14 +276,14 @@ export default function InvoicesPage() {
             current: 1,
             pageSize: 10,
             total: filteredInvoices.length,
-            onChange: () => {}
+            onChange: () => { }
           }}
           onSearch={(filters) => {
             const filtered = invoices.filter(invoice => {
               if (filters.search) {
                 const searchLower = filters.search.toLowerCase()
                 return invoice.invoice_number.toLowerCase().includes(searchLower) ||
-                       invoice.customer_name.toLowerCase().includes(searchLower)
+                  invoice.customer_name.toLowerCase().includes(searchLower)
               }
               return true
             })

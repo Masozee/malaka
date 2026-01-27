@@ -27,6 +27,7 @@ import {
   InformationCircleIcon
 } from '@hugeicons/core-free-icons';
 import { goodsReceiptService, GoodsReceipt, GoodsReceiptItem } from '@/services/inventory';
+import { useToast } from '@/components/ui/toast';
 
 const getStatusBadge = (status?: 'pending' | 'approved' | 'completed') => {
   const variants = {
@@ -61,6 +62,7 @@ const getStatusBadge = (status?: 'pending' | 'approved' | 'completed') => {
 export default function GoodsReceiptDetailPage() {
   const params = useParams();
   const router = useRouter();
+  const { addToast } = useToast();
   const [mounted, setMounted] = useState(false);
   const [receipt, setReceipt] = useState<GoodsReceipt | null>(null);
   const [loading, setLoading] = useState(true);
@@ -118,17 +120,29 @@ export default function GoodsReceiptDetailPage() {
   }, [receiptId]);
 
   const handleEdit = () => {
+    // Only pending receipts can be edited
+    if (receipt?.status !== 'pending') {
+      addToast({ type: 'error', title: 'Only pending receipts can be edited' });
+      return;
+    }
     router.push(`/inventory/goods-receipt/${receiptId}/edit`);
   };
 
   const handleDelete = async () => {
+    // Only pending receipts can be deleted
+    if (receipt?.status !== 'pending') {
+      addToast({ type: 'error', title: 'Only pending receipts can be deleted' });
+      return;
+    }
+
     if (confirm('Are you sure you want to delete this goods receipt?')) {
       try {
         await goodsReceiptService.delete(receiptId);
+        addToast({ type: 'success', title: 'Goods receipt deleted successfully' });
         router.push('/inventory/goods-receipt');
       } catch (error) {
         console.error('Error deleting goods receipt:', error);
-        alert('Failed to delete goods receipt');
+        addToast({ type: 'error', title: 'Failed to delete goods receipt' });
       }
     }
   };
@@ -252,14 +266,18 @@ export default function GoodsReceiptDetailPage() {
               <HugeiconsIcon icon={Download01Icon} className="w-4 h-4 mr-2" />
               Export
             </Button>
-            <Button variant="outline" size="sm" onClick={handleEdit}>
-              <HugeiconsIcon icon={PencilEdit01Icon} className="w-4 h-4 mr-2" />
-              Edit
-            </Button>
-            <Button variant="destructive" size="sm" onClick={handleDelete}>
-              <HugeiconsIcon icon={Delete02Icon} className="w-4 h-4 mr-2" />
-              Delete
-            </Button>
+            {receipt.status === 'pending' && (
+              <>
+                <Button variant="outline" size="sm" onClick={handleEdit}>
+                  <HugeiconsIcon icon={PencilEdit01Icon} className="w-4 h-4 mr-2" />
+                  Edit
+                </Button>
+                <Button variant="destructive" size="sm" onClick={handleDelete}>
+                  <HugeiconsIcon icon={Delete02Icon} className="w-4 h-4 mr-2" />
+                  Delete
+                </Button>
+              </>
+            )}
             <Button variant="outline" size="sm" onClick={handleBack}>
               <HugeiconsIcon icon={ArrowLeft01Icon} className="w-4 h-4 mr-2" />
               Back

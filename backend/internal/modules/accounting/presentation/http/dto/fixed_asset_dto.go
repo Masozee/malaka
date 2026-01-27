@@ -27,6 +27,7 @@ type FixedAssetRequest struct {
 type FixedAssetResponse struct {
 	ID              uuid.UUID               `json:"id"`
 	CompanyID       string                  `json:"company_id"`
+	AssetCode       string                  `json:"asset_code"`
 	AssetName       string                  `json:"asset_name"`
 	Description     string                  `json:"description"`
 	Category        string                  `json:"category"`
@@ -70,6 +71,7 @@ func MapFixedAssetEntityToResponse(entity *entities.FixedAsset) *FixedAssetRespo
 	return &FixedAssetResponse{
 		ID:              entity.ID,
 		CompanyID:       entity.CompanyID,
+		AssetCode:       entity.AssetCode,
 		AssetName:       entity.AssetName,
 		Description:     entity.Notes,            // Using Notes as Description
 		Category:        entity.AssetCategory,

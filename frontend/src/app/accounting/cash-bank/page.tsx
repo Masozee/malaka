@@ -65,7 +65,7 @@ export default function CashBankPage() {
         cashBankService.getAll(),
         cashBankService.getTransactions()
       ])
-      
+
       setAccounts(accountsResponse.data || [])
       setTransactions(transactionsResponse.data || [])
     } catch (error) {
@@ -98,8 +98,8 @@ export default function CashBankPage() {
 
   // Filter accounts
   const filteredAccounts = accounts.filter(account => {
-    if (searchTerm && !account.account_name.toLowerCase().includes(searchTerm.toLowerCase()) && 
-        !account.account_code.toLowerCase().includes(searchTerm.toLowerCase())) return false
+    if (searchTerm && !account.account_name.toLowerCase().includes(searchTerm.toLowerCase()) &&
+      !account.account_code.toLowerCase().includes(searchTerm.toLowerCase())) return false
     if (statusFilter !== 'all' && account.status !== statusFilter) return false
     if (accountTypeFilter !== 'all' && account.account_type !== accountTypeFilter) return false
     return true
@@ -107,8 +107,8 @@ export default function CashBankPage() {
 
   // Filter transactions
   const filteredTransactions = transactions.filter(transaction => {
-    if (searchTerm && !transaction.description.toLowerCase().includes(searchTerm.toLowerCase()) && 
-        !transaction.reference.toLowerCase().includes(searchTerm.toLowerCase())) return false
+    if (searchTerm && !transaction.description.toLowerCase().includes(searchTerm.toLowerCase()) &&
+      !transaction.reference.toLowerCase().includes(searchTerm.toLowerCase())) return false
     if (statusFilter !== 'all' && transaction.status !== statusFilter) return false
     if (transactionTypeFilter !== 'all' && transaction.transaction_type !== transactionTypeFilter) return false
     return true
@@ -223,16 +223,16 @@ export default function CashBankPage() {
       render: (value: unknown, account: CashBankAccount) => (
         <div className="flex items-center space-x-2">
           <Button variant="ghost" size="sm" asChild>
-            <Link href={`/accounting/cash-bank/${account.id}`}>
+            <Link href={`/accounting/cash-bank/${account.id}`} aria-label={`View account ${account.account_name}`}>
               View
             </Link>
           </Button>
           <Button variant="ghost" size="sm" asChild>
-            <Link href={`/accounting/cash-bank/${account.id}/edit`}>
+            <Link href={`/accounting/cash-bank/${account.id}/edit`} aria-label={`Edit account ${account.account_name}`}>
               Edit
             </Link>
           </Button>
-          <Button variant="ghost" size="sm">
+          <Button variant="ghost" size="sm" aria-label={`Delete account ${account.account_name}`}>
             Delete
           </Button>
         </div>
@@ -287,9 +287,8 @@ export default function CashBankPage() {
       key: 'amount' as keyof CashBankTransaction,
       title: 'Amount',
       render: (value: unknown, transaction: CashBankTransaction) => (
-        <div className={`text-right font-medium ${
-          transaction.transaction_type === 'deposit' ? 'text-green-600' : 'text-red-600'
-        }`}>
+        <div className={`text-right font-medium ${transaction.transaction_type === 'deposit' ? 'text-green-600' : 'text-red-600'
+          }`}>
           {transaction.transaction_type === 'deposit' ? '+' : '-'}{formatCurrency(transaction.amount)}
         </div>
       )
@@ -314,11 +313,11 @@ export default function CashBankPage() {
       title: 'Actions',
       render: (value: unknown, transaction: CashBankTransaction) => (
         <div className="flex items-center space-x-2">
-          <Button variant="ghost" size="sm">
+          <Button variant="ghost" size="sm" aria-label={`View transaction ${transaction.reference}`}>
             View
           </Button>
           {transaction.status === 'pending' && (
-            <Button variant="ghost" size="sm">
+            <Button variant="ghost" size="sm" aria-label={`Edit transaction ${transaction.reference}`}>
               Edit
             </Button>
           )}
@@ -329,7 +328,7 @@ export default function CashBankPage() {
 
   return (
     <TwoLevelLayout>
-      <Header 
+      <Header
         title="Cash & Bank"
         description="Manage cash accounts, bank accounts, and financial transactions"
         breadcrumbs={breadcrumbs}
@@ -408,13 +407,14 @@ export default function CashBankPage() {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-3"
+                aria-label="Search accounts or transactions"
               />
             </div>
           </div>
-          
+
           <div className="flex items-center gap-2">
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-32">
+              <SelectTrigger className="w-32" aria-label="Filter by status">
                 <SelectValue placeholder="All statuses" />
               </SelectTrigger>
               <SelectContent>
@@ -430,7 +430,7 @@ export default function CashBankPage() {
 
             {activeTab === 'accounts' && (
               <Select value={accountTypeFilter} onValueChange={setAccountTypeFilter}>
-                <SelectTrigger className="w-32">
+                <SelectTrigger className="w-32" aria-label="Filter by account type">
                   <SelectValue placeholder="All types" />
                 </SelectTrigger>
                 <SelectContent>
@@ -443,7 +443,7 @@ export default function CashBankPage() {
 
             {activeTab === 'transactions' && (
               <Select value={transactionTypeFilter} onValueChange={setTransactionTypeFilter}>
-                <SelectTrigger className="w-32">
+                <SelectTrigger className="w-32" aria-label="Filter by transaction type">
                   <SelectValue placeholder="All types" />
                 </SelectTrigger>
                 <SelectContent>
@@ -478,7 +478,7 @@ export default function CashBankPage() {
             </div>
           </div>
           <div className="text-sm text-muted-foreground">
-            {activeTab === 'accounts' 
+            {activeTab === 'accounts'
               ? `${filteredAccounts.length} of ${accounts.length} accounts`
               : `${filteredTransactions.length} of ${transactions.length} transactions`
             }
@@ -495,7 +495,7 @@ export default function CashBankPage() {
               current: 1,
               pageSize: 10,
               total: filteredAccounts.length,
-              onChange: () => {}
+              onChange: () => { }
             }}
           />
         )}
@@ -509,7 +509,7 @@ export default function CashBankPage() {
               current: 1,
               pageSize: 10,
               total: filteredTransactions.length,
-              onChange: () => {}
+              onChange: () => { }
             }}
           />
         )}

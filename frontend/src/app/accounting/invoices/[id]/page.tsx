@@ -119,13 +119,13 @@ export default function InvoiceDetailPage() {
   if (loading) {
     return (
       <TwoLevelLayout>
-        <Header 
+        <Header
           title="Loading..."
           description="Loading invoice details"
           breadcrumbs={breadcrumbs}
         />
         <div className="flex-1 p-6">
-          <div className="animate-pulse space-y-4">
+          <div className="animate-pulse space-y-4" aria-busy="true" aria-label="Loading invoice details">
             <div className="h-4 bg-gray-300 rounded w-1/4"></div>
             <div className="h-4 bg-gray-300 rounded w-1/2"></div>
             <div className="h-4 bg-gray-300 rounded w-3/4"></div>
@@ -138,7 +138,7 @@ export default function InvoiceDetailPage() {
   if (!invoice) {
     return (
       <TwoLevelLayout>
-        <Header 
+        <Header
           title="Invoice Not Found"
           description="The requested invoice could not be found"
           breadcrumbs={breadcrumbs}
@@ -167,7 +167,7 @@ export default function InvoiceDetailPage() {
 
   return (
     <TwoLevelLayout>
-      <Header 
+      <Header
         title={invoice.invoice_number}
         description={`Invoice for ${invoice.customer_name}`}
         breadcrumbs={breadcrumbs}
@@ -200,9 +200,9 @@ export default function InvoiceDetailPage() {
           </div>
         }
       />
-      
+
       <div className="flex-1 p-6 space-y-6">
-        
+
         {/* Invoice Header */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <Card className="p-4 lg:col-span-2">

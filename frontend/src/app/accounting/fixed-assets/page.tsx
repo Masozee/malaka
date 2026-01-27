@@ -9,30 +9,30 @@ import { Header } from '@/components/ui/header'
 import { AdvancedDataTable, type AdvancedColumn } from '@/components/ui/advanced-data-table'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { Progress } from '@/components/ui/progress'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu'
+import { fixedAssetService, type FixedAsset as APIFixedAsset } from '@/services/accounting'
 
 import Link from 'next/link'
 
-// Fixed Asset types and interfaces
+// Fixed Asset types and interfaces (extended for UI)
 interface FixedAsset {
   id: string
   asset_code: string
   asset_name: string
   description: string
-  category: 'building' | 'machinery' | 'vehicle' | 'equipment' | 'furniture' | 'computer'
+  category: string
   location: string
   purchase_date: string
   purchase_cost: number
   salvage_value: number
   useful_life_years: number
-  depreciation_method: 'straight_line' | 'declining_balance' | 'units_of_production'
+  depreciation_method: string
   current_book_value: number
   accumulated_depreciation: number
   annual_depreciation: number
-  status: 'active' | 'disposed' | 'maintenance' | 'idle'
-  condition: 'excellent' | 'good' | 'fair' | 'poor' | 'critical'
+  status: string
+  condition: string
   last_maintenance_date?: string
   next_maintenance_date?: string
   vendor: string
@@ -44,218 +44,73 @@ interface FixedAsset {
   updated_at: string
 }
 
-const mockFixedAssets: FixedAsset[] = [
-  {
-    id: '1',
-    asset_code: 'FA-001',
-    asset_name: 'Pabrik Produksi Utama',
-    description: 'Gedung pabrik untuk produksi sepatu',
-    category: 'building',
-    location: 'Jakarta Factory',
-    purchase_date: '2020-01-15',
-    purchase_cost: 5000000000,
-    salvage_value: 500000000,
-    useful_life_years: 30,
-    depreciation_method: 'straight_line',
-    current_book_value: 4400000000,
-    accumulated_depreciation: 600000000,
-    annual_depreciation: 150000000,
-    status: 'active',
-    condition: 'good',
-    last_maintenance_date: '2024-06-15',
-    next_maintenance_date: '2024-12-15',
-    vendor: 'PT Konstruksi Jakarta',
-    serial_number: 'BLDG-001',
-    created_by: 'admin',
-    created_at: '2020-01-15T08:00:00Z',
-    updated_at: '2024-07-25T10:00:00Z'
-  },
-  {
-    id: '2',
-    asset_code: 'FA-002',
-    asset_name: 'Mesin Cutting Kulit',
-    description: 'Mesin untuk memotong kulit sepatu',
-    category: 'machinery',
-    location: 'Production Floor A',
-    purchase_date: '2022-03-10',
-    purchase_cost: 850000000,
-    salvage_value: 85000000,
-    useful_life_years: 10,
-    depreciation_method: 'straight_line',
-    current_book_value: 689000000,
-    accumulated_depreciation: 161000000,
-    annual_depreciation: 76500000,
-    status: 'active',
-    condition: 'excellent',
-    last_maintenance_date: '2024-07-01',
-    next_maintenance_date: '2024-08-01',
-    vendor: 'Machinery Solutions Ltd',
-    serial_number: 'MCH-CUT-001',
-    model: 'CutMaster 3000',
-    warranty_expiry: '2025-03-10',
-    created_by: 'admin',
-    created_at: '2022-03-10T09:00:00Z',
-    updated_at: '2024-07-25T11:00:00Z'
-  },
-  {
-    id: '3',
-    asset_code: 'FA-003',
-    asset_name: 'Mesin Jahit Industrial',
-    description: 'Mesin jahit untuk produksi sepatu',
-    category: 'machinery',
-    location: 'Production Floor B',
-    purchase_date: '2021-06-20',
-    purchase_cost: 450000000,
-    salvage_value: 45000000,
-    useful_life_years: 8,
-    depreciation_method: 'straight_line',
-    current_book_value: 303750000,
-    accumulated_depreciation: 146250000,
-    annual_depreciation: 50625000,
-    status: 'maintenance',
-    condition: 'good',
-    last_maintenance_date: '2024-07-20',
-    next_maintenance_date: '2024-08-20',
-    vendor: 'Sewing Tech Indonesia',
-    serial_number: 'SEW-IND-001',
-    model: 'Industrial Stitch Pro',
-    warranty_expiry: '2023-06-20',
-    created_by: 'admin',
-    created_at: '2021-06-20T10:00:00Z',
-    updated_at: '2024-07-25T12:00:00Z'
-  },
-  {
-    id: '4',
-    asset_code: 'FA-004',
-    asset_name: 'Truk Pengiriman',
-    description: 'Truk untuk pengiriman produk',
-    category: 'vehicle',
-    location: 'Warehouse Parking',
-    purchase_date: '2023-02-15',
-    purchase_cost: 650000000,
-    salvage_value: 130000000,
-    useful_life_years: 8,
-    depreciation_method: 'straight_line',
-    current_book_value: 567500000,
-    accumulated_depreciation: 82500000,
-    annual_depreciation: 65000000,
-    status: 'active',
-    condition: 'good',
-    last_maintenance_date: '2024-07-10',
-    next_maintenance_date: '2024-10-10',
-    vendor: 'PT Hino Motors',
-    serial_number: 'TRK-001',
-    model: 'Hino Dutro 130 HD',
-    warranty_expiry: '2026-02-15',
-    created_by: 'admin',
-    created_at: '2023-02-15T08:30:00Z',
-    updated_at: '2024-07-25T13:00:00Z'
-  },
-  {
-    id: '5',
-    asset_code: 'FA-005',
-    asset_name: 'Komputer Kantor',
-    description: 'Set komputer untuk administrasi',
-    category: 'computer',
-    location: 'Admin Office',
-    purchase_date: '2023-08-01',
-    purchase_cost: 45000000,
-    salvage_value: 4500000,
-    useful_life_years: 4,
-    depreciation_method: 'straight_line',
-    current_book_value: 35437500,
-    accumulated_depreciation: 9562500,
-    annual_depreciation: 10125000,
-    status: 'active',
-    condition: 'excellent',
-    vendor: 'PT Komputer Indonesia',
-    serial_number: 'PC-ADM-001',
-    model: 'Dell OptiPlex 3090',
-    warranty_expiry: '2026-08-01',
-    created_by: 'admin',
-    created_at: '2023-08-01T14:00:00Z',
-    updated_at: '2024-07-25T14:00:00Z'
-  },
-  {
-    id: '6',
-    asset_code: 'FA-006',
-    asset_name: 'Meja Kantor Executive',
-    description: 'Set meja kantor untuk manajemen',
-    category: 'furniture',
-    location: 'Executive Office',
-    purchase_date: '2022-11-10',
-    purchase_cost: 25000000,
-    salvage_value: 2500000,
-    useful_life_years: 10,
-    depreciation_method: 'straight_line',
-    current_book_value: 21375000,
-    accumulated_depreciation: 3625000,
-    annual_depreciation: 2250000,
-    status: 'active',
-    condition: 'good',
-    vendor: 'Furniture Plaza',
-    serial_number: 'FURN-EXE-001',
-    model: 'Executive Desk L-Shape',
-    created_by: 'admin',
-    created_at: '2022-11-10T09:00:00Z',
-    updated_at: '2024-07-25T15:00:00Z'
-  },
-  {
-    id: '7',
-    asset_code: 'FA-007',
-    asset_name: 'Conveyor Belt System',
-    description: 'Sistem conveyor untuk lini produksi',
-    category: 'equipment',
-    location: 'Production Floor A',
-    purchase_date: '2021-09-05',
-    purchase_cost: 320000000,
-    salvage_value: 32000000,
-    useful_life_years: 12,
-    depreciation_method: 'straight_line',
-    current_book_value: 248000000,
-    accumulated_depreciation: 72000000,
-    annual_depreciation: 24000000,
-    status: 'active',
-    condition: 'fair',
-    last_maintenance_date: '2024-06-30',
-    next_maintenance_date: '2024-09-30',
-    vendor: 'Conveyor Systems Ltd',
-    serial_number: 'CNV-001',
-    model: 'Belt Conveyor 5M',
-    created_by: 'admin',
-    created_at: '2021-09-05T11:00:00Z',
-    updated_at: '2024-07-25T16:00:00Z'
-  },
-  {
-    id: '8',
-    asset_code: 'FA-008',
-    asset_name: 'Generator Backup',
-    description: 'Generator cadangan untuk listrik',
-    category: 'equipment',
-    location: 'Utility Room',
-    purchase_date: '2020-12-01',
-    purchase_cost: 180000000,
-    salvage_value: 18000000,
-    useful_life_years: 15,
-    depreciation_method: 'straight_line',
-    current_book_value: 140400000,
-    accumulated_depreciation: 39600000,
-    annual_depreciation: 10800000,
-    status: 'idle',
-    condition: 'good',
-    last_maintenance_date: '2024-05-15',
-    next_maintenance_date: '2024-11-15',
-    vendor: 'Power Gen Indonesia',
-    serial_number: 'GEN-BCK-001',
-    model: 'PowerGen 500KVA',
-    created_by: 'admin',
-    created_at: '2020-12-01T16:00:00Z',
-    updated_at: '2024-07-25T17:00:00Z'
+// Transform API response to UI format
+function transformAsset(apiAsset: APIFixedAsset): FixedAsset {
+  const purchaseCost = apiAsset.cost || 0
+  const salvageValue = apiAsset.salvage_value || 0
+  const usefulLife = apiAsset.useful_life || 1
+  const accumulatedDepreciation = apiAsset.accumulated_depreciation || 0
+  const bookValue = apiAsset.book_value || (purchaseCost - accumulatedDepreciation)
+  const annualDepreciation = usefulLife > 0 ? (purchaseCost - salvageValue) / usefulLife : 0
+
+  // Map status from API to UI
+  const statusMap: Record<string, string> = {
+    'ACTIVE': 'active',
+    'DISPOSED': 'disposed',
+    'SOLD': 'disposed',
+    'LOST': 'disposed',
+    'DAMAGED': 'maintenance'
   }
-]
+
+  // Derive condition from book value ratio
+  const valueRatio = purchaseCost > 0 ? bookValue / purchaseCost : 0
+  let condition = 'good'
+  if (valueRatio > 0.8) condition = 'excellent'
+  else if (valueRatio > 0.5) condition = 'good'
+  else if (valueRatio > 0.3) condition = 'fair'
+  else if (valueRatio > 0.1) condition = 'poor'
+  else condition = 'critical'
+
+  // Map category
+  const categoryMap: Record<string, string> = {
+    'BUILDING': 'building',
+    'MACHINERY': 'machinery',
+    'VEHICLE': 'vehicle',
+    'EQUIPMENT': 'equipment',
+    'FURNITURE': 'furniture',
+    'COMPUTER': 'computer'
+  }
+
+  return {
+    id: apiAsset.id,
+    asset_code: apiAsset.asset_code || '',
+    asset_name: apiAsset.asset_name,
+    description: apiAsset.description || '',
+    category: categoryMap[apiAsset.category?.toUpperCase()] || apiAsset.category?.toLowerCase() || 'equipment',
+    location: apiAsset.current_location || '',
+    purchase_date: apiAsset.acquisition_date?.split('T')[0] || '',
+    purchase_cost: purchaseCost,
+    salvage_value: salvageValue,
+    useful_life_years: usefulLife,
+    depreciation_method: apiAsset.depreciation_method?.toLowerCase().replace(/_/g, '_') || 'straight_line',
+    current_book_value: bookValue,
+    accumulated_depreciation: accumulatedDepreciation,
+    annual_depreciation: annualDepreciation,
+    status: statusMap[apiAsset.status] || 'active',
+    condition: condition,
+    vendor: '',
+    serial_number: apiAsset.serial_number || '',
+    created_by: 'system',
+    created_at: apiAsset.created_at,
+    updated_at: apiAsset.updated_at
+  }
+}
 
 export default function FixedAssetsPage() {
   const [mounted, setMounted] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [assets, setAssets] = useState<FixedAsset[]>([])
   const [searchTerm, setSearchTerm] = useState('')
   const [categoryFilter, setCategoryFilter] = useState<string>('all')
   const [statusFilter, setStatusFilter] = useState<string>('all')
@@ -263,7 +118,25 @@ export default function FixedAssetsPage() {
 
   useEffect(() => {
     setMounted(true)
+    loadAssets()
   }, [])
+
+  async function loadAssets() {
+    try {
+      setLoading(true)
+      setError(null)
+      const response = await fixedAssetService.getAll()
+      if (response.success && response.data) {
+        const transformedAssets = response.data.map(transformAsset)
+        setAssets(transformedAssets)
+      }
+    } catch (err) {
+      console.error('Failed to load fixed assets:', err)
+      setError('Failed to load fixed assets. Please try again.')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const formatCurrency = (amount?: number): string => {
     if (!mounted || typeof amount !== 'number' || isNaN(amount)) return ''
@@ -281,9 +154,9 @@ export default function FixedAssetsPage() {
   ]
 
   // Filter assets
-  const filteredAssets = mockFixedAssets.filter(asset => {
-    if (searchTerm && !asset.asset_name.toLowerCase().includes(searchTerm.toLowerCase()) && 
-        !asset.asset_code.toLowerCase().includes(searchTerm.toLowerCase())) return false
+  const filteredAssets = assets.filter(asset => {
+    if (searchTerm && !asset.asset_name.toLowerCase().includes(searchTerm.toLowerCase()) &&
+      !asset.asset_code.toLowerCase().includes(searchTerm.toLowerCase())) return false
     if (categoryFilter !== 'all' && asset.category !== categoryFilter) return false
     if (statusFilter !== 'all' && asset.status !== statusFilter) return false
     if (conditionFilter !== 'all' && asset.condition !== conditionFilter) return false
@@ -292,13 +165,13 @@ export default function FixedAssetsPage() {
 
   // Summary statistics
   const summaryStats = {
-    totalAssets: mockFixedAssets.length,
-    totalValue: mockFixedAssets.reduce((sum, asset) => sum + asset.purchase_cost, 0),
-    totalBookValue: mockFixedAssets.reduce((sum, asset) => sum + asset.current_book_value, 0),
-    totalDepreciation: mockFixedAssets.reduce((sum, asset) => sum + asset.accumulated_depreciation, 0),
-    activeAssets: mockFixedAssets.filter(asset => asset.status === 'active').length,
-    maintenanceAssets: mockFixedAssets.filter(asset => asset.status === 'maintenance').length,
-    criticalAssets: mockFixedAssets.filter(asset => asset.condition === 'critical' || asset.condition === 'poor').length
+    totalAssets: assets.length,
+    totalValue: assets.reduce((sum, asset) => sum + asset.purchase_cost, 0),
+    totalBookValue: assets.reduce((sum, asset) => sum + asset.current_book_value, 0),
+    totalDepreciation: assets.reduce((sum, asset) => sum + asset.accumulated_depreciation, 0),
+    activeAssets: assets.filter(asset => asset.status === 'active').length,
+    maintenanceAssets: assets.filter(asset => asset.status === 'maintenance').length,
+    criticalAssets: assets.filter(asset => asset.condition === 'critical' || asset.condition === 'poor').length
   }
 
   const getCategoryLabel = (category: string) => {
@@ -339,7 +212,7 @@ export default function FixedAssetsPage() {
     const nextDate = new Date(asset.next_maintenance_date)
     const today = new Date()
     const daysUntil = Math.ceil((nextDate.getTime() - today.getTime()) / (1000 * 3600 * 24))
-    
+
     if (daysUntil < 0) return { status: 'overdue', label: 'Overdue', color: 'text-red-600' }
     if (daysUntil <= 7) return { status: 'due_soon', label: 'Due Soon', color: 'text-orange-600' }
     if (daysUntil <= 30) return { status: 'upcoming', label: 'Upcoming', color: 'text-yellow-600' }
@@ -464,7 +337,7 @@ export default function FixedAssetsPage() {
       render: (_: unknown, asset: FixedAsset) => (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="sm">
+            <Button variant="ghost" size="sm" aria-label={`Actions for asset ${asset.asset_name}`}>
               ...
             </Button>
           </DropdownMenuTrigger>
@@ -500,7 +373,7 @@ export default function FixedAssetsPage() {
   ]
 
   // Category summary
-  const categoryStats = mockFixedAssets.reduce((acc, asset) => {
+  const categoryStats = assets.reduce((acc, asset) => {
     if (!acc[asset.category]) {
       acc[asset.category] = { count: 0, value: 0, bookValue: 0 }
     }
@@ -512,7 +385,7 @@ export default function FixedAssetsPage() {
 
   return (
     <TwoLevelLayout>
-      <Header 
+      <Header
         title="Fixed Assets"
         description="Manage fixed assets, depreciation, and maintenance schedules"
         breadcrumbs={breadcrumbs}
@@ -532,7 +405,7 @@ export default function FixedAssetsPage() {
           </div>
         }
       />
-      
+
       <div className="flex-1 p-6 space-y-6">
         {/* Summary Statistics (max 4 cards) */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -590,13 +463,14 @@ export default function FixedAssetsPage() {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-3"
+                aria-label="Search assets"
               />
             </div>
           </div>
 
           <div className="flex items-center gap-2">
             <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-              <SelectTrigger className="w-32">
+              <SelectTrigger className="w-32" aria-label="Filter by category">
                 <SelectValue placeholder="Category" />
               </SelectTrigger>
               <SelectContent>
@@ -609,9 +483,9 @@ export default function FixedAssetsPage() {
                 <SelectItem value="furniture">Furniture</SelectItem>
               </SelectContent>
             </Select>
-            
+
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-32">
+              <SelectTrigger className="w-32" aria-label="Filter by status">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
@@ -622,9 +496,9 @@ export default function FixedAssetsPage() {
                 <SelectItem value="disposed">Disposed</SelectItem>
               </SelectContent>
             </Select>
-            
+
             <Select value={conditionFilter} onValueChange={setConditionFilter}>
-              <SelectTrigger className="w-32">
+              <SelectTrigger className="w-32" aria-label="Filter by condition">
                 <SelectValue placeholder="Condition" />
               </SelectTrigger>
               <SelectContent>
@@ -647,15 +521,25 @@ export default function FixedAssetsPage() {
             </div>
           </div>
           <div className="text-sm text-muted-foreground">
-            {filteredAssets.length} of {mockFixedAssets.length} items
+            {filteredAssets.length} of {assets.length} items
           </div>
         </div>
+
+        {/* Error State */}
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+            <p className="text-red-700">{error}</p>
+            <Button variant="outline" size="sm" onClick={loadAssets} className="mt-2">
+              Retry
+            </Button>
+          </div>
+        )}
 
         {/* Content - Table without Card wrapper */}
         <AdvancedDataTable
           data={filteredAssets}
           columns={columns}
-          loading={false}
+          loading={loading}
         />
 
         {/* Critical Assets Alert */}

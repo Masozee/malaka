@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { purchaseRequestService } from '@/services/procurement'
 import type { PurchaseRequest } from '@/types/procurement'
+import { useAuth } from '@/contexts/auth-context'
 import Link from 'next/link'
 
 const statusColors: Record<string, string> = {
@@ -30,6 +31,7 @@ const priorityColors: Record<string, string> = {
 export default function PurchaseRequestDetailPage() {
   const params = useParams()
   const router = useRouter()
+  const { canApprove } = useAuth()
   const [request, setRequest] = useState<PurchaseRequest | null>(null)
   const [loading, setLoading] = useState(true)
   const [mounted, setMounted] = useState(false)
@@ -151,7 +153,8 @@ export default function PurchaseRequestDetailPage() {
         breadcrumbs={breadcrumbs}
         actions={
           <div className="flex items-center gap-2">
-            {request.status === 'pending' && (
+            {/* Approve/Reject buttons only shown to users with approver role */}
+            {request.status === 'pending' && canApprove() && (
               <>
                 <Button variant="outline" onClick={handleReject}>
                   Reject

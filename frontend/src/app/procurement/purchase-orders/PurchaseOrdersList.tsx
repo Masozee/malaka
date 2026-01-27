@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
+import { useAuth } from '@/contexts/auth-context'
 import { TwoLevelLayout } from '@/components/ui/two-level-layout'
 import { Header } from '@/components/ui/header'
 import { Card } from '@/components/ui/card'
@@ -52,6 +53,7 @@ interface PurchaseOrdersListProps {
 export default function PurchaseOrdersList({ initialData, userId }: PurchaseOrdersListProps) {
     const router = useRouter()
     const { addToast } = useToast()
+    const { canApprove } = useAuth()
     const [searchQuery, setSearchQuery] = useState('')
     const [purchaseOrders, setPurchaseOrders] = useState<PurchaseOrder[]>(initialData)
     const [loading, setLoading] = useState(false)
@@ -104,10 +106,21 @@ export default function PurchaseOrdersList({ initialData, userId }: PurchaseOrde
     }
 
     const handleEdit = (po: PurchaseOrder) => {
+        // Only draft or pending_approval orders can be edited
+        if (po.status !== 'draft' && po.status !== 'pending_approval') {
+            addToast({ type: 'error', title: 'Only draft or pending approval orders can be edited' })
+            return
+        }
         router.push(`/procurement/purchase-orders/${po.id}/edit`)
     }
 
     const handleDelete = async (po: PurchaseOrder) => {
+        // Only draft orders can be deleted
+        if (po.status !== 'draft') {
+            addToast({ type: 'error', title: 'Only draft orders can be deleted' })
+            return
+        }
+
         if (!confirm(`Are you sure you want to delete PO ${po.po_number}?`)) return
 
         try {

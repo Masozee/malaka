@@ -70,7 +70,17 @@ import {
   Share01Icon,
   ArrowRightIcon,
   QuotesIcon,
-  MoreVerticalIcon
+  MoreVerticalIcon,
+  Analytics02Icon,
+  DatabaseAddIcon,
+  SquareArrowLeftRightIcon,
+  ThreeDViewIcon,
+  Upload05Icon,
+  CalculateIcon,
+  FileZipIcon,
+  ChartUpIcon,
+  Analytics01Icon,
+  FileLockedIcon
 } from '@hugeicons/core-free-icons'
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -118,18 +128,18 @@ const menuData: MenuItem[] = [
   {
     id: "dashboard",
     label: "Dashboard",
-    icon: Home01Icon,
+    icon: Analytics02Icon,
     items: [
-      { id: "overview", label: "Overview", icon: Home01Icon, href: "/dashboard" },
+      { id: "overview", label: "Overview", icon: Analytics01Icon, href: "/dashboard" },
       { id: "analytics", label: "Analytics", icon: ChartColumnIcon, href: "/dashboard/analytics" },
-      { id: "sales-dashboard", label: "Sales Dashboard", icon: ChartIncreaseIcon, href: "/sales/dashboard" },
+      { id: "sales-dashboard", label: "Sales Dashboard", icon: ChartUpIcon, href: "/sales/dashboard" },
       { id: "reports-dashboard", label: "Reports Dashboard", icon: PieChart01Icon, href: "/reports/dashboard" }
     ]
   },
   {
     id: "master-data",
     label: "Master Data",
-    icon: Database01Icon,
+    icon: DatabaseAddIcon,
     items: [
       { id: "companies", label: "Companies", icon: Building01Icon, href: "/master-data/companies", count: 24 },
       { id: "users", label: "Users", icon: UserCheck01Icon, href: "/master-data/users", count: 156 },
@@ -158,11 +168,11 @@ const menuData: MenuItem[] = [
   {
     id: "sales",
     label: "Sales",
-    icon: ShoppingCartIcon,
+    icon: SquareArrowLeftRightIcon,
     href: "/sales",
     items: [
       { id: "pos", label: "Point of Sale", icon: CreditCardIcon, href: "/sales/pos", count: 142 },
-      { id: "online-sales", label: "Online Sales", icon: ChartIncreaseIcon, href: "/sales/online", count: 789 },
+      { id: "online-sales", label: "Online Sales", icon: ChartUpIcon, href: "/sales/online", count: 789 },
       { id: "direct-sales", label: "Direct Sales", icon: StoreIcon, href: "/sales/direct", count: 234 },
       { id: "quotations", label: "Quotations", icon: QuotesIcon, href: "/sales/quotations", count: 89 },
       { id: "orders", label: "Sales Orders", icon: FileIcon, href: "/sales/orders", count: 567 },
@@ -196,7 +206,7 @@ const menuData: MenuItem[] = [
   {
     id: "production",
     label: "Production",
-    icon: Factory01Icon,
+    icon: ThreeDViewIcon,
     href: "/production",
     items: [
       { id: "suppliers", label: "Suppliers", icon: TruckIcon, href: "/production/suppliers", count: 67 },
@@ -212,7 +222,7 @@ const menuData: MenuItem[] = [
   {
     id: "procurement",
     label: "Procurement",
-    icon: ShoppingBag01Icon,
+    icon: Upload05Icon,
     href: "/procurement",
     items: [
       { id: "suppliers", label: "Suppliers", icon: TruckIcon, href: "/procurement/suppliers", count: 45 },
@@ -220,7 +230,7 @@ const menuData: MenuItem[] = [
       { id: "purchase-orders", label: "Purchase Orders", icon: SealIcon, href: "/procurement/purchase-orders", count: 67 },
       { id: "rfq", label: "RFQ (Quotations)", icon: Chat01Icon, href: "/procurement/rfq", count: 12 },
       { id: "vendor-evaluation", label: "Vendor Evaluation", icon: StarIcon, href: "/procurement/vendor-evaluation", count: 8 },
-      { id: "contracts", label: "Contracts", icon: Agreement01Icon, href: "/procurement/contracts", count: 15 },
+      { id: "contracts", label: "Contracts", icon: FileLockedIcon, href: "/procurement/contracts", count: 15 },
       { id: "analytics", label: "Analytics", icon: ChartColumnIcon, href: "/procurement/analytics" },
       { id: "procurement-settings", label: "Settings", icon: SettingsIcon, href: "/procurement/settings" }
     ]
@@ -243,9 +253,10 @@ const menuData: MenuItem[] = [
   {
     id: "accounting",
     label: "Accounting",
-    icon: CalculatorIcon,
+    icon: CalculateIcon,
     href: "/accounting",
     items: [
+      { id: "chart-of-accounts", label: "Chart of Accounts", icon: HierarchyIcon, href: "/accounting/chart-of-accounts" },
       { id: "general-ledger", label: "General Ledger", icon: BookOpen01Icon, href: "/accounting/general-ledger" },
       { id: "journal-entries", label: "Journal Entries", icon: FileIcon, href: "/accounting/journal" },
       { id: "trial-balance", label: "Trial Balance", icon: ChartColumnIcon, href: "/accounting/trial-balance" },
@@ -276,7 +287,7 @@ const menuData: MenuItem[] = [
   {
     id: "reporting",
     label: "Reporting",
-    icon: ChartColumnIcon,
+    icon: FileZipIcon,
     href: "/reports",
     items: [
       { id: "dashboard", label: "BI Dashboard", icon: PieChart01Icon, href: "/reports/dashboard" },
@@ -344,7 +355,7 @@ export function TwoLevelLayout({ children }: LayoutProps) {
   return (
     <div className="flex min-h-screen w-full">
       {/* First Level Sidebar - Main Modules */}
-      <aside className="fixed left-0 top-0 h-screen w-12 bg-gray-100 dark:bg-gray-800 border-r border-gray-300 dark:border-gray-600 flex flex-col z-20">
+      <aside className="fixed left-0 top-0 h-screen w-12 bg-gray-100 dark:bg-gray-800 flex flex-col z-20">
         {/* Header - Aligned with combined navbar height */}
         <div className="h-[54px] flex items-center justify-center">
           <img
@@ -353,7 +364,7 @@ export function TwoLevelLayout({ children }: LayoutProps) {
             className="h-6 w-6 object-contain"
           />
         </div>
-        
+
         {/* Navigation */}
         <nav className="flex-1 p-1">
           <ul className="space-y-2">
@@ -365,28 +376,26 @@ export function TwoLevelLayout({ children }: LayoutProps) {
                   {menu.href ? (
                     <Link
                       href={menu.href}
-                      className={`flex items-center justify-center p-2 rounded-md transition-colors ${
-                        isActive
-                          ? ' '
-                          : 'hover:bg-gray-200 dark:hover:bg-gray-700'
-                      }`}
+                      className={`flex items-center justify-center p-2 rounded-md transition-colors ${isActive
+                        ? ' '
+                        : 'hover:bg-gray-200 dark:hover:bg-gray-700'
+                        }`}
                       style={isActive ? { backgroundColor: '#cfff04' } : {}}
                       title={menu.label}
                     >
-                      <Icon icon={menu.icon} className={`h-4 w-4 ${isActive ? 'text-black' : 'text-gray-600 dark:text-gray-300'}`} strokeWidth={2} />
+                      <Icon icon={menu.icon} className={`h-[18px] w-[18px] ${isActive ? 'text-black' : 'text-gray-600 dark:text-gray-300'}`} strokeWidth={2} />
                     </Link>
                   ) : (
                     <button
                       onClick={() => handleMenuClick(menu.id)}
-                      className={`w-full flex items-center justify-center p-2 rounded-md transition-colors ${
-                        isActive
-                          ? ' '
-                          : 'hover:bg-gray-200 dark:hover:bg-gray-700'
-                      }`}
+                      className={`w-full flex items-center justify-center p-2 rounded-md transition-colors ${isActive
+                        ? ' '
+                        : 'hover:bg-gray-200 dark:hover:bg-gray-700'
+                        }`}
                       style={isActive ? { backgroundColor: '#cfff04' } : {}}
                       title={menu.label}
                     >
-                      <Icon icon={menu.icon} className={`h-4 w-4 ${isActive ? 'text-black' : 'text-gray-600 dark:text-gray-300'}`} strokeWidth={2} />
+                      <Icon icon={menu.icon} className={`h-[18px] w-[18px] ${isActive ? 'text-black' : 'text-gray-600 dark:text-gray-300'}`} strokeWidth={2} />
                     </button>
                   )}
                 </li>
@@ -394,22 +403,21 @@ export function TwoLevelLayout({ children }: LayoutProps) {
             })}
           </ul>
         </nav>
-        
+
         {/* Bottom Section - Calendar, Theme Toggle, Gear, Bell and User Avatar */}
         <div className="p-1 border-t border-gray-300 dark:border-gray-600 relative">
           <div className="space-y-1">
             {/* Calendar Icon */}
             <Link
               href="/calendar"
-              className={`w-full flex items-center justify-center p-2 rounded-md transition-colors ${
-                pathname === '/calendar'
-                  ? ' '
-                  : 'hover:bg-gray-200 dark:hover:bg-gray-700'
-              }`}
+              className={`w-full flex items-center justify-center p-2 rounded-md transition-colors ${pathname === '/calendar'
+                ? ' '
+                : 'hover:bg-gray-200 dark:hover:bg-gray-700'
+                }`}
               style={pathname === '/calendar' ? { backgroundColor: '#cfff04' } : {}}
               title="Calendar"
             >
-              <Icon icon={Calendar01Icon} className={`h-4 w-4 ${pathname === '/calendar' ? 'text-black' : 'text-gray-600 dark:text-gray-300'}`} strokeWidth={2} />
+              <Icon icon={Calendar01Icon} className={`h-[18px] w-[18px] ${pathname === '/calendar' ? 'text-black' : 'text-gray-600 dark:text-gray-300'}`} strokeWidth={2} />
             </Link>
 
             {/* Theme Toggle */}
@@ -421,15 +429,14 @@ export function TwoLevelLayout({ children }: LayoutProps) {
             {/* Settings */}
             <Link
               href="/settings"
-              className={`w-full flex items-center justify-center p-2 rounded-md transition-colors ${
-                pathname === '/settings'
-                  ? ' '
-                  : 'hover:bg-gray-200 dark:hover:bg-gray-700'
-              }`}
+              className={`w-full flex items-center justify-center p-2 rounded-md transition-colors ${pathname === '/settings'
+                ? ' '
+                : 'hover:bg-gray-200 dark:hover:bg-gray-700'
+                }`}
               style={pathname === '/settings' ? { backgroundColor: '#cfff04' } : {}}
               title="Settings"
             >
-              <Icon icon={SettingsIcon} className={`h-4 w-4 ${pathname === '/settings' ? 'text-black' : 'text-gray-600 dark:text-gray-300'}`} strokeWidth={2} />
+              <Icon icon={SettingsIcon} className={`h-[18px] w-[18px] ${pathname === '/settings' ? 'text-black' : 'text-gray-600 dark:text-gray-300'}`} strokeWidth={2} />
             </Link>
           </div>
         </div>
@@ -437,9 +444,8 @@ export function TwoLevelLayout({ children }: LayoutProps) {
 
       {/* Second Level Sidebar - Detailed Menu Items */}
       {activeMenu && activeMenuData?.items && (
-        <aside className={`${
-          isSecondSidebarCollapsed ? 'w-12' : 'w-64'
-        } ml-12 bg-gray-50 dark:bg-gray-800 border-r border-gray-300 dark:border-gray-600 flex flex-col transition-all duration-300 z-10 fixed left-0 top-0 h-screen font-[family-name:var(--font-noto-sans)]`}>
+        <aside className={`${isSecondSidebarCollapsed ? 'w-12' : 'w-64'
+          } ml-12 bg-gray-50 dark:bg-gray-800 flex flex-col transition-all duration-300 z-10 fixed left-0 top-0 h-screen font-[family-name:var(--font-noto-sans)]`}>
           {/* Header - Aligned with first sidebar header */}
           <div className="h-[54px] px-4 border-b border-gray-300 dark:border-gray-600 flex items-center justify-between">
             {!isSecondSidebarCollapsed ? (
@@ -447,7 +453,7 @@ export function TwoLevelLayout({ children }: LayoutProps) {
                 <span className="font-semibold text-gray-900 dark:text-gray-100">{activeMenuData.label}</span>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                    <Button variant="outline" size="sm" className="h-8 w-8 p-0">
                       <Icon icon={MoreVerticalIcon} className="h-4 w-4 text-gray-500" />
                     </Button>
                   </DropdownMenuTrigger>
@@ -470,7 +476,7 @@ export function TwoLevelLayout({ children }: LayoutProps) {
             ) : (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0 mx-auto">
+                  <Button variant="outline" size="sm" className="h-8 w-8 p-0 mx-auto">
                     <Icon icon={MoreVerticalIcon} className="h-4 w-4 text-gray-500" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -491,7 +497,7 @@ export function TwoLevelLayout({ children }: LayoutProps) {
               </DropdownMenu>
             )}
           </div>
-          
+
           {/* Sub Navigation */}
           <nav className="flex-1 p-2">
             <ul className="space-y-1">
@@ -502,13 +508,11 @@ export function TwoLevelLayout({ children }: LayoutProps) {
                   <li key={item.id}>
                     <Link
                       href={item.href}
-                      className={`flex items-center ${
-                        isSecondSidebarCollapsed ? 'justify-center p-3' : 'justify-between px-3 py-2'
-                      } rounded-lg transition-colors ${
-                        isActive
+                      className={`flex items-center ${isSecondSidebarCollapsed ? 'justify-center p-3' : 'justify-between px-3 py-2'
+                        } rounded-lg transition-colors ${isActive
                           ? 'text-black  '
                           : 'hover:bg-white dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
-                      }`}
+                        }`}
                       style={isActive ? { backgroundColor: '#cfff04' } : {}}
                       title={isSecondSidebarCollapsed ? item.label : undefined}
                     >
@@ -556,13 +560,12 @@ export function TwoLevelLayout({ children }: LayoutProps) {
           )}
         </aside>
       )}
-      
+
       {/* Main Content */}
-      <main className={`flex-1 flex flex-col overflow-hidden bg-gray-50 dark:bg-gray-900 ${
-        activeMenu && activeMenuData?.items
-          ? isSecondSidebarCollapsed ? 'ml-24' : 'ml-[304px]'
-          : 'ml-12'
-      } transition-all duration-300`}>
+      <main className={`flex-1 flex flex-col overflow-hidden bg-gray-100 dark:bg-gray-900 ${activeMenu && activeMenuData?.items
+        ? isSecondSidebarCollapsed ? 'ml-24' : 'ml-[304px]'
+        : 'ml-12'
+        } transition-all duration-300`}>
         <SidebarProvider
           collapsed={isSecondSidebarCollapsed}
           onToggle={() => setIsSecondSidebarCollapsed(!isSecondSidebarCollapsed)}

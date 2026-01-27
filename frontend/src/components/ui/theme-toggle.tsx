@@ -22,8 +22,8 @@ export function ThemeToggle() {
 
   return (
     <Button variant="ghost" size="icon" onClick={toggleTheme} className="h-8 w-8 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700">
-      <HugeiconsIcon icon={Sun01Icon} className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0 text-gray-600 dark:text-gray-300" />
-      <HugeiconsIcon icon={Moon01Icon} className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100 text-gray-600 dark:text-gray-300" />
+      <HugeiconsIcon icon={Sun01Icon} className="h-[18px] w-[18px] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0 text-gray-600 dark:text-gray-300" />
+      <HugeiconsIcon icon={Moon01Icon} className="absolute h-[18px] w-[18px] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100 text-gray-600 dark:text-gray-300" />
       <span className="sr-only">Toggle theme</span>
     </Button>
   )

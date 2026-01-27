@@ -63,4 +63,14 @@ type BudgetService interface {
 	// Budget forecasting
 	ForecastBudget(ctx context.Context, budgetID uuid.UUID, projectionMonths int) (*entities.Budget, error)
 	CompareBudgetYearOverYear(ctx context.Context, companyID string, budgetType entities.BudgetType, currentYear, previousYear int) (map[string]interface{}, error)
+
+	// Budget commitment operations
+	CreateCommitment(ctx context.Context, commitment *entities.BudgetCommitment) error
+	GetCommitmentByReferenceID(ctx context.Context, refType entities.BudgetCommitmentReferenceType, refID uuid.UUID) (*entities.BudgetCommitment, error)
+	ReleaseCommitment(ctx context.Context, commitmentID uuid.UUID, releasedBy uuid.UUID, reason string) error
+
+	// Budget realization operations
+	CreateRealization(ctx context.Context, realization *entities.BudgetRealization) error
+	CreateRealizationFromGR(ctx context.Context, grID uuid.UUID, grNumber string, amount float64, accountID uuid.UUID, transactionDate time.Time, realizedBy uuid.UUID, poID *uuid.UUID) error
+	GetRealizationSummary(ctx context.Context, budgetID uuid.UUID) ([]*entities.BudgetRealizationSummary, error)
 }

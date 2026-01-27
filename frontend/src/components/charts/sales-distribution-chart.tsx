@@ -13,23 +13,23 @@ interface SalesDistributionChartProps {
 }
 
 const COLORS = [
-  '#3b82f6', // Blue
-  '#ef4444', // Red  
-  '#10b981', // Green
-  '#f59e0b', // Amber
-  '#8b5cf6', // Purple
-  '#ec4899', // Pink
-  '#6b7280', // Gray
-  '#14b8a6', // Teal
-  '#f97316', // Orange
-  '#84cc16'  // Lime
+  '#2563eb', // Blue 600
+  '#7c3aed', // Violet 600
+  '#db2777', // Pink 600
+  '#ea580c', // Orange 600
+  '#059669', // Emerald 600
+  '#0891b2', // Cyan 600
+  '#4f46e5', // Indigo 600
+  '#be185d', // Rose 600
+  '#d97706', // Amber 600
+  '#16a34a'  // Green 600
 ]
 
-export function SalesDistributionChart({ 
-  data, 
-  title = "Sales by Category", 
+export function SalesDistributionChart({
+  data,
+  title = "Sales by Category",
   height = 350,
-  showLabels = true 
+  showLabels = true
 }: SalesDistributionChartProps) {
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -42,7 +42,7 @@ export function SalesDistributionChart({
 
   const chartData = React.useMemo(() => {
     const totalRevenue = data.reduce((sum, category) => sum + category.total_revenue, 0)
-    
+
     return data.map((category, index) => ({
       name: category.category_name,
       value: category.total_revenue,
@@ -53,18 +53,18 @@ export function SalesDistributionChart({
     }))
   }, [data])
 
-  const CustomTooltip = ({ active, payload }: { 
-    active?: boolean; 
-    payload?: Array<{ 
-      payload: { 
-        name: string; 
-        value: number; 
-        percentage: number; 
-        units: number; 
-        productCount: number; 
-        color: string 
-      } 
-    }> 
+  const CustomTooltip = ({ active, payload }: {
+    active?: boolean;
+    payload?: Array<{
+      payload: {
+        name: string;
+        value: number;
+        percentage: number;
+        units: number;
+        productCount: number;
+        color: string
+      }
+    }>
   }) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload
@@ -97,18 +97,18 @@ export function SalesDistributionChart({
   const renderCustomLabel = (props: any) => {
     const { cx, cy, midAngle, innerRadius, outerRadius, percentage } = props
     if (!showLabels || percentage < 5) return null // Don't show labels for slices less than 5%
-    
+
     const RADIAN = Math.PI / 180
     const radius = innerRadius + (outerRadius - innerRadius) * 0.5
     const x = cx + radius * Math.cos(-midAngle * RADIAN)
     const y = cy + radius * Math.sin(-midAngle * RADIAN)
 
     return (
-      <text 
-        x={x} 
-        y={y} 
-        fill="white" 
-        textAnchor={x > cx ? 'start' : 'end'} 
+      <text
+        x={x}
+        y={y}
+        fill="white"
+        textAnchor={x > cx ? 'start' : 'end'}
         dominantBaseline="central"
         className="text-xs font-medium"
       >
@@ -117,15 +117,15 @@ export function SalesDistributionChart({
     )
   }
 
-  const CustomLegend = ({ payload }: { 
-    payload?: Array<{ color: string; value: string }> 
+  const CustomLegend = ({ payload }: {
+    payload?: Array<{ color: string; value: string }>
   }) => {
     return (
       <div className="flex flex-wrap justify-center gap-4 mt-4">
         {payload?.map((entry, index: number) => (
           <div key={index} className="flex items-center gap-2">
-            <div 
-              className="w-3 h-3 rounded-full" 
+            <div
+              className="w-3 h-3 rounded-full"
               style={{ backgroundColor: entry.color }}
             />
             <span className="text-sm text-gray-700 dark:text-gray-300">

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { TwoLevelLayout } from '@/components/ui/two-level-layout'
 import { Header } from '@/components/ui/header'
@@ -28,6 +28,7 @@ import {
 import { purchaseRequestService } from '@/services/procurement'
 import type { PurchaseRequest, PurchaseRequestStats } from '@/types/procurement'
 import { useToast } from '@/components/ui/toast'
+import { useAuth } from '@/contexts/auth-context'
 import Link from 'next/link'
 import { TanStackColumn } from '@/components/ui/tanstack-data-table'
 import {
@@ -61,6 +62,7 @@ interface PurchaseRequestsListProps {
 export default function PurchaseRequestsList({ initialData }: PurchaseRequestsListProps) {
     const router = useRouter()
     const { addToast } = useToast()
+    const { canApprove } = useAuth()
     const [mounted, setMounted] = useState(true)
     const [searchQuery, setSearchQuery] = useState('')
     const [loading, setLoading] = useState(false)
@@ -95,9 +97,9 @@ export default function PurchaseRequestsList({ initialData }: PurchaseRequestsLi
         setSearchQuery(e.target.value)
     }
 
-    useState(() => {
+    useEffect(() => {
         purchaseRequestService.getStats().then(setStats).catch(console.error)
-    })
+    }, [])
 
     const breadcrumbs = [
         { label: 'Procurement', href: '/procurement' },
@@ -109,6 +111,11 @@ export default function PurchaseRequestsList({ initialData }: PurchaseRequestsLi
     }
 
     const handleEditRequest = (request: PurchaseRequest) => {
+        // Only allow editing draft requests
+        if (request.status !== 'draft') {
+            addToast({ type: 'error', title: 'Only draft requests can be edited' })
+            return
+        }
         router.push(`/procurement/purchase-requests/${request.id}/edit`)
     }
 
@@ -117,6 +124,11 @@ export default function PurchaseRequestsList({ initialData }: PurchaseRequestsLi
     }
 
     const handleSubmit = async (request: PurchaseRequest) => {
+        // Only allow submitting draft requests
+        if (request.status !== 'draft') {
+            addToast({ type: 'error', title: 'Only draft requests can be submitted' })
+            return
+        }
         try {
             await purchaseRequestService.submit(request.id)
             addToast({ type: 'success', title: 'Purchase request submitted successfully' })
@@ -128,6 +140,15 @@ export default function PurchaseRequestsList({ initialData }: PurchaseRequestsLi
     }
 
     const handleApprove = async (request: PurchaseRequest) => {
+        // Only allow approving pending requests by users with approver role
+        if (request.status !== 'pending') {
+            addToast({ type: 'error', title: 'Only pending requests can be approved' })
+            return
+        }
+        if (!canApprove()) {
+            addToast({ type: 'error', title: 'You do not have permission to approve requests' })
+            return
+        }
         try {
             await purchaseRequestService.approve(request.id)
             addToast({ type: 'success', title: 'Purchase request approved' })
@@ -139,6 +160,11 @@ export default function PurchaseRequestsList({ initialData }: PurchaseRequestsLi
     }
 
     const handleCancel = async (request: PurchaseRequest) => {
+        // Only allow cancelling draft or pending requests
+        if (!['draft', 'pending'].includes(request.status)) {
+            addToast({ type: 'error', title: 'Only draft or pending requests can be cancelled' })
+            return
+        }
         try {
             await purchaseRequestService.cancel(request.id)
             addToast({ type: 'success', title: 'Purchase request cancelled' })
@@ -150,6 +176,11 @@ export default function PurchaseRequestsList({ initialData }: PurchaseRequestsLi
     }
 
     const handleDelete = async (request: PurchaseRequest) => {
+        // Only allow deleting draft requests
+        if (request.status !== 'draft') {
+            addToast({ type: 'error', title: 'Only draft requests can be deleted' })
+            return
+        }
         if (!confirm('Are you sure you want to delete this purchase request?')) return
         try {
             await purchaseRequestService.delete(request.id)

@@ -6,7 +6,7 @@ import (
 )
 
 // RegisterHRRoutes registers the HR module's API routes.
-func RegisterHRRoutes(router *gin.RouterGroup, employeeHandler *handlers.EmployeeHandler, payrollHandler *handlers.PayrollHandler, attendanceHandler *handlers.AttendanceHandler, leaveHandler *handlers.LeaveHandler, performanceHandler *handlers.PerformanceReviewHandler) {
+func RegisterHRRoutes(router *gin.RouterGroup, employeeHandler *handlers.EmployeeHandler, payrollHandler *handlers.PayrollHandler, attendanceHandler *handlers.AttendanceHandler, leaveHandler *handlers.LeaveHandler, performanceHandler *handlers.PerformanceReviewHandler, trainingHandler *handlers.TrainingHandler) {
 	hr := router.Group("/hr")
 	{
 		// Employee routes
@@ -119,6 +119,32 @@ func RegisterHRRoutes(router *gin.RouterGroup, employeeHandler *handlers.Employe
 			performance.GET("/cycles", performanceHandler.GetReviewCycles)
 			performance.GET("/goals", performanceHandler.GetPerformanceGoals)
 			performance.GET("/competencies", performanceHandler.GetCompetencies)
+		}
+
+		// Training Management routes
+		training := hr.Group("/training")
+		{
+			// Training programs
+			programs := training.Group("/programs")
+			{
+				programs.POST("/", trainingHandler.CreateProgram)
+				programs.GET("/", trainingHandler.GetAllPrograms)
+				programs.GET("/:id", trainingHandler.GetProgramByID)
+				programs.PUT("/:id", trainingHandler.UpdateProgram)
+				programs.DELETE("/:id", trainingHandler.DeleteProgram)
+			}
+
+			// Training enrollments
+			enrollments := training.Group("/enrollments")
+			{
+				enrollments.POST("/", trainingHandler.EnrollEmployee)
+				enrollments.GET("/", trainingHandler.GetAllEnrollments)
+				enrollments.PUT("/:id/progress", trainingHandler.UpdateProgress)
+				enrollments.POST("/:id/complete", trainingHandler.CompleteTraining)
+			}
+
+			// Training statistics
+			training.GET("/statistics", trainingHandler.GetStatistics)
 		}
 	}
 }

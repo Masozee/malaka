@@ -20,7 +20,7 @@ type WorkOrderRequest struct {
 	ActualEndDate    *time.Time                    `json:"actual_end_date,omitempty"`
 	Status           entities.WorkOrderStatus      `json:"status"`
 	Priority         entities.WorkOrderPriority    `json:"priority"`
-	WarehouseID      int                           `json:"warehouse_id" binding:"required"`
+	WarehouseID      string                        `json:"warehouse_id" binding:"required"`
 	Supervisor       *string                       `json:"supervisor,omitempty"`
 	TotalCost        float64                       `json:"total_cost"`
 	ActualCost       float64                       `json:"actual_cost"`
@@ -81,7 +81,7 @@ type WorkOrderResponse struct {
 	ActualEndDate    *time.Time                   `json:"actual_end_date,omitempty"`
 	Status           entities.WorkOrderStatus     `json:"status"`
 	Priority         entities.WorkOrderPriority   `json:"priority"`
-	WarehouseID      int                          `json:"warehouse_id"`
+	WarehouseID      string                       `json:"warehouse_id"`
 	Supervisor       *string                      `json:"supervisor,omitempty"`
 	TotalCost        float64                      `json:"total_cost"`
 	ActualCost       float64                      `json:"actual_cost"`
@@ -176,7 +176,7 @@ type WorkOrderFiltersRequest struct {
 	Status      *entities.WorkOrderStatus  `form:"status"`
 	Type        *entities.WorkOrderType    `form:"type"`
 	Priority    *entities.WorkOrderPriority `form:"priority"`
-	WarehouseID *int                       `form:"warehouse_id"`
+	WarehouseID *string                    `form:"warehouse_id"`
 	Supervisor  *string                    `form:"supervisor"`
 	StartDate   *time.Time                 `form:"start_date" time_format:"2006-01-02"`
 	EndDate     *time.Time                 `form:"end_date" time_format:"2006-01-02"`

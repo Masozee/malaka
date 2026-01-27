@@ -93,7 +93,7 @@ export default function CurrencyPage() {
     try {
       setLoading(true)
       setError(null)
-      
+
       // Try backend API first, then fallback to Bank Indonesia
       let data: Currency[]
       try {
@@ -103,7 +103,7 @@ export default function CurrencyPage() {
         console.warn('Backend API failed, using Bank Indonesia rates:', backendError)
         data = await currencyService.getAllCurrencies()
       }
-      
+
       setCurrencies(data)
       setLastUpdated(new Date().toISOString())
     } catch (err) {
@@ -118,7 +118,7 @@ export default function CurrencyPage() {
     try {
       setLoading(true)
       setError(null)
-      
+
       // Try to refresh via backend API first
       try {
         const refreshResponse = await fetch('http://localhost:8084/api/v1/accounting/exchange-rates/refresh', {
@@ -127,7 +127,7 @@ export default function CurrencyPage() {
             'Content-Type': 'application/json',
           },
         })
-        
+
         if (refreshResponse.ok) {
           console.log('Backend refresh successful')
           // Fetch updated data
@@ -141,7 +141,7 @@ export default function CurrencyPage() {
         const data = await currencyService.refreshRates()
         setCurrencies(data)
       }
-      
+
       setLastUpdated(new Date().toISOString())
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to refresh rates')
@@ -176,8 +176,8 @@ export default function CurrencyPage() {
 
   // Filter currencies
   const filteredCurrencies = currencies.filter(currency => {
-    if (searchTerm && !currency.name.toLowerCase().includes(searchTerm.toLowerCase()) && 
-        !currency.code.toLowerCase().includes(searchTerm.toLowerCase())) return false
+    if (searchTerm && !currency.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
+      !currency.code.toLowerCase().includes(searchTerm.toLowerCase())) return false
     if (statusFilter !== 'all' && (statusFilter === 'active' ? !currency.is_active : currency.is_active)) return false
     return true
   })
@@ -187,14 +187,14 @@ export default function CurrencyPage() {
     totalCurrencies: currencies.length,
     activeCurrencies: currencies.filter(c => c.is_active).length,
     baseCurrency: currencies.find(c => c.is_base)?.code || 'IDR',
-    strongestGainer: currencies.filter(c => !c.is_base).reduce((max, curr) => 
+    strongestGainer: currencies.filter(c => !c.is_base).reduce((max, curr) =>
       curr.rate_change_24h > (max?.rate_change_24h || 0) ? curr : max, null as Currency | null),
-    biggestLoser: currencies.filter(c => !c.is_base).reduce((min, curr) => 
+    biggestLoser: currencies.filter(c => !c.is_base).reduce((min, curr) =>
       curr.rate_change_24h < (min?.rate_change_24h || 0) ? curr : min, null as Currency | null)
   }
 
   const getStatusBadge = (isActive: boolean) => {
-    return isActive 
+    return isActive
       ? { variant: 'default' as const, label: 'Active' }
       : { variant: 'secondary' as const, label: 'Inactive' }
   }
@@ -393,7 +393,7 @@ export default function CurrencyPage() {
 
   return (
     <TwoLevelLayout>
-      <Header 
+      <Header
         title="Currency Management"
         description="Manage currencies and exchange rates for international transactions"
         breadcrumbs={breadcrumbs}
@@ -418,7 +418,7 @@ export default function CurrencyPage() {
           </div>
         }
       />
-      
+
       <div className="flex-1 p-6 space-y-6">
         {/* Error Display */}
         {error && (
@@ -518,13 +518,14 @@ export default function CurrencyPage() {
                     className="pl-3"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
+                    aria-label="Search currencies"
                   />
                 </div>
               </div>
 
               <div className="flex items-center gap-2">
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger className="w-32">
+                  <SelectTrigger className="w-32" aria-label="Filter by status">
                     <SelectValue placeholder="Status" />
                   </SelectTrigger>
                   <SelectContent>
@@ -540,15 +541,15 @@ export default function CurrencyPage() {
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-4">
                 <div className="flex space-x-1 bg-muted p-1 rounded-lg">
-                  <Button 
-                    variant={activeView === 'cards' ? 'default' : 'ghost'} 
+                  <Button
+                    variant={activeView === 'cards' ? 'default' : 'ghost'}
                     size="sm"
                     onClick={() => setActiveView('cards')}
                   >
                     Cards
                   </Button>
-                  <Button 
-                    variant={activeView === 'table' ? 'default' : 'ghost'} 
+                  <Button
+                    variant={activeView === 'table' ? 'default' : 'ghost'}
                     size="sm"
                     onClick={() => setActiveView('table')}
                   >
@@ -556,7 +557,7 @@ export default function CurrencyPage() {
                   </Button>
                 </div>
                 <Select defaultValue="name">
-                  <SelectTrigger className="w-44">
+                  <SelectTrigger className="w-44" aria-label="Sort by">
                     <SelectValue placeholder="Sort by" />
                   </SelectTrigger>
                   <SelectContent>

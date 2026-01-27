@@ -29,6 +29,20 @@ const (
 	PurchaseOrderPaymentPaid    PurchaseOrderPaymentStatus = "paid"
 )
 
+// ProcurementType represents the type of procurement for accounting classification
+type ProcurementType string
+
+const (
+	// ProcurementTypeRawMaterial - Items that flow into COGS (Cost of Goods Sold)
+	ProcurementTypeRawMaterial ProcurementType = "RAW_MATERIAL"
+	// ProcurementTypeOfficeSupply - Items recorded as OPEX (Operating Expenses)
+	ProcurementTypeOfficeSupply ProcurementType = "OFFICE_SUPPLY"
+	// ProcurementTypeAsset - Items that are capitalized and depreciated
+	ProcurementTypeAsset ProcurementType = "ASSET"
+	// ProcurementTypeService - Services recorded as OPEX
+	ProcurementTypeService ProcurementType = "SERVICE"
+)
+
 // PurchaseOrder represents a purchase order in the procurement module
 type PurchaseOrder struct {
 	ID                   string                     `json:"id" db:"id"`
@@ -49,6 +63,12 @@ type PurchaseOrder struct {
 	Status               PurchaseOrderStatus        `json:"status" db:"status"`
 	PaymentStatus        PurchaseOrderPaymentStatus `json:"payment_status" db:"payment_status"`
 	Notes                string                     `json:"notes,omitempty" db:"notes"`
+	// ProcurementType determines how this PO flows into accounting (COGS, OPEX, or Asset)
+	ProcurementType      ProcurementType            `json:"procurement_type" db:"procurement_type"`
+	// ExpenseAccountID is the GL account to debit for this procurement (optional, defaults based on type)
+	ExpenseAccountID     *string                    `json:"expense_account_id,omitempty" db:"expense_account_id"`
+	// BudgetCommitmentID references the budget commitment created when PO is approved
+	BudgetCommitmentID   *string                    `json:"budget_commitment_id,omitempty" db:"budget_commitment_id"`
 	CreatedBy            string                     `json:"created_by" db:"created_by"`
 	CreatedByName        string                     `json:"created_by_name" db:"created_by_name"`
 	CreatedByPosition    string                     `json:"created_by_position" db:"created_by_position"`
@@ -87,15 +107,46 @@ type PurchaseOrderItem struct {
 func NewPurchaseOrder(supplierID, createdBy string) *PurchaseOrder {
 	now := time.Now()
 	return &PurchaseOrder{
-		ID:            uuid.New().String(),
-		SupplierID:    supplierID,
-		OrderDate:     now,
-		Currency:      "IDR",
-		Status:        PurchaseOrderStatusDraft,
-		PaymentStatus: PurchaseOrderPaymentUnpaid,
-		CreatedBy:     createdBy,
-		CreatedAt:     now,
-		UpdatedAt:     now,
+		ID:              uuid.New().String(),
+		SupplierID:      supplierID,
+		OrderDate:       now,
+		Currency:        "IDR",
+		Status:          PurchaseOrderStatusDraft,
+		PaymentStatus:   PurchaseOrderPaymentUnpaid,
+		ProcurementType: ProcurementTypeRawMaterial, // Default to raw material
+		CreatedBy:       createdBy,
+		CreatedAt:       now,
+		UpdatedAt:       now,
+	}
+}
+
+// NewPurchaseOrderWithType creates a new purchase order with a specific procurement type
+func NewPurchaseOrderWithType(supplierID, createdBy string, procType ProcurementType) *PurchaseOrder {
+	po := NewPurchaseOrder(supplierID, createdBy)
+	po.ProcurementType = procType
+	return po
+}
+
+// IsValidProcurementType checks if the procurement type is valid
+func IsValidProcurementType(t ProcurementType) bool {
+	switch t {
+	case ProcurementTypeRawMaterial, ProcurementTypeOfficeSupply, ProcurementTypeAsset, ProcurementTypeService:
+		return true
+	}
+	return false
+}
+
+// GetAccountingTreatment returns how this procurement should be treated in accounting
+func (po *PurchaseOrder) GetAccountingTreatment() string {
+	switch po.ProcurementType {
+	case ProcurementTypeRawMaterial:
+		return "COGS" // Flows into Cost of Goods Sold via Inventory
+	case ProcurementTypeOfficeSupply, ProcurementTypeService:
+		return "OPEX" // Direct expense
+	case ProcurementTypeAsset:
+		return "CAPITALIZE" // Capitalize and depreciate
+	default:
+		return "OPEX"
 	}
 }
 

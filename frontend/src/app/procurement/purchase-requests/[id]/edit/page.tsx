@@ -15,6 +15,7 @@ import { Separator } from '@/components/ui/separator'
 import { purchaseRequestService } from '@/services/procurement'
 import type { PurchaseRequest, PurchaseRequestFormData } from '@/types/procurement'
 import Link from 'next/link'
+import { useToast } from '@/components/ui/toast'
 
 interface RequestItem {
   id: string
@@ -30,6 +31,7 @@ interface RequestItem {
 export default function EditPurchaseRequestPage() {
   const params = useParams()
   const router = useRouter()
+  const { addToast } = useToast()
   const [request, setRequest] = useState<PurchaseRequest | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -72,6 +74,14 @@ export default function EditPurchaseRequestPage() {
     try {
       setLoading(true)
       const data = await purchaseRequestService.getById(params.id as string)
+
+      // Status guard: Only draft requests can be edited
+      if (data.status !== 'draft') {
+        addToast({ type: 'error', title: 'Only draft requests can be edited' })
+        router.replace(`/procurement/purchase-requests/${params.id}`)
+        return
+      }
+
       setRequest(data)
       form.setFieldValue('title', data.title || '')
       form.setFieldValue('description', data.description || '')

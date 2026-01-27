@@ -70,12 +70,27 @@ import (
 	invitations_services "malaka/internal/modules/invitations/domain/services"
 	invitations_persistence "malaka/internal/modules/invitations/infrastructure/persistence"
 
+	// Profile imports
+	profile_services "malaka/internal/modules/profile/domain/services"
+	profile_persistence "malaka/internal/modules/profile/infrastructure/persistence"
+
 	// Storage imports
 	"malaka/internal/shared/storage"
 	"malaka/internal/shared/upload"
 
 	// Email imports
 	"malaka/internal/shared/email"
+
+	// Event-driven architecture imports
+	"malaka/internal/shared/events"
+	"malaka/internal/shared/integration"
+
+	// Application layer imports for event handlers
+	finance_app "malaka/internal/modules/finance/application"
+	inventory_app "malaka/internal/modules/inventory/application"
+
+	// Accounting infrastructure for budget integration
+	accounting_infra_services "malaka/internal/modules/accounting/infrastructure/services"
 )
 
 // Container holds the application's dependencies.
@@ -170,6 +185,7 @@ type Container struct {
 	PayrollService           hr_services.PayrollService
 	LeaveService             hr_services.LeaveService
 	PerformanceReviewService hr_services.PerformanceReviewService
+	TrainingService          hr_services.TrainingService
 
 	// Calendar services
 	EventService calendar_services.EventService
@@ -178,14 +194,20 @@ type Container struct {
 	SettingService *settings_services.SettingService
 
 	// Production services
-	WorkOrderService production_services.WorkOrderService
+	WorkOrderService       production_services.WorkOrderService
+	QualityControlService  production_services.QualityControlService
+	ProductionPlanService  production_services.ProductionPlanService
 
 	// Accounting services
-	JournalEntryService  accounting_services.JournalEntryService
-	AutoJournalService   accounting_services.AutoJournalService
-	GeneralLedgerService accounting_services.GeneralLedgerService
-	CostCenterService    accounting_services.CostCenterService
-	ExchangeRateService  *accounting_services.ExchangeRateService
+	JournalEntryService        accounting_services.JournalEntryService
+	AutoJournalService         accounting_services.AutoJournalService
+	GeneralLedgerService       accounting_services.GeneralLedgerService
+	CostCenterService          accounting_services.CostCenterService
+	ExchangeRateService        *accounting_services.ExchangeRateService
+	ChartOfAccountService      accounting_services.ChartOfAccountService
+	BudgetService              accounting_services.BudgetService
+	FinancialPeriodService     accounting_services.FinancialPeriodService
+	FixedAssetService          accounting_services.FixedAssetService
 	// TrialBalanceService     accounting_services.TrialBalanceService
 
 	// Procurement services
@@ -201,6 +223,15 @@ type Container struct {
 
 	// Invitation services
 	InvitationService *invitations_services.InvitationService
+
+	// Profile services
+	ProfileService *profile_services.ProfileService
+
+	// Event-driven architecture
+	EventBus events.EventBus
+
+	// Integration services
+	BudgetIntegrationService integration.BudgetIntegrationService
 }
 
 // NewContainer creates a new dependency container.
@@ -411,6 +442,9 @@ func NewContainer(cfg *config.Config, logger *zap.Logger, db *sql.DB, gormDB *go
 	autoJournalConfigRepo := accounting_persistence.NewAutoJournalConfigRepository(db)
 	generalLedgerRepo := accounting_persistence.NewGeneralLedgerRepository(db)
 	costCenterRepo := accounting_persistence.NewSimpleCostCenterRepository(db)
+	chartOfAccountRepo := accounting_persistence.NewPostgresChartOfAccountRepository(db)
+	budgetRepo := accounting_persistence.NewBudgetRepository(db)
+	financialPeriodRepo := accounting_persistence.NewFinancialPeriodRepository(db)
 
 	// Initialize exchange rate repository with SQLite
 	exchangeRateRepo, err := accounting_persistence.NewExchangeRateSQLiteRepository("data/exchange_rates.db")
@@ -442,12 +476,14 @@ func NewContainer(cfg *config.Config, logger *zap.Logger, db *sql.DB, gormDB *go
 	salaryCalculationRepo := hr_persistence.NewPostgreSQLSalaryCalculationRepository(db)
 	leaveRepo := hr_persistence.NewLeaveRepository(db)
 	performanceReviewRepo := hr_persistence.NewPerformanceReviewRepository(gormDB)
+	trainingRepo := hr_persistence.NewTrainingRepository(sqlxDB)
 
 	// Initialize HR services
 	employeeService := hr_services.NewEmployeeService(employeeRepo)
 	payrollService := hr_services.NewPayrollService(payrollPeriodRepo, salaryCalculationRepo, employeeRepo)
 	leaveService := hr_services.NewLeaveService(leaveRepo)
 	performanceReviewService := hr_services.NewPerformanceReviewService(performanceReviewRepo)
+	trainingService := hr_services.NewTrainingService(trainingRepo, employeeRepo)
 
 	// Initialize calendar repositories
 	eventRepo := calendar_persistence.NewEventRepository(sqlxDB)
@@ -463,15 +499,28 @@ func NewContainer(cfg *config.Config, logger *zap.Logger, db *sql.DB, gormDB *go
 
 	// Initialize production repositories
 	workOrderRepo := production_persistence.NewWorkOrderRepositoryImpl(sqlxDB)
+	qualityControlRepo := production_persistence.NewQualityControlRepositoryImpl(sqlxDB)
+	productionPlanRepo := production_persistence.NewProductionPlanRepositoryImpl(sqlxDB)
 
 	// Initialize production services
 	workOrderService := production_services.NewWorkOrderService(workOrderRepo)
+	qualityControlService := production_services.NewQualityControlService(qualityControlRepo)
+	productionPlanService := production_services.NewProductionPlanService(productionPlanRepo)
 
 	// Initialize accounting services
 	journalEntryService := accounting_services.NewJournalEntryService(journalEntryRepo)
 	autoJournalService := accounting_services.NewAutoJournalService(journalEntryRepo, autoJournalConfigRepo, journalEntryService)
 	generalLedgerService := accounting_services.NewGeneralLedgerServiceImpl(generalLedgerRepo, journalEntryRepo)
 	costCenterService := accounting_services.NewCostCenterService(costCenterRepo)
+	chartOfAccountService := accounting_services.NewChartOfAccountService(chartOfAccountRepo)
+	// Initialize budget commitment and realization repositories
+	budgetCommitmentRepo := accounting_persistence.NewBudgetCommitmentRepository(sqlxDB)
+	budgetRealizationRepo := accounting_persistence.NewBudgetRealizationRepository(sqlxDB)
+	budgetService := accounting_services.NewBudgetServiceWithRepos(budgetRepo, budgetCommitmentRepo, budgetRealizationRepo)
+	financialPeriodService := accounting_services.NewFinancialPeriodService(financialPeriodRepo)
+	// Initialize fixed asset repository and service
+	fixedAssetRepo := accounting_persistence.NewFixedAssetRepository(sqlxDB)
+	fixedAssetService := accounting_services.NewFixedAssetService(fixedAssetRepo)
 
 	// Initialize exchange rate service
 	var exchangeRateService *accounting_services.ExchangeRateService
@@ -479,6 +528,14 @@ func NewContainer(cfg *config.Config, logger *zap.Logger, db *sql.DB, gormDB *go
 		exchangeRateService = accounting_services.NewExchangeRateService(exchangeRateRepo)
 	}
 	// trialBalanceService := accounting_services.NewTrialBalanceServiceImpl(trialBalanceRepo, generalLedgerRepo)
+
+	// Initialize event bus for cross-module communication
+	eventBus := events.NewInMemoryEventBus()
+	logger.Info("Event bus initialized for cross-module communication")
+
+	// Initialize budget integration service
+	budgetIntegrationService := accounting_infra_services.NewBudgetIntegrationService(sqlxDB)
+	logger.Info("Budget integration service initialized")
 
 	// Initialize procurement repositories
 	purchaseRequestRepo := procurement_persistence.NewPurchaseRequestRepositoryImpl(sqlxDB)
@@ -494,11 +551,24 @@ func NewContainer(cfg *config.Config, logger *zap.Logger, db *sql.DB, gormDB *go
 	purchaseRequestService := procurement_services.NewPurchaseRequestService(purchaseRequestRepo)
 	purchaseRequestService.SetPurchaseOrderRepository(procurementPurchaseOrderRepo) // Enable PR to PO conversion
 	procurementPurchaseOrderService := procurement_services.NewPurchaseOrderService(procurementPurchaseOrderRepo, rbacService)
+	// Wire budget integration and event bus to PO service
+	procurementPurchaseOrderService.WithBudgetIntegration(budgetIntegrationService, budgetIntegrationService).WithEventBus(eventBus)
 	contractService := procurement_services.NewContractService(contractRepo)
 	vendorEvaluationService := procurement_services.NewVendorEvaluationService(vendorEvaluationRepo)
 	procurementAnalyticsService := procurement_services.NewAnalyticsService(sqlxDB)
 	procurementRFQService := procurement_services.NewRFQService(procurementRFQRepo)
 	procurementRFQService.SetPurchaseOrderRepository(procurementPurchaseOrderRepo) // Enable RFQ to PO conversion
+
+	// Register event handlers for cross-module communication
+	// Inventory event handlers - handle PO approved, AP created events
+	inventoryEventHandler := inventory_app.NewInventoryEventHandler()
+	inventoryEventHandler.RegisterHandlers(eventBus)
+	logger.Info("Inventory event handlers registered")
+
+	// Finance event handlers - handle GR posted, PO approved/cancelled events
+	financeEventHandler := finance_app.NewFinanceEventHandler(budgetIntegrationService, eventBus)
+	financeEventHandler.RegisterHandlers(eventBus)
+	logger.Info("Finance event handlers registered")
 
 	// Initialize notification repository and service
 	notificationRepo := notifications_persistence.NewPostgresNotificationRepository(sqlxDB)
@@ -510,6 +580,10 @@ func NewContainer(cfg *config.Config, logger *zap.Logger, db *sql.DB, gormDB *go
 	// Initialize invitation repository and service
 	invitationRepo := invitations_persistence.NewInvitationRepository(sqlxDB)
 	invitationService := invitations_services.NewInvitationService(invitationRepo, userRepo, emailService)
+
+	// Initialize profile repository and service
+	profileRepo := profile_persistence.NewProfileRepositoryImpl(sqlxDB)
+	profileService := profile_services.NewProfileService(profileRepo)
 
 	return &Container{
 		Config:              cfg,
@@ -602,6 +676,7 @@ func NewContainer(cfg *config.Config, logger *zap.Logger, db *sql.DB, gormDB *go
 		PayrollService:           payrollService,
 		LeaveService:             leaveService,
 		PerformanceReviewService: performanceReviewService,
+		TrainingService:          trainingService,
 
 		// Calendar services
 		EventService: eventService,
@@ -610,14 +685,20 @@ func NewContainer(cfg *config.Config, logger *zap.Logger, db *sql.DB, gormDB *go
 		SettingService: settingService,
 
 		// Production services
-		WorkOrderService: workOrderService,
+		WorkOrderService:      workOrderService,
+		QualityControlService: qualityControlService,
+		ProductionPlanService: productionPlanService,
 
 		// Accounting services
-		JournalEntryService:  journalEntryService,
-		AutoJournalService:   autoJournalService,
-		GeneralLedgerService: generalLedgerService,
-		CostCenterService:    costCenterService,
-		ExchangeRateService:  exchangeRateService,
+		JournalEntryService:    journalEntryService,
+		AutoJournalService:     autoJournalService,
+		GeneralLedgerService:   generalLedgerService,
+		CostCenterService:      costCenterService,
+		ExchangeRateService:    exchangeRateService,
+		ChartOfAccountService:  chartOfAccountService,
+		BudgetService:          budgetService,
+		FinancialPeriodService: financialPeriodService,
+		FixedAssetService:      fixedAssetService,
 		// TrialBalanceService:   trialBalanceService,
 
 		// Procurement services
@@ -633,6 +714,15 @@ func NewContainer(cfg *config.Config, logger *zap.Logger, db *sql.DB, gormDB *go
 
 		// Invitation services
 		InvitationService: invitationService,
+
+		// Profile services
+		ProfileService: profileService,
+
+		// Event-driven architecture
+		EventBus: eventBus,
+
+		// Integration services
+		BudgetIntegrationService: budgetIntegrationService,
 	}
 }
 

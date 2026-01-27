@@ -11,17 +11,35 @@ import (
 	"malaka/internal/modules/procurement/domain/entities"
 	"malaka/internal/modules/procurement/domain/repositories"
 	"malaka/internal/shared/auth"
+	"malaka/internal/shared/events"
+	"malaka/internal/shared/integration"
 )
 
 // PurchaseOrderService handles business logic for purchase orders
 type PurchaseOrderService struct {
-	repo repositories.PurchaseOrderRepository
-	rbac *auth.RBACService
+	repo         repositories.PurchaseOrderRepository
+	rbac         *auth.RBACService
+	budgetReader integration.BudgetReader  // Optional: for budget availability checks
+	budgetWriter integration.BudgetWriter  // Optional: for budget commitments
+	eventBus     events.EventBus           // Optional: for event-driven integration
 }
 
 // NewPurchaseOrderService creates a new purchase order service
 func NewPurchaseOrderService(repo repositories.PurchaseOrderRepository, rbac *auth.RBACService) *PurchaseOrderService {
 	return &PurchaseOrderService{repo: repo, rbac: rbac}
+}
+
+// WithBudgetIntegration adds budget integration to the service
+func (s *PurchaseOrderService) WithBudgetIntegration(reader integration.BudgetReader, writer integration.BudgetWriter) *PurchaseOrderService {
+	s.budgetReader = reader
+	s.budgetWriter = writer
+	return s
+}
+
+// WithEventBus adds event bus for cross-module communication
+func (s *PurchaseOrderService) WithEventBus(bus events.EventBus) *PurchaseOrderService {
+	s.eventBus = bus
+	return s
 }
 
 // Create creates a new purchase order
@@ -171,6 +189,37 @@ func (s *PurchaseOrderService) Approve(ctx context.Context, id, approverID strin
 		return nil, errors.New("approver does not have sufficient authority")
 	}
 
+	// Budget Check: If budget integration is configured, check availability and commit
+	if s.budgetReader != nil && order.ExpenseAccountID != nil {
+		// Check budget availability
+		result, err := s.budgetReader.CheckAvailability(ctx, *order.ExpenseAccountID, order.TotalAmount)
+		if err != nil {
+			return nil, fmt.Errorf("budget check failed: %w", err)
+		}
+		if !result.IsAvailable {
+			return nil, fmt.Errorf("insufficient budget: requested %.2f, available %.2f (shortfall: %.2f)",
+				order.TotalAmount, result.AvailableAmount, result.ShortfallAmount)
+		}
+
+		// Commit budget if writer is available
+		if s.budgetWriter != nil {
+			commitResult, err := s.budgetWriter.CommitBudget(ctx, &integration.BudgetCommitmentRequest{
+				BudgetID:        result.BudgetID,
+				AccountID:       *order.ExpenseAccountID,
+				Amount:          order.TotalAmount,
+				ReferenceType:   "PURCHASE_ORDER",
+				ReferenceID:     order.ID,
+				ReferenceNumber: order.PONumber,
+				Description:     fmt.Sprintf("Budget commitment for PO %s - %s", order.PONumber, order.SupplierName),
+				CommittedBy:     approverID,
+			})
+			if err != nil {
+				return nil, fmt.Errorf("budget commitment failed: %w", err)
+			}
+			order.BudgetCommitmentID = &commitResult.CommitmentID
+		}
+	}
+
 	now := time.Now()
 	order.Status = entities.PurchaseOrderStatusApproved
 	order.ApprovedBy = &approverID
@@ -179,6 +228,40 @@ func (s *PurchaseOrderService) Approve(ctx context.Context, id, approverID strin
 
 	if err := s.repo.Update(ctx, order); err != nil {
 		return nil, err
+	}
+
+	// Publish PO Approved event for cross-module integration
+	if s.eventBus != nil {
+		items := make([]events.POItemEventData, len(order.Items))
+		for i, item := range order.Items {
+			items[i] = events.POItemEventData{
+				ItemID:    item.ID,
+				ItemName:  item.ItemName,
+				Quantity:  item.Quantity,
+				Unit:      item.Unit,
+				UnitPrice: item.UnitPrice,
+				LineTotal: item.LineTotal,
+			}
+		}
+
+		event := events.NewPurchaseOrderApprovedEvent(
+			order.ID,
+			order.PONumber,
+			order.SupplierID,
+			order.SupplierName,
+			order.TotalAmount,
+			order.Currency,
+			integration.ProcurementType(order.ProcurementType),
+			approverID,
+			items,
+		)
+		event.ExpectedDelivery = order.ExpectedDeliveryDate
+		event.DeliveryAddress = order.DeliveryAddress
+		event.PaymentTerms = order.PaymentTerms
+		event.ExpenseAccountID = order.ExpenseAccountID
+
+		// Publish asynchronously to avoid blocking
+		s.eventBus.PublishAsync(ctx, event)
 	}
 
 	return order, nil

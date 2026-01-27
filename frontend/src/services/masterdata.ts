@@ -49,7 +49,7 @@ export abstract class BaseMasterDataService<T, ListResponseType> {
         page: 1,
         limit: response.data?.length || 0
       } as ListResponseType
-    } else {
+    } else if (response.data) {
       // New paginated format
       const paginatedData = response.data as {
         data: T[],
@@ -62,9 +62,17 @@ export abstract class BaseMasterDataService<T, ListResponseType> {
       }
       return {
         data: paginatedData.data || [],
-        total: paginatedData.pagination.total_rows || 0,
-        page: paginatedData.pagination.page || 1,
-        limit: paginatedData.pagination.limit || 10
+        total: paginatedData.pagination?.total_rows || 0,
+        page: paginatedData.pagination?.page || 1,
+        limit: paginatedData.pagination?.limit || 10
+      } as ListResponseType
+    } else {
+      // Handle cases where data is null or undefined
+      return {
+        data: [],
+        total: 0,
+        page: 1,
+        limit: 10
       } as ListResponseType
     }
   }
@@ -156,7 +164,18 @@ class ArticleService extends BaseMasterDataService<Article, ArticleListResponse>
       formData.append('image_urls', file)
     })
 
-    const response = await apiClient.post(
+    const response = await apiClient.post<{
+      success: boolean
+      message: string
+      data: {
+        uploaded_images: string[]
+        success_count: number
+        total_files: number
+        article: Article
+        errors?: string[]
+        error_count?: number
+      }
+    }>(
       `/api/v1/masterdata/${this.endpoint}/${articleId}/images/`,
       formData
       // Note: Don't set Content-Type header for FormData - let browser set it automatically with boundary
@@ -173,7 +192,14 @@ class ArticleService extends BaseMasterDataService<Article, ArticleListResponse>
       article: Article
     }
   }> {
-    const response = await apiClient.delete(
+    const response = await apiClient.delete<{
+      success: boolean
+      message: string
+      data: {
+        deleted_image: string
+        article: Article
+      }
+    }>(
       `/api/v1/masterdata/${this.endpoint}/${articleId}/images/?image_url=${encodeURIComponent(imageUrl)}`
     )
 

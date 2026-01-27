@@ -17,6 +17,7 @@ import { supplierService } from '@/services/masterdata'
 import type { PurchaseOrder } from '@/types/procurement'
 import type { Supplier } from '@/types/masterdata'
 import Link from 'next/link'
+import { useToast } from '@/components/ui/toast'
 
 interface OrderItem {
   id: string
@@ -35,6 +36,7 @@ interface OrderItem {
 export default function EditPurchaseOrderPage() {
   const params = useParams()
   const router = useRouter()
+  const { addToast } = useToast()
   const [order, setOrder] = useState<PurchaseOrder | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -60,10 +62,14 @@ export default function EditPurchaseOrderPage() {
           ...value,
           items: items.map(({ id, line_total, ...item }) => item),
         })
+        addToast({ type: 'success', title: 'Purchase order updated successfully' })
         router.push(`/procurement/purchase-orders/${order.id}`)
-      } catch (error) {
+      } catch (error: unknown) {
         console.error('Error updating purchase order:', error)
-        alert('Failed to update purchase order. Please try again.')
+        const errorMessage = error instanceof Error && error.message.includes('can only update draft orders')
+          ? 'Cannot update: Only draft orders can be edited'
+          : 'Failed to update purchase order. Please try again.'
+        addToast({ type: 'error', title: errorMessage })
       } finally {
         setSaving(false)
       }
@@ -89,6 +95,14 @@ export default function EditPurchaseOrderPage() {
     try {
       setLoading(true)
       const data = await purchaseOrderService.getById(params.id as string)
+
+      // Status guard: Only draft orders can be edited
+      if (data.status !== 'draft') {
+        addToast({ type: 'error', title: 'Only draft orders can be edited. This order is currently in "' + data.status + '" status.' })
+        router.replace(`/procurement/purchase-orders/${params.id}`)
+        return
+      }
+
       setOrder(data)
       form.setFieldValue('supplier_id', data.supplier_id || '')
       form.setFieldValue('purchase_request_id', data.purchase_request_id || '')

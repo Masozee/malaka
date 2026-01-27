@@ -9,6 +9,22 @@ import { Input } from '@/components/ui/input'
 import { AdvancedDataTable } from '@/components/ui/advanced-data-table'
 import { Badge } from '@/components/ui/badge'
 import { HRService } from '@/services/hr'
+import { HugeiconsIcon } from '@hugeicons/react'
+import {
+  BookOpen01Icon,
+  PlayIcon,
+  Calendar01Icon,
+  CheckmarkCircle01Icon,
+  UserGroupIcon,
+  Award01Icon,
+  ChartIncreaseIcon,
+  File01Icon,
+  Clock01Icon,
+  UserIcon,
+  Search01Icon,
+  AlertCircleIcon,
+  ArrowTurnBackwardIcon,
+} from '@hugeicons/core-free-icons'
 
 interface TrainingProgram {
   id: string
@@ -346,7 +362,7 @@ export default function TrainingPage() {
       title: 'Duration',
       render: (value: unknown, record: TrainingProgram) => (
         <div className="flex items-center text-xs">
-          <Clock className="h-3 w-3 mr-1 text-muted-foreground" />
+          <HugeiconsIcon icon={Clock01Icon} className="h-3 w-3 mr-1 text-muted-foreground" />
           {record.duration_hours}h
         </div>
       )
@@ -436,7 +452,7 @@ export default function TrainingPage() {
           <div className="flex justify-between">
             <span className="text-gray-500">Instructor:</span>
             <span className="flex items-center">
-              <User className="h-3 w-3 mr-1 text-gray-400" />
+              <HugeiconsIcon icon={UserIcon} className="h-3 w-3 mr-1 text-gray-400" />
               {program.instructor_name}
             </span>
           </div>
@@ -444,7 +460,7 @@ export default function TrainingPage() {
           <div className="flex justify-between">
             <span className="text-gray-500">Duration:</span>
             <span className="flex items-center">
-              <Clock className="h-3 w-3 mr-1 text-gray-400" />
+              <HugeiconsIcon icon={Clock01Icon} className="h-3 w-3 mr-1 text-gray-400" />
               {program.duration_hours} hours
             </span>
           </div>
@@ -481,7 +497,7 @@ export default function TrainingPage() {
           {program.provides_certification && (
             <div className="mt-2 p-2 bg-blue-50 rounded text-xs">
               <span className="flex items-center text-blue-700">
-                <Award className="h-3 w-3 mr-1" />
+                <HugeiconsIcon icon={Award01Icon} className="h-3 w-3 mr-1" />
                 Certificate awarded upon completion
               </span>
             </div>
@@ -490,12 +506,12 @@ export default function TrainingPage() {
         
         <div className="flex space-x-2 mt-4">
           <Button size="sm" variant="outline" className="flex-1">
-            <FileText className="h-4 w-4 mr-1" />
+            <HugeiconsIcon icon={File01Icon} className="h-4 w-4 mr-1" />
             View Details
           </Button>
           {program.program_status === 'active' && (
             <Button size="sm" className="flex-1">
-              <Play className="h-4 w-4 mr-1" />
+              <HugeiconsIcon icon={PlayIcon} className="h-4 w-4 mr-1" />
               Enroll
             </Button>
           )}
@@ -519,7 +535,7 @@ export default function TrainingPage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-blue-100 rounded-lg">
-                <GraduationCap className="h-5 w-5 text-blue-600" />
+                <HugeiconsIcon icon={BookOpen01Icon} className="h-5 w-5 text-blue-600" />
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600">Total Programs</p>
@@ -531,7 +547,7 @@ export default function TrainingPage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-green-100 rounded-lg">
-                <Play className="h-5 w-5 text-green-600" />
+                <HugeiconsIcon icon={PlayIcon} className="h-5 w-5 text-green-600" />
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600">Active</p>
@@ -543,7 +559,7 @@ export default function TrainingPage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-blue-100 rounded-lg">
-                <Calendar className="h-5 w-5 text-blue-600" />
+                <HugeiconsIcon icon={Calendar01Icon} className="h-5 w-5 text-blue-600" />
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600">Upcoming</p>
@@ -555,7 +571,7 @@ export default function TrainingPage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-gray-100 rounded-lg">
-                <CheckCircle className="h-5 w-5 text-gray-600" />
+                <HugeiconsIcon icon={CheckmarkCircle01Icon} className="h-5 w-5 text-gray-600" />
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600">Completed</p>
@@ -567,7 +583,7 @@ export default function TrainingPage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-purple-100 rounded-lg">
-                <Users className="h-5 w-5 text-purple-600" />
+                <HugeiconsIcon icon={UserGroupIcon} className="h-5 w-5 text-purple-600" />
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600">Total Enrolled</p>
@@ -579,7 +595,7 @@ export default function TrainingPage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-indigo-100 rounded-lg">
-                <Award className="h-5 w-5 text-indigo-600" />
+                <HugeiconsIcon icon={Award01Icon} className="h-5 w-5 text-indigo-600" />
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600">Completed</p>
@@ -591,7 +607,7 @@ export default function TrainingPage() {
           <Card className="p-4">
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-teal-100 rounded-lg">
-                <TrendUp className="h-5 w-5 text-teal-600" />
+                <HugeiconsIcon icon={ChartIncreaseIcon} className="h-5 w-5 text-teal-600" />
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600">Success Rate</p>
@@ -609,7 +625,7 @@ export default function TrainingPage() {
             <div className="flex flex-col sm:flex-row gap-4">
               <div className="flex-1">
                 <div className="relative">
-                  <MagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                  <HugeiconsIcon icon={Search01Icon} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                   <Input
                     placeholder="Search programs, instructors, or categories..."
                     className="pl-10"
@@ -619,14 +635,14 @@ export default function TrainingPage() {
               </div>
               <div className="flex items-center gap-2">
                 <Button variant="outline" size="sm">
-                  <BookOpen className="h-4 w-4 mr-2" />
+                  <HugeiconsIcon icon={BookOpen01Icon} className="h-4 w-4 mr-2" />
                   Training Calendar
                 </Button>
                 <Button variant="outline" size="sm">
                   Export
                 </Button>
                 <Button size="sm">
-                  <GraduationCap className="h-4 w-4 mr-2" />
+                  <HugeiconsIcon icon={BookOpen01Icon} className="h-4 w-4 mr-2" />
                   New Program
                 </Button>
               </div>
@@ -665,12 +681,12 @@ export default function TrainingPage() {
           ) : error ? (
             <Card className="p-8">
               <div className="flex flex-col items-center justify-center space-y-4 text-center">
-                <Warning className="h-8 w-8 text-red-500" />
+                <HugeiconsIcon icon={AlertCircleIcon} className="h-8 w-8 text-red-500" />
                 <div>
                   <h3 className="font-semibold text-gray-900 mb-2">Failed to Load Training Programs</h3>
                   <p className="text-sm text-muted-foreground mb-4">{error}</p>
                   <Button onClick={retryFetch} variant="outline" size="sm">
-                    <ArrowsClockwise className="h-4 w-4 mr-2" />
+                    <HugeiconsIcon icon={ArrowTurnBackwardIcon} className="h-4 w-4 mr-2" />
                     Try Again
                   </Button>
                 </div>
@@ -688,14 +704,14 @@ export default function TrainingPage() {
               {trainingData.length === 0 && (
                 <Card className="p-8">
                   <div className="flex flex-col items-center justify-center space-y-4 text-center">
-                    <GraduationCap className="h-12 w-12 text-muted-foreground" />
+                    <HugeiconsIcon icon={BookOpen01Icon} className="h-12 w-12 text-muted-foreground" />
                     <div>
                       <h3 className="font-semibold text-gray-900 mb-2">No Training Programs Found</h3>
                       <p className="text-sm text-muted-foreground mb-4">
                         Get started by creating your first training program.
                       </p>
                       <Button size="sm">
-                        <GraduationCap className="h-4 w-4 mr-2" />
+                        <HugeiconsIcon icon={BookOpen01Icon} className="h-4 w-4 mr-2" />
                         Create Program
                       </Button>
                     </div>

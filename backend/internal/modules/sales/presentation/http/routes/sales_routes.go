@@ -44,7 +44,7 @@ func RegisterSalesRoutes(router gin.IRouter, soHandler *handlers.SalesOrderHandl
 		oo := sales.Group("/online-orders")
 		{
 			oo.POST("/", ooHandler.CreateOnlineOrder)
-			// oo.GET("/", ooHandler.GetAllOnlineOrders) // TODO: Implement missing method
+			oo.GET("/", ooHandler.GetAllOnlineOrders)
 			oo.GET("/:id", ooHandler.GetOnlineOrderByID)
 			oo.PUT("/:id", ooHandler.UpdateOnlineOrder)
 			oo.DELETE("/:id", ooHandler.DeleteOnlineOrder)
@@ -54,7 +54,7 @@ func RegisterSalesRoutes(router gin.IRouter, soHandler *handlers.SalesOrderHandl
 		cs := sales.Group("/consignment-sales")
 		{
 			cs.POST("/", csHandler.CreateConsignmentSales)
-			// cs.GET("/", csHandler.GetAllConsignmentSales) // TODO: Implement missing method
+			cs.GET("/", csHandler.GetAllConsignmentSales)
 			cs.GET("/:id", csHandler.GetConsignmentSalesByID)
 			cs.PUT("/:id", csHandler.UpdateConsignmentSales)
 			cs.DELETE("/:id", csHandler.DeleteConsignmentSales)
@@ -64,7 +64,7 @@ func RegisterSalesRoutes(router gin.IRouter, soHandler *handlers.SalesOrderHandl
 		sr := sales.Group("/returns")
 		{
 			sr.POST("/", srHandler.CreateSalesReturn)
-			// sr.GET("/", srHandler.GetAllSalesReturns) // TODO: Implement missing method
+			sr.GET("/", srHandler.GetAllSalesReturns)
 			sr.GET("/:id", srHandler.GetSalesReturnByID)
 			sr.PUT("/:id", srHandler.UpdateSalesReturn)
 			sr.DELETE("/:id", srHandler.DeleteSalesReturn)
@@ -74,7 +74,7 @@ func RegisterSalesRoutes(router gin.IRouter, soHandler *handlers.SalesOrderHandl
 		promo := sales.Group("/promotions")
 		{
 			promo.POST("/", promoHandler.CreatePromotion)
-			// promo.GET("/", promoHandler.GetAllPromotions) // TODO: Implement missing method
+			promo.GET("/", promoHandler.GetAllPromotions)
 			promo.GET("/:id", promoHandler.GetPromotionByID)
 			promo.PUT("/:id", promoHandler.UpdatePromotion)
 			promo.DELETE("/:id", promoHandler.DeletePromotion)
@@ -84,7 +84,7 @@ func RegisterSalesRoutes(router gin.IRouter, soHandler *handlers.SalesOrderHandl
 		st := sales.Group("/targets")
 		{
 			st.POST("/", stHandler.CreateSalesTarget)
-			// st.GET("/", stHandler.GetAllSalesTargets) // TODO: Implement missing method
+			st.GET("/", stHandler.GetAllSalesTargets)
 			st.GET("/:id", stHandler.GetSalesTargetByID)
 			st.PUT("/:id", stHandler.UpdateSalesTarget)
 			st.DELETE("/:id", stHandler.DeleteSalesTarget)

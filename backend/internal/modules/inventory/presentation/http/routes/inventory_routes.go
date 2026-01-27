@@ -28,6 +28,7 @@ func RegisterInventoryRoutes(router *gin.RouterGroup, poHandler *handlers.Purcha
 			gr.GET("/:id", grHandler.GetGoodsReceiptByID)
 			gr.PUT("/:id", grHandler.UpdateGoodsReceipt)
 			gr.DELETE("/:id", grHandler.DeleteGoodsReceipt)
+			gr.POST("/:id/post", grHandler.PostGoodsReceipt) // Post GR and create journal entry
 		}
 
 		// Stock routes

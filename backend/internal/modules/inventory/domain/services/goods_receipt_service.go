@@ -19,6 +19,12 @@ func NewGoodsReceiptService(repo repositories.GoodsReceiptRepository) *GoodsRece
 	return &GoodsReceiptService{repo: repo}
 }
 
+// PostGoodsReceiptResult contains the result of posting a GR
+type PostGoodsReceiptResult struct {
+	GoodsReceipt *entities.GoodsReceipt
+	// JournalEntryID will be set by the handler after creating the journal entry
+}
+
 // CreateGoodsReceipt creates a new goods receipt.
 func (s *GoodsReceiptService) CreateGoodsReceipt(ctx context.Context, gr *entities.GoodsReceipt) error {
 	if gr.ID == "" {
@@ -71,4 +77,46 @@ func (s *GoodsReceiptService) GetAllGoodsReceiptsWithDetails(ctx context.Context
 // GetGoodsReceiptByIDWithDetails retrieves a goods receipt by ID with complete related information
 func (s *GoodsReceiptService) GetGoodsReceiptByIDWithDetails(ctx context.Context, id string) (map[string]interface{}, error) {
 	return s.repo.GetByIDWithDetails(ctx, id)
+}
+
+// PostGoodsReceipt posts a goods receipt and marks it as POSTED
+// Returns the updated GR that needs to have a journal entry created
+func (s *GoodsReceiptService) PostGoodsReceipt(ctx context.Context, id string, userID string) (*entities.GoodsReceipt, error) {
+	// Get the goods receipt
+	gr, err := s.repo.GetByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	if gr == nil {
+		return nil, errors.New("goods receipt not found")
+	}
+
+	// Validate it can be posted
+	if gr.Status != entities.GoodsReceiptStatusDraft {
+		return nil, errors.New("only draft goods receipts can be posted")
+	}
+
+	// Mark as posted
+	gr.Post(userID)
+
+	// Update in database
+	if err := s.repo.Update(ctx, gr); err != nil {
+		return nil, err
+	}
+
+	return gr, nil
+}
+
+// SetJournalEntryID updates the GR with the created journal entry ID
+func (s *GoodsReceiptService) SetJournalEntryID(ctx context.Context, grID string, journalEntryID string) error {
+	gr, err := s.repo.GetByID(ctx, grID)
+	if err != nil {
+		return err
+	}
+	if gr == nil {
+		return errors.New("goods receipt not found")
+	}
+
+	gr.JournalEntryID = &journalEntryID
+	return s.repo.Update(ctx, gr)
 }

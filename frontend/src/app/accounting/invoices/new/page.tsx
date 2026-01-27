@@ -151,7 +151,7 @@ export default function InvoiceDesignerPage() {
         total_amount: totalAmount
       }))
     }
-    
+
     calculateTotals()
   }, [invoiceData.items, invoiceData.discount_percentage, invoiceData.tax_percentage])
 
@@ -179,13 +179,13 @@ export default function InvoiceDesignerPage() {
       items: prev.items.map(item => {
         if (item.id === itemId) {
           const updatedItem = { ...item, [field]: value }
-          
+
           // Recalculate line total
           const quantity = updatedItem.quantity
           const unitPrice = updatedItem.unit_price
           const discountAmount = (quantity * unitPrice * updatedItem.discount_percentage) / 100
           const lineTotal = (quantity * unitPrice) - discountAmount
-          
+
           return { ...updatedItem, line_total: lineTotal }
         }
         return item
@@ -220,7 +220,7 @@ export default function InvoiceDesignerPage() {
     try {
       setIsGeneratingPDF(true)
       console.log('Starting PDF generation...')
-      
+
       // Create completely clean HTML for PDF without any Tailwind classes
       const cleanInvoiceHTML = `
         <div style="
@@ -412,18 +412,18 @@ export default function InvoiceDesignerPage() {
           </div>
         </div>
       `
-      
+
       // Create temporary container with clean HTML
       const tempContainer = document.createElement('div')
       tempContainer.style.position = 'absolute'
       tempContainer.style.left = '-9999px'
       tempContainer.style.top = '0'
       tempContainer.innerHTML = cleanInvoiceHTML
-      
+
       document.body.appendChild(tempContainer)
-      
+
       console.log('Rendering canvas with clean HTML...')
-      
+
       // Generate canvas
       const canvas = await html2canvas(tempContainer, {
         scale: 1.5,
@@ -434,25 +434,25 @@ export default function InvoiceDesignerPage() {
         width: 794,
         height: Math.max(1123, tempContainer.scrollHeight + 80)
       })
-      
+
       console.log('Canvas created:', canvas.width, 'x', canvas.height)
-      
+
       // Remove temporary container
       document.body.removeChild(tempContainer)
-      
+
       // Create PDF (dynamically loaded)
       const jsPDF = (await import('jspdf')).default
       const pdf = new jsPDF('p', 'mm', 'a4')
       const imgData = canvas.toDataURL('image/png', 0.95)
-      
+
       // Calculate dimensions
       const pdfWidth = pdf.internal.pageSize.getWidth()
       const pdfHeight = pdf.internal.pageSize.getHeight()
       const imgAspectRatio = canvas.height / canvas.width
       const pdfAspectRatio = pdfHeight / pdfWidth
-      
+
       let imgWidth, imgHeight, imgX, imgY
-      
+
       if (imgAspectRatio > pdfAspectRatio) {
         imgHeight = pdfHeight - 20
         imgWidth = imgHeight / imgAspectRatio
@@ -464,17 +464,17 @@ export default function InvoiceDesignerPage() {
         imgX = 10
         imgY = (pdfHeight - imgHeight) / 2
       }
-      
+
       pdf.addImage(imgData, 'PNG', imgX, imgY, imgWidth, imgHeight)
-      
+
       // Generate filename
       const fileName = `${invoiceData.invoice_number.replace(/[^a-zA-Z0-9]/g, '_') || 'invoice'}_${new Date().toISOString().split('T')[0]}.pdf`
-      
+
       console.log('Saving PDF as:', fileName)
       pdf.save(fileName)
-      
+
       console.log('PDF generation completed successfully')
-      
+
     } catch (error) {
       console.error('Detailed PDF generation error:', error)
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
@@ -492,7 +492,7 @@ export default function InvoiceDesignerPage() {
 
   return (
     <TwoLevelLayout>
-      <Header 
+      <Header
         title="Invoice Designer"
         description="Create and customize professional invoices"
         breadcrumbs={breadcrumbs}
@@ -513,377 +513,378 @@ export default function InvoiceDesignerPage() {
           </div>
         }
       />
-      
+
       <div className="flex-1 p-0">
         <div className={`grid h-full ${showPreview ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-2'}`}>
-          
+
           {/* Left Panel - Invoice Form */}
           {!showPreview && (
             <div className="bg-background border-r p-6 overflow-y-auto space-y-6">
-            
-            {/* Invoice Header */}
-            <Card className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-semibold flex items-center">
-                  <HugeiconsIcon icon={FileIcon} className="h-5 w-5 mr-2" />
-                  Invoice Details
-                </h3>
-                <Select value={selectedTemplate} onValueChange={setSelectedTemplate}>
-                  <SelectTrigger className="w-40">
-                    <SelectValue placeholder="Template" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="modern">Modern</SelectItem>
-                    <SelectItem value="classic">Classic</SelectItem>
-                    <SelectItem value="minimal">Minimal</SelectItem>
-                    <SelectItem value="corporate">Corporate</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="invoice_number">Invoice Number</Label>
-                    <Input
-                      id="invoice_number"
-                      value={invoiceData.invoice_number}
-                      onChange={(e) => setInvoiceData(prev => ({ ...prev, invoice_number: e.target.value }))}
-                      className="font-mono"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="invoice_date">Invoice Date</Label>
-                    <Input
-                      id="invoice_date"
-                      type="date"
-                      value={invoiceData.invoice_date}
-                      onChange={(e) => setInvoiceData(prev => ({ ...prev, invoice_date: e.target.value }))}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="payment_terms">Payment Terms</Label>
-                    <Select 
-                      value={invoiceData.payment_terms} 
-                      onValueChange={(value) => setInvoiceData(prev => ({ ...prev, payment_terms: value }))}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select terms" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="immediate">Due Immediately</SelectItem>
-                        <SelectItem value="15 days">Net 15</SelectItem>
-                        <SelectItem value="30 days">Net 30</SelectItem>
-                        <SelectItem value="45 days">Net 45</SelectItem>
-                        <SelectItem value="60 days">Net 60</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="due_date">Due Date</Label>
-                    <Input
-                      id="due_date"
-                      type="date"
-                      value={invoiceData.due_date}
-                      onChange={(e) => setInvoiceData(prev => ({ ...prev, due_date: e.target.value }))}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="currency">Currency</Label>
-                    <Select 
-                      value={invoiceData.currency} 
-                      onValueChange={(value) => setInvoiceData(prev => ({ ...prev, currency: value }))}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select currency" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="IDR">Indonesian Rupiah (IDR)</SelectItem>
-                        <SelectItem value="USD">US Dollar (USD)</SelectItem>
-                        <SelectItem value="EUR">Euro (EUR)</SelectItem>
-                        <SelectItem value="SGD">Singapore Dollar (SGD)</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label>Status</Label>
-                    <div className="flex items-center space-x-2">
-                      <Badge variant="secondary">{invoiceData.status}</Badge>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </Card>
-
-            {/* Customer Selection */}
-            <Card className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-semibold flex items-center">
-                  <HugeiconsIcon icon={UserGroupIcon} className="h-5 w-5 mr-2" />
-                  Customer Information
-                </h3>
-                <Button variant="outline" size="sm">
-                  <HugeiconsIcon icon={PlusSignIcon} className="h-4 w-4 mr-2" />
-                  New Customer
-                </Button>
-              </div>
-
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="customer">Select Customer</Label>
-                  <Select 
-                    value={invoiceData.customer?.id || ''} 
-                    onValueChange={(value) => {
-                      const customer = mockCustomers.find(c => c.id === value)
-                      setInvoiceData(prev => ({ ...prev, customer: customer || null }))
-                    }}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Choose a customer" />
+              {/* Invoice Header */}
+              <Card className="p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-lg font-semibold flex items-center">
+                    <HugeiconsIcon icon={FileIcon} className="h-5 w-5 mr-2" />
+                    Invoice Details
+                  </h3>
+                  <Select value={selectedTemplate} onValueChange={setSelectedTemplate}>
+                    <SelectTrigger className="w-40">
+                      <SelectValue placeholder="Template" />
                     </SelectTrigger>
                     <SelectContent>
-                      {mockCustomers.map((customer) => (
-                        <SelectItem key={customer.id} value={customer.id}>
-                          <div>
-                            <div className="font-medium">{customer.name}</div>
-                            <div className="text-sm text-muted-foreground">{customer.email}</div>
-                          </div>
-                        </SelectItem>
-                      ))}
+                      <SelectItem value="modern">Modern</SelectItem>
+                      <SelectItem value="classic">Classic</SelectItem>
+                      <SelectItem value="minimal">Minimal</SelectItem>
+                      <SelectItem value="corporate">Corporate</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
 
-                {invoiceData.customer && (
-                  <div className="bg-muted/50 p-4 rounded-lg">
-                    <h4 className="font-medium mb-2">{invoiceData.customer.name}</h4>
-                    <div className="text-sm text-muted-foreground space-y-1">
-                      <p>{invoiceData.customer.email}</p>
-                      <p>{invoiceData.customer.phone}</p>
-                      <p>{invoiceData.customer.address}</p>
-                      <p>{invoiceData.customer.city}, {invoiceData.customer.postal_code}</p>
-                      <p>{invoiceData.customer.country}</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="invoice_number">Invoice Number</Label>
+                      <Input
+                        id="invoice_number"
+                        value={invoiceData.invoice_number}
+                        onChange={(e) => setInvoiceData(prev => ({ ...prev, invoice_number: e.target.value }))}
+                        className="font-mono"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="invoice_date">Invoice Date</Label>
+                      <Input
+                        id="invoice_date"
+                        type="date"
+                        value={invoiceData.invoice_date}
+                        onChange={(e) => setInvoiceData(prev => ({ ...prev, invoice_date: e.target.value }))}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="payment_terms">Payment Terms</Label>
+                      <Select
+                        value={invoiceData.payment_terms}
+                        onValueChange={(value) => setInvoiceData(prev => ({ ...prev, payment_terms: value }))}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select terms" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="immediate">Due Immediately</SelectItem>
+                          <SelectItem value="15 days">Net 15</SelectItem>
+                          <SelectItem value="30 days">Net 30</SelectItem>
+                          <SelectItem value="45 days">Net 45</SelectItem>
+                          <SelectItem value="60 days">Net 60</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
-                )}
-              </div>
-            </Card>
 
-            {/* Invoice Items */}
-            <Card className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-semibold flex items-center">
-                  <HugeiconsIcon icon={Package01Icon} className="h-5 w-5 mr-2" />
-                  Invoice Items
-                </h3>
-                <Button onClick={addInvoiceItem} size="sm">
-                  <HugeiconsIcon icon={PlusSignIcon} className="h-4 w-4 mr-2" />
-                  Add Item
-                </Button>
-              </div>
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="due_date">Due Date</Label>
+                      <Input
+                        id="due_date"
+                        type="date"
+                        value={invoiceData.due_date}
+                        onChange={(e) => setInvoiceData(prev => ({ ...prev, due_date: e.target.value }))}
+                      />
+                    </div>
 
-              <div className="space-y-4">
-                {invoiceData.items.map((item, index) => (
-                  <div key={item.id} className="border rounded-lg p-4 space-y-4">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium">Item #{index + 1}</span>
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        onClick={() => removeInvoiceItem(item.id)}
+                    <div className="space-y-2">
+                      <Label htmlFor="currency">Currency</Label>
+                      <Select
+                        value={invoiceData.currency}
+                        onValueChange={(value) => setInvoiceData(prev => ({ ...prev, currency: value }))}
                       >
-                        <HugeiconsIcon icon={DeleteIcon} className="h-4 w-4" />
-                      </Button>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select currency" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="IDR">Indonesian Rupiah (IDR)</SelectItem>
+                          <SelectItem value="USD">US Dollar (USD)</SelectItem>
+                          <SelectItem value="EUR">Euro (EUR)</SelectItem>
+                          <SelectItem value="SGD">Singapore Dollar (SGD)</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label>Product</Label>
-                        <Select 
-                          value={item.product_code} 
-                          onValueChange={(value) => {
-                            const product = mockProducts.find(p => p.code === value)
-                            if (product) selectProduct(item.id, product.id)
-                          }}
+                    <div className="space-y-2">
+                      <Label>Status</Label>
+                      <div className="flex items-center space-x-2">
+                        <Badge variant="secondary">{invoiceData.status}</Badge>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </Card>
+
+              {/* Customer Selection */}
+              <Card className="p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-lg font-semibold flex items-center">
+                    <HugeiconsIcon icon={UserGroupIcon} className="h-5 w-5 mr-2" />
+                    Customer Information
+                  </h3>
+                  <Button variant="outline" size="sm">
+                    <HugeiconsIcon icon={PlusSignIcon} className="h-4 w-4 mr-2" />
+                    New Customer
+                  </Button>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="customer">Select Customer</Label>
+                    <Select
+                      value={invoiceData.customer?.id || ''}
+                      onValueChange={(value) => {
+                        const customer = mockCustomers.find(c => c.id === value)
+                        setInvoiceData(prev => ({ ...prev, customer: customer || null }))
+                      }}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Choose a customer" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {mockCustomers.map((customer) => (
+                          <SelectItem key={customer.id} value={customer.id}>
+                            <div>
+                              <div className="font-medium">{customer.name}</div>
+                              <div className="text-sm text-muted-foreground">{customer.email}</div>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {invoiceData.customer && (
+                    <div className="bg-muted/50 p-4 rounded-lg">
+                      <h4 className="font-medium mb-2">{invoiceData.customer.name}</h4>
+                      <div className="text-sm text-muted-foreground space-y-1">
+                        <p>{invoiceData.customer.email}</p>
+                        <p>{invoiceData.customer.phone}</p>
+                        <p>{invoiceData.customer.address}</p>
+                        <p>{invoiceData.customer.city}, {invoiceData.customer.postal_code}</p>
+                        <p>{invoiceData.customer.country}</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </Card>
+
+              {/* Invoice Items */}
+              <Card className="p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-lg font-semibold flex items-center">
+                    <HugeiconsIcon icon={Package01Icon} className="h-5 w-5 mr-2" />
+                    Invoice Items
+                  </h3>
+                  <Button onClick={addInvoiceItem} size="sm">
+                    <HugeiconsIcon icon={PlusSignIcon} className="h-4 w-4 mr-2" />
+                    Add Item
+                  </Button>
+                </div>
+
+                <div className="space-y-4">
+                  {invoiceData.items.map((item, index) => (
+                    <div key={item.id} className="border rounded-lg p-4 space-y-4">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium">Item #{index + 1}</span>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeInvoiceItem(item.id)}
+                          aria-label="Remove item"
                         >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select product" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {mockProducts.map((product) => (
-                              <SelectItem key={product.id} value={product.code}>
-                                <div>
-                                  <div className="font-medium">{product.name}</div>
-                                  <div className="text-sm text-muted-foreground">
-                                    {product.code} - {formatCurrency(product.price)}
+                          <HugeiconsIcon icon={DeleteIcon} className="h-4 w-4" />
+                        </Button>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label>Product</Label>
+                          <Select
+                            value={item.product_code}
+                            onValueChange={(value) => {
+                              const product = mockProducts.find(p => p.code === value)
+                              if (product) selectProduct(item.id, product.id)
+                            }}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select product" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {mockProducts.map((product) => (
+                                <SelectItem key={product.id} value={product.code}>
+                                  <div>
+                                    <div className="font-medium">{product.name}</div>
+                                    <div className="text-sm text-muted-foreground">
+                                      {product.code} - {formatCurrency(product.price)}
+                                    </div>
                                   </div>
-                                </div>
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label>Description</Label>
+                          <Input
+                            value={item.description}
+                            onChange={(e) => updateInvoiceItem(item.id, 'description', e.target.value)}
+                            placeholder="Item description"
+                          />
+                        </div>
                       </div>
 
-                      <div className="space-y-2">
-                        <Label>Description</Label>
-                        <Input
-                          value={item.description}
-                          onChange={(e) => updateInvoiceItem(item.id, 'description', e.target.value)}
-                          placeholder="Item description"
-                        />
-                      </div>
-                    </div>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div className="space-y-2">
+                          <Label>Quantity</Label>
+                          <Input
+                            type="number"
+                            value={item.quantity}
+                            onChange={(e) => updateInvoiceItem(item.id, 'quantity', parseFloat(e.target.value) || 0)}
+                            min="0"
+                          />
+                        </div>
 
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                      <div className="space-y-2">
-                        <Label>Quantity</Label>
-                        <Input
-                          type="number"
-                          value={item.quantity}
-                          onChange={(e) => updateInvoiceItem(item.id, 'quantity', parseFloat(e.target.value) || 0)}
-                          min="0"
-                        />
-                      </div>
+                        <div className="space-y-2">
+                          <Label>Unit Price</Label>
+                          <Input
+                            type="number"
+                            value={item.unit_price}
+                            onChange={(e) => updateInvoiceItem(item.id, 'unit_price', parseFloat(e.target.value) || 0)}
+                            min="0"
+                          />
+                        </div>
 
-                      <div className="space-y-2">
-                        <Label>Unit Price</Label>
-                        <Input
-                          type="number"
-                          value={item.unit_price}
-                          onChange={(e) => updateInvoiceItem(item.id, 'unit_price', parseFloat(e.target.value) || 0)}
-                          min="0"
-                        />
-                      </div>
+                        <div className="space-y-2">
+                          <Label>Discount %</Label>
+                          <Input
+                            type="number"
+                            value={item.discount_percentage}
+                            onChange={(e) => updateInvoiceItem(item.id, 'discount_percentage', parseFloat(e.target.value) || 0)}
+                            min="0"
+                            max="100"
+                          />
+                        </div>
 
-                      <div className="space-y-2">
-                        <Label>Discount %</Label>
-                        <Input
-                          type="number"
-                          value={item.discount_percentage}
-                          onChange={(e) => updateInvoiceItem(item.id, 'discount_percentage', parseFloat(e.target.value) || 0)}
-                          min="0"
-                          max="100"
-                        />
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label>Line Total</Label>
-                        <div className="h-10 px-3 py-2 bg-muted rounded-md text-sm font-medium">
-                          {formatCurrency(item.line_total)}
+                        <div className="space-y-2">
+                          <Label>Line Total</Label>
+                          <div className="h-10 px-3 py-2 bg-muted rounded-md text-sm font-medium">
+                            {formatCurrency(item.line_total)}
+                          </div>
                         </div>
                       </div>
                     </div>
+                  ))}
+
+                  {invoiceData.items.length === 0 && (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <HugeiconsIcon icon={Package01Icon} className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                      <p>No items added yet</p>
+                      <p className="text-sm">Click "Add Item" to start building your invoice</p>
+                    </div>
+                  )}
+                </div>
+              </Card>
+
+              {/* Calculation Controls */}
+              <Card className="p-6">
+                <h3 className="text-lg font-semibold mb-6 flex items-center">
+                  <HugeiconsIcon icon={CalculatorIcon} className="h-5 w-5 mr-2" />
+                  Calculations
+                </h3>
+
+                <div className="grid grid-cols-2 gap-4 mb-6">
+                  <div className="space-y-2">
+                    <Label>Global Discount %</Label>
+                    <Input
+                      type="number"
+                      value={invoiceData.discount_percentage}
+                      onChange={(e) => setInvoiceData(prev => ({ ...prev, discount_percentage: parseFloat(e.target.value) || 0 }))}
+                      min="0"
+                      max="100"
+                      placeholder="0"
+                    />
                   </div>
-                ))}
 
-                {invoiceData.items.length === 0 && (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <HugeiconsIcon icon={Package01Icon} className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                    <p>No items added yet</p>
-                    <p className="text-sm">Click "Add Item" to start building your invoice</p>
+                  <div className="space-y-2">
+                    <Label>Tax %</Label>
+                    <Input
+                      type="number"
+                      value={invoiceData.tax_percentage}
+                      onChange={(e) => setInvoiceData(prev => ({ ...prev, tax_percentage: parseFloat(e.target.value) || 0 }))}
+                      min="0"
+                      max="100"
+                      placeholder="11"
+                    />
                   </div>
-                )}
-              </div>
-            </Card>
-
-            {/* Calculation Controls */}
-            <Card className="p-6">
-              <h3 className="text-lg font-semibold mb-6 flex items-center">
-                <HugeiconsIcon icon={CalculatorIcon} className="h-5 w-5 mr-2" />
-                Calculations
-              </h3>
-              
-              <div className="grid grid-cols-2 gap-4 mb-6">
-                <div className="space-y-2">
-                  <Label>Global Discount %</Label>
-                  <Input
-                    type="number"
-                    value={invoiceData.discount_percentage}
-                    onChange={(e) => setInvoiceData(prev => ({ ...prev, discount_percentage: parseFloat(e.target.value) || 0 }))}
-                    min="0"
-                    max="100"
-                    placeholder="0"
-                  />
                 </div>
 
-                <div className="space-y-2">
-                  <Label>Tax %</Label>
-                  <Input
-                    type="number"
-                    value={invoiceData.tax_percentage}
-                    onChange={(e) => setInvoiceData(prev => ({ ...prev, tax_percentage: parseFloat(e.target.value) || 0 }))}
-                    min="0"
-                    max="100"
-                    placeholder="11"
-                  />
-                </div>
-              </div>
-
-              {/* Totals Summary */}
-              <div className="bg-muted/50 p-4 rounded-lg space-y-3">
-                <div className="flex justify-between text-sm">
-                  <span>Subtotal:</span>
-                  <span className="font-medium">{formatCurrency(invoiceData.subtotal)}</span>
-                </div>
-
-                {invoiceData.discount_amount > 0 && (
-                  <div className="flex justify-between text-sm text-green-600">
-                    <span>Discount ({invoiceData.discount_percentage}%):</span>
-                    <span>-{formatCurrency(invoiceData.discount_amount)}</span>
+                {/* Totals Summary */}
+                <div className="bg-muted/50 p-4 rounded-lg space-y-3">
+                  <div className="flex justify-between text-sm">
+                    <span>Subtotal:</span>
+                    <span className="font-medium">{formatCurrency(invoiceData.subtotal)}</span>
                   </div>
-                )}
 
-                <div className="flex justify-between text-sm">
-                  <span>Tax ({invoiceData.tax_percentage}%):</span>
-                  <span className="font-medium">{formatCurrency(invoiceData.tax_amount)}</span>
-                </div>
+                  {invoiceData.discount_amount > 0 && (
+                    <div className="flex justify-between text-sm text-green-600">
+                      <span>Discount ({invoiceData.discount_percentage}%):</span>
+                      <span>-{formatCurrency(invoiceData.discount_amount)}</span>
+                    </div>
+                  )}
 
-                <div className="border-t border-border pt-3">
-                  <div className="flex justify-between text-lg font-bold">
-                    <span>Total Amount:</span>
-                    <span className="text-primary">{formatCurrency(invoiceData.total_amount)}</span>
+                  <div className="flex justify-between text-sm">
+                    <span>Tax ({invoiceData.tax_percentage}%):</span>
+                    <span className="font-medium">{formatCurrency(invoiceData.tax_amount)}</span>
                   </div>
-                  <p className="text-right text-sm text-muted-foreground">{invoiceData.currency}</p>
-                </div>
-              </div>
-            </Card>
 
-            {/* Notes and Terms */}
-            <Card className="p-6">
-              <h3 className="text-lg font-semibold mb-6">Additional Information</h3>
-              
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="notes">Notes</Label>
-                  <Textarea
-                    id="notes"
-                    value={invoiceData.notes}
-                    onChange={(e) => setInvoiceData(prev => ({ ...prev, notes: e.target.value }))}
-                    placeholder="Add any notes or special instructions"
-                    rows={3}
-                  />
+                  <div className="border-t border-border pt-3">
+                    <div className="flex justify-between text-lg font-bold">
+                      <span>Total Amount:</span>
+                      <span className="text-primary">{formatCurrency(invoiceData.total_amount)}</span>
+                    </div>
+                    <p className="text-right text-sm text-muted-foreground">{invoiceData.currency}</p>
+                  </div>
                 </div>
+              </Card>
 
-                <div className="space-y-2">
-                  <Label htmlFor="terms">Terms & Conditions</Label>
-                  <Textarea
-                    id="terms"
-                    value={invoiceData.terms_conditions}
-                    onChange={(e) => setInvoiceData(prev => ({ ...prev, terms_conditions: e.target.value }))}
-                    placeholder="Enter terms and conditions"
-                    rows={4}
-                  />
+              {/* Notes and Terms */}
+              <Card className="p-6">
+                <h3 className="text-lg font-semibold mb-6">Additional Information</h3>
+
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="notes">Notes</Label>
+                    <Textarea
+                      id="notes"
+                      value={invoiceData.notes}
+                      onChange={(e) => setInvoiceData(prev => ({ ...prev, notes: e.target.value }))}
+                      placeholder="Add any notes or special instructions"
+                      rows={3}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="terms">Terms & Conditions</Label>
+                    <Textarea
+                      id="terms"
+                      value={invoiceData.terms_conditions}
+                      onChange={(e) => setInvoiceData(prev => ({ ...prev, terms_conditions: e.target.value }))}
+                      placeholder="Enter terms and conditions"
+                      rows={4}
+                    />
+                  </div>
                 </div>
-              </div>
-            </Card>
-          </div>
+              </Card>
+            </div>
           )}
 
           {/* Right Panel - Real Invoice Design */}
@@ -891,9 +892,9 @@ export default function InvoiceDesignerPage() {
             {/* Preview Mode Floating Toolbar */}
             {showPreview && (
               <div className="fixed top-20 right-6 z-50 bg-white  border rounded-lg p-3 flex items-center space-x-2">
-                <Button 
-                  variant="outline" 
-                  size="sm" 
+                <Button
+                  variant="outline"
+                  size="sm"
                   onClick={generatePDF}
                   disabled={isGeneratingPDF}
                 >
@@ -910,7 +911,7 @@ export default function InvoiceDesignerPage() {
                 </Button>
               </div>
             )}
-            
+
             <div ref={invoiceRef} className={`mx-auto ${showPreview ? 'max-w-4xl' : 'max-w-2xl'}`}>
               {/* Invoice Header with Logo */}
               <div className="flex justify-between items-start mb-12">
@@ -1044,19 +1045,19 @@ export default function InvoiceDesignerPage() {
                       <span>Subtotal:</span>
                       <span className="font-medium">{formatCurrency(invoiceData.subtotal)}</span>
                     </div>
-                    
+
                     {invoiceData.discount_amount > 0 && (
                       <div className="flex justify-between text-green-600">
                         <span>Discount ({invoiceData.discount_percentage}%):</span>
                         <span className="font-medium">-{formatCurrency(invoiceData.discount_amount)}</span>
                       </div>
                     )}
-                    
+
                     <div className="flex justify-between text-gray-700">
                       <span>Tax ({invoiceData.tax_percentage}%):</span>
                       <span className="font-medium">{formatCurrency(invoiceData.tax_amount)}</span>
                     </div>
-                    
+
                     <div className="border-t border-gray-300 pt-3">
                       <div className="flex justify-between items-center">
                         <span className="text-xl font-bold text-gray-900">Total:</span>
@@ -1077,7 +1078,7 @@ export default function InvoiceDesignerPage() {
                       <p className="text-gray-700 whitespace-pre-wrap">{invoiceData.notes}</p>
                     </div>
                   )}
-                  
+
                   {invoiceData.terms_conditions && (
                     <div>
                       <h4 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">Terms & Conditions</h4>
@@ -1112,7 +1113,7 @@ export default function InvoiceDesignerPage() {
                     <HugeiconsIcon icon={ViewIcon} className="h-4 w-4" />
                     Preview PDF
                   </Button>
-                  <Button 
+                  <Button
                     className="flex items-center gap-2"
                     onClick={generatePDF}
                     disabled={isGeneratingPDF}
@@ -1126,7 +1127,7 @@ export default function InvoiceDesignerPage() {
                   </Button>
                 </div>
               )}
-              
+
               {/* Preview Mode Print Instructions */}
               {showPreview && (
                 <div className="mt-8 pt-6 border-t border-gray-200 text-center print:hidden">
@@ -1134,7 +1135,7 @@ export default function InvoiceDesignerPage() {
                     This is a preview of how your invoice will appear when printed or exported to PDF.
                   </p>
                   <div className="flex justify-center gap-3">
-                    <Button 
+                    <Button
                       onClick={generatePDF}
                       disabled={isGeneratingPDF}
                       className="flex items-center gap-2"

@@ -17,7 +17,30 @@ import {
   FileIcon,
   ChartIncreaseIcon,
   Clock01Icon,
-  LocationIcon
+  LocationIcon,
+  Analytics02Icon,
+  Analytics01Icon,
+  DatabaseAddIcon,
+  SquareArrowLeftRightIcon,
+  ThreeDViewIcon,
+  Upload05Icon,
+  CalculateIcon,
+  FileZipIcon,
+  ChartUpIcon,
+  FileLockedIcon,
+  HierarchyIcon,
+  StoreIcon,
+  CubeIcon,
+  RulerIcon,
+  ColorsIcon,
+  BarcodeScanIcon,
+  Image01Icon,
+  TruckIcon,
+  WarehouseIcon,
+  SealIcon,
+  Chat01Icon,
+  StarIcon,
+  Agreement01Icon
 } from "@hugeicons/core-free-icons"
 
 import { useRouter } from "next/navigation"
@@ -34,32 +57,32 @@ const commands = [
   {
     group: "Navigation",
     items: [
-      { label: "Dashboard", icon: Home01Icon, href: "/dashboard", keywords: ["home", "dashboard", "overview"] },
-      { label: "Master Data", icon: Database01Icon, href: "/master-data", keywords: ["master", "data", "companies", "articles"] },
-      { label: "Companies", icon: Database01Icon, href: "/master-data/companies", keywords: ["companies", "company", "organization"] },
-      { label: "Articles", icon: Database01Icon, href: "/master-data/articles", keywords: ["articles", "products", "shoes", "items"] },
-      { label: "Colors", icon: Database01Icon, href: "/master-data/colors", keywords: ["colors", "variants", "palette"] },
-      { label: "Classifications", icon: Database01Icon, href: "/master-data/classifications", keywords: ["classifications", "categories", "types"] },
-      { label: "Models", icon: Database01Icon, href: "/master-data/models", keywords: ["models", "designs", "variants"] },
-      { label: "Sizes", icon: Database01Icon, href: "/master-data/sizes", keywords: ["sizes", "measurements", "dimensions"] },
+      { label: "Dashboard", icon: Analytics02Icon, href: "/dashboard", keywords: ["home", "dashboard", "overview"] },
+      { label: "Master Data", icon: DatabaseAddIcon, href: "/master-data", keywords: ["master", "data", "companies", "articles"] },
+      { label: "Companies", icon: DatabaseAddIcon, href: "/master-data/companies", keywords: ["companies", "company", "organization"] },
+      { label: "Articles", icon: DatabaseAddIcon, href: "/master-data/articles", keywords: ["articles", "products", "shoes", "items"] },
+      { label: "Colors", icon: ColorsIcon, href: "/master-data/colors", keywords: ["colors", "variants", "palette"] },
+      { label: "Classifications", icon: HierarchyIcon, href: "/master-data/classifications", keywords: ["classifications", "categories", "types"] },
+      { label: "Models", icon: CubeIcon, href: "/master-data/models", keywords: ["models", "designs", "variants"] },
+      { label: "Sizes", icon: RulerIcon, href: "/master-data/sizes", keywords: ["sizes", "measurements", "dimensions"] },
     ]
   },
   {
     group: "Sales & Commerce",
     items: [
-      { label: "Sales Management", icon: ShoppingCartIcon, href: "#", keywords: ["sales", "orders", "customers", "pos"] },
+      { label: "Sales Management", icon: SquareArrowLeftRightIcon, href: "#", keywords: ["sales", "orders", "customers", "pos"] },
       { label: "Point of Sale", icon: ShoppingCartIcon, href: "#", keywords: ["pos", "retail", "checkout", "payment"] },
-      { label: "Online Sales", icon: ChartIncreaseIcon, href: "#", keywords: ["online", "ecommerce", "web", "digital"] },
+      { label: "Online Sales", icon: ChartUpIcon, href: "#", keywords: ["online", "ecommerce", "web", "digital"] },
       { label: "Customer Returns", icon: ShoppingCartIcon, href: "#", keywords: ["returns", "refunds", "exchanges"] },
-      { label: "Promotions", icon: ChartIncreaseIcon, href: "#", keywords: ["promotions", "discounts", "campaigns", "marketing"] },
+      { label: "Promotions", icon: ChartUpIcon, href: "#", keywords: ["promotions", "discounts", "campaigns", "marketing"] },
     ]
   },
   {
     group: "Production & Manufacturing",
     items: [
-      { label: "Production Planning", icon: Factory01Icon, href: "#", keywords: ["production", "manufacturing", "planning", "scheduling"] },
-      { label: "Work Orders", icon: Factory01Icon, href: "#", keywords: ["work", "orders", "manufacturing", "jobs"] },
-      { label: "Quality Control", icon: Factory01Icon, href: "#", keywords: ["quality", "control", "inspection", "testing"] },
+      { label: "Production Planning", icon: ThreeDViewIcon, href: "#", keywords: ["production", "manufacturing", "planning", "scheduling"] },
+      { label: "Work Orders", icon: ThreeDViewIcon, href: "#", keywords: ["work", "orders", "manufacturing", "jobs"] },
+      { label: "Quality Control", icon: ThreeDViewIcon, href: "#", keywords: ["quality", "control", "inspection", "testing"] },
       { label: "Material Planning", icon: Package01Icon, href: "#", keywords: ["material", "planning", "mrp", "requirements"] },
       { label: "Production Reports", icon: ChartBarLineIcon, href: "#", keywords: ["production", "reports", "efficiency", "output"] },
     ]
@@ -82,8 +105,8 @@ const commands = [
       { label: "Accounts Payable", icon: Dollar01Icon, href: "#", keywords: ["payable", "ap", "vendors", "bills"] },
       { label: "Cash Management", icon: Dollar01Icon, href: "#", keywords: ["cash", "bank", "payments", "receipts"] },
       { label: "Financial Reports", icon: FileIcon, href: "#", keywords: ["financial", "reports", "statements", "balance"] },
-      { label: "Trial Balance", icon: CalculatorIcon, href: "#", keywords: ["trial", "balance", "accounts", "summary"] },
-      { label: "Cost Centers", icon: CalculatorIcon, href: "#", keywords: ["cost", "centers", "allocation", "budget"] },
+      { label: "Trial Balance", icon: CalculateIcon, href: "#", keywords: ["trial", "balance", "accounts", "summary"] },
+      { label: "Cost Centers", icon: CalculateIcon, href: "#", keywords: ["cost", "centers", "allocation", "budget"] },
     ]
   },
   {
@@ -99,11 +122,11 @@ const commands = [
   {
     group: "Reports & Analytics",
     items: [
-      { label: "Business Intelligence", icon: ChartBarLineIcon, href: "#", keywords: ["bi", "analytics", "intelligence", "insights"] },
-      { label: "Sales Reports", icon: ChartIncreaseIcon, href: "#", keywords: ["sales", "reports", "performance", "revenue"] },
+      { label: "Business Intelligence", icon: Analytics01Icon, href: "#", keywords: ["bi", "analytics", "intelligence", "insights"] },
+      { label: "Sales Reports", icon: ChartUpIcon, href: "#", keywords: ["sales", "reports", "performance", "revenue"] },
       { label: "Inventory Reports", icon: Package01Icon, href: "#", keywords: ["inventory", "reports", "stock", "levels"] },
-      { label: "Financial Analysis", icon: CalculatorIcon, href: "#", keywords: ["financial", "analysis", "ratios", "performance"] },
-      { label: "Custom Reports", icon: FileIcon, href: "#", keywords: ["custom", "reports", "builder", "designer"] },
+      { label: "Financial Analysis", icon: CalculateIcon, href: "#", keywords: ["financial", "analysis", "ratios", "performance"] },
+      { label: "Custom Reports", icon: FileZipIcon, href: "#", keywords: ["custom", "reports", "builder", "designer"] },
     ]
   },
   {
@@ -111,8 +134,8 @@ const commands = [
     items: [
       { label: "User Management", icon: UserGroupIcon, href: "#", keywords: ["users", "permissions", "roles", "access"] },
       { label: "System Gear", icon: SettingsIcon, href: "#", keywords: ["settings", "configuration", "preferences", "setup"] },
-      { label: "Data Import/Export", icon: Database01Icon, href: "#", keywords: ["import", "export", "data", "migration"] },
-      { label: "Backup & Restore", icon: Database01Icon, href: "#", keywords: ["backup", "restore", "recovery", "archive"] },
+      { label: "Data Import/Export", icon: DatabaseAddIcon, href: "#", keywords: ["import", "export", "data", "migration"] },
+      { label: "Backup & Restore", icon: DatabaseAddIcon, href: "#", keywords: ["backup", "restore", "recovery", "archive"] },
     ]
   }
 ]
@@ -126,7 +149,7 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
 
     return commands.map(group => ({
       ...group,
-      items: group.items.filter(item => 
+      items: group.items.filter(item =>
         item.label.toLowerCase().includes(search.toLowerCase()) ||
         item.keywords.some(keyword => keyword.toLowerCase().includes(search.toLowerCase()))
       )
@@ -161,7 +184,7 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
             Quick Navigation
           </DialogTitle>
         </DialogHeader>
-        
+
         <div className="flex items-center border-b px-4 pb-4">
           <HugeiconsIcon icon={Search01Icon} className="mr-3 h-5 w-5 shrink-0 opacity-50" />
           <Input

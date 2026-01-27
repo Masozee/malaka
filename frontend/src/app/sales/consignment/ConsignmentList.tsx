@@ -196,7 +196,7 @@ export default function ConsignmentList({ initialData }: ConsignmentListProps) {
                         <span className="text-xs">{row.original.sold_quantity} / {row.original.total_quantity}</span>
                         <div className="h-1.5 w-16 bg-gray-200 rounded-full dark:bg-gray-700 overflow-hidden">
                             <div
-                                className={`h-full ${percentage >= 70 ? 'bg-green-500' : percentage >= 40 ? 'bg-orange-500' : 'bg-red-500'}`}
+                                className={`h-full ${percentage >= 70 ? 'bg-emerald-500' : percentage >= 40 ? 'bg-amber-500' : 'bg-rose-500'}`}
                                 style={{ width: `${percentage}%` }}
                             />
                         </div>

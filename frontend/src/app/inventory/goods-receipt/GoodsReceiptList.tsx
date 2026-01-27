@@ -67,7 +67,22 @@ export default function GoodsReceiptList({ initialData }: GoodsReceiptListProps)
         return { total, pending, completed, totalValue }
     }, [data])
 
+    const handleEdit = (item: GoodsReceipt) => {
+        // Only pending receipts can be edited
+        if (item.status !== 'pending') {
+            addToast({ type: 'error', title: 'Only pending receipts can be edited' })
+            return
+        }
+        router.push(`/inventory/goods-receipt/${item.id}/edit`)
+    }
+
     const handleDelete = async (item: GoodsReceipt) => {
+        // Only pending receipts can be deleted
+        if (item.status !== 'pending') {
+            addToast({ type: 'error', title: 'Only pending receipts can be deleted' })
+            return
+        }
+
         if (confirm('Are you sure you want to delete this receipt?')) {
             // API call would go here
             setData(prev => prev.filter(i => i.id !== item.id))
@@ -249,7 +264,7 @@ export default function GoodsReceiptList({ initialData }: GoodsReceiptListProps)
                 <TanStackDataTable
                     data={filteredData}
                     columns={columns}
-                    onEdit={(item) => router.push(`/inventory/goods-receipt/${item.id}/edit`)}
+                    onEdit={handleEdit}
                     onDelete={handleDelete}
                     pagination={{
                         pageSize: 10,

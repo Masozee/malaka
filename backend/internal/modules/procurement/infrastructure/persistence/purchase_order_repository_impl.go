@@ -30,9 +30,9 @@ func (r *PurchaseOrderRepositoryImpl) Create(ctx context.Context, order *entitie
 			id, po_number, supplier_id, purchase_request_id, order_date,
 			expected_delivery_date, delivery_address, payment_terms, currency,
 			subtotal, discount_amount, tax_amount, shipping_cost, total_amount,
-			status, payment_status, notes, created_by, created_at, updated_at
+			status, payment_status, notes, created_by, expense_account_id, created_at, updated_at
 		) VALUES (
-			$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20
+			$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21
 		)
 	`
 
@@ -55,6 +55,7 @@ func (r *PurchaseOrderRepositoryImpl) Create(ctx context.Context, order *entitie
 		order.PaymentStatus,
 		order.Notes,
 		order.CreatedBy,
+		order.ExpenseAccountID,
 		order.CreatedAt,
 		order.UpdatedAt,
 	)
@@ -83,6 +84,7 @@ func (r *PurchaseOrderRepositoryImpl) GetByID(ctx context.Context, id string) (*
 			po.status, po.payment_status, COALESCE(po.notes, '') as notes, po.created_by, po.approved_by, po.approved_at,
 			po.sent_at, po.confirmed_at, po.received_at, po.cancelled_at, COALESCE(po.cancel_reason, '') as cancel_reason,
 			po.created_at, po.updated_at,
+			po.expense_account_id, po.budget_commitment_id,
 			COALESCE(s.name, '') as supplier_name,
 			COALESCE(e.employee_name, u.username, '') as created_by_name,
 			COALESCE(e.position, 'Staff') as created_by_position
@@ -274,7 +276,9 @@ func (r *PurchaseOrderRepositoryImpl) Update(ctx context.Context, order *entitie
 			received_at = $20,
 			cancelled_at = $21,
 			cancel_reason = $22,
-			updated_at = $23
+			expense_account_id = $23,
+			budget_commitment_id = $24,
+			updated_at = $25
 		WHERE id = $1
 	`
 
@@ -303,6 +307,8 @@ func (r *PurchaseOrderRepositoryImpl) Update(ctx context.Context, order *entitie
 		order.ReceivedAt,
 		order.CancelledAt,
 		order.CancelReason,
+		order.ExpenseAccountID,
+		order.BudgetCommitmentID,
 		order.UpdatedAt,
 	)
 

@@ -119,7 +119,8 @@ export interface RFQListResponse {
 }
 
 export class RFQService {
-  private readonly baseUrl = '/api/v1/inventory/rfqs';
+  // RFQ is part of Procurement module, not Inventory
+  private readonly baseUrl = '/api/v1/procurement/rfqs';
 
   /**
    * Get all RFQs with optional filtering and pagination

@@ -38,6 +38,9 @@ import (
 	// Invitations imports
 	invitations_handlers "malaka/internal/modules/invitations/presentation/http/handlers"
 
+	// Profile imports
+	profile_handlers "malaka/internal/modules/profile/presentation/http/handlers"
+
 	// Accounting imports (handlers now initialized in router.go)
 	// accounting_handlers "malaka/internal/modules/accounting/presentation/http/handlers"
 	// accounting_routes "malaka/internal/modules/accounting/presentation/http/routes"
@@ -446,9 +449,10 @@ func (server *Server) setupRouter() {
 	attendanceHandler := hr_handlers.NewAttendanceHandler()
 	leaveHandler := hr_handlers.NewLeaveHandler(server.container.LeaveService)
 	performanceReviewHandler := hr_handlers.NewPerformanceReviewHandler(server.container.PerformanceReviewService)
+	trainingHandler := hr_handlers.NewTrainingHandler(server.container.TrainingService)
 
 	// Register HR routes (protected)
-	hr_routes.RegisterHRRoutes(protectedAPI, employeeHandler, payrollHandler, attendanceHandler, leaveHandler, performanceReviewHandler)
+	hr_routes.RegisterHRRoutes(protectedAPI, employeeHandler, payrollHandler, attendanceHandler, leaveHandler, performanceReviewHandler, trainingHandler)
 
 	// Initialize calendar handlers
 	eventHandler := calendar_handlers.NewEventHandler(server.container.EventService)
@@ -462,6 +466,13 @@ func (server *Server) setupRouter() {
 
 	// Initialize production handlers
 	workOrderHandler := production_handlers.NewWorkOrderHandler(server.container.WorkOrderService)
+	qualityControlHandler := production_handlers.NewQualityControlHandler(server.container.QualityControlService)
+	productionPlanHandler := production_handlers.NewProductionPlanHandler(server.container.ProductionPlanService)
+	productionDashboardHandler := production_handlers.NewProductionDashboardHandler(
+		server.container.WorkOrderService,
+		server.container.ProductionPlanService,
+		server.container.QualityControlService,
+	)
 
 	// Register settings routes - public settings are accessible without auth
 	publicSettings := apiV1.Group("/settings")
@@ -483,7 +494,10 @@ func (server *Server) setupRouter() {
 	// Register production routes (protected)
 	production := protectedAPI.Group("/production")
 	{
+		production_routes.SetupProductionDashboardRoutes(production, productionDashboardHandler)
 		production_routes.SetupWorkOrderRoutes(production, workOrderHandler)
+		production_routes.SetupQualityControlRoutes(production, qualityControlHandler)
+		production_routes.SetupProductionPlanRoutes(production, productionPlanHandler)
 	}
 
 	// Register cache health/monitoring routes (protected)
@@ -500,6 +514,47 @@ func (server *Server) setupRouter() {
 		protectedInvitations.POST("/:id/revoke", invitationHandler.RevokeInvitation)
 		protectedInvitations.POST("/:id/resend", invitationHandler.ResendInvitation)
 		protectedInvitations.DELETE("/:id", invitationHandler.DeleteInvitation)
+	}
+
+	// Initialize profile handler and register routes
+	if server.container.ProfileService != nil {
+		profileHandler := profile_handlers.NewProfileHandler(server.container.ProfileService, server.container.StorageService)
+		profile := protectedAPI.Group("/profile")
+		{
+			profile.GET("", profileHandler.GetProfile)
+			profile.PUT("", profileHandler.UpdateProfile)
+			profile.POST("/avatar", profileHandler.UploadAvatar)
+			profile.DELETE("/avatar", profileHandler.DeleteAvatar)
+
+			// Profile settings
+			settings := profile.Group("/settings")
+			{
+				settings.GET("/notifications", profileHandler.GetNotificationSettings)
+				settings.PUT("/notifications", profileHandler.UpdateNotificationSettings)
+				settings.GET("/privacy", profileHandler.GetPrivacySettings)
+				settings.PUT("/privacy", profileHandler.UpdatePrivacySettings)
+				settings.GET("/security", profileHandler.GetSecuritySettings)
+				settings.PUT("/security", profileHandler.UpdateSecuritySettings)
+				settings.GET("/appearance", profileHandler.GetAppearanceSettings)
+				settings.PUT("/appearance", profileHandler.UpdateAppearanceSettings)
+				settings.GET("/language", profileHandler.GetLanguageSettings)
+				settings.PUT("/language", profileHandler.UpdateLanguageSettings)
+			}
+
+			// Security operations
+			profile.POST("/change-password", profileHandler.ChangePassword)
+			security := profile.Group("/security")
+			{
+				security.POST("/2fa/enable", profileHandler.EnableTwoFactorAuth)
+				security.POST("/2fa/disable", profileHandler.DisableTwoFactorAuth)
+				security.DELETE("/sessions/:sessionId", profileHandler.TerminateSession)
+			}
+
+			// Account operations
+			profile.GET("/stats", profileHandler.GetProfileStats)
+			profile.GET("/export", profileHandler.ExportProfileData)
+			profile.DELETE("/delete-account", profileHandler.DeleteAccount)
+		}
 	}
 
 	// Setup public routes (API documentation, etc.)

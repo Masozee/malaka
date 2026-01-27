@@ -21,28 +21,107 @@ func NewGoodsReceiptRepositoryImpl(db *sqlx.DB) *GoodsReceiptRepositoryImpl {
 
 // Create creates a new goods receipt in the database.
 func (r *GoodsReceiptRepositoryImpl) Create(ctx context.Context, gr *entities.GoodsReceipt) error {
-	query := `INSERT INTO goods_receipts (id, purchase_order_id, receipt_date, warehouse_id, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6)`
-	_, err := r.db.ExecContext(ctx, query, gr.ID, gr.PurchaseOrderID, gr.ReceiptDate, gr.WarehouseID, gr.CreatedAt, gr.UpdatedAt)
+	query := `INSERT INTO goods_receipts (
+		id, purchase_order_id, receipt_date, warehouse_id,
+		gr_number, status, supplier_id, supplier_name, total_amount,
+		currency, procurement_type, notes, received_by,
+		created_at, updated_at
+	) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)`
+
+	status := gr.Status
+	if status == "" {
+		status = entities.GoodsReceiptStatusDraft
+	}
+
+	_, err := r.db.ExecContext(ctx, query,
+		gr.ID, gr.PurchaseOrderID, gr.ReceiptDate, gr.WarehouseID,
+		gr.GRNumber, status, gr.SupplierID, gr.SupplierName, gr.TotalAmount,
+		gr.Currency, gr.ProcurementType, gr.Notes, gr.ReceivedBy,
+		gr.CreatedAt, gr.UpdatedAt)
 	return err
 }
 
 // GetByID retrieves a goods receipt by its ID from the database.
 func (r *GoodsReceiptRepositoryImpl) GetByID(ctx context.Context, id string) (*entities.GoodsReceipt, error) {
-	query := `SELECT id, purchase_order_id, receipt_date, warehouse_id, created_at, updated_at FROM goods_receipts WHERE id = $1`
+	query := `SELECT
+		id, purchase_order_id, receipt_date, warehouse_id,
+		COALESCE(gr_number, '') as gr_number,
+		COALESCE(status, 'DRAFT') as status,
+		COALESCE(supplier_id::text, '') as supplier_id,
+		COALESCE(supplier_name, '') as supplier_name,
+		COALESCE(total_amount, 0) as total_amount,
+		COALESCE(currency, 'IDR') as currency,
+		COALESCE(procurement_type, 'RAW_MATERIAL') as procurement_type,
+		COALESCE(notes, '') as notes,
+		received_by,
+		posted_at, posted_by,
+		COALESCE(ap_created, false) as ap_created,
+		ap_id, journal_entry_id,
+		created_at, updated_at
+	FROM goods_receipts WHERE id = $1`
 	row := r.db.QueryRowContext(ctx, query, id)
 
 	gr := &entities.GoodsReceipt{}
-	err := row.Scan(&gr.ID, &gr.PurchaseOrderID, &gr.ReceiptDate, &gr.WarehouseID, &gr.CreatedAt, &gr.UpdatedAt)
+	var receivedBy, postedBy, apID, journalEntryID sql.NullString
+	var postedAt sql.NullTime
+	var status, procurementType string
+
+	err := row.Scan(
+		&gr.ID, &gr.PurchaseOrderID, &gr.ReceiptDate, &gr.WarehouseID,
+		&gr.GRNumber, &status, &gr.SupplierID, &gr.SupplierName, &gr.TotalAmount,
+		&gr.Currency, &procurementType, &gr.Notes, &receivedBy,
+		&postedAt, &postedBy, &gr.APCreated, &apID, &journalEntryID,
+		&gr.CreatedAt, &gr.UpdatedAt)
+
 	if err == sql.ErrNoRows {
 		return nil, nil // Goods receipt not found
 	}
-	return gr, err
+	if err != nil {
+		return nil, err
+	}
+
+	gr.Status = entities.GoodsReceiptStatus(status)
+	gr.ProcurementType = entities.ProcurementType(procurementType)
+
+	if receivedBy.Valid {
+		gr.ReceivedBy = receivedBy.String
+	}
+	if postedAt.Valid {
+		gr.PostedAt = &postedAt.Time
+	}
+	if postedBy.Valid {
+		gr.PostedBy = &postedBy.String
+	}
+	if apID.Valid {
+		gr.APID = &apID.String
+	}
+	if journalEntryID.Valid {
+		gr.JournalEntryID = &journalEntryID.String
+	}
+
+	return gr, nil
 }
 
 // Update updates an existing goods receipt in the database.
 func (r *GoodsReceiptRepositoryImpl) Update(ctx context.Context, gr *entities.GoodsReceipt) error {
-	query := `UPDATE goods_receipts SET purchase_order_id = $1, receipt_date = $2, warehouse_id = $3, updated_at = $4 WHERE id = $5`
-	_, err := r.db.ExecContext(ctx, query, gr.PurchaseOrderID, gr.ReceiptDate, gr.WarehouseID, gr.UpdatedAt, gr.ID)
+	query := `UPDATE goods_receipts SET
+		purchase_order_id = $1, receipt_date = $2, warehouse_id = $3,
+		gr_number = $4, status = $5, supplier_id = $6, supplier_name = $7,
+		total_amount = $8, currency = $9, procurement_type = $10, notes = $11,
+		received_by = $12, posted_at = $13, posted_by = $14,
+		ap_created = $15, ap_id = $16, journal_entry_id = $17,
+		updated_at = $18
+	WHERE id = $19`
+
+	gr.UpdatedAt = time.Now()
+
+	_, err := r.db.ExecContext(ctx, query,
+		gr.PurchaseOrderID, gr.ReceiptDate, gr.WarehouseID,
+		gr.GRNumber, gr.Status, gr.SupplierID, gr.SupplierName,
+		gr.TotalAmount, gr.Currency, gr.ProcurementType, gr.Notes,
+		gr.ReceivedBy, gr.PostedAt, gr.PostedBy,
+		gr.APCreated, gr.APID, gr.JournalEntryID,
+		gr.UpdatedAt, gr.ID)
 	return err
 }
 

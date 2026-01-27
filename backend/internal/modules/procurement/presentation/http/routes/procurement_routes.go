@@ -4,7 +4,11 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"malaka/internal/modules/procurement/presentation/http/handlers"
+	"malaka/internal/shared/auth"
 )
+
+// Allowed roles for approval actions
+var approverRoles = []string{"admin", "approver", "manager"}
 
 // RegisterProcurementRoutes registers all procurement module routes.
 func RegisterProcurementRoutes(
@@ -68,7 +72,8 @@ func RegisterProcurementRoutes(
 			purchaseOrders.DELETE("/:id", purchaseOrderHandler.Delete)
 			purchaseOrders.POST("/:id/send", purchaseOrderHandler.Send)
 			purchaseOrders.POST("/:id/submit", purchaseOrderHandler.Submit)
-			purchaseOrders.POST("/:id/approve", purchaseOrderHandler.Approve)
+			// Approval requires approver/manager/admin role
+			purchaseOrders.POST("/:id/approve", auth.RoleMiddleware(approverRoles...), purchaseOrderHandler.Approve)
 			purchaseOrders.POST("/:id/confirm", purchaseOrderHandler.Confirm)
 			purchaseOrders.POST("/:id/ship", purchaseOrderHandler.Ship)
 			purchaseOrders.POST("/:id/receive", purchaseOrderHandler.Receive)
@@ -87,8 +92,9 @@ func RegisterProcurementRoutes(
 			purchaseRequests.PUT("/:id", purchaseRequestHandler.Update)
 			purchaseRequests.DELETE("/:id", purchaseRequestHandler.Delete)
 			purchaseRequests.POST("/:id/submit", purchaseRequestHandler.Submit)
-			purchaseRequests.POST("/:id/approve", purchaseRequestHandler.Approve)
-			purchaseRequests.POST("/:id/reject", purchaseRequestHandler.Reject)
+			// Approval/rejection requires approver/manager/admin role
+			purchaseRequests.POST("/:id/approve", auth.RoleMiddleware(approverRoles...), purchaseRequestHandler.Approve)
+			purchaseRequests.POST("/:id/reject", auth.RoleMiddleware(approverRoles...), purchaseRequestHandler.Reject)
 			purchaseRequests.POST("/:id/cancel", purchaseRequestHandler.Cancel)
 			purchaseRequests.POST("/:id/convert-to-po", purchaseRequestHandler.ConvertToPO)
 			purchaseRequests.POST("/:id/items", purchaseRequestHandler.AddItem)
@@ -122,7 +128,8 @@ func RegisterProcurementRoutes(
 			vendorEvaluations.PUT("/:id", vendorEvaluationHandler.Update)
 			vendorEvaluations.DELETE("/:id", vendorEvaluationHandler.Delete)
 			vendorEvaluations.POST("/:id/complete", vendorEvaluationHandler.Complete)
-			vendorEvaluations.POST("/:id/approve", vendorEvaluationHandler.Approve)
+			// Approval requires approver/manager/admin role
+			vendorEvaluations.POST("/:id/approve", auth.RoleMiddleware(approverRoles...), vendorEvaluationHandler.Approve)
 		}
 	}
 }
