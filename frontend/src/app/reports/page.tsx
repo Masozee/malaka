@@ -6,6 +6,16 @@ import { Header } from "@/components/ui/header"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { HugeiconsIcon } from '@hugeicons/react'
+import {
+  File01Icon,
+  ChartLineData01Icon,
+  FilterHorizontalIcon,
+  CheckmarkCircle01Icon,
+  ArrowRight01Icon,
+  Download01Icon,
+  Time04Icon
+} from '@hugeicons/core-free-icons'
 
 import Link from "next/link"
 
@@ -112,21 +122,22 @@ export default function ReportsPage() {
     ? reports
     : reports.filter(report => report.category === selectedCategory)
 
+  // Neutral status badges
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "active":
-        return { variant: "default" as const, label: "Active", color: "bg-green-500" }
+        return { color: "bg-gray-800" } // Dark gray/black
       case "updating":
-        return { variant: "secondary" as const, label: "Updating", color: "bg-yellow-500" }
+        return { color: "bg-gray-400" } // Medium gray
       case "error":
-        return { variant: "destructive" as const, label: "Error", color: "bg-red-500" }
+        return { color: "bg-gray-200" } // Light gray
       default:
-        return { variant: "outline" as const, label: "Unknown", color: "bg-gray-500" }
+        return { color: "bg-gray-300" }
     }
   }
 
   const breadcrumbs = [
-    { label: "Reports & Analytics" }
+    { label: "Reports & Analytics", href: "/reports" }
   ]
 
   return (
@@ -154,61 +165,65 @@ export default function ReportsPage() {
         />
 
         <div className="flex-1 overflow-auto p-6 space-y-6">
-          {/* Quick Stats */}
+          {/* Quick Stats - Neutral Design */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <Card className="p-4 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950 dark:to-blue-900 border-0 ">
-              <div className="flex items-center space-x-3">
-                <div className="p-2 bg-blue-500 text-white rounded-lg">
-                </div>
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border">
+              <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-blue-700 dark:text-blue-300">Total Reports</p>
-                  <p className="text-2xl font-bold text-blue-900 dark:text-blue-100">{reports.length}</p>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Reports</p>
+                  <p className="text-3xl font-bold text-gray-900 dark:text-gray-100">{reports.length}</p>
+                </div>
+                <div className="h-12 w-12 bg-gray-100 dark:bg-gray-700/50 rounded-lg flex items-center justify-center">
+                  <HugeiconsIcon icon={File01Icon} className="h-6 w-6 text-gray-600 dark:text-gray-300" />
                 </div>
               </div>
-            </Card>
+            </div>
 
-            <Card className="p-4 bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950 dark:to-green-900 border-0 ">
-              <div className="flex items-center space-x-3">
-                <div className="p-2 bg-green-500 text-white rounded-lg">
-                </div>
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border">
+              <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-green-700 dark:text-green-300">Active Reports</p>
-                  <p className="text-2xl font-bold text-green-900 dark:text-green-100">
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Active Reports</p>
+                  <p className="text-3xl font-bold text-gray-900 dark:text-gray-100">
                     {reports.filter(r => r.status === 'active').length}
                   </p>
                 </div>
-              </div>
-            </Card>
-
-            <Card className="p-4 bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-950 dark:to-purple-900 border-0 ">
-              <div className="flex items-center space-x-3">
-                <div className="p-2 bg-purple-500 text-white rounded-lg">
+                <div className="h-12 w-12 bg-gray-100 dark:bg-gray-700/50 rounded-lg flex items-center justify-center">
+                  <HugeiconsIcon icon={CheckmarkCircle01Icon} className="h-6 w-6 text-gray-600 dark:text-gray-300" />
                 </div>
+              </div>
+            </div>
+
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border">
+              <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-purple-700 dark:text-purple-300">Categories</p>
-                  <p className="text-2xl font-bold text-purple-900 dark:text-purple-100">
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Categories</p>
+                  <p className="text-3xl font-bold text-gray-900 dark:text-gray-100">
                     {categories.length - 1}
                   </p>
                 </div>
+                <div className="h-12 w-12 bg-gray-100 dark:bg-gray-700/50 rounded-lg flex items-center justify-center">
+                  <HugeiconsIcon icon={FilterHorizontalIcon} className="h-6 w-6 text-gray-600 dark:text-gray-300" />
+                </div>
               </div>
-            </Card>
+            </div>
 
-            <Card className="p-4 bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-950 dark:to-orange-900 border-0 ">
-              <div className="flex items-center space-x-3">
-                <div className="p-2 bg-orange-500 text-white rounded-lg">
-                </div>
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border">
+              <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-orange-700 dark:text-orange-300">Last Updated</p>
-                  <p className="text-lg font-bold text-orange-900 dark:text-orange-100">1 min ago</p>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Last Updated</p>
+                  <p className="text-3xl font-bold text-gray-900 dark:text-gray-100">1m</p>
+                </div>
+                <div className="h-12 w-12 bg-gray-100 dark:bg-gray-700/50 rounded-lg flex items-center justify-center">
+                  <HugeiconsIcon icon={Time04Icon} className="h-6 w-6 text-gray-600 dark:text-gray-300" />
                 </div>
               </div>
-            </Card>
+            </div>
           </div>
 
           {/* Filters */}
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="flex-1">
-              <div className="flex space-x-2 overflow-x-auto">
+              <div className="flex space-x-2 overflow-x-auto pb-2">
                 {categories.map((category) => (
                   <Button
                     key={category}
@@ -232,19 +247,20 @@ export default function ReportsPage() {
               return (
                 <Card
                   key={report.id}
-                  className="group hover: transition-all duration-200 border-0  bg-gradient-to-br from-white via-white to-slate-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900"
+                  className="group hover:shadow-md transition-all duration-200 border bg-white dark:bg-gray-800"
                 >
                   <CardHeader className="pb-3">
                     <div className="flex items-start justify-between">
-                      <div className="flex items-center space-x-3">
-                        <div className="p-2 bg-primary/10 rounded-lg">
+                      <div className="flex items-center space-x-3 w-full">
+                        <div className="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg">
+                          <HugeiconsIcon icon={ChartLineData01Icon} className="h-5 w-5 text-gray-600 dark:text-gray-300" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <CardTitle className="text-base font-semibold truncate">
+                          <CardTitle className="text-base font-semibold truncate text-gray-900 dark:text-gray-100">
                             {report.title}
                           </CardTitle>
                           <div className="flex items-center space-x-2 mt-1">
-                            <Badge variant="outline" className="text-xs">
+                            <Badge variant="outline" className="text-xs text-gray-500 border-gray-200 dark:border-gray-700">
                               {report.category}
                             </Badge>
                             <div className={`w-2 h-2 rounded-full ${statusBadge.color}`} />
@@ -255,28 +271,29 @@ export default function ReportsPage() {
                   </CardHeader>
 
                   <CardContent className="pt-0">
-                    <CardDescription className="text-sm text-muted-foreground mb-4">
+                    <CardDescription className="text-sm text-gray-500 dark:text-gray-400 mb-4 line-clamp-2 h-10">
                       {report.description}
                     </CardDescription>
 
-                    <div className="space-y-3">
+                    <div className="space-y-3 pt-2 border-t border-gray-100 dark:border-gray-700">
                       <div className="flex items-center justify-between text-sm">
-                        <span className="text-muted-foreground">Data Points</span>
-                        <span className="font-medium">{report.dataPoints.toLocaleString()}</span>
+                        <span className="text-gray-500">Data Points</span>
+                        <span className="font-medium text-gray-900 dark:text-gray-100">{report.dataPoints.toLocaleString()}</span>
                       </div>
 
                       <div className="flex items-center justify-between text-sm">
-                        <span className="text-muted-foreground">Updated</span>
-                        <span className="font-medium">{report.lastUpdated}</span>
+                        <span className="text-gray-500">Updated</span>
+                        <span className="font-medium text-gray-900 dark:text-gray-100">{report.lastUpdated}</span>
                       </div>
 
                       <div className="flex space-x-2 pt-2">
-                        <Button size="sm" asChild className="flex-1">
+                        <Button size="sm" asChild className="flex-1" variant="outline">
                           <Link href={report.href}>
-                            View
+                            View Report
                           </Link>
                         </Button>
-                        <Button size="sm" variant="outline">
+                        <Button size="sm" variant="ghost" className="px-2">
+                          <HugeiconsIcon icon={Download01Icon} className="h-4 w-4 text-gray-500" />
                         </Button>
                       </div>
                     </div>
