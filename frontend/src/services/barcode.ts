@@ -41,7 +41,7 @@ class BarcodeService {
    */
   async generateBarcode(request: BarcodeRequest): Promise<BarcodeResult> {
     const response = await api.post(`${this.baseUrl}/generate`, request)
-    return response.data.data
+    return response.data
   }
 
   /**
@@ -58,9 +58,8 @@ class BarcodeService {
     })
     console.log('Raw API response:', response)
     console.log('Response data:', response.data)
-    console.log('Extracted data:', response.data.data)
-    
-    return response.data.data
+
+    return response.data
   }
 
   /**
@@ -75,9 +74,8 @@ class BarcodeService {
     const response = await api.post(`${this.baseUrl}/generate/articles`, request)
     console.log('Raw article API response:', response)
     console.log('Article response data:', response.data)
-    console.log('Article extracted data:', response.data.data)
-    
-    return response.data.data
+
+    return response.data
   }
 
   /**
@@ -114,10 +112,17 @@ class BarcodeService {
     }
 
     const link = document.createElement('a')
-    
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'
+
     if (result.image_url) {
-      // If we have a MinIO URL, use it directly (may need hostname adjustment for local development)
-      link.href = result.image_url
+      // Convert relative URL to absolute URL with backend base
+      if (result.image_url.startsWith('/')) {
+        link.href = `${baseUrl}${result.image_url}`
+      } else if (result.image_url.startsWith('http')) {
+        link.href = result.image_url
+      } else {
+        link.href = `${baseUrl}/api/v1/media/${result.image_url}`
+      }
     } else if (result.image_base64) {
       // Fallback to base64 data
       link.href = `data:image/png;base64,${result.image_base64}`
@@ -196,9 +201,17 @@ class BarcodeService {
    * Create barcode data URL for display
    */
   createBarcodeDataUrl(result: BarcodeResult): string {
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'
+
     if (result.image_url) {
-      // Return MinIO URL directly for display (may need hostname adjustment for local development)
-      return result.image_url
+      // Convert relative URL to absolute URL with backend base
+      if (result.image_url.startsWith('/')) {
+        return `${baseUrl}${result.image_url}`
+      } else if (result.image_url.startsWith('http')) {
+        return result.image_url
+      } else {
+        return `${baseUrl}/api/v1/media/${result.image_url}`
+      }
     } else if (result.image_base64) {
       // Fallback to base64 data URL
       return `data:image/png;base64,${result.image_base64}`

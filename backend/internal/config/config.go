@@ -1,6 +1,8 @@
 package config
 
 import (
+	"os"
+	"path/filepath"
 	"strings"
 	"time"
 )
@@ -42,11 +44,28 @@ type Config struct {
 }
 
 // GetMediaPath returns the media storage path with default of ./media
+// Converts relative paths to absolute paths based on the executable's directory
 func (c *Config) GetMediaPath() string {
-	if c.MediaPath == "" {
-		return "./media"
+	mediaPath := c.MediaPath
+	if mediaPath == "" {
+		mediaPath = "./media"
 	}
-	return c.MediaPath
+
+	// If it's already an absolute path, return as-is
+	if filepath.IsAbs(mediaPath) {
+		return mediaPath
+	}
+
+	// Convert relative path to absolute based on current working directory
+	absPath, err := filepath.Abs(mediaPath)
+	if err != nil {
+		// Fallback to trying executable directory
+		if exe, err := os.Executable(); err == nil {
+			return filepath.Join(filepath.Dir(exe), mediaPath)
+		}
+		return mediaPath
+	}
+	return absPath
 }
 
 // GetCORSAllowedOrigins returns a slice of allowed CORS origins

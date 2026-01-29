@@ -261,7 +261,7 @@ export default function RFQDetailPage() {
                     <div key={response.id} className="border rounded-lg p-4">
                       <div className="flex items-start justify-between">
                         <div>
-                          <h4 className="font-medium">{response.supplier?.name || 'Unknown Supplier'}</h4>
+                          <h4 className="font-medium">{response.supplier?.name || response.supplier_name || 'Unknown Supplier'}</h4>
                           <p className="text-sm text-muted-foreground">
                             Responded on {rfqService.formatDate(response.response_date)}
                           </p>
@@ -341,7 +341,7 @@ export default function RFQDetailPage() {
                   {rfq.suppliers.map((supplier) => (
                     <div key={supplier.id} className="flex items-center justify-between">
                       <div>
-                        <p className="font-medium">{supplier.supplier?.name || 'Unknown'}</p>
+                        <p className="font-medium">{supplier.supplier?.name || supplier.supplier_name || 'Unknown'}</p>
                         <p className="text-xs text-muted-foreground capitalize">{supplier.status}</p>
                       </div>
                       <Badge className={

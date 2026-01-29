@@ -31,6 +31,7 @@ export interface RFQSupplier {
   responded_at: string | null;
   status: 'invited' | 'responded' | 'declined';
   supplier?: Supplier;
+  supplier_name?: string; // Backend returns this directly
   created_at: string;
   updated_at: string;
 }
@@ -48,6 +49,7 @@ export interface RFQResponse {
   notes: string;
   status: 'submitted' | 'under_review' | 'accepted' | 'rejected';
   supplier?: Supplier;
+  supplier_name?: string; // Backend returns this directly
   created_at: string;
   updated_at: string;
 }
@@ -120,7 +122,7 @@ export interface RFQListResponse {
 
 export class RFQService {
   // RFQ is part of Procurement module, not Inventory
-  private readonly baseUrl = '/api/v1/procurement/rfqs';
+  private readonly baseUrl = '/api/v1/procurement/rfqs/';
 
   /**
    * Get all RFQs with optional filtering and pagination
@@ -134,20 +136,28 @@ export class RFQService {
     if (filters?.limit) params.append('limit', filters.limit.toString());
 
     const queryString = params.toString();
-    const url = `${this.baseUrl}/${queryString ? `?${queryString}` : ''}`;
+    const url = `${this.baseUrl}${queryString ? `?${queryString}` : ''}`;
 
     console.log('RFQ Service: Making API call to:', url);
 
-    const response = await api.get<{ success: boolean; data: RFQListResponse }>(url, {}, { token });
+    // Backend returns { data: [...], pagination: { page, limit, total_rows } }
+    const response = await api.get<{ success: boolean; data: { data: RFQ[]; pagination: { page: number; limit: number; total_rows: number } } }>(url, {}, { token });
     console.log('RFQ Service: API response:', response);
-    return response.data;
+
+    // Map backend response to frontend interface
+    return {
+      rfqs: response.data.data || [],
+      total: response.data.pagination?.total_rows || 0,
+      page: response.data.pagination?.page || 1,
+      limit: response.data.pagination?.limit || 10,
+    };
   }
 
   /**
    * Get RFQ by ID
    */
   async getRFQById(id: string): Promise<RFQ> {
-    const response = await api.get<{ success: boolean; data: RFQ }>(`${this.baseUrl}/${id}`);
+    const response = await api.get<{ success: boolean; data: RFQ }>(`${this.baseUrl}${id}`);
     return response.data;
   }
 
@@ -155,7 +165,12 @@ export class RFQService {
    * Create a new RFQ
    */
   async createRFQ(rfq: CreateRFQRequest): Promise<RFQ> {
-    const response = await api.post<{ data: RFQ }>(this.baseUrl, rfq);
+    // Transform date to RFC3339 format for backend
+    const payload = {
+      ...rfq,
+      due_date: rfq.due_date ? new Date(rfq.due_date + 'T00:00:00Z').toISOString() : undefined,
+    };
+    const response = await api.post<{ data: RFQ }>(this.baseUrl, payload);
     return response.data;
   }
 
@@ -163,7 +178,12 @@ export class RFQService {
    * Update an existing RFQ
    */
   async updateRFQ(id: string, updates: UpdateRFQRequest): Promise<RFQ> {
-    const response = await api.put<{ data: RFQ }>(`${this.baseUrl}/${id}`, updates);
+    // Transform date to RFC3339 format for backend if present
+    const payload = {
+      ...updates,
+      due_date: updates.due_date ? new Date(updates.due_date + 'T00:00:00Z').toISOString() : undefined,
+    };
+    const response = await api.put<{ data: RFQ }>(`${this.baseUrl}${id}`, payload);
     return response.data;
   }
 
@@ -171,14 +191,14 @@ export class RFQService {
    * Delete an RFQ
    */
   async deleteRFQ(id: string): Promise<void> {
-    await api.delete(`${this.baseUrl}/${id}`);
+    await api.delete(`${this.baseUrl}${id}`);
   }
 
   /**
    * Publish an RFQ (send to suppliers)
    */
   async publishRFQ(id: string): Promise<RFQ> {
-    const response = await api.post<{ data: RFQ }>(`${this.baseUrl}/${id}/publish`);
+    const response = await api.post<{ data: RFQ }>(`${this.baseUrl}${id}/publish`);
     return response.data;
   }
 
@@ -186,7 +206,7 @@ export class RFQService {
    * Close an RFQ
    */
   async closeRFQ(id: string): Promise<RFQ> {
-    const response = await api.post<{ data: RFQ }>(`${this.baseUrl}/${id}/close`);
+    const response = await api.post<{ data: RFQ }>(`${this.baseUrl}${id}/close`);
     return response.data;
   }
 
@@ -194,7 +214,7 @@ export class RFQService {
    * Add item to RFQ
    */
   async addRFQItem(rfqId: string, item: CreateRFQItemRequest): Promise<RFQItem> {
-    const response = await api.post<{ data: RFQItem }>(`${this.baseUrl}/${rfqId}/items`, item);
+    const response = await api.post<{ data: RFQItem }>(`${this.baseUrl}${rfqId}/items`, item);
     return response.data;
   }
 
@@ -202,15 +222,15 @@ export class RFQService {
    * Invite supplier to RFQ
    */
   async inviteSupplier(rfqId: string, supplierId: string): Promise<void> {
-    await api.post(`${this.baseUrl}/${rfqId}/suppliers`, { supplier_id: supplierId });
+    await api.post(`${this.baseUrl}${rfqId}/suppliers`, { supplier_id: supplierId });
   }
 
   /**
    * Get RFQ statistics
    */
   async getRFQStats(): Promise<RFQStats> {
-    console.log('RFQ Service: Getting stats from:', `${this.baseUrl}/stats`);
-    const response = await api.get<{ success: boolean; data: RFQStats }>(`${this.baseUrl}/stats`);
+    console.log('RFQ Service: Getting stats from:', `${this.baseUrl}stats`);
+    const response = await api.get<{ success: boolean; data: RFQStats }>(`${this.baseUrl}stats`);
     console.log('RFQ Service: Stats response:', response);
     return response.data;
   }

@@ -208,14 +208,14 @@ class ArticleService extends BaseMasterDataService<Article, ArticleListResponse>
 
   getImageUrl(objectKey: string): string {
     // Return the download URL for an image from local storage
-    // Use relative URL so it works with any host/port
     if (!objectKey) return ''
     // If it's already a full URL, return as is
     if (objectKey.startsWith('http://') || objectKey.startsWith('https://')) {
       return objectKey
     }
-    // Use the media endpoint for local storage
-    return `/api/v1/media/${objectKey}`
+    // Use the media endpoint with full backend URL
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'
+    return `${baseUrl}/api/v1/media/${objectKey}`
   }
 }
 

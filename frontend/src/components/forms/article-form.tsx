@@ -40,9 +40,64 @@ const initialFormData: ArticleFormData = {
   status: "active"
 }
 
-// ... existing code ...
+interface PendingImage {
+  file: File
+  preview: string
+}
 
-// Reset form when modal opens/closes or article changes
+const statusOptions = [
+  { value: "active", label: "Active" },
+  { value: "inactive", label: "Inactive" },
+  { value: "discontinued", label: "Discontinued" }
+]
+
+const genderOptions = [
+  { value: "male", label: "Male" },
+  { value: "female", label: "Female" },
+  { value: "unisex", label: "Unisex" },
+  { value: "not_specified", label: "Not Specified" }
+]
+
+const createValidationRules = {
+  code: commonRules.required,
+  name: commonRules.required,
+  classification_id: commonRules.required,
+  status: commonRules.required
+}
+
+const editValidationRules = {
+  name: commonRules.required,
+  classification_id: commonRules.required,
+  status: commonRules.required
+}
+
+export function ArticleForm({ open, onOpenChange, article, onSuccess }: ArticleFormProps) {
+  const [formData, setFormData] = React.useState<ArticleFormData>(initialFormData)
+  const [loading, setLoading] = React.useState(false)
+  const [errors, setErrors] = React.useState<Record<string, string>>({})
+  const [classifications, setClassifications] = React.useState<Classification[]>([])
+  const [existingImages, setExistingImages] = React.useState<string[]>([])
+  const [pendingImages, setPendingImages] = React.useState<PendingImage[]>([])
+  const [imagesToDelete, setImagesToDelete] = React.useState<string[]>([])
+  const fileInputRef = React.useRef<HTMLInputElement>(null)
+  const { addToast } = useToast()
+
+  const isEditing = !!article
+
+  // Fetch classifications on mount
+  React.useEffect(() => {
+    const fetchClassifications = async () => {
+      try {
+        const response = await classificationService.getAll({ page: 1, limit: 100 })
+        setClassifications(response.data)
+      } catch (error) {
+        console.error("Error fetching classifications:", error)
+      }
+    }
+    fetchClassifications()
+  }, [])
+
+  // Reset form when modal opens/closes or article changes
 React.useEffect(() => {
   if (open) {
     if (article) {

@@ -10,8 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Checkbox } from '@/components/ui/checkbox'
+// Using native form elements to avoid Radix UI infinite loop issues
 import { rfqService, CreateRFQRequest, CreateRFQItemRequest } from '@/services/rfq'
 import { supplierService } from '@/services/masterdata'
 import type { Supplier } from '@/types/masterdata'
@@ -32,6 +31,7 @@ export default function NewRFQPage() {
   const [saving, setSaving] = useState(false)
   const [suppliers, setSuppliers] = useState<Supplier[]>([])
   const [selectedSuppliers, setSelectedSuppliers] = useState<string[]>([])
+  const [priority, setPriority] = useState<'low' | 'medium' | 'high' | 'urgent'>('medium')
   const [items, setItems] = useState<RFQItem[]>([
     {
       id: '1',
@@ -48,8 +48,6 @@ export default function NewRFQPage() {
     defaultValues: {
       title: '',
       description: '',
-      priority: 'medium' as const,
-      created_by: '',
       due_date: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
     },
     onSubmit: async ({ value }) => {
@@ -58,8 +56,8 @@ export default function NewRFQPage() {
         const rfqData: CreateRFQRequest = {
           title: value.title,
           description: value.description,
-          priority: value.priority,
-          created_by: value.created_by || 'system',
+          priority: priority,
+          created_by: '', // Let backend handle this from auth context or default user
           due_date: value.due_date,
           items: items.map(({ id, ...item }): CreateRFQItemRequest => item),
           supplier_ids: selectedSuppliers,
@@ -168,27 +166,20 @@ export default function NewRFQPage() {
                 )}
               </form.Field>
 
-              <form.Field name="priority">
-                {(field) => (
-                  <div className="space-y-2">
-                    <Label htmlFor="priority">Priority *</Label>
-                    <Select
-                      value={field.state.value}
-                      onValueChange={(value) => field.handleChange(value as 'low' | 'medium' | 'high' | 'urgent')}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="low">Low</SelectItem>
-                        <SelectItem value="medium">Medium</SelectItem>
-                        <SelectItem value="high">High</SelectItem>
-                        <SelectItem value="urgent">Urgent</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
-              </form.Field>
+              <div className="space-y-2">
+                <Label htmlFor="priority">Priority *</Label>
+                <select
+                  id="priority"
+                  value={priority}
+                  onChange={(e) => setPriority(e.target.value as 'low' | 'medium' | 'high' | 'urgent')}
+                  className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                >
+                  <option value="low">Low</option>
+                  <option value="medium">Medium</option>
+                  <option value="high">High</option>
+                  <option value="urgent">Urgent</option>
+                </select>
+              </div>
 
               <form.Field name="due_date">
                 {(field) => (
@@ -271,22 +262,18 @@ export default function NewRFQPage() {
 
                     <div className="space-y-2">
                       <Label>Unit</Label>
-                      <Select
+                      <select
                         value={item.unit}
-                        onValueChange={(value) => updateItem(item.id, 'unit', value)}
+                        onChange={(e) => updateItem(item.id, 'unit', e.target.value)}
+                        className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
                       >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="pcs">Pcs</SelectItem>
-                          <SelectItem value="kg">Kg</SelectItem>
-                          <SelectItem value="m">Meter</SelectItem>
-                          <SelectItem value="box">Box</SelectItem>
-                          <SelectItem value="roll">Roll</SelectItem>
-                          <SelectItem value="set">Set</SelectItem>
-                        </SelectContent>
-                      </Select>
+                        <option value="pcs">Pcs</option>
+                        <option value="kg">Kg</option>
+                        <option value="m">Meter</option>
+                        <option value="box">Box</option>
+                        <option value="roll">Roll</option>
+                        <option value="set">Set</option>
+                      </select>
                     </div>
 
                     <div className="space-y-2 md:col-span-2">
@@ -333,19 +320,20 @@ export default function NewRFQPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {suppliers.map((supplier) => (
-                <div
+                <label
                   key={supplier.id}
                   className={`border rounded-lg p-4 cursor-pointer transition-colors ${
                     selectedSuppliers.includes(supplier.id)
                       ? 'border-blue-500 bg-blue-50'
                       : 'hover:border-gray-400'
                   }`}
-                  onClick={() => toggleSupplier(supplier.id)}
                 >
                   <div className="flex items-start space-x-3">
-                    <Checkbox
+                    <input
+                      type="checkbox"
                       checked={selectedSuppliers.includes(supplier.id)}
-                      onCheckedChange={() => toggleSupplier(supplier.id)}
+                      onChange={() => toggleSupplier(supplier.id)}
+                      className="mt-1 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                     />
                     <div>
                       <p className="font-medium">{supplier.name}</p>
@@ -355,7 +343,7 @@ export default function NewRFQPage() {
                       )}
                     </div>
                   </div>
-                </div>
+                </label>
               ))}
             </div>
 
