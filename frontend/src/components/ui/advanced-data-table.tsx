@@ -52,6 +52,13 @@ export interface AdvancedColumn<T> {
   filterOptions?: { value: string; label: string }[]
 }
 
+export interface PaginationProps {
+  current: number
+  pageSize: number
+  total: number
+  onChange: (page: number, pageSize: number) => void
+}
+
 interface AdvancedDataTableProps<T> {
   data: T[]
   columns: AdvancedColumn<T>[]
@@ -61,6 +68,7 @@ interface AdvancedDataTableProps<T> {
   onDelete?: (record: T) => void
   rowSelection?: boolean
   showToolbar?: boolean
+  pagination?: PaginationProps
 }
 
 export function AdvancedDataTable<T extends { id: string }>({
@@ -72,6 +80,7 @@ export function AdvancedDataTable<T extends { id: string }>({
   onDelete,
   rowSelection = false,
   showToolbar = false,
+  pagination,
 }: AdvancedDataTableProps<T>) {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
@@ -190,6 +199,8 @@ export function AdvancedDataTable<T extends { id: string }>({
   const table = useReactTable({
     data,
     columns,
+    rowCount: pagination?.total,
+    manualPagination: !!pagination,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
@@ -198,11 +209,30 @@ export function AdvancedDataTable<T extends { id: string }>({
     getFilteredRowModel: getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelectionState,
+    onPaginationChange: (updater) => {
+      if (pagination) {
+        if (typeof updater === 'function') {
+          const newState = updater({
+            pageIndex: pagination.current - 1,
+            pageSize: pagination.pageSize,
+          })
+          pagination.onChange(newState.pageIndex + 1, newState.pageSize)
+        } else {
+          pagination.onChange(updater.pageIndex + 1, updater.pageSize)
+        }
+      }
+    },
     state: {
       sorting,
       columnFilters,
       columnVisibility,
       rowSelection: rowSelectionState,
+      pagination: pagination
+        ? {
+          pageIndex: pagination.current - 1,
+          pageSize: pagination.pageSize,
+        }
+        : undefined, // Let TanStack manage if no pagination prop
     },
     initialState: {
       pagination: {
@@ -231,9 +261,9 @@ export function AdvancedDataTable<T extends { id: string }>({
                       {header.isPlaceholder
                         ? null
                         : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
                     </th>
                   ))}
                 </tr>
@@ -256,9 +286,8 @@ export function AdvancedDataTable<T extends { id: string }>({
                 table.getRowModel().rows.map((row) => (
                   <tr
                     key={row.id}
-                    className={`hover:bg-muted/50 transition-colors ${
-                      row.getIsSelected() ? "bg-muted" : ""
-                    }`}
+                    className={`hover:bg-muted/50 transition-colors ${row.getIsSelected() ? "bg-muted" : ""
+                      }`}
                     data-state={row.getIsSelected() && "selected"}
                   >
                     {row.getVisibleCells().map((cell) => (
@@ -292,7 +321,7 @@ export function AdvancedDataTable<T extends { id: string }>({
           {table.getFilteredSelectedRowModel().rows.length > 0 && (
             <span className="mr-4">
               {table.getFilteredSelectedRowModel().rows.length} of{" "}
-              {table.getFilteredRowModel().rows.length} row(s) selected
+              {table.getRowCount()} row(s) selected
             </span>
           )}
           <span>
@@ -303,10 +332,10 @@ export function AdvancedDataTable<T extends { id: string }>({
             to{" "}
             {Math.min(
               (table.getState().pagination.pageIndex + 1) *
-                table.getState().pagination.pageSize,
-              table.getFilteredRowModel().rows.length
+              table.getState().pagination.pageSize,
+              table.getRowCount()
             )}{" "}
-            of {table.getFilteredRowModel().rows.length} results
+            of {table.getRowCount()} results
           </span>
         </div>
 
