@@ -241,10 +241,10 @@ func (h *ArticleHandler) UploadArticleImage(c *gin.Context) {
 			continue
 		}
 
-		// Validate file size (max 5MB per image)
-		const maxImageSize = 5 * 1024 * 1024
+		// Validate file size (max 10MB per image)
+		const maxImageSize = 10 * 1024 * 1024
 		if file.Size > maxImageSize {
-			errors = append(errors, fmt.Sprintf("File %s exceeds 5MB limit", file.Filename))
+			errors = append(errors, fmt.Sprintf("File %s exceeds 10MB limit", file.Filename))
 			continue
 		}
 
