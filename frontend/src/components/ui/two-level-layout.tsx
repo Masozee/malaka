@@ -212,6 +212,7 @@ const menuData: MenuItem[] = [
       { id: "suppliers", label: "Suppliers", icon: TruckIcon, href: "/production/suppliers", count: 67 },
       { id: "warehouses", label: "Warehouses", icon: WarehouseIcon, href: "/production/warehouses", count: 8 },
       { id: "purchase-orders", label: "Purchase Orders", icon: FileIcon, href: "/production/purchase-orders", count: 89 },
+      { id: "bill-of-materials", label: "Bill of Materials", icon: HierarchyIcon, href: "/production/bill-of-materials" },
       { id: "work-orders", label: "Work Orders", icon: SettingsIcon, href: "/production/work-orders", count: 45 },
       { id: "quality-control", label: "Quality Control", icon: CheckmarkCircle01Icon, href: "/production/quality-control", count: 12 },
       { id: "material-planning", label: "Material Planning", icon: Package01Icon, href: "/production/material-planning", count: 15 },
