@@ -238,7 +238,7 @@ export default function InvoiceDesignerPage() {
               <div style="
                 width: 64px; 
                 height: 64px; 
-                background: #2563eb; 
+                background: #00979D; 
                 border-radius: 8px; 
                 display: flex; 
                 align-items: center; 
@@ -254,7 +254,7 @@ export default function InvoiceDesignerPage() {
             </div>
             <div style="text-align: right;">
               <h2 style="font-size: 32px; font-weight: bold; color: black; margin: 0 0 8px 0;">INVOICE</h2>
-              <p style="font-size: 18px; font-weight: 600; color: #2563eb; margin: 0;">${invoiceData.invoice_number}</p>
+              <p style="font-size: 18px; font-weight: 600; color: #00979D; margin: 0;">${invoiceData.invoice_number}</p>
             </div>
           </div>
 
@@ -377,7 +377,7 @@ export default function InvoiceDesignerPage() {
                 <div style="border-top: 1px solid #d1d5db; padding-top: 12px;">
                   <div style="display: flex; justify-content: space-between; align-items: center;">
                     <span style="font-size: 20px; font-weight: bold; color: black;">Total:</span>
-                    <span style="font-size: 24px; font-weight: bold; color: #2563eb;">${formatCurrency(invoiceData.total_amount)}</span>
+                    <span style="font-size: 24px; font-weight: bold; color: #00979D;">${formatCurrency(invoiceData.total_amount)}</span>
                   </div>
                   <p style="text-align: right; font-size: 12px; color: #999; margin: 4px 0 0 0;">${invoiceData.currency}</p>
                 </div>
@@ -401,7 +401,7 @@ export default function InvoiceDesignerPage() {
                     font-size: 12px; 
                     font-weight: 500; 
                     border-radius: 4px; 
-                    background: ${invoiceData.status === 'draft' ? '#f3f4f6' : invoiceData.status === 'sent' ? '#2563eb' : '#e5e7eb'}; 
+                    background: ${invoiceData.status === 'draft' ? '#f3f4f6' : invoiceData.status === 'sent' ? '#00979D' : '#e5e7eb'}; 
                     color: ${invoiceData.status === 'draft' ? '#374151' : invoiceData.status === 'sent' ? 'white' : '#374151'};
                   ">
                     ${invoiceData.status.charAt(0).toUpperCase() + invoiceData.status.slice(1)}

@@ -6,6 +6,7 @@ import (
 
 	"malaka/internal/modules/finance/domain/entities"
 	"malaka/internal/modules/finance/domain/repositories"
+	"malaka/internal/shared/uuid"
 )
 
 type purchaseVoucherRepositoryImpl struct {
@@ -19,6 +20,10 @@ func NewPurchaseVoucherRepository(db *sql.DB) repositories.PurchaseVoucherReposi
 }
 
 func (r *purchaseVoucherRepositoryImpl) Create(ctx context.Context, voucher *entities.PurchaseVoucher) error {
+	if voucher.ID.IsNil() {
+		voucher.ID = uuid.New()
+	}
+
 	query := `
 		INSERT INTO purchase_vouchers (
 			id, voucher_number, voucher_date, supplier_id, invoice_id,
@@ -35,7 +40,7 @@ func (r *purchaseVoucherRepositoryImpl) Create(ctx context.Context, voucher *ent
 	return err
 }
 
-func (r *purchaseVoucherRepositoryImpl) GetByID(ctx context.Context, id string) (*entities.PurchaseVoucher, error) {
+func (r *purchaseVoucherRepositoryImpl) GetByID(ctx context.Context, id uuid.ID) (*entities.PurchaseVoucher, error) {
 	voucher := &entities.PurchaseVoucher{}
 	query := `
 		SELECT id, voucher_number, voucher_date, supplier_id, invoice_id,
@@ -103,7 +108,7 @@ func (r *purchaseVoucherRepositoryImpl) Update(ctx context.Context, voucher *ent
 	return err
 }
 
-func (r *purchaseVoucherRepositoryImpl) Delete(ctx context.Context, id string) error {
+func (r *purchaseVoucherRepositoryImpl) Delete(ctx context.Context, id uuid.ID) error {
 	query := `DELETE FROM purchase_vouchers WHERE id = $1`
 	_, err := r.db.ExecContext(ctx, query, id)
 	return err

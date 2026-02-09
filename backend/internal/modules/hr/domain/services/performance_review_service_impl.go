@@ -5,10 +5,10 @@ import (
 	"math"
 	"time"
 
-	"github.com/google/uuid"
 	"malaka/internal/modules/hr/domain/entities"
 	"malaka/internal/modules/hr/domain/repositories"
 	"malaka/internal/modules/hr/presentation/http/dto"
+	"malaka/internal/shared/uuid"
 )
 
 type performanceReviewService struct {
@@ -48,7 +48,7 @@ func (s *performanceReviewService) CreatePerformanceReview(ctx context.Context, 
 	return s.GetPerformanceReviewWithDetails(ctx, review.ID)
 }
 
-func (s *performanceReviewService) GetPerformanceReviewByID(ctx context.Context, id string) (*dto.PerformanceReviewResponse, error) {
+func (s *performanceReviewService) GetPerformanceReviewByID(ctx context.Context, id uuid.ID) (*dto.PerformanceReviewResponse, error) {
 	review, err := s.performanceRepo.GetPerformanceReviewByID(ctx, id)
 	if err != nil {
 		return nil, err
@@ -94,7 +94,7 @@ func (s *performanceReviewService) GetAllPerformanceReviews(ctx context.Context,
 	}, nil
 }
 
-func (s *performanceReviewService) UpdatePerformanceReview(ctx context.Context, id string, req *dto.PerformanceReviewUpdateRequest) (*dto.PerformanceReviewResponse, error) {
+func (s *performanceReviewService) UpdatePerformanceReview(ctx context.Context, id uuid.ID, req *dto.PerformanceReviewUpdateRequest) (*dto.PerformanceReviewResponse, error) {
 	review, err := s.performanceRepo.GetPerformanceReviewByID(ctx, id)
 	if err != nil {
 		return nil, err
@@ -137,11 +137,11 @@ func (s *performanceReviewService) UpdatePerformanceReview(ctx context.Context, 
 	return s.GetPerformanceReviewWithDetails(ctx, id)
 }
 
-func (s *performanceReviewService) DeletePerformanceReview(ctx context.Context, id string) error {
+func (s *performanceReviewService) DeletePerformanceReview(ctx context.Context, id uuid.ID) error {
 	return s.performanceRepo.DeletePerformanceReview(ctx, id)
 }
 
-func (s *performanceReviewService) GetPerformanceReviewWithDetails(ctx context.Context, id string) (*dto.PerformanceReviewResponse, error) {
+func (s *performanceReviewService) GetPerformanceReviewWithDetails(ctx context.Context, id uuid.ID) (*dto.PerformanceReviewResponse, error) {
 	review, err := s.performanceRepo.GetPerformanceReviewWithDetails(ctx, id)
 	if err != nil {
 		return nil, err
@@ -150,7 +150,7 @@ func (s *performanceReviewService) GetPerformanceReviewWithDetails(ctx context.C
 	return s.mapToResponseWithDetails(review), nil
 }
 
-func (s *performanceReviewService) GetPerformanceReviewsByEmployee(ctx context.Context, employeeID string) ([]*dto.PerformanceReviewResponse, error) {
+func (s *performanceReviewService) GetPerformanceReviewsByEmployee(ctx context.Context, employeeID uuid.ID) ([]*dto.PerformanceReviewResponse, error) {
 	reviews, err := s.performanceRepo.GetPerformanceReviewsByEmployee(ctx, employeeID)
 	if err != nil {
 		return nil, err
@@ -242,7 +242,7 @@ func (s *performanceReviewService) mapToResponse(review *entities.PerformanceRev
 	}
 
 	// Set employee details
-	if review.Employee.ID != uuid.Nil {
+	if !review.Employee.ID.IsNil() {
 		response.EmployeeName = review.Employee.EmployeeName
 		response.EmployeeCode = review.Employee.EmployeeCode
 		response.Department = review.Employee.Department
@@ -250,12 +250,12 @@ func (s *performanceReviewService) mapToResponse(review *entities.PerformanceRev
 	}
 
 	// Set reviewer name
-	if review.Reviewer.ID != uuid.Nil {
+	if !review.Reviewer.ID.IsNil() {
 		response.Reviewer = review.Reviewer.EmployeeName
 	}
 
 	// Set review type from cycle
-	if review.ReviewCycle.ID != "" {
+	if !review.ReviewCycle.ID.IsNil() {
 		response.ReviewType = review.ReviewCycle.ReviewType
 	}
 
@@ -287,7 +287,7 @@ func (s *performanceReviewService) mapToResponseWithDetails(review *entities.Per
 			Comments:              goal.Comments,
 		}
 
-		if goal.Goal.ID != "" {
+		if !goal.Goal.ID.IsNil() {
 			goalDetails[i].GoalTitle = goal.Goal.Title
 			goalDetails[i].GoalCategory = goal.Goal.Category
 		}
@@ -309,7 +309,7 @@ func (s *performanceReviewService) mapToResponseWithDetails(review *entities.Per
 			ManagerComments: comp.ManagerComments,
 		}
 
-		if comp.Competency.ID != "" {
+		if !comp.Competency.ID.IsNil() {
 			competencyDetails[i].CompetencyName = comp.Competency.Name
 			competencyDetails[i].Category = comp.Competency.Category
 

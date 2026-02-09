@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/google/uuid"
+	"malaka/internal/shared/uuid"
 	"malaka/internal/modules/accounting/domain/entities"
 	"malaka/internal/modules/accounting/domain/repositories"
 )
@@ -53,7 +53,7 @@ func (r *journalEntryRepositoryImpl) Create(ctx context.Context, entry *entities
 }
 
 // GetByID retrieves a journal entry by ID
-func (r *journalEntryRepositoryImpl) GetByID(ctx context.Context, id uuid.UUID) (*entities.JournalEntry, error) {
+func (r *journalEntryRepositoryImpl) GetByID(ctx context.Context, id uuid.ID) (*entities.JournalEntry, error) {
 	entry := &entities.JournalEntry{}
 	
 	query := `
@@ -138,7 +138,7 @@ func (r *journalEntryRepositoryImpl) Update(ctx context.Context, entry *entities
 }
 
 // Delete deletes a journal entry
-func (r *journalEntryRepositoryImpl) Delete(ctx context.Context, id uuid.UUID) error {
+func (r *journalEntryRepositoryImpl) Delete(ctx context.Context, id uuid.ID) error {
 	tx, err := r.db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
@@ -187,7 +187,7 @@ func (r *journalEntryRepositoryImpl) CreateLine(ctx context.Context, line *entit
 }
 
 // GetLinesByEntryID retrieves journal entry lines by entry ID
-func (r *journalEntryRepositoryImpl) GetLinesByEntryID(ctx context.Context, entryID uuid.UUID) ([]*entities.JournalEntryLine, error) {
+func (r *journalEntryRepositoryImpl) GetLinesByEntryID(ctx context.Context, entryID uuid.ID) ([]*entities.JournalEntryLine, error) {
 	query := `
 		SELECT id, journal_entry_id, line_number, account_id, description,
 			   debit_amount, credit_amount, base_debit_amount, base_credit_amount,
@@ -238,14 +238,14 @@ func (r *journalEntryRepositoryImpl) UpdateLine(ctx context.Context, line *entit
 }
 
 // DeleteLine deletes a journal entry line
-func (r *journalEntryRepositoryImpl) DeleteLine(ctx context.Context, lineID uuid.UUID) error {
+func (r *journalEntryRepositoryImpl) DeleteLine(ctx context.Context, lineID uuid.ID) error {
 	query := `DELETE FROM journal_entry_lines WHERE id = $1`
 	_, err := r.db.ExecContext(ctx, query, lineID)
 	return err
 }
 
 // DeleteLinesByEntryID deletes all lines for a journal entry
-func (r *journalEntryRepositoryImpl) DeleteLinesByEntryID(ctx context.Context, entryID uuid.UUID) error {
+func (r *journalEntryRepositoryImpl) DeleteLinesByEntryID(ctx context.Context, entryID uuid.ID) error {
 	query := `DELETE FROM journal_entry_lines WHERE journal_entry_id = $1`
 	_, err := r.db.ExecContext(ctx, query, entryID)
 	return err
@@ -389,7 +389,7 @@ func (r *journalEntryRepositoryImpl) GetByCompanyAndDateRange(ctx context.Contex
 }
 
 // Post posts a journal entry
-func (r *journalEntryRepositoryImpl) Post(ctx context.Context, entryID uuid.UUID, userID string) error {
+func (r *journalEntryRepositoryImpl) Post(ctx context.Context, entryID uuid.ID, userID string) error {
 	now := time.Now()
 	query := `
 		UPDATE journal_entries SET
@@ -414,7 +414,7 @@ func (r *journalEntryRepositoryImpl) Post(ctx context.Context, entryID uuid.UUID
 }
 
 // Reverse reverses a journal entry
-func (r *journalEntryRepositoryImpl) Reverse(ctx context.Context, entryID uuid.UUID, userID string) error {
+func (r *journalEntryRepositoryImpl) Reverse(ctx context.Context, entryID uuid.ID, userID string) error {
 	now := time.Now()
 	query := `
 		UPDATE journal_entries SET
@@ -544,7 +544,7 @@ func (r *journalEntryRepositoryImpl) GetEntriesForPeriod(ctx context.Context, co
 }
 
 // GetEntriesByAccount retrieves entries affecting a specific account
-func (r *journalEntryRepositoryImpl) GetEntriesByAccount(ctx context.Context, accountID uuid.UUID, startDate, endDate time.Time) ([]*entities.JournalEntry, error) {
+func (r *journalEntryRepositoryImpl) GetEntriesByAccount(ctx context.Context, accountID uuid.ID, startDate, endDate time.Time) ([]*entities.JournalEntry, error) {
 	query := `
 		SELECT DISTINCT je.id, je.entry_number, je.entry_date, je.description, je.reference, je.status,
 			   je.total_debit, je.total_credit, je.currency_code, je.exchange_rate,

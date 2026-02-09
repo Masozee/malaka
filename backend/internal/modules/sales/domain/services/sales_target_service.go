@@ -6,7 +6,7 @@ import (
 
 	"malaka/internal/modules/sales/domain/entities"
 	"malaka/internal/modules/sales/domain/repositories"
-	"malaka/internal/shared/utils"
+	"malaka/internal/shared/uuid"
 )
 
 // SalesTargetService provides business logic for sales target operations.
@@ -21,8 +21,8 @@ func NewSalesTargetService(repo repositories.SalesTargetRepository) *SalesTarget
 
 // CreateSalesTarget creates a new sales target.
 func (s *SalesTargetService) CreateSalesTarget(ctx context.Context, target *entities.SalesTarget) error {
-	if target.ID == "" {
-		target.ID = utils.RandomString(10) // Generate a random ID if not provided
+	if target.ID.IsNil() {
+		target.ID = uuid.New()
 	}
 	return s.repo.Create(ctx, target)
 }
@@ -40,7 +40,7 @@ func (s *SalesTargetService) GetSalesTargetByID(ctx context.Context, id string) 
 // UpdateSalesTarget updates an existing sales target.
 func (s *SalesTargetService) UpdateSalesTarget(ctx context.Context, target *entities.SalesTarget) error {
 	// Ensure the sales target exists before updating
-	existingTarget, err := s.repo.GetByID(ctx, target.ID)
+	existingTarget, err := s.repo.GetByID(ctx, target.ID.String())
 	if err != nil {
 		return err
 	}

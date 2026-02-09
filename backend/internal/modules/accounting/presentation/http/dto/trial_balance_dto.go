@@ -3,7 +3,7 @@ package dto
 import (
 	"time"
 
-	"github.com/google/uuid"
+	"malaka/internal/shared/uuid"
 	"malaka/internal/modules/accounting/domain/entities"
 )
 
@@ -33,7 +33,7 @@ type GenerateTrialBalanceRequest struct {
 
 // TrialBalanceResponse represents the response for trial balance operations
 type TrialBalanceResponse struct {
-	ID          uuid.UUID                    `json:"id"`
+	ID          uuid.ID                    `json:"id"`
 	PeriodStart time.Time                    `json:"period_start"`
 	PeriodEnd   time.Time                    `json:"period_end"`
 	GeneratedAt time.Time                    `json:"generated_at"`
@@ -55,7 +55,7 @@ type TrialBalanceListResponse struct {
 
 // TrialBalanceSummaryResponse represents a summary of trial balance information
 type TrialBalanceSummaryResponse struct {
-	ID          uuid.UUID `json:"id"`
+	ID          uuid.ID `json:"id"`
 	PeriodStart time.Time `json:"period_start"`
 	PeriodEnd   time.Time `json:"period_end"`
 	GeneratedAt time.Time `json:"generated_at"`
@@ -70,7 +70,7 @@ type TrialBalanceSummaryResponse struct {
 
 // TrialBalanceAccountResponse represents an account in the trial balance
 type TrialBalanceAccountResponse struct {
-	AccountID           uuid.UUID `json:"account_id"`
+	AccountID           uuid.ID `json:"account_id"`
 	AccountCode         string    `json:"account_code"`
 	AccountName         string    `json:"account_name"`
 	AccountType         string    `json:"account_type"`
@@ -100,7 +100,7 @@ type TrialBalanceTotalsSummaryResponse struct {
 // AccountBalanceRequest represents request to get account balance
 type TrialBalanceAccountBalanceRequest struct {
 	CompanyID string    `json:"company_id" binding:"required"`
-	AccountID uuid.UUID `json:"account_id" binding:"required"`
+	AccountID uuid.ID `json:"account_id" binding:"required"`
 	AsOfDate  time.Time `json:"as_of_date" binding:"required"`
 }
 
@@ -221,7 +221,7 @@ func (r *CreateTrialBalanceRequest) ToEntity() *entities.TrialBalance {
 }
 
 // ToEntity converts UpdateTrialBalanceRequest to TrialBalance entity
-func (r *UpdateTrialBalanceRequest) ToEntity(id uuid.UUID) *entities.TrialBalance {
+func (r *UpdateTrialBalanceRequest) ToEntity(id uuid.ID) *entities.TrialBalance {
 	return &entities.TrialBalance{
 		ID:          id,
 		PeriodStart: r.PeriodStart,

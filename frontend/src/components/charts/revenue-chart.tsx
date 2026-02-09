@@ -115,10 +115,10 @@ export function RevenueChart({
               <Line
                 type="monotone"
                 dataKey="current"
-                stroke="#3b82f6"
+                stroke="#00979D"
                 strokeWidth={3}
-                dot={{ fill: "#3b82f6", strokeWidth: 2, r: 4 }}
-                activeDot={{ r: 6, stroke: "#3b82f6", strokeWidth: 2 }}
+                dot={{ fill: "#00979D", strokeWidth: 2, r: 4 }}
+                activeDot={{ r: 6, stroke: "#00979D", strokeWidth: 2 }}
                 name={showComparison ? "Current Period" : "Revenue"}
               />
               

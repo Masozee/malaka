@@ -3,10 +3,10 @@ package persistence
 import (
 	"context"
 
-	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"malaka/internal/modules/shipping/domain/entities"
 	"malaka/internal/modules/shipping/domain/repositories"
+	"malaka/internal/shared/uuid"
 )
 
 type shipmentRepository struct {
@@ -24,7 +24,7 @@ func (r *shipmentRepository) Create(ctx context.Context, shipment *entities.Ship
 	return err
 }
 
-func (r *shipmentRepository) GetByID(ctx context.Context, id uuid.UUID) (*entities.Shipment, error) {
+func (r *shipmentRepository) GetByID(ctx context.Context, id uuid.ID) (*entities.Shipment, error) {
 	var shipment entities.Shipment
 	query := `SELECT * FROM shipments WHERE id = $1`
 	err := r.db.GetContext(ctx, &shipment, query, id)
@@ -45,7 +45,7 @@ func (r *shipmentRepository) Update(ctx context.Context, shipment *entities.Ship
 	return err
 }
 
-func (r *shipmentRepository) Delete(ctx context.Context, id uuid.UUID) error {
+func (r *shipmentRepository) Delete(ctx context.Context, id uuid.ID) error {
 	query := `DELETE FROM shipments WHERE id = $1`
 	_, err := r.db.ExecContext(ctx, query, id)
 	return err

@@ -9,6 +9,7 @@ import (
 	"malaka/internal/modules/masterdata/domain/services"
 	"malaka/internal/modules/masterdata/presentation/http/dto"
 	"malaka/internal/shared/response"
+	"malaka/internal/shared/uuid"
 )
 
 // UserHandler handles HTTP requests for users.
@@ -102,7 +103,7 @@ func (h *UserHandler) GetUserByID(c *gin.Context) {
 		return
 	}
 
-	user, err := h.service.GetUserByID(c.Request.Context(), id)
+	user, err := h.service.GetUserByID(c.Request.Context(), uuid.MustParse(id))
 	if err != nil {
 		response.InternalServerError(c, "Failed to retrieve user", err.Error())
 		return
@@ -130,7 +131,7 @@ func (h *UserHandler) UpdateUser(c *gin.Context) {
 	}
 
 	// Get existing user first
-	existingUser, err := h.service.GetUserByID(c.Request.Context(), id)
+	existingUser, err := h.service.GetUserByID(c.Request.Context(), uuid.MustParse(id))
 	if err != nil {
 		response.InternalServerError(c, "Failed to retrieve user", err.Error())
 		return
@@ -154,7 +155,7 @@ func (h *UserHandler) UpdateUser(c *gin.Context) {
 	}
 	
 	// Set the ID and timestamps
-	user.ID = id
+	user.ID = uuid.MustParse(id)
 	user.CreatedAt = existingUser.CreatedAt
 	user.UpdatedAt = time.Now()
 
@@ -208,7 +209,7 @@ func (h *UserHandler) DeleteUser(c *gin.Context) {
 		return
 	}
 
-	if err := h.service.DeleteUser(c.Request.Context(), id); err != nil {
+	if err := h.service.DeleteUser(c.Request.Context(), uuid.MustParse(id)); err != nil {
 		response.InternalServerError(c, "Failed to delete user", err.Error())
 		return
 	}

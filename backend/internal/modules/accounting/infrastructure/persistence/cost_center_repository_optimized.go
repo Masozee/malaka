@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/google/uuid"
+	"malaka/internal/shared/uuid"
 	"github.com/jmoiron/sqlx"
 	"malaka/internal/modules/accounting/domain/entities"
 )
@@ -22,7 +22,7 @@ func NewOptimizedCostCenterMethods(db *sqlx.DB) *OptimizedCostCenterMethods {
 }
 
 // ProcessAllocationsOptimized - OPTIMIZED VERSION without N+1 queries
-func (r *OptimizedCostCenterMethods) ProcessAllocationsOptimized(ctx context.Context, costCenterID uuid.UUID, period time.Time) error {
+func (r *OptimizedCostCenterMethods) ProcessAllocationsOptimized(ctx context.Context, costCenterID uuid.ID, period time.Time) error {
 	// Single query to get allocations with their source cost center costs
 	// This eliminates the N+1 query pattern
 	query := `
@@ -145,9 +145,9 @@ func (r *OptimizedCostCenterMethods) BatchUpdateAllocations(ctx context.Context,
 }
 
 // GetDirectCostsBatch - Optimized batch version to get costs for multiple cost centers
-func (r *OptimizedCostCenterMethods) GetDirectCostsBatch(ctx context.Context, costCenterIDs []uuid.UUID, startDate, endDate time.Time) (map[uuid.UUID]float64, error) {
+func (r *OptimizedCostCenterMethods) GetDirectCostsBatch(ctx context.Context, costCenterIDs []uuid.ID, startDate, endDate time.Time) (map[uuid.ID]float64, error) {
 	if len(costCenterIDs) == 0 {
-		return make(map[uuid.UUID]float64), nil
+		return make(map[uuid.ID]float64), nil
 	}
 
 	// Create placeholder string for IN clause
@@ -181,9 +181,9 @@ func (r *OptimizedCostCenterMethods) GetDirectCostsBatch(ctx context.Context, co
 	}
 	defer rows.Close()
 
-	costs := make(map[uuid.UUID]float64)
+	costs := make(map[uuid.ID]float64)
 	for rows.Next() {
-		var costCenterID uuid.UUID
+		var costCenterID uuid.ID
 		var totalCosts float64
 		
 		err := rows.Scan(&costCenterID, &totalCosts)
@@ -247,7 +247,7 @@ func (r *OptimizedCostCenterMethods) GetArticlesWithRelatedDataOptimized(ctx con
 
 // ArticleWithRelations - Example struct for optimized article queries
 type ArticleWithRelations struct {
-	ID            uuid.UUID    `db:"id"`
+	ID            uuid.ID    `db:"id"`
 	Name          string       `db:"name"`
 	Description   string       `db:"description"`
 	Price         float64      `db:"price"`
@@ -260,12 +260,12 @@ type ArticleWithRelations struct {
 }
 
 type RelatedEntity struct {
-	ID   uuid.UUID `db:"id"`
+	ID   uuid.ID `db:"id"`
 	Name string    `db:"name"`
 }
 
 // GetStockBalancesWithDetailsOptimized - Example for inventory N+1 optimization
-func (r *OptimizedCostCenterMethods) GetStockBalancesWithDetailsOptimized(ctx context.Context, warehouseID *uuid.UUID) ([]*StockBalanceWithDetails, error) {
+func (r *OptimizedCostCenterMethods) GetStockBalancesWithDetailsOptimized(ctx context.Context, warehouseID *uuid.ID) ([]*StockBalanceWithDetails, error) {
 	whereClause := ""
 	args := []interface{}{}
 	
@@ -320,7 +320,7 @@ func (r *OptimizedCostCenterMethods) GetStockBalancesWithDetailsOptimized(ctx co
 }
 
 type StockBalanceWithDetails struct {
-	ID                  uuid.UUID    `db:"id"`
+	ID                  uuid.ID    `db:"id"`
 	Quantity           int          `db:"quantity"`
 	CreatedAt          time.Time    `db:"created_at"`
 	UpdatedAt          time.Time    `db:"updated_at"`
@@ -332,13 +332,13 @@ type StockBalanceWithDetails struct {
 }
 
 type ArticleInfo struct {
-	ID    uuid.UUID `db:"id"`
+	ID    uuid.ID `db:"id"`
 	Name  string    `db:"name"`
 	Price float64   `db:"price"`
 }
 
 type WarehouseInfo struct {
-	ID   uuid.UUID `db:"id"`
+	ID   uuid.ID `db:"id"`
 	Name string    `db:"name"`
 	Code string    `db:"code"`
 }

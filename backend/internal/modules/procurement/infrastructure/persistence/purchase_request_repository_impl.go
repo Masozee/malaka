@@ -10,6 +10,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	"malaka/internal/modules/procurement/domain/entities"
 	"malaka/internal/modules/procurement/domain/repositories"
+	"malaka/internal/shared/uuid"
 )
 
 // PurchaseRequestRepositoryImpl implements repositories.PurchaseRequestRepository.
@@ -68,7 +69,7 @@ func (r *PurchaseRequestRepositoryImpl) GetByID(ctx context.Context, id string) 
 	pr := &entities.PurchaseRequest{}
 	var description, notes, rejectionReason sql.NullString
 	var requiredDate, approvedDate sql.NullTime
-	var approvedBy sql.NullString
+	var approvedBy uuid.NullableID
 
 	err := r.db.QueryRowContext(ctx, query, id).Scan(
 		&pr.ID, &pr.RequestNumber, &pr.Title, &description, &pr.RequesterID,
@@ -101,7 +102,7 @@ func (r *PurchaseRequestRepositoryImpl) GetByID(ctx context.Context, id string) 
 		pr.ApprovedDate = &approvedDate.Time
 	}
 	if approvedBy.Valid {
-		pr.ApprovedBy = &approvedBy.String
+		pr.ApprovedBy = &approvedBy.ID
 	}
 
 	// Load items
@@ -197,7 +198,7 @@ func (r *PurchaseRequestRepositoryImpl) GetAll(ctx context.Context, filter *repo
 		pr := &entities.PurchaseRequest{}
 		var description, notes, rejectionReason sql.NullString
 		var requiredDate, approvedDate sql.NullTime
-		var approvedBy sql.NullString
+		var approvedBy uuid.NullableID
 
 		err := rows.Scan(
 			&pr.ID, &pr.RequestNumber, &pr.Title, &description, &pr.RequesterID,
@@ -226,7 +227,7 @@ func (r *PurchaseRequestRepositoryImpl) GetAll(ctx context.Context, filter *repo
 			pr.ApprovedDate = &approvedDate.Time
 		}
 		if approvedBy.Valid {
-			pr.ApprovedBy = &approvedBy.String
+			pr.ApprovedBy = &approvedBy.ID
 		}
 
 		purchaseRequests = append(purchaseRequests, pr)
@@ -299,7 +300,8 @@ func (r *PurchaseRequestRepositoryImpl) GetItemsByRequestID(ctx context.Context,
 	var items []*entities.PurchaseRequestItem
 	for rows.Next() {
 		item := &entities.PurchaseRequestItem{}
-		var description, specification, supplierID, supplierName sql.NullString
+		var description, specification, supplierName sql.NullString
+		var supplierID uuid.NullableID
 
 		err := rows.Scan(
 			&item.ID, &item.PurchaseRequestID, &item.ItemName, &description, &specification,
@@ -318,7 +320,7 @@ func (r *PurchaseRequestRepositoryImpl) GetItemsByRequestID(ctx context.Context,
 			item.Specification = &specification.String
 		}
 		if supplierID.Valid {
-			item.SupplierID = &supplierID.String
+			item.SupplierID = &supplierID.ID
 		}
 		if supplierName.Valid {
 			item.SupplierName = &supplierName.String

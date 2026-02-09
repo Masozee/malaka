@@ -91,7 +91,7 @@ function SignupContent() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#09f] mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00979D] mx-auto mb-4"></div>
           <p className="text-gray-600">Validating invitation...</p>
         </div>
       </div>
@@ -114,7 +114,7 @@ function SignupContent() {
               />
               <div>
                 <h1 className="text-3xl font-bold text-black">
-                  Malaka<span className="text-[#09f]">ERP</span>
+                  Malaka<span className="text-[#00979D]">ERP</span>
                 </h1>
               </div>
             </Link>
@@ -128,7 +128,7 @@ function SignupContent() {
             <p className="text-red-700 mb-6">{invitation?.error || 'This invitation link is invalid or has expired.'}</p>
             <Link
               href="/login"
-              className="inline-block px-6 py-3 bg-[#09f] text-white font-medium hover:bg-[#0088e6] transition-colors"
+              className="inline-block px-6 py-3 bg-[#00979D] text-white font-medium hover:bg-[#007F84] transition-colors"
             >
               Go to Login
             </Link>
@@ -154,7 +154,7 @@ function SignupContent() {
               />
               <div>
                 <h1 className="text-3xl font-bold text-black">
-                  Malaka<span className="text-[#09f]">ERP</span>
+                  Malaka<span className="text-[#00979D]">ERP</span>
                 </h1>
               </div>
             </Link>
@@ -168,7 +168,7 @@ function SignupContent() {
             <p className="text-green-700 mb-6">Your account has been created successfully. Redirecting to login...</p>
             <Link
               href="/login"
-              className="inline-block px-6 py-3 bg-[#09f] text-white font-medium hover:bg-[#0088e6] transition-colors"
+              className="inline-block px-6 py-3 bg-[#00979D] text-white font-medium hover:bg-[#007F84] transition-colors"
             >
               Go to Login Now
             </Link>
@@ -216,7 +216,7 @@ function SignupContent() {
               />
               <div>
                 <h1 className="text-3xl font-bold text-black">
-                  Malaka<span className="text-[#09f]">ERP</span>
+                  Malaka<span className="text-[#00979D]">ERP</span>
                 </h1>
                 <p className="text-sm text-gray-500">Enterprise Resource Planning</p>
               </div>
@@ -229,7 +229,7 @@ function SignupContent() {
               Create Your Account
             </h2>
             <p className="mt-2 text-gray-600">
-              You&apos;ve been invited to join as <span className="font-medium text-[#09f]">{invitation.role}</span>
+              You&apos;ve been invited to join as <span className="font-medium text-[#00979D]">{invitation.role}</span>
             </p>
           </div>
 
@@ -261,7 +261,7 @@ function SignupContent() {
                 type="text"
                 required
                 autoComplete="name"
-                className="w-full px-4 py-3 border border-gray-200 focus:border-[#09f] focus:outline-none transition-colors"
+                className="w-full px-4 py-3 border border-gray-200 focus:border-[#00979D] focus:outline-none transition-colors"
                 placeholder="Enter your full name"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
@@ -277,7 +277,7 @@ function SignupContent() {
                 name="phone"
                 type="tel"
                 autoComplete="tel"
-                className="w-full px-4 py-3 border border-gray-200 focus:border-[#09f] focus:outline-none transition-colors"
+                className="w-full px-4 py-3 border border-gray-200 focus:border-[#00979D] focus:outline-none transition-colors"
                 placeholder="Enter your phone number"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
@@ -294,7 +294,7 @@ function SignupContent() {
                 type="password"
                 required
                 autoComplete="new-password"
-                className="w-full px-4 py-3 border border-gray-200 focus:border-[#09f] focus:outline-none transition-colors"
+                className="w-full px-4 py-3 border border-gray-200 focus:border-[#00979D] focus:outline-none transition-colors"
                 placeholder="Create a password (min 8 characters)"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -311,7 +311,7 @@ function SignupContent() {
                 type="password"
                 required
                 autoComplete="new-password"
-                className="w-full px-4 py-3 border border-gray-200 focus:border-[#09f] focus:outline-none transition-colors"
+                className="w-full px-4 py-3 border border-gray-200 focus:border-[#00979D] focus:outline-none transition-colors"
                 placeholder="Confirm your password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
@@ -327,7 +327,7 @@ function SignupContent() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full px-5 py-3 bg-[#09f] text-white font-medium hover:bg-[#0088e6] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full px-5 py-3 bg-[#00979D] text-white font-medium hover:bg-[#007F84] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? 'Creating Account...' : 'Create Account'}
             </button>
@@ -337,7 +337,7 @@ function SignupContent() {
           <div className="mt-6 pt-6 border-t border-gray-200">
             <p className="text-sm text-gray-600 text-center">
               Already have an account?{' '}
-              <Link href="/login" className="text-[#09f] hover:underline">
+              <Link href="/login" className="text-[#00979D] hover:underline">
                 Sign in
               </Link>
             </p>
@@ -353,7 +353,7 @@ export default function SignupPage() {
     <Suspense fallback={
       <div className="min-h-screen flex items-center justify-center bg-white">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#09f] mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00979D] mx-auto mb-4"></div>
           <p className="text-gray-600">Loading...</p>
         </div>
       </div>

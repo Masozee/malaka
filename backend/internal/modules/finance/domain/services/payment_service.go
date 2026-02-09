@@ -6,7 +6,7 @@ import (
 
 	"malaka/internal/modules/finance/domain/entities"
 	"malaka/internal/modules/finance/domain/repositories"
-	"malaka/internal/shared/utils"
+	"malaka/internal/shared/uuid"
 )
 
 // PaymentService provides business logic for payment operations.
@@ -21,14 +21,14 @@ func NewPaymentService(repo repositories.PaymentRepository) *PaymentService {
 
 // CreatePayment creates a new payment.
 func (s *PaymentService) CreatePayment(ctx context.Context, payment *entities.Payment) error {
-	if payment.ID == "" {
-		payment.ID = utils.RandomString(10) // Generate a random ID if not provided
+	if payment.ID.IsNil() {
+		payment.ID = uuid.New()
 	}
 	return s.repo.Create(ctx, payment)
 }
 
 // GetPaymentByID retrieves a payment by its ID.
-func (s *PaymentService) GetPaymentByID(ctx context.Context, id string) (*entities.Payment, error) {
+func (s *PaymentService) GetPaymentByID(ctx context.Context, id uuid.ID) (*entities.Payment, error) {
 	return s.repo.GetByID(ctx, id)
 }
 
@@ -46,7 +46,7 @@ func (s *PaymentService) UpdatePayment(ctx context.Context, payment *entities.Pa
 }
 
 // DeletePayment deletes a payment by its ID.
-func (s *PaymentService) DeletePayment(ctx context.Context, id string) error {
+func (s *PaymentService) DeletePayment(ctx context.Context, id uuid.ID) error {
 	// Ensure the payment exists before deleting
 	existingPayment, err := s.repo.GetByID(ctx, id)
 	if err != nil {

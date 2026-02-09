@@ -6,7 +6,7 @@ import (
 
 	"malaka/internal/modules/masterdata/domain/entities"
 	"malaka/internal/modules/masterdata/domain/repositories"
-	"malaka/internal/shared/utils"
+	"malaka/internal/shared/uuid"
 )
 
 // GalleryImageService provides business logic for gallery image operations.
@@ -21,14 +21,14 @@ func NewGalleryImageService(repo repositories.GalleryImageRepository) *GalleryIm
 
 // CreateGalleryImage creates a new gallery image.
 func (s *GalleryImageService) CreateGalleryImage(ctx context.Context, image *entities.GalleryImage) error {
-	if image.ID == "" {
-		image.ID = utils.RandomString(10) // Generate a random ID if not provided
+	if image.ID.IsNil() {
+		image.ID = uuid.New()
 	}
 	return s.repo.Create(ctx, image)
 }
 
 // GetGalleryImageByID retrieves a gallery image by its ID.
-func (s *GalleryImageService) GetGalleryImageByID(ctx context.Context, id string) (*entities.GalleryImage, error) {
+func (s *GalleryImageService) GetGalleryImageByID(ctx context.Context, id uuid.ID) (*entities.GalleryImage, error) {
 	return s.repo.GetByID(ctx, id)
 }
 
@@ -51,7 +51,7 @@ func (s *GalleryImageService) UpdateGalleryImage(ctx context.Context, image *ent
 }
 
 // DeleteGalleryImage deletes a gallery image by its ID.
-func (s *GalleryImageService) DeleteGalleryImage(ctx context.Context, id string) error {
+func (s *GalleryImageService) DeleteGalleryImage(ctx context.Context, id uuid.ID) error {
 	// Ensure the image exists before deleting
 	existingImage, err := s.repo.GetByID(ctx, id)
 	if err != nil {
@@ -64,6 +64,6 @@ func (s *GalleryImageService) DeleteGalleryImage(ctx context.Context, id string)
 }
 
 // GetGalleryImagesByArticleID retrieves all gallery images for a given article ID.
-func (s *GalleryImageService) GetGalleryImagesByArticleID(ctx context.Context, articleID string) ([]*entities.GalleryImage, error) {
+func (s *GalleryImageService) GetGalleryImagesByArticleID(ctx context.Context, articleID uuid.ID) ([]*entities.GalleryImage, error) {
 	return s.repo.GetByArticleID(ctx, articleID)
 }

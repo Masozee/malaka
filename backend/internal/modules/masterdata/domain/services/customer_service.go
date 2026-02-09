@@ -6,7 +6,7 @@ import (
 
 	"malaka/internal/modules/masterdata/domain/entities"
 	"malaka/internal/modules/masterdata/domain/repositories"
-	"malaka/internal/shared/utils"
+	"malaka/internal/shared/uuid"
 )
 
 // CustomerService provides business logic for customer operations.
@@ -21,14 +21,14 @@ func NewCustomerService(repo repositories.CustomerRepository) *CustomerService {
 
 // CreateCustomer creates a new customer.
 func (s *CustomerService) CreateCustomer(ctx context.Context, customer *entities.Customer) error {
-	if customer.ID == "" {
-		customer.ID = utils.RandomString(10) // Generate a random ID if not provided
+	if customer.ID.IsNil() {
+		customer.ID = uuid.New()
 	}
 	return s.repo.Create(ctx, customer)
 }
 
 // GetCustomerByID retrieves a customer by its ID.
-func (s *CustomerService) GetCustomerByID(ctx context.Context, id string) (*entities.Customer, error) {
+func (s *CustomerService) GetCustomerByID(ctx context.Context, id uuid.ID) (*entities.Customer, error) {
 	return s.repo.GetByID(ctx, id)
 }
 
@@ -56,7 +56,7 @@ func (s *CustomerService) UpdateCustomer(ctx context.Context, customer *entities
 }
 
 // DeleteCustomer deletes a customer by its ID.
-func (s *CustomerService) DeleteCustomer(ctx context.Context, id string) error {
+func (s *CustomerService) DeleteCustomer(ctx context.Context, id uuid.ID) error {
 	// Ensure the customer exists before deleting
 	existingCustomer, err := s.repo.GetByID(ctx, id)
 	if err != nil {

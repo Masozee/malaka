@@ -3,8 +3,8 @@ package entities
 import (
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/lib/pq"
+	"malaka/internal/shared/uuid"
 )
 
 // QCType represents the type of quality control inspection
@@ -88,13 +88,13 @@ const (
 
 // QualityControl represents a quality control inspection record
 type QualityControl struct {
-	ID              uuid.UUID       `json:"id" db:"id"`
+	ID              uuid.ID         `json:"id" db:"id"`
 	QCNumber        string          `json:"qc_number" db:"qc_number"`
 	Type            QCType          `json:"type" db:"type"`
 	ReferenceType   QCReferenceType `json:"reference_type" db:"reference_type"`
-	ReferenceID     string          `json:"reference_id" db:"reference_id"`
+	ReferenceID     uuid.ID         `json:"reference_id" db:"reference_id"`
 	ReferenceNumber string          `json:"reference_number" db:"reference_number"`
-	ProductID       string          `json:"product_id" db:"product_id"`
+	ProductID       uuid.ID         `json:"product_id" db:"product_id"`
 	ProductCode     string          `json:"product_code" db:"product_code"`
 	ProductName     string          `json:"product_name" db:"product_name"`
 	BatchNumber     string          `json:"batch_number" db:"batch_number"`
@@ -116,8 +116,8 @@ type QualityControl struct {
 
 // QualityTest represents a single test within a quality control inspection
 type QualityTest struct {
-	ID             uuid.UUID  `json:"id" db:"id"`
-	QualityCtrlID  uuid.UUID  `json:"quality_ctrl_id" db:"quality_ctrl_id"`
+	ID             uuid.ID    `json:"id" db:"id"`
+	QualityCtrlID  uuid.ID    `json:"quality_ctrl_id" db:"quality_ctrl_id"`
 	TestName       string     `json:"test_name" db:"test_name"`
 	TestType       TestType   `json:"test_type" db:"test_type"`
 	Specification  string     `json:"specification" db:"specification"`
@@ -131,8 +131,8 @@ type QualityTest struct {
 
 // QualityDefect represents a defect found during quality control
 type QualityDefect struct {
-	ID            uuid.UUID      `json:"id" db:"id"`
-	QualityCtrlID uuid.UUID      `json:"quality_ctrl_id" db:"quality_ctrl_id"`
+	ID            uuid.ID        `json:"id" db:"id"`
+	QualityCtrlID uuid.ID        `json:"quality_ctrl_id" db:"quality_ctrl_id"`
 	DefectType    string         `json:"defect_type" db:"defect_type"`
 	Description   string         `json:"description" db:"description"`
 	Severity      DefectSeverity `json:"severity" db:"severity"`
@@ -145,11 +145,11 @@ type QualityDefect struct {
 
 // QualityAction represents a corrective action for quality control
 type QualityAction struct {
-	ID            uuid.UUID    `json:"id" db:"id"`
-	QualityCtrlID uuid.UUID    `json:"quality_ctrl_id" db:"quality_ctrl_id"`
+	ID            uuid.ID      `json:"id" db:"id"`
+	QualityCtrlID uuid.ID      `json:"quality_ctrl_id" db:"quality_ctrl_id"`
 	ActionType    ActionType   `json:"action_type" db:"action_type"`
 	Description   string       `json:"description" db:"description"`
-	AssignedTo    string       `json:"assigned_to" db:"assigned_to"`
+	AssignedTo    uuid.ID      `json:"assigned_to" db:"assigned_to"`
 	DueDate       time.Time    `json:"due_date" db:"due_date"`
 	Status        ActionStatus `json:"status" db:"status"`
 	CompletedDate *time.Time   `json:"completed_date,omitempty" db:"completed_date"`
@@ -185,7 +185,7 @@ func (qc *QualityControl) Validate() error {
 	if qc.QCNumber == "" {
 		return NewValidationError("qc_number", "QC number is required")
 	}
-	if qc.ProductID == "" {
+	if qc.ProductID.IsNil() {
 		return NewValidationError("product_id", "Product ID is required")
 	}
 	if qc.Inspector == "" {

@@ -44,7 +44,7 @@ export function JournalEntryFilters({ filters, onFiltersChange, onClearFilters }
 
   const getActiveFilterBadges = () => {
     const badges = []
-    
+
     if (filters.search) {
       badges.push({ key: 'search', label: 'Search', value: filters.search })
     }
@@ -85,84 +85,49 @@ export function JournalEntryFilters({ filters, onFiltersChange, onClearFilters }
   }
 
   return (
-    <Card className="p-4 mb-6">
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center space-x-2">
-          <HugeiconsIcon icon={FilterIcon} className="h-5 w-5 text-gray-500" />
-          <h3 className="font-medium">Filters</h3>
-          {activeFiltersCount > 0 && (
-            <Badge variant="secondary" className="ml-2">
-              {activeFiltersCount}
-            </Badge>
-          )}
-        </div>
-        
-        <div className="flex items-center space-x-2">
-          {activeFiltersCount > 0 && (
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={onClearFilters}
-            >
-              <HugeiconsIcon icon={RotateLeftIcon} className="h-4 w-4 mr-1" />
-              Clear All
-            </Button>
-          )}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setIsExpanded(!isExpanded)}
-          >
-            {isExpanded ? 'Less Filters' : 'More Filters'}
-          </Button>
-        </div>
-      </div>
-
+    <div className="space-y-4">
       {/* Active Filter Badges */}
       {activeFiltersCount > 0 && (
-        <div className="flex flex-wrap gap-2 mb-4">
+        <div className="flex flex-wrap gap-2">
           {getActiveFilterBadges().map((badge) => (
-            <Badge 
-              key={badge.key} 
-              variant="secondary" 
-              className="pl-2 pr-1 py-1 flex items-center gap-1"
+            <Badge
+              key={badge.key}
+              variant="secondary"
+              className="px-2 py-1"
             >
               <span className="text-xs">
                 <strong>{badge.label}:</strong> {badge.value}
               </span>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-4 w-4 p-0 hover:bg-transparent"
-                onClick={() => removeBadgeFilter(badge.key)}
-              >
-                <HugeiconsIcon icon={CancelIcon} className="h-3 w-3" />
-              </Button>
             </Badge>
           ))}
         </div>
       )}
 
-      {/* Basic Filters */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-        <div>
-          <Label htmlFor="search">Search</Label>
+      {/* Main Filters Row */}
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        {/* Search - Left Side */}
+        <div className="relative w-full md:w-96">
+          <HugeiconsIcon
+            icon={FilterIcon}
+            className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground"
+          />
           <Input
             id="search"
-            placeholder="Entry number, description, reference..."
+            placeholder="Search entry number, description, reference..."
             value={filters.search || ''}
             onChange={(e) => handleFilterChange('search', e.target.value)}
+            className="pl-10 bg-white dark:bg-zinc-900"
           />
         </div>
 
-        <div>
-          <Label htmlFor="status">Status</Label>
-          <Select 
-            value={filters.status || ''} 
+        {/* Filters - Right Side */}
+        <div className="flex items-center gap-2 flex-wrap">
+          <Select
+            value={filters.status || ''}
             onValueChange={(value) => handleFilterChange('status', value)}
           >
-            <SelectTrigger>
-              <SelectValue placeholder="All statuses" />
+            <SelectTrigger className="w-[130px] h-10 bg-white dark:bg-zinc-900">
+              <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All statuses</SelectItem>
@@ -176,38 +141,13 @@ export function JournalEntryFilters({ filters, onFiltersChange, onClearFilters }
               )}
             </SelectContent>
           </Select>
-        </div>
 
-        <div>
-          <Label htmlFor="fiscal_year">Fiscal Year</Label>
-          <Select 
-            value={filters.fiscal_year?.toString() || ''} 
-            onValueChange={(value) => handleFilterChange('fiscal_year', value ? parseInt(value) : undefined)}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="All years" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All years</SelectItem>
-              {mounted && (
-                <>
-                  <SelectItem value="2024">2024</SelectItem>
-                  <SelectItem value="2023">2023</SelectItem>
-                  <SelectItem value="2022">2022</SelectItem>
-                </>
-              )}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div>
-          <Label htmlFor="period">Period</Label>
-          <Select 
-            value={filters.period || ''} 
+          <Select
+            value={filters.period || ''}
             onValueChange={(value) => handleFilterChange('period', value)}
           >
-            <SelectTrigger>
-              <SelectValue placeholder="All periods" />
+            <SelectTrigger className="w-[130px] h-10 bg-white dark:bg-zinc-900">
+              <SelectValue placeholder="Period" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All periods</SelectItem>
@@ -229,6 +169,45 @@ export function JournalEntryFilters({ filters, onFiltersChange, onClearFilters }
               )}
             </SelectContent>
           </Select>
+
+          {activeFiltersCount > 0 && (
+            <Button
+              variant="outline"
+              size="default"
+              className="h-10"
+              onClick={onClearFilters}
+            >
+              Clear
+            </Button>
+          )}
+
+          <Select
+            value={filters.fiscal_year?.toString() || ''}
+            onValueChange={(value) => handleFilterChange('fiscal_year', value ? parseInt(value) : undefined)}
+          >
+            <SelectTrigger className="w-[130px] h-10 bg-white dark:bg-zinc-900">
+              <SelectValue placeholder="Fiscal Year" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All years</SelectItem>
+              {mounted && (
+                <>
+                  <SelectItem value="2024">2024</SelectItem>
+                  <SelectItem value="2023">2023</SelectItem>
+                  <SelectItem value="2022">2022</SelectItem>
+                </>
+              )}
+            </SelectContent>
+          </Select>
+
+          <Button
+            variant="outline"
+            size="default"
+            className="h-10"
+            onClick={() => setIsExpanded(!isExpanded)}
+          >
+            {isExpanded ? 'Less' : 'Advanced'}
+          </Button>
         </div>
       </div>
 
@@ -242,6 +221,7 @@ export function JournalEntryFilters({ filters, onFiltersChange, onClearFilters }
               type="date"
               value={filters.start_date || ''}
               onChange={(e) => handleFilterChange('start_date', e.target.value)}
+              className="bg-white dark:bg-zinc-900"
             />
           </div>
 
@@ -252,6 +232,7 @@ export function JournalEntryFilters({ filters, onFiltersChange, onClearFilters }
               type="date"
               value={filters.end_date || ''}
               onChange={(e) => handleFilterChange('end_date', e.target.value)}
+              className="bg-white dark:bg-zinc-900"
             />
           </div>
 
@@ -263,6 +244,7 @@ export function JournalEntryFilters({ filters, onFiltersChange, onClearFilters }
               placeholder="e.g., 1000000"
               value={filters.min_amount || ''}
               onChange={(e) => handleFilterChange('min_amount', e.target.value ? parseInt(e.target.value) : undefined)}
+              className="bg-white dark:bg-zinc-900"
             />
           </div>
 
@@ -274,6 +256,7 @@ export function JournalEntryFilters({ filters, onFiltersChange, onClearFilters }
               placeholder="e.g., 50000000"
               value={filters.max_amount || ''}
               onChange={(e) => handleFilterChange('max_amount', e.target.value ? parseInt(e.target.value) : undefined)}
+              className="bg-white dark:bg-zinc-900"
             />
           </div>
 
@@ -284,10 +267,11 @@ export function JournalEntryFilters({ filters, onFiltersChange, onClearFilters }
               placeholder="e.g., Invoice, PO, Payroll..."
               value={filters.source_document || ''}
               onChange={(e) => handleFilterChange('source_document', e.target.value)}
+              className="bg-white dark:bg-zinc-900"
             />
           </div>
         </div>
       )}
-    </Card>
+    </div>
   )
 }

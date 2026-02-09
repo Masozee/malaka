@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/google/uuid"
 	"malaka/internal/modules/shipping/domain"
 	"malaka/internal/modules/shipping/domain/dtos"
 	"malaka/internal/modules/shipping/domain/entities"
 	"malaka/internal/modules/shipping/domain/repositories"
+	"malaka/internal/shared/uuid"
 )
 
 // shippingInvoiceService implements the ShippingInvoiceService interface.
@@ -50,7 +50,7 @@ func (s *shippingInvoiceService) CreateShippingInvoice(ctx context.Context, requ
 	}
 
 	// Generate UUID for the invoice
-	invoice.ID = uuid.New().String()
+	invoice.ID = uuid.New()
 
 	// Calculate total amount
 	invoice.CalculateTotal()
@@ -64,7 +64,7 @@ func (s *shippingInvoiceService) CreateShippingInvoice(ctx context.Context, requ
 }
 
 // GetShippingInvoiceByID retrieves a shipping invoice by ID.
-func (s *shippingInvoiceService) GetShippingInvoiceByID(ctx context.Context, id uuid.UUID) (*entities.ShippingInvoice, error) {
+func (s *shippingInvoiceService) GetShippingInvoiceByID(ctx context.Context, id uuid.ID) (*entities.ShippingInvoice, error) {
 	invoice, err := s.repo.GetShippingInvoiceByID(ctx, id)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get shipping invoice by ID: %w", err)
@@ -84,7 +84,7 @@ func (s *shippingInvoiceService) GetShippingInvoiceByInvoiceNumber(ctx context.C
 }
 
 // GetShippingInvoicesByShipmentID retrieves shipping invoices by shipment ID.
-func (s *shippingInvoiceService) GetShippingInvoicesByShipmentID(ctx context.Context, shipmentID uuid.UUID) ([]entities.ShippingInvoice, error) {
+func (s *shippingInvoiceService) GetShippingInvoicesByShipmentID(ctx context.Context, shipmentID uuid.ID) ([]entities.ShippingInvoice, error) {
 	invoices, err := s.repo.GetShippingInvoicesByShipmentID(ctx, shipmentID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get shipping invoices by shipment ID: %w", err)
@@ -94,7 +94,7 @@ func (s *shippingInvoiceService) GetShippingInvoicesByShipmentID(ctx context.Con
 }
 
 // GetShippingInvoicesByCourierID retrieves shipping invoices by courier ID.
-func (s *shippingInvoiceService) GetShippingInvoicesByCourierID(ctx context.Context, courierID uuid.UUID) ([]entities.ShippingInvoice, error) {
+func (s *shippingInvoiceService) GetShippingInvoicesByCourierID(ctx context.Context, courierID uuid.ID) ([]entities.ShippingInvoice, error) {
 	invoices, err := s.repo.GetShippingInvoicesByCourierID(ctx, courierID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get shipping invoices by courier ID: %w", err)
@@ -124,7 +124,7 @@ func (s *shippingInvoiceService) GetAllShippingInvoices(ctx context.Context, pag
 }
 
 // UpdateShippingInvoice updates an existing shipping invoice.
-func (s *shippingInvoiceService) UpdateShippingInvoice(ctx context.Context, id uuid.UUID, request *dtos.UpdateShippingInvoiceRequest) (*entities.ShippingInvoice, error) {
+func (s *shippingInvoiceService) UpdateShippingInvoice(ctx context.Context, id uuid.ID, request *dtos.UpdateShippingInvoiceRequest) (*entities.ShippingInvoice, error) {
 	// Get the existing invoice
 	invoice, err := s.repo.GetShippingInvoiceByID(ctx, id)
 	if err != nil {
@@ -175,7 +175,7 @@ func (s *shippingInvoiceService) UpdateShippingInvoice(ctx context.Context, id u
 }
 
 // DeleteShippingInvoice deletes a shipping invoice by ID.
-func (s *shippingInvoiceService) DeleteShippingInvoice(ctx context.Context, id uuid.UUID) error {
+func (s *shippingInvoiceService) DeleteShippingInvoice(ctx context.Context, id uuid.ID) error {
 	if err := s.repo.DeleteShippingInvoice(ctx, id); err != nil {
 		return fmt.Errorf("failed to delete shipping invoice: %w", err)
 	}
@@ -184,7 +184,7 @@ func (s *shippingInvoiceService) DeleteShippingInvoice(ctx context.Context, id u
 }
 
 // PayShippingInvoice marks a shipping invoice as paid.
-func (s *shippingInvoiceService) PayShippingInvoice(ctx context.Context, id uuid.UUID, request *dtos.PayShippingInvoiceRequest) (*entities.ShippingInvoice, error) {
+func (s *shippingInvoiceService) PayShippingInvoice(ctx context.Context, id uuid.ID, request *dtos.PayShippingInvoiceRequest) (*entities.ShippingInvoice, error) {
 	// Get the existing invoice
 	invoice, err := s.repo.GetShippingInvoiceByID(ctx, id)
 	if err != nil {
@@ -196,7 +196,7 @@ func (s *shippingInvoiceService) PayShippingInvoice(ctx context.Context, id uuid
 
 	// Update notes if provided
 	if request.PaymentNotes != "" {
-		invoice.Notes = fmt.Sprintf("%s\nPayment Method: %s\nPayment Notes: %s", 
+		invoice.Notes = fmt.Sprintf("%s\nPayment Method: %s\nPayment Notes: %s",
 			invoice.Notes, request.PaymentMethod, request.PaymentNotes)
 	}
 
@@ -224,9 +224,9 @@ func (s *shippingInvoiceService) GenerateInvoiceNumber(ctx context.Context) (str
 	prefix := "SI" // Shipping Invoice
 	datePart := now.Format("20060102")
 	timePart := now.Format("150405")
-	
+
 	// Generate a simple incremental number (in a real system, you might want to use a sequence)
 	invoiceNumber := fmt.Sprintf("%s%s%s", prefix, datePart, timePart)
-	
+
 	return invoiceNumber, nil
 }

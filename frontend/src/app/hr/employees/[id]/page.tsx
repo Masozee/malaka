@@ -14,6 +14,7 @@ import type { Employee } from '@/types/hr'
 import { HRService } from '@/services/hr'
 import { ProfileImageUpload } from '@/components/hr/profile-image-upload'
 import Link from 'next/link'
+import { EntityShareButton } from '@/components/messaging/EntityShareButton'
 import { HugeiconsIcon } from '@hugeicons/react'
 import {
   UserCircleIcon,
@@ -178,6 +179,15 @@ export default function EmployeeDetailPage() {
         breadcrumbs={breadcrumbs}
         actions={
           <div className="flex items-center space-x-3">
+            <EntityShareButton
+              entityType="employee"
+              entityId={params.id as string}
+              title={employee.employee_name}
+              subtitle={`${employee.position} - ${employee.department}`}
+              status={employee.employment_status}
+              statusColor={employee.employment_status === 'active' ? 'green' : 'gray'}
+              url={`/hr/employees/${params.id}`}
+            />
             <Button variant="outline" size="sm">
               <HugeiconsIcon icon={Download01Icon} className="h-4 w-4 mr-2" />
               Export

@@ -6,7 +6,7 @@ import { Header } from '@/components/ui/header'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'
-import { 
+import {
   Dialog,
   DialogContent,
   DialogHeader,
@@ -17,8 +17,8 @@ import { DataTable } from '@/components/ui/data-table'
 import { JournalEntryFilters } from '@/components/accounting/journal-entry-filters'
 import { JournalEntryForm } from '@/components/accounting/journal-entry-form'
 
-import type { 
-  JournalEntry, 
+import type {
+  JournalEntry,
   AccountingFilters,
   CreateJournalEntryRequest,
   UpdateJournalEntryRequest
@@ -26,7 +26,14 @@ import type {
 import { journalEntryService } from '@/services/accounting'
 import Link from 'next/link'
 import { HugeiconsIcon } from '@hugeicons/react'
-import { Calendar01Icon, Dollar01Icon } from '@hugeicons/core-free-icons'
+import {
+  Calendar01Icon,
+  Dollar01Icon,
+  FileScriptIcon,
+  CheckmarkCircle01Icon,
+  Edit01Icon,
+  Search01Icon
+} from '@hugeicons/core-free-icons'
 
 const statusColors = {
   DRAFT: 'bg-gray-500',
@@ -155,7 +162,7 @@ export default function AccountingJournalPage() {
       key: 'entry_number' as keyof JournalEntry,
       title: 'Entry Number',
       render: (value: unknown, record: JournalEntry) => (
-        <Link 
+        <Link
           href={`/accounting/journal/${record.id}`}
           className="font-medium text-blue-600 hover:text-blue-800"
         >
@@ -283,7 +290,7 @@ export default function AccountingJournalPage() {
 
   return (
     <TwoLevelLayout>
-      <Header 
+      <Header
         title="Journal Entries"
         description="Manage and track all accounting journal entries"
         breadcrumbs={breadcrumbs}
@@ -306,13 +313,15 @@ export default function AccountingJournalPage() {
           </Dialog>
         }
       />
-      
+
       <div className="flex-1 p-6 space-y-6">
         {/* Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card className="p-4">
             <div className="flex items-center space-x-3">
-              <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center" />
+              <div className="h-10 w-10 bg-zinc-100 dark:bg-zinc-800 rounded-lg flex items-center justify-center">
+                <HugeiconsIcon icon={FileScriptIcon} className="h-5 w-5 text-foreground" aria-hidden="true" />
+              </div>
               <div>
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Entries</p>
                 <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{summaryStats.totalEntries}</p>
@@ -322,7 +331,9 @@ export default function AccountingJournalPage() {
 
           <Card className="p-4">
             <div className="flex items-center space-x-3">
-              <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center" />
+              <div className="h-10 w-10 bg-zinc-100 dark:bg-zinc-800 rounded-lg flex items-center justify-center">
+                <HugeiconsIcon icon={Dollar01Icon} className="h-5 w-5 text-foreground" aria-hidden="true" />
+              </div>
               <div>
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Amount</p>
                 <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
@@ -337,7 +348,9 @@ export default function AccountingJournalPage() {
 
           <Card className="p-4">
             <div className="flex items-center space-x-3">
-              <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center" />
+              <div className="h-10 w-10 bg-zinc-100 dark:bg-zinc-800 rounded-lg flex items-center justify-center">
+                <HugeiconsIcon icon={Edit01Icon} className="h-5 w-5 text-foreground" aria-hidden="true" />
+              </div>
               <div>
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Draft Entries</p>
                 <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{summaryStats.draftEntries}</p>
@@ -347,7 +360,9 @@ export default function AccountingJournalPage() {
 
           <Card className="p-4">
             <div className="flex items-center space-x-3">
-              <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center" />
+              <div className="h-10 w-10 bg-zinc-100 dark:bg-zinc-800 rounded-lg flex items-center justify-center">
+                <HugeiconsIcon icon={CheckmarkCircle01Icon} className="h-5 w-5 text-foreground" aria-hidden="true" />
+              </div>
               <div>
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Posted Entries</p>
                 <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{summaryStats.postedEntries}</p>
@@ -362,18 +377,6 @@ export default function AccountingJournalPage() {
           onFiltersChange={handleFiltersChange}
           onClearFilters={handleClearFilters}
         />
-
-        {/* Export Actions */}
-        <div className="flex justify-between items-center">
-          <div className="text-sm text-muted-foreground">
-            {journalEntries.length} entries found
-          </div>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm">
-              Export
-            </Button>
-          </div>
-        </div>
 
         {/* Data Table */}
         <DataTable

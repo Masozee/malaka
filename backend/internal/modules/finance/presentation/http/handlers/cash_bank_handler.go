@@ -8,6 +8,7 @@ import (
 	"malaka/internal/modules/finance/domain/services"
 	"malaka/internal/modules/finance/presentation/http/dto"
 	"malaka/internal/shared/response"
+	"malaka/internal/shared/uuid"
 )
 
 // CashBankHandler handles HTTP requests for cash/bank operations.
@@ -46,7 +47,13 @@ func (h *CashBankHandler) GetCashBankByID(c *gin.Context) {
 		return
 	}
 
-	cashBank, err := h.service.GetCashBankByID(c.Request.Context(), id)
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		response.Error(c, http.StatusBadRequest, "Invalid ID", err)
+		return
+	}
+
+	cashBank, err := h.service.GetCashBankByID(c.Request.Context(), parsedID)
 	if err != nil {
 		response.Error(c, http.StatusNotFound, "Cash/bank account not found", err)
 		return
@@ -70,8 +77,14 @@ func (h *CashBankHandler) UpdateCashBank(c *gin.Context) {
 		return
 	}
 
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		response.Error(c, http.StatusBadRequest, "Invalid ID", err)
+		return
+	}
+
 	cashBank := req.ToCashBankEntity()
-	cashBank.ID = id
+	cashBank.ID = parsedID
 
 	if err := h.service.UpdateCashBank(c.Request.Context(), cashBank); err != nil {
 		response.Error(c, http.StatusInternalServerError, "Failed to update cash/bank account", err)
@@ -90,7 +103,13 @@ func (h *CashBankHandler) DeleteCashBank(c *gin.Context) {
 		return
 	}
 
-	if err := h.service.DeleteCashBank(c.Request.Context(), id); err != nil {
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		response.Error(c, http.StatusBadRequest, "Invalid ID", err)
+		return
+	}
+
+	if err := h.service.DeleteCashBank(c.Request.Context(), parsedID); err != nil {
 		response.Error(c, http.StatusInternalServerError, "Failed to delete cash/bank account", err)
 		return
 	}

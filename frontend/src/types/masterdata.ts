@@ -40,6 +40,7 @@ export interface Classification extends BaseEntity {
   name: string
   description?: string
   parent_id?: string
+  company_id: string
   status: 'active' | 'inactive'
 }
 
@@ -49,6 +50,7 @@ export interface Color extends BaseEntity {
   code: string
   hex_code?: string
   description?: string
+  company_id: string
   status: 'active' | 'inactive'
 }
 
@@ -65,6 +67,7 @@ export interface Article extends BaseEntity {
   model_id?: string
   size_id?: string
   supplier_id?: string
+  company_id: string
   barcode?: string
   barcode_url?: string
   price?: number
@@ -88,6 +91,7 @@ export interface Model extends BaseEntity {
   name: string
   description?: string
   article_id?: string
+  company_id: string
   status: 'active' | 'inactive'
 }
 
@@ -98,6 +102,7 @@ export interface Size extends BaseEntity {
   description?: string
   size_category?: 'shoe' | 'clothing' | 'accessory'
   sort_order?: number
+  company_id: string
   status: 'active' | 'inactive'
 }
 
@@ -105,6 +110,7 @@ export interface Size extends BaseEntity {
 export interface Barcode extends BaseEntity {
   barcode: string
   article_id: string
+  company_id: string
   color_id?: string
   size_id?: string
   model_id?: string
@@ -120,6 +126,7 @@ export interface Barcode extends BaseEntity {
 // Price
 export interface Price extends BaseEntity {
   article_id: string
+  company_id: string
   price_type: 'retail' | 'wholesale' | 'cost' | 'special'
   amount: number
   currency: string
@@ -134,6 +141,7 @@ export interface Price extends BaseEntity {
 // Gallery Image
 export interface GalleryImage extends BaseEntity {
   article_id: string
+  company_id: string
   image_url: string
   image_path: string
   alt_text?: string
@@ -157,6 +165,7 @@ export interface Supplier extends BaseEntity {
   tax_id?: string
   payment_terms?: string
   credit_limit?: number
+  company_id: string
   status: 'active' | 'inactive'
 }
 
@@ -179,6 +188,7 @@ export interface Warehouse extends BaseEntity {
   manager_name?: string
   warehouse_type: 'main' | 'branch' | 'transit'
   capacity?: number
+  company_id: string
   status: 'active' | 'inactive'
 }
 
@@ -191,6 +201,7 @@ export interface Courier extends BaseEntity {
   email?: string
   website?: string
   service_type: 'standard' | 'express' | 'overnight'
+  company_id: string
   status: 'active' | 'inactive'
 }
 
@@ -199,6 +210,7 @@ export interface CourierRate extends BaseEntity {
   courier_id: string
   origin: string
   destination: string
+  company_id: string
   service_type: string
   weight_min: number
   weight_max: number
@@ -223,6 +235,7 @@ export interface Depstore extends BaseEntity {
   contact_person?: string
   commission_rate?: number
   payment_terms?: string
+  company_id: string
   status: 'active' | 'inactive'
 }
 
@@ -234,6 +247,7 @@ export interface Division extends BaseEntity {
   parent_id?: string
   level: number
   sort_order?: number
+  company_id: string
   status: 'active' | 'inactive'
   
   // Relations

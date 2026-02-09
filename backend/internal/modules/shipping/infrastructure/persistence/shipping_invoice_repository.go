@@ -4,10 +4,10 @@ import (
 	"context"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"malaka/internal/modules/shipping/domain/entities"
 	"malaka/internal/modules/shipping/domain/repositories"
+	"malaka/internal/shared/uuid"
 )
 
 // shippingInvoiceRepositoryImpl implements the ShippingInvoiceRepository interface.
@@ -44,7 +44,7 @@ func (r *shippingInvoiceRepositoryImpl) CreateShippingInvoice(ctx context.Contex
 }
 
 // GetShippingInvoiceByID retrieves a shipping invoice by ID.
-func (r *shippingInvoiceRepositoryImpl) GetShippingInvoiceByID(ctx context.Context, id uuid.UUID) (*entities.ShippingInvoice, error) {
+func (r *shippingInvoiceRepositoryImpl) GetShippingInvoiceByID(ctx context.Context, id uuid.ID) (*entities.ShippingInvoice, error) {
 	query := `
 		SELECT id, invoice_number, shipment_id, courier_id, invoice_date, due_date,
 			   origin, destination, weight, base_rate, additional_fees, tax_amount,
@@ -80,7 +80,7 @@ func (r *shippingInvoiceRepositoryImpl) GetShippingInvoiceByInvoiceNumber(ctx co
 }
 
 // GetShippingInvoicesByShipmentID retrieves shipping invoices by shipment ID.
-func (r *shippingInvoiceRepositoryImpl) GetShippingInvoicesByShipmentID(ctx context.Context, shipmentID uuid.UUID) ([]entities.ShippingInvoice, error) {
+func (r *shippingInvoiceRepositoryImpl) GetShippingInvoicesByShipmentID(ctx context.Context, shipmentID uuid.ID) ([]entities.ShippingInvoice, error) {
 	query := `
 		SELECT id, invoice_number, shipment_id, courier_id, invoice_date, due_date,
 			   origin, destination, weight, base_rate, additional_fees, tax_amount,
@@ -99,7 +99,7 @@ func (r *shippingInvoiceRepositoryImpl) GetShippingInvoicesByShipmentID(ctx cont
 }
 
 // GetShippingInvoicesByCourierID retrieves shipping invoices by courier ID.
-func (r *shippingInvoiceRepositoryImpl) GetShippingInvoicesByCourierID(ctx context.Context, courierID uuid.UUID) ([]entities.ShippingInvoice, error) {
+func (r *shippingInvoiceRepositoryImpl) GetShippingInvoicesByCourierID(ctx context.Context, courierID uuid.ID) ([]entities.ShippingInvoice, error) {
 	query := `
 		SELECT id, invoice_number, shipment_id, courier_id, invoice_date, due_date,
 			   origin, destination, weight, base_rate, additional_fees, tax_amount,
@@ -192,7 +192,7 @@ func (r *shippingInvoiceRepositoryImpl) UpdateShippingInvoice(ctx context.Contex
 }
 
 // DeleteShippingInvoice deletes a shipping invoice by ID.
-func (r *shippingInvoiceRepositoryImpl) DeleteShippingInvoice(ctx context.Context, id uuid.UUID) error {
+func (r *shippingInvoiceRepositoryImpl) DeleteShippingInvoice(ctx context.Context, id uuid.ID) error {
 	query := `DELETE FROM shipping_invoices WHERE id = $1`
 
 	_, err := r.db.ExecContext(ctx, query, id)

@@ -3,7 +3,7 @@ package entities
 import (
 	"time"
 
-	"github.com/google/uuid"
+	"malaka/internal/shared/uuid"
 )
 
 // PurchaseOrderStatus represents the status of a purchase order
@@ -45,11 +45,11 @@ const (
 
 // PurchaseOrder represents a purchase order in the procurement module
 type PurchaseOrder struct {
-	ID                   string                     `json:"id" db:"id"`
+	ID                   uuid.ID                    `json:"id" db:"id"`
 	PONumber             string                     `json:"po_number" db:"po_number"`
-	SupplierID           string                     `json:"supplier_id" db:"supplier_id"`
+	SupplierID           uuid.ID                    `json:"supplier_id" db:"supplier_id"`
 	SupplierName         string                     `json:"supplier_name" db:"supplier_name"`
-	PurchaseRequestID    *string                    `json:"purchase_request_id,omitempty" db:"purchase_request_id"`
+	PurchaseRequestID    *uuid.ID                   `json:"purchase_request_id,omitempty" db:"purchase_request_id"`
 	OrderDate            time.Time                  `json:"order_date" db:"order_date"`
 	ExpectedDeliveryDate *time.Time                 `json:"expected_delivery_date,omitempty" db:"expected_delivery_date"`
 	DeliveryAddress      string                     `json:"delivery_address" db:"delivery_address"`
@@ -66,13 +66,13 @@ type PurchaseOrder struct {
 	// ProcurementType determines how this PO flows into accounting (COGS, OPEX, or Asset)
 	ProcurementType      ProcurementType            `json:"procurement_type" db:"procurement_type"`
 	// ExpenseAccountID is the GL account to debit for this procurement (optional, defaults based on type)
-	ExpenseAccountID     *string                    `json:"expense_account_id,omitempty" db:"expense_account_id"`
+	ExpenseAccountID     *uuid.ID                   `json:"expense_account_id,omitempty" db:"expense_account_id"`
 	// BudgetCommitmentID references the budget commitment created when PO is approved
-	BudgetCommitmentID   *string                    `json:"budget_commitment_id,omitempty" db:"budget_commitment_id"`
-	CreatedBy            string                     `json:"created_by" db:"created_by"`
+	BudgetCommitmentID   *uuid.ID                   `json:"budget_commitment_id,omitempty" db:"budget_commitment_id"`
+	CreatedBy            uuid.ID                    `json:"created_by" db:"created_by"`
 	CreatedByName        string                     `json:"created_by_name" db:"created_by_name"`
 	CreatedByPosition    string                     `json:"created_by_position" db:"created_by_position"`
-	ApprovedBy           *string                    `json:"approved_by,omitempty" db:"approved_by"`
+	ApprovedBy           *uuid.ID                   `json:"approved_by,omitempty" db:"approved_by"`
 	ApprovedAt           *time.Time                 `json:"approved_at,omitempty" db:"approved_at"`
 	SentAt               *time.Time                 `json:"sent_at,omitempty" db:"sent_at"`
 	ConfirmedAt          *time.Time                 `json:"confirmed_at,omitempty" db:"confirmed_at"`
@@ -86,8 +86,8 @@ type PurchaseOrder struct {
 
 // PurchaseOrderItem represents a line item in a purchase order
 type PurchaseOrderItem struct {
-	ID                 string    `json:"id" db:"id"`
-	PurchaseOrderID    string    `json:"purchase_order_id" db:"purchase_order_id"`
+	ID                 uuid.ID   `json:"id" db:"id"`
+	PurchaseOrderID    uuid.ID   `json:"purchase_order_id" db:"purchase_order_id"`
 	ItemName           string    `json:"item_name" db:"item_name"`
 	Description        string    `json:"description,omitempty" db:"description"`
 	Specification      string    `json:"specification,omitempty" db:"specification"`
@@ -104,10 +104,10 @@ type PurchaseOrderItem struct {
 }
 
 // NewPurchaseOrder creates a new purchase order with default values
-func NewPurchaseOrder(supplierID, createdBy string) *PurchaseOrder {
+func NewPurchaseOrder(supplierID, createdBy uuid.ID) *PurchaseOrder {
 	now := time.Now()
 	return &PurchaseOrder{
-		ID:              uuid.New().String(),
+		ID:              uuid.New(),
 		SupplierID:      supplierID,
 		OrderDate:       now,
 		Currency:        "IDR",
@@ -121,7 +121,7 @@ func NewPurchaseOrder(supplierID, createdBy string) *PurchaseOrder {
 }
 
 // NewPurchaseOrderWithType creates a new purchase order with a specific procurement type
-func NewPurchaseOrderWithType(supplierID, createdBy string, procType ProcurementType) *PurchaseOrder {
+func NewPurchaseOrderWithType(supplierID, createdBy uuid.ID, procType ProcurementType) *PurchaseOrder {
 	po := NewPurchaseOrder(supplierID, createdBy)
 	po.ProcurementType = procType
 	return po
@@ -151,10 +151,10 @@ func (po *PurchaseOrder) GetAccountingTreatment() string {
 }
 
 // NewPurchaseOrderItem creates a new purchase order item
-func NewPurchaseOrderItem(purchaseOrderID string) *PurchaseOrderItem {
+func NewPurchaseOrderItem(purchaseOrderID uuid.ID) *PurchaseOrderItem {
 	now := time.Now()
 	return &PurchaseOrderItem{
-		ID:              uuid.New().String(),
+		ID:              uuid.New(),
 		PurchaseOrderID: purchaseOrderID,
 		Quantity:        1,
 		Unit:            "pcs",

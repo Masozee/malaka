@@ -7,6 +7,16 @@ import { Badge } from '@/components/ui/badge'
 import { TwoLevelLayout } from '@/components/ui/two-level-layout'
 import { Header } from '@/components/ui/header'
 import { AdvancedDataTable, AdvancedColumn } from '@/components/ui/advanced-data-table'
+import { HugeiconsIcon } from '@hugeicons/react'
+import {
+  UserMultiple02Icon,
+  DollarCircleIcon,
+  ArrowUpRight01Icon,
+  Calculator01Icon,
+  FileEditIcon,
+  Settings01Icon,
+  Time04Icon
+} from '@hugeicons/core-free-icons'
 
 import type { PayrollPeriod } from '@/types/hr'
 import { HRService } from '@/services/hr'
@@ -19,7 +29,7 @@ export default function PayrollDashboard() {
 
   useEffect(() => {
     setMounted(true)
-    
+
     const fetchPayrollPeriods = async () => {
       try {
         setLoading(true)
@@ -49,34 +59,30 @@ export default function PayrollDashboard() {
       value: currentPeriod?.totalEmployees || 0,
       change: '+2 from last month',
       changeType: 'positive' as const,
-      icon: Users,
-      color: 'blue'
+      icon: UserMultiple02Icon
     },
     {
       title: 'Gross Payroll',
       value: formatCurrency(currentPeriod?.totalGrossPay, mounted),
       change: '+5.2% from last month',
       changeType: 'positive' as const,
-      icon: CurrencyDollar,
-      color: 'green'
+      icon: DollarCircleIcon
     },
     {
       title: 'Net Payroll',
       value: formatCurrency(currentPeriod?.totalNetPay, mounted),
       change: '+4.8% from last month',
       changeType: 'positive' as const,
-      icon: TrendUp,
-      color: 'purple'
+      icon: ArrowUpRight01Icon
     },
     {
       title: 'Average Salary',
-      value: currentPeriod?.totalEmployees 
+      value: currentPeriod?.totalEmployees
         ? formatCurrency(Math.round((currentPeriod?.totalNetPay || 0) / currentPeriod.totalEmployees), mounted)
         : '',
       change: '+2.1% from last month',
       changeType: 'positive' as const,
-      icon: Calculator,
-      color: 'orange'
+      icon: Calculator01Icon
     }
   ]
 
@@ -84,23 +90,20 @@ export default function PayrollDashboard() {
     {
       title: 'Process Payroll',
       description: 'Calculate and process current month payroll',
-      icon: Calculator,
-      href: '/hr/payroll/process',
-      color: 'blue'
+      icon: Calculator01Icon,
+      href: '/hr/payroll/process'
     },
     {
       title: 'Payroll Reports',
       description: 'View detailed payroll reports and history',
-      icon: FileText,
-      href: '/hr/payroll/history',
-      color: 'green'
+      icon: FileEditIcon,
+      href: '/hr/payroll/history'
     },
     {
-      title: 'Payroll Gear',
+      title: 'Payroll Settings',
       description: 'Configure tax rates, allowances, and policies',
-      icon: Gear,
-      href: '/hr/payroll/settings',
-      color: 'purple'
+      icon: Settings01Icon,
+      href: '/hr/payroll/settings'
     }
   ]
 
@@ -160,7 +163,7 @@ export default function PayrollDashboard() {
     return (
       <TwoLevelLayout>
         <div className="flex-1 space-y-6">
-          <Header 
+          <Header
             title="Payroll Dashboard"
             description="Manage employee payroll and compensation"
             breadcrumbs={breadcrumbs}
@@ -178,54 +181,25 @@ export default function PayrollDashboard() {
 
   return (
     <TwoLevelLayout>
-      <div className="flex-1 space-y-6">
-        <Header 
-          title="Payroll Dashboard"
-          description="Manage employee payroll and compensation"
-          breadcrumbs={breadcrumbs}
-          actions={
-            <div className="flex items-center space-x-3">
-              <Button variant="outline" size="sm">
-                <FileText className="h-4 w-4 mr-2" />
-                Export Report
-              </Button>
-              <Button size="sm">
-                <Calculator className="h-4 w-4 mr-2" />
-                Process Payroll
-              </Button>
-            </div>
-          }
-        />
+      <Header
+        title="Payroll Dashboard"
+        description="Manage employee payroll and compensation"
+        breadcrumbs={breadcrumbs}
+        actions={
+          <div className="flex items-center space-x-3">
+            <Button variant="outline" size="sm">
+              <HugeiconsIcon icon={FileEditIcon} className="h-4 w-4 mr-2" />
+              Export Report
+            </Button>
+            <Button size="sm">
+              <HugeiconsIcon icon={Calculator01Icon} className="h-4 w-4 mr-2" />
+              Process Payroll
+            </Button>
+          </div>
+        }
+      />
 
-        {/* Current Period Status */}
-        {currentPeriod && (
-          <Card className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-lg font-semibold">Current Period Status</h3>
-                <div className="flex items-center space-x-4 mt-2">
-                  <div className="flex items-center space-x-2">
-                    <Clock className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm text-muted-foreground">
-                      {formatDate(currentPeriod?.startDate, mounted)} - {formatDate(currentPeriod?.endDate, mounted)}
-                    </span>
-                  </div>
-                  {currentPeriod?.status && (
-                    <Badge variant={getStatusBadge(currentPeriod.status).variant}>
-                      {getStatusBadge(currentPeriod.status).label}
-                    </Badge>
-                  )}
-                </div>
-              </div>
-              {currentPeriod?.status === 'processing' && (
-                <Button>
-                  Continue Processing
-                </Button>
-              )}
-            </div>
-          </Card>
-        )}
-
+      <div className="flex-1 p-6 space-y-6">
         {/* KPI Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {kpiCards.map((card, index) => (
@@ -236,8 +210,8 @@ export default function PayrollDashboard() {
                   <p className="text-2xl font-bold mt-1">{card.value}</p>
                   <p className="text-sm text-green-600 mt-1">{card.change}</p>
                 </div>
-                <div className={`p-3 rounded-lg bg-${card.color}-100`}>
-                  <card.icon className={`h-6 w-6 text-${card.color}-600`} />
+                <div className="p-3 rounded-lg bg-gray-100 dark:bg-gray-700/50">
+                  <HugeiconsIcon icon={card.icon} className="h-6 w-6 text-gray-600 dark:text-gray-300" />
                 </div>
               </div>
             </Card>
@@ -249,10 +223,10 @@ export default function PayrollDashboard() {
           <h2 className="text-xl font-semibold mb-4">Quick Actions</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {quickActions.map((action, index) => (
-              <Card key={index} className="p-4 hover: transition-shadow cursor-pointer">
+              <Card key={index} className="p-4 hover:shadow-md transition-shadow cursor-pointer">
                 <div className="flex items-start space-x-4">
-                  <div className={`p-3 rounded-lg bg-${action.color}-100`}>
-                    <action.icon className={`h-6 w-6 text-${action.color}-600`} />
+                  <div className="p-3 rounded-lg bg-gray-100 dark:bg-gray-700/50">
+                    <HugeiconsIcon icon={action.icon} className="h-6 w-6 text-gray-600 dark:text-gray-300" />
                   </div>
                   <div>
                     <h3 className="font-semibold">{action.title}</h3>
@@ -274,7 +248,7 @@ export default function PayrollDashboard() {
               current: 1,
               pageSize: 10,
               total: payrollPeriods.length,
-              onChange: () => {}
+              onChange: () => { }
             }}
           />
         </div>

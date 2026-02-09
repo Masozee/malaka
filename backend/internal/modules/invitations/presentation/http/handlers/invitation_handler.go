@@ -7,6 +7,7 @@ import (
 	"malaka/internal/modules/invitations/domain/entities"
 	"malaka/internal/modules/invitations/domain/services"
 	"malaka/internal/shared/response"
+	"malaka/internal/shared/uuid"
 
 	"github.com/gin-gonic/gin"
 )
@@ -30,13 +31,19 @@ func (h *InvitationHandler) CreateInvitation(c *gin.Context) {
 	}
 
 	// Get inviter ID from JWT context
-	inviterID, exists := c.Get("user_id")
+	inviterIDStr, exists := c.Get("user_id")
 	if !exists {
 		response.Error(c, http.StatusUnauthorized, "User not authenticated", nil)
 		return
 	}
 
-	invitation, err := h.service.CreateInvitation(c.Request.Context(), &req, inviterID.(string))
+	inviterID, err := uuid.Parse(inviterIDStr.(string))
+	if err != nil {
+		response.Error(c, http.StatusBadRequest, "Invalid user ID", err.Error())
+		return
+	}
+
+	invitation, err := h.service.CreateInvitation(c.Request.Context(), &req, inviterID)
 	if err != nil {
 		response.Error(c, http.StatusBadRequest, "Failed to create invitation", err.Error())
 		return
@@ -118,9 +125,15 @@ func (h *InvitationHandler) AcceptInvitation(c *gin.Context) {
 
 // GetInvitation handles GET /api/v1/invitations/:id
 func (h *InvitationHandler) GetInvitation(c *gin.Context) {
-	id := c.Param("id")
-	if id == "" {
+	idStr := c.Param("id")
+	if idStr == "" {
 		response.Error(c, http.StatusBadRequest, "Invitation ID is required", nil)
+		return
+	}
+
+	id, err := uuid.Parse(idStr)
+	if err != nil {
+		response.Error(c, http.StatusBadRequest, "Invalid invitation ID", err.Error())
 		return
 	}
 
@@ -191,13 +204,19 @@ func (h *InvitationHandler) ListInvitations(c *gin.Context) {
 
 // RevokeInvitation handles POST /api/v1/invitations/:id/revoke
 func (h *InvitationHandler) RevokeInvitation(c *gin.Context) {
-	id := c.Param("id")
-	if id == "" {
+	idStr := c.Param("id")
+	if idStr == "" {
 		response.Error(c, http.StatusBadRequest, "Invitation ID is required", nil)
 		return
 	}
 
-	err := h.service.RevokeInvitation(c.Request.Context(), id)
+	id, err := uuid.Parse(idStr)
+	if err != nil {
+		response.Error(c, http.StatusBadRequest, "Invalid invitation ID", err.Error())
+		return
+	}
+
+	err = h.service.RevokeInvitation(c.Request.Context(), id)
 	if err != nil {
 		response.Error(c, http.StatusBadRequest, "Failed to revoke invitation", err.Error())
 		return
@@ -208,20 +227,32 @@ func (h *InvitationHandler) RevokeInvitation(c *gin.Context) {
 
 // ResendInvitation handles POST /api/v1/invitations/:id/resend
 func (h *InvitationHandler) ResendInvitation(c *gin.Context) {
-	id := c.Param("id")
-	if id == "" {
+	idStr := c.Param("id")
+	if idStr == "" {
 		response.Error(c, http.StatusBadRequest, "Invitation ID is required", nil)
 		return
 	}
 
+	id, err := uuid.Parse(idStr)
+	if err != nil {
+		response.Error(c, http.StatusBadRequest, "Invalid invitation ID", err.Error())
+		return
+	}
+
 	// Get inviter ID from JWT context
-	inviterID, exists := c.Get("user_id")
+	inviterIDStr, exists := c.Get("user_id")
 	if !exists {
 		response.Error(c, http.StatusUnauthorized, "User not authenticated", nil)
 		return
 	}
 
-	err := h.service.ResendInvitation(c.Request.Context(), id, inviterID.(string))
+	inviterID, err := uuid.Parse(inviterIDStr.(string))
+	if err != nil {
+		response.Error(c, http.StatusBadRequest, "Invalid user ID", err.Error())
+		return
+	}
+
+	err = h.service.ResendInvitation(c.Request.Context(), id, inviterID)
 	if err != nil {
 		response.Error(c, http.StatusBadRequest, "Failed to resend invitation", err.Error())
 		return
@@ -232,13 +263,19 @@ func (h *InvitationHandler) ResendInvitation(c *gin.Context) {
 
 // DeleteInvitation handles DELETE /api/v1/invitations/:id
 func (h *InvitationHandler) DeleteInvitation(c *gin.Context) {
-	id := c.Param("id")
-	if id == "" {
+	idStr := c.Param("id")
+	if idStr == "" {
 		response.Error(c, http.StatusBadRequest, "Invitation ID is required", nil)
 		return
 	}
 
-	err := h.service.DeleteInvitation(c.Request.Context(), id)
+	id, err := uuid.Parse(idStr)
+	if err != nil {
+		response.Error(c, http.StatusBadRequest, "Invalid invitation ID", err.Error())
+		return
+	}
+
+	err = h.service.DeleteInvitation(c.Request.Context(), id)
 	if err != nil {
 		response.Error(c, http.StatusInternalServerError, "Failed to delete invitation", err.Error())
 		return

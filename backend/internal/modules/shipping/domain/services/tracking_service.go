@@ -6,7 +6,7 @@ import (
 
 	"malaka/internal/modules/shipping/domain/entities"
 	"malaka/internal/modules/shipping/domain/repositories"
-	"malaka/internal/shared/utils"
+	"malaka/internal/shared/uuid"
 )
 
 // TrackingService provides business logic for tracking operations.
@@ -21,14 +21,14 @@ func NewTrackingService(repo repositories.TrackingRepository) *TrackingService {
 
 // CreateTracking creates a new tracking record.
 func (s *TrackingService) CreateTracking(ctx context.Context, tracking *entities.Tracking) error {
-	if tracking.ID == "" {
-		tracking.ID = utils.RandomString(10) // Generate a random ID if not provided
+	if tracking.ID.IsNil() {
+		tracking.ID = uuid.New()
 	}
 	return s.repo.Create(ctx, tracking)
 }
 
 // GetTrackingByID retrieves a tracking record by its ID.
-func (s *TrackingService) GetTrackingByID(ctx context.Context, id string) (*entities.Tracking, error) {
+func (s *TrackingService) GetTrackingByID(ctx context.Context, id uuid.ID) (*entities.Tracking, error) {
 	return s.repo.GetByID(ctx, id)
 }
 
@@ -46,7 +46,7 @@ func (s *TrackingService) UpdateTracking(ctx context.Context, tracking *entities
 }
 
 // DeleteTracking deletes a tracking record by its ID.
-func (s *TrackingService) DeleteTracking(ctx context.Context, id string) error {
+func (s *TrackingService) DeleteTracking(ctx context.Context, id uuid.ID) error {
 	// Ensure the tracking record exists before deleting
 	existingTracking, err := s.repo.GetByID(ctx, id)
 	if err != nil {

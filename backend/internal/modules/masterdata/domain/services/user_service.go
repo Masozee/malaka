@@ -5,10 +5,11 @@ import (
 	"errors"
 	"time"
 
-	"github.com/dgrijalva/jwt-go"
 	"malaka/internal/modules/masterdata/domain/entities"
 	"malaka/internal/modules/masterdata/domain/repositories"
+	"malaka/internal/shared/auth"
 	"malaka/internal/shared/utils"
+	"malaka/internal/shared/uuid"
 )
 
 // UserService provides business logic for user operations.
@@ -44,7 +45,7 @@ func (s *UserService) CreateUser(ctx context.Context, user *entities.User) error
 }
 
 // GetUserByID retrieves a user by its ID.
-func (s *UserService) GetUserByID(ctx context.Context, id string) (*entities.User, error) {
+func (s *UserService) GetUserByID(ctx context.Context, id uuid.ID) (*entities.User, error) {
 	return s.repo.GetByID(ctx, id)
 }
 
@@ -67,7 +68,7 @@ func (s *UserService) UpdateUser(ctx context.Context, user *entities.User) error
 }
 
 // DeleteUser deletes a user by its ID.
-func (s *UserService) DeleteUser(ctx context.Context, id string) error {
+func (s *UserService) DeleteUser(ctx context.Context, id uuid.ID) error {
 	// Ensure the user exists before deleting
 	existingUser, err := s.repo.GetByID(ctx, id)
 	if err != nil {
@@ -94,14 +95,14 @@ func (s *UserService) AuthenticateUser(ctx context.Context, email, password stri
 	}
 
 	// Create token with configurable expiry (default 48 hours = 2 days)
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"sub":  user.ID,
-		"role": user.Role,
-		"exp":  time.Now().Add(time.Hour * time.Duration(s.jwtExpiryHours)).Unix(),
-	})
-
-	// Generate encoded token and send it as response.
-	t, err := token.SignedString([]byte(s.jwtSecret))
+	t, err := auth.NewJWT(
+		user.ID.String(),
+		user.CompanyID,
+		user.Email,
+		user.Role,
+		s.jwtSecret,
+		s.jwtExpiryHours,
+	)
 	if err != nil {
 		return "", err
 	}

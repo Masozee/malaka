@@ -3,10 +3,11 @@ package services
 import (
 	"context"
 	"errors"
+	"time"
 
 	"malaka/internal/modules/inventory/domain/entities"
 	"malaka/internal/modules/inventory/domain/repositories"
-	"malaka/internal/shared/utils"
+	"malaka/internal/shared/uuid"
 )
 
 // TransferService provides business logic for stock transfers.
@@ -27,8 +28,8 @@ func NewTransferService(toRepo repositories.TransferOrderRepository, tiRepo repo
 
 // CreateTransferOrder creates a new transfer order and records stock movements.
 func (s *TransferService) CreateTransferOrder(ctx context.Context, to *entities.TransferOrder, items []*entities.TransferItem) error {
-	if to.ID == "" {
-		to.ID = utils.RandomString(10) // Generate a random ID if not provided
+	if to.ID.IsNil() {
+		to.ID = uuid.New()
 	}
 
 	// Create the transfer order
@@ -36,23 +37,27 @@ func (s *TransferService) CreateTransferOrder(ctx context.Context, to *entities.
 		return err
 	}
 
+	now := time.Now()
 	for _, item := range items {
-		item.TransferOrderID = to.ID
-		if item.ID == "" {
-			item.ID = utils.RandomString(10)
+		item.TransferOrderID = to.ID.String()
+		if item.ID.IsNil() {
+			item.ID = uuid.New()
 		}
 		// Create transfer item
 		if err := s.transferItemRepo.Create(ctx, item); err != nil {
 			return err
 		}
 
+		// Parse article ID to uuid.ID
+		articleID, _ := uuid.Parse(item.ArticleID)
+
 		// Record stock movement out of source warehouse
 		outMovement := &entities.StockMovement{
-			ArticleID:    item.ArticleID,
+			ArticleID:    articleID,
 			WarehouseID:  to.FromWarehouseID,
 			Quantity:     item.Quantity,
 			MovementType: "out",
-			MovementDate: utils.Now(),
+			MovementDate: now,
 			ReferenceID:  to.ID,
 		}
 		if err := s.stockService.RecordStockMovement(ctx, outMovement); err != nil {
@@ -61,11 +66,11 @@ func (s *TransferService) CreateTransferOrder(ctx context.Context, to *entities.
 
 		// Record stock movement into destination warehouse
 		inMovement := &entities.StockMovement{
-			ArticleID:    item.ArticleID,
+			ArticleID:    articleID,
 			WarehouseID:  to.ToWarehouseID,
 			Quantity:     item.Quantity,
 			MovementType: "in",
-			MovementDate: utils.Now(),
+			MovementDate: now,
 			ReferenceID:  to.ID,
 		}
 		if err := s.stockService.RecordStockMovement(ctx, inMovement); err != nil {
@@ -89,7 +94,7 @@ func (s *TransferService) GetAllTransferOrders(ctx context.Context) ([]*entities
 // UpdateTransferOrder updates an existing transfer order.
 func (s *TransferService) UpdateTransferOrder(ctx context.Context, to *entities.TransferOrder) error {
 	// Ensure the transfer order exists before updating
-	existingTO, err := s.transferOrderRepo.GetByID(ctx, to.ID)
+	existingTO, err := s.transferOrderRepo.GetByID(ctx, to.ID.String())
 	if err != nil {
 		return err
 	}

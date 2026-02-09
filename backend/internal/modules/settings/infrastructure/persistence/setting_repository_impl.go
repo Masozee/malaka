@@ -9,6 +9,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	"malaka/internal/modules/settings/domain/entities"
 	"malaka/internal/modules/settings/domain/repositories"
+	"malaka/internal/shared/uuid"
 )
 
 // SettingRepositoryImpl implements repositories.SettingRepository
@@ -36,27 +37,68 @@ func (r *SettingRepositoryImpl) Create(ctx context.Context, setting *entities.Se
 	).Scan(&setting.ID, &setting.CreatedAt, &setting.UpdatedAt)
 }
 
+// settingRow is a helper struct for database scanning
+type settingRow struct {
+	ID              string     `db:"id"`
+	Category        string     `db:"category"`
+	SubCategory     *string    `db:"sub_category"`
+	SettingKey      string     `db:"setting_key"`
+	SettingValue    *string    `db:"setting_value"`
+	DataType        string     `db:"data_type"`
+	IsSensitive     bool       `db:"is_sensitive"`
+	IsPublic        bool       `db:"is_public"`
+	DefaultValue    *string    `db:"default_value"`
+	ValidationRules *string    `db:"validation_rules"`
+	Description     *string    `db:"description"`
+	CreatedBy       *string    `db:"created_by"`
+	UpdatedBy       *string    `db:"updated_by"`
+	CreatedAt       string     `db:"created_at"`
+	UpdatedAt       string     `db:"updated_at"`
+}
+
+func (r *settingRow) toEntity() *entities.Setting {
+	id, _ := uuid.Parse(r.ID)
+	return &entities.Setting{
+		ID:              id,
+		Category:        r.Category,
+		SubCategory:     r.SubCategory,
+		SettingKey:      r.SettingKey,
+		SettingValue:    r.SettingValue,
+		DataType:        r.DataType,
+		IsSensitive:     r.IsSensitive,
+		IsPublic:        r.IsPublic,
+		DefaultValue:    r.DefaultValue,
+		ValidationRules: r.ValidationRules,
+		Description:     r.Description,
+		CreatedBy:       r.CreatedBy,
+		UpdatedBy:       r.UpdatedBy,
+	}
+}
+
 // GetByID retrieves a setting by ID
-func (r *SettingRepositoryImpl) GetByID(ctx context.Context, id string) (*entities.Setting, error) {
+func (r *SettingRepositoryImpl) GetByID(ctx context.Context, id uuid.ID) (*entities.Setting, error) {
 	query := `
 		SELECT id, category, sub_category, setting_key, setting_value, data_type,
 			is_sensitive, is_public, default_value, validation_rules, description,
 			created_by, updated_by, created_at, updated_at
 		FROM settings WHERE id = $1`
-	
-	setting := &entities.Setting{}
-	err := r.db.GetContext(ctx, setting, query, id)
+
+	var row settingRow
+	err := r.db.GetContext(ctx, &row, query, id.String())
 	if err == sql.ErrNoRows {
 		return nil, nil
 	}
-	return setting, err
+	if err != nil {
+		return nil, err
+	}
+	return row.toEntity(), nil
 }
 
 // GetByKey retrieves a setting by category, subcategory, and key
 func (r *SettingRepositoryImpl) GetByKey(ctx context.Context, category, subCategory, key string) (*entities.Setting, error) {
 	var query string
 	var args []interface{}
-	
+
 	if subCategory != "" {
 		query = `
 			SELECT id, category, sub_category, setting_key, setting_value, data_type,
@@ -72,30 +114,33 @@ func (r *SettingRepositoryImpl) GetByKey(ctx context.Context, category, subCateg
 			FROM settings WHERE category = $1 AND sub_category IS NULL AND setting_key = $2`
 		args = []interface{}{category, key}
 	}
-	
-	setting := &entities.Setting{}
-	err := r.db.GetContext(ctx, setting, query, args...)
+
+	var row settingRow
+	err := r.db.GetContext(ctx, &row, query, args...)
 	if err == sql.ErrNoRows {
 		return nil, nil
 	}
-	return setting, err
+	if err != nil {
+		return nil, err
+	}
+	return row.toEntity(), nil
 }
 
 // Update updates a setting
-func (r *SettingRepositoryImpl) Update(ctx context.Context, id string, update *entities.SettingUpdate) error {
+func (r *SettingRepositoryImpl) Update(ctx context.Context, id uuid.ID, update *entities.SettingUpdate) error {
 	query := `
-		UPDATE settings 
+		UPDATE settings
 		SET setting_value = $1, updated_by = $2, updated_at = NOW()
 		WHERE id = $3`
-	
-	_, err := r.db.ExecContext(ctx, query, update.SettingValue, update.UpdatedBy, id)
+
+	_, err := r.db.ExecContext(ctx, query, update.SettingValue, update.UpdatedBy, id.String())
 	return err
 }
 
 // Delete deletes a setting
-func (r *SettingRepositoryImpl) Delete(ctx context.Context, id string) error {
+func (r *SettingRepositoryImpl) Delete(ctx context.Context, id uuid.ID) error {
 	query := `DELETE FROM settings WHERE id = $1`
-	_, err := r.db.ExecContext(ctx, query, id)
+	_, err := r.db.ExecContext(ctx, query, id.String())
 	return err
 }
 
@@ -223,25 +268,25 @@ func (r *SettingRepositoryImpl) GetAllSettings(ctx context.Context, filters *ent
 }
 
 // UpdateBulk updates multiple settings in a transaction
-func (r *SettingRepositoryImpl) UpdateBulk(ctx context.Context, updates map[string]*entities.SettingUpdate) error {
+func (r *SettingRepositoryImpl) UpdateBulk(ctx context.Context, updates map[uuid.ID]*entities.SettingUpdate) error {
 	tx, err := r.db.BeginTxx(ctx, nil)
 	if err != nil {
 		return err
 	}
 	defer tx.Rollback()
-	
+
 	query := `
-		UPDATE settings 
+		UPDATE settings
 		SET setting_value = $1, updated_by = $2, updated_at = NOW()
 		WHERE id = $3`
-	
+
 	for id, update := range updates {
-		_, err = tx.ExecContext(ctx, query, update.SettingValue, update.UpdatedBy, id)
+		_, err = tx.ExecContext(ctx, query, update.SettingValue, update.UpdatedBy, id.String())
 		if err != nil {
 			return err
 		}
 	}
-	
+
 	return tx.Commit()
 }
 
@@ -331,31 +376,73 @@ func (r *SettingRepositoryImpl) GetUserSettings(ctx context.Context, userRole st
 	return settings, err
 }
 
+// settingAuditRow is a helper struct for database scanning
+type settingAuditRow struct {
+	ID           string  `db:"id"`
+	SettingID    string  `db:"setting_id"`
+	OldValue     *string `db:"old_value"`
+	NewValue     *string `db:"new_value"`
+	ChangedBy    *string `db:"changed_by"`
+	ChangeReason *string `db:"change_reason"`
+	IPAddress    *string `db:"ip_address"`
+	UserAgent    *string `db:"user_agent"`
+	CreatedAt    string  `db:"created_at"`
+}
+
+func (r *settingAuditRow) toEntity() *entities.SettingAudit {
+	id, _ := uuid.Parse(r.ID)
+	settingID, _ := uuid.Parse(r.SettingID)
+	return &entities.SettingAudit{
+		ID:           id,
+		SettingID:    settingID,
+		OldValue:     r.OldValue,
+		NewValue:     r.NewValue,
+		ChangedBy:    r.ChangedBy,
+		ChangeReason: r.ChangeReason,
+		IPAddress:    r.IPAddress,
+		UserAgent:    r.UserAgent,
+	}
+}
+
 // GetAuditLog retrieves audit log for a setting
-func (r *SettingRepositoryImpl) GetAuditLog(ctx context.Context, settingID string, limit int) ([]*entities.SettingAudit, error) {
+func (r *SettingRepositoryImpl) GetAuditLog(ctx context.Context, settingID uuid.ID, limit int) ([]*entities.SettingAudit, error) {
 	query := `
 		SELECT id, setting_id, old_value, new_value, changed_by, change_reason,
 			ip_address, user_agent, created_at
-		FROM settings_audit 
+		FROM settings_audit
 		WHERE setting_id = $1
 		ORDER BY created_at DESC
 		LIMIT $2`
-	
-	audits := []*entities.SettingAudit{}
-	err := r.db.SelectContext(ctx, &audits, query, settingID, limit)
-	return audits, err
+
+	var rows []settingAuditRow
+	err := r.db.SelectContext(ctx, &rows, query, settingID.String(), limit)
+	if err != nil {
+		return nil, err
+	}
+
+	audits := make([]*entities.SettingAudit, len(rows))
+	for i, row := range rows {
+		audits[i] = row.toEntity()
+	}
+	return audits, nil
 }
 
 // LogChange logs a setting change
 func (r *SettingRepositoryImpl) LogChange(ctx context.Context, audit *entities.SettingAudit) error {
 	query := `
-		INSERT INTO settings_audit (setting_id, old_value, new_value, changed_by, 
+		INSERT INTO settings_audit (setting_id, old_value, new_value, changed_by,
 			change_reason, ip_address, user_agent)
 		VALUES ($1, $2, $3, $4, $5, $6, $7)
 		RETURNING id, created_at`
-	
-	return r.db.QueryRowContext(ctx, query,
-		audit.SettingID, audit.OldValue, audit.NewValue, audit.ChangedBy,
+
+	var idStr string
+	err := r.db.QueryRowContext(ctx, query,
+		audit.SettingID.String(), audit.OldValue, audit.NewValue, audit.ChangedBy,
 		audit.ChangeReason, audit.IPAddress, audit.UserAgent,
-	).Scan(&audit.ID, &audit.CreatedAt)
+	).Scan(&idStr, &audit.CreatedAt)
+	if err != nil {
+		return err
+	}
+	audit.ID, _ = uuid.Parse(idStr)
+	return nil
 }

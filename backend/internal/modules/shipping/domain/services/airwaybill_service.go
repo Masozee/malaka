@@ -3,11 +3,11 @@ package services
 import (
 	"context"
 
-	"github.com/google/uuid"
 	"malaka/internal/modules/shipping/domain"
 	"malaka/internal/modules/shipping/domain/dtos"
 	"malaka/internal/modules/shipping/domain/entities"
 	"malaka/internal/modules/shipping/domain/repositories"
+	"malaka/internal/shared/uuid"
 )
 
 type airwaybillService struct {
@@ -20,16 +20,16 @@ func NewAirwaybillService(repo repositories.AirwaybillRepository) domain.Airwayb
 
 func (s *airwaybillService) CreateAirwaybill(ctx context.Context, req *dtos.CreateAirwaybillRequest) error {
 	airwaybill := &entities.Airwaybill{
-		ShipmentID: req.ShipmentID.String(),
-		AWBNumber:  req.AWBNumber,
-		IssueDate:  req.IssueDate,
-		Origin:     req.Origin,
+		ShipmentID:  req.ShipmentID,
+		AWBNumber:   req.AWBNumber,
+		IssueDate:   req.IssueDate,
+		Origin:      req.Origin,
 		Destination: req.Destination,
 	}
 	return s.repo.Create(ctx, airwaybill)
 }
 
-func (s *airwaybillService) GetAirwaybillByID(ctx context.Context, id uuid.UUID) (*entities.Airwaybill, error) {
+func (s *airwaybillService) GetAirwaybillByID(ctx context.Context, id uuid.ID) (*entities.Airwaybill, error) {
 	return s.repo.GetByID(ctx, id)
 }
 
@@ -43,7 +43,7 @@ func (s *airwaybillService) UpdateAirwaybill(ctx context.Context, req *dtos.Upda
 		return err
 	}
 
-	airwaybill.ShipmentID = req.ShipmentID.String()
+	airwaybill.ShipmentID = req.ShipmentID
 	airwaybill.AWBNumber = req.AWBNumber
 	airwaybill.IssueDate = req.IssueDate
 	airwaybill.Origin = req.Origin
@@ -52,7 +52,6 @@ func (s *airwaybillService) UpdateAirwaybill(ctx context.Context, req *dtos.Upda
 	return s.repo.Update(ctx, airwaybill)
 }
 
-func (s *airwaybillService) DeleteAirwaybill(ctx context.Context, id uuid.UUID) error {
+func (s *airwaybillService) DeleteAirwaybill(ctx context.Context, id uuid.ID) error {
 	return s.repo.Delete(ctx, id)
 }
-

@@ -4,6 +4,8 @@ import (
 	"database/sql/driver"
 	"fmt"
 	"time"
+
+	"malaka/internal/shared/uuid"
 )
 
 // EventType represents the type of calendar event
@@ -37,34 +39,34 @@ const (
 
 // Event represents a calendar event entity
 type Event struct {
-	ID             string     `json:"id" db:"id"`
+	ID             uuid.ID    `json:"id" db:"id"`
 	Title          string     `json:"title" db:"title"`
-	Description    string `json:"description" db:"description"`
+	Description    string     `json:"description" db:"description"`
 	StartDateTime  time.Time  `json:"start_datetime" db:"start_datetime"`
 	EndDateTime    *time.Time `json:"end_datetime,omitempty" db:"end_datetime"`
-	Location       string `json:"location" db:"location"`
+	Location       string     `json:"location" db:"location"`
 	EventType      EventType  `json:"event_type" db:"event_type"`
 	Priority       Priority   `json:"priority" db:"priority"`
 	IsAllDay       bool       `json:"is_all_day" db:"is_all_day"`
-	RecurrenceRule string `json:"recurrence_rule,omitempty" db:"recurrence_rule"`
-	CreatedBy      string     `json:"created_by" db:"created_by"`
+	RecurrenceRule string     `json:"recurrence_rule,omitempty" db:"recurrence_rule"`
+	CreatedBy      uuid.ID    `json:"created_by" db:"created_by"`
 	CreatedAt      time.Time  `json:"created_at" db:"created_at"`
 	UpdatedAt      time.Time  `json:"updated_at" db:"updated_at"`
-	
+
 	// Related entities (loaded separately)
 	Attendees []EventAttendee `json:"attendees,omitempty"`
 }
 
 // EventAttendee represents an attendee of a calendar event
 type EventAttendee struct {
-	ID              string         `json:"id" db:"id"`
-	EventID         string         `json:"event_id" db:"event_id"`
-	UserID          string         `json:"user_id" db:"user_id"`
+	ID              uuid.ID        `json:"id" db:"id"`
+	EventID         uuid.ID        `json:"event_id" db:"event_id"`
+	UserID          uuid.ID        `json:"user_id" db:"user_id"`
 	Status          AttendeeStatus `json:"status" db:"status"`
 	ResponseMessage string         `json:"response_message,omitempty" db:"response_message"`
 	InvitedAt       time.Time      `json:"invited_at" db:"invited_at"`
 	RespondedAt     *time.Time     `json:"responded_at,omitempty" db:"responded_at"`
-	
+
 	// Related user info (loaded separately)
 	UserName  string `json:"user_name,omitempty"`
 	UserEmail string `json:"user_email,omitempty"`
@@ -72,15 +74,15 @@ type EventAttendee struct {
 
 // EventFilter represents filtering options for events
 type EventFilter struct {
-	StartDate  *time.Time  `json:"start_date,omitempty"`
-	EndDate    *time.Time  `json:"end_date,omitempty"`
-	EventType  *EventType  `json:"event_type,omitempty"`
-	Priority   *Priority   `json:"priority,omitempty"`
-	CreatedBy  *string     `json:"created_by,omitempty"`
-	UserID     *string     `json:"user_id,omitempty"` // For events where user is creator or attendee
-	Search     *string     `json:"search,omitempty"`
-	Page       int         `json:"page"`
-	Limit      int         `json:"limit"`
+	StartDate *time.Time `json:"start_date,omitempty"`
+	EndDate   *time.Time `json:"end_date,omitempty"`
+	EventType *EventType `json:"event_type,omitempty"`
+	Priority  *Priority  `json:"priority,omitempty"`
+	CreatedBy *string    `json:"created_by,omitempty"`
+	UserID    *string    `json:"user_id,omitempty"` // For events where user is creator or attendee
+	Search    *string    `json:"search,omitempty"`
+	Page      int        `json:"page"`
+	Limit     int        `json:"limit"`
 }
 
 // Validate validates the event entity
@@ -88,15 +90,15 @@ func (e *Event) Validate() error {
 	if e.Title == "" {
 		return fmt.Errorf("event title is required")
 	}
-	
+
 	if e.StartDateTime.IsZero() {
 		return fmt.Errorf("event start date/time is required")
 	}
-	
+
 	if e.EndDateTime != nil && e.EndDateTime.Before(e.StartDateTime) {
 		return fmt.Errorf("event end date/time must be after start date/time")
 	}
-	
+
 	validEventTypes := map[EventType]bool{
 		EventTypeEvent:    true,
 		EventTypeMeeting:  true,
@@ -107,7 +109,7 @@ func (e *Event) Validate() error {
 	if !validEventTypes[e.EventType] {
 		return fmt.Errorf("invalid event type: %s", e.EventType)
 	}
-	
+
 	validPriorities := map[Priority]bool{
 		PriorityLow:    true,
 		PriorityMedium: true,
@@ -116,24 +118,24 @@ func (e *Event) Validate() error {
 	if !validPriorities[e.Priority] {
 		return fmt.Errorf("invalid priority: %s", e.Priority)
 	}
-	
-	if e.CreatedBy == "" {
+
+	if e.CreatedBy.IsNil() {
 		return fmt.Errorf("created_by is required")
 	}
-	
+
 	return nil
 }
 
 // Validate validates the event attendee entity
 func (ea *EventAttendee) Validate() error {
-	if ea.EventID == "" {
+	if ea.EventID.IsNil() {
 		return fmt.Errorf("event_id is required")
 	}
-	
-	if ea.UserID == "" {
+
+	if ea.UserID.IsNil() {
 		return fmt.Errorf("user_id is required")
 	}
-	
+
 	validStatuses := map[AttendeeStatus]bool{
 		AttendeeStatusPending:  true,
 		AttendeeStatusAccepted: true,
@@ -142,7 +144,7 @@ func (ea *EventAttendee) Validate() error {
 	if !validStatuses[ea.Status] {
 		return fmt.Errorf("invalid attendee status: %s", ea.Status)
 	}
-	
+
 	return nil
 }
 

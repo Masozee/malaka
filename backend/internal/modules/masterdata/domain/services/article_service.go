@@ -6,7 +6,7 @@ import (
 
 	"malaka/internal/modules/masterdata/domain/entities"
 	"malaka/internal/modules/masterdata/domain/repositories"
-	"malaka/internal/shared/utils"
+	"malaka/internal/shared/uuid"
 )
 
 // ArticleService provides business logic for article operations.
@@ -21,14 +21,14 @@ func NewArticleService(repo repositories.ArticleRepository) *ArticleService {
 
 // CreateArticle creates a new article.
 func (s *ArticleService) CreateArticle(ctx context.Context, article *entities.Article) error {
-	if article.ID == "" {
-		article.ID = utils.RandomString(10) // Generate a random ID if not provided
+	if article.ID.IsNil() {
+		article.ID = uuid.New()
 	}
 	return s.repo.Create(ctx, article)
 }
 
 // GetArticleByID retrieves an article by its ID.
-func (s *ArticleService) GetArticleByID(ctx context.Context, id string) (*entities.Article, error) {
+func (s *ArticleService) GetArticleByID(ctx context.Context, id uuid.ID) (*entities.Article, error) {
 	return s.repo.GetByID(ctx, id)
 }
 
@@ -51,7 +51,7 @@ func (s *ArticleService) UpdateArticle(ctx context.Context, article *entities.Ar
 }
 
 // DeleteArticle deletes an article by its ID.
-func (s *ArticleService) DeleteArticle(ctx context.Context, id string) error {
+func (s *ArticleService) DeleteArticle(ctx context.Context, id uuid.ID) error {
 	// Ensure the article exists before deleting
 	existingArticle, err := s.repo.GetByID(ctx, id)
 	if err != nil {

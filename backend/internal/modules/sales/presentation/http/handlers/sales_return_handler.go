@@ -8,6 +8,7 @@ import (
 	"malaka/internal/modules/sales/presentation/http/dto"
 	"malaka/internal/shared/response"
 	"malaka/internal/shared/utils"
+	"malaka/internal/shared/uuid"
 )
 
 // SalesReturnHandler handles HTTP requests for sales return operations.
@@ -79,13 +80,19 @@ func (h *SalesReturnHandler) UpdateSalesReturn(c *gin.Context) {
 		return
 	}
 
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		response.BadRequest(c, "Invalid ID format", nil)
+		return
+	}
+
 	sr := &entities.SalesReturn{
 		SalesInvoiceID: req.SalesInvoiceID,
 		ReturnDate:     utils.Now(),
 		Reason:         req.Reason,
 		TotalAmount:    req.TotalAmount,
 	}
-	sr.ID = id // Set the ID from the URL parameter
+	sr.ID = parsedID // Set the ID from the URL parameter
 
 	if err := h.service.UpdateSalesReturn(c.Request.Context(), sr); err != nil {
 		response.InternalServerError(c, err.Error(), nil)

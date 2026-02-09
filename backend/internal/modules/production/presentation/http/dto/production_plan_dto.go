@@ -3,8 +3,8 @@ package dto
 import (
 	"time"
 
-	"github.com/google/uuid"
 	"malaka/internal/modules/production/domain/entities"
+	"malaka/internal/shared/uuid"
 )
 
 // ProductionPlanRequest represents the request body for creating/updating production plans
@@ -109,7 +109,7 @@ func MapProductionPlanRequestToEntity(req *ProductionPlanRequest, createdBy stri
 		EndDate:    endDate,
 		Status:     entities.PlanStatus(req.Status),
 		Notes:      req.Notes,
-		CreatedBy:  createdBy,
+		CreatedBy:  uuid.MustParse(createdBy),
 	}
 
 	// Map items
@@ -126,7 +126,7 @@ func MapProductionPlanItemRequestToEntity(req *ProductionPlanItemRequest) entiti
 	endDate, _ := time.Parse("2006-01-02", req.EndDate)
 
 	item := entities.ProductionPlanItem{
-		ProductID:       req.ProductID,
+		ProductID:       uuid.MustParse(req.ProductID),
 		ProductCode:     req.ProductCode,
 		ProductName:     req.ProductName,
 		PlannedQuantity: req.PlannedQuantity,
@@ -138,7 +138,8 @@ func MapProductionPlanItemRequestToEntity(req *ProductionPlanItemRequest) entiti
 	}
 
 	if req.ID != nil && *req.ID != "" {
-		item.ID, _ = uuid.Parse(*req.ID)
+		id, _ := uuid.Parse(*req.ID)
+		item.ID = id
 	}
 
 	// Default priority
@@ -151,6 +152,13 @@ func MapProductionPlanItemRequestToEntity(req *ProductionPlanItemRequest) entiti
 
 // MapProductionPlanEntityToResponse maps entity to response
 func MapProductionPlanEntityToResponse(plan *entities.ProductionPlan) *ProductionPlanResponse {
+	// Convert ApprovedBy from *uuid.ID to *string
+	var approvedByStr *string
+	if plan.ApprovedBy != nil && !plan.ApprovedBy.IsNil() {
+		str := plan.ApprovedBy.String()
+		approvedByStr = &str
+	}
+
 	resp := &ProductionPlanResponse{
 		ID:            plan.ID.String(),
 		PlanNumber:    plan.PlanNumber,
@@ -163,8 +171,8 @@ func MapProductionPlanEntityToResponse(plan *entities.ProductionPlan) *Productio
 		TotalQuantity: plan.TotalQuantity,
 		TotalValue:    plan.TotalValue,
 		Notes:         plan.Notes,
-		CreatedBy:     plan.CreatedBy,
-		ApprovedBy:    plan.ApprovedBy,
+		CreatedBy:     plan.CreatedBy.String(),
+		ApprovedBy:    approvedByStr,
 		Items:         make([]ProductionPlanItemResponse, 0),
 		CreatedAt:     plan.CreatedAt.Format(time.RFC3339),
 		UpdatedAt:     plan.UpdatedAt.Format(time.RFC3339),
@@ -182,7 +190,7 @@ func MapProductionPlanEntityToResponse(plan *entities.ProductionPlan) *Productio
 func MapProductionPlanItemEntityToResponse(item *entities.ProductionPlanItem) ProductionPlanItemResponse {
 	return ProductionPlanItemResponse{
 		ID:               item.ID.String(),
-		ProductID:        item.ProductID,
+		ProductID:        item.ProductID.String(),
 		ProductCode:      item.ProductCode,
 		ProductName:      item.ProductName,
 		PlannedQuantity:  item.PlannedQuantity,

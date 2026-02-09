@@ -7,6 +7,7 @@ import (
 
 	"malaka/internal/modules/inventory/domain/entities"
 	"malaka/internal/modules/inventory/domain/repositories"
+	"malaka/internal/shared/uuid"
 )
 
 // RFQRepositoryImpl implements the RFQRepository interface
@@ -56,26 +57,26 @@ func (r *RFQRepositoryImpl) GetByID(ctx context.Context, id string) (*entities.R
 	}
 	
 	// Load related items
-	items, err := r.GetRFQItems(ctx, rfq.ID)
+	items, err := r.GetRFQItems(ctx, rfq.ID.String())
 	if err != nil {
 		return nil, err
 	}
 	rfq.Items = items
-	
+
 	// Load related suppliers
-	suppliers, err := r.GetRFQSuppliers(ctx, rfq.ID)
+	suppliers, err := r.GetRFQSuppliers(ctx, rfq.ID.String())
 	if err != nil {
 		return nil, err
 	}
 	rfq.Suppliers = suppliers
-	
+
 	// Load responses
-	responses, err := r.GetRFQResponses(ctx, rfq.ID)
+	responses, err := r.GetRFQResponses(ctx, rfq.ID.String())
 	if err != nil {
 		return nil, err
 	}
 	rfq.Responses = responses
-	
+
 	return rfq, nil
 }
 
@@ -106,9 +107,9 @@ func (r *RFQRepositoryImpl) GetAll(ctx context.Context) ([]*entities.RFQ, error)
 		}
 		
 		// Load basic item count and supplier count for list view
-		rfq.Items, _ = r.GetRFQItems(ctx, rfq.ID)
-		rfq.Suppliers, _ = r.GetRFQSuppliers(ctx, rfq.ID)
-		
+		rfq.Items, _ = r.GetRFQItems(ctx, rfq.ID.String())
+		rfq.Suppliers, _ = r.GetRFQSuppliers(ctx, rfq.ID.String())
+
 		rfqs = append(rfqs, rfq)
 	}
 	
@@ -313,16 +314,16 @@ func (r *RFQRepositoryImpl) GetRFQSuppliers(ctx context.Context, rfqID string) (
 		}
 		
 		if supplierID.Valid {
-			supplier.ID = supplierID.String
+			supplier.ID, _ = uuid.Parse(supplierID.String)
 			supplier.Name = supplierName.String
 			supplier.ContactPerson = supplierContact.String
 			supplier.Address = supplierAddress.String
 			rfqSupplier.Supplier = supplier
 		}
-		
+
 		rfqSuppliers = append(rfqSuppliers, rfqSupplier)
 	}
-	
+
 	return rfqSuppliers, nil
 }
 
@@ -363,16 +364,16 @@ func (r *RFQRepositoryImpl) GetRFQResponses(ctx context.Context, rfqID string) (
 		}
 		
 		if supplierID.Valid {
-			supplier.ID = supplierID.String
+			supplier.ID, _ = uuid.Parse(supplierID.String)
 			supplier.Name = supplierName.String
 			supplier.ContactPerson = supplierContact.String
 			supplier.Address = supplierAddress.String
 			response.Supplier = supplier
 		}
-		
+
 		responses = append(responses, response)
 	}
-	
+
 	return responses, nil
 }
 

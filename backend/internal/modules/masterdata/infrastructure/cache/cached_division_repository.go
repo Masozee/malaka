@@ -5,10 +5,10 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/google/uuid"
 	"malaka/internal/modules/masterdata/domain/entities"
 	"malaka/internal/modules/masterdata/domain/repositories"
 	"malaka/internal/shared/cache"
+	"malaka/internal/shared/uuid"
 )
 
 const (
@@ -43,7 +43,7 @@ func (r *CachedDivisionRepository) Create(ctx context.Context, division *entitie
 }
 
 // GetByID retrieves a division by ID with caching.
-func (r *CachedDivisionRepository) GetByID(ctx context.Context, id uuid.UUID) (*entities.Division, error) {
+func (r *CachedDivisionRepository) GetByID(ctx context.Context, id uuid.ID) (*entities.Division, error) {
 	cacheKey := fmt.Sprintf("%s%s", divisionKeyPrefix, id.String())
 	
 	// Try to get from cache first
@@ -125,7 +125,7 @@ func (r *CachedDivisionRepository) GetAllWithPagination(ctx context.Context, lim
 }
 
 // GetByParentID retrieves divisions by parent ID (not cached due to relational nature).
-func (r *CachedDivisionRepository) GetByParentID(ctx context.Context, parentID uuid.UUID) ([]*entities.Division, error) {
+func (r *CachedDivisionRepository) GetByParentID(ctx context.Context, parentID uuid.ID) ([]*entities.Division, error) {
 	// For relational queries, we usually bypass cache to ensure fresh data
 	return r.repo.GetByParentID(ctx, parentID)
 }
@@ -153,7 +153,7 @@ func (r *CachedDivisionRepository) Update(ctx context.Context, division *entitie
 }
 
 // Delete deletes a division and invalidates related cache.
-func (r *CachedDivisionRepository) Delete(ctx context.Context, id uuid.UUID) error {
+func (r *CachedDivisionRepository) Delete(ctx context.Context, id uuid.ID) error {
 	// Get division first to get code for cache invalidation
 	division, err := r.repo.GetByID(ctx, id)
 	if err != nil {

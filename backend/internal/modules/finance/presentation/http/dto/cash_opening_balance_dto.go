@@ -5,6 +5,7 @@ import (
 
 	"malaka/internal/modules/finance/domain/entities"
 	"malaka/internal/shared/types"
+	"malaka/internal/shared/uuid"
 )
 
 // CashOpeningBalanceCreateRequest represents the request to create cash opening balance.
@@ -47,7 +48,7 @@ type CashOpeningBalanceResponse struct {
 func (req *CashOpeningBalanceCreateRequest) ToCashOpeningBalanceEntity() *entities.CashOpeningBalance {
 	return &entities.CashOpeningBalance{
 		BaseModel:      types.BaseModel{},
-		CashBankID:     req.CashBankID,
+		CashBankID:     uuid.MustParse(req.CashBankID),
 		OpeningDate:    req.OpeningDate,
 		OpeningBalance: req.OpeningBalance,
 		Currency:       req.Currency,
@@ -61,7 +62,7 @@ func (req *CashOpeningBalanceCreateRequest) ToCashOpeningBalanceEntity() *entiti
 func (req *CashOpeningBalanceUpdateRequest) ToCashOpeningBalanceEntity() *entities.CashOpeningBalance {
 	return &entities.CashOpeningBalance{
 		BaseModel:      types.BaseModel{},
-		CashBankID:     req.CashBankID,
+		CashBankID:     uuid.MustParse(req.CashBankID),
 		OpeningDate:    req.OpeningDate,
 		OpeningBalance: req.OpeningBalance,
 		Currency:       req.Currency,
@@ -74,8 +75,8 @@ func (req *CashOpeningBalanceUpdateRequest) ToCashOpeningBalanceEntity() *entiti
 // FromCashOpeningBalanceEntity converts entities.CashOpeningBalance to CashOpeningBalanceResponse.
 func FromCashOpeningBalanceEntity(balance *entities.CashOpeningBalance) *CashOpeningBalanceResponse {
 	return &CashOpeningBalanceResponse{
-		ID:             balance.ID,
-		CashBankID:     balance.CashBankID,
+		ID:             balance.ID.String(),
+		CashBankID:     balance.CashBankID.String(),
 		OpeningDate:    balance.OpeningDate,
 		OpeningBalance: balance.OpeningBalance,
 		Currency:       balance.Currency,

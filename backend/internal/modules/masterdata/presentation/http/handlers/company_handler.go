@@ -7,6 +7,7 @@ import (
 	"malaka/internal/modules/masterdata/domain/services"
 	"malaka/internal/modules/masterdata/presentation/http/dto"
 	"malaka/internal/shared/response"
+	"malaka/internal/shared/uuid"
 )
 
 // CompanyHandler handles HTTP requests for company operations.
@@ -51,7 +52,7 @@ func (h *CompanyHandler) CreateCompany(c *gin.Context) {
 // GetCompanyByID handles retrieving a company by its ID.
 func (h *CompanyHandler) GetCompanyByID(c *gin.Context) {
 	id := c.Param("id")
-	company, err := h.service.GetCompanyByID(c.Request.Context(), id)
+	company, err := h.service.GetCompanyByID(c.Request.Context(), uuid.MustParse(id))
 	if err != nil {
 		response.InternalServerError(c, err.Error(), nil)
 		return
@@ -91,7 +92,7 @@ func (h *CompanyHandler) UpdateCompany(c *gin.Context) {
 		Address: req.Address,
 		Status:  req.Status,
 	}
-	company.ID = id // Set the ID from the URL parameter
+	company.ID = uuid.MustParse(id) // Set the ID from the URL parameter
 
 	// Set default status if not provided
 	if company.Status == "" {
@@ -109,7 +110,7 @@ func (h *CompanyHandler) UpdateCompany(c *gin.Context) {
 // DeleteCompany handles deleting a company by its ID.
 func (h *CompanyHandler) DeleteCompany(c *gin.Context) {
 	id := c.Param("id")
-	if err := h.service.DeleteCompany(c.Request.Context(), id); err != nil {
+	if err := h.service.DeleteCompany(c.Request.Context(), uuid.MustParse(id)); err != nil {
 		response.InternalServerError(c, err.Error(), nil)
 		return
 	}

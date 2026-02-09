@@ -1,13 +1,15 @@
 package handlers
 
 import (
+	"time"
+
 	"github.com/gin-gonic/gin"
 
 	"malaka/internal/modules/inventory/domain/entities"
 	"malaka/internal/modules/inventory/domain/services"
 	"malaka/internal/modules/inventory/presentation/http/dto"
 	"malaka/internal/shared/response"
-	"malaka/internal/shared/utils"
+	"malaka/internal/shared/uuid"
 )
 
 // StockHandler handles HTTP requests for stock operations.
@@ -28,13 +30,27 @@ func (h *StockHandler) RecordStockMovement(c *gin.Context) {
 		return
 	}
 
+	articleID, err := uuid.Parse(req.ArticleID)
+	if err != nil {
+		response.BadRequest(c, "Invalid article ID format", nil)
+		return
+	}
+
+	warehouseID, err := uuid.Parse(req.WarehouseID)
+	if err != nil {
+		response.BadRequest(c, "Invalid warehouse ID format", nil)
+		return
+	}
+
+	referenceID, _ := uuid.Parse(req.ReferenceID) // Optional, may be empty
+
 	sm := &entities.StockMovement{
-		ArticleID:    req.ArticleID,
-		WarehouseID:  req.WarehouseID,
+		ArticleID:    articleID,
+		WarehouseID:  warehouseID,
 		Quantity:     req.Quantity,
 		MovementType: req.MovementType,
-		MovementDate: utils.Now(),
-		ReferenceID:  req.ReferenceID,
+		MovementDate: time.Now(),
+		ReferenceID:  referenceID,
 	}
 
 	if err := h.service.RecordStockMovement(c.Request.Context(), sm); err != nil {
@@ -47,11 +63,23 @@ func (h *StockHandler) RecordStockMovement(c *gin.Context) {
 
 // GetStockBalance handles retrieving the stock balance.
 func (h *StockHandler) GetStockBalance(c *gin.Context) {
-	articleID := c.Query("article_id")
-	warehouseID := c.Query("warehouse_id")
+	articleIDStr := c.Query("article_id")
+	warehouseIDStr := c.Query("warehouse_id")
 
-	if articleID == "" || warehouseID == "" {
+	if articleIDStr == "" || warehouseIDStr == "" {
 		response.BadRequest(c, "article_id and warehouse_id are required", nil)
+		return
+	}
+
+	articleID, err := uuid.Parse(articleIDStr)
+	if err != nil {
+		response.BadRequest(c, "Invalid article ID format", nil)
+		return
+	}
+
+	warehouseID, err := uuid.Parse(warehouseIDStr)
+	if err != nil {
+		response.BadRequest(c, "Invalid warehouse ID format", nil)
 		return
 	}
 
@@ -89,7 +117,7 @@ func (h *StockHandler) GetStockControl(c *gin.Context) {
 
 	// Transform repository data to DTO format
 	var stockItems []dto.StockControlResponse
-	
+
 	for _, item := range stockControlItems {
 		// Calculate status based on quantity
 		status := "in_stock"
@@ -107,7 +135,7 @@ func (h *StockHandler) GetStockControl(c *gin.Context) {
 
 		// Create response with actual database data
 		stockItem := dto.StockControlResponse{
-			ID:            item.StockBalanceID,
+			ID:            item.StockBalanceID.String(),
 			Code:          item.ArticleCode,
 			Name:          item.ArticleName,
 			Category:      item.ArticleCategory,
@@ -121,14 +149,14 @@ func (h *StockHandler) GetStockControl(c *gin.Context) {
 			LastUpdated:   item.StockUpdatedAt,
 			Status:        status,
 			ArticleDetails: dto.ArticleDetails{
-				ID:          item.ArticleID,
+				ID:          item.ArticleID.String(),
 				Name:        item.ArticleName,
 				Description: item.ArticleDescription,
 				Barcode:     item.ArticleBarcode,
 				Price:       item.ArticlePrice,
 			},
 			WarehouseDetails: dto.WarehouseDetails{
-				ID:     item.WarehouseID,
+				ID:     item.WarehouseID.String(),
 				Code:   item.WarehouseCode,
 				Name:   item.WarehouseName,
 				City:   item.WarehouseCity,

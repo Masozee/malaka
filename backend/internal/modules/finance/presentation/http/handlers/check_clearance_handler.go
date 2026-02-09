@@ -4,11 +4,11 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 
 	"malaka/internal/modules/finance/domain/services"
 	"malaka/internal/modules/finance/presentation/http/dto"
 	"malaka/internal/shared/response"
+	"malaka/internal/shared/uuid"
 )
 
 type CheckClearanceHandler struct {
@@ -29,7 +29,7 @@ func (h *CheckClearanceHandler) CreateCheckClearance(c *gin.Context) {
 	}
 
 	check := dto.ToCheckClearanceEntity(&req)
-	check.ID = uuid.New().String()
+	check.ID = uuid.New()
 	check.CreatedAt = time.Now()
 	check.UpdatedAt = time.Now()
 
@@ -44,7 +44,13 @@ func (h *CheckClearanceHandler) CreateCheckClearance(c *gin.Context) {
 func (h *CheckClearanceHandler) GetCheckClearanceByID(c *gin.Context) {
 	id := c.Param("id")
 
-	check, err := h.service.GetCheckClearanceByID(c.Request.Context(), id)
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		response.BadRequest(c, "Invalid ID", err.Error())
+		return
+	}
+
+	check, err := h.service.GetCheckClearanceByID(c.Request.Context(), parsedID)
 	if err != nil {
 		response.NotFound(c, "Check clearance not found", err.Error())
 		return
@@ -71,15 +77,33 @@ func (h *CheckClearanceHandler) GetAllCheckClearances(c *gin.Context) {
 func (h *CheckClearanceHandler) UpdateCheckClearance(c *gin.Context) {
 	id := c.Param("id")
 
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		response.BadRequest(c, "Invalid ID", err.Error())
+		return
+	}
+
 	var req dto.UpdateCheckClearanceRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		response.BadRequest(c, "Invalid request", err.Error())
 		return
 	}
 
-	check, err := h.service.GetCheckClearanceByID(c.Request.Context(), id)
+	check, err := h.service.GetCheckClearanceByID(c.Request.Context(), parsedID)
 	if err != nil {
 		response.NotFound(c, "Check clearance not found", err.Error())
+		return
+	}
+
+	parsedPayeeID, err := uuid.Parse(req.PayeeID)
+	if err != nil {
+		response.BadRequest(c, "Invalid PayeeID", err.Error())
+		return
+	}
+
+	parsedCashBankID, err := uuid.Parse(req.CashBankID)
+	if err != nil {
+		response.BadRequest(c, "Invalid CashBankID", err.Error())
 		return
 	}
 
@@ -87,9 +111,9 @@ func (h *CheckClearanceHandler) UpdateCheckClearance(c *gin.Context) {
 	check.CheckDate = req.CheckDate
 	check.BankName = req.BankName
 	check.Amount = req.Amount
-	check.PayeeID = req.PayeeID
+	check.PayeeID = parsedPayeeID
 	check.PayeeName = req.PayeeName
-	check.CashBankID = req.CashBankID
+	check.CashBankID = parsedCashBankID
 	check.ClearanceDate = req.ClearanceDate
 	check.Status = req.Status
 	check.Description = req.Description
@@ -107,7 +131,13 @@ func (h *CheckClearanceHandler) UpdateCheckClearance(c *gin.Context) {
 func (h *CheckClearanceHandler) DeleteCheckClearance(c *gin.Context) {
 	id := c.Param("id")
 
-	if err := h.service.DeleteCheckClearance(c.Request.Context(), id); err != nil {
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		response.BadRequest(c, "Invalid ID", err.Error())
+		return
+	}
+
+	if err := h.service.DeleteCheckClearance(c.Request.Context(), parsedID); err != nil {
 		response.InternalServerError(c, "Failed to delete check clearance", err.Error())
 		return
 	}
@@ -165,29 +195,41 @@ func (h *CheckClearanceHandler) GetOutgoingChecks(c *gin.Context) {
 func (h *CheckClearanceHandler) ClearCheck(c *gin.Context) {
 	id := c.Param("id")
 
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		response.BadRequest(c, "Invalid ID", err.Error())
+		return
+	}
+
 	var req dto.ClearCheckRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		response.BadRequest(c, "Invalid request", err.Error())
 		return
 	}
 
-	if err := h.service.ClearCheck(c.Request.Context(), id, req.ClearanceDate); err != nil {
+	if err := h.service.ClearCheck(c.Request.Context(), parsedID, req.ClearanceDate); err != nil {
 		response.InternalServerError(c, "Failed to clear check", err.Error())
 		return
 	}
 
-	check, _ := h.service.GetCheckClearanceByID(c.Request.Context(), id)
+	check, _ := h.service.GetCheckClearanceByID(c.Request.Context(), parsedID)
 	response.OK(c, "Check cleared successfully", dto.ToCheckClearanceResponse(check))
 }
 
 func (h *CheckClearanceHandler) BounceCheck(c *gin.Context) {
 	id := c.Param("id")
 
-	if err := h.service.BounceCheck(c.Request.Context(), id); err != nil {
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		response.BadRequest(c, "Invalid ID", err.Error())
+		return
+	}
+
+	if err := h.service.BounceCheck(c.Request.Context(), parsedID); err != nil {
 		response.InternalServerError(c, "Failed to bounce check", err.Error())
 		return
 	}
 
-	check, _ := h.service.GetCheckClearanceByID(c.Request.Context(), id)
+	check, _ := h.service.GetCheckClearanceByID(c.Request.Context(), parsedID)
 	response.OK(c, "Check bounced successfully", dto.ToCheckClearanceResponse(check))
 }

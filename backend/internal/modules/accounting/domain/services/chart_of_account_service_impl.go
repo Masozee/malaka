@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/google/uuid"
 	"malaka/internal/modules/accounting/domain/entities"
 	"malaka/internal/modules/accounting/domain/repositories"
+	"malaka/internal/shared/uuid"
 )
 
 // chartOfAccountService implements ChartOfAccountService.
@@ -39,7 +39,7 @@ func (s *chartOfAccountService) CreateChartOfAccount(ctx context.Context, coa *e
 }
 
 // GetChartOfAccountByID retrieves a ChartOfAccount by its ID.
-func (s *chartOfAccountService) GetChartOfAccountByID(ctx context.Context, id uuid.UUID) (*entities.ChartOfAccount, error) {
+func (s *chartOfAccountService) GetChartOfAccountByID(ctx context.Context, id uuid.ID) (*entities.ChartOfAccount, error) {
 	return s.repo.GetByID(ctx, id)
 }
 
@@ -84,7 +84,7 @@ func (s *chartOfAccountService) UpdateChartOfAccount(ctx context.Context, coa *e
 }
 
 // DeleteChartOfAccount deletes a ChartOfAccount by its ID.
-func (s *chartOfAccountService) DeleteChartOfAccount(ctx context.Context, id uuid.UUID) error {
+func (s *chartOfAccountService) DeleteChartOfAccount(ctx context.Context, id uuid.ID) error {
 	// Ensure the COA exists before deleting
 	existingCoa, err := s.repo.GetByID(ctx, id)
 	if err != nil {

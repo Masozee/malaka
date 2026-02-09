@@ -6,7 +6,7 @@ import (
 
 	"malaka/internal/modules/finance/domain/entities"
 	"malaka/internal/modules/finance/domain/repositories"
-	"malaka/internal/shared/utils"
+	"malaka/internal/shared/uuid"
 )
 
 // CashDisbursementService provides business logic for cash disbursement operations.
@@ -21,14 +21,14 @@ func NewCashDisbursementService(repo repositories.CashDisbursementRepository) *C
 
 // CreateCashDisbursement creates a new cash disbursement.
 func (s *CashDisbursementService) CreateCashDisbursement(ctx context.Context, cd *entities.CashDisbursement) error {
-	if cd.ID == "" {
-		cd.ID = utils.RandomString(10) // Generate a random ID if not provided
+	if cd.ID.IsNil() {
+		cd.ID = uuid.New()
 	}
 	return s.repo.Create(ctx, cd)
 }
 
 // GetCashDisbursementByID retrieves a cash disbursement by its ID.
-func (s *CashDisbursementService) GetCashDisbursementByID(ctx context.Context, id string) (*entities.CashDisbursement, error) {
+func (s *CashDisbursementService) GetCashDisbursementByID(ctx context.Context, id uuid.ID) (*entities.CashDisbursement, error) {
 	return s.repo.GetByID(ctx, id)
 }
 
@@ -46,7 +46,7 @@ func (s *CashDisbursementService) UpdateCashDisbursement(ctx context.Context, cd
 }
 
 // DeleteCashDisbursement deletes a cash disbursement by its ID.
-func (s *CashDisbursementService) DeleteCashDisbursement(ctx context.Context, id string) error {
+func (s *CashDisbursementService) DeleteCashDisbursement(ctx context.Context, id uuid.ID) error {
 	// Ensure the cash disbursement exists before deleting
 	existingCD, err := s.repo.GetByID(ctx, id)
 	if err != nil {

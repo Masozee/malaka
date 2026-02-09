@@ -2,11 +2,13 @@ package entities
 
 import (
 	"time"
+
+	"malaka/internal/shared/uuid"
 )
 
 // Setting represents a configuration setting
 type Setting struct {
-	ID              string     `json:"id" db:"id"`
+	ID              uuid.ID    `json:"id" db:"id"`
 	Category        string     `json:"category" db:"category"`
 	SubCategory     *string    `json:"sub_category,omitempty" db:"sub_category"`
 	SettingKey      string     `json:"setting_key" db:"setting_key"`
@@ -25,8 +27,8 @@ type Setting struct {
 
 // SettingAudit represents an audit log entry for setting changes
 type SettingAudit struct {
-	ID           string     `json:"id" db:"id"`
-	SettingID    string     `json:"setting_id" db:"setting_id"`
+	ID           uuid.ID    `json:"id" db:"id"`
+	SettingID    uuid.ID    `json:"setting_id" db:"setting_id"`
 	OldValue     *string    `json:"old_value,omitempty" db:"old_value"`
 	NewValue     *string    `json:"new_value,omitempty" db:"new_value"`
 	ChangedBy    *string    `json:"changed_by,omitempty" db:"changed_by"`
@@ -38,7 +40,7 @@ type SettingAudit struct {
 
 // SettingPermission represents role-based permissions for settings
 type SettingPermission struct {
-	ID          string    `json:"id" db:"id"`
+	ID          uuid.ID   `json:"id" db:"id"`
 	Role        string    `json:"role" db:"role"`
 	Category    string    `json:"category" db:"category"`
 	SubCategory *string   `json:"sub_category,omitempty" db:"sub_category"`

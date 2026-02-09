@@ -1,13 +1,12 @@
-
 package services
 
 import (
 	"context"
 
-	"github.com/google/uuid"
 	"malaka/internal/modules/shipping/domain/dtos"
 	"malaka/internal/modules/shipping/domain/entities"
 	"malaka/internal/modules/shipping/domain/repositories"
+	"malaka/internal/shared/uuid"
 )
 
 type outboundScanService struct {
@@ -28,10 +27,10 @@ func (s *outboundScanService) CreateOutboundScan(ctx context.Context, req *dtos.
 	return s.outboundScanRepo.CreateOutboundScan(ctx, outboundScan)
 }
 
-func (s *outboundScanService) GetOutboundScanByID(ctx context.Context, id uuid.UUID) (*entities.OutboundScan, error) {
+func (s *outboundScanService) GetOutboundScanByID(ctx context.Context, id uuid.ID) (*entities.OutboundScan, error) {
 	return s.outboundScanRepo.GetOutboundScanByID(ctx, id)
 }
 
-func (s *outboundScanService) GetOutboundScansByShipmentID(ctx context.Context, shipmentID uuid.UUID) ([]entities.OutboundScan, error) {
+func (s *outboundScanService) GetOutboundScansByShipmentID(ctx context.Context, shipmentID uuid.ID) ([]entities.OutboundScan, error) {
 	return s.outboundScanRepo.GetOutboundScansByShipmentID(ctx, shipmentID)
 }

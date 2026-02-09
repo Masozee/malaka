@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/google/uuid"
+	"malaka/internal/shared/uuid"
 	"malaka/internal/modules/accounting/domain/entities"
 	"malaka/internal/modules/accounting/domain/repositories"
 )
@@ -44,7 +44,7 @@ func (s *financialPeriodService) CreateFinancialPeriod(ctx context.Context, peri
 }
 
 // GetFinancialPeriodByID retrieves a financial period by its ID
-func (s *financialPeriodService) GetFinancialPeriodByID(ctx context.Context, id uuid.UUID) (*entities.FinancialPeriod, error) {
+func (s *financialPeriodService) GetFinancialPeriodByID(ctx context.Context, id uuid.ID) (*entities.FinancialPeriod, error) {
 	return s.repo.GetByID(ctx, id)
 }
 
@@ -72,7 +72,7 @@ func (s *financialPeriodService) UpdateFinancialPeriod(ctx context.Context, peri
 }
 
 // DeleteFinancialPeriod deletes a financial period by its ID
-func (s *financialPeriodService) DeleteFinancialPeriod(ctx context.Context, id uuid.UUID) error {
+func (s *financialPeriodService) DeleteFinancialPeriod(ctx context.Context, id uuid.ID) error {
 	existingPeriod, err := s.repo.GetByID(ctx, id)
 	if err != nil {
 		return fmt.Errorf("failed to check for existing period: %w", err)
@@ -114,7 +114,7 @@ func (s *financialPeriodService) GetClosedFinancialPeriods(ctx context.Context, 
 }
 
 // CloseFinancialPeriod marks a financial period as closed
-func (s *financialPeriodService) CloseFinancialPeriod(ctx context.Context, id uuid.UUID, userID string) error {
+func (s *financialPeriodService) CloseFinancialPeriod(ctx context.Context, id uuid.ID, userID string) error {
 	period, err := s.repo.GetByID(ctx, id)
 	if err != nil {
 		return err
@@ -128,7 +128,7 @@ func (s *financialPeriodService) CloseFinancialPeriod(ctx context.Context, id uu
 }
 
 // ReopenFinancialPeriod reopens a closed financial period
-func (s *financialPeriodService) ReopenFinancialPeriod(ctx context.Context, id uuid.UUID) error {
+func (s *financialPeriodService) ReopenFinancialPeriod(ctx context.Context, id uuid.ID) error {
 	period, err := s.repo.GetByID(ctx, id)
 	if err != nil {
 		return err

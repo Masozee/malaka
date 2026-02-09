@@ -2,11 +2,13 @@ package dto
 
 import (
 	"time"
+
+	"malaka/internal/shared/uuid"
 )
 
 type PerformanceReviewResponse struct {
-	ID                     string                            `json:"id"`
-	EmployeeID             string                            `json:"employee_id"`
+	ID                     uuid.ID                           `json:"id"`
+	EmployeeID             uuid.ID                           `json:"employee_id"`
 	EmployeeName           string                            `json:"employee_name"`
 	EmployeeCode           string                            `json:"employee_code"`
 	Department             string                            `json:"department"`
@@ -35,16 +37,16 @@ type PerformanceGoalsSummary struct {
 }
 
 type PerformanceCompetenciesSummary struct {
-	Technical       float64 `json:"technical"`
-	Communication   float64 `json:"communication"`
-	Leadership      float64 `json:"leadership"`
-	Teamwork        float64 `json:"teamwork"`
-	ProblemSolving  float64 `json:"problem_solving"`
+	Technical      float64 `json:"technical"`
+	Communication  float64 `json:"communication"`
+	Leadership     float64 `json:"leadership"`
+	Teamwork       float64 `json:"teamwork"`
+	ProblemSolving float64 `json:"problem_solving"`
 }
 
 type PerformanceReviewGoalResponse struct {
-	ID                    string  `json:"id"`
-	GoalID                string  `json:"goal_id"`
+	ID                    uuid.ID `json:"id"`
+	GoalID                uuid.ID `json:"goal_id"`
 	GoalTitle             string  `json:"goal_title"`
 	GoalCategory          string  `json:"goal_category"`
 	TargetValue           string  `json:"target_value"`
@@ -55,8 +57,8 @@ type PerformanceReviewGoalResponse struct {
 }
 
 type PerformanceCompetencyResponse struct {
-	ID              string  `json:"id"`
-	CompetencyID    string  `json:"competency_id"`
+	ID              uuid.ID `json:"id"`
+	CompetencyID    uuid.ID `json:"competency_id"`
 	CompetencyName  string  `json:"competency_name"`
 	Category        string  `json:"category"`
 	SelfScore       float64 `json:"self_score"`
@@ -67,14 +69,14 @@ type PerformanceCompetencyResponse struct {
 }
 
 type PerformanceReviewCreateRequest struct {
-	EmployeeID     string `json:"employee_id" binding:"required"`
-	ReviewCycleID  string `json:"review_cycle_id" binding:"required"`
-	ReviewerID     string `json:"reviewer_id" binding:"required"`
-	ReviewPeriod   string `json:"review_period" binding:"required"`
-	OverallScore   *float64 `json:"overall_score"`
-	Status         string `json:"status"`
-	ReviewDate     *time.Time `json:"review_date"`
-	Notes          string `json:"notes"`
+	EmployeeID    uuid.ID    `json:"employee_id" binding:"required"`
+	ReviewCycleID uuid.ID    `json:"review_cycle_id" binding:"required"`
+	ReviewerID    uuid.ID    `json:"reviewer_id" binding:"required"`
+	ReviewPeriod  string     `json:"review_period" binding:"required"`
+	OverallScore  *float64   `json:"overall_score"`
+	Status        string     `json:"status"`
+	ReviewDate    *time.Time `json:"review_date"`
+	Notes         string     `json:"notes"`
 }
 
 type PerformanceReviewUpdateRequest struct {
@@ -96,12 +98,12 @@ type PerformanceReviewListResponse struct {
 }
 
 type PerformanceStatisticsResponse struct {
-	TotalReviews       int     `json:"total_reviews"`
-	CompletedReviews   int     `json:"completed_reviews"`
-	PendingReviews     int     `json:"pending_reviews"`
-	OverdueReviews     int     `json:"overdue_reviews"`
-	DraftReviews       int     `json:"draft_reviews"`
-	AverageScore       float64 `json:"average_score"`
-	HighPerformers     int     `json:"high_performers"`
-	CompletionRate     float64 `json:"completion_rate"`
+	TotalReviews     int     `json:"total_reviews"`
+	CompletedReviews int     `json:"completed_reviews"`
+	PendingReviews   int     `json:"pending_reviews"`
+	OverdueReviews   int     `json:"overdue_reviews"`
+	DraftReviews     int     `json:"draft_reviews"`
+	AverageScore     float64 `json:"average_score"`
+	HighPerformers   int     `json:"high_performers"`
+	CompletionRate   float64 `json:"completion_rate"`
 }

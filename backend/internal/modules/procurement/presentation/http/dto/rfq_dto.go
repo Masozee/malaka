@@ -183,7 +183,7 @@ func ToRFQResponse(rfq *entities.RFQ) *RFQResponse {
 	}
 
 	response := &RFQResponse{
-		ID:          rfq.ID,
+		ID:          rfq.ID.String(),
 		RFQNumber:   rfq.RFQNumber,
 		Title:       rfq.Title,
 		Description: rfq.Description,
@@ -202,7 +202,7 @@ func ToRFQResponse(rfq *entities.RFQ) *RFQResponse {
 		response.Items = make([]*RFQItemResponse, len(rfq.Items))
 		for i, item := range rfq.Items {
 			response.Items[i] = &RFQItemResponse{
-				ID:            item.ID,
+				ID:            item.ID.String(),
 				RFQID:         item.RFQID,
 				ItemName:      item.ItemName,
 				Description:   item.Description,
@@ -221,7 +221,7 @@ func ToRFQResponse(rfq *entities.RFQ) *RFQResponse {
 		response.Suppliers = make([]*RFQSupplierResponse, len(rfq.Suppliers))
 		for i, supplier := range rfq.Suppliers {
 			response.Suppliers[i] = &RFQSupplierResponse{
-				ID:           supplier.ID,
+				ID:           supplier.ID.String(),
 				RFQID:        supplier.RFQID,
 				SupplierID:   supplier.SupplierID,
 				SupplierName: supplier.SupplierName,
@@ -252,7 +252,7 @@ func ToRFQResponseDetail(resp *entities.RFQResponse) *RFQResponseDetail {
 	}
 
 	detail := &RFQResponseDetail{
-		ID:              resp.ID,
+		ID:              resp.ID.String(),
 		RFQID:           resp.RFQID,
 		SupplierID:      resp.SupplierID,
 		SupplierName:    resp.SupplierName,
@@ -273,7 +273,7 @@ func ToRFQResponseDetail(resp *entities.RFQResponse) *RFQResponseDetail {
 		detail.Items = make([]*RFQResponseItemDetail, len(resp.ResponseItems))
 		for i, item := range resp.ResponseItems {
 			detail.Items[i] = &RFQResponseItemDetail{
-				ID:            item.ID,
+				ID:            item.ID.String(),
 				RFQResponseID: item.RFQResponseID,
 				RFQItemID:     item.RFQItemID,
 				UnitPrice:     item.UnitPrice,

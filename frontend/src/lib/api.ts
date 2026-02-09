@@ -34,6 +34,7 @@ export interface PaginatedResponse<T> {
 class ApiClient {
   private baseURL: string
   private token: string | null = null
+  private companyId: string | null = null
 
   constructor(baseURL: string) {
     this.baseURL = baseURL
@@ -65,6 +66,14 @@ class ApiClient {
 
   getToken(): string | null {
     return this.token
+  }
+
+  setCompanyId(companyId: string | undefined) {
+    this.companyId = companyId || null
+  }
+
+  getCompanyId(): string | null {
+    return this.companyId
   }
 
   private async request<T>(
@@ -118,9 +127,14 @@ class ApiClient {
 
   async get<T>(endpoint: string, params?: Record<string, unknown>, options?: { cache?: boolean, ttl?: number, token?: string }): Promise<T> {
     let url = endpoint
-    if (params) {
+    // Merge company_id into params for tenant filtering
+    const mergedParams = { ...params }
+    if (this.companyId && !mergedParams.company_id) {
+      mergedParams.company_id = this.companyId
+    }
+    if (Object.keys(mergedParams).length > 0) {
       const searchParams = new URLSearchParams()
-      Object.entries(params).forEach(([key, value]) => {
+      Object.entries(mergedParams).forEach(([key, value]) => {
         if (value !== undefined && value !== null) {
           searchParams.append(key, value.toString())
         }

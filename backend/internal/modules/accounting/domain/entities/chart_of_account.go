@@ -3,13 +3,13 @@ package entities
 import (
 	"time"
 
-	"github.com/google/uuid"
+	"malaka/internal/shared/uuid"
 )
 
 // ChartOfAccount represents a single account in the chart of accounts.
 type ChartOfAccount struct {
-	ID           uuid.UUID  `json:"id"`
-	ParentID     *uuid.UUID `json:"parent_id"`
+	ID           uuid.ID  `json:"id"`
+	ParentID     *uuid.ID `json:"parent_id"`
 	AccountCode  string     `json:"account_code"`
 	AccountName  string     `json:"account_name"`
 	AccountType  string     `json:"account_type"`    // e.g., Asset, Liability, Equity, Revenue, Expense

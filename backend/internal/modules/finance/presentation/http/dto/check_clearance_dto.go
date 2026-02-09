@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"malaka/internal/modules/finance/domain/entities"
+	"malaka/internal/shared/uuid"
 )
 
 type CreateCheckClearanceRequest struct {
@@ -56,14 +57,14 @@ type CheckClearanceResponse struct {
 
 func ToCheckClearanceResponse(check *entities.CheckClearance) *CheckClearanceResponse {
 	return &CheckClearanceResponse{
-		ID:            check.ID,
+		ID:            check.ID.String(),
 		CheckNumber:   check.CheckNumber,
 		CheckDate:     check.CheckDate,
 		BankName:      check.BankName,
 		Amount:        check.Amount,
-		PayeeID:       check.PayeeID,
+		PayeeID:       check.PayeeID.String(),
 		PayeeName:     check.PayeeName,
-		CashBankID:    check.CashBankID,
+		CashBankID:    check.CashBankID.String(),
 		ClearanceDate: check.ClearanceDate,
 		Status:        check.Status,
 		Description:   check.Description,
@@ -79,9 +80,9 @@ func ToCheckClearanceEntity(req *CreateCheckClearanceRequest) *entities.CheckCle
 		CheckDate:     req.CheckDate,
 		BankName:      req.BankName,
 		Amount:        req.Amount,
-		PayeeID:       req.PayeeID,
+		PayeeID:       uuid.MustParse(req.PayeeID),
 		PayeeName:     req.PayeeName,
-		CashBankID:    req.CashBankID,
+		CashBankID:    uuid.MustParse(req.CashBankID),
 		ClearanceDate: req.ClearanceDate,
 		Description:   req.Description,
 		IsIncoming:    req.IsIncoming,

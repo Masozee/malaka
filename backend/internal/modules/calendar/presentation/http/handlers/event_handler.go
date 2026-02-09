@@ -11,6 +11,7 @@ import (
 	"malaka/internal/modules/calendar/domain/services"
 	"malaka/internal/modules/calendar/presentation/http/dto"
 	"malaka/internal/shared/response"
+	"malaka/internal/shared/uuid"
 )
 
 type EventHandler struct {
@@ -51,14 +52,20 @@ func (h *EventHandler) CreateEvent(c *gin.Context) {
 	}
 
 	// Get user ID from context (set by auth middleware)
-	userID, exists := c.Get("user_id")
+	userIDStr, exists := c.Get("user_id")
 	if !exists {
 		response.Error(c, http.StatusUnauthorized, "User not authenticated", nil)
 		return
 	}
 
+	userID, err := uuid.Parse(userIDStr.(string))
+	if err != nil {
+		response.Error(c, http.StatusBadRequest, "Invalid user ID", err)
+		return
+	}
+
 	// Convert to entity
-	event := req.ToEntity(userID.(string))
+	event := req.ToEntity(userID)
 
 	// Create event
 	if err := h.eventService.CreateEvent(c.Request.Context(), event, req.AttendeeIDs); err != nil {
@@ -67,7 +74,7 @@ func (h *EventHandler) CreateEvent(c *gin.Context) {
 	}
 
 	// Get created event with attendees
-	createdEvent, err := h.eventService.GetEventByID(c.Request.Context(), event.ID, userID.(string))
+	createdEvent, err := h.eventService.GetEventByID(c.Request.Context(), event.ID, userID)
 	if err != nil {
 		response.Error(c, http.StatusInternalServerError, "Failed to retrieve created event", err)
 		return
@@ -89,21 +96,33 @@ func (h *EventHandler) CreateEvent(c *gin.Context) {
 // @Failure 404 {object} response.Response
 // @Router /calendar/events/{id} [get]
 func (h *EventHandler) GetEvent(c *gin.Context) {
-	eventID := c.Param("id")
-	if eventID == "" {
+	eventIDStr := c.Param("id")
+	if eventIDStr == "" {
 		response.Error(c, http.StatusBadRequest, "Event ID is required", nil)
 		return
 	}
 
+	eventID, err := uuid.Parse(eventIDStr)
+	if err != nil {
+		response.Error(c, http.StatusBadRequest, "Invalid event ID", err)
+		return
+	}
+
 	// Get user ID from context
-	userID, exists := c.Get("user_id")
+	userIDStr, exists := c.Get("user_id")
 	if !exists {
 		response.Error(c, http.StatusUnauthorized, "User not authenticated", nil)
 		return
 	}
 
+	userID, err := uuid.Parse(userIDStr.(string))
+	if err != nil {
+		response.Error(c, http.StatusBadRequest, "Invalid user ID", err)
+		return
+	}
+
 	// Get event
-	event, err := h.eventService.GetEventByID(c.Request.Context(), eventID, userID.(string))
+	event, err := h.eventService.GetEventByID(c.Request.Context(), eventID, userID)
 	if err != nil {
 		if err.Error() == "access denied: user does not have permission to view this event" {
 			response.Error(c, http.StatusForbidden, "Access denied", err)
@@ -131,9 +150,15 @@ func (h *EventHandler) GetEvent(c *gin.Context) {
 // @Failure 404 {object} response.Response
 // @Router /calendar/events/{id} [put]
 func (h *EventHandler) UpdateEvent(c *gin.Context) {
-	eventID := c.Param("id")
-	if eventID == "" {
+	eventIDStr := c.Param("id")
+	if eventIDStr == "" {
 		response.Error(c, http.StatusBadRequest, "Event ID is required", nil)
+		return
+	}
+
+	eventID, err := uuid.Parse(eventIDStr)
+	if err != nil {
+		response.Error(c, http.StatusBadRequest, "Invalid event ID", err)
 		return
 	}
 
@@ -149,14 +174,20 @@ func (h *EventHandler) UpdateEvent(c *gin.Context) {
 	}
 
 	// Get user ID from context
-	userID, exists := c.Get("user_id")
+	userIDStr, exists := c.Get("user_id")
 	if !exists {
 		response.Error(c, http.StatusUnauthorized, "User not authenticated", nil)
 		return
 	}
 
+	userID, err := uuid.Parse(userIDStr.(string))
+	if err != nil {
+		response.Error(c, http.StatusBadRequest, "Invalid user ID", err)
+		return
+	}
+
 	// Get existing event
-	existingEvent, err := h.eventService.GetEventByID(c.Request.Context(), eventID, userID.(string))
+	existingEvent, err := h.eventService.GetEventByID(c.Request.Context(), eventID, userID)
 	if err != nil {
 		response.Error(c, http.StatusNotFound, "Event not found", err)
 		return
@@ -192,7 +223,7 @@ func (h *EventHandler) UpdateEvent(c *gin.Context) {
 	}
 
 	// Update event
-	if err := h.eventService.UpdateEvent(c.Request.Context(), existingEvent, req.AttendeeIDs, userID.(string)); err != nil {
+	if err := h.eventService.UpdateEvent(c.Request.Context(), existingEvent, req.AttendeeIDs, userID); err != nil {
 		if err.Error() == "access denied: only event creator can update this event" {
 			response.Error(c, http.StatusForbidden, "Access denied", err)
 			return
@@ -202,7 +233,7 @@ func (h *EventHandler) UpdateEvent(c *gin.Context) {
 	}
 
 	// Get updated event
-	updatedEvent, err := h.eventService.GetEventByID(c.Request.Context(), eventID, userID.(string))
+	updatedEvent, err := h.eventService.GetEventByID(c.Request.Context(), eventID, userID)
 	if err != nil {
 		response.Error(c, http.StatusInternalServerError, "Failed to retrieve updated event", err)
 		return
@@ -224,21 +255,33 @@ func (h *EventHandler) UpdateEvent(c *gin.Context) {
 // @Failure 404 {object} response.Response
 // @Router /calendar/events/{id} [delete]
 func (h *EventHandler) DeleteEvent(c *gin.Context) {
-	eventID := c.Param("id")
-	if eventID == "" {
+	eventIDStr := c.Param("id")
+	if eventIDStr == "" {
 		response.Error(c, http.StatusBadRequest, "Event ID is required", nil)
 		return
 	}
 
+	eventID, err := uuid.Parse(eventIDStr)
+	if err != nil {
+		response.Error(c, http.StatusBadRequest, "Invalid event ID", err)
+		return
+	}
+
 	// Get user ID from context
-	userID, exists := c.Get("user_id")
+	userIDStr, exists := c.Get("user_id")
 	if !exists {
 		response.Error(c, http.StatusUnauthorized, "User not authenticated", nil)
 		return
 	}
 
+	userID, err := uuid.Parse(userIDStr.(string))
+	if err != nil {
+		response.Error(c, http.StatusBadRequest, "Invalid user ID", err)
+		return
+	}
+
 	// Delete event
-	if err := h.eventService.DeleteEvent(c.Request.Context(), eventID, userID.(string)); err != nil {
+	if err := h.eventService.DeleteEvent(c.Request.Context(), eventID, userID); err != nil {
 		if err.Error() == "access denied: only event creator can delete this event" ||
 			err.Error() == "system holidays cannot be deleted" {
 			response.Error(c, http.StatusForbidden, "Access denied", err)
@@ -315,8 +358,8 @@ func (h *EventHandler) ListEvents(c *gin.Context) {
 	filter.Limit = limit
 
 	// Get user ID for filtering if needed (optional for public holiday access)
-	if userID, exists := c.Get("user_id"); exists {
-		uid := userID.(string)
+	if userIDStr, exists := c.Get("user_id"); exists {
+		uid := userIDStr.(string)
 		filter.UserID = &uid
 	} else if filter.EventType != nil && *filter.EventType == "holiday" {
 		// Allow public access to holidays without authentication

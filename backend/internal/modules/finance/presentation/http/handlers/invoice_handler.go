@@ -8,6 +8,7 @@ import (
 	"malaka/internal/modules/finance/domain/services"
 	"malaka/internal/modules/finance/presentation/http/dto"
 	"malaka/internal/shared/response"
+	"malaka/internal/shared/uuid"
 )
 
 // InvoiceHandler handles HTTP requests for invoice operations.
@@ -46,7 +47,13 @@ func (h *InvoiceHandler) GetInvoiceByID(c *gin.Context) {
 		return
 	}
 
-	invoice, err := h.service.GetInvoiceByID(c.Request.Context(), id)
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		response.Error(c, http.StatusBadRequest, "Invalid ID", err)
+		return
+	}
+
+	invoice, err := h.service.GetInvoiceByID(c.Request.Context(), parsedID)
 	if err != nil {
 		response.Error(c, http.StatusNotFound, "Invoice not found", err)
 		return
@@ -70,8 +77,14 @@ func (h *InvoiceHandler) UpdateInvoice(c *gin.Context) {
 		return
 	}
 
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		response.Error(c, http.StatusBadRequest, "Invalid ID", err)
+		return
+	}
+
 	invoice := req.ToInvoiceEntity()
-	invoice.ID = id
+	invoice.ID = parsedID
 
 	if err := h.service.UpdateInvoice(c.Request.Context(), invoice); err != nil {
 		response.Error(c, http.StatusInternalServerError, "Failed to update invoice", err)
@@ -90,7 +103,13 @@ func (h *InvoiceHandler) DeleteInvoice(c *gin.Context) {
 		return
 	}
 
-	if err := h.service.DeleteInvoice(c.Request.Context(), id); err != nil {
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		response.Error(c, http.StatusBadRequest, "Invalid ID", err)
+		return
+	}
+
+	if err := h.service.DeleteInvoice(c.Request.Context(), parsedID); err != nil {
 		response.Error(c, http.StatusInternalServerError, "Failed to delete invoice", err)
 		return
 	}

@@ -4,15 +4,16 @@ import (
 	"context"
 
 	"malaka/internal/modules/finance/domain/entities"
+	"malaka/internal/shared/uuid"
 )
 
 // CashOpeningBalanceRepository defines the interface for cash opening balance data access.
 type CashOpeningBalanceRepository interface {
 	Create(ctx context.Context, balance *entities.CashOpeningBalance) error
-	GetByID(ctx context.Context, id string) (*entities.CashOpeningBalance, error)
+	GetByID(ctx context.Context, id uuid.ID) (*entities.CashOpeningBalance, error)
 	GetAll(ctx context.Context) ([]*entities.CashOpeningBalance, error)
 	GetByCashBankID(ctx context.Context, cashBankID string) ([]*entities.CashOpeningBalance, error)
 	GetByFiscalYear(ctx context.Context, fiscalYear int) ([]*entities.CashOpeningBalance, error)
 	Update(ctx context.Context, balance *entities.CashOpeningBalance) error
-	Delete(ctx context.Context, id string) error
+	Delete(ctx context.Context, id uuid.ID) error
 }

@@ -3,7 +3,7 @@ package entities
 import (
 	"time"
 
-	"github.com/google/uuid"
+	"malaka/internal/shared/uuid"
 )
 
 // PlanType represents the type of production plan
@@ -49,7 +49,7 @@ const (
 
 // ProductionPlan represents a production planning document
 type ProductionPlan struct {
-	ID            uuid.UUID            `json:"id" db:"id"`
+	ID            uuid.ID              `json:"id" db:"id"`
 	PlanNumber    string               `json:"plan_number" db:"plan_number"`
 	PlanName      string               `json:"plan_name" db:"plan_name"`
 	PlanType      PlanType             `json:"plan_type" db:"plan_type"`
@@ -60,8 +60,8 @@ type ProductionPlan struct {
 	TotalQuantity int                  `json:"total_quantity" db:"total_quantity"`
 	TotalValue    float64              `json:"total_value" db:"total_value"`
 	Notes         *string              `json:"notes,omitempty" db:"notes"`
-	CreatedBy     string               `json:"created_by" db:"created_by"`
-	ApprovedBy    *string              `json:"approved_by,omitempty" db:"approved_by"`
+	CreatedBy     uuid.ID              `json:"created_by" db:"created_by"`
+	ApprovedBy    *uuid.ID             `json:"approved_by,omitempty" db:"approved_by"`
 	ApprovedAt    *time.Time           `json:"approved_at,omitempty" db:"approved_at"`
 	CreatedAt     time.Time            `json:"created_at" db:"created_at"`
 	UpdatedAt     time.Time            `json:"updated_at" db:"updated_at"`
@@ -72,9 +72,9 @@ type ProductionPlan struct {
 
 // ProductionPlanItem represents a single item in a production plan
 type ProductionPlanItem struct {
-	ID               uuid.UUID        `json:"id" db:"id"`
-	PlanID           uuid.UUID        `json:"plan_id" db:"plan_id"`
-	ProductID        string           `json:"product_id" db:"product_id"`
+	ID               uuid.ID          `json:"id" db:"id"`
+	PlanID           uuid.ID          `json:"plan_id" db:"plan_id"`
+	ProductID        uuid.ID          `json:"product_id" db:"product_id"`
 	ProductCode      string           `json:"product_code" db:"product_code"`
 	ProductName      string           `json:"product_name" db:"product_name"`
 	PlannedQuantity  int              `json:"planned_quantity" db:"planned_quantity"`
@@ -117,7 +117,7 @@ func (p *ProductionPlan) Validate() error {
 	if p.PlanName == "" {
 		return NewValidationError("plan_name", "Plan name is required")
 	}
-	if p.CreatedBy == "" {
+	if p.CreatedBy.IsNil() {
 		return NewValidationError("created_by", "Created by is required")
 	}
 	if p.EndDate.Before(p.StartDate) {

@@ -4,33 +4,33 @@ import (
 	"context"
 	"time"
 
-	"github.com/google/uuid"
 	"malaka/internal/modules/accounting/domain/entities"
 	"malaka/internal/modules/accounting/domain/repositories"
+	"malaka/internal/shared/uuid"
 )
 
 // GeneralLedgerService defines the interface for general ledger business logic
 type GeneralLedgerService interface {
 	// Basic CRUD operations
 	CreateEntry(ctx context.Context, entry *entities.GeneralLedger) error
-	GetEntryByID(ctx context.Context, id uuid.UUID) (*entities.GeneralLedger, error)
+	GetEntryByID(ctx context.Context, id uuid.ID) (*entities.GeneralLedger, error)
 	GetAllEntries(ctx context.Context) ([]*entities.GeneralLedger, error)
 	UpdateEntry(ctx context.Context, entry *entities.GeneralLedger) error
-	DeleteEntry(ctx context.Context, id uuid.UUID) error
+	DeleteEntry(ctx context.Context, id uuid.ID) error
 
 	// Account operations
-	GetEntriesByAccount(ctx context.Context, accountID uuid.UUID) ([]*entities.GeneralLedger, error)
-	GetAccountBalance(ctx context.Context, accountID uuid.UUID, asOfDate time.Time) (float64, error)
-	GetAccountMovements(ctx context.Context, accountID uuid.UUID, startDate, endDate time.Time) ([]*entities.GeneralLedger, error)
-	RecalculateAccountBalances(ctx context.Context, accountID uuid.UUID) error
+	GetEntriesByAccount(ctx context.Context, accountID uuid.ID) ([]*entities.GeneralLedger, error)
+	GetAccountBalance(ctx context.Context, accountID uuid.ID, asOfDate time.Time) (float64, error)
+	GetAccountMovements(ctx context.Context, accountID uuid.ID, startDate, endDate time.Time) ([]*entities.GeneralLedger, error)
+	RecalculateAccountBalances(ctx context.Context, accountID uuid.ID) error
 
 	// Journal entry operations
-	GetEntriesByJournalEntry(ctx context.Context, journalEntryID uuid.UUID) ([]*entities.GeneralLedger, error)
+	GetEntriesByJournalEntry(ctx context.Context, journalEntryID uuid.ID) ([]*entities.GeneralLedger, error)
 	CreateEntriesFromJournal(ctx context.Context, journalEntry *entities.JournalEntry) error
 
 	// Reporting operations
 	GetTrialBalanceData(ctx context.Context, companyID string, asOfDate time.Time) ([]*entities.GeneralLedger, error)
-	GetLedgerReport(ctx context.Context, accountID uuid.UUID, startDate, endDate time.Time) ([]*entities.GeneralLedger, error)
+	GetLedgerReport(ctx context.Context, accountID uuid.ID, startDate, endDate time.Time) ([]*entities.GeneralLedger, error)
 
 	// Company operations
 	GetEntriesByCompany(ctx context.Context, companyID string) ([]*entities.GeneralLedger, error)
@@ -38,7 +38,7 @@ type GeneralLedgerService interface {
 
 	// Validation and business rules
 	ValidateEntry(ctx context.Context, entry *entities.GeneralLedger) error
-	PostJournalToLedger(ctx context.Context, journalEntryID uuid.UUID) error
+	PostJournalToLedger(ctx context.Context, journalEntryID uuid.ID) error
 }
 
 type generalLedgerService struct {
@@ -65,7 +65,7 @@ func (s *generalLedgerService) CreateEntry(ctx context.Context, entry *entities.
 }
 
 // GetEntryByID retrieves a general ledger entry by ID
-func (s *generalLedgerService) GetEntryByID(ctx context.Context, id uuid.UUID) (*entities.GeneralLedger, error) {
+func (s *generalLedgerService) GetEntryByID(ctx context.Context, id uuid.ID) (*entities.GeneralLedger, error) {
 	return s.repo.GetByID(ctx, id)
 }
 
@@ -84,32 +84,32 @@ func (s *generalLedgerService) UpdateEntry(ctx context.Context, entry *entities.
 }
 
 // DeleteEntry deletes a general ledger entry
-func (s *generalLedgerService) DeleteEntry(ctx context.Context, id uuid.UUID) error {
+func (s *generalLedgerService) DeleteEntry(ctx context.Context, id uuid.ID) error {
 	return s.repo.Delete(ctx, id)
 }
 
 // GetEntriesByAccount retrieves entries by account ID
-func (s *generalLedgerService) GetEntriesByAccount(ctx context.Context, accountID uuid.UUID) ([]*entities.GeneralLedger, error) {
+func (s *generalLedgerService) GetEntriesByAccount(ctx context.Context, accountID uuid.ID) ([]*entities.GeneralLedger, error) {
 	return s.repo.GetByAccountID(ctx, accountID)
 }
 
 // GetAccountBalance calculates account balance as of a specific date
-func (s *generalLedgerService) GetAccountBalance(ctx context.Context, accountID uuid.UUID, asOfDate time.Time) (float64, error) {
+func (s *generalLedgerService) GetAccountBalance(ctx context.Context, accountID uuid.ID, asOfDate time.Time) (float64, error) {
 	return s.repo.GetAccountBalance(ctx, accountID, asOfDate)
 }
 
 // GetAccountMovements retrieves account movements for a period
-func (s *generalLedgerService) GetAccountMovements(ctx context.Context, accountID uuid.UUID, startDate, endDate time.Time) ([]*entities.GeneralLedger, error) {
+func (s *generalLedgerService) GetAccountMovements(ctx context.Context, accountID uuid.ID, startDate, endDate time.Time) ([]*entities.GeneralLedger, error) {
 	return s.repo.GetAccountMovements(ctx, accountID, startDate, endDate)
 }
 
 // RecalculateAccountBalances recalculates running balances for an account
-func (s *generalLedgerService) RecalculateAccountBalances(ctx context.Context, accountID uuid.UUID) error {
+func (s *generalLedgerService) RecalculateAccountBalances(ctx context.Context, accountID uuid.ID) error {
 	return s.repo.RecalculateAccountBalances(ctx, accountID)
 }
 
 // GetEntriesByJournalEntry retrieves entries by journal entry ID
-func (s *generalLedgerService) GetEntriesByJournalEntry(ctx context.Context, journalEntryID uuid.UUID) ([]*entities.GeneralLedger, error) {
+func (s *generalLedgerService) GetEntriesByJournalEntry(ctx context.Context, journalEntryID uuid.ID) ([]*entities.GeneralLedger, error) {
 	return s.repo.GetByJournalEntryID(ctx, journalEntryID)
 }
 
@@ -155,7 +155,7 @@ func (s *generalLedgerService) GetTrialBalanceData(ctx context.Context, companyI
 }
 
 // GetLedgerReport generates a ledger report for an account
-func (s *generalLedgerService) GetLedgerReport(ctx context.Context, accountID uuid.UUID, startDate, endDate time.Time) ([]*entities.GeneralLedger, error) {
+func (s *generalLedgerService) GetLedgerReport(ctx context.Context, accountID uuid.ID, startDate, endDate time.Time) ([]*entities.GeneralLedger, error) {
 	entries, err := s.repo.GetByAccountAndDateRange(ctx, accountID, startDate, endDate)
 	if err != nil {
 		return nil, err
@@ -187,7 +187,7 @@ func (s *generalLedgerService) ValidateEntry(ctx context.Context, entry *entitie
 }
 
 // PostJournalToLedger posts a journal entry to the general ledger
-func (s *generalLedgerService) PostJournalToLedger(ctx context.Context, journalEntryID uuid.UUID) error {
+func (s *generalLedgerService) PostJournalToLedger(ctx context.Context, journalEntryID uuid.ID) error {
 	// TODO: This would require access to journal entry repository
 	// For now, return a placeholder implementation that can be completed
 	// once journal entry repository is accessible from this service

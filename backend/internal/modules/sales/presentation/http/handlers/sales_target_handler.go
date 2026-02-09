@@ -9,6 +9,7 @@ import (
 	"malaka/internal/modules/sales/domain/services"
 	"malaka/internal/modules/sales/presentation/http/dto"
 	"malaka/internal/shared/response"
+	"malaka/internal/shared/uuid"
 )
 
 // SalesTargetHandler handles HTTP requests for sales target operations.
@@ -103,6 +104,12 @@ func (h *SalesTargetHandler) UpdateSalesTarget(c *gin.Context) {
 		return
 	}
 
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		response.BadRequest(c, "Invalid ID format", nil)
+		return
+	}
+
 	target := &entities.SalesTarget{
 		UserID:      req.UserID,
 		PeriodStart: periodStart,
@@ -110,7 +117,7 @@ func (h *SalesTargetHandler) UpdateSalesTarget(c *gin.Context) {
 		TargetAmount: req.TargetAmount,
 		AchievedAmount: req.AchievedAmount,
 	}
-	target.ID = id // Set the ID from the URL parameter
+	target.ID = parsedID // Set the ID from the URL parameter
 
 	if err := h.service.UpdateSalesTarget(c.Request.Context(), target); err != nil {
 		response.InternalServerError(c, err.Error(), nil)

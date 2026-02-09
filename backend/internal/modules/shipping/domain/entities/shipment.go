@@ -3,16 +3,16 @@ package entities
 import (
 	"time"
 
-	"github.com/google/uuid"
 	"malaka/internal/shared/types"
+	"malaka/internal/shared/uuid"
 )
 
 // Shipment represents a shipment entity.
 type Shipment struct {
 	types.BaseModel
-	SalesOrderID string    `json:"sales_order_id"`
-	ShipmentDate time.Time `json:"shipment_date"`
-	Status       string    `json:"status"`
-	TrackingNumber string    `json:"tracking_number"`
-	CourierID    uuid.UUID `json:"courier_id" gorm:"type:uuid"`
+	SalesOrderID   uuid.ID   `json:"sales_order_id" db:"sales_order_id"`
+	ShipmentDate   time.Time `json:"shipment_date" db:"shipment_date"`
+	Status         string    `json:"status" db:"status"`
+	TrackingNumber string    `json:"tracking_number" db:"tracking_number"`
+	CourierID      uuid.ID   `json:"courier_id" db:"courier_id"`
 }

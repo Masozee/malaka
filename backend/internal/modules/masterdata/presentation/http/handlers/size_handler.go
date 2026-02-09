@@ -8,6 +8,7 @@ import (
 	"malaka/internal/modules/masterdata/domain/services"
 	"malaka/internal/modules/masterdata/presentation/http/dto"
 	"malaka/internal/shared/response"
+	"malaka/internal/shared/uuid"
 )
 
 // SizeHandler handles HTTP requests for size operations.
@@ -43,7 +44,12 @@ func (h *SizeHandler) CreateSize(c *gin.Context) {
 // GetSizeByID handles retrieving a size by its ID.
 func (h *SizeHandler) GetSizeByID(c *gin.Context) {
 	id := c.Param("id")
-	size, err := h.service.GetSizeByID(c.Request.Context(), id)
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		response.BadRequest(c, "Invalid ID format", nil)
+		return
+	}
+	size, err := h.service.GetSizeByID(c.Request.Context(), parsedID)
 	if err != nil {
 		response.InternalServerError(c, err.Error(), nil)
 		return
@@ -70,9 +76,14 @@ func (h *SizeHandler) GetAllSizes(c *gin.Context) {
 // UpdateSize handles updating an existing size.
 func (h *SizeHandler) UpdateSize(c *gin.Context) {
 	id := c.Param("id")
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		response.BadRequest(c, "Invalid ID format", nil)
+		return
+	}
 
 	// First, retrieve the existing size
-	existingSize, err := h.service.GetSizeByID(c.Request.Context(), id)
+	existingSize, err := h.service.GetSizeByID(c.Request.Context(), parsedID)
 	if err != nil {
 		response.InternalServerError(c, err.Error(), nil)
 		return
@@ -103,7 +114,12 @@ func (h *SizeHandler) UpdateSize(c *gin.Context) {
 // DeleteSize handles deleting a size by its ID.
 func (h *SizeHandler) DeleteSize(c *gin.Context) {
 	id := c.Param("id")
-	if err := h.service.DeleteSize(c.Request.Context(), id); err != nil {
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		response.BadRequest(c, "Invalid ID format", nil)
+		return
+	}
+	if err := h.service.DeleteSize(c.Request.Context(), parsedID); err != nil {
 		response.InternalServerError(c, err.Error(), nil)
 		return
 	}

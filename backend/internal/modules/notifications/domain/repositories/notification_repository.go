@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"malaka/internal/modules/notifications/domain/entities"
+	"malaka/internal/shared/uuid"
 )
 
 // NotificationFilter defines filtering options for listing notifications
@@ -28,7 +29,7 @@ type NotificationRepository interface {
 	CreateBatch(ctx context.Context, notifications []*entities.Notification) error
 
 	// GetByID retrieves a notification by ID
-	GetByID(ctx context.Context, id string) (*entities.Notification, error)
+	GetByID(ctx context.Context, id uuid.ID) (*entities.Notification, error)
 
 	// List retrieves notifications based on filter
 	List(ctx context.Context, filter NotificationFilter) ([]*entities.Notification, error)
@@ -37,25 +38,25 @@ type NotificationRepository interface {
 	Count(ctx context.Context, filter NotificationFilter) (int64, error)
 
 	// GetUnreadCount returns the count of unread notifications for a user
-	GetUnreadCount(ctx context.Context, userID string) (int64, error)
+	GetUnreadCount(ctx context.Context, userID uuid.ID) (int64, error)
 
 	// MarkAsRead marks a notification as read
-	MarkAsRead(ctx context.Context, id string) error
+	MarkAsRead(ctx context.Context, id uuid.ID) error
 
 	// MarkAllAsRead marks all notifications as read for a user
-	MarkAllAsRead(ctx context.Context, userID string) error
+	MarkAllAsRead(ctx context.Context, userID uuid.ID) error
 
 	// Archive archives a notification
-	Archive(ctx context.Context, id string) error
+	Archive(ctx context.Context, id uuid.ID) error
 
 	// Delete soft-deletes a notification
-	Delete(ctx context.Context, id string) error
+	Delete(ctx context.Context, id uuid.ID) error
 
 	// DeleteExpired removes expired notifications
 	DeleteExpired(ctx context.Context) (int64, error)
 
 	// GetPreferences retrieves user notification preferences
-	GetPreferences(ctx context.Context, userID string) (*entities.NotificationPreferences, error)
+	GetPreferences(ctx context.Context, userID uuid.ID) (*entities.NotificationPreferences, error)
 
 	// CreatePreferences creates notification preferences for a user
 	CreatePreferences(ctx context.Context, prefs *entities.NotificationPreferences) error

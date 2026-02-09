@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/google/uuid"
+	"malaka/internal/shared/uuid"
 	"malaka/internal/modules/accounting/domain/entities"
 )
 
@@ -12,10 +12,10 @@ import (
 type TrialBalanceService interface {
 	// Basic CRUD operations
 	CreateTrialBalance(ctx context.Context, trialBalance *entities.TrialBalance) (*entities.TrialBalance, error)
-	GetTrialBalanceByID(ctx context.Context, id uuid.UUID) (*entities.TrialBalance, error)
+	GetTrialBalanceByID(ctx context.Context, id uuid.ID) (*entities.TrialBalance, error)
 	GetAllTrialBalances(ctx context.Context) ([]*entities.TrialBalance, error)
 	UpdateTrialBalance(ctx context.Context, trialBalance *entities.TrialBalance) (*entities.TrialBalance, error)
-	DeleteTrialBalance(ctx context.Context, id uuid.UUID) error
+	DeleteTrialBalance(ctx context.Context, id uuid.ID) error
 
 	// Company and period specific operations
 	GetTrialBalancesByCompany(ctx context.Context, companyID string) ([]*entities.TrialBalance, error)
@@ -29,12 +29,12 @@ type TrialBalanceService interface {
 	CalculateAccountBalances(ctx context.Context, companyID string, periodStart, periodEnd time.Time) ([]entities.TrialBalanceAccount, error)
 
 	// Account-specific operations
-	GetAccountBalance(ctx context.Context, companyID string, accountID uuid.UUID, asOfDate time.Time) (*entities.TrialBalanceAccount, error)
+	GetAccountBalance(ctx context.Context, companyID string, accountID uuid.ID, asOfDate time.Time) (*entities.TrialBalanceAccount, error)
 	GetAccountsByType(ctx context.Context, companyID string, accountType string, asOfDate time.Time) ([]entities.TrialBalanceAccount, error)
 
 	// Reporting and analysis operations
 	GetTrialBalanceSummary(ctx context.Context, companyID string, asOfDate time.Time) (*entities.TrialBalanceSummary, error)
-	ValidateTrialBalance(ctx context.Context, trialBalanceID uuid.UUID) (bool, []string, error)
+	ValidateTrialBalance(ctx context.Context, trialBalanceID uuid.ID) (bool, []string, error)
 	GetAccountTypesSummary(ctx context.Context, companyID string, asOfDate time.Time) (map[string]float64, error)
 
 	// Historical and comparative operations
@@ -48,7 +48,7 @@ type TrialBalanceService interface {
 	// GetRevenuesAndExpenses(ctx context.Context, companyID string, periodStart, periodEnd time.Time) (*entities.IncomeStatementData, error)
 
 	// Audit and compliance operations - TODO: implement when entities are available
-	// GetTrialBalanceAuditTrail(ctx context.Context, trialBalanceID uuid.UUID) ([]entities.AuditEntry, error)
+	// GetTrialBalanceAuditTrail(ctx context.Context, trialBalanceID uuid.ID) ([]entities.AuditEntry, error)
 	// VerifyTrialBalanceIntegrity(ctx context.Context, companyID string, asOfDate time.Time) (*entities.IntegrityReport, error)
 
 	// Bulk operations
@@ -56,6 +56,6 @@ type TrialBalanceService interface {
 	RegenerateHistoricalTrialBalances(ctx context.Context, companyID string, fromDate, toDate time.Time, createdBy string) ([]*entities.TrialBalance, error)
 
 	// Export operations
-	ExportTrialBalanceToCSV(ctx context.Context, trialBalanceID uuid.UUID) ([]byte, error)
-	ExportTrialBalanceToExcel(ctx context.Context, trialBalanceID uuid.UUID) ([]byte, error)
+	ExportTrialBalanceToCSV(ctx context.Context, trialBalanceID uuid.ID) ([]byte, error)
+	ExportTrialBalanceToExcel(ctx context.Context, trialBalanceID uuid.ID) ([]byte, error)
 }

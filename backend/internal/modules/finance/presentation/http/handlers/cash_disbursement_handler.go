@@ -8,6 +8,7 @@ import (
 	"malaka/internal/modules/finance/domain/services"
 	"malaka/internal/modules/finance/presentation/http/dto"
 	"malaka/internal/shared/response"
+	"malaka/internal/shared/uuid"
 )
 
 // CashDisbursementHandler handles HTTP requests for cash disbursement operations.
@@ -46,7 +47,13 @@ func (h *CashDisbursementHandler) GetCashDisbursementByID(c *gin.Context) {
 		return
 	}
 
-	cashDisbursement, err := h.service.GetCashDisbursementByID(c.Request.Context(), id)
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		response.Error(c, http.StatusBadRequest, "Invalid ID", err)
+		return
+	}
+
+	cashDisbursement, err := h.service.GetCashDisbursementByID(c.Request.Context(), parsedID)
 	if err != nil {
 		response.Error(c, http.StatusNotFound, "Cash disbursement not found", err)
 		return
@@ -70,8 +77,14 @@ func (h *CashDisbursementHandler) UpdateCashDisbursement(c *gin.Context) {
 		return
 	}
 
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		response.Error(c, http.StatusBadRequest, "Invalid ID", err)
+		return
+	}
+
 	cashDisbursement := req.ToCashDisbursementEntity()
-	cashDisbursement.ID = id
+	cashDisbursement.ID = parsedID
 
 	if err := h.service.UpdateCashDisbursement(c.Request.Context(), cashDisbursement); err != nil {
 		response.Error(c, http.StatusInternalServerError, "Failed to update cash disbursement", err)
@@ -90,7 +103,13 @@ func (h *CashDisbursementHandler) DeleteCashDisbursement(c *gin.Context) {
 		return
 	}
 
-	if err := h.service.DeleteCashDisbursement(c.Request.Context(), id); err != nil {
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		response.Error(c, http.StatusBadRequest, "Invalid ID", err)
+		return
+	}
+
+	if err := h.service.DeleteCashDisbursement(c.Request.Context(), parsedID); err != nil {
 		response.Error(c, http.StatusInternalServerError, "Failed to delete cash disbursement", err)
 		return
 	}

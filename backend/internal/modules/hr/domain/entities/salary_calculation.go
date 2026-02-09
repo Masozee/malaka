@@ -4,32 +4,32 @@ import (
 	"strings"
 	"time"
 
-	"github.com/google/uuid"
+	"malaka/internal/shared/uuid"
 )
 
 // SalaryCalculation represents salary calculation for an employee in a specific period
 type SalaryCalculation struct {
-	ID                uuid.UUID  `json:"id" db:"id"`
-	EmployeeID        uuid.UUID  `json:"employee_id" db:"employee_id"`
-	PeriodYear        int        `json:"period_year" db:"period_year"`
-	PeriodMonth       int        `json:"period_month" db:"period_month"`
-	BasicSalary       float64    `json:"basic_salary" db:"basic_salary"`
-	Allowances        float64    `json:"allowances" db:"allowances"`
-	OvertimeAmount    float64    `json:"overtime_amount" db:"overtime_amount"`
-	CommissionAmount  float64    `json:"commission_amount" db:"commission_amount"`
-	BonusAmount       float64    `json:"bonus_amount" db:"bonus_amount"`
-	GrossSalary       float64    `json:"gross_salary" db:"gross_salary"`
-	TaxDeduction      float64    `json:"tax_deduction" db:"tax_deduction"`
-	InsuranceDeduction float64   `json:"insurance_deduction" db:"insurance_deduction"`
-	LoanDeduction     float64    `json:"loan_deduction" db:"loan_deduction"`
-	OtherDeductions   float64    `json:"other_deductions" db:"other_deductions"`
-	TotalDeductions   float64    `json:"total_deductions" db:"total_deductions"`
-	NetSalary         float64    `json:"net_salary" db:"net_salary"`
-	Status            string     `json:"status" db:"status"`
-	CalculatedBy      *uuid.UUID `json:"calculated_by" db:"calculated_by"`
-	CalculatedAt      *time.Time `json:"calculated_at" db:"calculated_at"`
-	CreatedAt         time.Time  `json:"created_at" db:"created_at"`
-	
+	ID                 uuid.ID    `json:"id" db:"id"`
+	EmployeeID         uuid.ID    `json:"employee_id" db:"employee_id"`
+	PeriodYear         int        `json:"period_year" db:"period_year"`
+	PeriodMonth        int        `json:"period_month" db:"period_month"`
+	BasicSalary        float64    `json:"basic_salary" db:"basic_salary"`
+	Allowances         float64    `json:"allowances" db:"allowances"`
+	OvertimeAmount     float64    `json:"overtime_amount" db:"overtime_amount"`
+	CommissionAmount   float64    `json:"commission_amount" db:"commission_amount"`
+	BonusAmount        float64    `json:"bonus_amount" db:"bonus_amount"`
+	GrossSalary        float64    `json:"gross_salary" db:"gross_salary"`
+	TaxDeduction       float64    `json:"tax_deduction" db:"tax_deduction"`
+	InsuranceDeduction float64    `json:"insurance_deduction" db:"insurance_deduction"`
+	LoanDeduction      float64    `json:"loan_deduction" db:"loan_deduction"`
+	OtherDeductions    float64    `json:"other_deductions" db:"other_deductions"`
+	TotalDeductions    float64    `json:"total_deductions" db:"total_deductions"`
+	NetSalary          float64    `json:"net_salary" db:"net_salary"`
+	Status             string     `json:"status" db:"status"`
+	CalculatedBy       *uuid.ID   `json:"calculated_by" db:"calculated_by"`
+	CalculatedAt       *time.Time `json:"calculated_at" db:"calculated_at"`
+	CreatedAt          time.Time  `json:"created_at" db:"created_at"`
+
 	// Associated employee data (for joins)
 	Employee *Employee `json:"employee,omitempty"`
 }
@@ -86,29 +86,29 @@ func (s *SalaryCalculation) CanBePaid() bool {
 
 // PayrollItemDTO represents the frontend-expected structure for payroll items
 type PayrollItemDTO struct {
-	ID               string                `json:"id"`
-	PayrollPeriodID  string                `json:"payrollPeriodId"`
-	EmployeeID       string                `json:"employeeId"`
-	Employee         *PayrollEmployeeDTO   `json:"employee"`
-	BasicSalary      float64               `json:"basicSalary"`
-	Allowances       []PayrollAllowanceDTO `json:"allowances"`
-	Deductions       []PayrollDeductionDTO `json:"deductions"`
-	Overtime         []PayrollOvertimeDTO  `json:"overtime"`
-	GrossPay         float64               `json:"grossPay"`
-	TotalDeductions  float64               `json:"totalDeductions"`
-	NetPay           float64               `json:"netPay"`
-	Status           string                `json:"status"`
-	Notes            string                `json:"notes,omitempty"`
-	CreatedAt        string                `json:"createdAt"`
-	UpdatedAt        string                `json:"updatedAt"`
+	ID              string                `json:"id"`
+	PayrollPeriodID string                `json:"payrollPeriodId"`
+	EmployeeID      string                `json:"employeeId"`
+	Employee        *PayrollEmployeeDTO   `json:"employee"`
+	BasicSalary     float64               `json:"basicSalary"`
+	Allowances      []PayrollAllowanceDTO `json:"allowances"`
+	Deductions      []PayrollDeductionDTO `json:"deductions"`
+	Overtime        []PayrollOvertimeDTO  `json:"overtime"`
+	GrossPay        float64               `json:"grossPay"`
+	TotalDeductions float64               `json:"totalDeductions"`
+	NetPay          float64               `json:"netPay"`
+	Status          string                `json:"status"`
+	Notes           string                `json:"notes,omitempty"`
+	CreatedAt       string                `json:"createdAt"`
+	UpdatedAt       string                `json:"updatedAt"`
 }
 
 type PayrollEmployeeDTO struct {
-	ID           string `json:"id"`
-	EmployeeID   string `json:"employeeId"`
-	Name         string `json:"name"`
-	Position     string `json:"position"`
-	Department   string `json:"department"`
+	ID         string `json:"id"`
+	EmployeeID string `json:"employeeId"`
+	Name       string `json:"name"`
+	Position   string `json:"position"`
+	Department string `json:"department"`
 }
 
 type PayrollAllowanceDTO struct {
@@ -168,7 +168,7 @@ func (s *SalaryCalculation) ToPayrollItemDTO() *PayrollItemDTO {
 	// Add allowances breakdown
 	if s.Allowances > 0 {
 		dto.Allowances = append(dto.Allowances, PayrollAllowanceDTO{
-			ID:        uuid.New().String(),
+			ID:        uuid.NewString(),
 			Type:      "allowances",
 			Name:      "Total Allowances",
 			Amount:    s.Allowances,
@@ -178,7 +178,7 @@ func (s *SalaryCalculation) ToPayrollItemDTO() *PayrollItemDTO {
 
 	if s.OvertimeAmount > 0 {
 		dto.Allowances = append(dto.Allowances, PayrollAllowanceDTO{
-			ID:        uuid.New().String(),
+			ID:        uuid.NewString(),
 			Type:      "overtime",
 			Name:      "Overtime Pay",
 			Amount:    s.OvertimeAmount,
@@ -188,7 +188,7 @@ func (s *SalaryCalculation) ToPayrollItemDTO() *PayrollItemDTO {
 
 	if s.CommissionAmount > 0 {
 		dto.Allowances = append(dto.Allowances, PayrollAllowanceDTO{
-			ID:        uuid.New().String(),
+			ID:        uuid.NewString(),
 			Type:      "commission",
 			Name:      "Sales Commission",
 			Amount:    s.CommissionAmount,
@@ -198,7 +198,7 @@ func (s *SalaryCalculation) ToPayrollItemDTO() *PayrollItemDTO {
 
 	if s.BonusAmount > 0 {
 		dto.Allowances = append(dto.Allowances, PayrollAllowanceDTO{
-			ID:        uuid.New().String(),
+			ID:        uuid.NewString(),
 			Type:      "bonus",
 			Name:      "Performance Bonus",
 			Amount:    s.BonusAmount,
@@ -209,7 +209,7 @@ func (s *SalaryCalculation) ToPayrollItemDTO() *PayrollItemDTO {
 	// Add deductions breakdown
 	if s.TaxDeduction > 0 {
 		dto.Deductions = append(dto.Deductions, PayrollDeductionDTO{
-			ID:       uuid.New().String(),
+			ID:       uuid.NewString(),
 			Type:     "tax",
 			Name:     "Income Tax",
 			Amount:   s.TaxDeduction,
@@ -219,7 +219,7 @@ func (s *SalaryCalculation) ToPayrollItemDTO() *PayrollItemDTO {
 
 	if s.InsuranceDeduction > 0 {
 		dto.Deductions = append(dto.Deductions, PayrollDeductionDTO{
-			ID:       uuid.New().String(),
+			ID:       uuid.NewString(),
 			Type:     "insurance",
 			Name:     "Health Insurance",
 			Amount:   s.InsuranceDeduction,
@@ -229,7 +229,7 @@ func (s *SalaryCalculation) ToPayrollItemDTO() *PayrollItemDTO {
 
 	if s.LoanDeduction > 0 {
 		dto.Deductions = append(dto.Deductions, PayrollDeductionDTO{
-			ID:       uuid.New().String(),
+			ID:       uuid.NewString(),
 			Type:     "loan",
 			Name:     "Employee Loan",
 			Amount:   s.LoanDeduction,
@@ -239,7 +239,7 @@ func (s *SalaryCalculation) ToPayrollItemDTO() *PayrollItemDTO {
 
 	if s.OtherDeductions > 0 {
 		dto.Deductions = append(dto.Deductions, PayrollDeductionDTO{
-			ID:       uuid.New().String(),
+			ID:       uuid.NewString(),
 			Type:     "other",
 			Name:     "Other Deductions",
 			Amount:   s.OtherDeductions,

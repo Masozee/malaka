@@ -8,6 +8,7 @@ import (
 	"malaka/internal/modules/finance/domain/services"
 	"malaka/internal/modules/finance/presentation/http/dto"
 	"malaka/internal/shared/response"
+	"malaka/internal/shared/uuid"
 )
 
 // PaymentHandler handles HTTP requests for payment operations.
@@ -46,7 +47,13 @@ func (h *PaymentHandler) GetPaymentByID(c *gin.Context) {
 		return
 	}
 
-	payment, err := h.service.GetPaymentByID(c.Request.Context(), id)
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		response.Error(c, http.StatusBadRequest, "Invalid ID", err)
+		return
+	}
+
+	payment, err := h.service.GetPaymentByID(c.Request.Context(), parsedID)
 	if err != nil {
 		response.Error(c, http.StatusNotFound, "Payment not found", err)
 		return
@@ -70,8 +77,14 @@ func (h *PaymentHandler) UpdatePayment(c *gin.Context) {
 		return
 	}
 
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		response.Error(c, http.StatusBadRequest, "Invalid ID", err)
+		return
+	}
+
 	payment := req.ToPaymentEntity()
-	payment.ID = id
+	payment.ID = parsedID
 
 	if err := h.service.UpdatePayment(c.Request.Context(), payment); err != nil {
 		response.Error(c, http.StatusInternalServerError, "Failed to update payment", err)
@@ -90,7 +103,13 @@ func (h *PaymentHandler) DeletePayment(c *gin.Context) {
 		return
 	}
 
-	if err := h.service.DeletePayment(c.Request.Context(), id); err != nil {
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		response.Error(c, http.StatusBadRequest, "Invalid ID", err)
+		return
+	}
+
+	if err := h.service.DeletePayment(c.Request.Context(), parsedID); err != nil {
 		response.Error(c, http.StatusInternalServerError, "Failed to delete payment", err)
 		return
 	}

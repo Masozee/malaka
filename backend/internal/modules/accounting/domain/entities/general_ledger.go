@@ -3,14 +3,14 @@ package entities
 import (
 	"time"
 
-	"github.com/google/uuid"
+	"malaka/internal/shared/uuid"
 )
 
 // GeneralLedger represents a general ledger entry
 type GeneralLedger struct {
-	ID              uuid.UUID `json:"id" db:"id"`
-	AccountID       uuid.UUID `json:"account_id" db:"account_id"`           // Foreign key to chart_of_accounts
-	JournalEntryID  uuid.UUID `json:"journal_entry_id" db:"journal_entry_id"` // Foreign key to journal_entries
+	ID              uuid.ID `json:"id" db:"id"`
+	AccountID       uuid.ID `json:"account_id" db:"account_id"`           // Foreign key to chart_of_accounts
+	JournalEntryID  uuid.ID `json:"journal_entry_id" db:"journal_entry_id"` // Foreign key to journal_entries
 	TransactionDate time.Time `json:"transaction_date" db:"transaction_date"`
 	Description     string    `json:"description" db:"description"`
 	Reference       string    `json:"reference" db:"reference"`               // Reference number/document
@@ -61,10 +61,10 @@ func (gl *GeneralLedger) CalculateBaseAmounts() {
 
 // Validate checks if the general ledger entry is valid
 func (gl *GeneralLedger) Validate() error {
-	if gl.AccountID == uuid.Nil {
+	if gl.AccountID.IsNil() {
 		return NewValidationError("account_id is required")
 	}
-	if gl.JournalEntryID == uuid.Nil {
+	if gl.JournalEntryID.IsNil() {
 		return NewValidationError("journal_entry_id is required")
 	}
 	if gl.DebitAmount > 0 && gl.CreditAmount > 0 {

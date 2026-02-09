@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
+	googleuuid "github.com/google/uuid"
 
 	accounting_entities "malaka/internal/modules/accounting/domain/entities"
 	accounting_services "malaka/internal/modules/accounting/domain/services"
@@ -13,7 +13,7 @@ import (
 	"malaka/internal/modules/inventory/domain/services"
 	"malaka/internal/modules/inventory/presentation/http/dto"
 	"malaka/internal/shared/response"
-	"malaka/internal/shared/utils"
+	shareuuid "malaka/internal/shared/uuid"
 )
 
 // GoodsReceiptHandler handles HTTP requests for goods receipt operations.
@@ -54,7 +54,7 @@ func (h *GoodsReceiptHandler) CreateGoodsReceipt(c *gin.Context) {
 
 	gr := &entities.GoodsReceipt{
 		PurchaseOrderID: req.PurchaseOrderID,
-		ReceiptDate:     utils.Now(),
+		ReceiptDate:     time.Now(),
 		WarehouseID:     req.WarehouseID,
 	}
 
@@ -104,10 +104,16 @@ func (h *GoodsReceiptHandler) UpdateGoodsReceipt(c *gin.Context) {
 
 	gr := &entities.GoodsReceipt{
 		PurchaseOrderID: req.PurchaseOrderID,
-		ReceiptDate:     utils.Now(),
+		ReceiptDate:     time.Now(),
 		WarehouseID:     req.WarehouseID,
 	}
-	gr.ID = id // Set the ID from the URL parameter
+	// Set the ID from the URL parameter
+	parsedID, err := shareuuid.Parse(id)
+	if err != nil {
+		response.BadRequest(c, "Invalid ID format", err.Error())
+		return
+	}
+	gr.ID = parsedID
 
 	if err := h.service.UpdateGoodsReceipt(c.Request.Context(), gr); err != nil {
 		response.InternalServerError(c, "Failed to update goods receipt", err.Error())
@@ -148,10 +154,14 @@ func (h *GoodsReceiptHandler) PostGoodsReceipt(c *gin.Context) {
 	// Update stock for each item if stock service is available
 	var stockUpdated int
 	if h.stockService != nil && len(gr.Items) > 0 {
+		// Parse warehouse ID once
+		warehouseID, _ := shareuuid.Parse(gr.WarehouseID)
 		for _, item := range gr.Items {
+			// Parse article ID
+			articleID, _ := shareuuid.Parse(item.ArticleID)
 			stockMovement := &entities.StockMovement{
-				ArticleID:    item.ArticleID,
-				WarehouseID:  gr.WarehouseID,
+				ArticleID:    articleID,
+				WarehouseID:  warehouseID,
 				MovementType: "in", // Goods receipt increases stock
 				Quantity:     item.Quantity,
 				ReferenceID:  gr.ID, // Reference to the GR
@@ -167,7 +177,7 @@ func (h *GoodsReceiptHandler) PostGoodsReceipt(c *gin.Context) {
 
 	// Create journal entry if journal service is available
 	var journalEntryID string
-	var debitAccountID uuid.UUID
+	var debitAccountID googleuuid.UUID
 	if h.journalEntryService != nil && gr.TotalAmount > 0 {
 		je, accountID, err := h.createJournalEntryForGR(c, gr, userID)
 		if err != nil {
@@ -177,7 +187,7 @@ func (h *GoodsReceiptHandler) PostGoodsReceipt(c *gin.Context) {
 			journalEntryID = je.ID.String()
 			debitAccountID = accountID
 			// Update GR with journal entry ID
-			if err := h.service.SetJournalEntryID(c.Request.Context(), gr.ID, journalEntryID); err != nil {
+			if err := h.service.SetJournalEntryID(c.Request.Context(), gr.ID.String(), journalEntryID); err != nil {
 				fmt.Printf("Warning: Failed to link journal entry to GR: %v\n", err)
 			}
 		}
@@ -186,39 +196,38 @@ func (h *GoodsReceiptHandler) PostGoodsReceipt(c *gin.Context) {
 	// Create budget realization if budget service is available
 	var budgetRealized bool
 	if h.budgetService != nil && gr.TotalAmount > 0 {
-		grUUID, err := uuid.Parse(gr.ID)
-		if err == nil {
-			userUUID, _ := uuid.Parse(userID)
-			var poUUID *uuid.UUID
-			if gr.PurchaseOrderID != "" {
-				parsed, err := uuid.Parse(gr.PurchaseOrderID)
-				if err == nil {
-					poUUID = &parsed
-				}
+		userUUID, _ := shareuuid.Parse(userID)
+		var poUUID *shareuuid.ID
+		if gr.PurchaseOrderID != "" {
+			parsed, err := shareuuid.Parse(gr.PurchaseOrderID)
+			if err == nil {
+				poUUID = &parsed
 			}
+		}
 
-			// Use the debit account from journal entry for budget realization
-			accountID := debitAccountID
-			if accountID == uuid.Nil {
-				// Fallback to default expense account
-				accountID = uuid.MustParse("00000000-0000-0000-0000-000000006000")
-			}
+		// Use the debit account from journal entry for budget realization
+		var accountIDForBudget shareuuid.ID
+		if debitAccountID == googleuuid.Nil {
+			// Fallback to default expense account
+			accountIDForBudget, _ = shareuuid.Parse("00000000-0000-0000-0000-000000006000")
+		} else {
+			accountIDForBudget = shareuuid.FromUUID(debitAccountID)
+		}
 
-			err = h.budgetService.CreateRealizationFromGR(
-				c.Request.Context(),
-				grUUID,
-				gr.GRNumber,
-				gr.TotalAmount,
-				accountID,
-				time.Now(),
-				userUUID,
-				poUUID,
-			)
-			if err != nil {
-				fmt.Printf("Warning: Failed to create budget realization for GR %s: %v\n", gr.ID, err)
-			} else {
-				budgetRealized = true
-			}
+		err = h.budgetService.CreateRealizationFromGR(
+			c.Request.Context(),
+			gr.ID,
+			gr.GRNumber,
+			gr.TotalAmount,
+			accountIDForBudget,
+			time.Now(),
+			userUUID,
+			poUUID,
+		)
+		if err != nil {
+			fmt.Printf("Warning: Failed to create budget realization for GR %s: %v\n", gr.ID, err)
+		} else {
+			budgetRealized = true
 		}
 	}
 
@@ -235,34 +244,34 @@ func (h *GoodsReceiptHandler) PostGoodsReceipt(c *gin.Context) {
 
 // createJournalEntryForGR creates a journal entry for the posted goods receipt
 // Returns the journal entry and the debit account ID (for budget realization)
-func (h *GoodsReceiptHandler) createJournalEntryForGR(c *gin.Context, gr *entities.GoodsReceipt, userID string) (*accounting_entities.JournalEntry, uuid.UUID, error) {
+func (h *GoodsReceiptHandler) createJournalEntryForGR(c *gin.Context, gr *entities.GoodsReceipt, userID string) (*accounting_entities.JournalEntry, googleuuid.UUID, error) {
 	// Determine accounts based on procurement type
-	var debitAccountID, creditAccountID uuid.UUID
+	var debitAccountID, creditAccountID googleuuid.UUID
 	var debitDesc, creditDesc string
 
 	switch gr.GetAccountingTreatment() {
 	case "COGS":
 		// Raw Material: Debit Inventory, Credit AP
 		// Using default account IDs - these should be configured
-		debitAccountID = uuid.MustParse("00000000-0000-0000-0000-000000001300") // Inventory
-		creditAccountID = uuid.MustParse("00000000-0000-0000-0000-000000002100") // AP
+		debitAccountID = googleuuid.MustParse("00000000-0000-0000-0000-000000001300") // Inventory
+		creditAccountID = googleuuid.MustParse("00000000-0000-0000-0000-000000002100") // AP
 		debitDesc = "Inventory - Raw Material Receipt"
 		creditDesc = "Accounts Payable - Supplier"
 	case "OPEX":
 		// Office Supply/Service: Debit Expense, Credit AP
-		debitAccountID = uuid.MustParse("00000000-0000-0000-0000-000000006000") // Operating Expense
-		creditAccountID = uuid.MustParse("00000000-0000-0000-0000-000000002100") // AP
+		debitAccountID = googleuuid.MustParse("00000000-0000-0000-0000-000000006000") // Operating Expense
+		creditAccountID = googleuuid.MustParse("00000000-0000-0000-0000-000000002100") // AP
 		debitDesc = "Operating Expense - " + string(gr.ProcurementType)
 		creditDesc = "Accounts Payable - Supplier"
 	case "CAPITALIZE":
 		// Asset: Debit Fixed Asset, Credit AP
-		debitAccountID = uuid.MustParse("00000000-0000-0000-0000-000000001500") // Fixed Asset
-		creditAccountID = uuid.MustParse("00000000-0000-0000-0000-000000002100") // AP
+		debitAccountID = googleuuid.MustParse("00000000-0000-0000-0000-000000001500") // Fixed Asset
+		creditAccountID = googleuuid.MustParse("00000000-0000-0000-0000-000000002100") // AP
 		debitDesc = "Fixed Asset - Capital Purchase"
 		creditDesc = "Accounts Payable - Supplier"
 	default:
-		debitAccountID = uuid.MustParse("00000000-0000-0000-0000-000000006000") // Default to expense
-		creditAccountID = uuid.MustParse("00000000-0000-0000-0000-000000002100") // AP
+		debitAccountID = googleuuid.MustParse("00000000-0000-0000-0000-000000006000") // Default to expense
+		creditAccountID = googleuuid.MustParse("00000000-0000-0000-0000-000000002100") // AP
 		debitDesc = "Expense - Goods Receipt"
 		creditDesc = "Accounts Payable"
 	}
@@ -276,20 +285,20 @@ func (h *GoodsReceiptHandler) createJournalEntryForGR(c *gin.Context, gr *entiti
 		CurrencyCode: gr.Currency,
 		ExchangeRate: 1.0,
 		SourceModule: "INVENTORY",
-		SourceID:     gr.ID,
+		SourceID:     gr.ID.String(),
 		CompanyID:    "1", // Default company
 		CreatedBy:    userID,
 		Lines: []*accounting_entities.JournalEntryLine{
 			{
 				LineNumber:   1,
-				AccountID:    debitAccountID,
+				AccountID:    shareuuid.FromUUID(debitAccountID),
 				DebitAmount:  gr.TotalAmount,
 				CreditAmount: 0,
 				Description:  debitDesc,
 			},
 			{
 				LineNumber:   2,
-				AccountID:    creditAccountID,
+				AccountID:    shareuuid.FromUUID(creditAccountID),
 				DebitAmount:  0,
 				CreditAmount: gr.TotalAmount,
 				Description:  creditDesc,
@@ -299,7 +308,7 @@ func (h *GoodsReceiptHandler) createJournalEntryForGR(c *gin.Context, gr *entiti
 
 	// Create the journal entry
 	if err := h.journalEntryService.CreateJournalEntry(c.Request.Context(), entry); err != nil {
-		return nil, uuid.Nil, fmt.Errorf("failed to create journal entry: %w", err)
+		return nil, googleuuid.Nil, fmt.Errorf("failed to create journal entry: %w", err)
 	}
 
 	// Auto-post the journal entry

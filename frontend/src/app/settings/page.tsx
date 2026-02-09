@@ -1240,11 +1240,10 @@ export default function SettingsPage() {
               className={`
                 flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-all
                 ${activeTab === tab.id
-                  ? 'text-black'
+                  ? 'bg-blue-600 dark:bg-blue-400 text-white dark:text-gray-950'
                   : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
                 }
               `}
-              style={activeTab === tab.id ? { backgroundColor: '#cfff04' } : {}}
             >
               <span className="hidden sm:inline">{tab.label}</span>
             </button>

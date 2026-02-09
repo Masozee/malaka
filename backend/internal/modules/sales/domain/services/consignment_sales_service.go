@@ -6,7 +6,7 @@ import (
 
 	"malaka/internal/modules/sales/domain/entities"
 	"malaka/internal/modules/sales/domain/repositories"
-	"malaka/internal/shared/utils"
+	"malaka/internal/shared/uuid"
 )
 
 // ConsignmentSalesService provides business logic for consignment sales operations.
@@ -21,8 +21,8 @@ func NewConsignmentSalesService(repo repositories.ConsignmentSalesRepository) *C
 
 // CreateConsignmentSales creates new consignment sales.
 func (s *ConsignmentSalesService) CreateConsignmentSales(ctx context.Context, cs *entities.ConsignmentSales) error {
-	if cs.ID == "" {
-		cs.ID = utils.RandomString(10) // Generate a random ID if not provided
+	if cs.ID.IsNil() {
+		cs.ID = uuid.New()
 	}
 	return s.repo.Create(ctx, cs)
 }
@@ -40,7 +40,7 @@ func (s *ConsignmentSalesService) GetConsignmentSalesByID(ctx context.Context, i
 // UpdateConsignmentSales updates existing consignment sales.
 func (s *ConsignmentSalesService) UpdateConsignmentSales(ctx context.Context, cs *entities.ConsignmentSales) error {
 	// Ensure the consignment sales exists before updating
-	existingCS, err := s.repo.GetByID(ctx, cs.ID)
+	existingCS, err := s.repo.GetByID(ctx, cs.ID.String())
 	if err != nil {
 		return err
 	}

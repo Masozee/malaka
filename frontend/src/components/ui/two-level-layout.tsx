@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { HugeiconsIcon } from '@hugeicons/react'
-import { SidebarProvider } from "@/contexts/sidebar-context"
+import { SidebarProvider, SecondarySidebarSlotProvider, useSecondarySidebarSlot } from "@/contexts/sidebar-context"
 import {
   Home01Icon,
   Database01Icon,
@@ -80,7 +80,8 @@ import {
   FileZipIcon,
   ChartUpIcon,
   Analytics01Icon,
-  FileLockedIcon
+  FileLockedIcon,
+  UserShield01Icon
 } from '@hugeicons/core-free-icons'
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -140,12 +141,14 @@ const menuData: MenuItem[] = [
     id: "master-data",
     label: "Master Data",
     icon: DatabaseAddIcon,
+    href: "/master-data",
     items: [
       { id: "companies", label: "Companies", icon: Building01Icon, href: "/master-data/companies", count: 24 },
       { id: "users", label: "Users", icon: UserCheck01Icon, href: "/master-data/users", count: 156 },
       { id: "customers", label: "Customers", icon: UserGroupIcon, href: "/master-data/customers", count: 3289 },
       { id: "divisions", label: "Divisions", icon: HierarchyIcon, href: "/master-data/divisions", count: 6 },
       { id: "depstores", label: "Dept Stores", icon: StoreIcon, href: "/master-data/depstores", count: 12 },
+      { id: "roles", label: "Roles & Permissions", icon: UserShield01Icon, href: "/master-data/roles" },
       { id: "master-data-settings", label: "Settings", icon: SettingsIcon, href: "/master-data/settings" }
     ]
   },
@@ -153,6 +156,7 @@ const menuData: MenuItem[] = [
     id: "products",
     label: "Products",
     icon: Shirt01Icon,
+    href: "/products",
     items: [
       { id: "articles", label: "Articles", icon: Shirt01Icon, href: "/master-data/articles", count: 2847 },
       { id: "classifications", label: "Classifications", icon: HierarchyIcon, href: "/products/classifications", count: 18 },
@@ -302,14 +306,33 @@ const menuData: MenuItem[] = [
       { id: "olap", label: "OLAP Analysis", icon: ChartColumnIcon, href: "/reports/olap" },
       { id: "reporting-settings", label: "Settings", icon: SettingsIcon, href: "/reports/settings" }
     ]
+  },
+  {
+    id: "messages",
+    label: "Chat",
+    icon: Chat01Icon,
+    href: "/messages",
+    items: [
+      { id: "personal-chat", label: "Personal Chat", icon: Chat01Icon, href: "/messages" },
+      { id: "group-chat", label: "Group Chat", icon: UserGroupIcon, href: "/messages/group" },
+    ]
   }
 ]
 
 export function TwoLevelLayout({ children }: LayoutProps) {
+  return (
+    <SecondarySidebarSlotProvider>
+      <TwoLevelLayoutInner>{children}</TwoLevelLayoutInner>
+    </SecondarySidebarSlotProvider>
+  )
+}
+
+function TwoLevelLayoutInner({ children }: LayoutProps) {
   const pathname = usePathname()
   useAuth() // Keep auth context active for session management
   const [activeMenu, setActiveMenu] = React.useState<string | null>(null)
   const [isSecondSidebarCollapsed, setIsSecondSidebarCollapsed] = React.useState(false)
+  const { slotContent } = useSecondarySidebarSlot()
 
   // Initialize session activity tracking
   useSessionActivity({
@@ -322,7 +345,7 @@ export function TwoLevelLayout({ children }: LayoutProps) {
     const currentMenu = menuData.find(menu => {
       // Special case for home page and dashboard - always show dashboard menu
       if ((pathname === '/' || pathname === '/dashboard') && menu.id === 'dashboard') return true
-      if (menu.href && pathname === menu.href) return true
+      if (menu.href && (pathname === menu.href || pathname.startsWith(menu.href + '/'))) return true
       if (menu.items) {
         return menu.items.some(item => pathname === item.href || pathname.startsWith(item.href + '/'))
       }
@@ -377,26 +400,28 @@ export function TwoLevelLayout({ children }: LayoutProps) {
                   {menu.href ? (
                     <Link
                       href={menu.href}
+                      onClick={() => {
+                        setActiveMenu(menu.id)
+                        setIsSecondSidebarCollapsed(false)
+                      }}
                       className={`flex items-center justify-center p-2 rounded-md transition-colors ${isActive
-                        ? ' '
+                        ? 'bg-blue-600 dark:bg-blue-400'
                         : 'hover:bg-gray-200 dark:hover:bg-gray-700'
                         }`}
-                      style={isActive ? { backgroundColor: '#cfff04' } : {}}
                       title={menu.label}
                     >
-                      <Icon icon={menu.icon} className={`h-[18px] w-[18px] ${isActive ? 'text-black' : 'text-gray-600 dark:text-gray-300'}`} strokeWidth={2} />
+                      <Icon icon={menu.icon} className={`h-[18px] w-[18px] ${isActive ? 'text-white dark:text-gray-950' : 'text-gray-600 dark:text-gray-300'}`} strokeWidth={2} />
                     </Link>
                   ) : (
                     <button
                       onClick={() => handleMenuClick(menu.id)}
                       className={`w-full flex items-center justify-center p-2 rounded-md transition-colors ${isActive
-                        ? ' '
+                        ? 'bg-blue-600 dark:bg-blue-400'
                         : 'hover:bg-gray-200 dark:hover:bg-gray-700'
                         }`}
-                      style={isActive ? { backgroundColor: '#cfff04' } : {}}
                       title={menu.label}
                     >
-                      <Icon icon={menu.icon} className={`h-[18px] w-[18px] ${isActive ? 'text-black' : 'text-gray-600 dark:text-gray-300'}`} strokeWidth={2} />
+                      <Icon icon={menu.icon} className={`h-[18px] w-[18px] ${isActive ? 'text-white dark:text-gray-950' : 'text-gray-600 dark:text-gray-300'}`} strokeWidth={2} />
                     </button>
                   )}
                 </li>
@@ -412,13 +437,12 @@ export function TwoLevelLayout({ children }: LayoutProps) {
             <Link
               href="/calendar"
               className={`w-full flex items-center justify-center p-2 rounded-md transition-colors ${pathname === '/calendar'
-                ? ' '
+                ? 'bg-blue-600 dark:bg-blue-400'
                 : 'hover:bg-gray-200 dark:hover:bg-gray-700'
                 }`}
-              style={pathname === '/calendar' ? { backgroundColor: '#cfff04' } : {}}
               title="Calendar"
             >
-              <Icon icon={Calendar01Icon} className={`h-[18px] w-[18px] ${pathname === '/calendar' ? 'text-black' : 'text-gray-600 dark:text-gray-300'}`} strokeWidth={2} />
+              <Icon icon={Calendar01Icon} className={`h-[18px] w-[18px] ${pathname === '/calendar' ? 'text-white dark:text-gray-950' : 'text-gray-600 dark:text-gray-300'}`} strokeWidth={2} />
             </Link>
 
             {/* Theme Toggle */}
@@ -431,13 +455,12 @@ export function TwoLevelLayout({ children }: LayoutProps) {
             <Link
               href="/settings"
               className={`w-full flex items-center justify-center p-2 rounded-md transition-colors ${pathname === '/settings'
-                ? ' '
+                ? 'bg-blue-600 dark:bg-blue-400'
                 : 'hover:bg-gray-200 dark:hover:bg-gray-700'
                 }`}
-              style={pathname === '/settings' ? { backgroundColor: '#cfff04' } : {}}
               title="Settings"
             >
-              <Icon icon={SettingsIcon} className={`h-[18px] w-[18px] ${pathname === '/settings' ? 'text-black' : 'text-gray-600 dark:text-gray-300'}`} strokeWidth={2} />
+              <Icon icon={SettingsIcon} className={`h-[18px] w-[18px] ${pathname === '/settings' ? 'text-white dark:text-gray-950' : 'text-gray-600 dark:text-gray-300'}`} strokeWidth={2} />
             </Link>
           </div>
         </div>
@@ -500,7 +523,7 @@ export function TwoLevelLayout({ children }: LayoutProps) {
           </div>
 
           {/* Sub Navigation */}
-          <nav className="flex-1 p-2">
+          <nav className={slotContent ? 'p-2' : 'flex-1 p-2'}>
             <ul className="space-y-1">
               {activeMenuData.items.map((item) => {
                 const isActive = pathname === item.href
@@ -511,14 +534,13 @@ export function TwoLevelLayout({ children }: LayoutProps) {
                       href={item.href}
                       className={`flex items-center ${isSecondSidebarCollapsed ? 'justify-center p-3' : 'justify-between px-3 py-2'
                         } rounded-lg transition-colors ${isActive
-                          ? 'text-black  '
+                          ? 'bg-blue-600 dark:bg-blue-400 text-white dark:text-gray-950'
                           : 'hover:bg-white dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
                         }`}
-                      style={isActive ? { backgroundColor: '#cfff04' } : {}}
                       title={isSecondSidebarCollapsed ? item.label : undefined}
                     >
                       <div className="flex items-center space-x-3">
-                        <Icon icon={item.icon} className={`h-4 w-4 flex-shrink-0 ${isActive ? 'text-black' : ''}`} />
+                        <Icon icon={item.icon} className={`h-4 w-4 flex-shrink-0 ${isActive ? 'text-white dark:text-gray-950' : ''}`} />
                         {!isSecondSidebarCollapsed && (
                           <span className="text-sm font-medium">{item.label}</span>
                         )}
@@ -534,6 +556,13 @@ export function TwoLevelLayout({ children }: LayoutProps) {
               })}
             </ul>
           </nav>
+
+          {/* Dynamic slot content (e.g. conversation list for chat) */}
+          {slotContent && !isSecondSidebarCollapsed && (
+            <div className="flex-1 overflow-y-auto border-t border-gray-200 dark:border-gray-700">
+              {slotContent}
+            </div>
+          )}
 
           {/* Help Card - Bottom section */}
           {!isSecondSidebarCollapsed && (

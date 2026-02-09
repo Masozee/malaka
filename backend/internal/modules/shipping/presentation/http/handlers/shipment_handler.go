@@ -2,14 +2,14 @@ package handlers
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 
 	"gorm.io/gorm"
 
 	"malaka/internal/modules/shipping/domain"
 	"malaka/internal/modules/shipping/domain/dtos"
-	"malaka/internal/shared/validator"
 	"malaka/internal/shared/response"
+	"malaka/internal/shared/uuid"
+	"malaka/internal/shared/validator"
 )
 
 type ShipmentHandler struct {

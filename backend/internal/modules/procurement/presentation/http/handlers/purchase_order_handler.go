@@ -11,6 +11,7 @@ import (
 	"malaka/internal/modules/procurement/domain/services"
 	"malaka/internal/modules/procurement/presentation/http/dto"
 	"malaka/internal/shared/response"
+	"malaka/internal/shared/uuid"
 )
 
 // PurchaseOrderHandler handles HTTP requests for purchase order operations.
@@ -172,12 +173,14 @@ func (h *PurchaseOrderHandler) Update(c *gin.Context) {
 
 	// Update fields
 	if req.SupplierID != "" {
-		order.SupplierID = req.SupplierID
+		supplierUUID, _ := uuid.Parse(req.SupplierID)
+		order.SupplierID = supplierUUID
 	}
 	if req.PurchaseRequestID != nil {
 		// Only set if not empty string, otherwise set to nil
 		if *req.PurchaseRequestID != "" {
-			order.PurchaseRequestID = req.PurchaseRequestID
+			prUUID, _ := uuid.Parse(*req.PurchaseRequestID)
+			order.PurchaseRequestID = &prUUID
 		} else {
 			order.PurchaseRequestID = nil
 		}

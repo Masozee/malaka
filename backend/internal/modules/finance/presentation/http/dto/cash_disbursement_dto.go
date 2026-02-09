@@ -5,6 +5,7 @@ import (
 
 	"malaka/internal/modules/finance/domain/entities"
 	"malaka/internal/shared/types"
+	"malaka/internal/shared/uuid"
 )
 
 // CashDisbursementCreateRequest represents the request to create cash disbursement.
@@ -41,7 +42,7 @@ func (req *CashDisbursementCreateRequest) ToCashDisbursementEntity() *entities.C
 		DisbursementDate: req.DisbursementDate,
 		Amount:           req.Amount,
 		Description:      req.Description,
-		CashBankID:       req.CashBankID,
+		CashBankID:       uuid.MustParse(req.CashBankID),
 	}
 }
 
@@ -52,18 +53,18 @@ func (req *CashDisbursementUpdateRequest) ToCashDisbursementEntity() *entities.C
 		DisbursementDate: req.DisbursementDate,
 		Amount:           req.Amount,
 		Description:      req.Description,
-		CashBankID:       req.CashBankID,
+		CashBankID:       uuid.MustParse(req.CashBankID),
 	}
 }
 
 // FromCashDisbursementEntity converts entities.CashDisbursement to CashDisbursementResponse.
 func FromCashDisbursementEntity(cd *entities.CashDisbursement) *CashDisbursementResponse {
 	return &CashDisbursementResponse{
-		ID:               cd.ID,
+		ID:               cd.ID.String(),
 		DisbursementDate: cd.DisbursementDate,
 		Amount:           cd.Amount,
 		Description:      cd.Description,
-		CashBankID:       cd.CashBankID,
+		CashBankID:       cd.CashBankID.String(),
 		CreatedAt:        cd.CreatedAt.Format("2006-01-02T15:04:05Z"),
 		UpdatedAt:        cd.UpdatedAt.Format("2006-01-02T15:04:05Z"),
 	}

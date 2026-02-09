@@ -11,6 +11,7 @@ import (
 
 	"malaka/internal/modules/production/domain/entities"
 	"malaka/internal/modules/production/domain/repositories"
+	"malaka/internal/shared/uuid"
 )
 
 type WorkOrderRepositoryImpl struct {
@@ -84,7 +85,7 @@ func (r *WorkOrderRepositoryImpl) Create(ctx context.Context, workOrder *entitie
 	return tx.Commit()
 }
 
-func (r *WorkOrderRepositoryImpl) GetByID(ctx context.Context, id int) (*entities.WorkOrder, error) {
+func (r *WorkOrderRepositoryImpl) GetByID(ctx context.Context, id uuid.ID) (*entities.WorkOrder, error) {
 	query := `
 		SELECT id, work_order_number, type, product_id, product_code, product_name,
 			   quantity, planned_start_date, planned_end_date, actual_start_date, actual_end_date,
@@ -96,7 +97,7 @@ func (r *WorkOrderRepositoryImpl) GetByID(ctx context.Context, id int) (*entitie
 	err := r.db.GetContext(ctx, &workOrder, query, id)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, fmt.Errorf("work order with id %d not found", id)
+			return nil, fmt.Errorf("work order with id %s not found", id)
 		}
 		return nil, fmt.Errorf("failed to get work order: %w", err)
 	}
@@ -160,7 +161,7 @@ func (r *WorkOrderRepositoryImpl) Update(ctx context.Context, workOrder *entitie
 	return nil
 }
 
-func (r *WorkOrderRepositoryImpl) Delete(ctx context.Context, id int) error {
+func (r *WorkOrderRepositoryImpl) Delete(ctx context.Context, id uuid.ID) error {
 	query := `DELETE FROM work_orders WHERE id = $1`
 	result, err := r.db.ExecContext(ctx, query, id)
 	if err != nil {
@@ -173,7 +174,7 @@ func (r *WorkOrderRepositoryImpl) Delete(ctx context.Context, id int) error {
 	}
 
 	if rowsAffected == 0 {
-		return fmt.Errorf("work order with id %d not found", id)
+		return fmt.Errorf("work order with id %s not found", id)
 	}
 
 	return nil
@@ -295,7 +296,7 @@ func (r *WorkOrderRepositoryImpl) GetSummary(ctx context.Context) (*entities.Wor
 	return &summary, nil
 }
 
-func (r *WorkOrderRepositoryImpl) ExistsWorkOrderNumber(ctx context.Context, workOrderNumber string, excludeID ...int) (bool, error) {
+func (r *WorkOrderRepositoryImpl) ExistsWorkOrderNumber(ctx context.Context, workOrderNumber string, excludeID ...uuid.ID) (bool, error) {
 	query := "SELECT EXISTS(SELECT 1 FROM work_orders WHERE work_order_number = $1"
 	args := []interface{}{workOrderNumber}
 
@@ -315,7 +316,7 @@ func (r *WorkOrderRepositoryImpl) ExistsWorkOrderNumber(ctx context.Context, wor
 }
 
 // Material methods
-func (r *WorkOrderRepositoryImpl) GetMaterials(ctx context.Context, workOrderID int) ([]entities.WorkOrderMaterial, error) {
+func (r *WorkOrderRepositoryImpl) GetMaterials(ctx context.Context, workOrderID uuid.ID) ([]entities.WorkOrderMaterial, error) {
 	query := `
 		SELECT id, work_order_id, article_id, article_code, article_name,
 			   required_quantity, allocated_quantity, consumed_quantity,
@@ -359,7 +360,7 @@ func (r *WorkOrderRepositoryImpl) createMaterial(ctx context.Context, exec sqlx.
 }
 
 // Operation methods
-func (r *WorkOrderRepositoryImpl) GetOperations(ctx context.Context, workOrderID int) ([]entities.WorkOrderOperation, error) {
+func (r *WorkOrderRepositoryImpl) GetOperations(ctx context.Context, workOrderID uuid.ID) ([]entities.WorkOrderOperation, error) {
 	query := `
 		SELECT id, work_order_id, operation_number, name, description,
 			   planned_duration, actual_duration, status, assigned_to, machine_id,
@@ -403,7 +404,7 @@ func (r *WorkOrderRepositoryImpl) createOperation(ctx context.Context, exec sqlx
 }
 
 // Assignment methods
-func (r *WorkOrderRepositoryImpl) GetAssignments(ctx context.Context, workOrderID int) ([]entities.WorkOrderAssignment, error) {
+func (r *WorkOrderRepositoryImpl) GetAssignments(ctx context.Context, workOrderID uuid.ID) ([]entities.WorkOrderAssignment, error) {
 	query := `
 		SELECT id, work_order_id, employee_id, role, assigned_at
 		FROM work_order_assignments
@@ -463,7 +464,7 @@ func (r *WorkOrderRepositoryImpl) GetWorkOrdersByDateRange(ctx context.Context, 
 	return nil, fmt.Errorf("not implemented")
 }
 
-func (r *WorkOrderRepositoryImpl) GetWorkOrdersByWarehouse(ctx context.Context, warehouseID int) ([]entities.WorkOrder, error) {
+func (r *WorkOrderRepositoryImpl) GetWorkOrdersByWarehouse(ctx context.Context, warehouseID uuid.ID) ([]entities.WorkOrder, error) {
 	// Implementation for getting by warehouse
 	return nil, fmt.Errorf("not implemented")
 }
@@ -488,7 +489,7 @@ func (r *WorkOrderRepositoryImpl) UpdateMaterial(ctx context.Context, material *
 	return fmt.Errorf("not implemented")
 }
 
-func (r *WorkOrderRepositoryImpl) RemoveMaterial(ctx context.Context, workOrderID, materialID int) error {
+func (r *WorkOrderRepositoryImpl) RemoveMaterial(ctx context.Context, workOrderID, materialID uuid.ID) error {
 	// Implementation for removing material
 	return fmt.Errorf("not implemented")
 }
@@ -498,27 +499,27 @@ func (r *WorkOrderRepositoryImpl) UpdateOperation(ctx context.Context, operation
 	return fmt.Errorf("not implemented")
 }
 
-func (r *WorkOrderRepositoryImpl) RemoveOperation(ctx context.Context, workOrderID, operationID int) error {
+func (r *WorkOrderRepositoryImpl) RemoveOperation(ctx context.Context, workOrderID, operationID uuid.ID) error {
 	// Implementation for removing operation
 	return fmt.Errorf("not implemented")
 }
 
-func (r *WorkOrderRepositoryImpl) UpdateOperationStatus(ctx context.Context, operationID int, status entities.OperationStatus) error {
+func (r *WorkOrderRepositoryImpl) UpdateOperationStatus(ctx context.Context, operationID uuid.ID, status entities.OperationStatus) error {
 	// Implementation for updating operation status
 	return fmt.Errorf("not implemented")
 }
 
-func (r *WorkOrderRepositoryImpl) UnassignEmployee(ctx context.Context, workOrderID int, employeeID string) error {
+func (r *WorkOrderRepositoryImpl) UnassignEmployee(ctx context.Context, workOrderID uuid.ID, employeeID uuid.ID) error {
 	// Implementation for unassigning employee
 	return fmt.Errorf("not implemented")
 }
 
-func (r *WorkOrderRepositoryImpl) GetWorkOrdersByEmployee(ctx context.Context, employeeID string) ([]entities.WorkOrder, error) {
+func (r *WorkOrderRepositoryImpl) GetWorkOrdersByEmployee(ctx context.Context, employeeID uuid.ID) ([]entities.WorkOrder, error) {
 	// Implementation for getting by employee
 	return nil, fmt.Errorf("not implemented")
 }
 
-func (r *WorkOrderRepositoryImpl) BulkUpdateStatus(ctx context.Context, ids []int, status entities.WorkOrderStatus) error {
+func (r *WorkOrderRepositoryImpl) BulkUpdateStatus(ctx context.Context, ids []uuid.ID, status entities.WorkOrderStatus) error {
 	query := `UPDATE work_orders SET status = $1, updated_at = CURRENT_TIMESTAMP WHERE id = ANY($2)`
 	_, err := r.db.ExecContext(ctx, query, status, pq.Array(ids))
 	if err != nil {
@@ -527,7 +528,7 @@ func (r *WorkOrderRepositoryImpl) BulkUpdateStatus(ctx context.Context, ids []in
 	return nil
 }
 
-func (r *WorkOrderRepositoryImpl) BulkAssignSupervisor(ctx context.Context, ids []int, supervisor string) error {
+func (r *WorkOrderRepositoryImpl) BulkAssignSupervisor(ctx context.Context, ids []uuid.ID, supervisor string) error {
 	query := `UPDATE work_orders SET supervisor = $1, updated_at = CURRENT_TIMESTAMP WHERE id = ANY($2)`
 	_, err := r.db.ExecContext(ctx, query, supervisor, pq.Array(ids))
 	if err != nil {

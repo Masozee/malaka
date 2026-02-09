@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"time"
 
-	"github.com/google/uuid"
+	"malaka/internal/shared/uuid"
 	"github.com/jmoiron/sqlx"
 	"malaka/internal/modules/accounting/domain/entities"
 	"malaka/internal/modules/accounting/domain/repositories"
@@ -42,7 +42,7 @@ func (r *budgetCommitmentRepository) Create(ctx context.Context, commitment *ent
 }
 
 // GetByID retrieves a commitment by ID
-func (r *budgetCommitmentRepository) GetByID(ctx context.Context, id uuid.UUID) (*entities.BudgetCommitment, error) {
+func (r *budgetCommitmentRepository) GetByID(ctx context.Context, id uuid.ID) (*entities.BudgetCommitment, error) {
 	query := `
 		SELECT id, budget_id, account_id, amount, reference_type, reference_id,
 			   reference_number, COALESCE(description, '') as description, status,
@@ -64,7 +64,7 @@ func (r *budgetCommitmentRepository) GetByID(ctx context.Context, id uuid.UUID) 
 }
 
 // GetByReferenceID retrieves a commitment by reference
-func (r *budgetCommitmentRepository) GetByReferenceID(ctx context.Context, refType entities.BudgetCommitmentReferenceType, refID uuid.UUID) (*entities.BudgetCommitment, error) {
+func (r *budgetCommitmentRepository) GetByReferenceID(ctx context.Context, refType entities.BudgetCommitmentReferenceType, refID uuid.ID) (*entities.BudgetCommitment, error) {
 	query := `
 		SELECT id, budget_id, account_id, amount, reference_type, reference_id,
 			   reference_number, COALESCE(description, '') as description, status,
@@ -86,7 +86,7 @@ func (r *budgetCommitmentRepository) GetByReferenceID(ctx context.Context, refTy
 }
 
 // GetByBudgetID retrieves all commitments for a budget
-func (r *budgetCommitmentRepository) GetByBudgetID(ctx context.Context, budgetID uuid.UUID) ([]*entities.BudgetCommitment, error) {
+func (r *budgetCommitmentRepository) GetByBudgetID(ctx context.Context, budgetID uuid.ID) ([]*entities.BudgetCommitment, error) {
 	query := `
 		SELECT id, budget_id, account_id, amount, reference_type, reference_id,
 			   reference_number, COALESCE(description, '') as description, status,
@@ -103,7 +103,7 @@ func (r *budgetCommitmentRepository) GetByBudgetID(ctx context.Context, budgetID
 }
 
 // GetActiveByBudgetID retrieves active commitments for a budget
-func (r *budgetCommitmentRepository) GetActiveByBudgetID(ctx context.Context, budgetID uuid.UUID) ([]*entities.BudgetCommitment, error) {
+func (r *budgetCommitmentRepository) GetActiveByBudgetID(ctx context.Context, budgetID uuid.ID) ([]*entities.BudgetCommitment, error) {
 	query := `
 		SELECT id, budget_id, account_id, amount, reference_type, reference_id,
 			   reference_number, COALESCE(description, '') as description, status,
@@ -138,7 +138,7 @@ func (r *budgetCommitmentRepository) Update(ctx context.Context, commitment *ent
 }
 
 // Release releases a commitment
-func (r *budgetCommitmentRepository) Release(ctx context.Context, id uuid.UUID, releasedBy uuid.UUID, reason string) error {
+func (r *budgetCommitmentRepository) Release(ctx context.Context, id uuid.ID, releasedBy uuid.ID, reason string) error {
 	now := time.Now()
 	query := `
 		UPDATE budget_commitments SET
@@ -154,7 +154,7 @@ func (r *budgetCommitmentRepository) Release(ctx context.Context, id uuid.UUID, 
 }
 
 // MarkRealized marks a commitment as realized
-func (r *budgetCommitmentRepository) MarkRealized(ctx context.Context, id uuid.UUID) error {
+func (r *budgetCommitmentRepository) MarkRealized(ctx context.Context, id uuid.ID) error {
 	now := time.Now()
 	query := `
 		UPDATE budget_commitments SET
@@ -167,7 +167,7 @@ func (r *budgetCommitmentRepository) MarkRealized(ctx context.Context, id uuid.U
 }
 
 // GetTotalCommittedByBudget returns total committed amount for a budget
-func (r *budgetCommitmentRepository) GetTotalCommittedByBudget(ctx context.Context, budgetID uuid.UUID) (float64, error) {
+func (r *budgetCommitmentRepository) GetTotalCommittedByBudget(ctx context.Context, budgetID uuid.ID) (float64, error) {
 	query := `
 		SELECT COALESCE(SUM(amount), 0)
 		FROM budget_commitments
@@ -179,7 +179,7 @@ func (r *budgetCommitmentRepository) GetTotalCommittedByBudget(ctx context.Conte
 }
 
 // GetTotalCommittedByAccount returns total committed amount for an account within a budget
-func (r *budgetCommitmentRepository) GetTotalCommittedByAccount(ctx context.Context, budgetID, accountID uuid.UUID) (float64, error) {
+func (r *budgetCommitmentRepository) GetTotalCommittedByAccount(ctx context.Context, budgetID, accountID uuid.ID) (float64, error) {
 	query := `
 		SELECT COALESCE(SUM(amount), 0)
 		FROM budget_commitments
@@ -222,7 +222,7 @@ func (r *budgetRealizationRepository) Create(ctx context.Context, realization *e
 }
 
 // GetByID retrieves a realization by ID
-func (r *budgetRealizationRepository) GetByID(ctx context.Context, id uuid.UUID) (*entities.BudgetRealization, error) {
+func (r *budgetRealizationRepository) GetByID(ctx context.Context, id uuid.ID) (*entities.BudgetRealization, error) {
 	query := `
 		SELECT id, commitment_id, budget_id, account_id, amount, reference_type,
 			   reference_id, reference_number, transaction_date,
@@ -243,7 +243,7 @@ func (r *budgetRealizationRepository) GetByID(ctx context.Context, id uuid.UUID)
 }
 
 // GetByReferenceID retrieves a realization by reference
-func (r *budgetRealizationRepository) GetByReferenceID(ctx context.Context, refType entities.BudgetRealizationReferenceType, refID uuid.UUID) (*entities.BudgetRealization, error) {
+func (r *budgetRealizationRepository) GetByReferenceID(ctx context.Context, refType entities.BudgetRealizationReferenceType, refID uuid.ID) (*entities.BudgetRealization, error) {
 	query := `
 		SELECT id, commitment_id, budget_id, account_id, amount, reference_type,
 			   reference_id, reference_number, transaction_date,
@@ -264,7 +264,7 @@ func (r *budgetRealizationRepository) GetByReferenceID(ctx context.Context, refT
 }
 
 // GetByBudgetID retrieves all realizations for a budget
-func (r *budgetRealizationRepository) GetByBudgetID(ctx context.Context, budgetID uuid.UUID) ([]*entities.BudgetRealization, error) {
+func (r *budgetRealizationRepository) GetByBudgetID(ctx context.Context, budgetID uuid.ID) ([]*entities.BudgetRealization, error) {
 	query := `
 		SELECT id, commitment_id, budget_id, account_id, amount, reference_type,
 			   reference_id, reference_number, transaction_date,
@@ -280,7 +280,7 @@ func (r *budgetRealizationRepository) GetByBudgetID(ctx context.Context, budgetI
 }
 
 // GetByCommitmentID retrieves realizations linked to a commitment
-func (r *budgetRealizationRepository) GetByCommitmentID(ctx context.Context, commitmentID uuid.UUID) ([]*entities.BudgetRealization, error) {
+func (r *budgetRealizationRepository) GetByCommitmentID(ctx context.Context, commitmentID uuid.ID) ([]*entities.BudgetRealization, error) {
 	query := `
 		SELECT id, commitment_id, budget_id, account_id, amount, reference_type,
 			   reference_id, reference_number, transaction_date,
@@ -296,7 +296,7 @@ func (r *budgetRealizationRepository) GetByCommitmentID(ctx context.Context, com
 }
 
 // GetTotalRealizedByBudget returns total realized amount for a budget
-func (r *budgetRealizationRepository) GetTotalRealizedByBudget(ctx context.Context, budgetID uuid.UUID) (float64, error) {
+func (r *budgetRealizationRepository) GetTotalRealizedByBudget(ctx context.Context, budgetID uuid.ID) (float64, error) {
 	query := `
 		SELECT COALESCE(SUM(amount), 0)
 		FROM budget_realizations
@@ -308,7 +308,7 @@ func (r *budgetRealizationRepository) GetTotalRealizedByBudget(ctx context.Conte
 }
 
 // GetTotalRealizedByAccount returns total realized amount for an account within a budget
-func (r *budgetRealizationRepository) GetTotalRealizedByAccount(ctx context.Context, budgetID, accountID uuid.UUID) (float64, error) {
+func (r *budgetRealizationRepository) GetTotalRealizedByAccount(ctx context.Context, budgetID, accountID uuid.ID) (float64, error) {
 	query := `
 		SELECT COALESCE(SUM(amount), 0)
 		FROM budget_realizations
@@ -320,7 +320,7 @@ func (r *budgetRealizationRepository) GetTotalRealizedByAccount(ctx context.Cont
 }
 
 // GetRealizationSummary returns a summary of realizations by account
-func (r *budgetRealizationRepository) GetRealizationSummary(ctx context.Context, budgetID uuid.UUID) ([]*entities.BudgetRealizationSummary, error) {
+func (r *budgetRealizationRepository) GetRealizationSummary(ctx context.Context, budgetID uuid.ID) ([]*entities.BudgetRealizationSummary, error) {
 	query := `
 		SELECT
 			br.budget_id,

@@ -10,6 +10,7 @@ import (
 	"malaka/internal/modules/masterdata/presentation/http/dto"
 	"malaka/internal/shared/response"
 	"malaka/internal/shared/types"
+	"malaka/internal/shared/uuid"
 )
 
 // ColorHandler handles HTTP requests for color operations.
@@ -36,6 +37,7 @@ func (h *ColorHandler) CreateColor(c *gin.Context) {
 		Name:        req.Name,
 		HexCode:     req.HexCode,
 		Description: req.Description,
+		CompanyID:   req.CompanyID,
 		Status:      req.Status,
 		BaseModel: types.BaseModel{
 			CreatedAt: now,
@@ -54,7 +56,12 @@ func (h *ColorHandler) CreateColor(c *gin.Context) {
 // GetColorByID handles retrieving a color by its ID.
 func (h *ColorHandler) GetColorByID(c *gin.Context) {
 	id := c.Param("id")
-	color, err := h.service.GetColorByID(c.Request.Context(), id)
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		response.BadRequest(c, "Invalid ID format", nil)
+		return
+	}
+	color, err := h.service.GetColorByID(c.Request.Context(), parsedID)
 	if err != nil {
 		response.InternalServerError(c, err.Error(), nil)
 		return
@@ -92,12 +99,13 @@ func (h *ColorHandler) UpdateColor(c *gin.Context) {
 		Name:        req.Name,
 		HexCode:     req.HexCode,
 		Description: req.Description,
+		CompanyID:   req.CompanyID,
 		Status:      req.Status,
 		BaseModel: types.BaseModel{
 			UpdatedAt: time.Now(),
 		},
 	}
-	color.ID = id // Set the ID from the URL parameter
+	color.ID = uuid.MustParse(id) // Set the ID from the URL parameter
 
 	if err := h.service.UpdateColor(c.Request.Context(), color); err != nil {
 		response.InternalServerError(c, err.Error(), nil)
@@ -110,7 +118,12 @@ func (h *ColorHandler) UpdateColor(c *gin.Context) {
 // DeleteColor handles deleting a color by its ID.
 func (h *ColorHandler) DeleteColor(c *gin.Context) {
 	id := c.Param("id")
-	if err := h.service.DeleteColor(c.Request.Context(), id); err != nil {
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		response.BadRequest(c, "Invalid ID format", nil)
+		return
+	}
+	if err := h.service.DeleteColor(c.Request.Context(), parsedID); err != nil {
 		response.InternalServerError(c, err.Error(), nil)
 		return
 	}

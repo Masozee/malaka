@@ -6,6 +6,7 @@ import (
 
 	"malaka/internal/modules/finance/domain/entities"
 	"malaka/internal/modules/finance/domain/repositories"
+	"malaka/internal/shared/uuid"
 )
 
 type checkClearanceRepositoryImpl struct {
@@ -19,6 +20,10 @@ func NewCheckClearanceRepository(db *sql.DB) repositories.CheckClearanceReposito
 }
 
 func (r *checkClearanceRepositoryImpl) Create(ctx context.Context, check *entities.CheckClearance) error {
+	if check.ID.IsNil() {
+		check.ID = uuid.New()
+	}
+
 	query := `
 		INSERT INTO check_clearance (
 			id, check_number, check_date, bank_name, amount, payee_id,
@@ -35,7 +40,7 @@ func (r *checkClearanceRepositoryImpl) Create(ctx context.Context, check *entiti
 	return err
 }
 
-func (r *checkClearanceRepositoryImpl) GetByID(ctx context.Context, id string) (*entities.CheckClearance, error) {
+func (r *checkClearanceRepositoryImpl) GetByID(ctx context.Context, id uuid.ID) (*entities.CheckClearance, error) {
 	check := &entities.CheckClearance{}
 	query := `
 		SELECT id, check_number, check_date, bank_name, amount, payee_id,
@@ -103,7 +108,7 @@ func (r *checkClearanceRepositoryImpl) Update(ctx context.Context, check *entiti
 	return err
 }
 
-func (r *checkClearanceRepositoryImpl) Delete(ctx context.Context, id string) error {
+func (r *checkClearanceRepositoryImpl) Delete(ctx context.Context, id uuid.ID) error {
 	query := `DELETE FROM check_clearance WHERE id = $1`
 	_, err := r.db.ExecContext(ctx, query, id)
 	return err

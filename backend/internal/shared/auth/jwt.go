@@ -8,14 +8,18 @@ import (
 
 // Claims represents the JWT claims.
 type Claims struct {
-	Role string `json:"role"`
+	Role      string `json:"role"`
+	CompanyID string `json:"company_id,omitempty"`
+	Email     string `json:"email,omitempty"`
 	jwt.StandardClaims
 }
 
-// NewJWT creates a new JWT token.
-func NewJWT(userID string, secret string, expiry int) (string, error) {
+// NewJWT creates a new JWT token with user info.
+func NewJWT(userID, companyID, email, role, secret string, expiry int) (string, error) {
 	claims := &Claims{
-		Role: "",
+		Role:      role,
+		CompanyID: companyID,
+		Email:     email,
 		StandardClaims: jwt.StandardClaims{
 			Subject:   userID,
 			ExpiresAt: time.Now().Add(time.Hour * time.Duration(expiry)).Unix(),

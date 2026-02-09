@@ -3,12 +3,13 @@ package services
 import (
 	"context"
 	"errors"
+	"time"
 
 	inventory_entities "malaka/internal/modules/inventory/domain/entities"
 	inventory_services "malaka/internal/modules/inventory/domain/services"
 	"malaka/internal/modules/sales/domain/entities"
 	"malaka/internal/modules/sales/domain/repositories"
-	"malaka/internal/shared/utils"
+	"malaka/internal/shared/uuid"
 )
 
 // SalesOrderService provides business logic for sales order operations.
@@ -29,8 +30,8 @@ func NewSalesOrderService(repo repositories.SalesOrderRepository, itemRepo repos
 
 // CreateSalesOrder creates a new sales order and records stock movements.
 func (s *SalesOrderService) CreateSalesOrder(ctx context.Context, so *entities.SalesOrder, items []*entities.SalesOrderItem) error {
-	if so.ID == "" {
-		so.ID = utils.RandomString(10) // Generate a random ID if not provided
+	if so.ID.IsNil() {
+		so.ID = uuid.New()
 	}
 
 	// Create the sales order
@@ -39,9 +40,9 @@ func (s *SalesOrderService) CreateSalesOrder(ctx context.Context, so *entities.S
 	}
 
 	for _, item := range items {
-		item.SalesOrderID = so.ID
-		if item.ID == "" {
-			item.ID = utils.RandomString(10)
+		item.SalesOrderID = so.ID.String()
+		if item.ID.IsNil() {
+			item.ID = uuid.New()
 		}
 		// Create sales order item
 		if err := s.itemRepo.Create(ctx, item); err != nil {
@@ -49,12 +50,14 @@ func (s *SalesOrderService) CreateSalesOrder(ctx context.Context, so *entities.S
 		}
 
 		// Record stock movement out of warehouse (assuming a default warehouse for now)
+		articleID, _ := uuid.Parse(item.ArticleID)
+		warehouseID := uuid.New() // TODO: Get actual warehouse ID
 		outMovement := &inventory_entities.StockMovement{
-			ArticleID:    item.ArticleID,
-			WarehouseID:  "default_warehouse_id", // TODO: Get actual warehouse ID
+			ArticleID:    articleID,
+			WarehouseID:  warehouseID,
 			Quantity:     item.Quantity,
 			MovementType: "out",
-			MovementDate: utils.Now(),
+			MovementDate: time.Now(),
 			ReferenceID:  so.ID,
 		}
 		if err := s.stockService.RecordStockMovement(ctx, outMovement); err != nil {
@@ -77,7 +80,7 @@ func (s *SalesOrderService) GetSalesOrderByID(ctx context.Context, id string) (*
 // UpdateSalesOrder updates an existing sales order.
 func (s *SalesOrderService) UpdateSalesOrder(ctx context.Context, so *entities.SalesOrder) error {
 	// Ensure the sales order exists before updating
-	existingSO, err := s.repo.GetByID(ctx, so.ID)
+	existingSO, err := s.repo.GetByID(ctx, so.ID.String())
 	if err != nil {
 		return err
 	}

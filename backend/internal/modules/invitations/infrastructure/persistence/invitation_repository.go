@@ -9,6 +9,7 @@ import (
 
 	"malaka/internal/modules/invitations/domain/entities"
 	"malaka/internal/modules/invitations/domain/repositories"
+	"malaka/internal/shared/uuid"
 
 	"github.com/jmoiron/sqlx"
 )
@@ -65,7 +66,7 @@ func (r *invitationRepository) Create(ctx context.Context, invitation *entities.
 }
 
 // GetByID retrieves an invitation by its ID
-func (r *invitationRepository) GetByID(ctx context.Context, id string) (*entities.Invitation, error) {
+func (r *invitationRepository) GetByID(ctx context.Context, id uuid.ID) (*entities.Invitation, error) {
 	query := `
 		SELECT
 			id, email, token, role, company_id, invited_by, status,
@@ -77,7 +78,7 @@ func (r *invitationRepository) GetByID(ctx context.Context, id string) (*entitie
 	`
 
 	var invitation entities.Invitation
-	err := r.db.GetContext(ctx, &invitation, query, id)
+	err := r.db.GetContext(ctx, &invitation, query, id.String())
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil
@@ -135,7 +136,7 @@ func (r *invitationRepository) GetByEmail(ctx context.Context, email string) ([]
 }
 
 // GetByInviter retrieves invitations sent by a specific user
-func (r *invitationRepository) GetByInviter(ctx context.Context, invitedBy string) ([]*entities.Invitation, error) {
+func (r *invitationRepository) GetByInviter(ctx context.Context, invitedBy uuid.ID) ([]*entities.Invitation, error) {
 	query := `
 		SELECT
 			id, email, token, role, company_id, invited_by, status,
@@ -148,7 +149,7 @@ func (r *invitationRepository) GetByInviter(ctx context.Context, invitedBy strin
 	`
 
 	var invitations []*entities.Invitation
-	err := r.db.SelectContext(ctx, &invitations, query, invitedBy)
+	err := r.db.SelectContext(ctx, &invitations, query, invitedBy.String())
 	if err != nil {
 		return nil, fmt.Errorf("failed to get invitations by inviter: %w", err)
 	}
@@ -157,7 +158,7 @@ func (r *invitationRepository) GetByInviter(ctx context.Context, invitedBy strin
 }
 
 // GetByCompany retrieves invitations for a specific company
-func (r *invitationRepository) GetByCompany(ctx context.Context, companyID string) ([]*entities.Invitation, error) {
+func (r *invitationRepository) GetByCompany(ctx context.Context, companyID uuid.ID) ([]*entities.Invitation, error) {
 	query := `
 		SELECT
 			id, email, token, role, company_id, invited_by, status,
@@ -170,7 +171,7 @@ func (r *invitationRepository) GetByCompany(ctx context.Context, companyID strin
 	`
 
 	var invitations []*entities.Invitation
-	err := r.db.SelectContext(ctx, &invitations, query, companyID)
+	err := r.db.SelectContext(ctx, &invitations, query, companyID.String())
 	if err != nil {
 		return nil, fmt.Errorf("failed to get invitations by company: %w", err)
 	}
@@ -249,7 +250,7 @@ func (r *invitationRepository) Update(ctx context.Context, invitation *entities.
 }
 
 // UpdateStatus updates the status of an invitation
-func (r *invitationRepository) UpdateStatus(ctx context.Context, id string, status entities.InvitationStatus) error {
+func (r *invitationRepository) UpdateStatus(ctx context.Context, id uuid.ID, status entities.InvitationStatus) error {
 	query := `
 		UPDATE invitations SET
 			status = $2,
@@ -257,7 +258,7 @@ func (r *invitationRepository) UpdateStatus(ctx context.Context, id string, stat
 		WHERE id = $1
 	`
 
-	_, err := r.db.ExecContext(ctx, query, id, status)
+	_, err := r.db.ExecContext(ctx, query, id.String(), status)
 	if err != nil {
 		return fmt.Errorf("failed to update invitation status: %w", err)
 	}
@@ -266,7 +267,7 @@ func (r *invitationRepository) UpdateStatus(ctx context.Context, id string, stat
 }
 
 // MarkAsAccepted marks an invitation as accepted and links to created user
-func (r *invitationRepository) MarkAsAccepted(ctx context.Context, id string, userID string) error {
+func (r *invitationRepository) MarkAsAccepted(ctx context.Context, id uuid.ID, userID uuid.ID) error {
 	query := `
 		UPDATE invitations SET
 			status = 'accepted',
@@ -276,7 +277,7 @@ func (r *invitationRepository) MarkAsAccepted(ctx context.Context, id string, us
 		WHERE id = $1
 	`
 
-	_, err := r.db.ExecContext(ctx, query, id, userID)
+	_, err := r.db.ExecContext(ctx, query, id.String(), userID.String())
 	if err != nil {
 		return fmt.Errorf("failed to mark invitation as accepted: %w", err)
 	}
@@ -285,10 +286,10 @@ func (r *invitationRepository) MarkAsAccepted(ctx context.Context, id string, us
 }
 
 // Delete deletes an invitation
-func (r *invitationRepository) Delete(ctx context.Context, id string) error {
+func (r *invitationRepository) Delete(ctx context.Context, id uuid.ID) error {
 	query := `DELETE FROM invitations WHERE id = $1`
 
-	_, err := r.db.ExecContext(ctx, query, id)
+	_, err := r.db.ExecContext(ctx, query, id.String())
 	if err != nil {
 		return fmt.Errorf("failed to delete invitation: %w", err)
 	}

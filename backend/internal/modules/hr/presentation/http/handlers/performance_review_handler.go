@@ -7,6 +7,7 @@ import (
 	"malaka/internal/modules/hr/domain/services"
 	"malaka/internal/modules/hr/presentation/http/dto"
 	"malaka/internal/shared/response"
+	"malaka/internal/shared/uuid"
 
 	"github.com/gin-gonic/gin"
 )
@@ -57,9 +58,15 @@ func (h *PerformanceReviewHandler) GetAllPerformanceReviews(c *gin.Context) {
 
 // GetPerformanceReviewByID handles GET /hr/performance/reviews/:id
 func (h *PerformanceReviewHandler) GetPerformanceReviewByID(c *gin.Context) {
-	id := c.Param("id")
-	if id == "" {
+	idStr := c.Param("id")
+	if idStr == "" {
 		response.Error(c, http.StatusBadRequest, "Review ID is required", nil)
+		return
+	}
+
+	id, err := uuid.Parse(idStr)
+	if err != nil {
+		response.Error(c, http.StatusBadRequest, "Invalid review ID format", err)
 		return
 	}
 
@@ -91,9 +98,15 @@ func (h *PerformanceReviewHandler) CreatePerformanceReview(c *gin.Context) {
 
 // UpdatePerformanceReview handles PUT /hr/performance/reviews/:id
 func (h *PerformanceReviewHandler) UpdatePerformanceReview(c *gin.Context) {
-	id := c.Param("id")
-	if id == "" {
+	idStr := c.Param("id")
+	if idStr == "" {
 		response.Error(c, http.StatusBadRequest, "Review ID is required", nil)
+		return
+	}
+
+	id, err := uuid.Parse(idStr)
+	if err != nil {
+		response.Error(c, http.StatusBadRequest, "Invalid review ID format", err)
 		return
 	}
 
@@ -114,13 +127,19 @@ func (h *PerformanceReviewHandler) UpdatePerformanceReview(c *gin.Context) {
 
 // DeletePerformanceReview handles DELETE /hr/performance/reviews/:id
 func (h *PerformanceReviewHandler) DeletePerformanceReview(c *gin.Context) {
-	id := c.Param("id")
-	if id == "" {
+	idStr := c.Param("id")
+	if idStr == "" {
 		response.Error(c, http.StatusBadRequest, "Review ID is required", nil)
 		return
 	}
 
-	err := h.performanceService.DeletePerformanceReview(c.Request.Context(), id)
+	id, err := uuid.Parse(idStr)
+	if err != nil {
+		response.Error(c, http.StatusBadRequest, "Invalid review ID format", err)
+		return
+	}
+
+	err = h.performanceService.DeletePerformanceReview(c.Request.Context(), id)
 	if err != nil {
 		response.Error(c, http.StatusInternalServerError, "Failed to delete performance review", err)
 		return
@@ -131,9 +150,15 @@ func (h *PerformanceReviewHandler) DeletePerformanceReview(c *gin.Context) {
 
 // GetPerformanceReviewsByEmployee handles GET /hr/performance/reviews/employee/:employeeId
 func (h *PerformanceReviewHandler) GetPerformanceReviewsByEmployee(c *gin.Context) {
-	employeeID := c.Param("employeeId")
-	if employeeID == "" {
+	employeeIDStr := c.Param("employeeId")
+	if employeeIDStr == "" {
 		response.Error(c, http.StatusBadRequest, "Employee ID is required", nil)
+		return
+	}
+
+	employeeID, err := uuid.Parse(employeeIDStr)
+	if err != nil {
+		response.Error(c, http.StatusBadRequest, "Invalid employee ID format", err)
 		return
 	}
 

@@ -2,11 +2,13 @@ package entities
 
 import (
 	"time"
+
+	"malaka/internal/shared/uuid"
 )
 
 // UserProfile represents the complete user profile
 type UserProfile struct {
-	ID           string    `json:"id" db:"id"`
+	ID           uuid.ID   `json:"id" db:"id"`
 	EmployeeID   *string   `json:"employee_id,omitempty" db:"employee_id"`
 	Username     string    `json:"username" db:"username"`
 	Email        string    `json:"email" db:"email"`

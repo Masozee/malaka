@@ -1,13 +1,12 @@
-
 package http
 
 import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	"malaka/internal/modules/shipping/domain"
 	"malaka/internal/modules/shipping/domain/dtos"
+	"malaka/internal/shared/uuid"
 )
 
 type OutboundScanHandler struct {

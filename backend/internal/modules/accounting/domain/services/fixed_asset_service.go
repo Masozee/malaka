@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/google/uuid"
+	"malaka/internal/shared/uuid"
 	"malaka/internal/modules/accounting/domain/entities"
 )
 
@@ -12,10 +12,10 @@ import (
 type FixedAssetService interface {
 	// Basic CRUD operations
 	CreateFixedAsset(ctx context.Context, asset *entities.FixedAsset) error
-	GetFixedAssetByID(ctx context.Context, id uuid.UUID) (*entities.FixedAsset, error)
+	GetFixedAssetByID(ctx context.Context, id uuid.ID) (*entities.FixedAsset, error)
 	GetAllFixedAssets(ctx context.Context) ([]*entities.FixedAsset, error)
 	UpdateFixedAsset(ctx context.Context, asset *entities.FixedAsset) error
-	DeleteFixedAsset(ctx context.Context, id uuid.UUID) error
+	DeleteFixedAsset(ctx context.Context, id uuid.ID) error
 
 	// Query operations
 	GetFixedAssetByCode(ctx context.Context, assetCode string) (*entities.FixedAsset, error)
@@ -29,13 +29,13 @@ type FixedAssetService interface {
 	GetActiveFixedAssetsByCompany(ctx context.Context, companyID string) ([]*entities.FixedAsset, error)
 
 	// Depreciation operations
-	ProcessDepreciation(ctx context.Context, assetID uuid.UUID) (*entities.FixedAssetDepreciation, error)
-	GetDepreciationSchedule(ctx context.Context, assetID uuid.UUID) ([]*entities.FixedAssetDepreciation, error)
+	ProcessDepreciation(ctx context.Context, assetID uuid.ID) (*entities.FixedAssetDepreciation, error)
+	GetDepreciationSchedule(ctx context.Context, assetID uuid.ID) ([]*entities.FixedAssetDepreciation, error)
 	ProcessMonthlyDepreciation(ctx context.Context, companyID string, month time.Time) error
 
 	// Disposal operations
 	DisposeAsset(ctx context.Context, disposal *entities.FixedAssetDisposal) error
-	GetDisposalByAsset(ctx context.Context, assetID uuid.UUID) (*entities.FixedAssetDisposal, error)
+	GetDisposalByAsset(ctx context.Context, assetID uuid.ID) (*entities.FixedAssetDisposal, error)
 
 	// Reporting operations
 	GetAssetSummary(ctx context.Context, companyID string) (*FixedAssetSummary, error)

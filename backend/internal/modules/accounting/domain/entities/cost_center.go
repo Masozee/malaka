@@ -3,7 +3,7 @@ package entities
 import (
 	"time"
 
-	"github.com/google/uuid"
+	"malaka/internal/shared/uuid"
 )
 
 // CostCenterType represents the type of cost center
@@ -18,11 +18,11 @@ const (
 
 // CostCenter represents a cost center
 type CostCenter struct {
-	ID              uuid.UUID      `json:"id" db:"id"`
+	ID              uuid.ID        `json:"id" db:"id"`
 	CostCenterCode  string         `json:"cost_center_code" db:"cost_center_code"`
 	CostCenterName  string         `json:"cost_center_name" db:"cost_center_name"`
 	CostCenterType  CostCenterType `json:"cost_center_type" db:"cost_center_type"`
-	ParentID        *uuid.UUID     `json:"parent_id" db:"parent_id"`
+	ParentID        *uuid.ID       `json:"parent_id" db:"parent_id"`
 	ManagerID       string         `json:"manager_id" db:"manager_id"`         // User ID of the cost center manager
 	Description     string         `json:"description" db:"description"`
 	IsActive        bool           `json:"is_active" db:"is_active"`
@@ -39,9 +39,9 @@ type CostCenter struct {
 
 // CostCenterAllocation represents cost allocation to cost centers
 type CostCenterAllocation struct {
-	ID               uuid.UUID `json:"id" db:"id"`
-	CostCenterID     uuid.UUID `json:"cost_center_id" db:"cost_center_id"`
-	SourceCostCenterID uuid.UUID `json:"source_cost_center_id" db:"source_cost_center_id"`
+	ID               uuid.ID `json:"id" db:"id"`
+	CostCenterID     uuid.ID `json:"cost_center_id" db:"cost_center_id"`
+	SourceCostCenterID uuid.ID `json:"source_cost_center_id" db:"source_cost_center_id"`
 	AllocationBasis  string    `json:"allocation_basis" db:"allocation_basis"`    // PERCENTAGE, AMOUNT, UNITS
 	AllocationValue  float64   `json:"allocation_value" db:"allocation_value"`
 	AllocatedAmount  float64   `json:"allocated_amount" db:"allocated_amount"`
@@ -56,7 +56,7 @@ type CostCenterAllocation struct {
 
 // CostCenterReport represents a cost center performance report
 type CostCenterReport struct {
-	CostCenterID     uuid.UUID `json:"cost_center_id"`
+	CostCenterID     uuid.ID `json:"cost_center_id"`
 	CostCenterCode   string    `json:"cost_center_code"`
 	CostCenterName   string    `json:"cost_center_name"`
 	CostCenterType   string    `json:"cost_center_type"`
@@ -147,10 +147,10 @@ func (cc *CostCenter) Validate() error {
 
 // Validate checks if the cost center allocation is valid
 func (cca *CostCenterAllocation) Validate() error {
-	if cca.CostCenterID == uuid.Nil {
+	if cca.CostCenterID.IsNil() {
 		return NewValidationError("cost_center_id is required")
 	}
-	if cca.SourceCostCenterID == uuid.Nil {
+	if cca.SourceCostCenterID.IsNil() {
 		return NewValidationError("source_cost_center_id is required")
 	}
 	if cca.AllocationBasis == "" {

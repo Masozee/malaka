@@ -6,11 +6,11 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 
 	"malaka/internal/modules/production/domain/entities"
 	"malaka/internal/modules/production/domain/repositories"
+	"malaka/internal/shared/uuid"
 )
 
 type ProductionPlanRepositoryImpl struct {
@@ -66,7 +66,7 @@ func (r *ProductionPlanRepositoryImpl) Create(ctx context.Context, plan *entitie
 	return tx.Commit()
 }
 
-func (r *ProductionPlanRepositoryImpl) GetByID(ctx context.Context, id uuid.UUID) (*entities.ProductionPlan, error) {
+func (r *ProductionPlanRepositoryImpl) GetByID(ctx context.Context, id uuid.ID) (*entities.ProductionPlan, error) {
 	query := `
 		SELECT id, plan_number, plan_name, plan_type, start_date, end_date,
 			   status, total_products, total_quantity, total_value,
@@ -153,7 +153,7 @@ func (r *ProductionPlanRepositoryImpl) Update(ctx context.Context, plan *entitie
 	return nil
 }
 
-func (r *ProductionPlanRepositoryImpl) Delete(ctx context.Context, id uuid.UUID) error {
+func (r *ProductionPlanRepositoryImpl) Delete(ctx context.Context, id uuid.ID) error {
 	query := `DELETE FROM production_plans WHERE id = $1`
 	result, err := r.db.ExecContext(ctx, query, id)
 	if err != nil {
@@ -317,7 +317,7 @@ func (r *ProductionPlanRepositoryImpl) GetActivePlans(ctx context.Context) ([]*e
 	return r.GetByStatus(ctx, entities.PlanStatusActive)
 }
 
-func (r *ProductionPlanRepositoryImpl) ExistsPlanNumber(ctx context.Context, planNumber string, excludeID ...uuid.UUID) (bool, error) {
+func (r *ProductionPlanRepositoryImpl) ExistsPlanNumber(ctx context.Context, planNumber string, excludeID ...uuid.ID) (bool, error) {
 	query := "SELECT EXISTS(SELECT 1 FROM production_plans WHERE plan_number = $1"
 	args := []interface{}{planNumber}
 
@@ -422,7 +422,7 @@ func (r *ProductionPlanRepositoryImpl) UpdateItem(ctx context.Context, item *ent
 	return nil
 }
 
-func (r *ProductionPlanRepositoryImpl) DeleteItem(ctx context.Context, id uuid.UUID) error {
+func (r *ProductionPlanRepositoryImpl) DeleteItem(ctx context.Context, id uuid.ID) error {
 	query := `DELETE FROM production_plan_items WHERE id = $1`
 	_, err := r.db.ExecContext(ctx, query, id)
 	if err != nil {
@@ -431,7 +431,7 @@ func (r *ProductionPlanRepositoryImpl) DeleteItem(ctx context.Context, id uuid.U
 	return nil
 }
 
-func (r *ProductionPlanRepositoryImpl) GetItems(ctx context.Context, planID uuid.UUID) ([]entities.ProductionPlanItem, error) {
+func (r *ProductionPlanRepositoryImpl) GetItems(ctx context.Context, planID uuid.ID) ([]entities.ProductionPlanItem, error) {
 	query := `
 		SELECT id, plan_id, product_id, product_code, product_name,
 			   planned_quantity, produced_quantity, pending_quantity,
@@ -449,7 +449,7 @@ func (r *ProductionPlanRepositoryImpl) GetItems(ctx context.Context, planID uuid
 	return items, nil
 }
 
-func (r *ProductionPlanRepositoryImpl) GetItemByID(ctx context.Context, id uuid.UUID) (*entities.ProductionPlanItem, error) {
+func (r *ProductionPlanRepositoryImpl) GetItemByID(ctx context.Context, id uuid.ID) (*entities.ProductionPlanItem, error) {
 	query := `
 		SELECT id, plan_id, product_id, product_code, product_name,
 			   planned_quantity, produced_quantity, pending_quantity,
@@ -469,7 +469,7 @@ func (r *ProductionPlanRepositoryImpl) GetItemByID(ctx context.Context, id uuid.
 	return &item, nil
 }
 
-func (r *ProductionPlanRepositoryImpl) UpdateItemProgress(ctx context.Context, itemID uuid.UUID, producedQuantity int) error {
+func (r *ProductionPlanRepositoryImpl) UpdateItemProgress(ctx context.Context, itemID uuid.ID, producedQuantity int) error {
 	query := `
 		UPDATE production_plan_items SET
 			produced_quantity = $2,

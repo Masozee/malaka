@@ -12,6 +12,7 @@ import (
 
 	"malaka/internal/modules/notifications/domain/entities"
 	"malaka/internal/modules/notifications/domain/repositories"
+	"malaka/internal/shared/uuid"
 )
 
 // PostgresNotificationRepository implements NotificationRepository using PostgreSQL
@@ -47,9 +48,12 @@ type notificationRow struct {
 }
 
 func (r *notificationRow) toEntity() *entities.Notification {
+	id, _ := uuid.Parse(r.ID)
+	userID, _ := uuid.Parse(r.UserID)
+
 	n := &entities.Notification{
-		ID:        r.ID,
-		UserID:    r.UserID,
+		ID:        id,
+		UserID:    userID,
 		Title:     r.Title,
 		Message:   r.Message,
 		Type:      entities.NotificationType(r.Type),
@@ -68,7 +72,8 @@ func (r *notificationRow) toEntity() *entities.Notification {
 		n.ReferenceID = &r.ReferenceID.String
 	}
 	if r.SenderID.Valid {
-		n.SenderID = &r.SenderID.String
+		senderID, _ := uuid.Parse(r.SenderID.String)
+		n.SenderID = &senderID
 	}
 	if r.ReadAt.Valid {
 		n.ReadAt = &r.ReadAt.Time
@@ -113,9 +118,15 @@ func (r *PostgresNotificationRepository) Create(ctx context.Context, notificatio
 		)
 	`
 
+	var senderID *string
+	if notification.SenderID != nil {
+		s := notification.SenderID.String()
+		senderID = &s
+	}
+
 	_, err = r.db.ExecContext(ctx, query,
-		notification.ID,
-		notification.UserID,
+		notification.ID.String(),
+		notification.UserID.String(),
 		notification.Title,
 		notification.Message,
 		notification.Type,
@@ -125,7 +136,7 @@ func (r *PostgresNotificationRepository) Create(ctx context.Context, notificatio
 		notification.ReferenceType,
 		notification.ReferenceID,
 		metadata,
-		notification.SenderID,
+		senderID,
 		notification.CreatedAt,
 		notification.ExpiresAt,
 	)
@@ -171,9 +182,15 @@ func (r *PostgresNotificationRepository) CreateBatch(ctx context.Context, notifi
 			return fmt.Errorf("failed to marshal metadata: %w", err)
 		}
 
+		var senderID *string
+		if notification.SenderID != nil {
+			s := notification.SenderID.String()
+			senderID = &s
+		}
+
 		_, err = stmt.ExecContext(ctx,
-			notification.ID,
-			notification.UserID,
+			notification.ID.String(),
+			notification.UserID.String(),
 			notification.Title,
 			notification.Message,
 			notification.Type,
@@ -183,7 +200,7 @@ func (r *PostgresNotificationRepository) CreateBatch(ctx context.Context, notifi
 			notification.ReferenceType,
 			notification.ReferenceID,
 			metadata,
-			notification.SenderID,
+			senderID,
 			notification.CreatedAt,
 			notification.ExpiresAt,
 		)
@@ -200,7 +217,7 @@ func (r *PostgresNotificationRepository) CreateBatch(ctx context.Context, notifi
 }
 
 // GetByID retrieves a notification by ID
-func (r *PostgresNotificationRepository) GetByID(ctx context.Context, id string) (*entities.Notification, error) {
+func (r *PostgresNotificationRepository) GetByID(ctx context.Context, id uuid.ID) (*entities.Notification, error) {
 	query := `
 		SELECT
 			n.id, n.user_id, n.title, n.message, n.type, n.priority, n.status,
@@ -213,7 +230,7 @@ func (r *PostgresNotificationRepository) GetByID(ctx context.Context, id string)
 	`
 
 	var row notificationRow
-	if err := r.db.GetContext(ctx, &row, query, id); err != nil {
+	if err := r.db.GetContext(ctx, &row, query, id.String()); err != nil {
 		if err == sql.ErrNoRows {
 			return nil, fmt.Errorf("notification not found")
 		}
@@ -344,14 +361,14 @@ func (r *PostgresNotificationRepository) Count(ctx context.Context, filter repos
 }
 
 // GetUnreadCount returns the count of unread notifications for a user
-func (r *PostgresNotificationRepository) GetUnreadCount(ctx context.Context, userID string) (int64, error) {
+func (r *PostgresNotificationRepository) GetUnreadCount(ctx context.Context, userID uuid.ID) (int64, error) {
 	query := `
 		SELECT COUNT(*) FROM notifications
 		WHERE user_id = $1 AND status = 'unread' AND deleted_at IS NULL
 	`
 
 	var count int64
-	if err := r.db.GetContext(ctx, &count, query, userID); err != nil {
+	if err := r.db.GetContext(ctx, &count, query, userID.String()); err != nil {
 		return 0, fmt.Errorf("failed to get unread count: %w", err)
 	}
 
@@ -359,14 +376,14 @@ func (r *PostgresNotificationRepository) GetUnreadCount(ctx context.Context, use
 }
 
 // MarkAsRead marks a notification as read
-func (r *PostgresNotificationRepository) MarkAsRead(ctx context.Context, id string) error {
+func (r *PostgresNotificationRepository) MarkAsRead(ctx context.Context, id uuid.ID) error {
 	query := `
 		UPDATE notifications
 		SET status = 'read', read_at = $1
 		WHERE id = $2 AND deleted_at IS NULL
 	`
 
-	result, err := r.db.ExecContext(ctx, query, time.Now(), id)
+	result, err := r.db.ExecContext(ctx, query, time.Now(), id.String())
 	if err != nil {
 		return fmt.Errorf("failed to mark notification as read: %w", err)
 	}
@@ -380,14 +397,14 @@ func (r *PostgresNotificationRepository) MarkAsRead(ctx context.Context, id stri
 }
 
 // MarkAllAsRead marks all notifications as read for a user
-func (r *PostgresNotificationRepository) MarkAllAsRead(ctx context.Context, userID string) error {
+func (r *PostgresNotificationRepository) MarkAllAsRead(ctx context.Context, userID uuid.ID) error {
 	query := `
 		UPDATE notifications
 		SET status = 'read', read_at = $1
 		WHERE user_id = $2 AND status = 'unread' AND deleted_at IS NULL
 	`
 
-	_, err := r.db.ExecContext(ctx, query, time.Now(), userID)
+	_, err := r.db.ExecContext(ctx, query, time.Now(), userID.String())
 	if err != nil {
 		return fmt.Errorf("failed to mark all notifications as read: %w", err)
 	}
@@ -396,14 +413,14 @@ func (r *PostgresNotificationRepository) MarkAllAsRead(ctx context.Context, user
 }
 
 // Archive archives a notification
-func (r *PostgresNotificationRepository) Archive(ctx context.Context, id string) error {
+func (r *PostgresNotificationRepository) Archive(ctx context.Context, id uuid.ID) error {
 	query := `
 		UPDATE notifications
 		SET status = 'archived', archived_at = $1
 		WHERE id = $2 AND deleted_at IS NULL
 	`
 
-	result, err := r.db.ExecContext(ctx, query, time.Now(), id)
+	result, err := r.db.ExecContext(ctx, query, time.Now(), id.String())
 	if err != nil {
 		return fmt.Errorf("failed to archive notification: %w", err)
 	}
@@ -417,14 +434,14 @@ func (r *PostgresNotificationRepository) Archive(ctx context.Context, id string)
 }
 
 // Delete soft-deletes a notification
-func (r *PostgresNotificationRepository) Delete(ctx context.Context, id string) error {
+func (r *PostgresNotificationRepository) Delete(ctx context.Context, id uuid.ID) error {
 	query := `
 		UPDATE notifications
 		SET deleted_at = $1
 		WHERE id = $2 AND deleted_at IS NULL
 	`
 
-	result, err := r.db.ExecContext(ctx, query, time.Now(), id)
+	result, err := r.db.ExecContext(ctx, query, time.Now(), id.String())
 	if err != nil {
 		return fmt.Errorf("failed to delete notification: %w", err)
 	}
@@ -473,9 +490,12 @@ type preferencesRow struct {
 }
 
 func (r *preferencesRow) toEntity() *entities.NotificationPreferences {
+	id, _ := uuid.Parse(r.ID)
+	userID, _ := uuid.Parse(r.UserID)
+
 	p := &entities.NotificationPreferences{
-		ID:                       r.ID,
-		UserID:                   r.UserID,
+		ID:                       id,
+		UserID:                   userID,
 		InAppEnabled:             r.InAppEnabled,
 		EmailEnabled:             r.EmailEnabled,
 		OrderNotifications:       r.OrderNotifications,
@@ -500,7 +520,7 @@ func (r *preferencesRow) toEntity() *entities.NotificationPreferences {
 }
 
 // GetPreferences retrieves user notification preferences
-func (r *PostgresNotificationRepository) GetPreferences(ctx context.Context, userID string) (*entities.NotificationPreferences, error) {
+func (r *PostgresNotificationRepository) GetPreferences(ctx context.Context, userID uuid.ID) (*entities.NotificationPreferences, error) {
 	query := `
 		SELECT
 			id, user_id, in_app_enabled, email_enabled,
@@ -513,7 +533,7 @@ func (r *PostgresNotificationRepository) GetPreferences(ctx context.Context, use
 	`
 
 	var row preferencesRow
-	if err := r.db.GetContext(ctx, &row, query, userID); err != nil {
+	if err := r.db.GetContext(ctx, &row, query, userID.String()); err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil // No preferences set, return nil
 		}
@@ -538,8 +558,8 @@ func (r *PostgresNotificationRepository) CreatePreferences(ctx context.Context, 
 	`
 
 	_, err := r.db.ExecContext(ctx, query,
-		prefs.ID,
-		prefs.UserID,
+		prefs.ID.String(),
+		prefs.UserID.String(),
 		prefs.InAppEnabled,
 		prefs.EmailEnabled,
 		prefs.OrderNotifications,
@@ -594,7 +614,7 @@ func (r *PostgresNotificationRepository) UpdatePreferences(ctx context.Context, 
 		prefs.QuietHoursStart,
 		prefs.QuietHoursEnd,
 		time.Now(),
-		prefs.UserID,
+		prefs.UserID.String(),
 	)
 
 	if err != nil {

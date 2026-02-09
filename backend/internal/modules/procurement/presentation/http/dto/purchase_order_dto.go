@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"malaka/internal/modules/procurement/domain/entities"
+	"malaka/internal/shared/uuid"
 )
 
 // CreatePurchaseOrderItemRequest represents a request to create a purchase order item
@@ -135,12 +136,26 @@ func ToPurchaseOrderResponse(order *entities.PurchaseOrder) *PurchaseOrderRespon
 		return nil
 	}
 
+	// Convert PurchaseRequestID from *uuid.ID to *string
+	var purchaseRequestIDStr *string
+	if order.PurchaseRequestID != nil && !order.PurchaseRequestID.IsNil() {
+		str := order.PurchaseRequestID.String()
+		purchaseRequestIDStr = &str
+	}
+
+	// Convert ApprovedBy from *uuid.ID to *string
+	var approvedByStr *string
+	if order.ApprovedBy != nil && !order.ApprovedBy.IsNil() {
+		str := order.ApprovedBy.String()
+		approvedByStr = &str
+	}
+
 	response := &PurchaseOrderResponse{
-		ID:                   order.ID,
+		ID:                   order.ID.String(),
 		PONumber:             order.PONumber,
-		SupplierID:           order.SupplierID,
+		SupplierID:           order.SupplierID.String(),
 		SupplierName:         order.SupplierName,
-		PurchaseRequestID:    order.PurchaseRequestID,
+		PurchaseRequestID:    purchaseRequestIDStr,
 		OrderDate:            order.OrderDate,
 		ExpectedDeliveryDate: order.ExpectedDeliveryDate,
 		DeliveryAddress:      order.DeliveryAddress,
@@ -154,10 +169,10 @@ func ToPurchaseOrderResponse(order *entities.PurchaseOrder) *PurchaseOrderRespon
 		Status:               string(order.Status),
 		PaymentStatus:        string(order.PaymentStatus),
 		Notes:                order.Notes,
-		CreatedBy:            order.CreatedBy,
+		CreatedBy:            order.CreatedBy.String(),
 		CreatedByName:        order.CreatedByName,
 		CreatedByPosition:    order.CreatedByPosition,
-		ApprovedBy:           order.ApprovedBy,
+		ApprovedBy:           approvedByStr,
 		ApprovedAt:           order.ApprovedAt,
 		SentAt:               order.SentAt,
 		ConfirmedAt:          order.ConfirmedAt,
@@ -170,8 +185,8 @@ func ToPurchaseOrderResponse(order *entities.PurchaseOrder) *PurchaseOrderRespon
 
 	for _, item := range order.Items {
 		response.Items = append(response.Items, PurchaseOrderItemResponse{
-			ID:                 item.ID,
-			PurchaseOrderID:    item.PurchaseOrderID,
+			ID:                 item.ID.String(),
+			PurchaseOrderID:    item.PurchaseOrderID.String(),
 			ItemName:           item.ItemName,
 			Description:        item.Description,
 			Specification:      item.Specification,
@@ -206,7 +221,7 @@ type PurchaseOrderItemEntity struct {
 
 // ToEntity converts a PurchaseOrderItemEntity to an entity
 func (i *PurchaseOrderItemEntity) ToEntity() *entities.PurchaseOrderItem {
-	item := entities.NewPurchaseOrderItem("")
+	item := entities.NewPurchaseOrderItem(uuid.ID{})
 	item.ItemName = i.ItemName
 	item.Description = i.Description
 	item.Specification = i.Specification
@@ -221,10 +236,11 @@ func (i *PurchaseOrderItemEntity) ToEntity() *entities.PurchaseOrderItem {
 
 // ToEntity converts a create request to an entity
 func (r *CreatePurchaseOrderRequest) ToEntity(createdBy string) *entities.PurchaseOrder {
-	order := entities.NewPurchaseOrder(r.SupplierID, createdBy)
+	order := entities.NewPurchaseOrder(uuid.MustParse(r.SupplierID), uuid.MustParse(createdBy))
 	// Only set purchase_request_id if it's not nil and not empty
 	if r.PurchaseRequestID != nil && *r.PurchaseRequestID != "" {
-		order.PurchaseRequestID = r.PurchaseRequestID
+		prID := uuid.MustParse(*r.PurchaseRequestID)
+		order.PurchaseRequestID = &prID
 	}
 	order.ExpectedDeliveryDate = r.ExpectedDeliveryDate
 	order.DeliveryAddress = r.DeliveryAddress

@@ -8,6 +8,7 @@ import (
 	"malaka/internal/modules/sales/presentation/http/dto"
 	"malaka/internal/shared/response"
 	"malaka/internal/shared/utils"
+	"malaka/internal/shared/uuid"
 )
 
 // OnlineOrderHandler handles HTTP requests for online order operations.
@@ -81,6 +82,12 @@ func (h *OnlineOrderHandler) UpdateOnlineOrder(c *gin.Context) {
 		return
 	}
 
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		response.BadRequest(c, "Invalid ID format", nil)
+		return
+	}
+
 	order := &entities.OnlineOrder{
 		Marketplace: req.Marketplace,
 		OrderID:     req.OrderID,
@@ -89,7 +96,7 @@ func (h *OnlineOrderHandler) UpdateOnlineOrder(c *gin.Context) {
 		Status:      req.Status,
 		CustomerID:  req.CustomerID,
 	}
-	order.ID = id // Set the ID from the URL parameter
+	order.ID = parsedID // Set the ID from the URL parameter
 
 	if err := h.service.UpdateOnlineOrder(c.Request.Context(), order); err != nil {
 		response.InternalServerError(c, err.Error(), nil)

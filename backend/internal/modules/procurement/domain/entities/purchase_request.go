@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"malaka/internal/shared/types"
+	"malaka/internal/shared/uuid"
 )
 
 // PurchaseRequest represents a purchase request entity.
@@ -12,13 +13,13 @@ type PurchaseRequest struct {
 	RequestNumber   string                 `json:"request_number" db:"request_number"`
 	Title           string                 `json:"title" db:"title"`
 	Description     string                 `json:"description,omitempty" db:"description"`
-	RequesterID     string                 `json:"requester_id" db:"requester_id"`
+	RequesterID     uuid.ID                `json:"requester_id" db:"requester_id"`
 	Department      string                 `json:"department" db:"department"`
 	Priority        string                 `json:"priority" db:"priority"`
 	Status          string                 `json:"status" db:"status"`
 	RequestedDate   time.Time              `json:"requested_date" db:"requested_date"`
 	RequiredDate    *time.Time             `json:"required_date,omitempty" db:"required_date"`
-	ApprovedBy      *string                `json:"approved_by,omitempty" db:"approved_by"`
+	ApprovedBy      *uuid.ID               `json:"approved_by,omitempty" db:"approved_by"`
 	ApprovedDate    *time.Time             `json:"approved_date,omitempty" db:"approved_date"`
 	RejectionReason *string                `json:"rejection_reason,omitempty" db:"rejection_reason"`
 	TotalAmount     float64                `json:"total_amount" db:"total_amount"`
@@ -33,7 +34,7 @@ type PurchaseRequest struct {
 // PurchaseRequestItem represents an item in a purchase request.
 type PurchaseRequestItem struct {
 	types.BaseModel
-	PurchaseRequestID string   `json:"purchase_request_id" db:"purchase_request_id"`
+	PurchaseRequestID uuid.ID  `json:"purchase_request_id" db:"purchase_request_id"`
 	ItemName          string   `json:"item_name" db:"item_name"`
 	Description       *string  `json:"description,omitempty" db:"description"`
 	Specification     *string  `json:"specification,omitempty" db:"specification"`
@@ -41,7 +42,7 @@ type PurchaseRequestItem struct {
 	Unit              string   `json:"unit" db:"unit"`
 	EstimatedPrice    float64  `json:"estimated_price" db:"estimated_price"`
 	Currency          string   `json:"currency" db:"currency"`
-	SupplierID        *string  `json:"supplier_id,omitempty" db:"supplier_id"`
+	SupplierID        *uuid.ID `json:"supplier_id,omitempty" db:"supplier_id"`
 
 	// Related data for API responses
 	SupplierName *string `json:"supplier_name,omitempty" db:"supplier_name"`

@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/google/uuid"
+	"malaka/internal/shared/uuid"
 	"malaka/internal/modules/accounting/domain/entities"
 	"malaka/internal/modules/accounting/domain/repositories"
 )
@@ -51,7 +51,7 @@ func (r *TrialBalanceRepositoryImpl) Create(ctx context.Context, trialBalance *e
 }
 
 // GetByID retrieves a trial balance by its ID
-func (r *TrialBalanceRepositoryImpl) GetByID(ctx context.Context, id uuid.UUID) (*entities.TrialBalance, error) {
+func (r *TrialBalanceRepositoryImpl) GetByID(ctx context.Context, id uuid.ID) (*entities.TrialBalance, error) {
 	query := `
 		SELECT id, period_start, period_end, generated_at, company_id, 
 			created_by, created_at
@@ -140,7 +140,7 @@ func (r *TrialBalanceRepositoryImpl) Update(ctx context.Context, trialBalance *e
 }
 
 // Delete removes a trial balance from the database
-func (r *TrialBalanceRepositoryImpl) Delete(ctx context.Context, id uuid.UUID) error {
+func (r *TrialBalanceRepositoryImpl) Delete(ctx context.Context, id uuid.ID) error {
 	query := `DELETE FROM trial_balance WHERE id = $1`
 	_, err := r.db.ExecContext(ctx, query, id)
 	if err != nil {
@@ -386,7 +386,7 @@ func (r *TrialBalanceRepositoryImpl) CalculateAccountBalances(ctx context.Contex
 }
 
 // GetAccountBalance retrieves balance for a specific account
-func (r *TrialBalanceRepositoryImpl) GetAccountBalance(ctx context.Context, companyID string, accountID uuid.UUID, asOfDate time.Time) (*entities.TrialBalanceAccount, error) {
+func (r *TrialBalanceRepositoryImpl) GetAccountBalance(ctx context.Context, companyID string, accountID uuid.ID, asOfDate time.Time) (*entities.TrialBalanceAccount, error) {
 	query := `
 		SELECT 
 			coa.id as account_id,
@@ -487,7 +487,7 @@ func (r *TrialBalanceRepositoryImpl) GetTrialBalanceSummary(ctx context.Context,
 }
 
 // ValidateTrialBalance validates that a trial balance is balanced
-func (r *TrialBalanceRepositoryImpl) ValidateTrialBalance(ctx context.Context, trialBalanceID uuid.UUID) (bool, error) {
+func (r *TrialBalanceRepositoryImpl) ValidateTrialBalance(ctx context.Context, trialBalanceID uuid.ID) (bool, error) {
 	trialBalance, err := r.GetByID(ctx, trialBalanceID)
 	if err != nil {
 		return false, err
@@ -574,7 +574,7 @@ func (r *TrialBalanceRepositoryImpl) CompareTrialBalances(ctx context.Context, c
 	}
 
 	// Create map for quick lookup
-	fromAccountMap := make(map[uuid.UUID]entities.TrialBalanceAccount)
+	fromAccountMap := make(map[uuid.ID]entities.TrialBalanceAccount)
 	for _, account := range fromAccounts {
 		fromAccountMap[account.AccountID] = account
 	}

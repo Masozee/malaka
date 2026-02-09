@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"malaka/internal/modules/finance/domain/entities"
+	"malaka/internal/shared/uuid"
 )
 
 type CreateCashBookEntryRequest struct {
@@ -57,8 +58,8 @@ type CashBalanceResponse struct {
 
 func ToCashBookEntryResponse(entry *entities.CashBook) *CashBookEntryResponse {
 	return &CashBookEntryResponse{
-		ID:              entry.ID,
-		CashBankID:      entry.CashBankID,
+		ID:              entry.ID.String(),
+		CashBankID:      entry.CashBankID.String(),
 		TransactionDate: entry.TransactionDate,
 		ReferenceNumber: entry.ReferenceNumber,
 		Description:     entry.Description,
@@ -67,8 +68,8 @@ func ToCashBookEntryResponse(entry *entities.CashBook) *CashBookEntryResponse {
 		Balance:         entry.Balance,
 		TransactionType: entry.TransactionType,
 		SourceModule:    entry.SourceModule,
-		SourceID:        entry.SourceID,
-		CreatedBy:       entry.CreatedBy,
+		SourceID:        entry.SourceID.String(),
+		CreatedBy:       entry.CreatedBy.String(),
 		CreatedAt:       entry.CreatedAt,
 		UpdatedAt:       entry.UpdatedAt,
 	}
@@ -76,7 +77,7 @@ func ToCashBookEntryResponse(entry *entities.CashBook) *CashBookEntryResponse {
 
 func ToCashBookEntity(req *CreateCashBookEntryRequest) *entities.CashBook {
 	return &entities.CashBook{
-		CashBankID:      req.CashBankID,
+		CashBankID:      uuid.MustParse(req.CashBankID),
 		TransactionDate: req.TransactionDate,
 		ReferenceNumber: req.ReferenceNumber,
 		Description:     req.Description,
@@ -84,7 +85,7 @@ func ToCashBookEntity(req *CreateCashBookEntryRequest) *entities.CashBook {
 		CreditAmount:    req.CreditAmount,
 		TransactionType: req.TransactionType,
 		SourceModule:    req.SourceModule,
-		SourceID:        req.SourceID,
-		CreatedBy:       req.CreatedBy,
+		SourceID:        uuid.MustParse(req.SourceID),
+		CreatedBy:       uuid.MustParse(req.CreatedBy),
 	}
 }

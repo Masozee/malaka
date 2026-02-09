@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/google/uuid"
+	"malaka/internal/shared/uuid"
 	"malaka/internal/modules/accounting/domain/entities"
 	"malaka/internal/modules/accounting/domain/repositories"
 )
@@ -50,7 +50,7 @@ func (r *PostgresChartOfAccountRepository) Create(ctx context.Context, coa *enti
 }
 
 // GetByID retrieves a ChartOfAccount by its ID.
-func (r *PostgresChartOfAccountRepository) GetByID(ctx context.Context, id uuid.UUID) (*entities.ChartOfAccount, error) {
+func (r *PostgresChartOfAccountRepository) GetByID(ctx context.Context, id uuid.ID) (*entities.ChartOfAccount, error) {
 	query := `
 		SELECT id, parent_id, account_code, account_name, account_type, normal_balance, description, is_active, created_at, updated_at
 		FROM chart_of_accounts
@@ -212,7 +212,7 @@ func (r *PostgresChartOfAccountRepository) Update(ctx context.Context, coa *enti
 }
 
 // Delete deletes a ChartOfAccount from the database by its ID.
-func (r *PostgresChartOfAccountRepository) Delete(ctx context.Context, id uuid.UUID) error {
+func (r *PostgresChartOfAccountRepository) Delete(ctx context.Context, id uuid.ID) error {
 	query := `DELETE FROM chart_of_accounts WHERE id = $1`
 	_, err := r.db.ExecContext(ctx, query, id)
 	if err != nil {

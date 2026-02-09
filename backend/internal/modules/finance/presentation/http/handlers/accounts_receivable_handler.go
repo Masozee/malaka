@@ -8,6 +8,7 @@ import (
 	"malaka/internal/modules/finance/domain/services"
 	"malaka/internal/modules/finance/presentation/http/dto"
 	"malaka/internal/shared/response"
+	"malaka/internal/shared/uuid"
 )
 
 // AccountsReceivableHandler handles HTTP requests for accounts receivable operations.
@@ -46,7 +47,13 @@ func (h *AccountsReceivableHandler) GetAccountsReceivableByID(c *gin.Context) {
 		return
 	}
 
-	accountsReceivable, err := h.service.GetAccountsReceivableByID(c.Request.Context(), id)
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		response.Error(c, http.StatusBadRequest, "Invalid ID", err)
+		return
+	}
+
+	accountsReceivable, err := h.service.GetAccountsReceivableByID(c.Request.Context(), parsedID)
 	if err != nil {
 		response.Error(c, http.StatusNotFound, "Accounts receivable not found", err)
 		return
@@ -70,8 +77,14 @@ func (h *AccountsReceivableHandler) UpdateAccountsReceivable(c *gin.Context) {
 		return
 	}
 
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		response.Error(c, http.StatusBadRequest, "Invalid ID", err)
+		return
+	}
+
 	accountsReceivable := req.ToAccountsReceivableEntity()
-	accountsReceivable.ID = id
+	accountsReceivable.ID = parsedID
 
 	if err := h.service.UpdateAccountsReceivable(c.Request.Context(), accountsReceivable); err != nil {
 		response.Error(c, http.StatusInternalServerError, "Failed to update accounts receivable", err)
@@ -90,7 +103,13 @@ func (h *AccountsReceivableHandler) DeleteAccountsReceivable(c *gin.Context) {
 		return
 	}
 
-	if err := h.service.DeleteAccountsReceivable(c.Request.Context(), id); err != nil {
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		response.Error(c, http.StatusBadRequest, "Invalid ID", err)
+		return
+	}
+
+	if err := h.service.DeleteAccountsReceivable(c.Request.Context(), parsedID); err != nil {
 		response.Error(c, http.StatusInternalServerError, "Failed to delete accounts receivable", err)
 		return
 	}

@@ -5,7 +5,9 @@ import (
 	"database/sql"
 
 	"github.com/jmoiron/sqlx"
+
 	"malaka/internal/modules/finance/domain/entities"
+	"malaka/internal/shared/uuid"
 )
 
 // BankTransferRepositoryImpl implements repositories.BankTransferRepository.
@@ -20,13 +22,16 @@ func NewBankTransferRepositoryImpl(db *sqlx.DB) *BankTransferRepositoryImpl {
 
 // Create creates a new bank transfer in the database.
 func (r *BankTransferRepositoryImpl) Create(ctx context.Context, bt *entities.BankTransfer) error {
+	if bt.ID.IsNil() {
+		bt.ID = uuid.New()
+	}
 	query := `INSERT INTO bank_transfers (id, transfer_date, from_cash_bank_id, to_cash_bank_id, amount, description, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`
 	_, err := r.db.ExecContext(ctx, query, bt.ID, bt.TransferDate, bt.FromCashBankID, bt.ToCashBankID, bt.Amount, bt.Description, bt.CreatedAt, bt.UpdatedAt)
 	return err
 }
 
 // GetByID retrieves a bank transfer by its ID from the database.
-func (r *BankTransferRepositoryImpl) GetByID(ctx context.Context, id string) (*entities.BankTransfer, error) {
+func (r *BankTransferRepositoryImpl) GetByID(ctx context.Context, id uuid.ID) (*entities.BankTransfer, error) {
 	query := `SELECT id, transfer_date, from_cash_bank_id, to_cash_bank_id, amount, description, created_at, updated_at FROM bank_transfers WHERE id = $1`
 	row := r.db.QueryRowContext(ctx, query, id)
 
@@ -46,7 +51,7 @@ func (r *BankTransferRepositoryImpl) Update(ctx context.Context, bt *entities.Ba
 }
 
 // Delete deletes a bank transfer by its ID from the database.
-func (r *BankTransferRepositoryImpl) Delete(ctx context.Context, id string) error {
+func (r *BankTransferRepositoryImpl) Delete(ctx context.Context, id uuid.ID) error {
 	query := `DELETE FROM bank_transfers WHERE id = $1`
 	_, err := r.db.ExecContext(ctx, query, id)
 	return err

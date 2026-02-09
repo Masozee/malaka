@@ -5,7 +5,9 @@ import (
 	"database/sql"
 
 	"github.com/jmoiron/sqlx"
+
 	"malaka/internal/modules/finance/domain/entities"
+	"malaka/internal/shared/uuid"
 )
 
 // AccountsReceivableRepositoryImpl implements repositories.AccountsReceivableRepository.
@@ -20,13 +22,16 @@ func NewAccountsReceivableRepositoryImpl(db *sqlx.DB) *AccountsReceivableReposit
 
 // Create creates a new accounts receivable record in the database.
 func (r *AccountsReceivableRepositoryImpl) Create(ctx context.Context, ar *entities.AccountsReceivable) error {
+	if ar.ID.IsNil() {
+		ar.ID = uuid.New()
+	}
 	query := `INSERT INTO accounts_receivable (id, invoice_id, customer_id, issue_date, due_date, amount, paid_amount, balance, status, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`
 	_, err := r.db.ExecContext(ctx, query, ar.ID, ar.InvoiceID, ar.CustomerID, ar.IssueDate, ar.DueDate, ar.Amount, ar.PaidAmount, ar.Balance, ar.Status, ar.CreatedAt, ar.UpdatedAt)
 	return err
 }
 
 // GetByID retrieves an accounts receivable record by its ID from the database.
-func (r *AccountsReceivableRepositoryImpl) GetByID(ctx context.Context, id string) (*entities.AccountsReceivable, error) {
+func (r *AccountsReceivableRepositoryImpl) GetByID(ctx context.Context, id uuid.ID) (*entities.AccountsReceivable, error) {
 	query := `SELECT id, invoice_id, customer_id, issue_date, due_date, amount, paid_amount, balance, status, created_at, updated_at FROM accounts_receivable WHERE id = $1`
 	row := r.db.QueryRowContext(ctx, query, id)
 
@@ -46,7 +51,7 @@ func (r *AccountsReceivableRepositoryImpl) Update(ctx context.Context, ar *entit
 }
 
 // Delete deletes an accounts receivable record by its ID from the database.
-func (r *AccountsReceivableRepositoryImpl) Delete(ctx context.Context, id string) error {
+func (r *AccountsReceivableRepositoryImpl) Delete(ctx context.Context, id uuid.ID) error {
 	query := `DELETE FROM accounts_receivable WHERE id = $1`
 	_, err := r.db.ExecContext(ctx, query, id)
 	return err

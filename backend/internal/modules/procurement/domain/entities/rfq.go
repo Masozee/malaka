@@ -3,10 +3,9 @@ package entities
 import (
 	"time"
 
-	"github.com/google/uuid"
-
 	"malaka/internal/shared/types"
 	"malaka/internal/shared/utils"
+	"malaka/internal/shared/uuid"
 )
 
 // RFQ represents a Request for Quotation entity in the procurement module
@@ -33,7 +32,7 @@ func NewRFQ(title, description, createdBy, priority string) *RFQ {
 	now := utils.Now()
 	return &RFQ{
 		BaseModel: types.BaseModel{
-			ID:        uuid.New().String(),
+			ID:        uuid.New(),
 			CreatedAt: now,
 			UpdatedAt: now,
 		},
@@ -62,7 +61,7 @@ func NewRFQItem(rfqID, itemName string, quantity int, unit string) *RFQItem {
 	now := utils.Now()
 	return &RFQItem{
 		BaseModel: types.BaseModel{
-			ID:        uuid.New().String(),
+			ID:        uuid.New(),
 			CreatedAt: now,
 			UpdatedAt: now,
 		},
@@ -91,7 +90,7 @@ func NewRFQSupplier(rfqID, supplierID string) *RFQSupplier {
 	now := utils.Now()
 	return &RFQSupplier{
 		BaseModel: types.BaseModel{
-			ID:        uuid.New().String(),
+			ID:        uuid.New(),
 			CreatedAt: now,
 			UpdatedAt: now,
 		},
@@ -126,7 +125,7 @@ func NewRFQResponse(rfqID, supplierID string, totalAmount float64, currency stri
 	now := utils.Now()
 	return &RFQResponse{
 		BaseModel: types.BaseModel{
-			ID:        uuid.New().String(),
+			ID:        uuid.New(),
 			CreatedAt: now,
 			UpdatedAt: now,
 		},
@@ -158,7 +157,7 @@ func NewRFQResponseItem(responseID, itemID string, unitPrice, totalPrice float64
 	now := utils.Now()
 	return &RFQResponseItem{
 		BaseModel: types.BaseModel{
-			ID:        uuid.New().String(),
+			ID:        uuid.New(),
 			CreatedAt: now,
 			UpdatedAt: now,
 		},

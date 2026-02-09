@@ -46,7 +46,7 @@ export default function StaticReportsPage() {
   return (
     <TwoLevelLayout>
       <div className="flex-1 flex flex-col overflow-hidden">
-        <Header 
+        <Header
           title="Static Reports"
           description="Pre-built regulatory and compliance reports"
           breadcrumbs={breadcrumbs}
@@ -56,7 +56,7 @@ export default function StaticReportsPage() {
           {/* Static Reports List */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {staticReports.map((report) => (
-              <Card key={report.id} className="hover: transition-shadow">
+              <Card key={report.id} className="hover:shadow-md transition-shadow">
                 <CardHeader>
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
@@ -70,7 +70,7 @@ export default function StaticReportsPage() {
                   </div>
                   <div className="flex items-center space-x-2 mt-4">
                     <Badge variant="outline">{report.category}</Badge>
-                    <Badge 
+                    <Badge
                       variant={report.status === 'ready' ? 'default' : 'secondary'}
                       className="flex items-center space-x-1"
                     >
@@ -90,10 +90,10 @@ export default function StaticReportsPage() {
                       <span className="font-medium">{report.lastGenerated}</span>
                     </div>
                     <div className="flex space-x-2 pt-2">
-                      <Button size="sm" className="flex-1" disabled={report.status !== 'ready'}>
+                      <Button size="sm" className="flex-1" disabled={report.status !== 'ready'} aria-label={`Download ${report.title}`}>
                         Download
                       </Button>
-                      <Button size="sm" variant="outline">
+                      <Button size="sm" variant="outline" aria-label={`Schedule ${report.title}`}>
                         Schedule
                       </Button>
                     </div>

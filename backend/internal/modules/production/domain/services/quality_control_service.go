@@ -5,48 +5,48 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/google/uuid"
 	"malaka/internal/modules/production/domain/entities"
 	"malaka/internal/modules/production/domain/repositories"
+	"malaka/internal/shared/uuid"
 )
 
 // QualityControlService defines the interface for quality control business logic
 type QualityControlService interface {
 	// CRUD operations
 	CreateQualityControl(ctx context.Context, qc *entities.QualityControl) error
-	GetQualityControl(ctx context.Context, id uuid.UUID) (*entities.QualityControl, error)
+	GetQualityControl(ctx context.Context, id uuid.ID) (*entities.QualityControl, error)
 	GetQualityControlByNumber(ctx context.Context, qcNumber string) (*entities.QualityControl, error)
 	UpdateQualityControl(ctx context.Context, qc *entities.QualityControl) error
-	DeleteQualityControl(ctx context.Context, id uuid.UUID) error
+	DeleteQualityControl(ctx context.Context, id uuid.ID) error
 
 	// List operations
 	GetAllQualityControls(ctx context.Context, limit, offset int, search, status, qcType string) ([]*entities.QualityControl, int, error)
 
 	// Status management
-	StartTesting(ctx context.Context, id uuid.UUID) error
-	CompleteQC(ctx context.Context, id uuid.UUID, passed bool) error
-	SetConditional(ctx context.Context, id uuid.UUID, reason string) error
+	StartTesting(ctx context.Context, id uuid.ID) error
+	CompleteQC(ctx context.Context, id uuid.ID, passed bool) error
+	SetConditional(ctx context.Context, id uuid.ID, reason string) error
 
 	// Test management
-	AddTest(ctx context.Context, qcID uuid.UUID, test *entities.QualityTest) error
+	AddTest(ctx context.Context, qcID uuid.ID, test *entities.QualityTest) error
 	UpdateTest(ctx context.Context, test *entities.QualityTest) error
-	DeleteTest(ctx context.Context, testID uuid.UUID) error
-	RecordTestResult(ctx context.Context, testID uuid.UUID, actualValue string, result entities.TestResult, score float64) error
+	DeleteTest(ctx context.Context, testID uuid.ID) error
+	RecordTestResult(ctx context.Context, testID uuid.ID, actualValue string, result entities.TestResult, score float64) error
 
 	// Defect management
-	AddDefect(ctx context.Context, qcID uuid.UUID, defect *entities.QualityDefect) error
+	AddDefect(ctx context.Context, qcID uuid.ID, defect *entities.QualityDefect) error
 	UpdateDefect(ctx context.Context, defect *entities.QualityDefect) error
-	DeleteDefect(ctx context.Context, defectID uuid.UUID) error
+	DeleteDefect(ctx context.Context, defectID uuid.ID) error
 
 	// Action management
-	AddAction(ctx context.Context, qcID uuid.UUID, action *entities.QualityAction) error
+	AddAction(ctx context.Context, qcID uuid.ID, action *entities.QualityAction) error
 	UpdateAction(ctx context.Context, action *entities.QualityAction) error
-	DeleteAction(ctx context.Context, actionID uuid.UUID) error
-	CompleteAction(ctx context.Context, actionID uuid.UUID) error
+	DeleteAction(ctx context.Context, actionID uuid.ID) error
+	CompleteAction(ctx context.Context, actionID uuid.ID) error
 
 	// Analytics and reporting
 	GetStatistics(ctx context.Context) (*entities.QualityControlStatistics, error)
-	GetQCByReference(ctx context.Context, referenceID string) ([]*entities.QualityControl, error)
+	GetQCByReference(ctx context.Context, referenceID uuid.ID) ([]*entities.QualityControl, error)
 	GetQCByInspector(ctx context.Context, inspector string) ([]*entities.QualityControl, error)
 	GetQCByDateRange(ctx context.Context, startDate, endDate string) ([]*entities.QualityControl, error)
 
@@ -101,7 +101,7 @@ func (s *QualityControlServiceImpl) CreateQualityControl(ctx context.Context, qc
 }
 
 // GetQualityControl retrieves a quality control by ID
-func (s *QualityControlServiceImpl) GetQualityControl(ctx context.Context, id uuid.UUID) (*entities.QualityControl, error) {
+func (s *QualityControlServiceImpl) GetQualityControl(ctx context.Context, id uuid.ID) (*entities.QualityControl, error) {
 	return s.repo.GetByID(ctx, id)
 }
 
@@ -141,7 +141,7 @@ func (s *QualityControlServiceImpl) UpdateQualityControl(ctx context.Context, qc
 }
 
 // DeleteQualityControl deletes a quality control
-func (s *QualityControlServiceImpl) DeleteQualityControl(ctx context.Context, id uuid.UUID) error {
+func (s *QualityControlServiceImpl) DeleteQualityControl(ctx context.Context, id uuid.ID) error {
 	// Verify the QC exists
 	existingQC, err := s.repo.GetByID(ctx, id)
 	if err != nil {
@@ -165,7 +165,7 @@ func (s *QualityControlServiceImpl) GetAllQualityControls(ctx context.Context, l
 }
 
 // StartTesting transitions QC to testing status
-func (s *QualityControlServiceImpl) StartTesting(ctx context.Context, id uuid.UUID) error {
+func (s *QualityControlServiceImpl) StartTesting(ctx context.Context, id uuid.ID) error {
 	qc, err := s.repo.GetByID(ctx, id)
 	if err != nil {
 		return err
@@ -180,7 +180,7 @@ func (s *QualityControlServiceImpl) StartTesting(ctx context.Context, id uuid.UU
 }
 
 // CompleteQC marks QC as passed or failed
-func (s *QualityControlServiceImpl) CompleteQC(ctx context.Context, id uuid.UUID, passed bool) error {
+func (s *QualityControlServiceImpl) CompleteQC(ctx context.Context, id uuid.ID, passed bool) error {
 	qc, err := s.repo.GetByID(ctx, id)
 	if err != nil {
 		return err
@@ -203,7 +203,7 @@ func (s *QualityControlServiceImpl) CompleteQC(ctx context.Context, id uuid.UUID
 }
 
 // SetConditional marks QC as conditionally accepted
-func (s *QualityControlServiceImpl) SetConditional(ctx context.Context, id uuid.UUID, reason string) error {
+func (s *QualityControlServiceImpl) SetConditional(ctx context.Context, id uuid.ID, reason string) error {
 	qc, err := s.repo.GetByID(ctx, id)
 	if err != nil {
 		return err
@@ -216,7 +216,7 @@ func (s *QualityControlServiceImpl) SetConditional(ctx context.Context, id uuid.
 }
 
 // Test management
-func (s *QualityControlServiceImpl) AddTest(ctx context.Context, qcID uuid.UUID, test *entities.QualityTest) error {
+func (s *QualityControlServiceImpl) AddTest(ctx context.Context, qcID uuid.ID, test *entities.QualityTest) error {
 	// Verify the QC exists
 	qc, err := s.repo.GetByID(ctx, qcID)
 	if err != nil {
@@ -234,11 +234,11 @@ func (s *QualityControlServiceImpl) UpdateTest(ctx context.Context, test *entiti
 	return s.repo.UpdateTest(ctx, test)
 }
 
-func (s *QualityControlServiceImpl) DeleteTest(ctx context.Context, testID uuid.UUID) error {
+func (s *QualityControlServiceImpl) DeleteTest(ctx context.Context, testID uuid.ID) error {
 	return s.repo.DeleteTest(ctx, testID)
 }
 
-func (s *QualityControlServiceImpl) RecordTestResult(ctx context.Context, testID uuid.UUID, actualValue string, result entities.TestResult, score float64) error {
+func (s *QualityControlServiceImpl) RecordTestResult(ctx context.Context, testID uuid.ID, actualValue string, result entities.TestResult, score float64) error {
 	test := &entities.QualityTest{
 		ID:          testID,
 		ActualValue: actualValue,
@@ -249,7 +249,7 @@ func (s *QualityControlServiceImpl) RecordTestResult(ctx context.Context, testID
 }
 
 // Defect management
-func (s *QualityControlServiceImpl) AddDefect(ctx context.Context, qcID uuid.UUID, defect *entities.QualityDefect) error {
+func (s *QualityControlServiceImpl) AddDefect(ctx context.Context, qcID uuid.ID, defect *entities.QualityDefect) error {
 	// Verify the QC exists
 	qc, err := s.repo.GetByID(ctx, qcID)
 	if err != nil {
@@ -267,12 +267,12 @@ func (s *QualityControlServiceImpl) UpdateDefect(ctx context.Context, defect *en
 	return s.repo.UpdateDefect(ctx, defect)
 }
 
-func (s *QualityControlServiceImpl) DeleteDefect(ctx context.Context, defectID uuid.UUID) error {
+func (s *QualityControlServiceImpl) DeleteDefect(ctx context.Context, defectID uuid.ID) error {
 	return s.repo.DeleteDefect(ctx, defectID)
 }
 
 // Action management
-func (s *QualityControlServiceImpl) AddAction(ctx context.Context, qcID uuid.UUID, action *entities.QualityAction) error {
+func (s *QualityControlServiceImpl) AddAction(ctx context.Context, qcID uuid.ID, action *entities.QualityAction) error {
 	// Verify the QC exists
 	qc, err := s.repo.GetByID(ctx, qcID)
 	if err != nil {
@@ -291,11 +291,11 @@ func (s *QualityControlServiceImpl) UpdateAction(ctx context.Context, action *en
 	return s.repo.UpdateAction(ctx, action)
 }
 
-func (s *QualityControlServiceImpl) DeleteAction(ctx context.Context, actionID uuid.UUID) error {
+func (s *QualityControlServiceImpl) DeleteAction(ctx context.Context, actionID uuid.ID) error {
 	return s.repo.DeleteAction(ctx, actionID)
 }
 
-func (s *QualityControlServiceImpl) CompleteAction(ctx context.Context, actionID uuid.UUID) error {
+func (s *QualityControlServiceImpl) CompleteAction(ctx context.Context, actionID uuid.ID) error {
 	now := time.Now()
 	action := &entities.QualityAction{
 		ID:            actionID,
@@ -310,7 +310,7 @@ func (s *QualityControlServiceImpl) GetStatistics(ctx context.Context) (*entitie
 	return s.repo.GetStatistics(ctx)
 }
 
-func (s *QualityControlServiceImpl) GetQCByReference(ctx context.Context, referenceID string) ([]*entities.QualityControl, error) {
+func (s *QualityControlServiceImpl) GetQCByReference(ctx context.Context, referenceID uuid.ID) ([]*entities.QualityControl, error) {
 	return s.repo.GetByReferenceID(ctx, referenceID)
 }
 

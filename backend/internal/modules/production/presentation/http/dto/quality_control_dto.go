@@ -3,9 +3,9 @@ package dto
 import (
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/lib/pq"
 	"malaka/internal/modules/production/domain/entities"
+	"malaka/internal/shared/uuid"
 )
 
 // QualityControlRequest represents the request body for creating/updating quality control
@@ -144,9 +144,9 @@ func MapQualityControlRequestToEntity(req *QualityControlRequest) *entities.Qual
 		QCNumber:        req.QCNumber,
 		Type:            entities.QCType(req.Type),
 		ReferenceType:   entities.QCReferenceType(req.ReferenceType),
-		ReferenceID:     req.ReferenceID,
+		ReferenceID:     uuid.MustParse(req.ReferenceID),
 		ReferenceNumber: req.ReferenceNumber,
-		ProductID:       req.ProductID,
+		ProductID:       uuid.MustParse(req.ProductID),
 		ProductCode:     req.ProductCode,
 		ProductName:     req.ProductName,
 		BatchNumber:     req.BatchNumber,
@@ -190,7 +190,8 @@ func MapQualityTestRequestToEntity(req *QualityTestRequest) entities.QualityTest
 	}
 
 	if req.ID != nil && *req.ID != "" {
-		test.ID, _ = uuid.Parse(*req.ID)
+		id, _ := uuid.Parse(*req.ID)
+		test.ID = id
 	}
 
 	return test
@@ -208,7 +209,8 @@ func MapQualityDefectRequestToEntity(req *QualityDefectRequest) entities.Quality
 	}
 
 	if req.ID != nil && *req.ID != "" {
-		defect.ID, _ = uuid.Parse(*req.ID)
+		id, _ := uuid.Parse(*req.ID)
+		defect.ID = id
 	}
 
 	return defect
@@ -221,13 +223,14 @@ func MapQualityActionRequestToEntity(req *QualityActionRequest) entities.Quality
 	action := entities.QualityAction{
 		ActionType:  entities.ActionType(req.ActionType),
 		Description: req.Description,
-		AssignedTo:  req.AssignedTo,
+		AssignedTo:  uuid.MustParse(req.AssignedTo),
 		DueDate:     dueDate,
 		Status:      entities.ActionStatus(req.Status),
 	}
 
 	if req.ID != nil && *req.ID != "" {
-		action.ID, _ = uuid.Parse(*req.ID)
+		id, _ := uuid.Parse(*req.ID)
+		action.ID = id
 	}
 
 	return action
@@ -240,9 +243,9 @@ func MapQualityControlEntityToResponse(qc *entities.QualityControl) *QualityCont
 		QCNumber:        qc.QCNumber,
 		Type:            string(qc.Type),
 		ReferenceType:   string(qc.ReferenceType),
-		ReferenceID:     qc.ReferenceID,
+		ReferenceID:     qc.ReferenceID.String(),
 		ReferenceNumber: qc.ReferenceNumber,
-		ProductID:       qc.ProductID,
+		ProductID:       qc.ProductID.String(),
 		ProductCode:     qc.ProductCode,
 		ProductName:     qc.ProductName,
 		BatchNumber:     qc.BatchNumber,
@@ -311,7 +314,7 @@ func MapQualityActionEntityToResponse(action *entities.QualityAction) QualityAct
 		ID:          action.ID.String(),
 		ActionType:  string(action.ActionType),
 		Description: action.Description,
-		AssignedTo:  action.AssignedTo,
+		AssignedTo:  action.AssignedTo.String(),
 		DueDate:     action.DueDate.Format("2006-01-02"),
 		Status:      string(action.Status),
 	}

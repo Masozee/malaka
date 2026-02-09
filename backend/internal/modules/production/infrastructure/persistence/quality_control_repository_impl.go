@@ -7,11 +7,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 
 	"malaka/internal/modules/production/domain/entities"
 	"malaka/internal/modules/production/domain/repositories"
+	"malaka/internal/shared/uuid"
 )
 
 type QualityControlRepositoryImpl struct {
@@ -84,7 +84,7 @@ func (r *QualityControlRepositoryImpl) Create(ctx context.Context, qc *entities.
 	return tx.Commit()
 }
 
-func (r *QualityControlRepositoryImpl) GetByID(ctx context.Context, id uuid.UUID) (*entities.QualityControl, error) {
+func (r *QualityControlRepositoryImpl) GetByID(ctx context.Context, id uuid.ID) (*entities.QualityControl, error) {
 	query := `
 		SELECT id, qc_number, type, reference_type, reference_id, reference_number,
 			   product_id, product_code, product_name, batch_number, quantity_tested,
@@ -167,7 +167,7 @@ func (r *QualityControlRepositoryImpl) Update(ctx context.Context, qc *entities.
 	return nil
 }
 
-func (r *QualityControlRepositoryImpl) Delete(ctx context.Context, id uuid.UUID) error {
+func (r *QualityControlRepositoryImpl) Delete(ctx context.Context, id uuid.ID) error {
 	query := `DELETE FROM quality_controls WHERE id = $1`
 	result, err := r.db.ExecContext(ctx, query, id)
 	if err != nil {
@@ -297,7 +297,7 @@ func (r *QualityControlRepositoryImpl) GetByStatus(ctx context.Context, status e
 	return qcList, nil
 }
 
-func (r *QualityControlRepositoryImpl) GetByReferenceID(ctx context.Context, referenceID string) ([]*entities.QualityControl, error) {
+func (r *QualityControlRepositoryImpl) GetByReferenceID(ctx context.Context, referenceID uuid.ID) ([]*entities.QualityControl, error) {
 	query := `
 		SELECT id, qc_number, type, reference_type, reference_id, reference_number,
 			   product_id, product_code, product_name, batch_number, quantity_tested,
@@ -352,7 +352,7 @@ func (r *QualityControlRepositoryImpl) GetByInspector(ctx context.Context, inspe
 	return qcList, nil
 }
 
-func (r *QualityControlRepositoryImpl) ExistsQCNumber(ctx context.Context, qcNumber string, excludeID ...uuid.UUID) (bool, error) {
+func (r *QualityControlRepositoryImpl) ExistsQCNumber(ctx context.Context, qcNumber string, excludeID ...uuid.ID) (bool, error) {
 	query := "SELECT EXISTS(SELECT 1 FROM quality_controls WHERE qc_number = $1"
 	args := []interface{}{qcNumber}
 
@@ -464,7 +464,7 @@ func (r *QualityControlRepositoryImpl) UpdateTest(ctx context.Context, test *ent
 	return nil
 }
 
-func (r *QualityControlRepositoryImpl) DeleteTest(ctx context.Context, id uuid.UUID) error {
+func (r *QualityControlRepositoryImpl) DeleteTest(ctx context.Context, id uuid.ID) error {
 	query := `DELETE FROM quality_tests WHERE id = $1`
 	_, err := r.db.ExecContext(ctx, query, id)
 	if err != nil {
@@ -473,7 +473,7 @@ func (r *QualityControlRepositoryImpl) DeleteTest(ctx context.Context, id uuid.U
 	return nil
 }
 
-func (r *QualityControlRepositoryImpl) GetTests(ctx context.Context, qcID uuid.UUID) ([]entities.QualityTest, error) {
+func (r *QualityControlRepositoryImpl) GetTests(ctx context.Context, qcID uuid.ID) ([]entities.QualityTest, error) {
 	query := `
 		SELECT id, quality_ctrl_id, test_name, test_type, specification,
 			   actual_value, result, score, COALESCE(notes, '') as notes,
@@ -545,7 +545,7 @@ func (r *QualityControlRepositoryImpl) UpdateDefect(ctx context.Context, defect 
 	return nil
 }
 
-func (r *QualityControlRepositoryImpl) DeleteDefect(ctx context.Context, id uuid.UUID) error {
+func (r *QualityControlRepositoryImpl) DeleteDefect(ctx context.Context, id uuid.ID) error {
 	query := `DELETE FROM quality_defects WHERE id = $1`
 	_, err := r.db.ExecContext(ctx, query, id)
 	if err != nil {
@@ -554,7 +554,7 @@ func (r *QualityControlRepositoryImpl) DeleteDefect(ctx context.Context, id uuid
 	return nil
 }
 
-func (r *QualityControlRepositoryImpl) GetDefects(ctx context.Context, qcID uuid.UUID) ([]entities.QualityDefect, error) {
+func (r *QualityControlRepositoryImpl) GetDefects(ctx context.Context, qcID uuid.ID) ([]entities.QualityDefect, error) {
 	query := `
 		SELECT id, quality_ctrl_id, defect_type, description, severity,
 			   quantity, COALESCE(location, '') as location, images,
@@ -626,7 +626,7 @@ func (r *QualityControlRepositoryImpl) UpdateAction(ctx context.Context, action 
 	return nil
 }
 
-func (r *QualityControlRepositoryImpl) DeleteAction(ctx context.Context, id uuid.UUID) error {
+func (r *QualityControlRepositoryImpl) DeleteAction(ctx context.Context, id uuid.ID) error {
 	query := `DELETE FROM quality_actions WHERE id = $1`
 	_, err := r.db.ExecContext(ctx, query, id)
 	if err != nil {
@@ -635,7 +635,7 @@ func (r *QualityControlRepositoryImpl) DeleteAction(ctx context.Context, id uuid
 	return nil
 }
 
-func (r *QualityControlRepositoryImpl) GetActions(ctx context.Context, qcID uuid.UUID) ([]entities.QualityAction, error) {
+func (r *QualityControlRepositoryImpl) GetActions(ctx context.Context, qcID uuid.ID) ([]entities.QualityAction, error) {
 	query := `
 		SELECT id, quality_ctrl_id, action_type, description, assigned_to,
 			   due_date, status, completed_date, created_at, updated_at

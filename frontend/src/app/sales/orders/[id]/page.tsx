@@ -10,6 +10,7 @@ import { Header } from '@/components/ui/header'
 import { Separator } from '@/components/ui/separator'
 
 import Link from 'next/link'
+import { EntityShareButton } from '@/components/messaging/EntityShareButton'
 
 // Mock data - same types as main page
 interface OrderItem {
@@ -220,6 +221,15 @@ export default function SalesOrderDetailPage() {
         breadcrumbs={breadcrumbs}
         actions={
           <div className="flex gap-2">
+            <EntityShareButton
+              entityType="sales_order"
+              entityId={order.id}
+              title={order.order_number}
+              subtitle={`${order.customer_name} - ${new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(order.total_amount)}`}
+              status={order.status}
+              statusColor={order.status === 'completed' ? 'green' : order.status === 'draft' ? 'gray' : 'blue'}
+              url={`/sales/orders/${order.id}`}
+            />
             <Button variant="outline" size="sm">
               <Printer className="h-4 w-4 mr-2" />
               Print

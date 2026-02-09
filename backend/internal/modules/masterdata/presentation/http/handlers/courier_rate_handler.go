@@ -4,11 +4,10 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
-	"malaka/internal/modules/masterdata/domain/entities"
 	"malaka/internal/modules/masterdata/domain/services"
 	"malaka/internal/modules/masterdata/presentation/http/dto"
 	"malaka/internal/shared/response"
+	"malaka/internal/shared/uuid"
 )
 
 
@@ -27,12 +26,7 @@ func (h *CourierRateHandler) CreateCourierRate(c *gin.Context) {
 		return
 	}
 
-	courierRate := &entities.CourierRate{
-		CourierID:   req.CourierID,
-		Origin:      req.Origin,
-		Destination: req.Destination,
-		Price:       req.Price,
-	}
+	courierRate := req.ToEntity()
 
 	if err := h.service.CreateCourierRate(c.Request.Context(), courierRate); err != nil {
 		response.Error(c, http.StatusInternalServerError, err.Error(), nil)
@@ -77,18 +71,7 @@ func (h *CourierRateHandler) UpdateCourierRate(c *gin.Context) {
 		return
 	}
 
-	if req.CourierID != uuid.Nil {
-		courierRate.CourierID = req.CourierID
-	}
-	if req.Origin != "" {
-		courierRate.Origin = req.Origin
-	}
-	if req.Destination != "" {
-		courierRate.Destination = req.Destination
-	}
-	if req.Price != 0 {
-		courierRate.Price = req.Price
-	}
+	req.ApplyToEntity(courierRate)
 
 	if err := h.service.UpdateCourierRate(c.Request.Context(), courierRate); err != nil {
 		response.Error(c, http.StatusInternalServerError, err.Error(), nil)

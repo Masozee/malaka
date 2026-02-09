@@ -6,6 +6,7 @@ import (
 
 	"github.com/jmoiron/sqlx"
 	"malaka/internal/modules/masterdata/domain/entities"
+	"malaka/internal/shared/uuid"
 )
 
 // SupplierRepositoryImpl implements repositories.SupplierRepository.
@@ -20,18 +21,18 @@ func NewSupplierRepositoryImpl(db *sqlx.DB) *SupplierRepositoryImpl {
 
 // Create creates a new supplier in the database.
 func (r *SupplierRepositoryImpl) Create(ctx context.Context, supplier *entities.Supplier) error {
-	query := `INSERT INTO suppliers (id, name, address, contact, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6)`
-	_, err := r.db.ExecContext(ctx, query, supplier.ID, supplier.Name, supplier.Address, supplier.Contact, supplier.CreatedAt, supplier.UpdatedAt)
+	query := `INSERT INTO suppliers (id, name, address, contact, company_id, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7)`
+	_, err := r.db.ExecContext(ctx, query, supplier.ID, supplier.Name, supplier.Address, supplier.Contact, supplier.CompanyID, supplier.CreatedAt, supplier.UpdatedAt)
 	return err
 }
 
 // GetByID retrieves a supplier by its ID from the database.
-func (r *SupplierRepositoryImpl) GetByID(ctx context.Context, id string) (*entities.Supplier, error) {
-	query := `SELECT id, name, address, contact, created_at, updated_at FROM suppliers WHERE id = $1`
+func (r *SupplierRepositoryImpl) GetByID(ctx context.Context, id uuid.ID) (*entities.Supplier, error) {
+	query := `SELECT id, name, address, contact, COALESCE(company_id::text, '') as company_id, created_at, updated_at FROM suppliers WHERE id = $1`
 	row := r.db.QueryRowContext(ctx, query, id)
 
 	supplier := &entities.Supplier{}
-	err := row.Scan(&supplier.ID, &supplier.Name, &supplier.Address, &supplier.Contact, &supplier.CreatedAt, &supplier.UpdatedAt)
+	err := row.Scan(&supplier.ID, &supplier.Name, &supplier.Address, &supplier.Contact, &supplier.CompanyID, &supplier.CreatedAt, &supplier.UpdatedAt)
 	if err == sql.ErrNoRows {
 		return nil, nil // Supplier not found
 	}
@@ -40,14 +41,14 @@ func (r *SupplierRepositoryImpl) GetByID(ctx context.Context, id string) (*entit
 
 // Update updates an existing supplier in the database.
 func (r *SupplierRepositoryImpl) Update(ctx context.Context, supplier *entities.Supplier) error {
-	query := `UPDATE suppliers SET name = $1, address = $2, contact = $3, updated_at = $4 WHERE id = $5`
-	_, err := r.db.ExecContext(ctx, query, supplier.Name, supplier.Address, supplier.Contact, supplier.UpdatedAt, supplier.ID)
+	query := `UPDATE suppliers SET name = $1, address = $2, contact = $3, company_id = $4, updated_at = $5 WHERE id = $6`
+	_, err := r.db.ExecContext(ctx, query, supplier.Name, supplier.Address, supplier.Contact, supplier.CompanyID, supplier.UpdatedAt, supplier.ID)
 	return err
 }
 
 // GetAll retrieves all suppliers from the database.
 func (r *SupplierRepositoryImpl) GetAll(ctx context.Context) ([]*entities.Supplier, error) {
-	query := `SELECT id, name, address, contact, created_at, updated_at FROM suppliers ORDER BY created_at DESC`
+	query := `SELECT id, name, address, contact, COALESCE(company_id::text, '') as company_id, created_at, updated_at FROM suppliers ORDER BY created_at DESC`
 	rows, err := r.db.QueryContext(ctx, query)
 	if err != nil {
 		return nil, err
@@ -57,7 +58,7 @@ func (r *SupplierRepositoryImpl) GetAll(ctx context.Context) ([]*entities.Suppli
 	var suppliers []*entities.Supplier
 	for rows.Next() {
 		supplier := &entities.Supplier{}
-		err := rows.Scan(&supplier.ID, &supplier.Name, &supplier.Address, &supplier.Contact, &supplier.CreatedAt, &supplier.UpdatedAt)
+		err := rows.Scan(&supplier.ID, &supplier.Name, &supplier.Address, &supplier.Contact, &supplier.CompanyID, &supplier.CreatedAt, &supplier.UpdatedAt)
 		if err != nil {
 			return nil, err
 		}
@@ -67,7 +68,7 @@ func (r *SupplierRepositoryImpl) GetAll(ctx context.Context) ([]*entities.Suppli
 }
 
 // Delete deletes a supplier by its ID from the database.
-func (r *SupplierRepositoryImpl) Delete(ctx context.Context, id string) error {
+func (r *SupplierRepositoryImpl) Delete(ctx context.Context, id uuid.ID) error {
 	query := `DELETE FROM suppliers WHERE id = $1`
 	_, err := r.db.ExecContext(ctx, query, id)
 	return err

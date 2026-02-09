@@ -7,7 +7,6 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	_ "github.com/lib/pq"
 	"malaka/internal/shared/response"
 )
 
@@ -15,22 +14,7 @@ type AttendanceHandler struct {
 	db *sql.DB
 }
 
-func NewAttendanceHandler() *AttendanceHandler {
-	// Use Docker internal database connection
-	dbURL := "postgres://postgres:TanahAbang1971@postgres:5432/malaka?sslmode=disable"
-	db, err := sql.Open("postgres", dbURL)
-	if err != nil {
-		log.Printf("Failed to connect to database: %v", err)
-		return &AttendanceHandler{db: nil}
-	}
-	
-	// Test the connection
-	if err := db.Ping(); err != nil {
-		log.Printf("Failed to ping database: %v", err)
-		return &AttendanceHandler{db: nil}
-	}
-	
-	log.Printf("Successfully connected to attendance database")
+func NewAttendanceHandler(db *sql.DB) *AttendanceHandler {
 	return &AttendanceHandler{db: db}
 }
 

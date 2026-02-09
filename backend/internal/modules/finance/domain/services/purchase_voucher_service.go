@@ -6,16 +6,17 @@ import (
 
 	"malaka/internal/modules/finance/domain/entities"
 	"malaka/internal/modules/finance/domain/repositories"
+	"malaka/internal/shared/uuid"
 )
 
 type PurchaseVoucherService interface {
 	CreatePurchaseVoucher(ctx context.Context, voucher *entities.PurchaseVoucher) error
-	GetPurchaseVoucherByID(ctx context.Context, id string) (*entities.PurchaseVoucher, error)
+	GetPurchaseVoucherByID(ctx context.Context, id uuid.ID) (*entities.PurchaseVoucher, error)
 	GetAllPurchaseVouchers(ctx context.Context) ([]*entities.PurchaseVoucher, error)
 	UpdatePurchaseVoucher(ctx context.Context, voucher *entities.PurchaseVoucher) error
-	DeletePurchaseVoucher(ctx context.Context, id string) error
+	DeletePurchaseVoucher(ctx context.Context, id uuid.ID) error
 	GetPurchaseVouchersByStatus(ctx context.Context, status string) ([]*entities.PurchaseVoucher, error)
-	ApprovePurchaseVoucher(ctx context.Context, id string, approvedBy string) error
+	ApprovePurchaseVoucher(ctx context.Context, id uuid.ID, approvedBy uuid.ID) error
 }
 
 type purchaseVoucherService struct {
@@ -35,7 +36,7 @@ func (s *purchaseVoucherService) CreatePurchaseVoucher(ctx context.Context, vouc
 	return s.repo.Create(ctx, voucher)
 }
 
-func (s *purchaseVoucherService) GetPurchaseVoucherByID(ctx context.Context, id string) (*entities.PurchaseVoucher, error) {
+func (s *purchaseVoucherService) GetPurchaseVoucherByID(ctx context.Context, id uuid.ID) (*entities.PurchaseVoucher, error) {
 	return s.repo.GetByID(ctx, id)
 }
 
@@ -47,7 +48,7 @@ func (s *purchaseVoucherService) UpdatePurchaseVoucher(ctx context.Context, vouc
 	return s.repo.Update(ctx, voucher)
 }
 
-func (s *purchaseVoucherService) DeletePurchaseVoucher(ctx context.Context, id string) error {
+func (s *purchaseVoucherService) DeletePurchaseVoucher(ctx context.Context, id uuid.ID) error {
 	return s.repo.Delete(ctx, id)
 }
 
@@ -55,7 +56,7 @@ func (s *purchaseVoucherService) GetPurchaseVouchersByStatus(ctx context.Context
 	return s.repo.GetByStatus(ctx, status)
 }
 
-func (s *purchaseVoucherService) ApprovePurchaseVoucher(ctx context.Context, id string, approvedBy string) error {
+func (s *purchaseVoucherService) ApprovePurchaseVoucher(ctx context.Context, id uuid.ID, approvedBy uuid.ID) error {
 	voucher, err := s.repo.GetByID(ctx, id)
 	if err != nil {
 		return err

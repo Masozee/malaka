@@ -8,6 +8,7 @@ import (
 	"malaka/internal/modules/finance/domain/services"
 	"malaka/internal/modules/finance/presentation/http/dto"
 	"malaka/internal/shared/response"
+	"malaka/internal/shared/uuid"
 )
 
 // AccountsPayableHandler handles HTTP requests for accounts payable operations.
@@ -46,7 +47,13 @@ func (h *AccountsPayableHandler) GetAccountsPayableByID(c *gin.Context) {
 		return
 	}
 
-	accountsPayable, err := h.service.GetAccountsPayableByID(c.Request.Context(), id)
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		response.Error(c, http.StatusBadRequest, "Invalid ID", err)
+		return
+	}
+
+	accountsPayable, err := h.service.GetAccountsPayableByID(c.Request.Context(), parsedID)
 	if err != nil {
 		response.Error(c, http.StatusNotFound, "Accounts payable not found", err)
 		return
@@ -70,8 +77,14 @@ func (h *AccountsPayableHandler) UpdateAccountsPayable(c *gin.Context) {
 		return
 	}
 
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		response.Error(c, http.StatusBadRequest, "Invalid ID", err)
+		return
+	}
+
 	accountsPayable := req.ToAccountsPayableEntity()
-	accountsPayable.ID = id
+	accountsPayable.ID = parsedID
 
 	if err := h.service.UpdateAccountsPayable(c.Request.Context(), accountsPayable); err != nil {
 		response.Error(c, http.StatusInternalServerError, "Failed to update accounts payable", err)
@@ -90,7 +103,13 @@ func (h *AccountsPayableHandler) DeleteAccountsPayable(c *gin.Context) {
 		return
 	}
 
-	if err := h.service.DeleteAccountsPayable(c.Request.Context(), id); err != nil {
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		response.Error(c, http.StatusBadRequest, "Invalid ID", err)
+		return
+	}
+
+	if err := h.service.DeleteAccountsPayable(c.Request.Context(), parsedID); err != nil {
 		response.Error(c, http.StatusInternalServerError, "Failed to delete accounts payable", err)
 		return
 	}

@@ -3,14 +3,14 @@ package dto
 import (
 	"time"
 
-	"github.com/google/uuid"
+	"malaka/internal/shared/uuid"
 	"malaka/internal/modules/accounting/domain/entities"
 )
 
 // JournalEntryLineRequest represents a journal entry line in requests
 type JournalEntryLineRequest struct {
 	LineNumber   int       `json:"line_number" validate:"min=1"`
-	AccountID    uuid.UUID `json:"account_id" validate:"required"`
+	AccountID    uuid.ID `json:"account_id" validate:"required"`
 	Description  string    `json:"description" validate:"required,max=500"`
 	DebitAmount  float64   `json:"debit_amount" validate:"min=0"`
 	CreditAmount float64   `json:"credit_amount" validate:"min=0"`
@@ -43,9 +43,9 @@ type JournalEntryUpdateRequest struct {
 
 // JournalEntryLineResponse represents a journal entry line in responses
 type JournalEntryLineResponse struct {
-	ID               uuid.UUID `json:"id"`
+	ID               uuid.ID `json:"id"`
 	LineNumber       int       `json:"line_number"`
-	AccountID        uuid.UUID `json:"account_id"`
+	AccountID        uuid.ID `json:"account_id"`
 	Description      string    `json:"description"`
 	DebitAmount      float64   `json:"debit_amount"`
 	CreditAmount     float64   `json:"credit_amount"`
@@ -60,7 +60,7 @@ type JournalEntryLineResponse struct {
 
 // JournalEntryResponse represents the response for a journal entry
 type JournalEntryResponse struct {
-	ID              uuid.UUID                  `json:"id"`
+	ID              uuid.ID                  `json:"id"`
 	EntryNumber     string                     `json:"entry_number"`
 	EntryDate       time.Time                  `json:"entry_date"`
 	Description     string                     `json:"description"`

@@ -6,6 +6,7 @@ import (
 
 	"malaka/internal/modules/finance/domain/entities"
 	"malaka/internal/modules/finance/domain/repositories"
+	"malaka/internal/shared/uuid"
 )
 
 type monthlyClosingRepositoryImpl struct {
@@ -19,6 +20,10 @@ func NewMonthlyClosingRepository(db *sql.DB) repositories.MonthlyClosingReposito
 }
 
 func (r *monthlyClosingRepositoryImpl) Create(ctx context.Context, closing *entities.MonthlyClosing) error {
+	if closing.ID.IsNil() {
+		closing.ID = uuid.New()
+	}
+
 	query := `
 		INSERT INTO monthly_closing (
 			id, closing_month, closing_year, closing_date, closed_by, status,
@@ -35,7 +40,7 @@ func (r *monthlyClosingRepositoryImpl) Create(ctx context.Context, closing *enti
 	return err
 }
 
-func (r *monthlyClosingRepositoryImpl) GetByID(ctx context.Context, id string) (*entities.MonthlyClosing, error) {
+func (r *monthlyClosingRepositoryImpl) GetByID(ctx context.Context, id uuid.ID) (*entities.MonthlyClosing, error) {
 	closing := &entities.MonthlyClosing{}
 	query := `
 		SELECT id, closing_month, closing_year, closing_date, closed_by, status,
@@ -103,7 +108,7 @@ func (r *monthlyClosingRepositoryImpl) Update(ctx context.Context, closing *enti
 	return err
 }
 
-func (r *monthlyClosingRepositoryImpl) Delete(ctx context.Context, id string) error {
+func (r *monthlyClosingRepositoryImpl) Delete(ctx context.Context, id uuid.ID) error {
 	query := `DELETE FROM monthly_closing WHERE id = $1`
 	_, err := r.db.ExecContext(ctx, query, id)
 	return err

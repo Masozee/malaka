@@ -9,6 +9,7 @@ import (
 	"malaka/internal/modules/sales/domain/services"
 	"malaka/internal/modules/sales/presentation/http/dto"
 	"malaka/internal/shared/response"
+	"malaka/internal/shared/uuid"
 )
 
 // PromotionHandler handles HTTP requests for promotion operations.
@@ -104,6 +105,12 @@ func (h *PromotionHandler) UpdatePromotion(c *gin.Context) {
 		return
 	}
 
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		response.BadRequest(c, "Invalid ID format", nil)
+		return
+	}
+
 	promo := &entities.Promotion{
 		Name:        req.Name,
 		Description: req.Description,
@@ -112,7 +119,7 @@ func (h *PromotionHandler) UpdatePromotion(c *gin.Context) {
 		DiscountRate: req.DiscountRate,
 		MinPurchase: req.MinPurchase,
 	}
-	promo.ID = id // Set the ID from the URL parameter
+	promo.ID = parsedID // Set the ID from the URL parameter
 
 	if err := h.service.UpdatePromotion(c.Request.Context(), promo); err != nil {
 		response.InternalServerError(c, err.Error(), nil)

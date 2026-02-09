@@ -5,6 +5,7 @@ import (
 
 	"malaka/internal/modules/finance/domain/entities"
 	"malaka/internal/shared/types"
+	"malaka/internal/shared/uuid"
 )
 
 // CashReceiptCreateRequest represents the request to create cash receipt.
@@ -41,7 +42,7 @@ func (req *CashReceiptCreateRequest) ToCashReceiptEntity() *entities.CashReceipt
 		ReceiptDate: req.ReceiptDate,
 		Amount:      req.Amount,
 		Description: req.Description,
-		CashBankID:  req.CashBankID,
+		CashBankID:  uuid.MustParse(req.CashBankID),
 	}
 }
 
@@ -52,18 +53,18 @@ func (req *CashReceiptUpdateRequest) ToCashReceiptEntity() *entities.CashReceipt
 		ReceiptDate: req.ReceiptDate,
 		Amount:      req.Amount,
 		Description: req.Description,
-		CashBankID:  req.CashBankID,
+		CashBankID:  uuid.MustParse(req.CashBankID),
 	}
 }
 
 // FromCashReceiptEntity converts entities.CashReceipt to CashReceiptResponse.
 func FromCashReceiptEntity(cr *entities.CashReceipt) *CashReceiptResponse {
 	return &CashReceiptResponse{
-		ID:          cr.ID,
+		ID:          cr.ID.String(),
 		ReceiptDate: cr.ReceiptDate,
 		Amount:      cr.Amount,
 		Description: cr.Description,
-		CashBankID:  cr.CashBankID,
+		CashBankID:  cr.CashBankID.String(),
 		CreatedAt:   cr.CreatedAt.Format("2006-01-02T15:04:05Z"),
 		UpdatedAt:   cr.UpdatedAt.Format("2006-01-02T15:04:05Z"),
 	}

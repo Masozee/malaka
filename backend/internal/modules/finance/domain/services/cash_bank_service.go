@@ -6,7 +6,7 @@ import (
 
 	"malaka/internal/modules/finance/domain/entities"
 	"malaka/internal/modules/finance/domain/repositories"
-	"malaka/internal/shared/utils"
+	"malaka/internal/shared/uuid"
 )
 
 // CashBankService provides business logic for cash/bank operations.
@@ -21,14 +21,14 @@ func NewCashBankService(repo repositories.CashBankRepository) *CashBankService {
 
 // CreateCashBank creates a new cash/bank account.
 func (s *CashBankService) CreateCashBank(ctx context.Context, cb *entities.CashBank) error {
-	if cb.ID == "" {
-		cb.ID = utils.RandomString(10) // Generate a random ID if not provided
+	if cb.ID.IsNil() {
+		cb.ID = uuid.New()
 	}
 	return s.repo.Create(ctx, cb)
 }
 
 // GetCashBankByID retrieves a cash/bank account by its ID.
-func (s *CashBankService) GetCashBankByID(ctx context.Context, id string) (*entities.CashBank, error) {
+func (s *CashBankService) GetCashBankByID(ctx context.Context, id uuid.ID) (*entities.CashBank, error) {
 	return s.repo.GetByID(ctx, id)
 }
 
@@ -46,7 +46,7 @@ func (s *CashBankService) UpdateCashBank(ctx context.Context, cb *entities.CashB
 }
 
 // DeleteCashBank deletes a cash/bank account by its ID.
-func (s *CashBankService) DeleteCashBank(ctx context.Context, id string) error {
+func (s *CashBankService) DeleteCashBank(ctx context.Context, id uuid.ID) error {
 	// Ensure the cash/bank account exists before deleting
 	existingCB, err := s.repo.GetByID(ctx, id)
 	if err != nil {

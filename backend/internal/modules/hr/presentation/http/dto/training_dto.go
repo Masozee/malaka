@@ -3,7 +3,6 @@ package dto
 import (
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/lib/pq"
 	"malaka/internal/modules/hr/domain/entities"
 )
@@ -30,8 +29,8 @@ type TrainingProgramRequest struct {
 
 // TrainingProgramResponse represents the response payload for a training program
 type TrainingProgramResponse struct {
-	ID                    uuid.UUID `json:"id"`
-	ProgramTitle          string    `json:"program_title"`
+	ID                    string `json:"id"`
+	ProgramTitle          string `json:"program_title"`
 	Description           string    `json:"description"`
 	Category              string    `json:"category"`
 	TrainingType          string    `json:"training_type"`
@@ -72,12 +71,12 @@ type TrainingCompleteRequest struct {
 
 // TrainingEnrollmentResponse represents the response payload for a training enrollment
 type TrainingEnrollmentResponse struct {
-	ID                 uuid.UUID `json:"id"`
-	EmployeeID         uuid.UUID `json:"employee_id"`
-	EmployeeName       string    `json:"employee_name"`
-	Department         string    `json:"department"`
-	ProgramID          uuid.UUID `json:"program_id"`
-	ProgramTitle       string    `json:"program_title"`
+	ID                 string `json:"id"`
+	EmployeeID         string `json:"employee_id"`
+	EmployeeName       string `json:"employee_name"`
+	Department         string `json:"department"`
+	ProgramID          string `json:"program_id"`
+	ProgramTitle       string `json:"program_title"`
 	EnrollmentDate     string    `json:"enrollment_date"`
 	CompletionDate     *string   `json:"completion_date,omitempty"`
 	ProgressPercentage float64   `json:"progress_percentage"`
@@ -168,7 +167,7 @@ func MapTrainingProgramEntityToResponse(program *entities.TrainingProgram) *Trai
 	}
 
 	return &TrainingProgramResponse{
-		ID:                    program.ID,
+		ID:                    program.ID.String(),
 		ProgramTitle:          program.ProgramTitle,
 		Description:           program.Description,
 		Category:              string(program.Category),
@@ -199,11 +198,11 @@ func MapTrainingEnrollmentEntityToResponse(enrollment *entities.TrainingEnrollme
 	}
 
 	resp := &TrainingEnrollmentResponse{
-		ID:                 enrollment.ID,
-		EmployeeID:         enrollment.EmployeeID,
+		ID:                 enrollment.ID.String(),
+		EmployeeID:         enrollment.EmployeeID.String(),
 		EmployeeName:       enrollment.EmployeeName,
 		Department:         enrollment.Department,
-		ProgramID:          enrollment.ProgramID,
+		ProgramID:          enrollment.ProgramID.String(),
 		ProgramTitle:       enrollment.ProgramTitle,
 		EnrollmentDate:     enrollment.EnrollmentDate.Format("2006-01-02"),
 		ProgressPercentage: enrollment.ProgressPercentage,

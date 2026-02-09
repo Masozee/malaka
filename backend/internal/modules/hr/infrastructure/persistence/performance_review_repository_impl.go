@@ -2,10 +2,11 @@ package persistence
 
 import (
 	"context"
-	"malaka/internal/modules/hr/domain/entities"
-	"malaka/internal/modules/hr/domain/repositories"
 
 	"gorm.io/gorm"
+	"malaka/internal/modules/hr/domain/entities"
+	"malaka/internal/modules/hr/domain/repositories"
+	"malaka/internal/shared/uuid"
 )
 
 type performanceReviewRepository struct {
@@ -21,7 +22,7 @@ func (r *performanceReviewRepository) CreatePerformanceReview(ctx context.Contex
 	return r.db.WithContext(ctx).Create(review).Error
 }
 
-func (r *performanceReviewRepository) GetPerformanceReviewByID(ctx context.Context, id string) (*entities.PerformanceReview, error) {
+func (r *performanceReviewRepository) GetPerformanceReviewByID(ctx context.Context, id uuid.ID) (*entities.PerformanceReview, error) {
 	var review entities.PerformanceReview
 	err := r.db.WithContext(ctx).Where("id = ?", id).First(&review).Error
 	if err != nil {
@@ -63,12 +64,12 @@ func (r *performanceReviewRepository) UpdatePerformanceReview(ctx context.Contex
 	return r.db.WithContext(ctx).Save(review).Error
 }
 
-func (r *performanceReviewRepository) DeletePerformanceReview(ctx context.Context, id string) error {
+func (r *performanceReviewRepository) DeletePerformanceReview(ctx context.Context, id uuid.ID) error {
 	return r.db.WithContext(ctx).Delete(&entities.PerformanceReview{}, "id = ?", id).Error
 }
 
 // Performance Review with relationships
-func (r *performanceReviewRepository) GetPerformanceReviewWithDetails(ctx context.Context, id string) (*entities.PerformanceReview, error) {
+func (r *performanceReviewRepository) GetPerformanceReviewWithDetails(ctx context.Context, id uuid.ID) (*entities.PerformanceReview, error) {
 	var review entities.PerformanceReview
 	err := r.db.WithContext(ctx).
 		Preload("Employee").
@@ -87,7 +88,7 @@ func (r *performanceReviewRepository) GetPerformanceReviewWithDetails(ctx contex
 	return &review, nil
 }
 
-func (r *performanceReviewRepository) GetPerformanceReviewsByEmployee(ctx context.Context, employeeID string) ([]*entities.PerformanceReview, error) {
+func (r *performanceReviewRepository) GetPerformanceReviewsByEmployee(ctx context.Context, employeeID uuid.ID) ([]*entities.PerformanceReview, error) {
 	var reviews []*entities.PerformanceReview
 	err := r.db.WithContext(ctx).
 		Preload("Employee").
@@ -137,7 +138,7 @@ func (r *performanceReviewRepository) GetAllReviewCycles(ctx context.Context) ([
 	return cycles, err
 }
 
-func (r *performanceReviewRepository) GetReviewCycleByID(ctx context.Context, id string) (*entities.PerformanceReviewCycle, error) {
+func (r *performanceReviewRepository) GetReviewCycleByID(ctx context.Context, id uuid.ID) (*entities.PerformanceReviewCycle, error) {
 	var cycle entities.PerformanceReviewCycle
 	err := r.db.WithContext(ctx).Where("id = ?", id).First(&cycle).Error
 	if err != nil {
@@ -157,7 +158,7 @@ func (r *performanceReviewRepository) GetAllPerformanceGoals(ctx context.Context
 	return goals, err
 }
 
-func (r *performanceReviewRepository) GetPerformanceGoalByID(ctx context.Context, id string) (*entities.PerformanceGoal, error) {
+func (r *performanceReviewRepository) GetPerformanceGoalByID(ctx context.Context, id uuid.ID) (*entities.PerformanceGoal, error) {
 	var goal entities.PerformanceGoal
 	err := r.db.WithContext(ctx).Where("id = ?", id).First(&goal).Error
 	if err != nil {
@@ -166,7 +167,7 @@ func (r *performanceReviewRepository) GetPerformanceGoalByID(ctx context.Context
 	return &goal, nil
 }
 
-func (r *performanceReviewRepository) GetReviewGoalsByReview(ctx context.Context, reviewID string) ([]*entities.PerformanceReviewGoal, error) {
+func (r *performanceReviewRepository) GetReviewGoalsByReview(ctx context.Context, reviewID uuid.ID) ([]*entities.PerformanceReviewGoal, error) {
 	var reviewGoals []*entities.PerformanceReviewGoal
 	err := r.db.WithContext(ctx).
 		Preload("Goal").
@@ -187,7 +188,7 @@ func (r *performanceReviewRepository) GetAllCompetencies(ctx context.Context) ([
 	return competencies, err
 }
 
-func (r *performanceReviewRepository) GetCompetencyByID(ctx context.Context, id string) (*entities.Competency, error) {
+func (r *performanceReviewRepository) GetCompetencyByID(ctx context.Context, id uuid.ID) (*entities.Competency, error) {
 	var competency entities.Competency
 	err := r.db.WithContext(ctx).Where("id = ?", id).First(&competency).Error
 	if err != nil {
@@ -196,7 +197,7 @@ func (r *performanceReviewRepository) GetCompetencyByID(ctx context.Context, id 
 	return &competency, nil
 }
 
-func (r *performanceReviewRepository) GetCompetencyEvaluationsByReview(ctx context.Context, reviewID string) ([]*entities.PerformanceCompetencyEvaluation, error) {
+func (r *performanceReviewRepository) GetCompetencyEvaluationsByReview(ctx context.Context, reviewID uuid.ID) ([]*entities.PerformanceCompetencyEvaluation, error) {
 	var evaluations []*entities.PerformanceCompetencyEvaluation
 	err := r.db.WithContext(ctx).
 		Preload("Competency").

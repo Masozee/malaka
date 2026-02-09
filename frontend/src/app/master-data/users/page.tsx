@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { useRouter } from "next/navigation"
 import { TwoLevelLayout } from "@/components/ui/two-level-layout"
 import { Header } from "@/components/ui/header"
 import { AdvancedDataTable } from "@/components/ui/advanced-data-table"
@@ -25,10 +26,10 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { UserForm } from "@/components/forms/user-form"
 import { useToast, toast } from "@/components/ui/toast"
 import { userService, companyService } from "@/services/masterdata"
 import { invitationService, Invitation } from "@/services/invitations"
+import { rbacService, Role } from "@/services/rbac"
 import { User, Company, MasterDataFilters } from "@/types/masterdata"
 import { HugeiconsIcon } from "@hugeicons/react"
 import {
@@ -43,6 +44,7 @@ import {
   Search01Icon,
   FilterIcon,
   Download01Icon,
+  ViewIcon,
 } from "@hugeicons/core-free-icons"
 import {
   DropdownMenu,
@@ -53,6 +55,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 
 export default function UsersPage() {
+  const router = useRouter()
   const [mounted, setMounted] = React.useState(false)
   const [users, setUsers] = React.useState<User[]>([])
   const [companies, setCompanies] = React.useState<Company[]>([])
@@ -62,8 +65,6 @@ export default function UsersPage() {
     pageSize: 10,
     total: 0
   })
-  const [formOpen, setFormOpen] = React.useState(false)
-  const [selectedUser, setSelectedUser] = React.useState<User | null>(null)
   const { addToast } = useToast()
 
   // Invitation state
@@ -78,6 +79,9 @@ export default function UsersPage() {
   })
   const [isSubmitting, setIsSubmitting] = React.useState(false)
   const [activeTab, setActiveTab] = React.useState('users')
+
+  // RBAC roles for filter/invite
+  const [allRoles, setAllRoles] = React.useState<Role[]>([])
 
   React.useEffect(() => {
     setMounted(true)
@@ -98,7 +102,10 @@ export default function UsersPage() {
       sortable: true,
       searchable: true,
       render: (fullName: unknown, user: User) => (
-        <div className="flex flex-col">
+        <div
+          className="flex flex-col cursor-pointer hover:underline"
+          onClick={() => router.push(`/master-data/users/${user.id}`)}
+        >
           <span className="font-medium text-gray-900 dark:text-gray-100">
             {fullName as string}
           </span>
@@ -113,7 +120,7 @@ export default function UsersPage() {
       title: 'Email',
       sortable: true,
       searchable: true,
-      hidden: true // Hidden as it's shown in full_name render
+      hidden: true
     },
     {
       key: 'phone' as keyof User,
@@ -236,6 +243,7 @@ export default function UsersPage() {
   // Load initial data
   React.useEffect(() => {
     fetchCompanies()
+    rbacService.getRoles().then(r => setAllRoles(r || [])).catch(() => {})
   }, [fetchCompanies])
 
   React.useEffect(() => {
@@ -265,18 +273,6 @@ export default function UsersPage() {
     setPagination(prev => ({ ...prev, current: page, pageSize }))
   }, [])
 
-  const handleEdit = (user: User) => {
-    setSelectedUser(user)
-    setFormOpen(true)
-  }
-
-  const handleFormSuccess = () => {
-    fetchUsers({
-      page: pagination.current,
-      limit: pagination.pageSize
-    })
-  }
-
   const handleDelete = async (user: User) => {
     if (confirm(`Are you sure you want to delete "${user.full_name}"?`)) {
       try {
@@ -290,41 +286,6 @@ export default function UsersPage() {
         console.error('Error deleting user:', error)
         addToast(toast.error("Failed to delete user", "Please try again later."))
       }
-    }
-  }
-
-  const handleBulkAction = async (action: string, selectedIds: string[]) => {
-    try {
-      switch (action) {
-        case 'activate':
-          await Promise.all(selectedIds.map(id =>
-            userService.update(id, { data: { status: 'active' } })
-          ))
-          addToast(toast.success("Users activated", `${selectedIds.length} users have been activated.`))
-          break
-        case 'deactivate':
-          await Promise.all(selectedIds.map(id =>
-            userService.update(id, { data: { status: 'inactive' } })
-          ))
-          addToast(toast.success("Users deactivated", `${selectedIds.length} users have been deactivated.`))
-          break
-        case 'delete':
-          if (confirm(`Are you sure you want to delete ${selectedIds.length} users?`)) {
-            await Promise.all(selectedIds.map(id => userService.delete(id)))
-            addToast(toast.success("Users deleted", `${selectedIds.length} users have been deleted.`))
-          }
-          break
-        default:
-          break
-      }
-
-      fetchUsers({
-        page: pagination.current,
-        limit: pagination.pageSize
-      })
-    } catch (error) {
-      console.error('Error performing bulk action:', error)
-      addToast(toast.error("Bulk action failed", "Please try again later."))
     }
   }
 
@@ -396,12 +357,6 @@ export default function UsersPage() {
       setIsSubmitting(false)
     }
   }
-
-  const bulkActions = [
-    { value: 'activate', label: 'Activate Selected', variant: 'default' as const },
-    { value: 'deactivate', label: 'Deactivate Selected', variant: 'secondary' as const },
-    { value: 'delete', label: 'Delete Selected', variant: 'destructive' as const }
-  ]
 
   const statusColors: Record<string, string> = {
     pending: 'bg-yellow-100 text-yellow-800',
@@ -583,9 +538,19 @@ export default function UsersPage() {
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="all">All Roles</SelectItem>
-                          <SelectItem value="admin">Admin</SelectItem>
-                          <SelectItem value="manager">Manager</SelectItem>
-                          <SelectItem value="user">User</SelectItem>
+                          {allRoles.length > 0 ? (
+                            allRoles.filter(r => r.is_active).map(role => (
+                              <SelectItem key={role.id} value={role.name.toLowerCase()}>
+                                {role.name}
+                              </SelectItem>
+                            ))
+                          ) : (
+                            <>
+                              <SelectItem value="admin">Admin</SelectItem>
+                              <SelectItem value="manager">Manager</SelectItem>
+                              <SelectItem value="user">User</SelectItem>
+                            </>
+                          )}
                         </SelectContent>
                       </Select>
                     </div>
@@ -645,10 +610,14 @@ export default function UsersPage() {
                 total: pagination.total,
                 onChange: handlePageChange
               }}
-              onEdit={handleEdit}
               onDelete={handleDelete}
-              onBulkAction={handleBulkAction}
-              bulkActions={bulkActions}
+              rowActions={[
+                {
+                  label: 'View Details',
+                  icon: <HugeiconsIcon icon={ViewIcon} className="h-4 w-4 mr-2" />,
+                  onClick: (user: User) => router.push(`/master-data/users/${user.id}`),
+                },
+              ]}
               rowSelection={true}
               showToolbar={false}
             />
@@ -743,14 +712,6 @@ export default function UsersPage() {
           </TabsContent>
         </Tabs>
 
-        <UserForm
-          open={formOpen}
-          onOpenChange={setFormOpen}
-          user={selectedUser}
-          companies={companies}
-          onSuccess={handleFormSuccess}
-        />
-
         {/* Invite User Dialog */}
         <Dialog open={showInviteDialog} onOpenChange={setShowInviteDialog}>
           <DialogContent className="sm:max-w-md">
@@ -786,9 +747,19 @@ export default function UsersPage() {
                       <SelectValue placeholder="Select a role" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="user">User</SelectItem>
-                      <SelectItem value="manager">Manager</SelectItem>
-                      <SelectItem value="admin">Admin</SelectItem>
+                      {allRoles.length > 0 ? (
+                        allRoles.filter(r => r.is_active).map(role => (
+                          <SelectItem key={role.id} value={role.name.toLowerCase()}>
+                            {role.name}
+                          </SelectItem>
+                        ))
+                      ) : (
+                        <>
+                          <SelectItem value="user">User</SelectItem>
+                          <SelectItem value="manager">Manager</SelectItem>
+                          <SelectItem value="admin">Admin</SelectItem>
+                        </>
+                      )}
                     </SelectContent>
                   </Select>
                 </div>

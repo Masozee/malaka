@@ -6,7 +6,7 @@ import (
 
 	"malaka/internal/modules/masterdata/domain/entities"
 	"malaka/internal/modules/masterdata/domain/repositories"
-	"malaka/internal/shared/utils"
+	"malaka/internal/shared/uuid"
 )
 
 // BarcodeService provides business logic for barcode operations.
@@ -25,14 +25,14 @@ func NewBarcodeService(repo repositories.BarcodeRepository, articleRepo reposito
 
 // CreateBarcode creates a new barcode.
 func (s *BarcodeService) CreateBarcode(ctx context.Context, barcode *entities.Barcode) error {
-	if barcode.ID == "" {
-		barcode.ID = utils.RandomString(10) // Generate a random ID if not provided
+	if barcode.ID.IsNil() {
+		barcode.ID = uuid.New()
 	}
 	return s.repo.Create(ctx, barcode)
 }
 
 // GetBarcodeByID retrieves a barcode by its ID.
-func (s *BarcodeService) GetBarcodeByID(ctx context.Context, id string) (*entities.Barcode, error) {
+func (s *BarcodeService) GetBarcodeByID(ctx context.Context, id uuid.ID) (*entities.Barcode, error) {
 	return s.repo.GetByID(ctx, id)
 }
 
@@ -55,7 +55,7 @@ func (s *BarcodeService) UpdateBarcode(ctx context.Context, barcode *entities.Ba
 }
 
 // DeleteBarcode deletes a barcode by its ID.
-func (s *BarcodeService) DeleteBarcode(ctx context.Context, id string) error {
+func (s *BarcodeService) DeleteBarcode(ctx context.Context, id uuid.ID) error {
 	// Ensure the barcode exists before deleting
 	existingBarcode, err := s.repo.GetByID(ctx, id)
 	if err != nil {
@@ -68,7 +68,7 @@ func (s *BarcodeService) DeleteBarcode(ctx context.Context, id string) error {
 }
 
 // GetBarcodesByArticleID retrieves all barcodes for a specific article.
-func (s *BarcodeService) GetBarcodesByArticleID(ctx context.Context, articleID string) ([]*entities.Barcode, error) {
+func (s *BarcodeService) GetBarcodesByArticleID(ctx context.Context, articleID uuid.ID) ([]*entities.Barcode, error) {
 	return s.repo.GetByArticleID(ctx, articleID)
 }
 
@@ -78,7 +78,7 @@ func (s *BarcodeService) GetAllArticlesForBarcodeGeneration(ctx context.Context)
 }
 
 // UpdateArticleBarcodeURL updates the barcode URL for an article.
-func (s *BarcodeService) UpdateArticleBarcodeURL(ctx context.Context, articleID, barcodeURL string) error {
+func (s *BarcodeService) UpdateArticleBarcodeURL(ctx context.Context, articleID uuid.ID, barcodeURL string) error {
 	article, err := s.articleRepo.GetByID(ctx, articleID)
 	if err != nil {
 		return err

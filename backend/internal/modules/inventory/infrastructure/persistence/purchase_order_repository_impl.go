@@ -6,6 +6,7 @@ import (
 
 	"github.com/jmoiron/sqlx"
 	"malaka/internal/modules/inventory/domain/entities"
+	"malaka/internal/shared/uuid"
 )
 
 // PurchaseOrderRepositoryImpl implements repositories.PurchaseOrderRepository.
@@ -40,9 +41,9 @@ func (r *PurchaseOrderRepositoryImpl) GetByID(ctx context.Context, id string) (*
 
 	po := &entities.PurchaseOrder{}
 	supplier := &entities.Supplier{}
-	
+
 	var supplierID, supplierName, contact, address sql.NullString
-	
+
 	err := row.Scan(
 		&po.ID, &po.SupplierID, &po.OrderDate, &po.Status, &po.TotalAmount, &po.CreatedAt, &po.UpdatedAt,
 		&supplierID, &supplierName, &contact, &address,
@@ -53,10 +54,10 @@ func (r *PurchaseOrderRepositoryImpl) GetByID(ctx context.Context, id string) (*
 	if err != nil {
 		return nil, err
 	}
-	
+
 	// Only populate supplier if it exists
 	if supplierID.Valid {
-		supplier.ID = supplierID.String
+		supplier.ID, _ = uuid.Parse(supplierID.String)
 		supplier.Name = supplierName.String
 		supplier.Code = "" // Not available in current schema
 		supplier.ContactPerson = contact.String
@@ -67,12 +68,12 @@ func (r *PurchaseOrderRepositoryImpl) GetByID(ctx context.Context, id string) (*
 	}
 	
 	// Load items for the purchase order
-	items, err := r.getPurchaseOrderItems(ctx, po.ID)
+	items, err := r.getPurchaseOrderItems(ctx, po.ID.String())
 	if err != nil {
 		return nil, err
 	}
 	po.Items = items
-	
+
 	return po, nil
 }
 
@@ -117,7 +118,7 @@ func (r *PurchaseOrderRepositoryImpl) GetAll(ctx context.Context) ([]*entities.P
 		
 		// Only populate supplier if it exists
 		if supplierID.Valid {
-			supplier.ID = supplierID.String
+			supplier.ID, _ = uuid.Parse(supplierID.String)
 			supplier.Name = supplierName.String
 			supplier.Code = "" // Not available in current schema
 			supplier.ContactPerson = contact.String
@@ -126,13 +127,13 @@ func (r *PurchaseOrderRepositoryImpl) GetAll(ctx context.Context) ([]*entities.P
 			supplier.Address = address.String
 			po.Supplier = supplier
 		}
-		
+
 		purchaseOrders = append(purchaseOrders, po)
 	}
-	
+
 	// Load items for each purchase order
 	for _, po := range purchaseOrders {
-		items, err := r.getPurchaseOrderItems(ctx, po.ID)
+		items, err := r.getPurchaseOrderItems(ctx, po.ID.String())
 		if err != nil {
 			return nil, err
 		}
@@ -184,13 +185,13 @@ func (r *PurchaseOrderRepositoryImpl) getPurchaseOrderItems(ctx context.Context,
 		
 		// Only populate article if it exists
 		if articleID.Valid {
-			article.ID = articleID.String
+			article.ID, _ = uuid.Parse(articleID.String)
 			article.Code = "" // Not available in current schema
 			article.Name = articleName.String
 			article.Description = articleDescription.String
 			item.Article = article
 		}
-		
+
 		items = append(items, item)
 	}
 	

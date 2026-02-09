@@ -3,9 +3,9 @@ package services
 import (
 	"context"
 
-	"github.com/google/uuid"
 	"malaka/internal/modules/masterdata/domain/entities"
 	"malaka/internal/modules/masterdata/domain/repositories"
+	"malaka/internal/shared/uuid"
 )
 
 // DepstoreService provides business logic for department store operations.
@@ -20,14 +20,14 @@ func NewDepstoreService(repo repositories.DepstoreRepository) *DepstoreService {
 
 // CreateDepstore creates a new department store.
 func (s *DepstoreService) CreateDepstore(ctx context.Context, depstore *entities.Depstore) error {
-	if depstore.ID == uuid.Nil {
+	if depstore.ID.IsNil() {
 		depstore.ID = uuid.New()
 	}
 	return s.repo.Create(ctx, depstore)
 }
 
 // GetDepstoreByID retrieves a department store by its ID.
-func (s *DepstoreService) GetDepstoreByID(ctx context.Context, id uuid.UUID) (*entities.Depstore, error) {
+func (s *DepstoreService) GetDepstoreByID(ctx context.Context, id uuid.ID) (*entities.Depstore, error) {
 	return s.repo.GetByID(ctx, id)
 }
 
@@ -52,6 +52,6 @@ func (s *DepstoreService) UpdateDepstore(ctx context.Context, depstore *entities
 }
 
 // DeleteDepstore deletes a department store by its ID.
-func (s *DepstoreService) DeleteDepstore(ctx context.Context, id uuid.UUID) error {
+func (s *DepstoreService) DeleteDepstore(ctx context.Context, id uuid.ID) error {
 	return s.repo.Delete(ctx, id)
 }

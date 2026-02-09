@@ -3,12 +3,12 @@ package entities
 import (
 	"time"
 
-	"github.com/google/uuid"
+	"malaka/internal/shared/uuid"
 )
 
 // TrialBalance represents a trial balance report
 type TrialBalance struct {
-	ID          uuid.UUID          `json:"id" db:"id"`
+	ID          uuid.ID            `json:"id" db:"id"`
 	PeriodStart time.Time          `json:"period_start" db:"period_start"`
 	PeriodEnd   time.Time          `json:"period_end" db:"period_end"`
 	GeneratedAt time.Time          `json:"generated_at" db:"generated_at"`
@@ -22,7 +22,7 @@ type TrialBalance struct {
 
 // TrialBalanceAccount represents an account in the trial balance
 type TrialBalanceAccount struct {
-	AccountID       uuid.UUID `json:"account_id"`
+	AccountID       uuid.ID `json:"account_id"`
 	AccountCode     string    `json:"account_code"`
 	AccountName     string    `json:"account_name"`
 	AccountType     string    `json:"account_type"`

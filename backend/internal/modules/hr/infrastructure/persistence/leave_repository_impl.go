@@ -6,9 +6,8 @@ import (
 	"fmt"
 	"malaka/internal/modules/hr/domain/entities"
 	"malaka/internal/modules/hr/domain/repositories"
+	"malaka/internal/shared/uuid"
 	"time"
-
-	"github.com/google/uuid"
 )
 
 type leaveRepositoryImpl struct {
@@ -37,13 +36,13 @@ func (r *leaveRepositoryImpl) CreateLeaveType(ctx context.Context, leaveType *en
 	return err
 }
 
-func (r *leaveRepositoryImpl) GetLeaveTypeByID(ctx context.Context, id uuid.UUID) (*entities.LeaveType, error) {
+func (r *leaveRepositoryImpl) GetLeaveTypeByID(ctx context.Context, id uuid.ID) (*entities.LeaveType, error) {
 	query := `
 		SELECT id, name, code, description, max_days_per_year, requires_approval, is_paid, is_active, created_at, updated_at
 		FROM leave_types WHERE id = $1`
 
 	row := r.db.QueryRowContext(ctx, query, id.String())
-	
+
 	leaveType := &entities.LeaveType{}
 	err := row.Scan(
 		&leaveType.ID, &leaveType.Name, &leaveType.Code, &leaveType.Description,
@@ -87,8 +86,8 @@ func (r *leaveRepositoryImpl) UpdateLeaveType(ctx context.Context, leaveType *en
 	leaveType.UpdatedAt = time.Now()
 
 	query := `
-		UPDATE leave_types 
-		SET name = $2, code = $3, description = $4, max_days_per_year = $5, 
+		UPDATE leave_types
+		SET name = $2, code = $3, description = $4, max_days_per_year = $5,
 		    requires_approval = $6, is_paid = $7, is_active = $8, updated_at = $9
 		WHERE id = $1`
 
@@ -100,7 +99,7 @@ func (r *leaveRepositoryImpl) UpdateLeaveType(ctx context.Context, leaveType *en
 	return err
 }
 
-func (r *leaveRepositoryImpl) DeleteLeaveType(ctx context.Context, id uuid.UUID) error {
+func (r *leaveRepositoryImpl) DeleteLeaveType(ctx context.Context, id uuid.ID) error {
 	query := `UPDATE leave_types SET is_active = false WHERE id = $1`
 	_, err := r.db.ExecContext(ctx, query, id.String())
 	return err
@@ -128,11 +127,11 @@ func (r *leaveRepositoryImpl) CreateLeaveRequest(ctx context.Context, request *e
 	return err
 }
 
-func (r *leaveRepositoryImpl) GetLeaveRequestByID(ctx context.Context, id uuid.UUID) (*entities.LeaveRequestWithDetails, error) {
+func (r *leaveRepositoryImpl) GetLeaveRequestByID(ctx context.Context, id uuid.ID) (*entities.LeaveRequestWithDetails, error) {
 	query := `
-		SELECT 
-			lr.id, lr.employee_id, lr.leave_type_id, lr.start_date, lr.end_date, lr.total_days, 
-			lr.reason, lr.emergency_contact, lr.status, lr.applied_date, lr.approved_by, 
+		SELECT
+			lr.id, lr.employee_id, lr.leave_type_id, lr.start_date, lr.end_date, lr.total_days,
+			lr.reason, lr.emergency_contact, lr.status, lr.applied_date, lr.approved_by,
 			lr.approved_date, lr.rejected_reason, lr.notes, lr.created_at, lr.updated_at,
 			e.employee_name, e.department, e.position,
 			lt.name as leave_type_name, lt.code as leave_type_code,
@@ -144,14 +143,14 @@ func (r *leaveRepositoryImpl) GetLeaveRequestByID(ctx context.Context, id uuid.U
 		WHERE lr.id = $1`
 
 	row := r.db.QueryRowContext(ctx, query, id.String())
-	
+
 	request := &entities.LeaveRequestWithDetails{LeaveRequest: &entities.LeaveRequest{}}
 	var employeeName, department, position sql.NullString
 	var leaveTypeName, leaveTypeCode sql.NullString
 	var approvedByName sql.NullString
 
 	err := row.Scan(
-		&request.ID, &request.EmployeeID, &request.LeaveTypeID, &request.StartDate, 
+		&request.ID, &request.EmployeeID, &request.LeaveTypeID, &request.StartDate,
 		&request.EndDate, &request.TotalDays, &request.Reason, &request.EmergencyContact,
 		&request.Status, &request.AppliedDate, &request.ApprovedBy, &request.ApprovedDate,
 		&request.RejectedReason, &request.Notes, &request.CreatedAt, &request.UpdatedAt,
@@ -213,9 +212,9 @@ func (r *leaveRepositoryImpl) GetLeaveRequestByID(ctx context.Context, id uuid.U
 
 func (r *leaveRepositoryImpl) GetAllLeaveRequests(ctx context.Context) ([]*entities.LeaveRequest, error) {
 	query := `
-		SELECT 
-			lr.id, lr.employee_id, lr.leave_type_id, lr.start_date, lr.end_date, lr.total_days, 
-			lr.reason, lr.emergency_contact, lr.status, lr.applied_date, lr.approved_by, 
+		SELECT
+			lr.id, lr.employee_id, lr.leave_type_id, lr.start_date, lr.end_date, lr.total_days,
+			lr.reason, lr.emergency_contact, lr.status, lr.applied_date, lr.approved_by,
 			lr.approved_date, lr.rejected_reason, lr.notes, lr.created_at, lr.updated_at,
 			e.employee_name, e.department, e.position,
 			lt.name as leave_type_name, lt.code as leave_type_code,
@@ -240,7 +239,7 @@ func (r *leaveRepositoryImpl) GetAllLeaveRequests(ctx context.Context) ([]*entit
 		var approvedByName sql.NullString
 
 		err := rows.Scan(
-			&request.ID, &request.EmployeeID, &request.LeaveTypeID, &request.StartDate, 
+			&request.ID, &request.EmployeeID, &request.LeaveTypeID, &request.StartDate,
 			&request.EndDate, &request.TotalDays, &request.Reason, &request.EmergencyContact,
 			&request.Status, &request.AppliedDate, &request.ApprovedBy, &request.ApprovedDate,
 			&request.RejectedReason, &request.Notes, &request.CreatedAt, &request.UpdatedAt,
@@ -283,11 +282,11 @@ func (r *leaveRepositoryImpl) GetAllLeaveRequests(ctx context.Context) ([]*entit
 	return requests, nil
 }
 
-func (r *leaveRepositoryImpl) GetLeaveRequestsByEmployee(ctx context.Context, employeeID uuid.UUID) ([]*entities.LeaveRequest, error) {
+func (r *leaveRepositoryImpl) GetLeaveRequestsByEmployee(ctx context.Context, employeeID uuid.ID) ([]*entities.LeaveRequest, error) {
 	query := `
-		SELECT 
-			lr.id, lr.employee_id, lr.leave_type_id, lr.start_date, lr.end_date, lr.total_days, 
-			lr.reason, lr.emergency_contact, lr.status, lr.applied_date, lr.approved_by, 
+		SELECT
+			lr.id, lr.employee_id, lr.leave_type_id, lr.start_date, lr.end_date, lr.total_days,
+			lr.reason, lr.emergency_contact, lr.status, lr.applied_date, lr.approved_by,
 			lr.approved_date, lr.rejected_reason, lr.notes, lr.created_at, lr.updated_at,
 			e.employee_name, e.department, e.position,
 			lt.name as leave_type_name, lt.code as leave_type_code
@@ -310,7 +309,7 @@ func (r *leaveRepositoryImpl) GetLeaveRequestsByEmployee(ctx context.Context, em
 		var leaveTypeName, leaveTypeCode sql.NullString
 
 		err := rows.Scan(
-			&request.ID, &request.EmployeeID, &request.LeaveTypeID, &request.StartDate, 
+			&request.ID, &request.EmployeeID, &request.LeaveTypeID, &request.StartDate,
 			&request.EndDate, &request.TotalDays, &request.Reason, &request.EmergencyContact,
 			&request.Status, &request.AppliedDate, &request.ApprovedBy, &request.ApprovedDate,
 			&request.RejectedReason, &request.Notes, &request.CreatedAt, &request.UpdatedAt,
@@ -347,9 +346,9 @@ func (r *leaveRepositoryImpl) GetLeaveRequestsByEmployee(ctx context.Context, em
 
 func (r *leaveRepositoryImpl) GetLeaveRequestsByStatus(ctx context.Context, status string) ([]*entities.LeaveRequest, error) {
 	query := `
-		SELECT 
-			lr.id, lr.employee_id, lr.leave_type_id, lr.start_date, lr.end_date, lr.total_days, 
-			lr.reason, lr.emergency_contact, lr.status, lr.applied_date, lr.approved_by, 
+		SELECT
+			lr.id, lr.employee_id, lr.leave_type_id, lr.start_date, lr.end_date, lr.total_days,
+			lr.reason, lr.emergency_contact, lr.status, lr.applied_date, lr.approved_by,
 			lr.approved_date, lr.rejected_reason, lr.notes, lr.created_at, lr.updated_at,
 			e.employee_name, e.department, e.position,
 			lt.name as leave_type_name, lt.code as leave_type_code
@@ -372,7 +371,7 @@ func (r *leaveRepositoryImpl) GetLeaveRequestsByStatus(ctx context.Context, stat
 		var leaveTypeName, leaveTypeCode sql.NullString
 
 		err := rows.Scan(
-			&request.ID, &request.EmployeeID, &request.LeaveTypeID, &request.StartDate, 
+			&request.ID, &request.EmployeeID, &request.LeaveTypeID, &request.StartDate,
 			&request.EndDate, &request.TotalDays, &request.Reason, &request.EmergencyContact,
 			&request.Status, &request.AppliedDate, &request.ApprovedBy, &request.ApprovedDate,
 			&request.RejectedReason, &request.Notes, &request.CreatedAt, &request.UpdatedAt,
@@ -411,7 +410,7 @@ func (r *leaveRepositoryImpl) UpdateLeaveRequest(ctx context.Context, request *e
 	request.UpdatedAt = time.Now()
 
 	query := `
-		UPDATE leave_requests 
+		UPDATE leave_requests
 		SET employee_id = $2, leave_type_id = $3, start_date = $4, end_date = $5, total_days = $6,
 		    reason = $7, emergency_contact = $8, status = $9, approved_by = $10, approved_date = $11,
 		    rejected_reason = $12, notes = $13, updated_at = $14
@@ -426,7 +425,7 @@ func (r *leaveRepositoryImpl) UpdateLeaveRequest(ctx context.Context, request *e
 	return err
 }
 
-func (r *leaveRepositoryImpl) DeleteLeaveRequest(ctx context.Context, id uuid.UUID) error {
+func (r *leaveRepositoryImpl) DeleteLeaveRequest(ctx context.Context, id uuid.ID) error {
 	query := `DELETE FROM leave_requests WHERE id = $1`
 	_, err := r.db.ExecContext(ctx, query, id.String())
 	return err
@@ -450,13 +449,13 @@ func (r *leaveRepositoryImpl) CreateLeaveBalance(ctx context.Context, balance *e
 	return err
 }
 
-func (r *leaveRepositoryImpl) GetLeaveBalanceByID(ctx context.Context, id uuid.UUID) (*entities.LeaveBalance, error) {
+func (r *leaveRepositoryImpl) GetLeaveBalanceByID(ctx context.Context, id uuid.ID) (*entities.LeaveBalance, error) {
 	query := `
 		SELECT id, employee_id, leave_type_id, year, allocated_days, used_days, remaining_days, carried_forward_days, created_at, updated_at
 		FROM leave_balances WHERE id = $1`
 
 	row := r.db.QueryRowContext(ctx, query, id.String())
-	
+
 	balance := &entities.LeaveBalance{}
 	err := row.Scan(
 		&balance.ID, &balance.EmployeeID, &balance.LeaveTypeID, &balance.Year,
@@ -469,10 +468,10 @@ func (r *leaveRepositoryImpl) GetLeaveBalanceByID(ctx context.Context, id uuid.U
 	return balance, nil
 }
 
-func (r *leaveRepositoryImpl) GetLeaveBalancesByEmployee(ctx context.Context, employeeID uuid.UUID, year int) ([]*entities.LeaveBalance, error) {
+func (r *leaveRepositoryImpl) GetLeaveBalancesByEmployee(ctx context.Context, employeeID uuid.ID, year int) ([]*entities.LeaveBalance, error) {
 	query := `
-		SELECT 
-			lb.id, lb.employee_id, lb.leave_type_id, lb.year, lb.allocated_days, 
+		SELECT
+			lb.id, lb.employee_id, lb.leave_type_id, lb.year, lb.allocated_days,
 			lb.used_days, lb.remaining_days, lb.carried_forward_days, lb.created_at, lb.updated_at,
 			e.employee_name, e.department,
 			lt.name as leave_type_name, lt.code as leave_type_code
@@ -532,7 +531,7 @@ func (r *leaveRepositoryImpl) UpdateLeaveBalance(ctx context.Context, balance *e
 	balance.UpdatedAt = time.Now()
 
 	query := `
-		UPDATE leave_balances 
+		UPDATE leave_balances
 		SET allocated_days = $2, used_days = $3, remaining_days = $4, carried_forward_days = $5, updated_at = $6
 		WHERE id = $1`
 
@@ -543,7 +542,7 @@ func (r *leaveRepositoryImpl) UpdateLeaveBalance(ctx context.Context, balance *e
 	return err
 }
 
-func (r *leaveRepositoryImpl) DeleteLeaveBalance(ctx context.Context, id uuid.UUID) error {
+func (r *leaveRepositoryImpl) DeleteLeaveBalance(ctx context.Context, id uuid.ID) error {
 	query := `DELETE FROM leave_balances WHERE id = $1`
 	_, err := r.db.ExecContext(ctx, query, id.String())
 	return err
@@ -555,11 +554,11 @@ func (r *leaveRepositoryImpl) CreateLeavePolicy(ctx context.Context, policy *ent
 	return fmt.Errorf("not implemented")
 }
 
-func (r *leaveRepositoryImpl) GetLeavePolicyByID(ctx context.Context, id uuid.UUID) (*entities.LeavePolicy, error) {
+func (r *leaveRepositoryImpl) GetLeavePolicyByID(ctx context.Context, id uuid.ID) (*entities.LeavePolicy, error) {
 	return nil, fmt.Errorf("not implemented")
 }
 
-func (r *leaveRepositoryImpl) GetLeavePolicyByLeaveType(ctx context.Context, leaveTypeID uuid.UUID) (*entities.LeavePolicy, error) {
+func (r *leaveRepositoryImpl) GetLeavePolicyByLeaveType(ctx context.Context, leaveTypeID uuid.ID) (*entities.LeavePolicy, error) {
 	return nil, fmt.Errorf("not implemented")
 }
 
@@ -571,7 +570,7 @@ func (r *leaveRepositoryImpl) UpdateLeavePolicy(ctx context.Context, policy *ent
 	return fmt.Errorf("not implemented")
 }
 
-func (r *leaveRepositoryImpl) DeleteLeavePolicy(ctx context.Context, id uuid.UUID) error {
+func (r *leaveRepositoryImpl) DeleteLeavePolicy(ctx context.Context, id uuid.ID) error {
 	return fmt.Errorf("not implemented")
 }
 
@@ -591,7 +590,7 @@ func (r *leaveRepositoryImpl) CreateLeaveAttachment(ctx context.Context, attachm
 	return err
 }
 
-func (r *leaveRepositoryImpl) GetLeaveAttachmentsByRequest(ctx context.Context, requestID uuid.UUID) ([]*entities.LeaveAttachment, error) {
+func (r *leaveRepositoryImpl) GetLeaveAttachmentsByRequest(ctx context.Context, requestID uuid.ID) ([]*entities.LeaveAttachment, error) {
 	query := `
 		SELECT id, leave_request_id, file_name, file_path, file_size, file_type, uploaded_at
 		FROM leave_attachments WHERE leave_request_id = $1 ORDER BY uploaded_at`
@@ -618,7 +617,7 @@ func (r *leaveRepositoryImpl) GetLeaveAttachmentsByRequest(ctx context.Context, 
 	return attachments, nil
 }
 
-func (r *leaveRepositoryImpl) DeleteLeaveAttachment(ctx context.Context, id uuid.UUID) error {
+func (r *leaveRepositoryImpl) DeleteLeaveAttachment(ctx context.Context, id uuid.ID) error {
 	query := `DELETE FROM leave_attachments WHERE id = $1`
 	_, err := r.db.ExecContext(ctx, query, id.String())
 	return err
@@ -640,9 +639,9 @@ func (r *leaveRepositoryImpl) CreateLeaveApprovalHistory(ctx context.Context, hi
 	return err
 }
 
-func (r *leaveRepositoryImpl) GetLeaveApprovalHistoryByRequest(ctx context.Context, requestID uuid.UUID) ([]*entities.LeaveApprovalHistory, error) {
+func (r *leaveRepositoryImpl) GetLeaveApprovalHistoryByRequest(ctx context.Context, requestID uuid.ID) ([]*entities.LeaveApprovalHistory, error) {
 	query := `
-		SELECT 
+		SELECT
 			lah.id, lah.leave_request_id, lah.approved_by, lah.action, lah.comments, lah.action_date,
 			e.employee_name
 		FROM leave_approval_history lah
@@ -682,7 +681,7 @@ func (r *leaveRepositoryImpl) GetLeaveApprovalHistoryByRequest(ctx context.Conte
 }
 
 // Business Logic Methods
-func (r *leaveRepositoryImpl) ApproveLeaveRequest(ctx context.Context, requestID uuid.UUID, approvedBy uuid.UUID, comments *string) error {
+func (r *leaveRepositoryImpl) ApproveLeaveRequest(ctx context.Context, requestID uuid.ID, approvedBy uuid.ID, comments *string) error {
 	tx, err := r.db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
@@ -692,7 +691,7 @@ func (r *leaveRepositoryImpl) ApproveLeaveRequest(ctx context.Context, requestID
 	// Update leave request status
 	now := time.Now()
 	query := `
-		UPDATE leave_requests 
+		UPDATE leave_requests
 		SET status = 'approved', approved_by = $2, approved_date = $3, notes = $4, updated_at = $5
 		WHERE id = $1`
 
@@ -715,7 +714,7 @@ func (r *leaveRepositoryImpl) ApproveLeaveRequest(ctx context.Context, requestID
 	return tx.Commit()
 }
 
-func (r *leaveRepositoryImpl) RejectLeaveRequest(ctx context.Context, requestID uuid.UUID, rejectedBy uuid.UUID, reason string) error {
+func (r *leaveRepositoryImpl) RejectLeaveRequest(ctx context.Context, requestID uuid.ID, rejectedBy uuid.ID, reason string) error {
 	tx, err := r.db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
@@ -725,7 +724,7 @@ func (r *leaveRepositoryImpl) RejectLeaveRequest(ctx context.Context, requestID 
 	// Update leave request status
 	now := time.Now()
 	query := `
-		UPDATE leave_requests 
+		UPDATE leave_requests
 		SET status = 'rejected', approved_by = $2, approved_date = $3, rejected_reason = $4, updated_at = $5
 		WHERE id = $1`
 
@@ -748,7 +747,7 @@ func (r *leaveRepositoryImpl) RejectLeaveRequest(ctx context.Context, requestID 
 	return tx.Commit()
 }
 
-func (r *leaveRepositoryImpl) CancelLeaveRequest(ctx context.Context, requestID uuid.UUID, cancelledBy uuid.UUID, reason string) error {
+func (r *leaveRepositoryImpl) CancelLeaveRequest(ctx context.Context, requestID uuid.ID, cancelledBy uuid.ID, reason string) error {
 	tx, err := r.db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
@@ -758,7 +757,7 @@ func (r *leaveRepositoryImpl) CancelLeaveRequest(ctx context.Context, requestID 
 	// Update leave request status
 	now := time.Now()
 	query := `
-		UPDATE leave_requests 
+		UPDATE leave_requests
 		SET status = 'cancelled', notes = $2, updated_at = $3
 		WHERE id = $1`
 

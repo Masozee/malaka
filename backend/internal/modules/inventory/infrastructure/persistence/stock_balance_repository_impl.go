@@ -7,6 +7,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	"malaka/internal/modules/inventory/domain/entities"
 	"malaka/internal/modules/inventory/domain/repositories"
+	"malaka/internal/shared/uuid"
 )
 
 // StockBalanceRepositoryImpl implements repositories.StockBalanceRepository.
@@ -27,7 +28,7 @@ func (r *StockBalanceRepositoryImpl) Create(ctx context.Context, sb *entities.St
 }
 
 // GetByID retrieves a stock balance by its ID from the database.
-func (r *StockBalanceRepositoryImpl) GetByID(ctx context.Context, id string) (*entities.StockBalance, error) {
+func (r *StockBalanceRepositoryImpl) GetByID(ctx context.Context, id uuid.ID) (*entities.StockBalance, error) {
 	query := `SELECT id, article_id, warehouse_id, quantity, created_at, updated_at FROM stock_balances WHERE id = $1`
 	row := r.db.QueryRowContext(ctx, query, id)
 
@@ -47,7 +48,7 @@ func (r *StockBalanceRepositoryImpl) Update(ctx context.Context, sb *entities.St
 }
 
 // Delete deletes a stock balance by its ID from the database.
-func (r *StockBalanceRepositoryImpl) Delete(ctx context.Context, id string) error {
+func (r *StockBalanceRepositoryImpl) Delete(ctx context.Context, id uuid.ID) error {
 	query := `DELETE FROM stock_balances WHERE id = $1`
 	_, err := r.db.ExecContext(ctx, query, id)
 	return err
@@ -75,7 +76,7 @@ func (r *StockBalanceRepositoryImpl) GetAll(ctx context.Context) ([]*entities.St
 }
 
 // GetByArticleAndWarehouse retrieves a stock balance by article ID and warehouse ID.
-func (r *StockBalanceRepositoryImpl) GetByArticleAndWarehouse(ctx context.Context, articleID, warehouseID string) (*entities.StockBalance, error) {
+func (r *StockBalanceRepositoryImpl) GetByArticleAndWarehouse(ctx context.Context, articleID, warehouseID uuid.ID) (*entities.StockBalance, error) {
 	query := `SELECT id, article_id, warehouse_id, quantity, created_at, updated_at FROM stock_balances WHERE article_id = $1 AND warehouse_id = $2`
 	row := r.db.QueryRowContext(ctx, query, articleID, warehouseID)
 

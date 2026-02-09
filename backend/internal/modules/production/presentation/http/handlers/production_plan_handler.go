@@ -4,11 +4,11 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	"malaka/internal/modules/production/domain/services"
 	"malaka/internal/modules/production/presentation/http/dto"
 	"malaka/internal/shared/response"
 	"malaka/internal/shared/types"
+	"malaka/internal/shared/uuid"
 )
 
 type ProductionPlanHandler struct {
@@ -151,7 +151,7 @@ func (h *ProductionPlanHandler) UpdatePlan(c *gin.Context) {
 		return
 	}
 
-	plan := dto.MapProductionPlanRequestToEntity(&req, existingPlan.CreatedBy)
+	plan := dto.MapProductionPlanRequestToEntity(&req, existingPlan.CreatedBy.String())
 	plan.ID = id
 
 	if err := h.planService.UpdatePlan(c.Request.Context(), plan); err != nil {
@@ -207,9 +207,14 @@ func (h *ProductionPlanHandler) ApprovePlan(c *gin.Context) {
 	}
 
 	// Get user ID from context
-	approverID := c.GetString("user_id")
-	if approverID == "" {
-		approverID = "system"
+	approverIDStr := c.GetString("user_id")
+	if approverIDStr == "" {
+		approverIDStr = "00000000-0000-0000-0000-000000000000" // Fallback for testing
+	}
+	approverID, err := uuid.Parse(approverIDStr)
+	if err != nil {
+		response.BadRequest(c, "Invalid approver ID", err.Error())
+		return
 	}
 
 	if err := h.planService.ApprovePlan(c.Request.Context(), id, approverID); err != nil {

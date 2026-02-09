@@ -10,6 +10,7 @@ import (
 	"malaka/internal/modules/shipping/domain/services"
 	"malaka/internal/modules/shipping/presentation/http/dto"
 	"malaka/internal/shared/response"
+	"malaka/internal/shared/uuid"
 )
 
 // CourierHandler handles HTTP requests for courier operations.
@@ -31,8 +32,9 @@ func (h *CourierHandler) CreateCourier(c *gin.Context) {
 	}
 
 	courier := &entities.Courier{
-		Name:    req.Name,
-		Contact: req.Contact,
+		Name:      req.Name,
+		Contact:   req.Contact,
+		CompanyID: req.CompanyID,
 	}
 	courier.CreatedAt = time.Now()
 	courier.UpdatedAt = time.Now()
@@ -43,11 +45,12 @@ func (h *CourierHandler) CreateCourier(c *gin.Context) {
 	}
 
 	resp := dto.CourierResponse{
-		ID:        courier.ID,
+		ID:        courier.ID.String(),
 		CreatedAt: courier.CreatedAt,
 		UpdatedAt: courier.UpdatedAt,
 		Name:      courier.Name,
 		Contact:   courier.Contact,
+		CompanyID: courier.CompanyID,
 	}
 
 	response.Created(c, "Courier created successfully", resp)
@@ -55,7 +58,13 @@ func (h *CourierHandler) CreateCourier(c *gin.Context) {
 
 // GetCourierByID handles retrieving a courier by ID.
 func (h *CourierHandler) GetCourierByID(c *gin.Context) {
-	id := c.Param("id")
+	idStr := c.Param("id")
+	id, err := uuid.Parse(idStr)
+	if err != nil {
+		response.BadRequest(c, "Invalid courier ID", nil)
+		return
+	}
+
 	courier, err := h.service.GetCourierByID(c.Request.Context(), id)
 	if err != nil {
 		response.InternalServerError(c, err.Error(), nil)
@@ -68,11 +77,12 @@ func (h *CourierHandler) GetCourierByID(c *gin.Context) {
 	}
 
 	resp := dto.CourierResponse{
-		ID:        courier.ID,
+		ID:        courier.ID.String(),
 		CreatedAt: courier.CreatedAt,
 		UpdatedAt: courier.UpdatedAt,
 		Name:      courier.Name,
 		Contact:   courier.Contact,
+		CompanyID: courier.CompanyID,
 	}
 
 	response.OK(c, "Courier retrieved successfully", resp)
@@ -89,11 +99,12 @@ func (h *CourierHandler) GetAllCouriers(c *gin.Context) {
 	var responses []dto.CourierResponse
 	for _, courier := range couriers {
 		responses = append(responses, dto.CourierResponse{
-			ID:        courier.ID,
+			ID:        courier.ID.String(),
 			CreatedAt: courier.CreatedAt,
 			UpdatedAt: courier.UpdatedAt,
 			Name:      courier.Name,
 			Contact:   courier.Contact,
+			CompanyID: courier.CompanyID,
 		})
 	}
 
@@ -102,7 +113,13 @@ func (h *CourierHandler) GetAllCouriers(c *gin.Context) {
 
 // UpdateCourier handles updating an existing courier.
 func (h *CourierHandler) UpdateCourier(c *gin.Context) {
-	id := c.Param("id")
+	idStr := c.Param("id")
+	id, err := uuid.Parse(idStr)
+	if err != nil {
+		response.BadRequest(c, "Invalid courier ID", nil)
+		return
+	}
+
 	var req dto.UpdateCourierRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		response.BadRequest(c, err.Error(), nil)
@@ -110,8 +127,9 @@ func (h *CourierHandler) UpdateCourier(c *gin.Context) {
 	}
 
 	courier := &entities.Courier{
-		Name:    req.Name,
-		Contact: req.Contact,
+		Name:      req.Name,
+		Contact:   req.Contact,
+		CompanyID: req.CompanyID,
 	}
 	courier.ID = id
 	courier.UpdatedAt = time.Now()
@@ -133,11 +151,12 @@ func (h *CourierHandler) UpdateCourier(c *gin.Context) {
 	}
 
 	resp := dto.CourierResponse{
-		ID:        updatedCourier.ID,
+		ID:        updatedCourier.ID.String(),
 		CreatedAt: updatedCourier.CreatedAt,
 		UpdatedAt: updatedCourier.UpdatedAt,
 		Name:      updatedCourier.Name,
 		Contact:   updatedCourier.Contact,
+		CompanyID: updatedCourier.CompanyID,
 	}
 
 	response.OK(c, "Courier updated successfully", resp)
@@ -145,7 +164,13 @@ func (h *CourierHandler) UpdateCourier(c *gin.Context) {
 
 // DeleteCourier handles deleting a courier.
 func (h *CourierHandler) DeleteCourier(c *gin.Context) {
-	id := c.Param("id")
+	idStr := c.Param("id")
+	id, err := uuid.Parse(idStr)
+	if err != nil {
+		response.BadRequest(c, "Invalid courier ID", nil)
+		return
+	}
+
 	if err := h.service.DeleteCourier(c.Request.Context(), id); err != nil {
 		if err.Error() == "courier not found" {
 			response.NotFound(c, "Courier not found", nil)

@@ -7,6 +7,7 @@ import (
 
 	"github.com/jmoiron/sqlx"
 	"malaka/internal/modules/masterdata/domain/entities"
+	"malaka/internal/shared/uuid"
 )
 
 // CustomerRepositoryImpl implements repositories.CustomerRepository.
@@ -27,7 +28,7 @@ func (r *CustomerRepositoryImpl) Create(ctx context.Context, customer *entities.
 }
 
 // GetByID retrieves a customer by its ID from the database.
-func (r *CustomerRepositoryImpl) GetByID(ctx context.Context, id string) (*entities.Customer, error) {
+func (r *CustomerRepositoryImpl) GetByID(ctx context.Context, id uuid.ID) (*entities.Customer, error) {
 	query := `SELECT id, name, contact_person, email, phone, company_id, status, created_at, updated_at FROM customers WHERE id = $1`
 	row := r.db.QueryRowContext(ctx, query, id)
 
@@ -127,7 +128,7 @@ func (r *CustomerRepositoryImpl) GetAllWithPagination(ctx context.Context, limit
 }
 
 // Delete deletes a customer by its ID from the database.
-func (r *CustomerRepositoryImpl) Delete(ctx context.Context, id string) error {
+func (r *CustomerRepositoryImpl) Delete(ctx context.Context, id uuid.ID) error {
 	query := `DELETE FROM customers WHERE id = $1`
 	_, err := r.db.ExecContext(ctx, query, id)
 	return err

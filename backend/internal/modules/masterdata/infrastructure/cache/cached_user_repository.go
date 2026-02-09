@@ -8,6 +8,7 @@ import (
 	"malaka/internal/modules/masterdata/domain/entities"
 	"malaka/internal/modules/masterdata/domain/repositories"
 	"malaka/internal/shared/cache"
+	"malaka/internal/shared/uuid"
 )
 
 const (
@@ -42,9 +43,9 @@ func (r *CachedUserRepository) Create(ctx context.Context, user *entities.User) 
 }
 
 // GetByID retrieves a user by ID with caching.
-func (r *CachedUserRepository) GetByID(ctx context.Context, id string) (*entities.User, error) {
-	cacheKey := fmt.Sprintf("%s%s", userKeyPrefix, id)
-	
+func (r *CachedUserRepository) GetByID(ctx context.Context, id uuid.ID) (*entities.User, error) {
+	cacheKey := fmt.Sprintf("%s%s", userKeyPrefix, id.String())
+
 	// Try to get from cache first
 	if cached, err := r.cache.Get(ctx, cacheKey); err == nil {
 		var user entities.User
@@ -129,7 +130,7 @@ func (r *CachedUserRepository) Update(ctx context.Context, user *entities.User) 
 }
 
 // Delete deletes a user and invalidates related cache.
-func (r *CachedUserRepository) Delete(ctx context.Context, id string) error {
+func (r *CachedUserRepository) Delete(ctx context.Context, id uuid.ID) error {
 	// Get user first to get username for cache invalidation
 	user, err := r.repo.GetByID(ctx, id)
 	if err != nil {
@@ -141,7 +142,7 @@ func (r *CachedUserRepository) Delete(ctx context.Context, id string) error {
 	}
 
 	// Invalidate specific and list caches
-	cacheKey := fmt.Sprintf("%s%s", userKeyPrefix, id)
+	cacheKey := fmt.Sprintf("%s%s", userKeyPrefix, id.String())
 	usernameKey := fmt.Sprintf("%susername:%s", userKeyPrefix, user.Username)
 	r.cache.Delete(ctx, cacheKey)
 	r.cache.Delete(ctx, usernameKey)

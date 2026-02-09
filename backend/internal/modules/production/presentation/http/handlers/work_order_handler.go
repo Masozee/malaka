@@ -7,6 +7,7 @@ import (
 	"malaka/internal/modules/production/domain/services"
 	"malaka/internal/shared/response"
 	"malaka/internal/shared/types"
+	"malaka/internal/shared/uuid"
 )
 
 type WorkOrderHandler struct {
@@ -72,7 +73,7 @@ func (h *WorkOrderHandler) GetWorkOrders(c *gin.Context) {
 // GetWorkOrder handles GET /api/v1/production/work-orders/:id
 func (h *WorkOrderHandler) GetWorkOrder(c *gin.Context) {
 	idStr := c.Param("id")
-	id, err := strconv.Atoi(idStr)
+	id, err := uuid.Parse(idStr)
 	if err != nil {
 		response.BadRequest(c, "Invalid work order ID", err.Error())
 		return

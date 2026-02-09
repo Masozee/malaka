@@ -3,7 +3,7 @@ package services
 import (
 	"context"
 
-	"github.com/google/uuid"
+	"malaka/internal/shared/uuid"
 	"malaka/internal/modules/accounting/domain/entities"
 )
 
@@ -11,10 +11,10 @@ import (
 type FinancialPeriodService interface {
 	// Basic CRUD operations
 	CreateFinancialPeriod(ctx context.Context, period *entities.FinancialPeriod) error
-	GetFinancialPeriodByID(ctx context.Context, id uuid.UUID) (*entities.FinancialPeriod, error)
+	GetFinancialPeriodByID(ctx context.Context, id uuid.ID) (*entities.FinancialPeriod, error)
 	GetAllFinancialPeriods(ctx context.Context) ([]*entities.FinancialPeriod, error)
 	UpdateFinancialPeriod(ctx context.Context, period *entities.FinancialPeriod) error
-	DeleteFinancialPeriod(ctx context.Context, id uuid.UUID) error
+	DeleteFinancialPeriod(ctx context.Context, id uuid.ID) error
 
 	// Query operations
 	GetFinancialPeriodsByCompany(ctx context.Context, companyID string) ([]*entities.FinancialPeriod, error)
@@ -24,6 +24,6 @@ type FinancialPeriodService interface {
 	GetClosedFinancialPeriods(ctx context.Context, companyID string) ([]*entities.FinancialPeriod, error)
 
 	// Period management
-	CloseFinancialPeriod(ctx context.Context, id uuid.UUID, userID string) error
-	ReopenFinancialPeriod(ctx context.Context, id uuid.UUID) error
+	CloseFinancialPeriod(ctx context.Context, id uuid.ID, userID string) error
+	ReopenFinancialPeriod(ctx context.Context, id uuid.ID) error
 }

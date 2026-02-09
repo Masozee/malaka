@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/google/uuid"
+	"malaka/internal/shared/uuid"
 	"malaka/internal/modules/accounting/domain/entities"
 	"malaka/internal/modules/accounting/domain/repositories"
 )
@@ -55,7 +55,7 @@ func (r *CostCenterRepositoryImpl) Create(ctx context.Context, costCenter *entit
 }
 
 // GetByID retrieves a cost center by its ID
-func (r *CostCenterRepositoryImpl) GetByID(ctx context.Context, id uuid.UUID) (*entities.CostCenter, error) {
+func (r *CostCenterRepositoryImpl) GetByID(ctx context.Context, id uuid.ID) (*entities.CostCenter, error) {
 	query := `
 		SELECT id, cost_center_code, cost_center_name, cost_center_type, parent_id, 
 			manager_id, description, is_active, budget_amount, actual_amount, 
@@ -172,7 +172,7 @@ func (r *CostCenterRepositoryImpl) Update(ctx context.Context, costCenter *entit
 }
 
 // Delete removes a cost center from the database
-func (r *CostCenterRepositoryImpl) Delete(ctx context.Context, id uuid.UUID) error {
+func (r *CostCenterRepositoryImpl) Delete(ctx context.Context, id uuid.ID) error {
 	// First check if cost center has children
 	children, err := r.GetChildren(ctx, id)
 	if err != nil {
@@ -231,7 +231,7 @@ func (r *CostCenterRepositoryImpl) CreateAllocation(ctx context.Context, allocat
 }
 
 // GetAllocationsByID retrieves a cost center allocation by ID
-func (r *CostCenterRepositoryImpl) GetAllocationsByID(ctx context.Context, allocationID uuid.UUID) (*entities.CostCenterAllocation, error) {
+func (r *CostCenterRepositoryImpl) GetAllocationsByID(ctx context.Context, allocationID uuid.ID) (*entities.CostCenterAllocation, error) {
 	query := `
 		SELECT id, cost_center_id, source_cost_center_id, allocation_basis, allocation_value,
 			allocated_amount, period_start, period_end, description, is_active,
@@ -259,7 +259,7 @@ func (r *CostCenterRepositoryImpl) GetAllocationsByID(ctx context.Context, alloc
 }
 
 // GetAllocationsByCostCenter retrieves all allocations for a cost center
-func (r *CostCenterRepositoryImpl) GetAllocationsByCostCenter(ctx context.Context, costCenterID uuid.UUID) ([]*entities.CostCenterAllocation, error) {
+func (r *CostCenterRepositoryImpl) GetAllocationsByCostCenter(ctx context.Context, costCenterID uuid.ID) ([]*entities.CostCenterAllocation, error) {
 	query := `
 		SELECT id, cost_center_id, source_cost_center_id, allocation_basis, allocation_value,
 			allocated_amount, period_start, period_end, description, is_active,
@@ -322,7 +322,7 @@ func (r *CostCenterRepositoryImpl) UpdateAllocation(ctx context.Context, allocat
 }
 
 // DeleteAllocation removes an allocation
-func (r *CostCenterRepositoryImpl) DeleteAllocation(ctx context.Context, allocationID uuid.UUID) error {
+func (r *CostCenterRepositoryImpl) DeleteAllocation(ctx context.Context, allocationID uuid.ID) error {
 	query := `DELETE FROM cost_center_allocations WHERE id = $1`
 	_, err := r.db.ExecContext(ctx, query, allocationID)
 	if err != nil {
@@ -407,7 +407,7 @@ func (r *CostCenterRepositoryImpl) GetByManager(ctx context.Context, managerID s
 }
 
 // GetByParentID retrieves child cost centers
-func (r *CostCenterRepositoryImpl) GetByParentID(ctx context.Context, parentID uuid.UUID) ([]*entities.CostCenter, error) {
+func (r *CostCenterRepositoryImpl) GetByParentID(ctx context.Context, parentID uuid.ID) ([]*entities.CostCenter, error) {
 	query := `
 		SELECT id, cost_center_code, cost_center_name, cost_center_type, parent_id, 
 			manager_id, description, is_active, budget_amount, actual_amount, 
@@ -538,7 +538,7 @@ func (r *CostCenterRepositoryImpl) GetActiveCostCenters(ctx context.Context, com
 }
 
 // Deactivate deactivates a cost center
-func (r *CostCenterRepositoryImpl) Deactivate(ctx context.Context, costCenterID uuid.UUID) error {
+func (r *CostCenterRepositoryImpl) Deactivate(ctx context.Context, costCenterID uuid.ID) error {
 	costCenter, err := r.GetByID(ctx, costCenterID)
 	if err != nil {
 		return err
@@ -552,7 +552,7 @@ func (r *CostCenterRepositoryImpl) Deactivate(ctx context.Context, costCenterID 
 }
 
 // Reactivate reactivates a cost center
-func (r *CostCenterRepositoryImpl) Reactivate(ctx context.Context, costCenterID uuid.UUID) error {
+func (r *CostCenterRepositoryImpl) Reactivate(ctx context.Context, costCenterID uuid.ID) error {
 	query := `
 		UPDATE cost_centers SET 
 			is_active = true, end_date = NULL, updated_at = $2
@@ -568,7 +568,7 @@ func (r *CostCenterRepositoryImpl) Reactivate(ctx context.Context, costCenterID 
 }
 
 // GetActiveAllocations retrieves active allocations for a cost center at a specific date
-func (r *CostCenterRepositoryImpl) GetActiveAllocations(ctx context.Context, costCenterID uuid.UUID, date time.Time) ([]*entities.CostCenterAllocation, error) {
+func (r *CostCenterRepositoryImpl) GetActiveAllocations(ctx context.Context, costCenterID uuid.ID, date time.Time) ([]*entities.CostCenterAllocation, error) {
 	query := `
 		SELECT id, cost_center_id, source_cost_center_id, allocation_basis, allocation_value,
 			allocated_amount, period_start, period_end, description, is_active,
@@ -604,7 +604,7 @@ func (r *CostCenterRepositoryImpl) GetActiveAllocations(ctx context.Context, cos
 }
 
 // GetAllocationsByPeriod retrieves allocations for a period
-func (r *CostCenterRepositoryImpl) GetAllocationsByPeriod(ctx context.Context, costCenterID uuid.UUID, startDate, endDate time.Time) ([]*entities.CostCenterAllocation, error) {
+func (r *CostCenterRepositoryImpl) GetAllocationsByPeriod(ctx context.Context, costCenterID uuid.ID, startDate, endDate time.Time) ([]*entities.CostCenterAllocation, error) {
 	query := `
 		SELECT id, cost_center_id, source_cost_center_id, allocation_basis, allocation_value,
 			allocated_amount, period_start, period_end, description, is_active,
@@ -642,7 +642,7 @@ func (r *CostCenterRepositoryImpl) GetAllocationsByPeriod(ctx context.Context, c
 }
 
 // ProcessAllocations processes cost allocations for a period - OPTIMIZED to eliminate N+1 queries
-func (r *CostCenterRepositoryImpl) ProcessAllocations(ctx context.Context, costCenterID uuid.UUID, period time.Time) error {
+func (r *CostCenterRepositoryImpl) ProcessAllocations(ctx context.Context, costCenterID uuid.ID, period time.Time) error {
 	// OPTIMIZED: Single query to get allocations with their source cost center costs
 	// This eliminates the N+1 query pattern
 	query := `
@@ -769,7 +769,7 @@ func (r *CostCenterRepositoryImpl) batchUpdateAllocations(ctx context.Context, a
 }
 
 // GetCostCenterReport generates a cost center report
-func (r *CostCenterRepositoryImpl) GetCostCenterReport(ctx context.Context, costCenterID uuid.UUID, startDate, endDate time.Time) (*entities.CostCenterReport, error) {
+func (r *CostCenterRepositoryImpl) GetCostCenterReport(ctx context.Context, costCenterID uuid.ID, startDate, endDate time.Time) (*entities.CostCenterReport, error) {
 	costCenter, err := r.GetByID(ctx, costCenterID)
 	if err != nil {
 		return nil, err
@@ -835,12 +835,12 @@ func (r *CostCenterRepositoryImpl) GetCostCenterPerformance(ctx context.Context,
 }
 
 // GetVarianceReport gets variance report for a cost center
-func (r *CostCenterRepositoryImpl) GetVarianceReport(ctx context.Context, costCenterID uuid.UUID, period time.Time) (*entities.CostCenterReport, error) {
+func (r *CostCenterRepositoryImpl) GetVarianceReport(ctx context.Context, costCenterID uuid.ID, period time.Time) (*entities.CostCenterReport, error) {
 	return r.GetCostCenterReport(ctx, costCenterID, period.AddDate(0, -1, 0), period)
 }
 
 // UpdateBudgetAmounts updates budget amounts for a cost center
-func (r *CostCenterRepositoryImpl) UpdateBudgetAmounts(ctx context.Context, costCenterID uuid.UUID, budgetAmount float64) error {
+func (r *CostCenterRepositoryImpl) UpdateBudgetAmounts(ctx context.Context, costCenterID uuid.ID, budgetAmount float64) error {
 	query := `
 		UPDATE cost_centers SET 
 			budget_amount = $2, variance_amount = actual_amount - $2, updated_at = $3
@@ -856,7 +856,7 @@ func (r *CostCenterRepositoryImpl) UpdateBudgetAmounts(ctx context.Context, cost
 }
 
 // UpdateActualAmounts updates actual amounts from transactions
-func (r *CostCenterRepositoryImpl) UpdateActualAmounts(ctx context.Context, costCenterID uuid.UUID, periodStart, periodEnd time.Time) error {
+func (r *CostCenterRepositoryImpl) UpdateActualAmounts(ctx context.Context, costCenterID uuid.ID, periodStart, periodEnd time.Time) error {
 	// This would integrate with general ledger to get actual costs
 	// For now, we'll use a placeholder query
 	query := `
@@ -883,7 +883,7 @@ func (r *CostCenterRepositoryImpl) UpdateActualAmounts(ctx context.Context, cost
 }
 
 // GetBudgetVsActual gets budget vs actual comparison
-func (r *CostCenterRepositoryImpl) GetBudgetVsActual(ctx context.Context, costCenterID uuid.UUID, period time.Time) (map[string]float64, error) {
+func (r *CostCenterRepositoryImpl) GetBudgetVsActual(ctx context.Context, costCenterID uuid.ID, period time.Time) (map[string]float64, error) {
 	costCenter, err := r.GetByID(ctx, costCenterID)
 	if err != nil {
 		return nil, err
@@ -900,7 +900,7 @@ func (r *CostCenterRepositoryImpl) GetBudgetVsActual(ctx context.Context, costCe
 }
 
 // CalculateAllocatedCosts calculates total allocated costs
-func (r *CostCenterRepositoryImpl) CalculateAllocatedCosts(ctx context.Context, costCenterID uuid.UUID, period time.Time) (float64, error) {
+func (r *CostCenterRepositoryImpl) CalculateAllocatedCosts(ctx context.Context, costCenterID uuid.ID, period time.Time) (float64, error) {
 	query := `
 		SELECT COALESCE(SUM(allocated_amount), 0)
 		FROM cost_center_allocations
@@ -918,7 +918,7 @@ func (r *CostCenterRepositoryImpl) CalculateAllocatedCosts(ctx context.Context, 
 }
 
 // GetDirectCosts gets direct costs for a cost center
-func (r *CostCenterRepositoryImpl) GetDirectCosts(ctx context.Context, costCenterID uuid.UUID, startDate, endDate time.Time) (float64, error) {
+func (r *CostCenterRepositoryImpl) GetDirectCosts(ctx context.Context, costCenterID uuid.ID, startDate, endDate time.Time) (float64, error) {
 	// This would integrate with general ledger for direct cost accounts
 	// For now, return a placeholder
 	query := `
@@ -940,19 +940,19 @@ func (r *CostCenterRepositoryImpl) GetDirectCosts(ctx context.Context, costCente
 }
 
 // GetIndirectCosts gets indirect costs for a cost center
-func (r *CostCenterRepositoryImpl) GetIndirectCosts(ctx context.Context, costCenterID uuid.UUID, startDate, endDate time.Time) (float64, error) {
+func (r *CostCenterRepositoryImpl) GetIndirectCosts(ctx context.Context, costCenterID uuid.ID, startDate, endDate time.Time) (float64, error) {
 	// This would integrate with general ledger for indirect cost accounts
 	// For now, return allocated costs as indirect costs
 	return r.CalculateAllocatedCosts(ctx, costCenterID, endDate)
 }
 
 // GetChildren gets child cost centers
-func (r *CostCenterRepositoryImpl) GetChildren(ctx context.Context, parentID uuid.UUID) ([]*entities.CostCenter, error) {
+func (r *CostCenterRepositoryImpl) GetChildren(ctx context.Context, parentID uuid.ID) ([]*entities.CostCenter, error) {
 	return r.GetByParentID(ctx, parentID)
 }
 
 // GetDescendants gets all descendant cost centers
-func (r *CostCenterRepositoryImpl) GetDescendants(ctx context.Context, parentID uuid.UUID) ([]*entities.CostCenter, error) {
+func (r *CostCenterRepositoryImpl) GetDescendants(ctx context.Context, parentID uuid.ID) ([]*entities.CostCenter, error) {
 	query := `
 		WITH RECURSIVE descendants AS (
 			SELECT id, cost_center_code, cost_center_name, cost_center_type, parent_id, 
@@ -985,7 +985,7 @@ func (r *CostCenterRepositoryImpl) GetDescendants(ctx context.Context, parentID 
 }
 
 // GetPath gets the path from root to cost center
-func (r *CostCenterRepositoryImpl) GetPath(ctx context.Context, costCenterID uuid.UUID) ([]*entities.CostCenter, error) {
+func (r *CostCenterRepositoryImpl) GetPath(ctx context.Context, costCenterID uuid.ID) ([]*entities.CostCenter, error) {
 	query := `
 		WITH RECURSIVE path AS (
 			SELECT id, cost_center_code, cost_center_name, cost_center_type, parent_id, 

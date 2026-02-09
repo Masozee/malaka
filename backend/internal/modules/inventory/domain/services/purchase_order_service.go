@@ -6,7 +6,7 @@ import (
 
 	"malaka/internal/modules/inventory/domain/entities"
 	"malaka/internal/modules/inventory/domain/repositories"
-	"malaka/internal/shared/utils"
+	"malaka/internal/shared/uuid"
 )
 
 // PurchaseOrderService provides business logic for purchase order operations.
@@ -21,8 +21,8 @@ func NewPurchaseOrderService(repo repositories.PurchaseOrderRepository) *Purchas
 
 // CreatePurchaseOrder creates a new purchase order.
 func (s *PurchaseOrderService) CreatePurchaseOrder(ctx context.Context, po *entities.PurchaseOrder) error {
-	if po.ID == "" {
-		po.ID = utils.RandomString(10) // Generate a random ID if not provided
+	if po.ID.IsNil() {
+		po.ID = uuid.New()
 	}
 	return s.repo.Create(ctx, po)
 }
@@ -40,7 +40,7 @@ func (s *PurchaseOrderService) GetAllPurchaseOrders(ctx context.Context) ([]*ent
 // UpdatePurchaseOrder updates an existing purchase order.
 func (s *PurchaseOrderService) UpdatePurchaseOrder(ctx context.Context, po *entities.PurchaseOrder) error {
 	// Ensure the purchase order exists before updating
-	existingPO, err := s.repo.GetByID(ctx, po.ID)
+	existingPO, err := s.repo.GetByID(ctx, po.ID.String())
 	if err != nil {
 		return err
 	}

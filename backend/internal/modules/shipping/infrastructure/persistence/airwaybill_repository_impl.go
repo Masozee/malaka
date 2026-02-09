@@ -3,10 +3,10 @@ package persistence
 import (
 	"context"
 
-	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"malaka/internal/modules/shipping/domain/entities"
 	"malaka/internal/modules/shipping/domain/repositories"
+	"malaka/internal/shared/uuid"
 )
 
 // AirwaybillRepositoryImpl implements repositories.AirwaybillRepository.
@@ -27,7 +27,7 @@ func (r *AirwaybillRepositoryImpl) Create(ctx context.Context, awb *entities.Air
 }
 
 // GetByID retrieves an airwaybill by its ID from the database.
-func (r *AirwaybillRepositoryImpl) GetByID(ctx context.Context, id uuid.UUID) (*entities.Airwaybill, error) {
+func (r *AirwaybillRepositoryImpl) GetByID(ctx context.Context, id uuid.ID) (*entities.Airwaybill, error) {
 	var awb entities.Airwaybill
 	query := `SELECT * FROM airwaybills WHERE id = $1`
 	err := r.db.GetContext(ctx, &awb, query, id)
@@ -50,9 +50,8 @@ func (r *AirwaybillRepositoryImpl) Update(ctx context.Context, awb *entities.Air
 }
 
 // Delete deletes an airwaybill by its ID from the database.
-func (r *AirwaybillRepositoryImpl) Delete(ctx context.Context, id uuid.UUID) error {
+func (r *AirwaybillRepositoryImpl) Delete(ctx context.Context, id uuid.ID) error {
 	query := `DELETE FROM airwaybills WHERE id = $1`
 	_, err := r.db.ExecContext(ctx, query, id)
 	return err
 }
-

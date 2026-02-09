@@ -8,6 +8,7 @@ import (
 	"malaka/internal/modules/sales/presentation/http/dto"
 	"malaka/internal/shared/response"
 	"malaka/internal/shared/utils"
+	"malaka/internal/shared/uuid"
 )
 
 // SalesOrderHandler handles HTTP requests for sales order operations.
@@ -88,13 +89,19 @@ func (h *SalesOrderHandler) UpdateSalesOrder(c *gin.Context) {
 		return
 	}
 
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		response.BadRequest(c, "Invalid ID format", nil)
+		return
+	}
+
 	so := &entities.SalesOrder{
 		CustomerID:  req.CustomerID,
 		OrderDate:   utils.Now(),
 		Status:      req.Status,
 		TotalAmount: req.TotalAmount,
 	}
-	so.ID = id // Set the ID from the URL parameter
+	so.ID = parsedID // Set the ID from the URL parameter
 
 	if err := h.service.UpdateSalesOrder(c.Request.Context(), so); err != nil {
 		response.InternalServerError(c, err.Error(), nil)

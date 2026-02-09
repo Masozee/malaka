@@ -3,13 +3,13 @@ package dtos
 import (
 	"time"
 
-	"github.com/google/uuid"
+	"malaka/internal/shared/uuid"
 )
 
 // CreateShippingInvoiceRequest represents the request to create a shipping invoice.
 type CreateShippingInvoiceRequest struct {
-	ShipmentID     uuid.UUID `json:"shipment_id" binding:"required"`
-	CourierID      uuid.UUID `json:"courier_id" binding:"required"`
+	ShipmentID     uuid.ID   `json:"shipment_id" binding:"required"`
+	CourierID      uuid.ID   `json:"courier_id" binding:"required"`
 	InvoiceDate    time.Time `json:"invoice_date" binding:"required"`
 	DueDate        time.Time `json:"due_date" binding:"required"`
 	Origin         string    `json:"origin" binding:"required"`
@@ -37,24 +37,24 @@ type UpdateShippingInvoiceRequest struct {
 
 // ShippingInvoiceResponse represents the response for a shipping invoice.
 type ShippingInvoiceResponse struct {
-	ID             uuid.UUID `json:"id"`
-	InvoiceNumber  string    `json:"invoice_number"`
-	ShipmentID     uuid.UUID `json:"shipment_id"`
-	CourierID      uuid.UUID `json:"courier_id"`
-	InvoiceDate    time.Time `json:"invoice_date"`
-	DueDate        time.Time `json:"due_date"`
-	Origin         string    `json:"origin"`
-	Destination    string    `json:"destination"`
-	Weight         float64   `json:"weight"`
-	BaseRate       float64   `json:"base_rate"`
-	AdditionalFees float64   `json:"additional_fees"`
-	TaxAmount      float64   `json:"tax_amount"`
-	TotalAmount    float64   `json:"total_amount"`
-	Status         string    `json:"status"`
+	ID             uuid.ID    `json:"id"`
+	InvoiceNumber  string     `json:"invoice_number"`
+	ShipmentID     uuid.ID    `json:"shipment_id"`
+	CourierID      uuid.ID    `json:"courier_id"`
+	InvoiceDate    time.Time  `json:"invoice_date"`
+	DueDate        time.Time  `json:"due_date"`
+	Origin         string     `json:"origin"`
+	Destination    string     `json:"destination"`
+	Weight         float64    `json:"weight"`
+	BaseRate       float64    `json:"base_rate"`
+	AdditionalFees float64    `json:"additional_fees"`
+	TaxAmount      float64    `json:"tax_amount"`
+	TotalAmount    float64    `json:"total_amount"`
+	Status         string     `json:"status"`
 	PaidAt         *time.Time `json:"paid_at,omitempty"`
-	Notes          string    `json:"notes,omitempty"`
-	CreatedAt      time.Time `json:"created_at"`
-	UpdatedAt      time.Time `json:"updated_at"`
+	Notes          string     `json:"notes,omitempty"`
+	CreatedAt      time.Time  `json:"created_at"`
+	UpdatedAt      time.Time  `json:"updated_at"`
 }
 
 // PayShippingInvoiceRequest represents the request to pay a shipping invoice.

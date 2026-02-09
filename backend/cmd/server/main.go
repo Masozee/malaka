@@ -29,7 +29,7 @@ const (
 	shutdownTimeout    = 30 * time.Second
 	cacheWarmupTimeout = 30 * time.Second
 	readTimeout        = 15 * time.Second
-	writeTimeout       = 30 * time.Second
+	writeTimeout       = 0 // Disabled for WebSocket long-lived connections
 	idleTimeout        = 120 * time.Second
 
 	// Worker pool settings

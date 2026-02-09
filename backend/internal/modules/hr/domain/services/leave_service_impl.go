@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"malaka/internal/modules/hr/domain/entities"
 	"malaka/internal/modules/hr/domain/repositories"
+	"malaka/internal/shared/uuid"
 	"time"
-	"github.com/google/uuid"
 )
 
 type leaveServiceImpl struct {
@@ -35,11 +35,11 @@ func (s *leaveServiceImpl) GetLeaveTypeByID(ctx context.Context, id string) (*en
 	if id == "" {
 		return nil, errors.New("leave type ID is required")
 	}
-	uuid, err := uuid.Parse(id)
+	parsedID, err := uuid.Parse(id)
 	if err != nil {
 		return nil, errors.New("invalid leave type ID format")
 	}
-	return s.leaveRepo.GetLeaveTypeByID(ctx, uuid)
+	return s.leaveRepo.GetLeaveTypeByID(ctx, parsedID)
 }
 
 func (s *leaveServiceImpl) GetAllLeaveTypes(ctx context.Context) ([]*entities.LeaveType, error) {
@@ -47,7 +47,7 @@ func (s *leaveServiceImpl) GetAllLeaveTypes(ctx context.Context) ([]*entities.Le
 }
 
 func (s *leaveServiceImpl) UpdateLeaveType(ctx context.Context, leaveType *entities.LeaveType) error {
-	if leaveType.ID == uuid.Nil {
+	if leaveType.ID.IsNil() {
 		return errors.New("leave type ID is required")
 	}
 	if leaveType.Name == "" {
@@ -63,11 +63,11 @@ func (s *leaveServiceImpl) DeleteLeaveType(ctx context.Context, id string) error
 	if id == "" {
 		return errors.New("leave type ID is required")
 	}
-	uuid, err := uuid.Parse(id)
+	parsedID, err := uuid.Parse(id)
 	if err != nil {
 		return errors.New("invalid leave type ID format")
 	}
-	return s.leaveRepo.DeleteLeaveType(ctx, uuid)
+	return s.leaveRepo.DeleteLeaveType(ctx, parsedID)
 }
 
 // Leave Requests
@@ -101,11 +101,11 @@ func (s *leaveServiceImpl) GetLeaveRequestByID(ctx context.Context, id string) (
 	if id == "" {
 		return nil, errors.New("leave request ID is required")
 	}
-	uuid, err := uuid.Parse(id)
+	parsedID, err := uuid.Parse(id)
 	if err != nil {
 		return nil, errors.New("invalid leave request ID format")
 	}
-	return s.leaveRepo.GetLeaveRequestByID(ctx, uuid)
+	return s.leaveRepo.GetLeaveRequestByID(ctx, parsedID)
 }
 
 func (s *leaveServiceImpl) GetAllLeaveRequests(ctx context.Context) ([]*entities.LeaveRequest, error) {
@@ -116,11 +116,11 @@ func (s *leaveServiceImpl) GetLeaveRequestsByEmployee(ctx context.Context, emplo
 	if employeeID == "" {
 		return nil, errors.New("employee ID is required")
 	}
-	uuid, err := uuid.Parse(employeeID)
+	parsedID, err := uuid.Parse(employeeID)
 	if err != nil {
 		return nil, errors.New("invalid employee ID format")
 	}
-	return s.leaveRepo.GetLeaveRequestsByEmployee(ctx, uuid)
+	return s.leaveRepo.GetLeaveRequestsByEmployee(ctx, parsedID)
 }
 
 func (s *leaveServiceImpl) GetLeaveRequestsByStatus(ctx context.Context, status string) ([]*entities.LeaveRequest, error) {
@@ -131,7 +131,7 @@ func (s *leaveServiceImpl) GetLeaveRequestsByStatus(ctx context.Context, status 
 }
 
 func (s *leaveServiceImpl) UpdateLeaveRequest(ctx context.Context, request *entities.LeaveRequest) error {
-	if request.ID == uuid.Nil {
+	if request.ID.IsNil() {
 		return errors.New("leave request ID is required")
 	}
 	if err := s.ValidateLeaveRequest(ctx, request); err != nil {
@@ -144,11 +144,11 @@ func (s *leaveServiceImpl) DeleteLeaveRequest(ctx context.Context, id string) er
 	if id == "" {
 		return errors.New("leave request ID is required")
 	}
-	uuid, err := uuid.Parse(id)
+	parsedID, err := uuid.Parse(id)
 	if err != nil {
 		return errors.New("invalid leave request ID format")
 	}
-	return s.leaveRepo.DeleteLeaveRequest(ctx, uuid)
+	return s.leaveRepo.DeleteLeaveRequest(ctx, parsedID)
 }
 
 // Leave Balances
@@ -159,15 +159,15 @@ func (s *leaveServiceImpl) GetLeaveBalancesByEmployee(ctx context.Context, emplo
 	if year == 0 {
 		year = time.Now().Year()
 	}
-	uuid, err := uuid.Parse(employeeID)
+	parsedID, err := uuid.Parse(employeeID)
 	if err != nil {
 		return nil, errors.New("invalid employee ID format")
 	}
-	return s.leaveRepo.GetLeaveBalancesByEmployee(ctx, uuid, year)
+	return s.leaveRepo.GetLeaveBalancesByEmployee(ctx, parsedID, year)
 }
 
 func (s *leaveServiceImpl) UpdateLeaveBalance(ctx context.Context, balance *entities.LeaveBalance) error {
-	if balance.ID == uuid.Nil {
+	if balance.ID.IsNil() {
 		return errors.New("leave balance ID is required")
 	}
 	return s.leaveRepo.UpdateLeaveBalance(ctx, balance)
@@ -256,7 +256,7 @@ func (s *leaveServiceImpl) CalculateLeaveDays(ctx context.Context, startDate, en
 		if autoDeductWeekends && (d.Weekday() == time.Saturday || d.Weekday() == time.Sunday) {
 			continue
 		}
-		
+
 		// Skip holidays if auto deduction is enabled (for now, just skip Indonesian public holidays)
 		if autoDeductHolidays && s.isPublicHoliday(d) {
 			continue
@@ -269,10 +269,10 @@ func (s *leaveServiceImpl) CalculateLeaveDays(ctx context.Context, startDate, en
 }
 
 func (s *leaveServiceImpl) ValidateLeaveRequest(ctx context.Context, request *entities.LeaveRequest) error {
-	if request.EmployeeID == uuid.Nil {
+	if request.EmployeeID.IsNil() {
 		return errors.New("employee ID is required")
 	}
-	if request.LeaveTypeID == uuid.Nil {
+	if request.LeaveTypeID.IsNil() {
 		return errors.New("leave type ID is required")
 	}
 	if request.StartDate.IsZero() {
@@ -335,14 +335,14 @@ func (s *leaveServiceImpl) isPublicHoliday(date time.Time) bool {
 	// check against a database of public holidays
 	month := int(date.Month())
 	day := date.Day()
-	
+
 	// Some fixed Indonesian holidays
 	holidays := map[string]bool{
 		"01-01": true, // New Year
 		"08-17": true, // Independence Day
 		"12-25": true, // Christmas
 	}
-	
+
 	key := fmt.Sprintf("%02d-%02d", month, day)
 	return holidays[key]
 }

@@ -25,6 +25,20 @@ export abstract class BaseMasterDataService<T, ListResponseType> {
     this.endpoint = endpoint
   }
 
+  // Client-side company filter for entities that have company_id
+  // Applied when the backend doesn't filter by company_id query param
+  protected filterByCompany(items: T[]): T[] {
+    const companyId = apiClient.getCompanyId()
+    if (!companyId) return items
+
+    return items.filter((item) => {
+      const record = item as Record<string, unknown>
+      // Only filter if the entity actually has a company_id field
+      if (!('company_id' in record)) return true
+      return record.company_id === companyId
+    })
+  }
+
   async getAll(filters?: MasterDataFilters, token?: string): Promise<ListResponseType> {
     const response = await apiClient.get<{
       success: boolean,
@@ -43,11 +57,12 @@ export abstract class BaseMasterDataService<T, ListResponseType> {
     // Handle both old format (direct array) and new paginated format
     if (Array.isArray(response.data)) {
       // Old format - direct array
+      const filtered = this.filterByCompany(response.data || [])
       return {
-        data: response.data || [],
-        total: response.data?.length || 0,
+        data: filtered,
+        total: filtered.length,
         page: 1,
-        limit: response.data?.length || 0
+        limit: filtered.length
       } as ListResponseType
     } else if (response.data) {
       // New paginated format
@@ -60,9 +75,10 @@ export abstract class BaseMasterDataService<T, ListResponseType> {
           total_pages: number
         }
       }
+      const filtered = this.filterByCompany(paginatedData.data || [])
       return {
-        data: paginatedData.data || [],
-        total: paginatedData.pagination?.total_rows || 0,
+        data: filtered,
+        total: paginatedData.pagination?.total_rows || filtered.length,
         page: paginatedData.pagination?.page || 1,
         limit: paginatedData.pagination?.limit || 10
       } as ListResponseType

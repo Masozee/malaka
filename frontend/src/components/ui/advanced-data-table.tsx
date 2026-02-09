@@ -59,6 +59,14 @@ export interface PaginationProps {
   onChange: (page: number, pageSize: number) => void
 }
 
+export interface RowAction<T> {
+  label: string
+  icon?: React.ReactNode
+  onClick: (record: T) => void
+  className?: string
+  separator?: boolean
+}
+
 interface AdvancedDataTableProps<T> {
   data: T[]
   columns: AdvancedColumn<T>[]
@@ -66,6 +74,7 @@ interface AdvancedDataTableProps<T> {
   pageSize?: number
   onEdit?: (record: T) => void
   onDelete?: (record: T) => void
+  rowActions?: RowAction<T>[]
   rowSelection?: boolean
   showToolbar?: boolean
   pagination?: PaginationProps
@@ -78,6 +87,7 @@ export function AdvancedDataTable<T extends { id: string }>({
   pageSize = 10,
   onEdit,
   onDelete,
+  rowActions,
   rowSelection = false,
   showToolbar = false,
   pagination,
@@ -158,7 +168,7 @@ export function AdvancedDataTable<T extends { id: string }>({
       })
 
     // Add actions column if needed
-    if (onEdit || onDelete) {
+    if (onEdit || onDelete || (rowActions && rowActions.length > 0)) {
       tanstackColumns.push({
         id: "actions",
         header: () => <span className="sr-only">Actions</span>,
@@ -175,7 +185,19 @@ export function AdvancedDataTable<T extends { id: string }>({
                   Edit
                 </DropdownMenuItem>
               )}
-              {onEdit && onDelete && <DropdownMenuSeparator />}
+              {rowActions && rowActions.map((action, idx) => (
+                <React.Fragment key={idx}>
+                  {action.separator && <DropdownMenuSeparator />}
+                  <DropdownMenuItem
+                    onClick={() => action.onClick(row.original)}
+                    className={action.className}
+                  >
+                    {action.icon}
+                    {action.label}
+                  </DropdownMenuItem>
+                </React.Fragment>
+              ))}
+              {(onEdit || (rowActions && rowActions.length > 0)) && onDelete && <DropdownMenuSeparator />}
               {onDelete && (
                 <DropdownMenuItem
                   onClick={() => onDelete(row.original)}
@@ -194,7 +216,7 @@ export function AdvancedDataTable<T extends { id: string }>({
     }
 
     return tanstackColumns
-  }, [legacyColumns, rowSelection, onEdit, onDelete])
+  }, [legacyColumns, rowSelection, onEdit, onDelete, rowActions])
 
   const table = useReactTable({
     data,
@@ -227,12 +249,12 @@ export function AdvancedDataTable<T extends { id: string }>({
       columnFilters,
       columnVisibility,
       rowSelection: rowSelectionState,
-      pagination: pagination
-        ? {
+      ...(pagination && {
+        pagination: {
           pageIndex: pagination.current - 1,
           pageSize: pagination.pageSize,
         }
-        : undefined, // Let TanStack manage if no pagination prop
+      }),
     },
     initialState: {
       pagination: {
@@ -244,16 +266,18 @@ export function AdvancedDataTable<T extends { id: string }>({
   return (
     <div className="space-y-4">
       {/* Table */}
-      <div className="rounded-lg bg-card">
+      <div className="rounded-lg bg-card overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-zinc-100 dark:bg-zinc-800">
+            <thead className="bg-zinc-200 dark:bg-zinc-900">
               {table.getHeaderGroups().map((headerGroup) => (
                 <tr key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => (
+                  {headerGroup.headers.map((header, index) => (
                     <th
                       key={header.id}
-                      className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider"
+                      className={`px-4 py-3 text-left text-sm font-medium text-muted-foreground uppercase tracking-wider ${index === 0 ? 'rounded-tl-lg' : ''
+                        } ${index === headerGroup.headers.length - 1 ? 'rounded-tr-lg' : ''
+                        }`}
                       style={{
                         width: header.getSize() !== 150 ? header.getSize() : undefined,
                       }}

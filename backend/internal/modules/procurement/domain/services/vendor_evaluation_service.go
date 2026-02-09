@@ -5,10 +5,10 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/google/uuid"
 	"malaka/internal/modules/procurement/domain/entities"
 	"malaka/internal/modules/procurement/domain/repositories"
 	"malaka/internal/shared/utils"
+	"malaka/internal/shared/uuid"
 )
 
 // VendorEvaluationService provides business logic for vendor evaluation operations.
@@ -23,8 +23,8 @@ func NewVendorEvaluationService(repo repositories.VendorEvaluationRepository) *V
 
 // Create creates a new vendor evaluation.
 func (s *VendorEvaluationService) Create(ctx context.Context, evaluation *entities.VendorEvaluation) error {
-	if evaluation.ID == "" {
-		evaluation.ID = uuid.New().String()
+	if evaluation.ID.IsNil() {
+		evaluation.ID = uuid.New()
 	}
 
 	// Generate evaluation number
@@ -83,7 +83,7 @@ func (s *VendorEvaluationService) GetAll(ctx context.Context, filter *repositori
 
 // Update updates an existing vendor evaluation.
 func (s *VendorEvaluationService) Update(ctx context.Context, evaluation *entities.VendorEvaluation) error {
-	existing, err := s.repo.GetByID(ctx, evaluation.ID)
+	existing, err := s.repo.GetByID(ctx, evaluation.ID.String())
 	if err != nil {
 		return err
 	}

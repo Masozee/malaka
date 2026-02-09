@@ -491,7 +491,7 @@ export function TanStackDataTable<T extends { id: string }>({
                     <th
                       key={header.id}
                       scope="col"
-                      className="px-4 py-2 text-left text-xs font-medium text-gray-700 dark:text-white"
+                      className="px-4 py-2 text-left text-sm font-medium text-gray-700 dark:text-white"
                       style={
                         header.column.getSize() !== 150
                           ? { width: header.column.getSize() }
@@ -524,7 +524,7 @@ export function TanStackDataTable<T extends { id: string }>({
                     data-state={row.getIsSelected() && "selected"}
                   >
                     {row.getVisibleCells().map((cell) => (
-                      <td key={cell.id} className="px-4 py-2 text-xs text-gray-900 dark:text-gray-100">
+                      <td key={cell.id} className="px-4 py-2 text-sm text-gray-900 dark:text-gray-100">
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
                       </td>
                     ))}

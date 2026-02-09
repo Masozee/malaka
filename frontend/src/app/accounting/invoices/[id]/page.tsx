@@ -11,6 +11,7 @@ import { TwoLevelLayout } from '@/components/ui/two-level-layout'
 import { Header } from '@/components/ui/header'
 
 import Link from 'next/link'
+import { EntityShareButton } from '@/components/messaging/EntityShareButton'
 import { invoiceService } from '@/services/accounting'
 
 // Invoice interfaces
@@ -173,6 +174,15 @@ export default function InvoiceDetailPage() {
         breadcrumbs={breadcrumbs}
         actions={
           <div className="flex items-center space-x-3">
+            <EntityShareButton
+              entityType="invoice"
+              entityId={invoiceId}
+              title={invoice.invoice_number}
+              subtitle={`${invoice.customer_name} - ${new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(invoice.total_amount)}`}
+              status={invoice.status}
+              statusColor={invoice.status === 'paid' ? 'green' : invoice.status === 'overdue' ? 'red' : invoice.status === 'draft' ? 'gray' : 'blue'}
+              url={`/accounting/invoices/${invoiceId}`}
+            />
             <Button variant="outline" size="sm">
               <HugeiconsIcon icon={Download01Icon} className="h-4 w-4 mr-2" />
               Download PDF

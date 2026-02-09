@@ -258,7 +258,7 @@ func (h *ProductionDashboardHandler) GetAnalytics(c *gin.Context) {
 	productMap := make(map[string]bool)
 	for _, wo := range workOrders {
 		if wo.Status == "completed" || wo.Status == "in_progress" {
-			productMap[wo.ProductID] = true
+			productMap[wo.ProductID.String()] = true
 		}
 	}
 
@@ -280,7 +280,7 @@ func (h *ProductionDashboardHandler) GetAnalytics(c *gin.Context) {
 		var totalPlannedHours, totalActualHours float64
 
 		for _, wo := range workOrders {
-			if wo.ProductID == productID {
+			if wo.ProductID.String() == productID {
 				if firstOrder == nil {
 					efficiency := 0.0
 					qualityScoreVal := 0.0

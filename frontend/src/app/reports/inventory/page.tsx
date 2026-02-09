@@ -3,698 +3,465 @@
 import { useState, useEffect } from 'react'
 import { TwoLevelLayout } from '@/components/ui/two-level-layout'
 import { Header } from '@/components/ui/header'
-import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { AdvancedDataTable } from '@/components/ui/advanced-data-table'
+import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { DataTable } from '@/components/ui/data-table'
+import { HugeiconsIcon } from '@hugeicons/react'
+import {
+  Search01Icon,
+  ReloadIcon,
+  Download01Icon,
+  Cancel01Icon,
+  PlusSignIcon
+} from '@hugeicons/core-free-icons'
 
 interface InventoryReport {
   id: string
   reportName: string
-  reportType: 'stock-level' | 'movement' | 'valuation' | 'turnover' | 'aging' | 'forecasting'
+  reportType: 'stock_level' | 'movement' | 'valuation' | 'turnover' | 'aging' | 'reorder'
+  category: 'finished_goods' | 'raw_materials' | 'wip' | 'packaging' | 'all'
   period: string
-  warehouseId: string
-  warehouseName: string
   totalItems: number
   totalValue: number
   lowStockItems: number
-  overstockItems: number
-  turnoverRate: number
+  outOfStockItems: number
   status: 'generated' | 'processing' | 'scheduled' | 'failed'
   generatedDate: string
   generatedBy: string
-  description: string
-  formats: string[]
-}
-
-interface InventoryMetric {
-  id: string
-  title: string
-  value: string
-  change: number
-  changeType: 'increase' | 'decrease'
-  period: string
-  color: string
-}
-
-interface StockAlert {
-  id: string
-  itemCode: string
-  itemName: string
-  currentStock: number
-  minimumStock: number
-  maximumStock: number
-  alertType: 'low-stock' | 'out-of-stock' | 'overstock' | 'expiring'
   warehouse: string
-  daysUntilExpiry?: number
-  lastMovement: string
 }
 
-// Mock inventory reports data
 const mockInventoryReports: InventoryReport[] = [
   {
     id: '1',
-    reportName: 'Monthly Stock Level Analysis - July 2024',
-    reportType: 'stock-level',
+    reportName: 'Stock Level Summary - July 2024',
+    reportType: 'stock_level',
+    category: 'all',
     period: 'July 2024',
-    warehouseId: 'WH001',
-    warehouseName: 'Main Warehouse Jakarta',
-    totalItems: 2847,
-    totalValue: 480000000,
-    lowStockItems: 45,
-    overstockItems: 12,
-    turnoverRate: 8.5,
+    totalItems: 1245,
+    totalValue: 487000000,
+    lowStockItems: 23,
+    outOfStockItems: 5,
     status: 'generated',
     generatedDate: '2024-07-25',
     generatedBy: 'Warehouse Manager',
-    description: 'Comprehensive monthly inventory stock level analysis with alerts and recommendations',
-    formats: ['PDF', 'Excel', 'CSV']
+    warehouse: 'Main Warehouse'
   },
   {
     id: '2',
-    reportName: 'Inventory Movement Report - Q2 2024',
+    reportName: 'Inventory Movement Report - Week 30',
     reportType: 'movement',
+    category: 'finished_goods',
+    period: 'Week 30, 2024',
+    totalItems: 456,
+    totalValue: 189000000,
+    lowStockItems: 12,
+    outOfStockItems: 2,
+    status: 'generated',
+    generatedDate: '2024-07-24',
+    generatedBy: 'Stock Controller',
+    warehouse: 'Main Warehouse'
+  },
+  {
+    id: '3',
+    reportName: 'Inventory Valuation - Q2 2024',
+    reportType: 'valuation',
+    category: 'all',
     period: 'Q2 2024',
-    warehouseId: 'ALL',
-    warehouseName: 'All Warehouses',
-    totalItems: 8456,
-    totalValue: 1250000000,
-    lowStockItems: 67,
-    overstockItems: 23,
-    turnoverRate: 6.8,
+    totalItems: 1567,
+    totalValue: 623000000,
+    lowStockItems: 34,
+    outOfStockItems: 8,
     status: 'generated',
     generatedDate: '2024-07-20',
-    generatedBy: 'Inventory Controller',
-    description: 'Quarterly inventory movement analysis including receipts, issues, and transfers',
-    formats: ['PDF', 'Excel', 'PowerPoint']
-  },
-  {
-    id: '3',
-    reportName: 'Inventory Valuation Report - June 2024',
-    reportType: 'valuation',
-    period: 'June 2024',
-    warehouseId: 'WH002',
-    warehouseName: 'Distribution Center Surabaya',
-    totalItems: 1567,
-    totalValue: 230000000,
-    lowStockItems: 23,
-    overstockItems: 8,
-    turnoverRate: 9.2,
-    status: 'generated',
-    generatedDate: '2024-07-18',
     generatedBy: 'Finance Manager',
-    description: 'Monthly inventory valuation using FIFO method with cost analysis',
-    formats: ['PDF', 'Excel']
+    warehouse: 'All Warehouses'
   },
   {
     id: '4',
-    reportName: 'Inventory Turnover Analysis - H1 2024',
+    reportName: 'Stock Turnover Analysis - H1 2024',
     reportType: 'turnover',
+    category: 'finished_goods',
     period: 'H1 2024',
-    warehouseId: 'ALL',
-    warehouseName: 'All Warehouses',
-    totalItems: 8456,
-    totalValue: 1250000000,
-    lowStockItems: 89,
-    overstockItems: 34,
-    turnoverRate: 7.3,
+    totalItems: 892,
+    totalValue: 356000000,
+    lowStockItems: 18,
+    outOfStockItems: 4,
     status: 'processing',
     generatedDate: '2024-07-25',
-    generatedBy: 'Data Analyst',
-    description: 'Half-yearly inventory turnover analysis with performance metrics',
-    formats: ['PDF', 'Excel']
-  },
-  {
-    id: '5',
-    reportName: 'Slow Moving Items Report - July 2024',
-    reportType: 'aging',
-    period: 'July 2024',
-    warehouseId: 'WH003',
-    warehouseName: 'Warehouse Bandung',
-    totalItems: 892,
-    totalValue: 145000000,
-    lowStockItems: 12,
-    overstockItems: 45,
-    turnoverRate: 3.2,
-    status: 'generated',
-    generatedDate: '2024-07-22',
     generatedBy: 'Inventory Analyst',
-    description: 'Analysis of slow-moving and obsolete inventory items requiring action',
-    formats: ['PDF', 'Excel', 'PowerPoint']
-  },
-  {
-    id: '6',
-    reportName: 'Demand Forecasting Report - Q3 2024',
-    reportType: 'forecasting',
-    period: 'Q3 2024 Forecast',
-    warehouseId: 'ALL',
-    warehouseName: 'All Warehouses',
-    totalItems: 8456,
-    totalValue: 1350000000,
-    lowStockItems: 0,
-    overstockItems: 0,
-    turnoverRate: 8.7,
-    status: 'scheduled',
-    generatedDate: '2024-07-28',
-    generatedBy: 'System Scheduler',
-    description: 'Quarterly demand forecasting based on historical data and trends',
-    formats: ['PDF', 'Excel', 'Interactive']
-  }
-]
-
-// Mock inventory metrics
-const mockInventoryMetrics: InventoryMetric[] = [
-  {
-    id: '1',
-    title: 'Total Inventory Value',
-    value: 'Rp 1.25B',
-    change: 5.2,
-    changeType: 'increase',
-    period: 'vs last month',
-    color: 'text-blue-600'
-  },
-  {
-    id: '2',
-    title: 'Total SKUs',
-    value: '8,456',
-    change: 2.8,
-    changeType: 'increase',
-    period: 'vs last month',
-    color: 'text-green-600'
-  },
-  {
-    id: '3',
-    title: 'Inventory Turnover',
-    value: '8.5x',
-    change: 12.3,
-    changeType: 'increase',
-    period: 'vs last month',
-    color: 'text-purple-600'
-  },
-  {
-    id: '4',
-    title: 'Stock Accuracy',
-    value: '98.2%',
-    change: 0.5,
-    changeType: 'increase',
-    period: 'vs last month',
-    color: 'text-teal-600'
+    warehouse: 'Main Warehouse'
   },
   {
     id: '5',
-    title: 'Low Stock Items',
-    value: '89',
-    change: -15.2,
-    changeType: 'decrease',
-    period: 'vs last month',
-    color: 'text-orange-600'
+    reportName: 'Raw Materials Aging Report - July 2024',
+    reportType: 'aging',
+    category: 'raw_materials',
+    period: 'July 2024',
+    totalItems: 234,
+    totalValue: 98000000,
+    lowStockItems: 8,
+    outOfStockItems: 1,
+    status: 'generated',
+    generatedDate: '2024-07-23',
+    generatedBy: 'Procurement Manager',
+    warehouse: 'Raw Materials Store'
   },
   {
     id: '6',
-    title: 'Days Sales Outstanding',
-    value: '42.5',
-    change: -8.1,
-    changeType: 'decrease',
-    period: 'vs last month',
-    color: 'text-indigo-600'
+    reportName: 'Reorder Point Analysis - July 2024',
+    reportType: 'reorder',
+    category: 'all',
+    period: 'July 2024',
+    totalItems: 1245,
+    totalValue: 487000000,
+    lowStockItems: 23,
+    outOfStockItems: 5,
+    status: 'scheduled',
+    generatedDate: '2024-07-26',
+    generatedBy: 'System Scheduler',
+    warehouse: 'All Warehouses'
+  },
+  {
+    id: '7',
+    reportName: 'WIP Inventory Status - July 2024',
+    reportType: 'stock_level',
+    category: 'wip',
+    period: 'July 2024',
+    totalItems: 178,
+    totalValue: 67000000,
+    lowStockItems: 5,
+    outOfStockItems: 0,
+    status: 'generated',
+    generatedDate: '2024-07-25',
+    generatedBy: 'Production Manager',
+    warehouse: 'Production Floor'
+  },
+  {
+    id: '8',
+    reportName: 'Packaging Materials Report - July 2024',
+    reportType: 'stock_level',
+    category: 'packaging',
+    period: 'July 2024',
+    totalItems: 89,
+    totalValue: 23000000,
+    lowStockItems: 4,
+    outOfStockItems: 1,
+    status: 'failed',
+    generatedDate: '2024-07-24',
+    generatedBy: 'Packaging Supervisor',
+    warehouse: 'Packaging Store'
   }
 ]
 
-// Mock stock alerts
-const mockStockAlerts: StockAlert[] = [
-  {
-    id: '1',
-    itemCode: 'RS-001-BLK-42',
-    itemName: 'Air Runner Pro Black Size 42',
-    currentStock: 5,
-    minimumStock: 20,
-    maximumStock: 100,
-    alertType: 'low-stock',
-    warehouse: 'Main Warehouse Jakarta',
-    lastMovement: '2024-07-23'
-  },
-  {
-    id: '2',
-    itemCode: 'CS-002-WHT-39',
-    itemName: 'Canvas Classic White Size 39',
-    currentStock: 0,
-    minimumStock: 15,
-    maximumStock: 80,
-    alertType: 'out-of-stock',
-    warehouse: 'Distribution Center Surabaya',
-    lastMovement: '2024-07-20'
-  },
-  {
-    id: '3',
-    itemCode: 'BT-003-BRN-41',
-    itemName: 'Winter Boot Brown Size 41',
-    currentStock: 150,
-    minimumStock: 10,
-    maximumStock: 50,
-    alertType: 'overstock',
-    warehouse: 'Warehouse Bandung',
-    lastMovement: '2024-07-15'
-  },
-  {
-    id: '4',
-    itemCode: 'LTH-004-PRM',
-    itemName: 'Premium Leather Roll',
-    currentStock: 25,
-    minimumStock: 10,
-    maximumStock: 100,
-    alertType: 'expiring',
-    warehouse: 'Raw Materials Warehouse',
-    daysUntilExpiry: 15,
-    lastMovement: '2024-07-10'
-  }
-]
-
-// Status and type color mappings
 const statusColors = {
-  generated: 'bg-green-100 text-green-800',
-  processing: 'bg-blue-100 text-blue-800',
-  scheduled: 'bg-yellow-100 text-yellow-800',
-  failed: 'bg-red-100 text-red-800'
+  generated: 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400',
+  processing: 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400',
+  scheduled: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400',
+  failed: 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'
 }
 
 const typeColors = {
-  'stock-level': 'bg-blue-100 text-blue-800',
-  'movement': 'bg-green-100 text-green-800',
-  'valuation': 'bg-purple-100 text-purple-800',
-  'turnover': 'bg-orange-100 text-orange-800',
-  'aging': 'bg-red-100 text-red-800',
-  'forecasting': 'bg-teal-100 text-teal-800'
+  stock_level: 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400',
+  movement: 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400',
+  valuation: 'bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-400',
+  turnover: 'bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-400',
+  aging: 'bg-pink-100 text-pink-800 dark:bg-pink-900/20 dark:text-pink-400',
+  reorder: 'bg-teal-100 text-teal-800 dark:bg-teal-900/20 dark:text-teal-400'
 }
 
-const alertColors = {
-  'low-stock': 'bg-yellow-100 text-yellow-800',
-  'out-of-stock': 'bg-red-100 text-red-800',
-  'overstock': 'bg-purple-100 text-purple-800',
-  'expiring': 'bg-orange-100 text-orange-800'
+const categoryColors = {
+  finished_goods: 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400',
+  raw_materials: 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400',
+  wip: 'bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-400',
+  packaging: 'bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-400',
+  all: 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400'
 }
 
 export default function InventoryReportsPage() {
   const [mounted, setMounted] = useState(false)
-  const [viewMode, setViewMode] = useState<'cards' | 'table'>('table')
+  const [reportsData, setReportsData] = useState<InventoryReport[]>(mockInventoryReports)
+  const [loading, setLoading] = useState(false)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [filteredData, setFilteredData] = useState<InventoryReport[]>(mockInventoryReports)
+  const [selectedType, setSelectedType] = useState<string>('all')
+  const [selectedCategory, setSelectedCategory] = useState<string>('all')
+  const [selectedStatus, setSelectedStatus] = useState<string>('all')
+  const [currentPage, setCurrentPage] = useState(1)
+  const [pageSize, setPageSize] = useState(10)
 
   useEffect(() => {
     setMounted(true)
   }, [])
+
+  useEffect(() => {
+    let filtered = reportsData
+
+    if (searchTerm) {
+      filtered = filtered.filter(item =>
+        item.reportName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.period.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.warehouse.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    }
+
+    if (selectedType !== 'all') {
+      filtered = filtered.filter(item => item.reportType === selectedType)
+    }
+
+    if (selectedCategory !== 'all') {
+      filtered = filtered.filter(item => item.category === selectedCategory)
+    }
+
+    if (selectedStatus !== 'all') {
+      filtered = filtered.filter(item => item.status === selectedStatus)
+    }
+
+    setFilteredData(filtered)
+    setCurrentPage(1)
+  }, [searchTerm, selectedType, selectedCategory, selectedStatus, reportsData])
+
+  const totalItems = filteredData.length
+  const startIndex = (currentPage - 1) * pageSize
+  const endIndex = startIndex + pageSize
+  const paginatedData = filteredData.slice(startIndex, endIndex)
+
+  const handlePageChange = (page: number, newPageSize: number) => {
+    setCurrentPage(page)
+    if (newPageSize !== pageSize) {
+      setPageSize(newPageSize)
+      setCurrentPage(1)
+    }
+  }
+
+  const columns = [
+    {
+      key: 'reportName' as keyof InventoryReport,
+      title: 'Report Name',
+      render: (value: unknown, item: InventoryReport) => (
+        <div>
+          <div className="font-medium max-w-64 truncate" title={item.reportName}>
+            {item.reportName}
+          </div>
+          <div className="text-xs text-gray-500 dark:text-gray-400">{item.period}</div>
+        </div>
+      )
+    },
+    {
+      key: 'reportType' as keyof InventoryReport,
+      title: 'Type',
+      render: (value: unknown, item: InventoryReport) => (
+        <Badge className={typeColors[item.reportType]}>
+          {item.reportType.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
+        </Badge>
+      )
+    },
+    {
+      key: 'category' as keyof InventoryReport,
+      title: 'Category',
+      render: (value: unknown, item: InventoryReport) => (
+        <Badge className={categoryColors[item.category]}>
+          {item.category.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
+        </Badge>
+      )
+    },
+    {
+      key: 'totalItems' as keyof InventoryReport,
+      title: 'Items',
+      render: (value: unknown, item: InventoryReport) => (
+        <div className="text-center font-medium">{item.totalItems}</div>
+      )
+    },
+    {
+      key: 'totalValue' as keyof InventoryReport,
+      title: 'Total Value',
+      render: (value: unknown, item: InventoryReport) => (
+        <div className="text-xs font-medium">
+          {mounted ? item.totalValue.toLocaleString('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }) : ''}
+        </div>
+      )
+    },
+    {
+      key: 'lowStockItems' as keyof InventoryReport,
+      title: 'Low Stock',
+      render: (value: unknown, item: InventoryReport) => (
+        <div className="text-center text-yellow-600 dark:text-yellow-400 font-medium">{item.lowStockItems}</div>
+      )
+    },
+    {
+      key: 'status' as keyof InventoryReport,
+      title: 'Status',
+      render: (value: unknown, item: InventoryReport) => (
+        <Badge className={statusColors[item.status]}>
+          {item.status.charAt(0).toUpperCase() + item.status.slice(1)}
+        </Badge>
+      )
+    },
+    {
+      key: 'warehouse' as keyof InventoryReport,
+      title: 'Warehouse',
+      render: (value: unknown, item: InventoryReport) => (
+        <div className="text-xs">{item.warehouse}</div>
+      )
+    }
+  ]
 
   const breadcrumbs = [
     { label: 'Reporting', href: '/reports' },
     { label: 'Inventory Reports', href: '/reports/inventory' }
   ]
 
-  // Calculate statistics
-  const totalReports = mockInventoryReports.length
-  const generatedReports = mockInventoryReports.filter(report => report.status === 'generated').length
-  const processingReports = mockInventoryReports.filter(report => report.status === 'processing').length
-  const scheduledReports = mockInventoryReports.filter(report => report.status === 'scheduled').length
-  const totalValue = mockInventoryReports.reduce((sum, report) => sum + report.totalValue, 0)
-  const totalItems = mockInventoryReports.reduce((sum, report) => sum + report.totalItems, 0)
-  const avgTurnover = mockInventoryReports.reduce((sum, report) => sum + report.turnoverRate, 0) / totalReports
-  const totalAlerts = mockStockAlerts.length
-
-  const columns = [
-    {
-      accessorKey: 'reportName',
-      header: 'Report Name',
-      cell: ({ row }: any) => (
-        <div>
-          <div className="font-medium max-w-64 truncate" title={row.getValue('reportName')}>
-            {row.getValue('reportName')}
-          </div>
-          <div className="text-xs text-gray-500">{row.original.warehouseName}</div>
-        </div>
-      )
-    },
-    {
-      accessorKey: 'reportType',
-      header: 'Type',
-      cell: ({ row }: any) => {
-        const type = row.getValue('reportType') as keyof typeof typeColors
-        return (
-          <Badge className={typeColors[type]}>
-            {type.replace('-', ' ').charAt(0).toUpperCase() + type.replace('-', ' ').slice(1)}
-          </Badge>
-        )
-      }
-    },
-    {
-      accessorKey: 'period',
-      header: 'Period',
-      cell: ({ row }: any) => (
-        <div className="text-xs">{row.getValue('period')}</div>
-      )
-    },
-    {
-      accessorKey: 'totalItems',
-      header: 'Items',
-      cell: ({ row }: any) => (
-        <div className="text-center font-medium">{row.getValue('totalItems')}</div>
-      )
-    },
-    {
-      accessorKey: 'totalValue',
-      header: 'Value',
-      cell: ({ row }: any) => (
-        <div className="text-xs font-medium">
-          {mounted ? row.getValue('totalValue').toLocaleString('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }) : ''}
-        </div>
-      )
-    },
-    {
-      accessorKey: 'turnoverRate',
-      header: 'Turnover',
-      cell: ({ row }: any) => (
-        <div className="text-center font-medium">{row.getValue('turnoverRate')}x</div>
-      )
-    },
-    {
-      accessorKey: 'status',
-      header: 'Status',
-      cell: ({ row }: any) => {
-        const status = row.getValue('status') as keyof typeof statusColors
-        return (
-          <Badge className={statusColors[status]}>
-            {status.charAt(0).toUpperCase() + status.slice(1)}
-          </Badge>
-        )
-      }
-    },
-    {
-      accessorKey: 'generatedDate',
-      header: 'Generated',
-      cell: ({ row }: any) => (
-        <div className="text-xs">
-          {mounted ? new Date(row.getValue('generatedDate')).toLocaleDateString('id-ID') : ''}
-        </div>
-      )
-    }
+  const typeOptions = [
+    { value: 'stock_level', label: 'Stock Level' },
+    { value: 'movement', label: 'Movement' },
+    { value: 'valuation', label: 'Valuation' },
+    { value: 'turnover', label: 'Turnover' },
+    { value: 'aging', label: 'Aging' },
+    { value: 'reorder', label: 'Reorder' }
   ]
 
-  const ReportCard = ({ report }: { report: InventoryReport }) => (
-    <Card className="p-4">
-      <div className="flex items-start justify-between mb-3">
-        <div className="flex-1">
-          <h3 className="font-semibold text-gray-900 mb-1 line-clamp-2" title={report.reportName}>
-            {report.reportName}
-          </h3>
-          <p className="text-sm text-gray-500">{report.description}</p>
-        </div>
-        <Badge className={statusColors[report.status]}>
-          {report.status.charAt(0).toUpperCase() + report.status.slice(1)}
-        </Badge>
-      </div>
-      
-      <div className="space-y-2 text-sm">
-        <div className="flex justify-between">
-          <span className="text-gray-500">Type:</span>
-          <Badge className={typeColors[report.reportType]}>
-            {report.reportType.replace('-', ' ').charAt(0).toUpperCase() + report.reportType.replace('-', ' ').slice(1)}
-          </Badge>
-        </div>
-        
-        <div className="flex justify-between">
-          <span className="text-gray-500">Warehouse:</span>
-          <span className="font-medium max-w-32 truncate" title={report.warehouseName}>
-            {report.warehouseName}
-          </span>
-        </div>
-        
-        <div className="flex justify-between">
-          <span className="text-gray-500">Period:</span>
-          <span className="font-medium">{report.period}</span>
-        </div>
-        
-        <div className="flex justify-between">
-          <span className="text-gray-500">Total Items:</span>
-          <span className="font-medium">{report.totalItems}</span>
-        </div>
-        
-        <div className="flex justify-between">
-          <span className="text-gray-500">Total Value:</span>
-          <span className="font-medium">
-            {mounted ? report.totalValue.toLocaleString('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }) : ''}
-          </span>
-        </div>
-        
-        <div className="flex justify-between">
-          <span className="text-gray-500">Turnover Rate:</span>
-          <span className="font-medium">{report.turnoverRate}x</span>
-        </div>
-        
-        <div className="flex justify-between">
-          <span className="text-gray-500">Generated:</span>
-          <span>{mounted ? new Date(report.generatedDate).toLocaleDateString('id-ID') : ''}</span>
-        </div>
-        
-        <div className="flex justify-between">
-          <span className="text-gray-500">Formats:</span>
-          <span className="text-xs">{report.formats.join(', ')}</span>
-        </div>
-      </div>
-      
-      <div className="flex space-x-2 mt-4">
-        <Button size="sm" variant="outline" className="flex-1">
-          View
-        </Button>
-        <Button size="sm" className="flex-1" disabled={report.status !== 'generated'}>
-          Download
-        </Button>
-      </div>
-    </Card>
-  )
+  const categoryOptions = [
+    { value: 'finished_goods', label: 'Finished Goods' },
+    { value: 'raw_materials', label: 'Raw Materials' },
+    { value: 'wip', label: 'WIP' },
+    { value: 'packaging', label: 'Packaging' },
+    { value: 'all', label: 'All Categories' }
+  ]
+
+  const statusOptions = [
+    { value: 'generated', label: 'Generated' },
+    { value: 'processing', label: 'Processing' },
+    { value: 'scheduled', label: 'Scheduled' },
+    { value: 'failed', label: 'Failed' }
+  ]
 
   return (
     <TwoLevelLayout>
-      <div className="flex-1 space-y-6">
-        <Header 
-          title="Inventory Reports"
-          breadcrumbs={breadcrumbs}
-        />
-
-        {/* Inventory Metrics */}
-        <div>
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Inventory Performance Overview</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-            {mockInventoryMetrics.map((metric) => {
-              const trendColor = metric.changeType === 'increase' ? 'text-green-600' : 'text-red-600'
-
-              return (
-                <Card key={metric.id} className="p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="p-2 bg-gray-100 rounded-lg">
-                      <div className={`h-5 w-5 ${metric.color}`} />
-                    </div>
-                    <div className={`flex items-center space-x-1 ${trendColor}`}>
-                      <span className="text-xs font-medium">{metric.changeType === 'increase' ? '+' : '-'}{Math.abs(metric.change)}%</span>
-                    </div>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-600">{metric.title}</p>
-                    <p className="text-xl font-bold text-gray-900">{metric.value}</p>
-                    <p className="text-xs text-gray-500">{metric.period}</p>
-                  </div>
-                </Card>
-              )
-            })}
-          </div>
-        </div>
-
-        {/* Stock Alerts */}
-        <Card className="p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-900">Stock Alerts</h3>
-            <Badge className="bg-red-100 text-red-800">
-              {totalAlerts} Active Alerts
-            </Badge>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {mockStockAlerts.map((alert) => (
-              <div key={alert.id} className="p-3 border rounded-lg">
-                <div className="flex items-center justify-between mb-2">
-                  <Badge className={alertColors[alert.alertType]} size="sm">
-                    {alert.alertType.replace('-', ' ').charAt(0).toUpperCase() + alert.alertType.replace('-', ' ').slice(1)}
-                  </Badge>
-                  {alert.alertType === 'expiring' && (
-                    <span className="text-xs text-orange-600 font-medium">
-                      {alert.daysUntilExpiry} days
-                    </span>
-                  )}
-                </div>
-                <h4 className="font-medium text-sm mb-1">{alert.itemCode}</h4>
-                <p className="text-xs text-gray-600 mb-2 line-clamp-2">{alert.itemName}</p>
-                <div className="text-xs space-y-1">
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">Current:</span>
-                    <span className="font-medium">{alert.currentStock}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">Min/Max:</span>
-                    <span className="font-medium">{alert.minimumStock}/{alert.maximumStock}</span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </Card>
-
-        {/* Statistics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-8 gap-4">
-          <Card className="p-4">
-            <div className="flex items-center space-x-3">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <div className="h-5 w-5" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-600">Total Reports</p>
-                <p className="text-2xl font-bold text-gray-900">{totalReports}</p>
-              </div>
-            </div>
-          </Card>
-
-          <Card className="p-4">
-            <div className="flex items-center space-x-3">
-              <div className="p-2 bg-green-100 rounded-lg">
-                <div className="h-5 w-5" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-600">Generated</p>
-                <p className="text-2xl font-bold text-green-600">{generatedReports}</p>
-              </div>
-            </div>
-          </Card>
-
-          <Card className="p-4">
-            <div className="flex items-center space-x-3">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <div className="h-5 w-5" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-600">Processing</p>
-                <p className="text-2xl font-bold text-blue-600">{processingReports}</p>
-              </div>
-            </div>
-          </Card>
-
-          <Card className="p-4">
-            <div className="flex items-center space-x-3">
-              <div className="p-2 bg-yellow-100 rounded-lg">
-                <div className="h-5 w-5" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-600">Scheduled</p>
-                <p className="text-2xl font-bold text-yellow-600">{scheduledReports}</p>
-              </div>
-            </div>
-          </Card>
-
-          <Card className="p-4">
-            <div className="flex items-center space-x-3">
-              <div className="p-2 bg-purple-100 rounded-lg">
-                <div className="h-5 w-5" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-600">Total Value</p>
-                <p className="text-2xl font-bold text-purple-600">
-                  {mounted ? (totalValue / 1000000000).toFixed(1) : ''}B
-                </p>
-              </div>
-            </div>
-          </Card>
-
-          <Card className="p-4">
-            <div className="flex items-center space-x-3">
-              <div className="p-2 bg-indigo-100 rounded-lg">
-                <div className="h-5 w-5" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-600">Total Items</p>
-                <p className="text-2xl font-bold text-indigo-600">
-                  {(totalItems / 1000).toFixed(1)}K
-                </p>
-              </div>
-            </div>
-          </Card>
-
-          <Card className="p-4">
-            <div className="flex items-center space-x-3">
-              <div className="p-2 bg-teal-100 rounded-lg">
-                <div className="h-5 w-5" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-600">Avg Turnover</p>
-                <p className="text-2xl font-bold text-teal-600">
-                  {mounted ? avgTurnover.toFixed(1) : ''}x
-                </p>
-              </div>
-            </div>
-          </Card>
-
-          <Card className="p-4">
-            <div className="flex items-center space-x-3">
-              <div className="p-2 bg-red-100 rounded-lg">
-                <div className="h-5 w-5" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-600">Alerts</p>
-                <p className="text-2xl font-bold text-red-600">{totalAlerts}</p>
-              </div>
-            </div>
-          </Card>
-        </div>
-
-        {/* View Toggle and Actions */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <Button
-              variant={viewMode === 'cards' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setViewMode('cards')}
-            >
-              Cards
-            </Button>
-            <Button
-              variant={viewMode === 'table' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setViewMode('table')}
-            >
-              Table
-            </Button>
-          </div>
-          
-          <div className="flex items-center space-x-2">
-            <Button variant="outline" size="sm">
-              Filter Reports
-            </Button>
-            <Button variant="outline" size="sm">
-              Schedule Report
+      <Header
+        title="Inventory Reports"
+        description="Stock levels, movements, and valuation analytics"
+        breadcrumbs={breadcrumbs}
+        actions={
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={() => setLoading(!loading)}>
+              <HugeiconsIcon icon={ReloadIcon} className="w-4 h-4 mr-2" />
+              Refresh
             </Button>
             <Button size="sm">
+              <HugeiconsIcon icon={PlusSignIcon} className="w-4 h-4 mr-2" />
               Generate Report
             </Button>
           </div>
+        }
+      />
+
+      <div className="flex-1 p-6 space-y-6">
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex-1 max-w-md">
+            <div className="relative">
+              <HugeiconsIcon icon={Search01Icon} className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search by report name, period, or warehouse..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-9"
+              />
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Select value={selectedType} onValueChange={setSelectedType}>
+              <SelectTrigger className="w-36">
+                <SelectValue placeholder="All Types" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Types</SelectItem>
+                {typeOptions.map(type => (
+                  <SelectItem key={type.value} value={type.value}>
+                    {type.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+              <SelectTrigger className="w-36">
+                <SelectValue placeholder="All Categories" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Categories</SelectItem>
+                {categoryOptions.map(category => (
+                  <SelectItem key={category.value} value={category.value}>
+                    {category.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+              <SelectTrigger className="w-36">
+                <SelectValue placeholder="All Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Status</SelectItem>
+                {statusOptions.map(status => (
+                  <SelectItem key={status.value} value={status.value}>
+                    {status.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {(searchTerm || selectedType !== 'all' || selectedCategory !== 'all' || selectedStatus !== 'all') && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setSearchTerm('')
+                  setSelectedType('all')
+                  setSelectedCategory('all')
+                  setSelectedStatus('all')
+                }}
+              >
+                <HugeiconsIcon icon={Cancel01Icon} className="w-4 h-4 mr-2" />
+                Clear
+              </Button>
+            )}
+
+            <Select>
+              <SelectTrigger className="w-36">
+                <HugeiconsIcon icon={Download01Icon} className="h-4 w-4 mr-2" />
+                <SelectValue placeholder="Export" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="pdf">Export as PDF</SelectItem>
+                <SelectItem value="excel">Export as Excel</SelectItem>
+                <SelectItem value="csv">Export as CSV</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
-        {/* Data Display */}
-        {viewMode === 'cards' ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {mockInventoryReports.map((report) => (
-              <ReportCard key={report.id} report={report} />
-            ))}
+        {loading ? (
+          <div className="flex justify-center items-center py-12">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <p className="text-muted-foreground">Loading inventory reports...</p>
+            </div>
           </div>
         ) : (
-          <Card>
-            <AdvancedDataTable
-              data={mockInventoryReports}
-              columns={columns}
-              searchPlaceholder="Search report names, types, or warehouses..."
-              showFilters={true}
-            />
-          </Card>
+          <DataTable
+            data={paginatedData}
+            columns={columns}
+            pagination={{
+              current: currentPage,
+              pageSize: pageSize,
+              total: totalItems,
+              onChange: handlePageChange
+            }}
+          />
         )}
       </div>
     </TwoLevelLayout>

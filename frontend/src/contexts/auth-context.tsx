@@ -87,6 +87,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
         console.log('Setting user data:', userData) // Debug log
         setUser(userData)
+        apiClient.setCompanyId(userData.company_id)
         return true
       } catch (tokenError) {
         console.error('Token parsing error:', tokenError)
@@ -131,6 +132,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
           console.log('Setting user data after login:', userData) // Debug log
           setUser(userData)
+          apiClient.setCompanyId(userData.company_id)
 
           // Clear auth attempt cookie on successful login
           if (typeof window !== 'undefined') {
@@ -185,6 +187,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     authService.logout()
     setUser(null)
     apiClient.setToken('')
+    apiClient.setCompanyId(undefined)
 
     // Clear stored email
     if (typeof window !== 'undefined') {
@@ -227,6 +230,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
             console.log('Setting user data on init:', userData) // Debug log
             setUser(userData)
             apiClient.setToken(token)
+            apiClient.setCompanyId(userData.company_id)
             authService.initializeAuth() // Set cookie
           } catch (tokenError) {
             // Fallback to full checkAuth if parsing fails

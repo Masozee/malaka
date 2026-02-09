@@ -3,11 +3,11 @@ package services
 import (
 	"context"
 
-	"github.com/google/uuid"
 	"malaka/internal/modules/shipping/domain"
 	"malaka/internal/modules/shipping/domain/dtos"
 	"malaka/internal/modules/shipping/domain/entities"
 	"malaka/internal/modules/shipping/domain/repositories"
+	"malaka/internal/shared/uuid"
 )
 
 type manifestService struct {
@@ -21,13 +21,13 @@ func NewManifestService(repo repositories.ManifestRepository) domain.ManifestSer
 func (s *manifestService) CreateManifest(ctx context.Context, req *dtos.CreateManifestRequest) error {
 	manifest := &entities.Manifest{
 		ManifestDate:   req.ManifestDate,
-		CourierID:      req.CourierID.String(),
+		CourierID:      req.CourierID,
 		TotalShipments: req.TotalShipments,
 	}
 	return s.repo.Create(ctx, manifest)
 }
 
-func (s *manifestService) GetManifestByID(ctx context.Context, id uuid.UUID) (*entities.Manifest, error) {
+func (s *manifestService) GetManifestByID(ctx context.Context, id uuid.ID) (*entities.Manifest, error) {
 	return s.repo.GetByID(ctx, id)
 }
 
@@ -42,13 +42,12 @@ func (s *manifestService) UpdateManifest(ctx context.Context, req *dtos.UpdateMa
 	}
 
 	manifest.ManifestDate = req.ManifestDate
-	manifest.CourierID = req.CourierID.String()
+	manifest.CourierID = req.CourierID
 	manifest.TotalShipments = req.TotalShipments
 
 	return s.repo.Update(ctx, manifest)
 }
 
-func (s *manifestService) DeleteManifest(ctx context.Context, id uuid.UUID) error {
+func (s *manifestService) DeleteManifest(ctx context.Context, id uuid.ID) error {
 	return s.repo.Delete(ctx, id)
 }
-

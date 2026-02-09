@@ -8,6 +8,7 @@ import (
 	"malaka/internal/modules/sales/presentation/http/dto"
 	"malaka/internal/shared/response"
 	"malaka/internal/shared/utils"
+	"malaka/internal/shared/uuid"
 )
 
 // PosTransactionHandler handles HTTP requests for POS transaction operations.
@@ -28,19 +29,30 @@ func (h *PosTransactionHandler) CreatePosTransaction(c *gin.Context) {
 		return
 	}
 
+	cashierID, err := uuid.Parse(req.CashierID)
+	if err != nil {
+		response.BadRequest(c, "Invalid cashier ID format", nil)
+		return
+	}
+
 	pt := &entities.PosTransaction{
 		TransactionDate: utils.Now(),
 		TotalAmount:     req.TotalAmount,
 		PaymentMethod:   req.PaymentMethod,
-		CashierID:       req.CashierID,
+		CashierID:       cashierID,
 	}
 
 	var items []*entities.PosItem
 	for _, itemReq := range req.Items {
+		articleID, err := uuid.Parse(itemReq.ArticleID)
+		if err != nil {
+			response.BadRequest(c, "Invalid article ID format", nil)
+			return
+		}
 		items = append(items, &entities.PosItem{
-			ArticleID: itemReq.ArticleID,
-			Quantity:  itemReq.Quantity,
-			UnitPrice: itemReq.UnitPrice,
+			ArticleID:  articleID,
+			Quantity:   itemReq.Quantity,
+			UnitPrice:  itemReq.UnitPrice,
 			TotalPrice: itemReq.TotalPrice,
 		})
 	}
@@ -67,7 +79,12 @@ func (h *PosTransactionHandler) GetAllPosTransactions(c *gin.Context) {
 // GetPosTransactionByID handles retrieving a POS transaction by its ID.
 func (h *PosTransactionHandler) GetPosTransactionByID(c *gin.Context) {
 	id := c.Param("id")
-	pt, err := h.service.GetPosTransactionByID(c.Request.Context(), id)
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		response.BadRequest(c, "Invalid ID format", nil)
+		return
+	}
+	pt, err := h.service.GetPosTransactionByID(c.Request.Context(), parsedID)
 	if err != nil {
 		response.InternalServerError(c, err.Error(), nil)
 		return
@@ -89,13 +106,25 @@ func (h *PosTransactionHandler) UpdatePosTransaction(c *gin.Context) {
 		return
 	}
 
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		response.BadRequest(c, "Invalid ID format", nil)
+		return
+	}
+
+	cashierID, err := uuid.Parse(req.CashierID)
+	if err != nil {
+		response.BadRequest(c, "Invalid cashier ID format", nil)
+		return
+	}
+
 	pt := &entities.PosTransaction{
 		TransactionDate: utils.Now(),
 		TotalAmount:     req.TotalAmount,
 		PaymentMethod:   req.PaymentMethod,
-		CashierID:       req.CashierID,
+		CashierID:       cashierID,
 	}
-	pt.ID = id // Set the ID from the URL parameter
+	pt.ID = parsedID // Set the ID from the URL parameter
 
 	if err := h.service.UpdatePosTransaction(c.Request.Context(), pt); err != nil {
 		response.InternalServerError(c, err.Error(), nil)
@@ -108,7 +137,12 @@ func (h *PosTransactionHandler) UpdatePosTransaction(c *gin.Context) {
 // DeletePosTransaction handles deleting a POS transaction by its ID.
 func (h *PosTransactionHandler) DeletePosTransaction(c *gin.Context) {
 	id := c.Param("id")
-	if err := h.service.DeletePosTransaction(c.Request.Context(), id); err != nil {
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		response.BadRequest(c, "Invalid ID format", nil)
+		return
+	}
+	if err := h.service.DeletePosTransaction(c.Request.Context(), parsedID); err != nil {
 		response.InternalServerError(c, err.Error(), nil)
 		return
 	}

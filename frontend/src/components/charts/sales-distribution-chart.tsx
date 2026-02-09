@@ -13,7 +13,7 @@ interface SalesDistributionChartProps {
 }
 
 const COLORS = [
-  '#2563eb', // Blue 600
+  '#00979D', // Teal primary
   '#7c3aed', // Violet 600
   '#db2777', // Pink 600
   '#ea580c', // Orange 600

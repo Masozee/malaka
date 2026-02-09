@@ -6,10 +6,10 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	"malaka/internal/modules/hr/domain/services"
 	"malaka/internal/modules/hr/presentation/http/dto"
 	"malaka/internal/shared/response"
+	"malaka/internal/shared/uuid"
 )
 
 // TrainingHandler handles HTTP requests for training operations
@@ -177,7 +177,7 @@ func (h *TrainingHandler) GetAllEnrollments(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "50"))
 
-	var programID, employeeID *uuid.UUID
+	var programID, employeeID *uuid.ID
 
 	if pidStr := c.Query("program_id"); pidStr != "" {
 		pid, err := uuid.Parse(pidStr)

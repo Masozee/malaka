@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/google/uuid"
+	"malaka/internal/shared/uuid"
 	"malaka/internal/modules/accounting/domain/entities"
 	"malaka/internal/modules/accounting/domain/repositories"
 )
@@ -42,7 +42,7 @@ func (s *generalLedgerServiceImpl) CreateEntry(ctx context.Context, entry *entit
 }
 
 // GetEntryByID retrieves a general ledger entry by ID
-func (s *generalLedgerServiceImpl) GetEntryByID(ctx context.Context, id uuid.UUID) (*entities.GeneralLedger, error) {
+func (s *generalLedgerServiceImpl) GetEntryByID(ctx context.Context, id uuid.ID) (*entities.GeneralLedger, error) {
 	return s.glRepo.GetByID(ctx, id)
 }
 
@@ -64,32 +64,32 @@ func (s *generalLedgerServiceImpl) UpdateEntry(ctx context.Context, entry *entit
 }
 
 // DeleteEntry deletes a general ledger entry
-func (s *generalLedgerServiceImpl) DeleteEntry(ctx context.Context, id uuid.UUID) error {
+func (s *generalLedgerServiceImpl) DeleteEntry(ctx context.Context, id uuid.ID) error {
 	return s.glRepo.Delete(ctx, id)
 }
 
 // GetEntriesByAccount retrieves entries by account ID
-func (s *generalLedgerServiceImpl) GetEntriesByAccount(ctx context.Context, accountID uuid.UUID) ([]*entities.GeneralLedger, error) {
+func (s *generalLedgerServiceImpl) GetEntriesByAccount(ctx context.Context, accountID uuid.ID) ([]*entities.GeneralLedger, error) {
 	return s.glRepo.GetByAccountID(ctx, accountID)
 }
 
 // GetAccountBalance calculates account balance as of a specific date
-func (s *generalLedgerServiceImpl) GetAccountBalance(ctx context.Context, accountID uuid.UUID, asOfDate time.Time) (float64, error) {
+func (s *generalLedgerServiceImpl) GetAccountBalance(ctx context.Context, accountID uuid.ID, asOfDate time.Time) (float64, error) {
 	return s.glRepo.GetAccountBalance(ctx, accountID, asOfDate)
 }
 
 // GetAccountMovements retrieves account movements for a period
-func (s *generalLedgerServiceImpl) GetAccountMovements(ctx context.Context, accountID uuid.UUID, startDate, endDate time.Time) ([]*entities.GeneralLedger, error) {
+func (s *generalLedgerServiceImpl) GetAccountMovements(ctx context.Context, accountID uuid.ID, startDate, endDate time.Time) ([]*entities.GeneralLedger, error) {
 	return s.glRepo.GetAccountMovements(ctx, accountID, startDate, endDate)
 }
 
 // RecalculateAccountBalances recalculates running balances for an account
-func (s *generalLedgerServiceImpl) RecalculateAccountBalances(ctx context.Context, accountID uuid.UUID) error {
+func (s *generalLedgerServiceImpl) RecalculateAccountBalances(ctx context.Context, accountID uuid.ID) error {
 	return s.glRepo.RecalculateAccountBalances(ctx, accountID)
 }
 
 // GetEntriesByJournalEntry retrieves entries by journal entry ID
-func (s *generalLedgerServiceImpl) GetEntriesByJournalEntry(ctx context.Context, journalEntryID uuid.UUID) ([]*entities.GeneralLedger, error) {
+func (s *generalLedgerServiceImpl) GetEntriesByJournalEntry(ctx context.Context, journalEntryID uuid.ID) ([]*entities.GeneralLedger, error) {
 	return s.glRepo.GetByJournalEntryID(ctx, journalEntryID)
 }
 
@@ -135,7 +135,7 @@ func (s *generalLedgerServiceImpl) GetTrialBalanceData(ctx context.Context, comp
 }
 
 // GetLedgerReport generates a ledger report for an account
-func (s *generalLedgerServiceImpl) GetLedgerReport(ctx context.Context, accountID uuid.UUID, startDate, endDate time.Time) ([]*entities.GeneralLedger, error) {
+func (s *generalLedgerServiceImpl) GetLedgerReport(ctx context.Context, accountID uuid.ID, startDate, endDate time.Time) ([]*entities.GeneralLedger, error) {
 	entries, err := s.glRepo.GetByAccountAndDateRange(ctx, accountID, startDate, endDate)
 	if err != nil {
 		return nil, err
@@ -167,7 +167,7 @@ func (s *generalLedgerServiceImpl) ValidateEntry(ctx context.Context, entry *ent
 }
 
 // PostJournalToLedger posts a journal entry to the general ledger
-func (s *generalLedgerServiceImpl) PostJournalToLedger(ctx context.Context, journalEntryID uuid.UUID) error {
+func (s *generalLedgerServiceImpl) PostJournalToLedger(ctx context.Context, journalEntryID uuid.ID) error {
 	// Retrieve the journal entry
 	journalEntry, err := s.journalRepo.GetByID(ctx, journalEntryID)
 	if err != nil {

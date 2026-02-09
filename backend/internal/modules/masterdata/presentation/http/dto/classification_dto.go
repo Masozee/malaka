@@ -1,6 +1,9 @@
 package dto
 
-import "malaka/internal/modules/masterdata/domain/entities"
+import (
+	"malaka/internal/modules/masterdata/domain/entities"
+	"malaka/internal/shared/uuid"
+)
 
 // CreateClassificationRequest represents the request body for creating a new classification.
 type CreateClassificationRequest struct {
@@ -8,6 +11,7 @@ type CreateClassificationRequest struct {
 	Name        string  `json:"name" binding:"required"`
 	Description *string `json:"description"`
 	ParentID    *string `json:"parent_id"`
+	CompanyID   string  `json:"company_id"`
 	Status      string  `json:"status"`
 }
 
@@ -17,7 +21,7 @@ func (r *CreateClassificationRequest) ToEntity() *entities.Classification {
 		Code:        r.Code,
 		Name:        r.Name,
 		Description: r.Description,
-		ParentID:    r.ParentID,
+		CompanyID:   r.CompanyID,
 		Status:      r.Status,
 	}
 
@@ -26,9 +30,11 @@ func (r *CreateClassificationRequest) ToEntity() *entities.Classification {
 		classification.Status = "active"
 	}
 
-	// Handle empty parent_id
-	if r.ParentID != nil && *r.ParentID == "" {
-		classification.ParentID = nil
+	// Handle ParentID - convert string to *uuid.ID
+	if r.ParentID != nil && *r.ParentID != "" {
+		if id, err := uuid.Parse(*r.ParentID); err == nil {
+			classification.ParentID = &id
+		}
 	}
 
 	return classification
@@ -58,7 +64,9 @@ func (r *UpdateClassificationRequest) ApplyToEntity(classification *entities.Cla
 		if *r.ParentID == "" {
 			classification.ParentID = nil
 		} else {
-			classification.ParentID = r.ParentID
+			if id, err := uuid.Parse(*r.ParentID); err == nil {
+				classification.ParentID = &id
+			}
 		}
 	}
 	if r.Status != nil {
@@ -73,21 +81,30 @@ type ClassificationResponse struct {
 	Name        string  `json:"name"`
 	Description *string `json:"description,omitempty"`
 	ParentID    *string `json:"parent_id,omitempty"`
+	CompanyID   string  `json:"company_id"`
 	Status      string  `json:"status"`
 	CreatedAt   string  `json:"created_at"`
 	UpdatedAt   string  `json:"updated_at"`
 }
 
-// FromEntity converts entities.Classification to ClassificationResponse.
+// ClassificationResponseFromEntity converts entities.Classification to ClassificationResponse.
 func ClassificationResponseFromEntity(classification *entities.Classification) *ClassificationResponse {
-	return &ClassificationResponse{
-		ID:          classification.ID,
+	resp := &ClassificationResponse{
+		ID:          classification.ID.String(),
 		Code:        classification.Code,
 		Name:        classification.Name,
 		Description: classification.Description,
-		ParentID:    classification.ParentID,
+		CompanyID:   classification.CompanyID,
 		Status:      classification.Status,
 		CreatedAt:   classification.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
 		UpdatedAt:   classification.UpdatedAt.Format("2006-01-02T15:04:05Z07:00"),
 	}
+
+	// Convert ParentID from *uuid.ID to *string
+	if classification.ParentID != nil {
+		parentIDStr := classification.ParentID.String()
+		resp.ParentID = &parentIDStr
+	}
+
+	return resp
 }

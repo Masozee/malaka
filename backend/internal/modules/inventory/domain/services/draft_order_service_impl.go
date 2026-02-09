@@ -6,7 +6,7 @@ import (
 
 	"malaka/internal/modules/inventory/domain/entities"
 	"malaka/internal/modules/inventory/domain/repositories"
-	"malaka/internal/shared/utils"
+	"malaka/internal/shared/uuid"
 )
 
 // draftOrderServiceImpl implements DraftOrderService.
@@ -21,8 +21,8 @@ func NewDraftOrderService(repo repositories.DraftOrderRepository) DraftOrderServ
 
 // CreateDraftOrder creates a new draft order.
 func (s *draftOrderServiceImpl) CreateDraftOrder(ctx context.Context, draftOrder *entities.DraftOrder) error {
-	if draftOrder.ID == "" {
-		draftOrder.ID = utils.RandomString(10) // Generate a random ID if not provided
+	if draftOrder.ID.IsNil() {
+		draftOrder.ID = uuid.New()
 	}
 	return s.repo.Create(ctx, draftOrder)
 }
@@ -35,7 +35,7 @@ func (s *draftOrderServiceImpl) GetDraftOrderByID(ctx context.Context, id string
 // UpdateDraftOrder updates an existing draft order.
 func (s *draftOrderServiceImpl) UpdateDraftOrder(ctx context.Context, draftOrder *entities.DraftOrder) error {
 	// Ensure the draft order exists before updating
-	existingDraftOrder, err := s.repo.GetByID(ctx, draftOrder.ID)
+	existingDraftOrder, err := s.repo.GetByID(ctx, draftOrder.ID.String())
 	if err != nil {
 		return err
 	}

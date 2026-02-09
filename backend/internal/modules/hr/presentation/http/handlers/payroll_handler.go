@@ -5,11 +5,11 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	"malaka/internal/modules/hr/domain/entities"
 	"malaka/internal/modules/hr/domain/services"
 	"malaka/internal/modules/hr/presentation/http/dto"
 	"malaka/internal/shared/response"
+	"malaka/internal/shared/uuid"
 )
 
 // PayrollHandler handles HTTP requests for payroll operations
@@ -42,8 +42,13 @@ func (h *PayrollHandler) GetPayrollPeriods(c *gin.Context) {
 
 // GetPayrollPeriodByID handles GET /payroll/periods/:id
 func (h *PayrollHandler) GetPayrollPeriodByID(c *gin.Context) {
-	id := c.Param("id")
-	
+	idStr := c.Param("id")
+	id, err := uuid.Parse(idStr)
+	if err != nil {
+		response.BadRequest(c, "Invalid ID format", err.Error())
+		return
+	}
+
 	period, err := h.payrollService.GetPayrollPeriodByID(c.Request.Context(), id)
 	if err != nil {
 		response.NotFound(c, "Payroll period not found", err.Error())
@@ -87,8 +92,13 @@ func (h *PayrollHandler) CreatePayrollPeriod(c *gin.Context) {
 
 // UpdatePayrollPeriod handles PUT /payroll/periods/:id
 func (h *PayrollHandler) UpdatePayrollPeriod(c *gin.Context) {
-	id := c.Param("id")
-	
+	idStr := c.Param("id")
+	id, err := uuid.Parse(idStr)
+	if err != nil {
+		response.BadRequest(c, "Invalid ID format", err.Error())
+		return
+	}
+
 	var req dto.PayrollPeriodRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		response.BadRequest(c, "Invalid request body", err.Error())
@@ -123,9 +133,14 @@ func (h *PayrollHandler) UpdatePayrollPeriod(c *gin.Context) {
 
 // DeletePayrollPeriod handles DELETE /payroll/periods/:id
 func (h *PayrollHandler) DeletePayrollPeriod(c *gin.Context) {
-	id := c.Param("id")
-	
-	err := h.payrollService.DeletePayrollPeriod(c.Request.Context(), id)
+	idStr := c.Param("id")
+	id, err := uuid.Parse(idStr)
+	if err != nil {
+		response.BadRequest(c, "Invalid ID format", err.Error())
+		return
+	}
+
+	err = h.payrollService.DeletePayrollPeriod(c.Request.Context(), id)
 	if err != nil {
 		response.BadRequest(c, "Failed to delete payroll period", err.Error())
 		return
@@ -173,8 +188,13 @@ func (h *PayrollHandler) GetSalaryCalculations(c *gin.Context) {
 
 // GetSalaryCalculationByID handles GET /payroll/calculations/:id
 func (h *PayrollHandler) GetSalaryCalculationByID(c *gin.Context) {
-	id := c.Param("id")
-	
+	idStr := c.Param("id")
+	id, err := uuid.Parse(idStr)
+	if err != nil {
+		response.BadRequest(c, "Invalid ID format", err.Error())
+		return
+	}
+
 	calculation, err := h.payrollService.GetSalaryCalculationByID(c.Request.Context(), id)
 	if err != nil {
 		response.NotFound(c, "Salary calculation not found", err.Error())
@@ -217,9 +237,14 @@ func (h *PayrollHandler) ProcessPayroll(c *gin.Context) {
 
 // ApprovePayroll handles POST /payroll/approve/:id
 func (h *PayrollHandler) ApprovePayroll(c *gin.Context) {
-	id := c.Param("id")
-	
-	err := h.payrollService.ApprovePayroll(c.Request.Context(), id)
+	idStr := c.Param("id")
+	id, err := uuid.Parse(idStr)
+	if err != nil {
+		response.BadRequest(c, "Invalid ID format", err.Error())
+		return
+	}
+
+	err = h.payrollService.ApprovePayroll(c.Request.Context(), id)
 	if err != nil {
 		response.BadRequest(c, "Failed to approve payroll", err.Error())
 		return

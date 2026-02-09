@@ -109,7 +109,7 @@ export function TopProductsChart({
               <Tooltip content={<CustomTooltip />} />
               <Bar 
                 dataKey={showRevenue ? "revenue" : "units"}
-                fill="#3b82f6"
+                fill="#00979D"
                 radius={[0, 4, 4, 0]}
               />
             </BarChart>

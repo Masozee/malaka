@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"strconv"
-	
+
 	"github.com/gin-gonic/gin"
 
 	"malaka/internal/modules/masterdata/domain/entities"
@@ -10,6 +10,7 @@ import (
 	"malaka/internal/modules/masterdata/presentation/http/dto"
 	"malaka/internal/shared/response"
 	"malaka/internal/shared/types"
+	"malaka/internal/shared/uuid"
 )
 
 // CustomerHandler handles HTTP requests for customer operations.
@@ -31,12 +32,12 @@ func (h *CustomerHandler) CreateCustomer(c *gin.Context) {
 	}
 
 	customer := &entities.Customer{
-		Name:        req.Name,
+		Name:          req.Name,
 		ContactPerson: req.ContactPerson,
-		Email:       req.Email,
-		Phone:       req.Phone,
-		CompanyID:   req.CompanyID,
-		Status:      req.Status,
+		Email:         req.Email,
+		Phone:         req.Phone,
+		CompanyID:     uuid.MustParse(req.CompanyID),
+		Status:        req.Status,
 	}
 
 	if err := h.service.CreateCustomer(c.Request.Context(), customer); err != nil {
@@ -50,7 +51,12 @@ func (h *CustomerHandler) CreateCustomer(c *gin.Context) {
 // GetCustomerByID handles retrieving a customer by its ID.
 func (h *CustomerHandler) GetCustomerByID(c *gin.Context) {
 	id := c.Param("id")
-	customer, err := h.service.GetCustomerByID(c.Request.Context(), id)
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		response.BadRequest(c, "Invalid ID format", nil)
+		return
+	}
+	customer, err := h.service.GetCustomerByID(c.Request.Context(), parsedID)
 	if err != nil {
 		response.InternalServerError(c, err.Error(), nil)
 		return
@@ -109,13 +115,18 @@ func (h *CustomerHandler) GetAllCustomers(c *gin.Context) {
 // UpdateCustomer handles updating an existing customer.
 func (h *CustomerHandler) UpdateCustomer(c *gin.Context) {
 	id := c.Param("id")
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		response.BadRequest(c, "Invalid ID format", nil)
+		return
+	}
 	var req dto.UpdateCustomerRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		response.BadRequest(c, err.Error(), nil)
 		return
 	}
 
-	customer, err := h.service.GetCustomerByID(c.Request.Context(), id)
+	customer, err := h.service.GetCustomerByID(c.Request.Context(), parsedID)
 	if err != nil {
 		response.InternalServerError(c, err.Error(), nil)
 		return
@@ -138,7 +149,7 @@ func (h *CustomerHandler) UpdateCustomer(c *gin.Context) {
 		customer.Phone = req.Phone
 	}
 	if req.CompanyID != "" {
-		customer.CompanyID = req.CompanyID
+		customer.CompanyID = uuid.MustParse(req.CompanyID)
 	}
 	if req.Status != "" {
 		customer.Status = req.Status
@@ -155,7 +166,12 @@ func (h *CustomerHandler) UpdateCustomer(c *gin.Context) {
 // DeleteCustomer handles deleting a customer by its ID.
 func (h *CustomerHandler) DeleteCustomer(c *gin.Context) {
 	id := c.Param("id")
-	if err := h.service.DeleteCustomer(c.Request.Context(), id); err != nil {
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		response.BadRequest(c, "Invalid ID format", nil)
+		return
+	}
+	if err := h.service.DeleteCustomer(c.Request.Context(), parsedID); err != nil {
 		response.InternalServerError(c, err.Error(), nil)
 		return
 	}

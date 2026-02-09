@@ -6,7 +6,7 @@ import (
 
 	"malaka/internal/modules/finance/domain/entities"
 	"malaka/internal/modules/finance/domain/repositories"
-	"malaka/internal/shared/utils"
+	"malaka/internal/shared/uuid"
 )
 
 // AccountsPayableService provides business logic for accounts payable operations.
@@ -21,14 +21,14 @@ func NewAccountsPayableService(repo repositories.AccountsPayableRepository) *Acc
 
 // CreateAccountsPayable creates a new accounts payable record.
 func (s *AccountsPayableService) CreateAccountsPayable(ctx context.Context, ap *entities.AccountsPayable) error {
-	if ap.ID == "" {
-		ap.ID = utils.RandomString(10) // Generate a random ID if not provided
+	if ap.ID.IsNil() {
+		ap.ID = uuid.New()
 	}
 	return s.repo.Create(ctx, ap)
 }
 
 // GetAccountsPayableByID retrieves an accounts payable record by its ID.
-func (s *AccountsPayableService) GetAccountsPayableByID(ctx context.Context, id string) (*entities.AccountsPayable, error) {
+func (s *AccountsPayableService) GetAccountsPayableByID(ctx context.Context, id uuid.ID) (*entities.AccountsPayable, error) {
 	return s.repo.GetByID(ctx, id)
 }
 
@@ -46,7 +46,7 @@ func (s *AccountsPayableService) UpdateAccountsPayable(ctx context.Context, ap *
 }
 
 // DeleteAccountsPayable deletes an accounts payable record by its ID.
-func (s *AccountsPayableService) DeleteAccountsPayable(ctx context.Context, id string) error {
+func (s *AccountsPayableService) DeleteAccountsPayable(ctx context.Context, id uuid.ID) error {
 	// Ensure the accounts payable record exists before deleting
 	existingAP, err := s.repo.GetByID(ctx, id)
 	if err != nil {

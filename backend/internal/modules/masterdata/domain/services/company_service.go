@@ -5,9 +5,9 @@ import (
 	"errors"
 	"time"
 
-	"github.com/google/uuid"
 	"malaka/internal/modules/masterdata/domain/entities"
 	"malaka/internal/modules/masterdata/domain/repositories"
+	"malaka/internal/shared/uuid"
 )
 
 // CompanyService provides business logic for company operations.
@@ -22,20 +22,20 @@ func NewCompanyService(repo repositories.CompanyRepository) *CompanyService {
 
 // CreateCompany creates a new company.
 func (s *CompanyService) CreateCompany(ctx context.Context, company *entities.Company) error {
-	if company.ID == "" {
-		company.ID = uuid.New().String() // Generate a UUID if not provided
+	if company.ID.IsNil() {
+		company.ID = uuid.New()
 	}
-	
+
 	// Set timestamps
 	now := time.Now()
 	company.CreatedAt = now
 	company.UpdatedAt = now
-	
+
 	return s.repo.Create(ctx, company)
 }
 
 // GetCompanyByID retrieves a company by its ID.
-func (s *CompanyService) GetCompanyByID(ctx context.Context, id string) (*entities.Company, error) {
+func (s *CompanyService) GetCompanyByID(ctx context.Context, id uuid.ID) (*entities.Company, error) {
 	return s.repo.GetByID(ctx, id)
 }
 
@@ -54,15 +54,15 @@ func (s *CompanyService) UpdateCompany(ctx context.Context, company *entities.Co
 	if existingCompany == nil {
 		return errors.New("company not found")
 	}
-	
+
 	// Set updated timestamp
 	company.UpdatedAt = time.Now()
-	
+
 	return s.repo.Update(ctx, company)
 }
 
 // DeleteCompany deletes a company by its ID.
-func (s *CompanyService) DeleteCompany(ctx context.Context, id string) error {
+func (s *CompanyService) DeleteCompany(ctx context.Context, id uuid.ID) error {
 	// Ensure the company exists before deleting
 	existingCompany, err := s.repo.GetByID(ctx, id)
 	if err != nil {

@@ -6,6 +6,7 @@ import (
 
 	"malaka/internal/modules/masterdata/domain/entities"
 	"malaka/internal/modules/masterdata/domain/repositories"
+	"malaka/internal/shared/uuid"
 )
 
 // ColorService provides business logic for color operations.
@@ -20,13 +21,14 @@ func NewColorService(repo repositories.ColorRepository) *ColorService {
 
 // CreateColor creates a new color.
 func (s *ColorService) CreateColor(ctx context.Context, color *entities.Color) error {
-	// Let the database generate the UUID (gen_random_uuid())
-	color.ID = ""
+	if color.ID.IsNil() {
+		color.ID = uuid.New()
+	}
 	return s.repo.Create(ctx, color)
 }
 
 // GetColorByID retrieves a color by its ID.
-func (s *ColorService) GetColorByID(ctx context.Context, id string) (*entities.Color, error) {
+func (s *ColorService) GetColorByID(ctx context.Context, id uuid.ID) (*entities.Color, error) {
 	return s.repo.GetByID(ctx, id)
 }
 
@@ -49,7 +51,7 @@ func (s *ColorService) UpdateColor(ctx context.Context, color *entities.Color) e
 }
 
 // DeleteColor deletes a color by its ID.
-func (s *ColorService) DeleteColor(ctx context.Context, id string) error {
+func (s *ColorService) DeleteColor(ctx context.Context, id uuid.ID) error {
 	// Ensure the color exists before deleting
 	existingColor, err := s.repo.GetByID(ctx, id)
 	if err != nil {

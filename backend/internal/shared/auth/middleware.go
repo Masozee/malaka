@@ -55,6 +55,8 @@ func Middleware(secret string) gin.HandlerFunc {
 		// Set user info in context for downstream handlers
 		c.Set("user_id", claims.Subject)
 		c.Set("user_role", claims.Role)
+		c.Set("company_id", claims.CompanyID)
+		c.Set("user_email", claims.Email)
 		c.Next()
 	}
 }

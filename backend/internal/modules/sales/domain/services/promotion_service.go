@@ -6,7 +6,7 @@ import (
 
 	"malaka/internal/modules/sales/domain/entities"
 	"malaka/internal/modules/sales/domain/repositories"
-	"malaka/internal/shared/utils"
+	"malaka/internal/shared/uuid"
 )
 
 // PromotionService provides business logic for promotion operations.
@@ -21,8 +21,8 @@ func NewPromotionService(repo repositories.PromotionRepository) *PromotionServic
 
 // CreatePromotion creates a new promotion.
 func (s *PromotionService) CreatePromotion(ctx context.Context, promo *entities.Promotion) error {
-	if promo.ID == "" {
-		promo.ID = utils.RandomString(10) // Generate a random ID if not provided
+	if promo.ID.IsNil() {
+		promo.ID = uuid.New()
 	}
 	return s.repo.Create(ctx, promo)
 }
@@ -40,7 +40,7 @@ func (s *PromotionService) GetPromotionByID(ctx context.Context, id string) (*en
 // UpdatePromotion updates an existing promotion.
 func (s *PromotionService) UpdatePromotion(ctx context.Context, promo *entities.Promotion) error {
 	// Ensure the promotion exists before updating
-	existingPromo, err := s.repo.GetByID(ctx, promo.ID)
+	existingPromo, err := s.repo.GetByID(ctx, promo.ID.String())
 	if err != nil {
 		return err
 	}

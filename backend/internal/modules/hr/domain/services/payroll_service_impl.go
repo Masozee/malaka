@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/google/uuid"
 	"malaka/internal/modules/hr/domain/entities"
 	"malaka/internal/modules/hr/domain/repositories"
+	"malaka/internal/shared/uuid"
 )
 
 // PayrollServiceImpl implements the PayrollService interface
@@ -35,7 +35,7 @@ func (s *PayrollServiceImpl) GetPayrollPeriods(ctx context.Context) ([]*entities
 	return s.payrollPeriodRepo.GetAll(ctx)
 }
 
-func (s *PayrollServiceImpl) GetPayrollPeriodByID(ctx context.Context, id string) (*entities.PayrollPeriod, error) {
+func (s *PayrollServiceImpl) GetPayrollPeriodByID(ctx context.Context, id uuid.ID) (*entities.PayrollPeriod, error) {
 	return s.payrollPeriodRepo.GetByID(ctx, id)
 }
 
@@ -47,7 +47,7 @@ func (s *PayrollServiceImpl) CreatePayrollPeriod(ctx context.Context, period *en
 	}
 
 	// Set defaults
-	if period.ID == uuid.Nil {
+	if period.ID.IsNil() {
 		period.ID = uuid.New()
 	}
 	if period.Status == "" {
@@ -62,7 +62,7 @@ func (s *PayrollServiceImpl) CreatePayrollPeriod(ctx context.Context, period *en
 
 func (s *PayrollServiceImpl) UpdatePayrollPeriod(ctx context.Context, period *entities.PayrollPeriod) error {
 	// Validate that period exists
-	existing, err := s.payrollPeriodRepo.GetByID(ctx, period.ID.String())
+	existing, err := s.payrollPeriodRepo.GetByID(ctx, period.ID)
 	if err != nil {
 		return fmt.Errorf("payroll period not found: %w", err)
 	}
@@ -75,7 +75,7 @@ func (s *PayrollServiceImpl) UpdatePayrollPeriod(ctx context.Context, period *en
 	return s.payrollPeriodRepo.Update(ctx, period)
 }
 
-func (s *PayrollServiceImpl) DeletePayrollPeriod(ctx context.Context, id string) error {
+func (s *PayrollServiceImpl) DeletePayrollPeriod(ctx context.Context, id uuid.ID) error {
 	// Validate that period exists and can be deleted
 	existing, err := s.payrollPeriodRepo.GetByID(ctx, id)
 	if err != nil {
@@ -98,21 +98,21 @@ func (s *PayrollServiceImpl) GetSalaryCalculationsByPeriod(ctx context.Context, 
 	return s.salaryCalculationRepo.GetByPeriod(ctx, year, month)
 }
 
-func (s *PayrollServiceImpl) GetSalaryCalculationByID(ctx context.Context, id string) (*entities.SalaryCalculation, error) {
+func (s *PayrollServiceImpl) GetSalaryCalculationByID(ctx context.Context, id uuid.ID) (*entities.SalaryCalculation, error) {
 	return s.salaryCalculationRepo.GetByID(ctx, id)
 }
 
 func (s *PayrollServiceImpl) CreateSalaryCalculation(ctx context.Context, calculation *entities.SalaryCalculation) error {
 	// Validate that calculation doesn't already exist for this employee and period
-	existing, err := s.salaryCalculationRepo.GetByEmployeeAndPeriod(ctx, 
-		calculation.EmployeeID.String(), calculation.PeriodYear, calculation.PeriodMonth)
+	existing, err := s.salaryCalculationRepo.GetByEmployeeAndPeriod(ctx,
+		calculation.EmployeeID, calculation.PeriodYear, calculation.PeriodMonth)
 	if err == nil && existing != nil {
-		return fmt.Errorf("salary calculation for employee %s in period %d-%02d already exists", 
+		return fmt.Errorf("salary calculation for employee %s in period %d-%02d already exists",
 			calculation.EmployeeID.String(), calculation.PeriodYear, calculation.PeriodMonth)
 	}
 
 	// Set defaults
-	if calculation.ID == uuid.Nil {
+	if calculation.ID.IsNil() {
 		calculation.ID = uuid.New()
 	}
 	if calculation.Status == "" {
@@ -130,7 +130,7 @@ func (s *PayrollServiceImpl) CreateSalaryCalculation(ctx context.Context, calcul
 
 func (s *PayrollServiceImpl) UpdateSalaryCalculation(ctx context.Context, calculation *entities.SalaryCalculation) error {
 	// Validate that calculation exists
-	existing, err := s.salaryCalculationRepo.GetByID(ctx, calculation.ID.String())
+	existing, err := s.salaryCalculationRepo.GetByID(ctx, calculation.ID)
 	if err != nil {
 		return fmt.Errorf("salary calculation not found: %w", err)
 	}
@@ -146,7 +146,7 @@ func (s *PayrollServiceImpl) UpdateSalaryCalculation(ctx context.Context, calcul
 	return s.salaryCalculationRepo.Update(ctx, calculation)
 }
 
-func (s *PayrollServiceImpl) DeleteSalaryCalculation(ctx context.Context, id string) error {
+func (s *PayrollServiceImpl) DeleteSalaryCalculation(ctx context.Context, id uuid.ID) error {
 	// Validate that calculation exists and can be deleted
 	existing, err := s.salaryCalculationRepo.GetByID(ctx, id)
 	if err != nil {
@@ -188,7 +188,7 @@ func (s *PayrollServiceImpl) ProcessPayroll(ctx context.Context, year, month int
 			calc.Status = entities.SalaryStatusCalculated
 			calc.CalculatedAt = &time.Time{}
 			*calc.CalculatedAt = time.Now()
-			
+
 			err = s.salaryCalculationRepo.Update(ctx, calc)
 			if err != nil {
 				return fmt.Errorf("failed to update salary calculation %s: %w", calc.ID.String(), err)
@@ -216,7 +216,7 @@ func (s *PayrollServiceImpl) ProcessPayroll(ctx context.Context, year, month int
 	return s.payrollPeriodRepo.Update(ctx, period)
 }
 
-func (s *PayrollServiceImpl) ApprovePayroll(ctx context.Context, periodID string) error {
+func (s *PayrollServiceImpl) ApprovePayroll(ctx context.Context, periodID uuid.ID) error {
 	// Get the payroll period
 	period, err := s.payrollPeriodRepo.GetByID(ctx, periodID)
 	if err != nil {

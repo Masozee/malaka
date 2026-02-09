@@ -6,6 +6,7 @@ import (
 
 	"github.com/jmoiron/sqlx"
 	"malaka/internal/modules/inventory/domain/entities"
+	"malaka/internal/shared/uuid"
 )
 
 // StockMovementRepositoryImpl implements repositories.StockMovementRepository.
@@ -26,7 +27,7 @@ func (r *StockMovementRepositoryImpl) Create(ctx context.Context, sm *entities.S
 }
 
 // GetByID retrieves a stock movement by its ID from the database.
-func (r *StockMovementRepositoryImpl) GetByID(ctx context.Context, id string) (*entities.StockMovement, error) {
+func (r *StockMovementRepositoryImpl) GetByID(ctx context.Context, id uuid.ID) (*entities.StockMovement, error) {
 	query := `SELECT id, article_id, warehouse_id, quantity, movement_type, movement_date, reference_id, created_at, updated_at FROM stock_movements WHERE id = $1`
 	row := r.db.QueryRowContext(ctx, query, id)
 
@@ -67,7 +68,7 @@ func (r *StockMovementRepositoryImpl) GetAll(ctx context.Context) ([]*entities.S
 }
 
 // Delete deletes a stock movement by its ID from the database.
-func (r *StockMovementRepositoryImpl) Delete(ctx context.Context, id string) error {
+func (r *StockMovementRepositoryImpl) Delete(ctx context.Context, id uuid.ID) error {
 	query := `DELETE FROM stock_movements WHERE id = $1`
 	_, err := r.db.ExecContext(ctx, query, id)
 	return err

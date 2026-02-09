@@ -87,7 +87,8 @@ export default function ReportsDashboardPage() {
               <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Revenue (MTD)</p>
               <p className="text-3xl font-bold text-gray-900 dark:text-gray-100">Rp 4.8B</p>
               <div className="mt-2">
-                <span className="text-sm text-green-600 font-medium">+12.5%</span>
+                <span className="text-sm text-green-600 font-medium" aria-hidden="true">+12.5%</span>
+                <span className="sr-only">Increased by 12.5 percent</span>
                 <span className="text-sm text-gray-500 ml-1">vs last month</span>
               </div>
             </div>
@@ -96,7 +97,8 @@ export default function ReportsDashboardPage() {
               <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Orders (MTD)</p>
               <p className="text-3xl font-bold text-gray-900 dark:text-gray-100">8,457</p>
               <div className="mt-2">
-                <span className="text-sm text-red-600 font-medium">-3.2%</span>
+                <span className="text-sm text-red-600 font-medium" aria-hidden="true">-3.2%</span>
+                <span className="sr-only">Decreased by 3.2 percent</span>
                 <span className="text-sm text-gray-500 ml-1">vs last month</span>
               </div>
             </div>
@@ -155,7 +157,7 @@ export default function ReportsDashboardPage() {
                     <p className="text-sm text-gray-500">Monthly sales summary</p>
                   </div>
                   <Link href="/reports/sales/generate">
-                    <Button size="sm">Generate</Button>
+                    <Button size="sm" aria-label="Generate monthly sales summary report">Generate</Button>
                   </Link>
                 </div>
               </Card>
@@ -167,7 +169,7 @@ export default function ReportsDashboardPage() {
                     <p className="text-sm text-gray-500">Download to Excel/PDF</p>
                   </div>
                   <Link href="/reports/financial/export">
-                    <Button size="sm">Export</Button>
+                    <Button size="sm" aria-label="Export financial data to Excel or PDF">Export</Button>
                   </Link>
                 </div>
               </Card>
@@ -179,7 +181,7 @@ export default function ReportsDashboardPage() {
                     <p className="text-sm text-gray-500">Setup automated delivery</p>
                   </div>
                   <Link href="/reports/scheduled/new">
-                    <Button size="sm">Schedule</Button>
+                    <Button size="sm" aria-label="Schedule automated report delivery">Schedule</Button>
                   </Link>
                 </div>
               </Card>
@@ -323,7 +325,7 @@ export default function ReportsDashboardPage() {
                   <p className="font-medium text-red-800">Failed Report Generation</p>
                   <p className="text-sm text-red-700">Production Efficiency Report failed to generate - data source unavailable</p>
                 </div>
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" aria-label="Retry failed production efficiency report">
                   <Link href="/reports/production/retry">Retry</Link>
                 </Button>
               </div>

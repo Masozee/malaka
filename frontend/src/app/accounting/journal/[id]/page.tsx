@@ -23,6 +23,7 @@ import { Card } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 
 import type { JournalEntry } from '@/types/accounting'
+import { EntityShareButton } from '@/components/messaging/EntityShareButton'
 import { journalEntryService } from '@/services/accounting'
 import Link from 'next/link'
 
@@ -196,6 +197,15 @@ export default function JournalEntryDetailPage() {
         breadcrumbs={breadcrumbs}
         actions={
           <div className="flex items-center space-x-2">
+            <EntityShareButton
+              entityType="journal_entry"
+              entityId={journalEntry.id}
+              title={journalEntry.entry_number}
+              subtitle={journalEntry.description}
+              status={journalEntry.status}
+              statusColor={journalEntry.status === 'POSTED' ? 'green' : 'gray'}
+              url={`/accounting/journal/${journalEntry.id}`}
+            />
             <Link href="/accounting/journal">
               <Button variant="outline" size="sm">
                 <HugeiconsIcon icon={ArrowLeft01Icon} className="h-4 w-4 mr-2" />

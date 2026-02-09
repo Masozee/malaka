@@ -1,12 +1,11 @@
-
 package persistence
 
 import (
 	"context"
 
-	"github.com/google/uuid"
 	"gorm.io/gorm"
 	"malaka/internal/modules/shipping/domain/entities"
+	"malaka/internal/shared/uuid"
 )
 
 type outboundScanRepository struct {
@@ -21,7 +20,7 @@ func (r *outboundScanRepository) CreateOutboundScan(ctx context.Context, scan *e
 	return r.db.WithContext(ctx).Create(scan).Error
 }
 
-func (r *outboundScanRepository) GetOutboundScanByID(ctx context.Context, id uuid.UUID) (*entities.OutboundScan, error) {
+func (r *outboundScanRepository) GetOutboundScanByID(ctx context.Context, id uuid.ID) (*entities.OutboundScan, error) {
 	var scan entities.OutboundScan
 	if err := r.db.WithContext(ctx).First(&scan, "id = ?", id).Error; err != nil {
 		return nil, err
@@ -29,7 +28,7 @@ func (r *outboundScanRepository) GetOutboundScanByID(ctx context.Context, id uui
 	return &scan, nil
 }
 
-func (r *outboundScanRepository) GetOutboundScansByShipmentID(ctx context.Context, shipmentID uuid.UUID) ([]entities.OutboundScan, error) {
+func (r *outboundScanRepository) GetOutboundScansByShipmentID(ctx context.Context, shipmentID uuid.ID) ([]entities.OutboundScan, error) {
 	var scans []entities.OutboundScan
 	if err := r.db.WithContext(ctx).Find(&scans, "shipment_id = ?", shipmentID).Error; err != nil {
 		return nil, err

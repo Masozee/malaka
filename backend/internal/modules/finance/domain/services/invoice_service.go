@@ -6,7 +6,7 @@ import (
 
 	"malaka/internal/modules/finance/domain/entities"
 	"malaka/internal/modules/finance/domain/repositories"
-	"malaka/internal/shared/utils"
+	"malaka/internal/shared/uuid"
 )
 
 // InvoiceService provides business logic for invoice operations.
@@ -21,14 +21,14 @@ func NewInvoiceService(repo repositories.InvoiceRepository) *InvoiceService {
 
 // CreateInvoice creates a new invoice.
 func (s *InvoiceService) CreateInvoice(ctx context.Context, invoice *entities.Invoice) error {
-	if invoice.ID == "" {
-		invoice.ID = utils.RandomString(10) // Generate a random ID if not provided
+	if invoice.ID.IsNil() {
+		invoice.ID = uuid.New()
 	}
 	return s.repo.Create(ctx, invoice)
 }
 
 // GetInvoiceByID retrieves an invoice by its ID.
-func (s *InvoiceService) GetInvoiceByID(ctx context.Context, id string) (*entities.Invoice, error) {
+func (s *InvoiceService) GetInvoiceByID(ctx context.Context, id uuid.ID) (*entities.Invoice, error) {
 	return s.repo.GetByID(ctx, id)
 }
 
@@ -46,7 +46,7 @@ func (s *InvoiceService) UpdateInvoice(ctx context.Context, invoice *entities.In
 }
 
 // DeleteInvoice deletes an invoice by its ID.
-func (s *InvoiceService) DeleteInvoice(ctx context.Context, id string) error {
+func (s *InvoiceService) DeleteInvoice(ctx context.Context, id uuid.ID) error {
 	// Ensure the invoice exists before deleting
 	existingInvoice, err := s.repo.GetByID(ctx, id)
 	if err != nil {

@@ -6,7 +6,7 @@ import (
 
 	"malaka/internal/modules/masterdata/domain/entities"
 	"malaka/internal/modules/masterdata/domain/repositories"
-	"malaka/internal/shared/utils"
+	"malaka/internal/shared/uuid"
 )
 
 // PriceService provides business logic for price operations.
@@ -21,14 +21,14 @@ func NewPriceService(repo repositories.PriceRepository) *PriceService {
 
 // CreatePrice creates a new price.
 func (s *PriceService) CreatePrice(ctx context.Context, price *entities.Price) error {
-	if price.ID == "" {
-		price.ID = utils.RandomString(10) // Generate a random ID if not provided
+	if price.ID.IsNil() {
+		price.ID = uuid.New()
 	}
 	return s.repo.Create(ctx, price)
 }
 
 // GetPriceByID retrieves a price by its ID.
-func (s *PriceService) GetPriceByID(ctx context.Context, id string) (*entities.Price, error) {
+func (s *PriceService) GetPriceByID(ctx context.Context, id uuid.ID) (*entities.Price, error) {
 	return s.repo.GetByID(ctx, id)
 }
 
@@ -51,7 +51,7 @@ func (s *PriceService) UpdatePrice(ctx context.Context, price *entities.Price) e
 }
 
 // DeletePrice deletes a price by its ID.
-func (s *PriceService) DeletePrice(ctx context.Context, id string) error {
+func (s *PriceService) DeletePrice(ctx context.Context, id uuid.ID) error {
 	// Ensure the price exists before deleting
 	existingPrice, err := s.repo.GetByID(ctx, id)
 	if err != nil {

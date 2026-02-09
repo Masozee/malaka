@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/google/uuid"
+	"malaka/internal/shared/uuid"
 	"malaka/internal/modules/accounting/domain/entities"
 	"malaka/internal/modules/accounting/domain/repositories"
 )
@@ -47,7 +47,7 @@ func (r *FinancialPeriodRepositoryImpl) Create(ctx context.Context, period *enti
 }
 
 // GetByID retrieves a financial period by its ID
-func (r *FinancialPeriodRepositoryImpl) GetByID(ctx context.Context, id uuid.UUID) (*entities.FinancialPeriod, error) {
+func (r *FinancialPeriodRepositoryImpl) GetByID(ctx context.Context, id uuid.ID) (*entities.FinancialPeriod, error) {
 	query := `
 		SELECT id, company_id, period_name, fiscal_year, period_month,
 			start_date, end_date, status, is_closed, closed_by, closed_at,
@@ -151,7 +151,7 @@ func (r *FinancialPeriodRepositoryImpl) Update(ctx context.Context, period *enti
 }
 
 // Delete removes a financial period from the database
-func (r *FinancialPeriodRepositoryImpl) Delete(ctx context.Context, id uuid.UUID) error {
+func (r *FinancialPeriodRepositoryImpl) Delete(ctx context.Context, id uuid.ID) error {
 	query := `DELETE FROM financial_periods WHERE id = $1`
 	_, err := r.db.ExecContext(ctx, query, id)
 	if err != nil {
@@ -279,7 +279,7 @@ func (r *FinancialPeriodRepositoryImpl) GetClosedPeriods(ctx context.Context, co
 }
 
 // Close marks a financial period as closed
-func (r *FinancialPeriodRepositoryImpl) Close(ctx context.Context, id uuid.UUID, userID string) error {
+func (r *FinancialPeriodRepositoryImpl) Close(ctx context.Context, id uuid.ID, userID string) error {
 	period, err := r.GetByID(ctx, id)
 	if err != nil {
 		return err
@@ -293,7 +293,7 @@ func (r *FinancialPeriodRepositoryImpl) Close(ctx context.Context, id uuid.UUID,
 }
 
 // Reopen reopens a closed financial period
-func (r *FinancialPeriodRepositoryImpl) Reopen(ctx context.Context, id uuid.UUID) error {
+func (r *FinancialPeriodRepositoryImpl) Reopen(ctx context.Context, id uuid.ID) error {
 	period, err := r.GetByID(ctx, id)
 	if err != nil {
 		return err

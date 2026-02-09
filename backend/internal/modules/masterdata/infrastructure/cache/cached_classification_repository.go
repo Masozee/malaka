@@ -8,6 +8,7 @@ import (
 	"malaka/internal/modules/masterdata/domain/entities"
 	"malaka/internal/modules/masterdata/domain/repositories"
 	"malaka/internal/shared/cache"
+	"malaka/internal/shared/uuid"
 )
 
 const (
@@ -49,8 +50,8 @@ func (r *CachedClassificationRepository) Create(ctx context.Context, classificat
 }
 
 // GetByID retrieves a classification by ID with caching.
-func (r *CachedClassificationRepository) GetByID(ctx context.Context, id string) (*entities.Classification, error) {
-	cacheKey := fmt.Sprintf("%s%s", classificationKeyPrefix, id)
+func (r *CachedClassificationRepository) GetByID(ctx context.Context, id uuid.ID) (*entities.Classification, error) {
+	cacheKey := fmt.Sprintf("%s%s", classificationKeyPrefix, id.String())
 
 	// Try to get from cache first
 	if cached, err := r.cache.Get(ctx, cacheKey); err == nil {
@@ -129,8 +130,8 @@ func (r *CachedClassificationRepository) GetAll(ctx context.Context) ([]*entitie
 }
 
 // GetByParentID retrieves classifications by parent ID with caching.
-func (r *CachedClassificationRepository) GetByParentID(ctx context.Context, parentID string) ([]*entities.Classification, error) {
-	cacheKey := fmt.Sprintf("%s%s", classificationParentPrefix, parentID)
+func (r *CachedClassificationRepository) GetByParentID(ctx context.Context, parentID uuid.ID) ([]*entities.Classification, error) {
+	cacheKey := fmt.Sprintf("%s%s", classificationParentPrefix, parentID.String())
 
 	// Try to get from cache first
 	if cached, err := r.cache.Get(ctx, cacheKey); err == nil {
@@ -206,7 +207,7 @@ func (r *CachedClassificationRepository) Update(ctx context.Context, classificat
 }
 
 // Delete deletes a classification and invalidates related cache.
-func (r *CachedClassificationRepository) Delete(ctx context.Context, id string) error {
+func (r *CachedClassificationRepository) Delete(ctx context.Context, id uuid.ID) error {
 	// Get the classification first to know which caches to invalidate
 	classification, _ := r.repo.GetByID(ctx, id)
 
@@ -215,7 +216,7 @@ func (r *CachedClassificationRepository) Delete(ctx context.Context, id string) 
 	}
 
 	// Invalidate specific classification cache
-	cacheKey := fmt.Sprintf("%s%s", classificationKeyPrefix, id)
+	cacheKey := fmt.Sprintf("%s%s", classificationKeyPrefix, id.String())
 	r.cache.Delete(ctx, cacheKey)
 
 	// Invalidate code cache if we have the classification

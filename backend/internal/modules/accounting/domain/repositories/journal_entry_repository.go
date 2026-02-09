@@ -4,25 +4,25 @@ import (
 	"context"
 	"time"
 
-	"github.com/google/uuid"
 	"malaka/internal/modules/accounting/domain/entities"
+	"malaka/internal/shared/uuid"
 )
 
 // JournalEntryRepository defines methods for journal entry operations
 type JournalEntryRepository interface {
 	// Basic CRUD operations
 	Create(ctx context.Context, entry *entities.JournalEntry) error
-	GetByID(ctx context.Context, id uuid.UUID) (*entities.JournalEntry, error)
+	GetByID(ctx context.Context, id uuid.ID) (*entities.JournalEntry, error)
 	GetAll(ctx context.Context) ([]*entities.JournalEntry, error)
 	Update(ctx context.Context, entry *entities.JournalEntry) error
-	Delete(ctx context.Context, id uuid.UUID) error
+	Delete(ctx context.Context, id uuid.ID) error
 
 	// Journal entry lines operations
 	CreateLine(ctx context.Context, line *entities.JournalEntryLine) error
-	GetLinesByEntryID(ctx context.Context, entryID uuid.UUID) ([]*entities.JournalEntryLine, error)
+	GetLinesByEntryID(ctx context.Context, entryID uuid.ID) ([]*entities.JournalEntryLine, error)
 	UpdateLine(ctx context.Context, line *entities.JournalEntryLine) error
-	DeleteLine(ctx context.Context, lineID uuid.UUID) error
-	DeleteLinesByEntryID(ctx context.Context, entryID uuid.UUID) error
+	DeleteLine(ctx context.Context, lineID uuid.ID) error
+	DeleteLinesByEntryID(ctx context.Context, entryID uuid.ID) error
 
 	// Query operations
 	GetByEntryNumber(ctx context.Context, entryNumber string) (*entities.JournalEntry, error)
@@ -38,8 +38,8 @@ type JournalEntryRepository interface {
 	GetByCompanyAndDateRange(ctx context.Context, companyID string, startDate, endDate time.Time) ([]*entities.JournalEntry, error)
 	
 	// Posting operations
-	Post(ctx context.Context, entryID uuid.UUID, userID string) error
-	Reverse(ctx context.Context, entryID uuid.UUID, userID string) error
+	Post(ctx context.Context, entryID uuid.ID, userID string) error
+	Reverse(ctx context.Context, entryID uuid.ID, userID string) error
 	
 	// Number generation
 	GetNextEntryNumber(ctx context.Context, companyID string, entryDate time.Time) (string, error)
@@ -51,5 +51,5 @@ type JournalEntryRepository interface {
 	// Reporting operations
 	GetUnpostedEntries(ctx context.Context, companyID string) ([]*entities.JournalEntry, error)
 	GetEntriesForPeriod(ctx context.Context, companyID string, startDate, endDate time.Time) ([]*entities.JournalEntry, error)
-	GetEntriesByAccount(ctx context.Context, accountID uuid.UUID, startDate, endDate time.Time) ([]*entities.JournalEntry, error)
+	GetEntriesByAccount(ctx context.Context, accountID uuid.ID, startDate, endDate time.Time) ([]*entities.JournalEntry, error)
 }

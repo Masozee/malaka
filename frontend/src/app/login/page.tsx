@@ -74,7 +74,7 @@ export default function LoginPage() {
               />
               <div>
                 <h1 className="text-3xl font-bold text-black">
-                  Malaka<span className="text-[#09f]">ERP</span>
+                  Malaka<span className="text-[#00979D]">ERP</span>
                 </h1>
                 <p className="text-sm text-gray-500">Enterprise Resource Planning</p>
               </div>
@@ -103,7 +103,7 @@ export default function LoginPage() {
                 type="email"
                 required
                 autoComplete="email"
-                className="w-full px-4 py-3 border border-gray-200 focus:border-[#09f] focus:outline-none transition-colors"
+                className="w-full px-4 py-3 border border-gray-200 focus:border-[#00979D] focus:outline-none transition-colors"
                 placeholder="Enter your email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -120,7 +120,7 @@ export default function LoginPage() {
                 type="password"
                 required
                 autoComplete="current-password"
-                className="w-full px-4 py-3 border border-gray-200 focus:border-[#09f] focus:outline-none transition-colors"
+                className="w-full px-4 py-3 border border-gray-200 focus:border-[#00979D] focus:outline-none transition-colors"
                 placeholder="Enter your password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -136,7 +136,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full px-5 py-3 bg-[#09f] text-white font-medium hover:bg-[#0088e6] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full px-5 py-3 bg-[#00979D] text-white font-medium hover:bg-[#007F84] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? 'Signing in...' : 'Sign in'}
             </button>
@@ -145,10 +145,10 @@ export default function LoginPage() {
           {/* Footer Links */}
           <div className="mt-8 pt-8 border-t border-gray-200">
             <div className="flex items-center justify-between text-sm">
-              <Link href="/" className="text-gray-500 hover:text-[#09f] transition-colors">
+              <Link href="/" className="text-gray-500 hover:text-[#00979D] transition-colors">
                 Back to Home
               </Link>
-              <Link href="/contact" className="text-gray-500 hover:text-[#09f] transition-colors">
+              <Link href="/contact" className="text-gray-500 hover:text-[#00979D] transition-colors">
                 Contact Support
               </Link>
             </div>

@@ -9,6 +9,7 @@ import (
 	"malaka/internal/modules/calendar/domain/services"
 	"malaka/internal/modules/calendar/presentation/http/dto"
 	"malaka/internal/shared/response"
+	"malaka/internal/shared/uuid"
 )
 
 type AttendeeHandler struct {
@@ -39,9 +40,15 @@ func NewAttendeeHandler(eventService services.EventService) *AttendeeHandler {
 // @Failure 404 {object} response.Response
 // @Router /calendar/attendees/events/{eventId} [post]
 func (h *AttendeeHandler) AddAttendee(c *gin.Context) {
-	eventID := c.Param("eventId")
-	if eventID == "" {
+	eventIDStr := c.Param("eventId")
+	if eventIDStr == "" {
 		response.Error(c, http.StatusBadRequest, "Event ID is required", nil)
+		return
+	}
+
+	eventID, err := uuid.Parse(eventIDStr)
+	if err != nil {
+		response.Error(c, http.StatusBadRequest, "Invalid event ID", err)
 		return
 	}
 
@@ -57,14 +64,20 @@ func (h *AttendeeHandler) AddAttendee(c *gin.Context) {
 	}
 
 	// Get user ID from context
-	userID, exists := c.Get("user_id")
+	userIDStr, exists := c.Get("user_id")
 	if !exists {
 		response.Error(c, http.StatusUnauthorized, "User not authenticated", nil)
 		return
 	}
 
+	userID, err := uuid.Parse(userIDStr.(string))
+	if err != nil {
+		response.Error(c, http.StatusBadRequest, "Invalid user ID", err)
+		return
+	}
+
 	// Add attendee
-	if err := h.eventService.AddAttendee(c.Request.Context(), eventID, userID.(string), req.UserID); err != nil {
+	if err := h.eventService.AddAttendee(c.Request.Context(), eventID, userID, req.UserID); err != nil {
 		if err.Error() == "access denied: only event creator can add attendees" {
 			response.Error(c, http.StatusForbidden, "Access denied", err)
 			return
@@ -93,21 +106,33 @@ func (h *AttendeeHandler) AddAttendee(c *gin.Context) {
 // @Failure 404 {object} response.Response
 // @Router /calendar/attendees/{attendeeId} [delete]
 func (h *AttendeeHandler) RemoveAttendee(c *gin.Context) {
-	attendeeID := c.Param("attendeeId")
-	if attendeeID == "" {
+	attendeeIDStr := c.Param("attendeeId")
+	if attendeeIDStr == "" {
 		response.Error(c, http.StatusBadRequest, "Attendee ID is required", nil)
 		return
 	}
 
+	attendeeID, err := uuid.Parse(attendeeIDStr)
+	if err != nil {
+		response.Error(c, http.StatusBadRequest, "Invalid attendee ID", err)
+		return
+	}
+
 	// Get user ID from context
-	userID, exists := c.Get("user_id")
+	userIDStr, exists := c.Get("user_id")
 	if !exists {
 		response.Error(c, http.StatusUnauthorized, "User not authenticated", nil)
 		return
 	}
 
+	userID, err := uuid.Parse(userIDStr.(string))
+	if err != nil {
+		response.Error(c, http.StatusBadRequest, "Invalid user ID", err)
+		return
+	}
+
 	// Remove attendee
-	if err := h.eventService.RemoveAttendee(c.Request.Context(), attendeeID, userID.(string)); err != nil {
+	if err := h.eventService.RemoveAttendee(c.Request.Context(), attendeeID, userID); err != nil {
 		if err.Error() == "access denied: only event creator or the attendee can remove attendance" {
 			response.Error(c, http.StatusForbidden, "Access denied", err)
 			return
@@ -138,9 +163,15 @@ func (h *AttendeeHandler) RemoveAttendee(c *gin.Context) {
 // @Failure 404 {object} response.Response
 // @Router /calendar/attendees/{attendeeId}/status [put]
 func (h *AttendeeHandler) UpdateAttendeeStatus(c *gin.Context) {
-	attendeeID := c.Param("attendeeId")
-	if attendeeID == "" {
+	attendeeIDStr := c.Param("attendeeId")
+	if attendeeIDStr == "" {
 		response.Error(c, http.StatusBadRequest, "Attendee ID is required", nil)
+		return
+	}
+
+	attendeeID, err := uuid.Parse(attendeeIDStr)
+	if err != nil {
+		response.Error(c, http.StatusBadRequest, "Invalid attendee ID", err)
 		return
 	}
 
@@ -156,9 +187,15 @@ func (h *AttendeeHandler) UpdateAttendeeStatus(c *gin.Context) {
 	}
 
 	// Get user ID from context
-	userID, exists := c.Get("user_id")
+	userIDStr, exists := c.Get("user_id")
 	if !exists {
 		response.Error(c, http.StatusUnauthorized, "User not authenticated", nil)
+		return
+	}
+
+	userID, err := uuid.Parse(userIDStr.(string))
+	if err != nil {
+		response.Error(c, http.StatusBadRequest, "Invalid user ID", err)
 		return
 	}
 
@@ -179,7 +216,7 @@ func (h *AttendeeHandler) UpdateAttendeeStatus(c *gin.Context) {
 	// Update attendee status
 	responseMessage := req.ResponseMessage
 
-	if err := h.eventService.UpdateAttendeeStatus(c.Request.Context(), attendeeID, userID.(string), status, responseMessage); err != nil {
+	if err := h.eventService.UpdateAttendeeStatus(c.Request.Context(), attendeeID, userID, status, responseMessage); err != nil {
 		if err.Error() == "access denied: only the attendee can update their own status" {
 			response.Error(c, http.StatusForbidden, "Access denied", err)
 			return

@@ -3,7 +3,7 @@ package dto
 import (
 	"time"
 
-	"github.com/google/uuid"
+	"malaka/internal/shared/uuid"
 	"malaka/internal/modules/accounting/domain/entities"
 )
 
@@ -19,7 +19,7 @@ type FinancialPeriodRequest struct {
 
 // FinancialPeriodResponse represents the response structure for a FinancialPeriod
 type FinancialPeriodResponse struct {
-	ID          uuid.UUID `json:"id"`
+	ID          uuid.ID `json:"id"`
 	CompanyID   string    `json:"company_id"`
 	PeriodName  string    `json:"period_name"`
 	FiscalYear  int       `json:"fiscal_year"`

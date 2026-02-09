@@ -3,8 +3,8 @@ package entities
 import (
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/lib/pq"
+	"malaka/internal/shared/uuid"
 )
 
 // TrainingCategory represents the category of a training program
@@ -42,7 +42,7 @@ const (
 
 // TrainingProgram represents a training program entity
 type TrainingProgram struct {
-	ID                    uuid.UUID        `json:"id" db:"id"`
+	ID                    uuid.ID          `json:"id" db:"id"`
 	ProgramTitle          string           `json:"program_title" db:"program_title"`
 	Description           string           `json:"description" db:"description"`
 	Category              TrainingCategory `json:"category" db:"category"`

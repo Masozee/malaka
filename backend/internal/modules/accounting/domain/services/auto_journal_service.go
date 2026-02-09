@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/google/uuid"
+	"malaka/internal/shared/uuid"
 	"malaka/internal/modules/accounting/domain/entities"
 	"malaka/internal/modules/accounting/domain/repositories"
 )
@@ -55,7 +55,7 @@ type AccountMapping struct {
 
 // MappingRule defines a single account mapping rule
 type MappingRule struct {
-	AccountID       uuid.UUID `json:"account_id"`
+	AccountID       uuid.ID `json:"account_id"`
 	AccountType     string    `json:"account_type"` // DEBIT or CREDIT
 	AmountField     string    `json:"amount_field"` // Field name in transaction data
 	Description     string    `json:"description"`
@@ -288,7 +288,7 @@ func (s *autoJournalService) generateJournalLines(transactionData map[string]int
 }
 
 // logAutoJournal logs the auto journal creation
-func (s *autoJournalService) logAutoJournal(ctx context.Context, journalEntryID uuid.UUID, req *AutoJournalRequest, status entities.AutoJournalLogStatus, errorMessage string) error {
+func (s *autoJournalService) logAutoJournal(ctx context.Context, journalEntryID uuid.ID, req *AutoJournalRequest, status entities.AutoJournalLogStatus, errorMessage string) error {
 	log := &entities.AutoJournalLog{
 		JournalEntryID:     &journalEntryID,
 		SourceModule:       req.SourceModule,

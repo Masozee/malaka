@@ -8,6 +8,7 @@ import (
 	"malaka/internal/modules/finance/domain/services"
 	"malaka/internal/modules/finance/presentation/http/dto"
 	"malaka/internal/shared/response"
+	"malaka/internal/shared/uuid"
 )
 
 // CashReceiptHandler handles HTTP requests for cash receipt operations.
@@ -46,7 +47,13 @@ func (h *CashReceiptHandler) GetCashReceiptByID(c *gin.Context) {
 		return
 	}
 
-	cashReceipt, err := h.service.GetCashReceiptByID(c.Request.Context(), id)
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		response.Error(c, http.StatusBadRequest, "Invalid ID", err)
+		return
+	}
+
+	cashReceipt, err := h.service.GetCashReceiptByID(c.Request.Context(), parsedID)
 	if err != nil {
 		response.Error(c, http.StatusNotFound, "Cash receipt not found", err)
 		return
@@ -70,8 +77,14 @@ func (h *CashReceiptHandler) UpdateCashReceipt(c *gin.Context) {
 		return
 	}
 
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		response.Error(c, http.StatusBadRequest, "Invalid ID", err)
+		return
+	}
+
 	cashReceipt := req.ToCashReceiptEntity()
-	cashReceipt.ID = id
+	cashReceipt.ID = parsedID
 
 	if err := h.service.UpdateCashReceipt(c.Request.Context(), cashReceipt); err != nil {
 		response.Error(c, http.StatusInternalServerError, "Failed to update cash receipt", err)
@@ -90,7 +103,13 @@ func (h *CashReceiptHandler) DeleteCashReceipt(c *gin.Context) {
 		return
 	}
 
-	if err := h.service.DeleteCashReceipt(c.Request.Context(), id); err != nil {
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		response.Error(c, http.StatusBadRequest, "Invalid ID", err)
+		return
+	}
+
+	if err := h.service.DeleteCashReceipt(c.Request.Context(), parsedID); err != nil {
 		response.Error(c, http.StatusInternalServerError, "Failed to delete cash receipt", err)
 		return
 	}

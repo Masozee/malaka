@@ -5,6 +5,7 @@ import (
 
 	"malaka/internal/modules/finance/domain/entities"
 	"malaka/internal/shared/types"
+	"malaka/internal/shared/uuid"
 )
 
 // AccountsReceivableCreateRequest represents the request to create accounts receivable.
@@ -50,8 +51,8 @@ type AccountsReceivableResponse struct {
 func (req *AccountsReceivableCreateRequest) ToAccountsReceivableEntity() *entities.AccountsReceivable {
 	return &entities.AccountsReceivable{
 		BaseModel:  types.BaseModel{},
-		InvoiceID:  req.InvoiceID,
-		CustomerID: req.CustomerID,
+		InvoiceID:  uuid.MustParse(req.InvoiceID),
+		CustomerID: uuid.MustParse(req.CustomerID),
 		IssueDate:  req.IssueDate,
 		DueDate:    req.DueDate,
 		Amount:     req.Amount,
@@ -65,8 +66,8 @@ func (req *AccountsReceivableCreateRequest) ToAccountsReceivableEntity() *entiti
 func (req *AccountsReceivableUpdateRequest) ToAccountsReceivableEntity() *entities.AccountsReceivable {
 	return &entities.AccountsReceivable{
 		BaseModel:  types.BaseModel{},
-		InvoiceID:  req.InvoiceID,
-		CustomerID: req.CustomerID,
+		InvoiceID:  uuid.MustParse(req.InvoiceID),
+		CustomerID: uuid.MustParse(req.CustomerID),
 		IssueDate:  req.IssueDate,
 		DueDate:    req.DueDate,
 		Amount:     req.Amount,
@@ -79,9 +80,9 @@ func (req *AccountsReceivableUpdateRequest) ToAccountsReceivableEntity() *entiti
 // FromAccountsReceivableEntity converts entities.AccountsReceivable to AccountsReceivableResponse.
 func FromAccountsReceivableEntity(ar *entities.AccountsReceivable) *AccountsReceivableResponse {
 	return &AccountsReceivableResponse{
-		ID:         ar.ID,
-		InvoiceID:  ar.InvoiceID,
-		CustomerID: ar.CustomerID,
+		ID:         ar.ID.String(),
+		InvoiceID:  ar.InvoiceID.String(),
+		CustomerID: ar.CustomerID.String(),
 		IssueDate:  ar.IssueDate,
 		DueDate:    ar.DueDate,
 		Amount:     ar.Amount,

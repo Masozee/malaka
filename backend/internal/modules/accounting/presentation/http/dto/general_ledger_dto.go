@@ -3,14 +3,14 @@ package dto
 import (
 	"time"
 
-	"github.com/google/uuid"
+	"malaka/internal/shared/uuid"
 	"malaka/internal/modules/accounting/domain/entities"
 )
 
 // GeneralLedgerCreateRequest represents the request to create a general ledger entry
 type GeneralLedgerCreateRequest struct {
-	AccountID        uuid.UUID `json:"account_id" validate:"required"`
-	JournalEntryID   uuid.UUID `json:"journal_entry_id" validate:"required"`
+	AccountID        uuid.ID `json:"account_id" validate:"required"`
+	JournalEntryID   uuid.ID `json:"journal_entry_id" validate:"required"`
 	TransactionDate  time.Time `json:"transaction_date" validate:"required"`
 	Description      string    `json:"description" validate:"required,max=500"`
 	Reference        string    `json:"reference" validate:"max=100"`
@@ -23,8 +23,8 @@ type GeneralLedgerCreateRequest struct {
 
 // GeneralLedgerUpdateRequest represents the request to update a general ledger entry
 type GeneralLedgerUpdateRequest struct {
-	AccountID        uuid.UUID `json:"account_id" validate:"required"`
-	JournalEntryID   uuid.UUID `json:"journal_entry_id" validate:"required"`
+	AccountID        uuid.ID `json:"account_id" validate:"required"`
+	JournalEntryID   uuid.ID `json:"journal_entry_id" validate:"required"`
 	TransactionDate  time.Time `json:"transaction_date" validate:"required"`
 	Description      string    `json:"description" validate:"required,max=500"`
 	Reference        string    `json:"reference" validate:"max=100"`
@@ -36,9 +36,9 @@ type GeneralLedgerUpdateRequest struct {
 
 // GeneralLedgerResponse represents the response for a general ledger entry
 type GeneralLedgerResponse struct {
-	ID               uuid.UUID `json:"id"`
-	AccountID        uuid.UUID `json:"account_id"`
-	JournalEntryID   uuid.UUID `json:"journal_entry_id"`
+	ID               uuid.ID `json:"id"`
+	AccountID        uuid.ID `json:"account_id"`
+	JournalEntryID   uuid.ID `json:"journal_entry_id"`
 	TransactionDate  time.Time `json:"transaction_date"`
 	Description      string    `json:"description"`
 	Reference        string    `json:"reference"`
@@ -60,27 +60,27 @@ type GeneralLedgerResponse struct {
 
 // AccountBalanceRequest represents a request for account balance
 type AccountBalanceRequest struct {
-	AccountID uuid.UUID `json:"account_id" validate:"required"`
+	AccountID uuid.ID `json:"account_id" validate:"required"`
 	AsOfDate  time.Time `json:"as_of_date" validate:"required"`
 }
 
 // AccountBalanceResponse represents the response for account balance
 type AccountBalanceResponse struct {
-	AccountID uuid.UUID `json:"account_id"`
+	AccountID uuid.ID `json:"account_id"`
 	Balance   float64   `json:"balance"`
 	AsOfDate  time.Time `json:"as_of_date"`
 }
 
 // LedgerReportRequest represents a request for ledger report
 type LedgerReportRequest struct {
-	AccountID uuid.UUID `json:"account_id" validate:"required"`
+	AccountID uuid.ID `json:"account_id" validate:"required"`
 	StartDate time.Time `json:"start_date" validate:"required"`
 	EndDate   time.Time `json:"end_date" validate:"required"`
 }
 
 // LedgerReportResponse represents the response for ledger report
 type LedgerReportResponse struct {
-	AccountID       uuid.UUID               `json:"account_id"`
+	AccountID       uuid.ID               `json:"account_id"`
 	StartDate       time.Time               `json:"start_date"`
 	EndDate         time.Time               `json:"end_date"`
 	OpeningBalance  float64                 `json:"opening_balance"`

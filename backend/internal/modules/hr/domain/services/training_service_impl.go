@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/google/uuid"
 	"malaka/internal/modules/hr/domain/entities"
 	"malaka/internal/modules/hr/domain/repositories"
+	"malaka/internal/shared/uuid"
 )
 
 // trainingService implements TrainingService
@@ -53,7 +53,7 @@ func (s *trainingService) CreateProgram(ctx context.Context, program *entities.T
 }
 
 // GetProgramByID retrieves a training program by ID
-func (s *trainingService) GetProgramByID(ctx context.Context, id uuid.UUID) (*entities.TrainingProgram, error) {
+func (s *trainingService) GetProgramByID(ctx context.Context, id uuid.ID) (*entities.TrainingProgram, error) {
 	return s.repo.GetProgramByID(ctx, id)
 }
 
@@ -83,7 +83,7 @@ func (s *trainingService) UpdateProgram(ctx context.Context, program *entities.T
 }
 
 // DeleteProgram deletes a training program
-func (s *trainingService) DeleteProgram(ctx context.Context, id uuid.UUID) error {
+func (s *trainingService) DeleteProgram(ctx context.Context, id uuid.ID) error {
 	existing, err := s.repo.GetProgramByID(ctx, id)
 	if err != nil {
 		return fmt.Errorf("failed to get existing program: %w", err)
@@ -106,7 +106,7 @@ func (s *trainingService) GetProgramsByCategory(ctx context.Context, category en
 }
 
 // EnrollEmployee enrolls an employee in a training program
-func (s *trainingService) EnrollEmployee(ctx context.Context, programID, employeeID uuid.UUID) (*entities.TrainingEnrollment, error) {
+func (s *trainingService) EnrollEmployee(ctx context.Context, programID, employeeID uuid.ID) (*entities.TrainingEnrollment, error) {
 	// Get program
 	program, err := s.repo.GetProgramByID(ctx, programID)
 	if err != nil {
@@ -122,7 +122,7 @@ func (s *trainingService) EnrollEmployee(ctx context.Context, programID, employe
 	}
 
 	// Get employee details
-	employee, err := s.employeeRepo.GetByID(ctx, employeeID.String())
+	employee, err := s.employeeRepo.GetByID(ctx, employeeID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get employee: %w", err)
 	}
@@ -170,12 +170,12 @@ func (s *trainingService) EnrollEmployee(ctx context.Context, programID, employe
 }
 
 // GetEnrollmentByID retrieves an enrollment by ID
-func (s *trainingService) GetEnrollmentByID(ctx context.Context, id uuid.UUID) (*entities.TrainingEnrollment, error) {
+func (s *trainingService) GetEnrollmentByID(ctx context.Context, id uuid.ID) (*entities.TrainingEnrollment, error) {
 	return s.repo.GetEnrollmentByID(ctx, id)
 }
 
 // GetAllEnrollments retrieves all enrollments with optional filters
-func (s *trainingService) GetAllEnrollments(ctx context.Context, page, pageSize int, programID, employeeID *uuid.UUID) ([]*entities.TrainingEnrollment, int, error) {
+func (s *trainingService) GetAllEnrollments(ctx context.Context, page, pageSize int, programID, employeeID *uuid.ID) ([]*entities.TrainingEnrollment, int, error) {
 	if page <= 0 {
 		page = 1
 	}
@@ -197,7 +197,7 @@ func (s *trainingService) GetAllEnrollments(ctx context.Context, page, pageSize 
 }
 
 // UpdateProgress updates the progress of an enrollment
-func (s *trainingService) UpdateProgress(ctx context.Context, enrollmentID uuid.UUID, progress float64, score *float64) error {
+func (s *trainingService) UpdateProgress(ctx context.Context, enrollmentID uuid.ID, progress float64, score *float64) error {
 	enrollment, err := s.repo.GetEnrollmentByID(ctx, enrollmentID)
 	if err != nil {
 		return fmt.Errorf("failed to get enrollment: %w", err)
@@ -226,7 +226,7 @@ func (s *trainingService) UpdateProgress(ctx context.Context, enrollmentID uuid.
 }
 
 // CompleteTraining marks a training as completed
-func (s *trainingService) CompleteTraining(ctx context.Context, enrollmentID uuid.UUID, score float64) error {
+func (s *trainingService) CompleteTraining(ctx context.Context, enrollmentID uuid.ID, score float64) error {
 	enrollment, err := s.repo.GetEnrollmentByID(ctx, enrollmentID)
 	if err != nil {
 		return fmt.Errorf("failed to get enrollment: %w", err)
@@ -266,7 +266,7 @@ func (s *trainingService) CompleteTraining(ctx context.Context, enrollmentID uui
 }
 
 // DropEnrollment drops an enrollment
-func (s *trainingService) DropEnrollment(ctx context.Context, enrollmentID uuid.UUID) error {
+func (s *trainingService) DropEnrollment(ctx context.Context, enrollmentID uuid.ID) error {
 	enrollment, err := s.repo.GetEnrollmentByID(ctx, enrollmentID)
 	if err != nil {
 		return fmt.Errorf("failed to get enrollment: %w", err)

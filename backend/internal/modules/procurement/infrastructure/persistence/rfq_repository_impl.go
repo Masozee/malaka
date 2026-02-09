@@ -59,21 +59,21 @@ func (r *RFQRepositoryImpl) GetByID(ctx context.Context, id string) (*entities.R
 	}
 
 	// Load related items
-	items, err := r.GetRFQItems(ctx, rfq.ID)
+	items, err := r.GetRFQItems(ctx, rfq.ID.String())
 	if err != nil {
 		return nil, err
 	}
 	rfq.Items = items
 
 	// Load related suppliers
-	suppliers, err := r.GetRFQSuppliers(ctx, rfq.ID)
+	suppliers, err := r.GetRFQSuppliers(ctx, rfq.ID.String())
 	if err != nil {
 		return nil, err
 	}
 	rfq.Suppliers = suppliers
 
 	// Load responses
-	responses, err := r.GetRFQResponses(ctx, rfq.ID)
+	responses, err := r.GetRFQResponses(ctx, rfq.ID.String())
 	if err != nil {
 		return nil, err
 	}
@@ -168,8 +168,8 @@ func (r *RFQRepositoryImpl) GetAll(ctx context.Context, filter *repositories.RFQ
 		}
 
 		// Load related items count and suppliers count for list view
-		rfq.Items, _ = r.GetRFQItems(ctx, rfq.ID)
-		rfq.Suppliers, _ = r.GetRFQSuppliers(ctx, rfq.ID)
+		rfq.Items, _ = r.GetRFQItems(ctx, rfq.ID.String())
+		rfq.Suppliers, _ = r.GetRFQSuppliers(ctx, rfq.ID.String())
 
 		rfqs = append(rfqs, rfq)
 	}
@@ -426,7 +426,7 @@ func (r *RFQRepositoryImpl) GetRFQResponses(ctx context.Context, rfqID string) (
 
 	// Load response items for each response
 	for _, resp := range responses {
-		items, err := r.GetResponseItems(ctx, resp.ID)
+		items, err := r.GetResponseItems(ctx, resp.ID.String())
 		if err != nil {
 			return nil, err
 		}
@@ -456,7 +456,7 @@ func (r *RFQRepositoryImpl) GetResponseBySupplier(ctx context.Context, rfqID, su
 	}
 
 	// Load response items
-	items, err := r.GetResponseItems(ctx, response.ID)
+	items, err := r.GetResponseItems(ctx, response.ID.String())
 	if err != nil {
 		return nil, err
 	}
@@ -487,7 +487,7 @@ func (r *RFQRepositoryImpl) GetResponseByID(ctx context.Context, id string) (*en
 	}
 
 	// Load response items
-	items, err := r.GetResponseItems(ctx, response.ID)
+	items, err := r.GetResponseItems(ctx, response.ID.String())
 	if err != nil {
 		return nil, err
 	}

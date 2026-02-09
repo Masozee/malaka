@@ -2,10 +2,11 @@ package services
 
 import (
 	"context"
+	"time"
 
 	"malaka/internal/modules/inventory/domain/entities"
 	"malaka/internal/modules/inventory/domain/repositories"
-	"malaka/internal/shared/utils"
+	"malaka/internal/shared/uuid"
 )
 
 // StockOpnameService provides business logic for stock opname operations.
@@ -30,11 +31,12 @@ func NewStockOpnameService(repo repositories.StockOpnameRepository) StockOpnameS
 
 // CreateStockOpname creates a new stock opname.
 func (s *stockOpnameServiceImpl) CreateStockOpname(ctx context.Context, opname *entities.StockOpname) error {
-	if opname.ID == "" {
-		opname.ID = utils.RandomString(10)
+	if opname.ID.IsNil() {
+		opname.ID = uuid.New()
 	}
-	opname.CreatedAt = utils.Now()
-	opname.UpdatedAt = utils.Now()
+	now := time.Now()
+	opname.CreatedAt = now
+	opname.UpdatedAt = now
 
 	return s.repo.Create(ctx, opname)
 }
@@ -51,7 +53,7 @@ func (s *stockOpnameServiceImpl) GetStockOpnameByID(ctx context.Context, id stri
 
 // UpdateStockOpname updates an existing stock opname.
 func (s *stockOpnameServiceImpl) UpdateStockOpname(ctx context.Context, opname *entities.StockOpname) error {
-	opname.UpdatedAt = utils.Now()
+	opname.UpdatedAt = time.Now()
 	return s.repo.Update(ctx, opname)
 }
 

@@ -12,6 +12,7 @@ import (
 
 	"malaka/internal/modules/settings/domain/entities"
 	"malaka/internal/modules/settings/domain/repositories"
+	"malaka/internal/shared/uuid"
 )
 
 // SettingService provides business logic for settings management
@@ -113,7 +114,7 @@ func (s *SettingService) UpdateBulkSettings(ctx context.Context, updates map[str
 	}
 	
 	// Prepare updates with encryption and validation
-	repoUpdates := make(map[string]*entities.SettingUpdate)
+	repoUpdates := make(map[uuid.ID]*entities.SettingUpdate)
 	for key, value := range updates {
 		setting, exists := settings[key]
 		if !exists {

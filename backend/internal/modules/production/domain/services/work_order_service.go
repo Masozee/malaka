@@ -5,45 +5,46 @@ import (
 
 	"malaka/internal/modules/production/domain/entities"
 	"malaka/internal/modules/production/domain/repositories"
+	"malaka/internal/shared/uuid"
 )
 
 type WorkOrderService interface {
 	// CRUD operations
 	CreateWorkOrder(ctx context.Context, workOrder *entities.WorkOrder) error
-	GetWorkOrder(ctx context.Context, id int) (*entities.WorkOrder, error)
+	GetWorkOrder(ctx context.Context, id uuid.ID) (*entities.WorkOrder, error)
 	GetWorkOrderByNumber(ctx context.Context, workOrderNumber string) (*entities.WorkOrder, error)
 	UpdateWorkOrder(ctx context.Context, workOrder *entities.WorkOrder) error
-	DeleteWorkOrder(ctx context.Context, id int) error
+	DeleteWorkOrder(ctx context.Context, id uuid.ID) error
 
 	// List operations
 	GetAllWorkOrders(ctx context.Context, limit, offset int, search, status string) ([]*entities.WorkOrder, int, error)
 	SearchWorkOrders(ctx context.Context, query string, limit, offset int) ([]*entities.WorkOrder, int, error)
 
 	// Status management
-	StartWorkOrder(ctx context.Context, id int) error
-	PauseWorkOrder(ctx context.Context, id int, reason string) error
-	ResumeWorkOrder(ctx context.Context, id int) error
-	CompleteWorkOrder(ctx context.Context, id int) error
-	CancelWorkOrder(ctx context.Context, id int, reason string) error
+	StartWorkOrder(ctx context.Context, id uuid.ID) error
+	PauseWorkOrder(ctx context.Context, id uuid.ID, reason string) error
+	ResumeWorkOrder(ctx context.Context, id uuid.ID) error
+	CompleteWorkOrder(ctx context.Context, id uuid.ID) error
+	CancelWorkOrder(ctx context.Context, id uuid.ID, reason string) error
 
 	// Material management
-	AddMaterial(ctx context.Context, workOrderID int, material *entities.WorkOrderMaterial) error
+	AddMaterial(ctx context.Context, workOrderID uuid.ID, material *entities.WorkOrderMaterial) error
 	UpdateMaterial(ctx context.Context, material *entities.WorkOrderMaterial) error
-	RemoveMaterial(ctx context.Context, workOrderID, materialID int) error
-	AllocateMaterials(ctx context.Context, workOrderID int) error
-	ConsumeMaterial(ctx context.Context, workOrderID, materialID int, quantity int) error
+	RemoveMaterial(ctx context.Context, workOrderID, materialID uuid.ID) error
+	AllocateMaterials(ctx context.Context, workOrderID uuid.ID) error
+	ConsumeMaterial(ctx context.Context, workOrderID, materialID uuid.ID, quantity int) error
 
 	// Operation management
-	AddOperation(ctx context.Context, workOrderID int, operation *entities.WorkOrderOperation) error
+	AddOperation(ctx context.Context, workOrderID uuid.ID, operation *entities.WorkOrderOperation) error
 	UpdateOperation(ctx context.Context, operation *entities.WorkOrderOperation) error
-	RemoveOperation(ctx context.Context, workOrderID, operationID int) error
-	StartOperation(ctx context.Context, operationID int) error
-	CompleteOperation(ctx context.Context, operationID int) error
+	RemoveOperation(ctx context.Context, workOrderID, operationID uuid.ID) error
+	StartOperation(ctx context.Context, operationID uuid.ID) error
+	CompleteOperation(ctx context.Context, operationID uuid.ID) error
 
 	// Assignment management
-	AssignEmployee(ctx context.Context, workOrderID int, employeeID string, role string) error
-	UnassignEmployee(ctx context.Context, workOrderID int, employeeID string) error
-	AssignSupervisor(ctx context.Context, workOrderID int, supervisorID string) error
+	AssignEmployee(ctx context.Context, workOrderID uuid.ID, employeeID uuid.ID, role string) error
+	UnassignEmployee(ctx context.Context, workOrderID uuid.ID, employeeID uuid.ID) error
+	AssignSupervisor(ctx context.Context, workOrderID uuid.ID, supervisorID string) error
 
 	// Analytics and reporting
 	GetWorkOrderSummary(ctx context.Context) (*entities.WorkOrderSummary, error)
@@ -57,8 +58,8 @@ type WorkOrderService interface {
 	GenerateWorkOrderNumber(ctx context.Context) (string, error)
 
 	// Bulk operations
-	BulkUpdateStatus(ctx context.Context, ids []int, status entities.WorkOrderStatus) error
-	BulkAssignSupervisor(ctx context.Context, ids []int, supervisorID string) error
+	BulkUpdateStatus(ctx context.Context, ids []uuid.ID, status entities.WorkOrderStatus) error
+	BulkAssignSupervisor(ctx context.Context, ids []uuid.ID, supervisorID string) error
 }
 
 // WorkOrderServiceImpl provides business logic for work order operations.
@@ -79,7 +80,7 @@ func (s *WorkOrderServiceImpl) GetAllWorkOrders(ctx context.Context, limit, offs
 }
 
 // GetWorkOrder retrieves a work order by ID.
-func (s *WorkOrderServiceImpl) GetWorkOrder(ctx context.Context, id int) (*entities.WorkOrder, error) {
+func (s *WorkOrderServiceImpl) GetWorkOrder(ctx context.Context, id uuid.ID) (*entities.WorkOrder, error) {
 	return s.repo.GetByID(ctx, id)
 }
 
@@ -94,7 +95,7 @@ func (s *WorkOrderServiceImpl) UpdateWorkOrder(ctx context.Context, workOrder *e
 }
 
 // DeleteWorkOrder deletes a work order.
-func (s *WorkOrderServiceImpl) DeleteWorkOrder(ctx context.Context, id int) error {
+func (s *WorkOrderServiceImpl) DeleteWorkOrder(ctx context.Context, id uuid.ID) error {
 	return s.repo.Delete(ctx, id)
 }
 
@@ -108,27 +109,27 @@ func (s *WorkOrderServiceImpl) SearchWorkOrders(ctx context.Context, query strin
 }
 
 // Stub implementations for other methods - can be implemented later
-func (s *WorkOrderServiceImpl) StartWorkOrder(ctx context.Context, id int) error {
+func (s *WorkOrderServiceImpl) StartWorkOrder(ctx context.Context, id uuid.ID) error {
 	return nil
 }
 
-func (s *WorkOrderServiceImpl) PauseWorkOrder(ctx context.Context, id int, reason string) error {
+func (s *WorkOrderServiceImpl) PauseWorkOrder(ctx context.Context, id uuid.ID, reason string) error {
 	return nil
 }
 
-func (s *WorkOrderServiceImpl) ResumeWorkOrder(ctx context.Context, id int) error {
+func (s *WorkOrderServiceImpl) ResumeWorkOrder(ctx context.Context, id uuid.ID) error {
 	return nil
 }
 
-func (s *WorkOrderServiceImpl) CompleteWorkOrder(ctx context.Context, id int) error {
+func (s *WorkOrderServiceImpl) CompleteWorkOrder(ctx context.Context, id uuid.ID) error {
 	return nil
 }
 
-func (s *WorkOrderServiceImpl) CancelWorkOrder(ctx context.Context, id int, reason string) error {
+func (s *WorkOrderServiceImpl) CancelWorkOrder(ctx context.Context, id uuid.ID, reason string) error {
 	return nil
 }
 
-func (s *WorkOrderServiceImpl) AddMaterial(ctx context.Context, workOrderID int, material *entities.WorkOrderMaterial) error {
+func (s *WorkOrderServiceImpl) AddMaterial(ctx context.Context, workOrderID uuid.ID, material *entities.WorkOrderMaterial) error {
 	return nil
 }
 
@@ -136,15 +137,15 @@ func (s *WorkOrderServiceImpl) UpdateMaterial(ctx context.Context, material *ent
 	return nil
 }
 
-func (s *WorkOrderServiceImpl) RemoveMaterial(ctx context.Context, workOrderID, materialID int) error {
+func (s *WorkOrderServiceImpl) RemoveMaterial(ctx context.Context, workOrderID, materialID uuid.ID) error {
 	return nil
 }
 
-func (s *WorkOrderServiceImpl) GetMaterials(ctx context.Context, workOrderID int) ([]entities.WorkOrderMaterial, error) {
+func (s *WorkOrderServiceImpl) GetMaterials(ctx context.Context, workOrderID uuid.ID) ([]entities.WorkOrderMaterial, error) {
 	return nil, nil
 }
 
-func (s *WorkOrderServiceImpl) AddOperation(ctx context.Context, workOrderID int, operation *entities.WorkOrderOperation) error {
+func (s *WorkOrderServiceImpl) AddOperation(ctx context.Context, workOrderID uuid.ID, operation *entities.WorkOrderOperation) error {
 	return nil
 }
 
@@ -152,31 +153,31 @@ func (s *WorkOrderServiceImpl) UpdateOperation(ctx context.Context, operation *e
 	return nil
 }
 
-func (s *WorkOrderServiceImpl) RemoveOperation(ctx context.Context, workOrderID, operationID int) error {
+func (s *WorkOrderServiceImpl) RemoveOperation(ctx context.Context, workOrderID, operationID uuid.ID) error {
 	return nil
 }
 
-func (s *WorkOrderServiceImpl) GetOperations(ctx context.Context, workOrderID int) ([]entities.WorkOrderOperation, error) {
+func (s *WorkOrderServiceImpl) GetOperations(ctx context.Context, workOrderID uuid.ID) ([]entities.WorkOrderOperation, error) {
 	return nil, nil
 }
 
-func (s *WorkOrderServiceImpl) StartOperation(ctx context.Context, operationID int) error {
+func (s *WorkOrderServiceImpl) StartOperation(ctx context.Context, operationID uuid.ID) error {
 	return nil
 }
 
-func (s *WorkOrderServiceImpl) CompleteOperation(ctx context.Context, operationID int) error {
+func (s *WorkOrderServiceImpl) CompleteOperation(ctx context.Context, operationID uuid.ID) error {
 	return nil
 }
 
-func (s *WorkOrderServiceImpl) AssignEmployee(ctx context.Context, workOrderID int, employeeID string, role string) error {
+func (s *WorkOrderServiceImpl) AssignEmployee(ctx context.Context, workOrderID uuid.ID, employeeID uuid.ID, role string) error {
 	return nil
 }
 
-func (s *WorkOrderServiceImpl) UnassignEmployee(ctx context.Context, workOrderID int, employeeID string) error {
+func (s *WorkOrderServiceImpl) UnassignEmployee(ctx context.Context, workOrderID uuid.ID, employeeID uuid.ID) error {
 	return nil
 }
 
-func (s *WorkOrderServiceImpl) AssignSupervisor(ctx context.Context, workOrderID int, supervisorID string) error {
+func (s *WorkOrderServiceImpl) AssignSupervisor(ctx context.Context, workOrderID uuid.ID, supervisorID string) error {
 	return nil
 }
 
@@ -208,19 +209,19 @@ func (s *WorkOrderServiceImpl) GenerateWorkOrderNumber(ctx context.Context) (str
 	return "", nil
 }
 
-func (s *WorkOrderServiceImpl) BulkUpdateStatus(ctx context.Context, ids []int, status entities.WorkOrderStatus) error {
+func (s *WorkOrderServiceImpl) BulkUpdateStatus(ctx context.Context, ids []uuid.ID, status entities.WorkOrderStatus) error {
 	return nil
 }
 
-func (s *WorkOrderServiceImpl) BulkAssignSupervisor(ctx context.Context, ids []int, supervisorID string) error {
+func (s *WorkOrderServiceImpl) BulkAssignSupervisor(ctx context.Context, ids []uuid.ID, supervisorID string) error {
 	return nil
 }
 
-func (s *WorkOrderServiceImpl) AllocateMaterials(ctx context.Context, workOrderID int) error {
+func (s *WorkOrderServiceImpl) AllocateMaterials(ctx context.Context, workOrderID uuid.ID) error {
 	return nil
 }
 
-func (s *WorkOrderServiceImpl) ConsumeMaterial(ctx context.Context, workOrderID, materialID int, quantity int) error {
+func (s *WorkOrderServiceImpl) ConsumeMaterial(ctx context.Context, workOrderID, materialID uuid.ID, quantity int) error {
 	return nil
 }
 

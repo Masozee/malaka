@@ -6,6 +6,7 @@ import (
 
 	"github.com/jmoiron/sqlx"
 	"malaka/internal/modules/masterdata/domain/entities"
+	"malaka/internal/shared/uuid"
 )
 
 // CompanyRepositoryImpl implements repositories.CompanyRepository.
@@ -26,7 +27,7 @@ func (r *CompanyRepositoryImpl) Create(ctx context.Context, company *entities.Co
 }
 
 // GetByID retrieves a company by its ID from the database.
-func (r *CompanyRepositoryImpl) GetByID(ctx context.Context, id string) (*entities.Company, error) {
+func (r *CompanyRepositoryImpl) GetByID(ctx context.Context, id uuid.ID) (*entities.Company, error) {
 	query := `SELECT id, name, COALESCE(email, '') as email, COALESCE(phone, '') as phone, COALESCE(address, '') as address, COALESCE(status, 'active') as status, created_at, updated_at FROM companies WHERE id = $1`
 	row := r.db.QueryRowContext(ctx, query, id)
 
@@ -67,7 +68,7 @@ func (r *CompanyRepositoryImpl) Update(ctx context.Context, company *entities.Co
 }
 
 // Delete deletes a company by its ID from the database.
-func (r *CompanyRepositoryImpl) Delete(ctx context.Context, id string) error {
+func (r *CompanyRepositoryImpl) Delete(ctx context.Context, id uuid.ID) error {
 	query := `DELETE FROM companies WHERE id = $1`
 	_, err := r.db.ExecContext(ctx, query, id)
 	return err

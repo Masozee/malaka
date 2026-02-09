@@ -3,11 +3,11 @@ package handlers
 import (
 	"github.com/gin-gonic/gin"
 
-	"malaka/internal/modules/masterdata/domain/entities"
 	"malaka/internal/modules/masterdata/domain/services"
 	"malaka/internal/modules/masterdata/infrastructure/external"
 	"malaka/internal/modules/masterdata/presentation/http/dto"
 	"malaka/internal/shared/response"
+	"malaka/internal/shared/uuid"
 )
 
 // BarcodeHandler handles HTTP requests for barcode operations.
@@ -32,10 +32,8 @@ func (h *BarcodeHandler) CreateBarcode(c *gin.Context) {
 		return
 	}
 
-	barcode := &entities.Barcode{
-		ArticleID: req.ArticleID,
-		Code:      req.Code,
-	}
+	// Use DTO's ToEntity method which handles UUID conversion properly
+	barcode := req.ToEntity()
 
 	if err := h.service.CreateBarcode(c.Request.Context(), barcode); err != nil {
 		response.InternalServerError(c, err.Error(), nil)
@@ -48,7 +46,7 @@ func (h *BarcodeHandler) CreateBarcode(c *gin.Context) {
 // GetBarcodeByID handles retrieving a barcode by its ID.
 func (h *BarcodeHandler) GetBarcodeByID(c *gin.Context) {
 	id := c.Param("id")
-	barcode, err := h.service.GetBarcodeByID(c.Request.Context(), id)
+	barcode, err := h.service.GetBarcodeByID(c.Request.Context(), uuid.MustParse(id))
 	if err != nil {
 		response.InternalServerError(c, err.Error(), nil)
 		return
@@ -75,30 +73,39 @@ func (h *BarcodeHandler) GetAllBarcodes(c *gin.Context) {
 // UpdateBarcode handles updating an existing barcode.
 func (h *BarcodeHandler) UpdateBarcode(c *gin.Context) {
 	id := c.Param("id")
+
+	// First, retrieve the existing barcode
+	existingBarcode, err := h.service.GetBarcodeByID(c.Request.Context(), uuid.MustParse(id))
+	if err != nil {
+		response.InternalServerError(c, err.Error(), nil)
+		return
+	}
+	if existingBarcode == nil {
+		response.NotFound(c, "Barcode not found", nil)
+		return
+	}
+
 	var req dto.UpdateBarcodeRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		response.BadRequest(c, err.Error(), nil)
 		return
 	}
 
-	barcode := &entities.Barcode{
-		ArticleID: req.ArticleID,
-		Code:      req.Code,
-	}
-	barcode.ID = id // Set the ID from the URL parameter
+	// Use DTO's ApplyToEntity method which handles UUID conversion properly
+	req.ApplyToEntity(existingBarcode)
 
-	if err := h.service.UpdateBarcode(c.Request.Context(), barcode); err != nil {
+	if err := h.service.UpdateBarcode(c.Request.Context(), existingBarcode); err != nil {
 		response.InternalServerError(c, err.Error(), nil)
 		return
 	}
 
-	response.OK(c, "Barcode updated successfully", barcode)
+	response.OK(c, "Barcode updated successfully", existingBarcode)
 }
 
 // DeleteBarcode handles deleting a barcode by its ID.
 func (h *BarcodeHandler) DeleteBarcode(c *gin.Context) {
 	id := c.Param("id")
-	if err := h.service.DeleteBarcode(c.Request.Context(), id); err != nil {
+	if err := h.service.DeleteBarcode(c.Request.Context(), uuid.MustParse(id)); err != nil {
 		response.InternalServerError(c, err.Error(), nil)
 		return
 	}
@@ -179,7 +186,7 @@ func (h *BarcodeHandler) GenerateArticleBarcodes(c *gin.Context) {
 	barcodeRequests := make([]external.BarcodeRequest, 0, len(req.ArticleIDs))
 	for _, articleID := range req.ArticleIDs {
 		// Get existing barcode for the article
-		existingBarcodes, err := h.service.GetBarcodesByArticleID(c.Request.Context(), articleID)
+		existingBarcodes, err := h.service.GetBarcodesByArticleID(c.Request.Context(), uuid.MustParse(articleID))
 		if err != nil {
 			response.InternalServerError(c, "Failed to fetch article barcodes: "+err.Error(), nil)
 			return
@@ -242,14 +249,15 @@ func (h *BarcodeHandler) GenerateAllArticleBarcodes(c *gin.Context) {
 	barcodeRequests := make([]external.BarcodeRequest, 0, len(articles))
 	for _, article := range articles {
 		// Use existing barcode if available, otherwise generate one based on article ID
+		articleIDStr := article.ID.String()
 		barcodeData := article.Barcode
 		if barcodeData == "" {
 			// Generate a simple barcode from article name/id
-			barcodeData = "ART" + article.ID[:8] // First 8 chars of UUID
+			barcodeData = "ART" + articleIDStr[:8] // First 8 chars of UUID
 		}
 
 		barcodeRequests = append(barcodeRequests, external.BarcodeRequest{
-			ID:     article.ID,
+			ID:     articleIDStr,
 			Data:   barcodeData,
 			Format: req.Format,
 			Width:  req.Width,
@@ -269,7 +277,7 @@ func (h *BarcodeHandler) GenerateAllArticleBarcodes(c *gin.Context) {
 		updateCount := 0
 		for _, barcodeResult := range result.Results {
 			if barcodeResult.ImageURL != "" && barcodeResult.Error == "" {
-				err := h.service.UpdateArticleBarcodeURL(c.Request.Context(), barcodeResult.ID, barcodeResult.ImageURL)
+				err := h.service.UpdateArticleBarcodeURL(c.Request.Context(), uuid.MustParse(barcodeResult.ID), barcodeResult.ImageURL)
 				if err != nil {
 					// Log error but don't fail the entire operation
 					continue

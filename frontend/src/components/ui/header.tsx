@@ -19,6 +19,8 @@ import { Button } from "@/components/ui/button"
 import { CommandPalette } from "@/components/ui/command"
 import { useSidebar } from "@/contexts/sidebar-context"
 import { useAuth } from "@/contexts/auth-context"
+import { useRealtimeNotifications } from "@/hooks/useRealtimeNotifications"
+import { notificationService } from "@/services/notifications"
 import { Badge } from "@/components/ui/badge"
 import {
   DropdownMenu,
@@ -39,58 +41,22 @@ interface BreadcrumbItem {
   href?: string
 }
 
-interface Notification {
-  id: string
-  title: string
-  message: string
-  time: string
-  read: boolean
-  type: 'info' | 'warning' | 'success' | 'error'
-}
-
 interface HeaderProps {
   title: string
   description?: string
   breadcrumbs?: BreadcrumbItem[]
   actions?: React.ReactNode
+  compact?: boolean
 }
 
-export function Header({ title, description, breadcrumbs, actions }: HeaderProps) {
+export function Header({ title, description, breadcrumbs, actions, compact }: HeaderProps) {
   const sidebar = useSidebar()
   const { user, logout } = useAuth()
   const router = useRouter()
   const [commandOpen, setCommandOpen] = React.useState(false)
   const [mounted, setMounted] = React.useState(false)
 
-  // Mock notifications - in production, fetch from API
-  const [notifications] = React.useState<Notification[]>([
-    {
-      id: '1',
-      title: 'New Order Received',
-      message: 'Order #12345 has been placed',
-      time: '5 min ago',
-      read: false,
-      type: 'info'
-    },
-    {
-      id: '2',
-      title: 'Low Stock Alert',
-      message: 'Product SKU-001 is running low',
-      time: '1 hour ago',
-      read: false,
-      type: 'warning'
-    },
-    {
-      id: '3',
-      title: 'Payment Received',
-      message: 'Invoice #INV-2024-001 paid',
-      time: '2 hours ago',
-      read: true,
-      type: 'success'
-    },
-  ])
-
-  const unreadCount = notifications.filter(n => !n.read).length
+  const { notifications, unreadCount, markAsRead, markAllAsRead } = useRealtimeNotifications(20)
 
   React.useEffect(() => {
     setMounted(true)
@@ -101,13 +67,23 @@ export function Header({ title, description, breadcrumbs, actions }: HeaderProps
     router.push('/login')
   }
 
-  const getNotificationColor = (type: Notification['type']) => {
+  const getNotificationColor = (type: string) => {
     switch (type) {
       case 'info': return 'bg-blue-100 text-blue-800'
-      case 'warning': return 'bg-yellow-100 text-yellow-800'
-      case 'success': return 'bg-green-100 text-green-800'
-      case 'error': return 'bg-red-100 text-red-800'
+      case 'alert': return 'bg-red-100 text-red-800'
+      case 'order': return 'bg-indigo-100 text-indigo-800'
+      case 'inventory': return 'bg-orange-100 text-orange-800'
+      case 'payment': return 'bg-green-100 text-green-800'
       default: return 'bg-gray-100 text-gray-800'
+    }
+  }
+
+  const handleNotificationClick = async (notif: typeof notifications[0]) => {
+    if (notif.status === 'unread') {
+      await markAsRead(notif.id)
+    }
+    if (notif.action_url) {
+      router.push(notif.action_url)
     }
   }
 
@@ -217,7 +193,8 @@ export function Header({ title, description, breadcrumbs, actions }: HeaderProps
                       notifications.map((notification) => (
                         <div
                           key={notification.id}
-                          className={`p-3 border-b last:border-0 hover:bg-muted/50 cursor-pointer ${!notification.read ? 'bg-muted/30' : ''
+                          onClick={() => handleNotificationClick(notification)}
+                          className={`p-3 border-b last:border-0 hover:bg-muted/50 cursor-pointer ${notification.status === 'unread' ? 'bg-muted/30' : ''
                             }`}
                         >
                           <div className="flex items-start gap-2">
@@ -227,18 +204,20 @@ export function Header({ title, description, breadcrumbs, actions }: HeaderProps
                             <div className="flex-1 min-w-0">
                               <p className="text-sm font-medium truncate">{notification.title}</p>
                               <p className="text-xs text-muted-foreground truncate">{notification.message}</p>
-                              <p className="text-xs text-muted-foreground mt-1">{notification.time}</p>
+                              <p className="text-xs text-muted-foreground mt-1">{notificationService.formatTimeAgo(notification.created_at)}</p>
                             </div>
                           </div>
                         </div>
                       ))
                     )}
                   </div>
-                  <div className="p-2 border-t">
-                    <Button variant="ghost" size="sm" className="w-full text-xs">
-                      View all notifications
-                    </Button>
-                  </div>
+                  {unreadCount > 0 && (
+                    <div className="p-2 border-t">
+                      <Button variant="ghost" size="sm" className="w-full text-xs" onClick={markAllAsRead}>
+                        Mark all as read
+                      </Button>
+                    </div>
+                  )}
                 </PopoverContent>
               </Popover>
             )}
@@ -294,21 +273,23 @@ export function Header({ title, description, breadcrumbs, actions }: HeaderProps
       </div>
 
       {/* Page Title Section */}
-      <header className="bg-white dark:bg-gray-900 px-6 py-6">
-        <div className="flex items-start justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">{title}</h1>
-            {description && (
-              <p className="text-gray-600 dark:text-gray-400 mt-2">{description}</p>
+      {!compact && (
+        <header className="bg-white dark:bg-gray-900 px-6 py-6">
+          <div className="flex items-start justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">{title}</h1>
+              {description && (
+                <p className="text-gray-600 dark:text-gray-400 mt-2">{description}</p>
+              )}
+            </div>
+            {actions && (
+              <div className="flex items-center space-x-2">
+                {actions}
+              </div>
             )}
           </div>
-          {actions && (
-            <div className="flex items-center space-x-2">
-              {actions}
-            </div>
-          )}
-        </div>
-      </header>
+        </header>
+      )}
 
       {/* Command Palette */}
       <CommandPalette open={commandOpen} onOpenChange={setCommandOpen} />

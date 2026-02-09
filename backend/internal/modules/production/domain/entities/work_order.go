@@ -2,6 +2,8 @@ package entities
 
 import (
 	"time"
+
+	"malaka/internal/shared/uuid"
 )
 
 type WorkOrderStatus string
@@ -44,10 +46,10 @@ const (
 )
 
 type WorkOrder struct {
-	ID                int                   `json:"id" db:"id"`
+	ID                uuid.ID               `json:"id" db:"id"`
 	WorkOrderNumber   string                `json:"work_order_number" db:"work_order_number"`
 	Type              WorkOrderType         `json:"type" db:"type"`
-	ProductID         string                `json:"product_id" db:"product_id"`
+	ProductID         uuid.ID               `json:"product_id" db:"product_id"`
 	ProductCode       string                `json:"product_code" db:"product_code"`
 	ProductName       string                `json:"product_name" db:"product_name"`
 	Quantity          int                   `json:"quantity" db:"quantity"`
@@ -57,14 +59,14 @@ type WorkOrder struct {
 	ActualEndDate     *time.Time            `json:"actual_end_date,omitempty" db:"actual_end_date"`
 	Status            WorkOrderStatus       `json:"status" db:"status"`
 	Priority          WorkOrderPriority     `json:"priority" db:"priority"`
-	WarehouseID       string                `json:"warehouse_id" db:"warehouse_id"`
+	WarehouseID       uuid.ID               `json:"warehouse_id" db:"warehouse_id"`
 	Supervisor        *string               `json:"supervisor,omitempty" db:"supervisor"`
 	TotalCost         float64               `json:"total_cost" db:"total_cost"`
 	ActualCost        float64               `json:"actual_cost" db:"actual_cost"`
 	Efficiency        *float64              `json:"efficiency,omitempty" db:"efficiency"`
 	QualityScore      *float64              `json:"quality_score,omitempty" db:"quality_score"`
 	Notes             *string               `json:"notes,omitempty" db:"notes"`
-	CreatedBy         string                `json:"created_by" db:"created_by"`
+	CreatedBy         uuid.ID               `json:"created_by" db:"created_by"`
 	CreatedAt         time.Time             `json:"created_at" db:"created_at"`
 	UpdatedAt         time.Time             `json:"updated_at" db:"updated_at"`
 	Materials         []WorkOrderMaterial   `json:"materials,omitempty"`
@@ -73,32 +75,32 @@ type WorkOrder struct {
 }
 
 type WorkOrderMaterial struct {
-	ID                int     `json:"id" db:"id"`
-	WorkOrderID       int     `json:"work_order_id" db:"work_order_id"`
-	ArticleID         string  `json:"article_id" db:"article_id"`
-	ArticleCode       string  `json:"article_code" db:"article_code"`
-	ArticleName       string  `json:"article_name" db:"article_name"`
-	RequiredQuantity  int     `json:"required_quantity" db:"required_quantity"`
-	AllocatedQuantity int     `json:"allocated_quantity" db:"allocated_quantity"`
-	ConsumedQuantity  int     `json:"consumed_quantity" db:"consumed_quantity"`
-	UnitCost          float64 `json:"unit_cost" db:"unit_cost"`
-	TotalCost         float64 `json:"total_cost" db:"total_cost"`
-	WasteQuantity     *int    `json:"waste_quantity,omitempty" db:"waste_quantity"`
+	ID                uuid.ID   `json:"id" db:"id"`
+	WorkOrderID       uuid.ID   `json:"work_order_id" db:"work_order_id"`
+	ArticleID         uuid.ID   `json:"article_id" db:"article_id"`
+	ArticleCode       string    `json:"article_code" db:"article_code"`
+	ArticleName       string    `json:"article_name" db:"article_name"`
+	RequiredQuantity  int       `json:"required_quantity" db:"required_quantity"`
+	AllocatedQuantity int       `json:"allocated_quantity" db:"allocated_quantity"`
+	ConsumedQuantity  int       `json:"consumed_quantity" db:"consumed_quantity"`
+	UnitCost          float64   `json:"unit_cost" db:"unit_cost"`
+	TotalCost         float64   `json:"total_cost" db:"total_cost"`
+	WasteQuantity     *int      `json:"waste_quantity,omitempty" db:"waste_quantity"`
 	CreatedAt         time.Time `json:"created_at" db:"created_at"`
 	UpdatedAt         time.Time `json:"updated_at" db:"updated_at"`
 }
 
 type WorkOrderOperation struct {
-	ID              int             `json:"id" db:"id"`
-	WorkOrderID     int             `json:"work_order_id" db:"work_order_id"`
+	ID              uuid.ID         `json:"id" db:"id"`
+	WorkOrderID     uuid.ID         `json:"work_order_id" db:"work_order_id"`
 	OperationNumber int             `json:"operation_number" db:"operation_number"`
 	Name            string          `json:"name" db:"name"`
 	Description     *string         `json:"description,omitempty" db:"description"`
 	PlannedDuration int             `json:"planned_duration" db:"planned_duration"` // in hours
 	ActualDuration  *int            `json:"actual_duration,omitempty" db:"actual_duration"`
 	Status          OperationStatus `json:"status" db:"status"`
-	AssignedTo      *string         `json:"assigned_to,omitempty" db:"assigned_to"`
-	MachineID       *string         `json:"machine_id,omitempty" db:"machine_id"`
+	AssignedTo      *uuid.ID        `json:"assigned_to,omitempty" db:"assigned_to"`
+	MachineID       *uuid.ID        `json:"machine_id,omitempty" db:"machine_id"`
 	StartTime       *time.Time      `json:"start_time,omitempty" db:"start_time"`
 	EndTime         *time.Time      `json:"end_time,omitempty" db:"end_time"`
 	Notes           *string         `json:"notes,omitempty" db:"notes"`
@@ -107,9 +109,9 @@ type WorkOrderOperation struct {
 }
 
 type WorkOrderAssignment struct {
-	ID          int       `json:"id" db:"id"`
-	WorkOrderID int       `json:"work_order_id" db:"work_order_id"`
-	EmployeeID  string    `json:"employee_id" db:"employee_id"`
+	ID          uuid.ID   `json:"id" db:"id"`
+	WorkOrderID uuid.ID   `json:"work_order_id" db:"work_order_id"`
+	EmployeeID  uuid.ID   `json:"employee_id" db:"employee_id"`
 	Role        *string   `json:"role,omitempty" db:"role"`
 	AssignedAt  time.Time `json:"assigned_at" db:"assigned_at"`
 }
@@ -128,14 +130,14 @@ type WorkOrderSummary struct {
 
 // WorkOrderFilters represents filtering options for work orders
 type WorkOrderFilters struct {
-	Status      *WorkOrderStatus  `json:"status,omitempty"`
-	Type        *WorkOrderType    `json:"type,omitempty"`
+	Status      *WorkOrderStatus   `json:"status,omitempty"`
+	Type        *WorkOrderType     `json:"type,omitempty"`
 	Priority    *WorkOrderPriority `json:"priority,omitempty"`
-	WarehouseID *string           `json:"warehouse_id,omitempty"`
-	Supervisor  *string           `json:"supervisor,omitempty"`
-	StartDate   *time.Time        `json:"start_date,omitempty"`
-	EndDate     *time.Time        `json:"end_date,omitempty"`
-	Search      *string           `json:"search,omitempty"`
+	WarehouseID *uuid.ID           `json:"warehouse_id,omitempty"`
+	Supervisor  *string            `json:"supervisor,omitempty"`
+	StartDate   *time.Time         `json:"start_date,omitempty"`
+	EndDate     *time.Time         `json:"end_date,omitempty"`
+	Search      *string            `json:"search,omitempty"`
 }
 
 // Validation methods
@@ -143,7 +145,7 @@ func (w *WorkOrder) Validate() error {
 	if w.WorkOrderNumber == "" {
 		return ErrWorkOrderNumberRequired
 	}
-	if w.ProductID == "" {
+	if w.ProductID.IsNil() {
 		return ErrProductIDRequired
 	}
 	if w.Quantity <= 0 {
@@ -152,7 +154,7 @@ func (w *WorkOrder) Validate() error {
 	if w.PlannedEndDate.Before(w.PlannedStartDate) {
 		return ErrEndDateBeforeStartDate
 	}
-	if w.CreatedBy == "" {
+	if w.CreatedBy.IsNil() {
 		return ErrCreatedByRequired
 	}
 	return nil

@@ -5,14 +5,37 @@ import { TwoLevelLayout } from "@/components/ui/two-level-layout"
 import { Header } from "@/components/ui/header"
 import { AdvancedDataTable } from "@/components/ui/advanced-data-table"
 import { Badge } from "@/components/ui/badge"
-import { CustomerForm } from "@/components/forms/customer-form" // Changed from UserForm
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import { CustomerForm } from "@/components/forms/customer-form"
 import { useToast, toast } from "@/components/ui/toast"
-import { customerService, companyService } from "@/services/masterdata" // Changed from userService
-import { Customer, Company, MasterDataFilters } from "@/types/masterdata" // Changed from User
+import { customerService, companyService } from "@/services/masterdata"
+import { Customer, Company, MasterDataFilters } from "@/types/masterdata"
+import { HugeiconsIcon } from "@hugeicons/react"
+import {
+  Search01Icon,
+  FilterIcon,
+  Download01Icon,
+  Add01Icon,
+} from "@hugeicons/core-free-icons"
 
-export default function CustomersPage() { // Changed from UsersPage
+export default function CustomersPage() {
   const [mounted, setMounted] = React.useState(false)
-  const [customers, setCustomers] = React.useState<Customer[]>([]) // Changed from users, User
+  const [customers, setCustomers] = React.useState<Customer[]>([])
   const [companies, setCompanies] = React.useState<Company[]>([])
   const [loading, setLoading] = React.useState(true)
   const [pagination, setPagination] = React.useState({
@@ -21,8 +44,13 @@ export default function CustomersPage() { // Changed from UsersPage
     total: 0
   })
   const [formOpen, setFormOpen] = React.useState(false)
-  const [selectedCustomer, setSelectedCustomer] = React.useState<Customer | null>(null) // Changed from selectedUser, User
+  const [selectedCustomer, setSelectedCustomer] = React.useState<Customer | null>(null)
   const { addToast } = useToast()
+
+  // Search and filter state
+  const [searchTerm, setSearchTerm] = React.useState("")
+  const [filterOpen, setFilterOpen] = React.useState(false)
+  const [filters, setFilters] = React.useState<Record<string, string>>({})
 
   React.useEffect(() => {
     setMounted(true)
@@ -106,18 +134,18 @@ export default function CustomersPage() { // Changed from UsersPage
   ]
 
   // Fetch customers with filters
-  const fetchCustomers = React.useCallback(async (filters?: MasterDataFilters) => { // Changed from fetchUsers
+  const fetchCustomers = React.useCallback(async (fetchFilters?: MasterDataFilters) => {
     try {
       setLoading(true)
-      const response = await customerService.getAll(filters) // Changed from userService
-      setCustomers(response.data) // Changed from setUsers
+      const response = await customerService.getAll(fetchFilters)
+      setCustomers(response.data)
       setPagination(prev => ({
         ...prev,
         total: response.total
       }))
     } catch (error) {
-      console.error('Error fetching customers:', error) // Changed from users
-      addToast(toast.error("Failed to fetch customers", "Please try again later.")) // Changed from users
+      console.error('Error fetching customers:', error)
+      addToast(toast.error("Failed to fetch customers", "Please try again later."))
     } finally {
       setLoading(false)
     }
@@ -141,116 +169,218 @@ export default function CustomersPage() { // Changed from UsersPage
   React.useEffect(() => {
     fetchCustomers({
       page: pagination.current,
-      limit: pagination.pageSize
+      limit: pagination.pageSize,
+      search: searchTerm || undefined,
+      ...filters
     })
   }, [pagination.current, pagination.pageSize, fetchCustomers])
 
   // Event handlers
-  const handleSearch = React.useCallback((filters: MasterDataFilters) => {
-    fetchCustomers({ // Changed from fetchUsers
-      ...filters,
+  const handleSearch = React.useCallback((searchFilters: MasterDataFilters) => {
+    fetchCustomers({
+      ...searchFilters,
       page: 1,
       limit: pagination.pageSize
     })
     setPagination(prev => ({ ...prev, current: 1 }))
-  }, [pagination.pageSize, fetchCustomers]) // Changed from fetchUsers
+  }, [pagination.pageSize, fetchCustomers])
 
   const handlePageChange = React.useCallback((page: number, pageSize: number) => {
     setPagination(prev => ({ ...prev, current: page, pageSize }))
   }, [])
 
   const handleAdd = () => {
-    setSelectedCustomer(null) // Changed from setSelectedUser
+    setSelectedCustomer(null)
     setFormOpen(true)
   }
 
-  const handleEdit = (customer: Customer) => { // Changed from user: User
-    setSelectedCustomer(customer) // Changed from setSelectedUser
+  const handleEdit = (customer: Customer) => {
+    setSelectedCustomer(customer)
     setFormOpen(true)
   }
 
   const handleFormSuccess = () => {
-    fetchCustomers({ // Changed from fetchUsers
+    fetchCustomers({
       page: pagination.current,
+      limit: pagination.pageSize,
+      search: searchTerm || undefined,
+      ...filters
+    })
+  }
+
+  const handleDelete = async (customer: Customer) => {
+    if (confirm(`Are you sure you want to delete "${customer.name}"?`)) {
+      try {
+        await customerService.delete(customer.id)
+        fetchCustomers({
+          page: pagination.current,
+          limit: pagination.pageSize,
+          search: searchTerm || undefined,
+          ...filters
+        })
+        addToast(toast.success("Customer deleted successfully", `${customer.name} has been removed.`))
+      } catch (error) {
+        console.error('Error deleting customer:', error)
+        addToast(toast.error("Failed to delete customer", "Please try again later."))
+      }
+    }
+  }
+
+  // Debounced search
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      handleSearch({
+        search: searchTerm || undefined,
+        ...filters,
+        page: 1,
+        limit: pagination.pageSize
+      })
+    }, 300)
+    return () => clearTimeout(timer)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchTerm])
+
+  // Handle filter changes
+  const handleFilterChange = (key: string, value: string) => {
+    const newFilters = { ...filters }
+    if (value && value !== 'all') {
+      newFilters[key] = value
+    } else {
+      delete newFilters[key]
+    }
+    setFilters(newFilters)
+    handleSearch({
+      search: searchTerm || undefined,
+      ...newFilters,
+      page: 1,
       limit: pagination.pageSize
     })
   }
 
-  const handleDelete = async (customer: Customer) => { // Changed from user: User
-    if (confirm(`Are you sure you want to delete "${customer.name}"?`)) { // Changed from user.full_name
-      try {
-        await customerService.delete(customer.id) // Changed from userService.delete
-        fetchCustomers({ // Changed from fetchUsers
-          page: pagination.current,
-          limit: pagination.pageSize
-        })
-        addToast(toast.success("Customer deleted successfully", `${customer.name} has been removed.`)) // Changed from User, user.full_name
-      } catch (error) {
-        console.error('Error deleting customer:', error) // Changed from user
-        addToast(toast.error("Failed to delete customer", "Please try again later.")) // Changed from user
-      }
-    }
+  // Export functionality
+  const handleExport = () => {
+    const visibleColumns = columns.filter(col => !col.hidden)
+    const csvContent = [
+      visibleColumns.map(col => col.title).join(','),
+      ...customers.map(row =>
+        visibleColumns.map(col => {
+          const value = row[col.key as keyof Customer]
+          return `"${String(value || '').replace(/"/g, '""')}"`
+        }).join(',')
+      )
+    ].join('\n')
+
+    const blob = new Blob([csvContent], { type: 'text/csv' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'customers-export.csv'
+    a.click()
+    URL.revokeObjectURL(url)
   }
 
-  const handleBulkAction = async (action: string, selectedIds: string[]) => {
-    try {
-      switch (action) {
-        case 'activate':
-          // Implement bulk activate
-          await Promise.all(selectedIds.map(id => 
-            customerService.update(id, { data: { status: 'active' } }) // Changed from userService.update
-          ))
-          addToast(toast.success("Customers activated", `${selectedIds.length} customers have been activated.`)) // Changed from Users
-          break
-        case 'deactivate':
-          // Implement bulk deactivate
-          await Promise.all(selectedIds.map(id => 
-            customerService.update(id, { data: { status: 'inactive' } }) // Changed from userService.update
-          ))
-          addToast(toast.success("Customers deactivated", `${selectedIds.length} customers have been deactivated.`)) // Changed from Users
-          break
-        case 'delete':
-          if (confirm(`Are you sure you want to delete ${selectedIds.length} customers?`)) { // Changed from users
-            await Promise.all(selectedIds.map(id => customerService.delete(id))) // Changed from userService.delete
-            addToast(toast.success("Customers deleted", `${selectedIds.length} customers have been deleted.`)) // Changed from Users
-          }
-          break
-        default:
-          break
-      }
-      
-      // Refresh data after bulk action
-      fetchCustomers({ // Changed from fetchUsers
-        page: pagination.current,
-        limit: pagination.pageSize
-      })
-    } catch (error) {
-      console.error('Error performing bulk action:', error)
-      addToast(toast.error("Bulk action failed", "Please try again later."))
-    }
-  }
-
-  const bulkActions = [
-    { value: 'activate', label: 'Activate Selected', variant: 'default' as const },
-    { value: 'deactivate', label: 'Deactivate Selected', variant: 'secondary' as const },
-    { value: 'delete', label: 'Delete Selected', variant: 'destructive' as const }
-  ]
+  const activeFiltersCount = Object.keys(filters).length
 
   return (
     <TwoLevelLayout>
-      <Header 
-        title="Customers" // Changed from Users
-        description="Manage customer accounts and information" // Changed from user accounts and access permissions
+      <Header
+        title="Customers"
+        description="Manage customer accounts and information"
         breadcrumbs={[
           { label: "Dashboard", href: "/dashboard" },
           { label: "Master Data", href: "/master-data" },
-          { label: "Customers" } // Changed from Users
+          { label: "Customers" }
         ]}
+        actions={
+          <Button onClick={handleAdd}>
+            <HugeiconsIcon icon={Add01Icon} className="h-4 w-4 mr-2" />
+            Add Customer
+          </Button>
+        }
       />
-      
+
       <div className="flex-1 p-6">
+        {/* Toolbar: Search, Filters, Export */}
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            {/* Search */}
+            <div className="relative">
+              <HugeiconsIcon icon={Search01Icon} className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Input
+                placeholder="Search customers by name, email, or contact..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 w-80"
+              />
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            {/* Filters */}
+            <Dialog open={filterOpen} onOpenChange={setFilterOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline" size="sm" className="relative">
+                  <HugeiconsIcon icon={FilterIcon} className="h-4 w-4 mr-2" />
+                  Filters
+                  {activeFiltersCount > 0 && (
+                    <Badge variant="secondary" className="ml-2 h-5 w-5 p-0 text-xs">
+                      {activeFiltersCount}
+                    </Badge>
+                  )}
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-md">
+                <DialogHeader>
+                  <DialogTitle>Filter Options</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Status</label>
+                    <Select
+                      value={filters['status'] || ""}
+                      onValueChange={(value) => handleFilterChange('status', value)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="All Status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Status</SelectItem>
+                        <SelectItem value="active">Active</SelectItem>
+                        <SelectItem value="inactive">Inactive</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  {activeFiltersCount > 0 && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setFilters({})
+                        handleSearch({
+                          search: searchTerm || undefined,
+                          page: 1,
+                          limit: pagination.pageSize
+                        })
+                      }}
+                      className="w-full"
+                    >
+                      Clear All Filters
+                    </Button>
+                  )}
+                </div>
+              </DialogContent>
+            </Dialog>
+
+            {/* Export */}
+            <Button variant="outline" size="sm" onClick={handleExport}>
+              <HugeiconsIcon icon={Download01Icon} className="h-4 w-4 mr-2" />
+              Export
+            </Button>
+          </div>
+        </div>
+
         <AdvancedDataTable
-          data={customers} // Changed from users
+          data={customers}
           columns={columns}
           loading={loading}
           pagination={{
@@ -259,22 +389,15 @@ export default function CustomersPage() { // Changed from UsersPage
             total: pagination.total,
             onChange: handlePageChange
           }}
-          onSearch={handleSearch}
-          onAdd={handleAdd}
           onEdit={handleEdit}
           onDelete={handleDelete}
-          onBulkAction={handleBulkAction}
-          bulkActions={bulkActions}
-          searchPlaceholder="Search customers by name, email, or contact person..." // Changed from users by name, email, or username
-          addButtonText="Add Customer" // Changed from Add User
-          exportEnabled={true}
           rowSelection={true}
         />
 
-        <CustomerForm // Changed from UserForm
+        <CustomerForm
           open={formOpen}
           onOpenChange={setFormOpen}
-          customer={selectedCustomer} // Changed from user
+          customer={selectedCustomer}
           companies={companies}
           onSuccess={handleFormSuccess}
         />

@@ -3,13 +3,13 @@ package dto
 import (
 	"time"
 
-	"github.com/google/uuid"
+	"malaka/internal/shared/uuid"
 	"malaka/internal/modules/accounting/domain/entities"
 )
 
 // BalanceSheetResponse represents the response structure for a Balance Sheet
 type BalanceSheetResponse struct {
-	ID        uuid.UUID `json:"id"`
+	ID        uuid.ID `json:"id"`
 	CompanyID string    `json:"company_id"`
 	AsOfDate  time.Time `json:"as_of_date"`
 	Assets    float64   `json:"assets"`
@@ -20,7 +20,7 @@ type BalanceSheetResponse struct {
 
 // IncomeStatementResponse represents the response structure for an Income Statement
 type IncomeStatementResponse struct {
-	ID          uuid.UUID `json:"id"`
+	ID          uuid.ID `json:"id"`
 	CompanyID   string    `json:"company_id"`
 	PeriodStart time.Time `json:"period_start"`
 	PeriodEnd   time.Time `json:"period_end"`
@@ -32,7 +32,7 @@ type IncomeStatementResponse struct {
 
 // CashFlowStatementResponse represents the response structure for a Cash Flow Statement
 type CashFlowStatementResponse struct {
-	ID                      uuid.UUID `json:"id"`
+	ID                      uuid.ID `json:"id"`
 	CompanyID               string    `json:"company_id"`
 	PeriodStart             time.Time `json:"period_start"`
 	PeriodEnd               time.Time `json:"period_end"`

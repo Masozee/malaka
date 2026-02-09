@@ -8,6 +8,7 @@ import (
 
 	"malaka/internal/modules/notifications/domain/entities"
 	"malaka/internal/modules/notifications/domain/services"
+	"malaka/internal/shared/uuid"
 )
 
 // NotificationHandler handles HTTP requests for notifications
@@ -29,9 +30,15 @@ type ListNotificationsResponse struct {
 
 // ListNotifications handles GET /notifications
 func (h *NotificationHandler) ListNotifications(c *gin.Context) {
-	userID, exists := c.Get("user_id")
+	userIDStr, exists := c.Get("user_id")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
+		return
+	}
+
+	userID, err := uuid.Parse(userIDStr.(string))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
 		return
 	}
 
@@ -52,13 +59,13 @@ func (h *NotificationHandler) ListNotifications(c *gin.Context) {
 
 	includeRead := c.Query("include_read") == "true"
 
-	notifications, err := h.service.ListNotifications(c.Request.Context(), userID.(string), limit, offset, includeRead)
+	notifications, err := h.service.ListNotifications(c.Request.Context(), userID, limit, offset, includeRead)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch notifications"})
 		return
 	}
 
-	unreadCount, err := h.service.GetUnreadCount(c.Request.Context(), userID.(string))
+	unreadCount, err := h.service.GetUnreadCount(c.Request.Context(), userID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get unread count"})
 		return
@@ -73,9 +80,15 @@ func (h *NotificationHandler) ListNotifications(c *gin.Context) {
 
 // GetNotification handles GET /notifications/:id
 func (h *NotificationHandler) GetNotification(c *gin.Context) {
-	id := c.Param("id")
-	if id == "" {
+	idStr := c.Param("id")
+	if idStr == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Notification ID is required"})
+		return
+	}
+
+	id, err := uuid.Parse(idStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid notification ID"})
 		return
 	}
 
@@ -86,8 +99,14 @@ func (h *NotificationHandler) GetNotification(c *gin.Context) {
 	}
 
 	// Verify ownership
-	userID, _ := c.Get("user_id")
-	if notification.UserID != userID.(string) {
+	userIDStr, _ := c.Get("user_id")
+	userID, err := uuid.Parse(userIDStr.(string))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+		return
+	}
+
+	if notification.UserID != userID {
 		c.JSON(http.StatusForbidden, gin.H{"error": "Access denied"})
 		return
 	}
@@ -97,13 +116,19 @@ func (h *NotificationHandler) GetNotification(c *gin.Context) {
 
 // GetUnreadCount handles GET /notifications/unread-count
 func (h *NotificationHandler) GetUnreadCount(c *gin.Context) {
-	userID, exists := c.Get("user_id")
+	userIDStr, exists := c.Get("user_id")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
 		return
 	}
 
-	count, err := h.service.GetUnreadCount(c.Request.Context(), userID.(string))
+	userID, err := uuid.Parse(userIDStr.(string))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+		return
+	}
+
+	count, err := h.service.GetUnreadCount(c.Request.Context(), userID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get unread count"})
 		return
@@ -119,9 +144,15 @@ type MarkAsReadRequest struct {
 
 // MarkAsRead handles POST /notifications/:id/read
 func (h *NotificationHandler) MarkAsRead(c *gin.Context) {
-	id := c.Param("id")
-	if id == "" {
+	idStr := c.Param("id")
+	if idStr == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Notification ID is required"})
+		return
+	}
+
+	id, err := uuid.Parse(idStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid notification ID"})
 		return
 	}
 
@@ -132,8 +163,14 @@ func (h *NotificationHandler) MarkAsRead(c *gin.Context) {
 		return
 	}
 
-	userID, _ := c.Get("user_id")
-	if notification.UserID != userID.(string) {
+	userIDStr, _ := c.Get("user_id")
+	userID, err := uuid.Parse(userIDStr.(string))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+		return
+	}
+
+	if notification.UserID != userID {
 		c.JSON(http.StatusForbidden, gin.H{"error": "Access denied"})
 		return
 	}
@@ -148,13 +185,19 @@ func (h *NotificationHandler) MarkAsRead(c *gin.Context) {
 
 // MarkAllAsRead handles POST /notifications/mark-all-read
 func (h *NotificationHandler) MarkAllAsRead(c *gin.Context) {
-	userID, exists := c.Get("user_id")
+	userIDStr, exists := c.Get("user_id")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
 		return
 	}
 
-	if err := h.service.MarkAllAsRead(c.Request.Context(), userID.(string)); err != nil {
+	userID, err := uuid.Parse(userIDStr.(string))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+		return
+	}
+
+	if err := h.service.MarkAllAsRead(c.Request.Context(), userID); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to mark all notifications as read"})
 		return
 	}
@@ -164,9 +207,15 @@ func (h *NotificationHandler) MarkAllAsRead(c *gin.Context) {
 
 // ArchiveNotification handles POST /notifications/:id/archive
 func (h *NotificationHandler) ArchiveNotification(c *gin.Context) {
-	id := c.Param("id")
-	if id == "" {
+	idStr := c.Param("id")
+	if idStr == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Notification ID is required"})
+		return
+	}
+
+	id, err := uuid.Parse(idStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid notification ID"})
 		return
 	}
 
@@ -177,8 +226,14 @@ func (h *NotificationHandler) ArchiveNotification(c *gin.Context) {
 		return
 	}
 
-	userID, _ := c.Get("user_id")
-	if notification.UserID != userID.(string) {
+	userIDStr, _ := c.Get("user_id")
+	userID, err := uuid.Parse(userIDStr.(string))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+		return
+	}
+
+	if notification.UserID != userID {
 		c.JSON(http.StatusForbidden, gin.H{"error": "Access denied"})
 		return
 	}
@@ -193,9 +248,15 @@ func (h *NotificationHandler) ArchiveNotification(c *gin.Context) {
 
 // DeleteNotification handles DELETE /notifications/:id
 func (h *NotificationHandler) DeleteNotification(c *gin.Context) {
-	id := c.Param("id")
-	if id == "" {
+	idStr := c.Param("id")
+	if idStr == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Notification ID is required"})
+		return
+	}
+
+	id, err := uuid.Parse(idStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid notification ID"})
 		return
 	}
 
@@ -206,8 +267,14 @@ func (h *NotificationHandler) DeleteNotification(c *gin.Context) {
 		return
 	}
 
-	userID, _ := c.Get("user_id")
-	if notification.UserID != userID.(string) {
+	userIDStr, _ := c.Get("user_id")
+	userID, err := uuid.Parse(userIDStr.(string))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+		return
+	}
+
+	if notification.UserID != userID {
 		c.JSON(http.StatusForbidden, gin.H{"error": "Access denied"})
 		return
 	}
@@ -222,13 +289,19 @@ func (h *NotificationHandler) DeleteNotification(c *gin.Context) {
 
 // GetPreferences handles GET /notifications/preferences
 func (h *NotificationHandler) GetPreferences(c *gin.Context) {
-	userID, exists := c.Get("user_id")
+	userIDStr, exists := c.Get("user_id")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
 		return
 	}
 
-	prefs, err := h.service.GetPreferences(c.Request.Context(), userID.(string))
+	userID, err := uuid.Parse(userIDStr.(string))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+		return
+	}
+
+	prefs, err := h.service.GetPreferences(c.Request.Context(), userID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get preferences"})
 		return
@@ -254,9 +327,15 @@ type UpdatePreferencesRequest struct {
 
 // UpdatePreferences handles PUT /notifications/preferences
 func (h *NotificationHandler) UpdatePreferences(c *gin.Context) {
-	userID, exists := c.Get("user_id")
+	userIDStr, exists := c.Get("user_id")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
+		return
+	}
+
+	userID, err := uuid.Parse(userIDStr.(string))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
 		return
 	}
 
@@ -267,7 +346,7 @@ func (h *NotificationHandler) UpdatePreferences(c *gin.Context) {
 	}
 
 	// Get existing preferences or create new ones
-	prefs, err := h.service.GetPreferences(c.Request.Context(), userID.(string))
+	prefs, err := h.service.GetPreferences(c.Request.Context(), userID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get preferences"})
 		return
@@ -326,9 +405,15 @@ type CreateTestNotificationRequest struct {
 
 // CreateTestNotification handles POST /notifications/test (for testing)
 func (h *NotificationHandler) CreateTestNotification(c *gin.Context) {
-	userID, exists := c.Get("user_id")
+	userIDStr, exists := c.Get("user_id")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
+		return
+	}
+
+	userID, err := uuid.Parse(userIDStr.(string))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
 		return
 	}
 
@@ -348,9 +433,9 @@ func (h *NotificationHandler) CreateTestNotification(c *gin.Context) {
 		priority = entities.NotificationPriority(req.Priority)
 	}
 
-	err := h.service.SendNotification(
+	err = h.service.SendNotification(
 		c.Request.Context(),
-		userID.(string),
+		userID,
 		req.Title,
 		req.Message,
 		notifType,

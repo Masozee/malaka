@@ -8,6 +8,7 @@ import (
 	"malaka/internal/modules/sales/presentation/http/dto"
 	"malaka/internal/shared/response"
 	"malaka/internal/shared/utils"
+	"malaka/internal/shared/uuid"
 )
 
 // SalesInvoiceHandler handles HTTP requests for sales invoice operations.
@@ -87,12 +88,18 @@ func (h *SalesInvoiceHandler) UpdateSalesInvoice(c *gin.Context) {
 		return
 	}
 
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		response.BadRequest(c, "Invalid ID format", nil)
+		return
+	}
+
 	invoice := &entities.SalesInvoice{
 		SalesOrderID: req.SalesOrderID,
 		InvoiceDate:  utils.Now(),
 		TotalAmount:  req.TotalAmount,
 	}
-	invoice.ID = id // Set the ID from the URL parameter
+	invoice.ID = parsedID // Set the ID from the URL parameter
 
 	if err := h.service.UpdateSalesInvoice(c.Request.Context(), invoice); err != nil {
 		response.InternalServerError(c, err.Error(), nil)

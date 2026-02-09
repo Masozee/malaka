@@ -8,66 +8,141 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-// RBACService provides role-based access control checks.
+// RBACService provides role-based access control checks with caching.
 type RBACService struct {
-	db *sqlx.DB
+	db    *sqlx.DB
+	repo  RBACRepository
+	cache RBACCache
 }
 
-// NewRBACService creates a new RBACService.
-func NewRBACService(db *sqlx.DB) *RBACService {
-	return &RBACService{db: db}
+// NewRBACService creates a new RBACService with repository and cache.
+func NewRBACService(db *sqlx.DB, repo RBACRepository, cache RBACCache) *RBACService {
+	return &RBACService{db: db, repo: repo, cache: cache}
 }
 
-// CheckPermission checks if a user has a specific permission on a resource.
-// For example: CheckPermission(ctx, userID, "purchase_order", "approve")
-func (s *RBACService) CheckPermission(ctx context.Context, userID, resource, action string) (bool, error) {
-	// Query joins: users -> roles -> permissions
-	query := `
-		SELECT COUNT(*) 
-		FROM users u
-		JOIN roles r ON u.role_id = r.id
-		JOIN permissions p ON r.id = p.role_id
-		WHERE u.id = $1 AND p.resource = $2 AND p.action = $3
-	`
-	var count int
-	err := s.db.GetContext(ctx, &count, query, userID, resource, action)
-	if err != nil {
-		return false, fmt.Errorf("failed to check permission: %w", err)
+// GetUserPermissions loads the permission set for a user, cache-first with DB fallback.
+func (s *RBACService) GetUserPermissions(ctx context.Context, userID string) (*UserPermissionSet, error) {
+	// Try cache first
+	ps, err := s.cache.GetUserPermissions(ctx, userID)
+	if err == nil && ps != nil {
+		return ps, nil
 	}
 
-	return count > 0, nil
+	// Cache miss - load from DB
+	ps, err = s.repo.GetUserPermissionSet(ctx, userID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to load permissions: %w", err)
+	}
+
+	// Store in cache (non-blocking, ignore errors)
+	go func() {
+		_ = s.cache.SetUserPermissions(context.Background(), userID, ps)
+	}()
+
+	return ps, nil
+}
+
+// CheckPermission checks if a user has a specific permission.
+// This method is backward-compatible with the old RBACService signature.
+func (s *RBACService) CheckPermission(ctx context.Context, userID, resource, action string) (bool, error) {
+	ps, err := s.GetUserPermissions(ctx, userID)
+	if err != nil {
+		return false, err
+	}
+
+	// Try the new dotted format first (e.g., "procurement.purchase-order.approve")
+	// The old callers use resource like "purchase_order" and action like "approve",
+	// so we need to check multiple possible codes.
+	code := resource + "." + action
+	if ps.HasPermission(code) {
+		return true, nil
+	}
+
+	// Also check with module prefixed codes by scanning all permissions
+	// that end with resource.action
+	suffix := "." + resource + "." + action
+	for perm := range ps.Permissions {
+		if len(perm) > len(suffix) && perm[len(perm)-len(suffix):] == suffix {
+			return true, nil
+		}
+	}
+
+	return false, nil
 }
 
 // CanApprove checks if the approver has a higher role level than the requester.
-// Ideally, approver level > requester level.
-// If requester role is unknown (nil), we assume level 0.
 func (s *RBACService) CanApprove(ctx context.Context, approverID, requesterID string) (bool, error) {
-	// Get Role Levels
-	query := `
-		SELECT 
-			COALESCE((SELECT r.level FROM users u JOIN roles r ON u.role_id = r.id WHERE u.id = $1), 0) as approver_level,
-			COALESCE((SELECT r.level FROM users u JOIN roles r ON u.role_id = r.id WHERE u.id = $2), 0) as requester_level
-	`
-
-	var result struct {
-		ApproverLevel  int `db:"approver_level"`
-		RequesterLevel int `db:"requester_level"`
-	}
-
-	err := s.db.GetContext(ctx, &result, query, approverID, requesterID)
+	approverPS, err := s.GetUserPermissions(ctx, approverID)
 	if err != nil {
-		return false, fmt.Errorf("failed to compare role levels: %w", err)
+		return false, fmt.Errorf("failed to get approver permissions: %w", err)
 	}
 
-	// Simple hierarchy Logic: Approver must be at least Level 2 (Supervisor) AND have higher level than requester
-	// Or simply verify Approver Level >= Required Level (e.g. 2)
-	// For this implementation: Approver must be > Requester OR Approver must be at least Level 2 (Manager/Supervisor) if requester is also high level?
-	// Let's stick to the plan: Approver > Requester is a good dynamic check.
-	// But simpler: Approver must be >= Level 2 (Supervisor).
+	// Superadmins can always approve
+	if approverPS.IsSuperadmin {
+		return true, nil
+	}
 
-	if result.ApproverLevel < 2 {
+	// Approver must be at least Level 2 (Supervisor)
+	if approverPS.MaxLevel < 2 {
 		return false, errors.New("approver must be at least a Supervisor (Level 2)")
 	}
 
 	return true, nil
+}
+
+// InvalidateUserPermissions removes cached permissions for a user.
+func (s *RBACService) InvalidateUserPermissions(ctx context.Context, userID string) error {
+	return s.cache.DeleteUserPermissions(ctx, userID)
+}
+
+// InvalidateAllPermissions removes all cached permission sets.
+func (s *RBACService) InvalidateAllPermissions(ctx context.Context) error {
+	return s.cache.InvalidateAll(ctx)
+}
+
+// AssignRoleToUser assigns a role to a user and writes an audit log entry.
+func (s *RBACService) AssignRoleToUser(ctx context.Context, userID, roleID string, assignedBy *string) error {
+	if err := s.repo.AssignRoleToUser(ctx, userID, roleID, assignedBy); err != nil {
+		return fmt.Errorf("failed to assign role: %w", err)
+	}
+
+	// Invalidate cache
+	_ = s.cache.DeleteUserPermissions(ctx, userID)
+
+	// Write audit log
+	entry := &RBACAuditEntry{
+		Action:       "role_assigned",
+		ActorID:      assignedBy,
+		TargetUserID: &userID,
+		TargetRoleID: &roleID,
+	}
+	_ = s.repo.WriteAuditLog(ctx, entry)
+
+	return nil
+}
+
+// RevokeRoleFromUser revokes a role from a user and writes an audit log entry.
+func (s *RBACService) RevokeRoleFromUser(ctx context.Context, userID, roleID string, revokedBy *string) error {
+	if err := s.repo.RevokeRoleFromUser(ctx, userID, roleID); err != nil {
+		return fmt.Errorf("failed to revoke role: %w", err)
+	}
+
+	// Invalidate cache
+	_ = s.cache.DeleteUserPermissions(ctx, userID)
+
+	// Write audit log
+	entry := &RBACAuditEntry{
+		Action:       "role_revoked",
+		ActorID:      revokedBy,
+		TargetUserID: &userID,
+		TargetRoleID: &roleID,
+	}
+	_ = s.repo.WriteAuditLog(ctx, entry)
+
+	return nil
+}
+
+// GetRepository returns the underlying RBAC repository for direct access by handlers.
+func (s *RBACService) GetRepository() RBACRepository {
+	return s.repo
 }

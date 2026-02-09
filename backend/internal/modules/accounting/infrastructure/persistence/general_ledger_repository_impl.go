@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"time"
 
-	"github.com/google/uuid"
+	"malaka/internal/shared/uuid"
 	"malaka/internal/modules/accounting/domain/entities"
 	"malaka/internal/modules/accounting/domain/repositories"
 )
@@ -51,7 +51,7 @@ func (r *generalLedgerRepositoryImpl) Create(ctx context.Context, entry *entitie
 }
 
 // GetByID retrieves a general ledger entry by ID
-func (r *generalLedgerRepositoryImpl) GetByID(ctx context.Context, id uuid.UUID) (*entities.GeneralLedger, error) {
+func (r *generalLedgerRepositoryImpl) GetByID(ctx context.Context, id uuid.ID) (*entities.GeneralLedger, error) {
 	entry := &entities.GeneralLedger{}
 	
 	query := `
@@ -132,14 +132,14 @@ func (r *generalLedgerRepositoryImpl) Update(ctx context.Context, entry *entitie
 }
 
 // Delete deletes a general ledger entry
-func (r *generalLedgerRepositoryImpl) Delete(ctx context.Context, id uuid.UUID) error {
+func (r *generalLedgerRepositoryImpl) Delete(ctx context.Context, id uuid.ID) error {
 	query := `DELETE FROM general_ledger WHERE id = $1`
 	_, err := r.db.ExecContext(ctx, query, id)
 	return err
 }
 
 // GetByAccountID retrieves entries by account ID
-func (r *generalLedgerRepositoryImpl) GetByAccountID(ctx context.Context, accountID uuid.UUID) ([]*entities.GeneralLedger, error) {
+func (r *generalLedgerRepositoryImpl) GetByAccountID(ctx context.Context, accountID uuid.ID) ([]*entities.GeneralLedger, error) {
 	query := `
 		SELECT id, account_id, journal_entry_id, transaction_date, description, reference,
 			   debit_amount, credit_amount, balance, currency_code, exchange_rate,
@@ -150,7 +150,7 @@ func (r *generalLedgerRepositoryImpl) GetByAccountID(ctx context.Context, accoun
 }
 
 // GetByJournalEntryID retrieves entries by journal entry ID
-func (r *generalLedgerRepositoryImpl) GetByJournalEntryID(ctx context.Context, journalEntryID uuid.UUID) ([]*entities.GeneralLedger, error) {
+func (r *generalLedgerRepositoryImpl) GetByJournalEntryID(ctx context.Context, journalEntryID uuid.ID) ([]*entities.GeneralLedger, error) {
 	query := `
 		SELECT id, account_id, journal_entry_id, transaction_date, description, reference,
 			   debit_amount, credit_amount, balance, currency_code, exchange_rate,
@@ -172,7 +172,7 @@ func (r *generalLedgerRepositoryImpl) GetByDateRange(ctx context.Context, startD
 }
 
 // GetByAccountAndDateRange retrieves entries by account and date range
-func (r *generalLedgerRepositoryImpl) GetByAccountAndDateRange(ctx context.Context, accountID uuid.UUID, startDate, endDate time.Time) ([]*entities.GeneralLedger, error) {
+func (r *generalLedgerRepositoryImpl) GetByAccountAndDateRange(ctx context.Context, accountID uuid.ID, startDate, endDate time.Time) ([]*entities.GeneralLedger, error) {
 	query := `
 		SELECT id, account_id, journal_entry_id, transaction_date, description, reference,
 			   debit_amount, credit_amount, balance, currency_code, exchange_rate,
@@ -196,7 +196,7 @@ func (r *generalLedgerRepositoryImpl) GetByReference(ctx context.Context, refere
 }
 
 // GetAccountBalance calculates account balance as of a specific date
-func (r *generalLedgerRepositoryImpl) GetAccountBalance(ctx context.Context, accountID uuid.UUID, asOfDate time.Time) (float64, error) {
+func (r *generalLedgerRepositoryImpl) GetAccountBalance(ctx context.Context, accountID uuid.ID, asOfDate time.Time) (float64, error) {
 	query := `
 		SELECT COALESCE(SUM(debit_amount - credit_amount), 0)
 		FROM general_ledger 
@@ -208,7 +208,7 @@ func (r *generalLedgerRepositoryImpl) GetAccountBalance(ctx context.Context, acc
 }
 
 // GetAccountBalanceRange calculates account balance for a date range
-func (r *generalLedgerRepositoryImpl) GetAccountBalanceRange(ctx context.Context, accountID uuid.UUID, startDate, endDate time.Time) (float64, error) {
+func (r *generalLedgerRepositoryImpl) GetAccountBalanceRange(ctx context.Context, accountID uuid.ID, startDate, endDate time.Time) (float64, error) {
 	query := `
 		SELECT COALESCE(SUM(debit_amount - credit_amount), 0)
 		FROM general_ledger 
@@ -233,7 +233,7 @@ func (r *generalLedgerRepositoryImpl) GetTrialBalanceData(ctx context.Context, c
 }
 
 // GetAccountMovements retrieves account movements for a period
-func (r *generalLedgerRepositoryImpl) GetAccountMovements(ctx context.Context, accountID uuid.UUID, startDate, endDate time.Time) ([]*entities.GeneralLedger, error) {
+func (r *generalLedgerRepositoryImpl) GetAccountMovements(ctx context.Context, accountID uuid.ID, startDate, endDate time.Time) ([]*entities.GeneralLedger, error) {
 	return r.GetByAccountAndDateRange(ctx, accountID, startDate, endDate)
 }
 
@@ -306,7 +306,7 @@ func (r *generalLedgerRepositoryImpl) CreateBatch(ctx context.Context, entries [
 }
 
 // UpdateBalance updates the balance for an account
-func (r *generalLedgerRepositoryImpl) UpdateBalance(ctx context.Context, accountID uuid.UUID, balance float64) error {
+func (r *generalLedgerRepositoryImpl) UpdateBalance(ctx context.Context, accountID uuid.ID, balance float64) error {
 	query := `
 		UPDATE general_ledger SET balance = $2, updated_at = $3 
 		WHERE account_id = $1 AND id = (
@@ -319,7 +319,7 @@ func (r *generalLedgerRepositoryImpl) UpdateBalance(ctx context.Context, account
 }
 
 // RecalculateAccountBalances recalculates running balances for an account
-func (r *generalLedgerRepositoryImpl) RecalculateAccountBalances(ctx context.Context, accountID uuid.UUID) error {
+func (r *generalLedgerRepositoryImpl) RecalculateAccountBalances(ctx context.Context, accountID uuid.ID) error {
 	// Get all entries for the account in chronological order
 	entries, err := r.GetByAccountID(ctx, accountID)
 	if err != nil {

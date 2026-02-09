@@ -8,7 +8,7 @@ import (
 
 	"malaka/internal/modules/finance/domain/entities"
 	"malaka/internal/modules/finance/domain/repositories"
-	"malaka/internal/shared/utils"
+	"malaka/internal/shared/uuid"
 )
 
 // CashOpeningBalanceRepositoryImpl implements the CashOpeningBalanceRepository interface.
@@ -23,8 +23,8 @@ func NewCashOpeningBalanceRepositoryImpl(db *sqlx.DB) repositories.CashOpeningBa
 
 // Create inserts a new cash opening balance into the database.
 func (r *CashOpeningBalanceRepositoryImpl) Create(ctx context.Context, balance *entities.CashOpeningBalance) error {
-	if balance.ID == "" {
-		balance.ID = utils.RandomString(10)
+	if balance.ID.IsNil() {
+		balance.ID = uuid.New()
 	}
 
 	query := `
@@ -36,7 +36,7 @@ func (r *CashOpeningBalanceRepositoryImpl) Create(ctx context.Context, balance *
 }
 
 // GetByID retrieves a cash opening balance by its ID.
-func (r *CashOpeningBalanceRepositoryImpl) GetByID(ctx context.Context, id string) (*entities.CashOpeningBalance, error) {
+func (r *CashOpeningBalanceRepositoryImpl) GetByID(ctx context.Context, id uuid.ID) (*entities.CashOpeningBalance, error) {
 	var balance entities.CashOpeningBalance
 	query := "SELECT * FROM cash_opening_balances WHERE id = $1"
 	err := r.db.GetContext(ctx, &balance, query, id)
@@ -73,9 +73,9 @@ func (r *CashOpeningBalanceRepositoryImpl) GetByFiscalYear(ctx context.Context, 
 // Update updates an existing cash opening balance.
 func (r *CashOpeningBalanceRepositoryImpl) Update(ctx context.Context, balance *entities.CashOpeningBalance) error {
 	query := `
-		UPDATE cash_opening_balances 
+		UPDATE cash_opening_balances
 		SET cash_bank_id = :cash_bank_id, opening_date = :opening_date, opening_balance = :opening_balance,
-		    currency = :currency, description = :description, fiscal_year = :fiscal_year, 
+		    currency = :currency, description = :description, fiscal_year = :fiscal_year,
 		    is_active = :is_active, updated_at = NOW()
 		WHERE id = :id
 	`
@@ -84,7 +84,7 @@ func (r *CashOpeningBalanceRepositoryImpl) Update(ctx context.Context, balance *
 }
 
 // Delete deletes a cash opening balance by its ID.
-func (r *CashOpeningBalanceRepositoryImpl) Delete(ctx context.Context, id string) error {
+func (r *CashOpeningBalanceRepositoryImpl) Delete(ctx context.Context, id uuid.ID) error {
 	query := "DELETE FROM cash_opening_balances WHERE id = $1"
 	_, err := r.db.ExecContext(ctx, query, id)
 	return err

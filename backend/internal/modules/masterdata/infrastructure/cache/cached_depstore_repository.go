@@ -5,10 +5,10 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/google/uuid"
 	"malaka/internal/modules/masterdata/domain/entities"
 	"malaka/internal/modules/masterdata/domain/repositories"
 	"malaka/internal/shared/cache"
+	"malaka/internal/shared/uuid"
 )
 
 const (
@@ -43,7 +43,7 @@ func (r *CachedDepstoreRepository) Create(ctx context.Context, depstore *entitie
 }
 
 // GetByID retrieves a depstore by ID with caching.
-func (r *CachedDepstoreRepository) GetByID(ctx context.Context, id uuid.UUID) (*entities.Depstore, error) {
+func (r *CachedDepstoreRepository) GetByID(ctx context.Context, id uuid.ID) (*entities.Depstore, error) {
 	cacheKey := fmt.Sprintf("%s%s", depstoreKeyPrefix, id.String())
 	
 	// Try to get from cache first
@@ -141,7 +141,7 @@ func (r *CachedDepstoreRepository) Update(ctx context.Context, depstore *entitie
 }
 
 // Delete deletes a depstore and invalidates related cache.
-func (r *CachedDepstoreRepository) Delete(ctx context.Context, id uuid.UUID) error {
+func (r *CachedDepstoreRepository) Delete(ctx context.Context, id uuid.ID) error {
 	// Get depstore first to get code for cache invalidation
 	depstore, err := r.repo.GetByID(ctx, id)
 	if err != nil {

@@ -6,6 +6,7 @@ import (
 
 	"github.com/jmoiron/sqlx"
 	"malaka/internal/modules/shipping/domain/entities"
+	"malaka/internal/shared/uuid"
 )
 
 // TrackingRepositoryImpl implements repositories.TrackingRepository.
@@ -26,7 +27,7 @@ func (r *TrackingRepositoryImpl) Create(ctx context.Context, tracking *entities.
 }
 
 // GetByID retrieves a tracking record by its ID from the database.
-func (r *TrackingRepositoryImpl) GetByID(ctx context.Context, id string) (*entities.Tracking, error) {
+func (r *TrackingRepositoryImpl) GetByID(ctx context.Context, id uuid.ID) (*entities.Tracking, error) {
 	query := `SELECT id, shipment_id, status, location, event_date, created_at, updated_at FROM tracking WHERE id = $1`
 	row := r.db.QueryRowContext(ctx, query, id)
 
@@ -46,7 +47,7 @@ func (r *TrackingRepositoryImpl) Update(ctx context.Context, tracking *entities.
 }
 
 // Delete deletes a tracking record by its ID from the database.
-func (r *TrackingRepositoryImpl) Delete(ctx context.Context, id string) error {
+func (r *TrackingRepositoryImpl) Delete(ctx context.Context, id uuid.ID) error {
 	query := `DELETE FROM tracking WHERE id = $1`
 	_, err := r.db.ExecContext(ctx, query, id)
 	return err

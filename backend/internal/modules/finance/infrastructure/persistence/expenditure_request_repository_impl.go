@@ -6,6 +6,7 @@ import (
 
 	"malaka/internal/modules/finance/domain/entities"
 	"malaka/internal/modules/finance/domain/repositories"
+	"malaka/internal/shared/uuid"
 )
 
 type expenditureRequestRepositoryImpl struct {
@@ -19,6 +20,10 @@ func NewExpenditureRequestRepository(db *sql.DB) repositories.ExpenditureRequest
 }
 
 func (r *expenditureRequestRepositoryImpl) Create(ctx context.Context, request *entities.ExpenditureRequest) error {
+	if request.ID.IsNil() {
+		request.ID = uuid.New()
+	}
+
 	query := `
 		INSERT INTO expenditure_requests (
 			id, request_number, request_date, requested_by, cash_bank_id,
@@ -35,7 +40,7 @@ func (r *expenditureRequestRepositoryImpl) Create(ctx context.Context, request *
 	return err
 }
 
-func (r *expenditureRequestRepositoryImpl) GetByID(ctx context.Context, id string) (*entities.ExpenditureRequest, error) {
+func (r *expenditureRequestRepositoryImpl) GetByID(ctx context.Context, id uuid.ID) (*entities.ExpenditureRequest, error) {
 	request := &entities.ExpenditureRequest{}
 	query := `
 		SELECT id, request_number, request_date, requested_by, cash_bank_id,
@@ -103,7 +108,7 @@ func (r *expenditureRequestRepositoryImpl) Update(ctx context.Context, request *
 	return err
 }
 
-func (r *expenditureRequestRepositoryImpl) Delete(ctx context.Context, id string) error {
+func (r *expenditureRequestRepositoryImpl) Delete(ctx context.Context, id uuid.ID) error {
 	query := `DELETE FROM expenditure_requests WHERE id = $1`
 	_, err := r.db.ExecContext(ctx, query, id)
 	return err

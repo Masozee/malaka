@@ -9,6 +9,24 @@ import { Header } from '@/components/ui/header'
 import { AdvancedDataTable } from '@/components/ui/advanced-data-table'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { HugeiconsIcon } from '@hugeicons/react'
+import {
+  MoreVerticalIcon,
+  ViewIcon,
+  Edit01Icon,
+  Delete01Icon,
+  WalletIcon,
+  BankIcon,
+  MoneyIcon,
+  CreditCardIcon
+} from '@hugeicons/core-free-icons'
 
 import Link from 'next/link'
 import { cashBankService } from '@/services/accounting'
@@ -20,6 +38,7 @@ interface CashBankAccount {
   account_name: string
   account_type: 'cash' | 'bank'
   bank_name?: string
+  bank_branch?: string
   account_number?: string
   currency: string
   balance: number
@@ -181,6 +200,17 @@ export default function CashBankPage() {
       )
     },
     {
+      key: 'bank_branch' as keyof CashBankAccount,
+      title: 'Branch',
+      render: (value: unknown, account: CashBankAccount) => (
+        account.account_type === 'bank' && account.bank_branch ? (
+          <div className="text-sm">{account.bank_branch}</div>
+        ) : (
+          <span className="text-muted-foreground">-</span>
+        )
+      )
+    },
+    {
       key: 'balance' as keyof CashBankAccount,
       title: 'Balance',
       render: (value: unknown, account: CashBankAccount) => (
@@ -221,21 +251,30 @@ export default function CashBankPage() {
       key: 'id' as keyof CashBankAccount,
       title: 'Actions',
       render: (value: unknown, account: CashBankAccount) => (
-        <div className="flex items-center space-x-2">
-          <Button variant="ghost" size="sm" asChild>
-            <Link href={`/accounting/cash-bank/${account.id}`} aria-label={`View account ${account.account_name}`}>
-              View
-            </Link>
-          </Button>
-          <Button variant="ghost" size="sm" asChild>
-            <Link href={`/accounting/cash-bank/${account.id}/edit`} aria-label={`Edit account ${account.account_name}`}>
-              Edit
-            </Link>
-          </Button>
-          <Button variant="ghost" size="sm" aria-label={`Delete account ${account.account_name}`}>
-            Delete
-          </Button>
-        </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+              <HugeiconsIcon icon={MoreVerticalIcon} className="h-4 w-4" />
+              <span className="sr-only">Open menu</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem asChild>
+              <Link href={`/accounting/cash-bank/${account.id}`} className="cursor-pointer">
+                View
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link href={`/accounting/cash-bank/${account.id}/edit`} className="cursor-pointer">
+                Edit
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem className="text-red-600 focus:text-red-600">
+              Delete
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       )
     }
   ]
@@ -312,16 +351,24 @@ export default function CashBankPage() {
       key: 'id' as keyof CashBankTransaction,
       title: 'Actions',
       render: (value: unknown, transaction: CashBankTransaction) => (
-        <div className="flex items-center space-x-2">
-          <Button variant="ghost" size="sm" aria-label={`View transaction ${transaction.reference}`}>
-            View
-          </Button>
-          {transaction.status === 'pending' && (
-            <Button variant="ghost" size="sm" aria-label={`Edit transaction ${transaction.reference}`}>
-              Edit
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+              <HugeiconsIcon icon={MoreVerticalIcon} className="h-4 w-4" />
+              <span className="sr-only">Open menu</span>
             </Button>
-          )}
-        </div>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem>
+              View
+            </DropdownMenuItem>
+            {transaction.status === 'pending' && (
+              <DropdownMenuItem>
+                Edit
+              </DropdownMenuItem>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
       )
     }
   ]
@@ -356,7 +403,9 @@ export default function CashBankPage() {
                 <p className="text-2xl font-bold mt-1">{summaryStats.totalCashAccounts}</p>
                 <p className="text-sm text-green-600 mt-1">Active accounts</p>
               </div>
-              <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center" />
+              <div className="h-10 w-10 bg-zinc-100 dark:bg-zinc-800 rounded-lg flex items-center justify-center">
+                <HugeiconsIcon icon={WalletIcon} className="h-5 w-5 text-foreground" aria-hidden="true" />
+              </div>
             </div>
           </Card>
 
@@ -367,7 +416,9 @@ export default function CashBankPage() {
                 <p className="text-2xl font-bold mt-1">{summaryStats.totalBankAccounts}</p>
                 <p className="text-sm text-blue-600 mt-1">Active accounts</p>
               </div>
-              <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center" />
+              <div className="h-10 w-10 bg-zinc-100 dark:bg-zinc-800 rounded-lg flex items-center justify-center">
+                <HugeiconsIcon icon={BankIcon} className="h-5 w-5 text-foreground" aria-hidden="true" />
+              </div>
             </div>
           </Card>
 
@@ -380,7 +431,9 @@ export default function CashBankPage() {
                 </p>
                 <p className="text-sm text-green-600 mt-1">Total cash</p>
               </div>
-              <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center" />
+              <div className="h-10 w-10 bg-zinc-100 dark:bg-zinc-800 rounded-lg flex items-center justify-center">
+                <HugeiconsIcon icon={MoneyIcon} className="h-5 w-5 text-foreground" aria-hidden="true" />
+              </div>
             </div>
           </Card>
 
@@ -393,7 +446,9 @@ export default function CashBankPage() {
                 </p>
                 <p className="text-sm text-blue-600 mt-1">Total banks</p>
               </div>
-              <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center" />
+              <div className="h-10 w-10 bg-zinc-100 dark:bg-zinc-800 rounded-lg flex items-center justify-center">
+                <HugeiconsIcon icon={CreditCardIcon} className="h-5 w-5 text-foreground" aria-hidden="true" />
+              </div>
             </div>
           </Card>
         </div>

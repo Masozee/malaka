@@ -6,13 +6,12 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/google/uuid"
-
 	"malaka/internal/modules/procurement/domain/entities"
 	"malaka/internal/modules/procurement/domain/repositories"
 	"malaka/internal/shared/auth"
 	"malaka/internal/shared/events"
 	"malaka/internal/shared/integration"
+	"malaka/internal/shared/uuid"
 )
 
 // PurchaseOrderService handles business logic for purchase orders
@@ -52,8 +51,8 @@ func (s *PurchaseOrderService) Create(ctx context.Context, order *entities.Purch
 	order.PONumber = poNumber
 
 	// Set defaults
-	if order.ID == "" {
-		order.ID = uuid.New().String()
+	if order.ID.IsNil() {
+		order.ID = uuid.New()
 	}
 	if order.Status == "" {
 		order.Status = entities.PurchaseOrderStatusDraft
@@ -72,8 +71,8 @@ func (s *PurchaseOrderService) Create(ctx context.Context, order *entities.Purch
 
 	// Process items
 	for i := range order.Items {
-		if order.Items[i].ID == "" {
-			order.Items[i].ID = uuid.New().String()
+		if order.Items[i].ID.IsNil() {
+			order.Items[i].ID = uuid.New()
 		}
 		order.Items[i].PurchaseOrderID = order.ID
 		order.Items[i].CalculateLineTotal()
@@ -102,7 +101,7 @@ func (s *PurchaseOrderService) GetAll(ctx context.Context, filter repositories.P
 
 // Update updates a purchase order
 func (s *PurchaseOrderService) Update(ctx context.Context, order *entities.PurchaseOrder) error {
-	existing, err := s.repo.GetByID(ctx, order.ID)
+	existing, err := s.repo.GetByID(ctx, order.ID.String())
 	if err != nil {
 		return err
 	}
@@ -181,7 +180,7 @@ func (s *PurchaseOrderService) Approve(ctx context.Context, id, approverID strin
 
 	// RBAC Check: Approver must be authorized
 	// We check if approver has higher authority than the creator
-	canApprove, err := s.rbac.CanApprove(ctx, approverID, order.CreatedBy)
+	canApprove, err := s.rbac.CanApprove(ctx, approverID, order.CreatedBy.String())
 	if err != nil {
 		return nil, fmt.Errorf("rbac check failed: %w", err)
 	}
@@ -192,7 +191,7 @@ func (s *PurchaseOrderService) Approve(ctx context.Context, id, approverID strin
 	// Budget Check: If budget integration is configured, check availability and commit
 	if s.budgetReader != nil && order.ExpenseAccountID != nil {
 		// Check budget availability
-		result, err := s.budgetReader.CheckAvailability(ctx, *order.ExpenseAccountID, order.TotalAmount)
+		result, err := s.budgetReader.CheckAvailability(ctx, order.ExpenseAccountID.String(), order.TotalAmount)
 		if err != nil {
 			return nil, fmt.Errorf("budget check failed: %w", err)
 		}
@@ -205,10 +204,10 @@ func (s *PurchaseOrderService) Approve(ctx context.Context, id, approverID strin
 		if s.budgetWriter != nil {
 			commitResult, err := s.budgetWriter.CommitBudget(ctx, &integration.BudgetCommitmentRequest{
 				BudgetID:        result.BudgetID,
-				AccountID:       *order.ExpenseAccountID,
+				AccountID:       order.ExpenseAccountID.String(),
 				Amount:          order.TotalAmount,
 				ReferenceType:   "PURCHASE_ORDER",
-				ReferenceID:     order.ID,
+				ReferenceID:     order.ID.String(),
 				ReferenceNumber: order.PONumber,
 				Description:     fmt.Sprintf("Budget commitment for PO %s - %s", order.PONumber, order.SupplierName),
 				CommittedBy:     approverID,
@@ -216,13 +215,15 @@ func (s *PurchaseOrderService) Approve(ctx context.Context, id, approverID strin
 			if err != nil {
 				return nil, fmt.Errorf("budget commitment failed: %w", err)
 			}
-			order.BudgetCommitmentID = &commitResult.CommitmentID
+			commitmentID, _ := uuid.Parse(commitResult.CommitmentID)
+			order.BudgetCommitmentID = &commitmentID
 		}
 	}
 
 	now := time.Now()
 	order.Status = entities.PurchaseOrderStatusApproved
-	order.ApprovedBy = &approverID
+	approverUUID, _ := uuid.Parse(approverID)
+	order.ApprovedBy = &approverUUID
 	order.ApprovedAt = &now
 	order.UpdatedAt = now
 
@@ -235,7 +236,7 @@ func (s *PurchaseOrderService) Approve(ctx context.Context, id, approverID strin
 		items := make([]events.POItemEventData, len(order.Items))
 		for i, item := range order.Items {
 			items[i] = events.POItemEventData{
-				ItemID:    item.ID,
+				ItemID:    item.ID.String(),
 				ItemName:  item.ItemName,
 				Quantity:  item.Quantity,
 				Unit:      item.Unit,
@@ -244,10 +245,16 @@ func (s *PurchaseOrderService) Approve(ctx context.Context, id, approverID strin
 			}
 		}
 
+		var expenseAccountIDStr *string
+		if order.ExpenseAccountID != nil {
+			s := order.ExpenseAccountID.String()
+			expenseAccountIDStr = &s
+		}
+
 		event := events.NewPurchaseOrderApprovedEvent(
-			order.ID,
+			order.ID.String(),
 			order.PONumber,
-			order.SupplierID,
+			order.SupplierID.String(),
 			order.SupplierName,
 			order.TotalAmount,
 			order.Currency,
@@ -258,7 +265,7 @@ func (s *PurchaseOrderService) Approve(ctx context.Context, id, approverID strin
 		event.ExpectedDelivery = order.ExpectedDeliveryDate
 		event.DeliveryAddress = order.DeliveryAddress
 		event.PaymentTerms = order.PaymentTerms
-		event.ExpenseAccountID = order.ExpenseAccountID
+		event.ExpenseAccountID = expenseAccountIDStr
 
 		// Publish asynchronously to avoid blocking
 		s.eventBus.PublishAsync(ctx, event)
@@ -365,7 +372,7 @@ func (s *PurchaseOrderService) Receive(ctx context.Context, id string, receivedI
 	// Update received quantities
 	for _, received := range receivedItems {
 		for i := range order.Items {
-			if order.Items[i].ID == received.ItemID {
+			if order.Items[i].ID.String() == received.ItemID {
 				order.Items[i].ReceivedQuantity = received.Quantity
 				if err := s.repo.UpdateItem(ctx, &order.Items[i]); err != nil {
 					return nil, err
@@ -433,10 +440,10 @@ func (s *PurchaseOrderService) AddItem(ctx context.Context, orderID string, item
 		return errors.New("can only add items to draft orders")
 	}
 
-	if item.ID == "" {
-		item.ID = uuid.New().String()
+	if item.ID.IsNil() {
+		item.ID = uuid.New()
 	}
-	item.PurchaseOrderID = orderID
+	item.PurchaseOrderID = order.ID
 	item.CalculateLineTotal()
 
 	now := time.Now()
@@ -475,7 +482,7 @@ func (s *PurchaseOrderService) DeleteItem(ctx context.Context, orderID, itemID s
 	// Recalculate order totals
 	var newItems []entities.PurchaseOrderItem
 	for _, item := range order.Items {
-		if item.ID != itemID {
+		if item.ID.String() != itemID {
 			newItems = append(newItems, item)
 		}
 	}

@@ -133,7 +133,7 @@ export function OptimizedTable<T extends Record<string, any>>({
               {columns.map((column) => (
                 <th
                   key={column.key as string}
-                  className={`px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider ${
+                  className={`px-4 py-3 text-left text-sm font-medium text-gray-500 uppercase tracking-wider ${
                     column.sortable !== false && sortable ? 'cursor-pointer hover:bg-gray-100' : ''
                   }`}
                   style={{ width: column.width }}

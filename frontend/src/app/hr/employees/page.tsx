@@ -14,6 +14,8 @@ import { EmployeeCard } from '@/components/hr/employee-card'
 import type { Employee, EmployeeFilters as FilterType } from '@/types/hr'
 import { HRService } from '@/services/hr'
 import Link from 'next/link'
+import { HugeiconsIcon } from '@hugeicons/react'
+import { PlusSignIcon, Search01Icon, UserGroupIcon } from '@hugeicons/core-free-icons'
 
 type ViewMode = 'grid' | 'table'
 
@@ -31,14 +33,13 @@ const statusLabels = {
 
 export default function EmployeesPage() {
   const [mounted, setMounted] = useState(false)
-  const [viewMode, setViewMode] = useState<ViewMode>('grid')
+  const [viewMode, setViewMode] = useState<ViewMode>('table')
   const [filters, setFilters] = useState<FilterType>({})
   const [employees, setEmployees] = useState<Employee[]>([])
   const [loading, setLoading] = useState(true)
   const [page, setPage] = useState(1)
   const [limit, setLimit] = useState(12)
   const [departments, setDepartments] = useState<string[]>([])
-  const [sortBy, setSortBy] = useState('employee_name')
 
   // Handle client-side hydration and data fetching
   useEffect(() => {
@@ -231,93 +232,87 @@ export default function EmployeesPage() {
 
   return (
     <TwoLevelLayout>
-      <Header 
+      <Header
         title="Employees"
-        description="Manage your company employees and their information"
         breadcrumbs={breadcrumbs}
         actions={
           <Link href="/hr/employees/new">
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
+            <Button size="sm">
+              <HugeiconsIcon icon={PlusSignIcon} className="h-4 w-4 mr-2" />
               Add Employee
             </Button>
           </Link>
         }
       />
 
-      <div className="flex-1 p-6 space-y-6">
-        {/* Summary Cards */}
+      <div className="flex-1 overflow-auto p-6 space-y-6">
+        {/* Statistics Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Total Employees</p>
-                <p className="text-3xl font-bold text-gray-900">{stats.total}</p>
+            <div className="flex items-center space-x-3">
+              <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
+                <HugeiconsIcon icon={UserGroupIcon} className="h-5 w-5 text-foreground" />
               </div>
-              <div className="h-12 w-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                <Users className="h-6 w-6 text-blue-600" />
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Total Employees</p>
+                <p className="text-2xl font-bold">{stats.total}</p>
               </div>
             </div>
           </Card>
-
           <Card className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Active</p>
-                <p className="text-3xl font-bold text-green-600">{stats.active}</p>
-              </div>
-              <div className="h-12 w-12 bg-green-100 rounded-lg flex items-center justify-center">
+            <div className="flex items-center space-x-3">
+              <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
                 <div className="h-3 w-3 bg-green-500 rounded-full"></div>
               </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Active</p>
+                <p className="text-2xl font-bold">{stats.active}</p>
+              </div>
             </div>
           </Card>
-
           <Card className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Inactive</p>
-                <p className="text-3xl font-bold text-yellow-600">{stats.inactive}</p>
-              </div>
-              <div className="h-12 w-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+            <div className="flex items-center space-x-3">
+              <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
                 <div className="h-3 w-3 bg-yellow-500 rounded-full"></div>
               </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Inactive</p>
+                <p className="text-2xl font-bold">{stats.inactive}</p>
+              </div>
             </div>
           </Card>
-
           <Card className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Terminated</p>
-                <p className="text-3xl font-bold text-red-600">{stats.terminated}</p>
-              </div>
-              <div className="h-12 w-12 bg-red-100 rounded-lg flex items-center justify-center">
+            <div className="flex items-center space-x-3">
+              <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
                 <div className="h-3 w-3 bg-red-500 rounded-full"></div>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Terminated</p>
+                <p className="text-2xl font-bold">{stats.terminated}</p>
               </div>
             </div>
           </Card>
         </div>
 
         {/* Filters */}
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex-1 max-w-md">
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex-1">
             <div className="relative">
-              <MagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input 
-                placeholder="Search employees..." 
-                className="pl-9"
+              <HugeiconsIcon icon={Search01Icon} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+              <Input
+                placeholder="Search employees..."
+                className="pl-10"
                 value={filters.search || ''}
                 onChange={(e) => setFilters({ ...filters, search: e.target.value })}
               />
             </div>
           </div>
-          
           <div className="flex items-center gap-2">
-            <Select 
-              value={filters.department || ''} 
+            <Select
+              value={filters.department || ''}
               onValueChange={(value) => setFilters({ ...filters, department: value || undefined })}
             >
-              <SelectTrigger className="w-32">
-                <Users className="h-4 w-4 mr-2" />
+              <SelectTrigger className="w-40">
                 <SelectValue placeholder="Department" />
               </SelectTrigger>
               <SelectContent>
@@ -326,13 +321,11 @@ export default function EmployeesPage() {
                 ))}
               </SelectContent>
             </Select>
-
             <Select
               value={filters.employment_status || ''}
               onValueChange={(value) => setFilters({ ...filters, employment_status: (value || undefined) as 'ACTIVE' | 'INACTIVE' | 'TERMINATED' | undefined })}
             >
-              <SelectTrigger className="w-32">
-                <div className="h-3 w-3 bg-gray-400 rounded-full mr-2"></div>
+              <SelectTrigger className="w-36">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
@@ -344,103 +337,61 @@ export default function EmployeesPage() {
           </div>
         </div>
 
-        {/* View Toggle & Sort */}
-        <div className="flex justify-between items-center">
-          <div className="flex items-center gap-4">
-            <div className="flex space-x-1 bg-muted p-1 rounded-lg">
-              <Button 
-                variant={viewMode === 'grid' ? 'default' : 'ghost'} 
-                size="sm"
-                onClick={() => setViewMode('grid')}
-              >
-                <SquaresFour className="h-4 w-4 mr-2" />
-                Cards
-              </Button>
-              <Button 
-                variant={viewMode === 'table' ? 'default' : 'ghost'} 
-                size="sm"
-                onClick={() => setViewMode('table')}
-              >
-                <List className="h-4 w-4 mr-2" />
-                Table
-              </Button>
-            </div>
-            <Select value={sortBy} onValueChange={setSortBy}>
-              <SelectTrigger className="w-44">
-                <ChartBar className="h-4 w-4 mr-2" />
-                <SelectValue placeholder="Sort by" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="employee_name">Name</SelectItem>
-                <SelectItem value="hire_date">Hire Date</SelectItem>
-                <SelectItem value="department">Department</SelectItem>
-                <SelectItem value="total_salary">Salary</SelectItem>
-                <SelectItem value="employment_status">Status</SelectItem>
-              </SelectContent>
-            </Select>
+        {/* View Toggle */}
+        <div className="flex items-center justify-between">
+          <div className="flex space-x-1 bg-muted p-1 rounded-lg">
+            <Button
+              variant={viewMode === 'grid' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => setViewMode('grid')}
+            >
+              Cards
+            </Button>
+            <Button
+              variant={viewMode === 'table' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => setViewMode('table')}
+            >
+              Table
+            </Button>
           </div>
-          <div className="flex items-center gap-4">
-            <div className="text-sm text-muted-foreground">
-              {filteredEmployees.length} of {employees.length} employees
-            </div>
-            <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm">
-                <UploadSimple className="h-4 w-4 mr-2" />
-                Import
-              </Button>
-              <Button variant="outline" size="sm">
-                <DownloadSimple className="h-4 w-4 mr-2" />
-                Export
-              </Button>
-            </div>
-          </div>
+          <span className="text-sm text-muted-foreground">
+            Showing {filteredEmployees.length} employees
+          </span>
         </div>
 
         {/* Content */}
-        {viewMode === 'grid' ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {loading ? (
-              // Loading skeleton
-              Array.from({ length: 6 }).map((_, i) => (
-                <Card key={i} className="p-4 animate-pulse">
-                  <div className="flex items-center space-x-4">
-                    <div className="h-16 w-16 bg-gray-200 rounded-full"></div>
-                    <div className="flex-1 space-y-2">
-                      <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                      <div className="h-3 bg-gray-200 rounded w-1/2"></div>
-                    </div>
-                  </div>
-                </Card>
-              ))
-            ) : paginatedEmployees.length > 0 ? (
-              paginatedEmployees.map(employee => (
-                <EmployeeCard key={employee.id} employee={employee} />
-              ))
-            ) : (
-              <div className="col-span-full text-center py-12">
-                <div className="text-gray-400 text-6xl mb-4">👥</div>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No employees found</h3>
-                <p className="text-gray-500 mb-4">
-                  {Object.keys(filters).length > 0 
-                    ? 'Try adjusting your filters to see more results.'
-                    : 'Get started by adding your first employee.'
-                  }
-                </p>
-                {Object.keys(filters).length > 0 ? (
-                  <Button variant="outline" onClick={clearFilters}>
-                    Clear Filters
-                  </Button>
-                ) : (
-                  <Link href="/hr/employees/new">
-                    <Button>
-                      <Plus className="h-4 w-4 mr-2" />
-                      Add Employee
-                    </Button>
-                  </Link>
-                )}
-              </div>
-            )}
+        {loading ? (
+          <div className="flex items-center justify-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 dark:border-gray-100" />
           </div>
+        ) : viewMode === 'grid' ? (
+          paginatedEmployees.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {paginatedEmployees.map(employee => (
+                <EmployeeCard key={employee.id} employee={employee} />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">No employees found</h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                {Object.keys(filters).length > 0
+                  ? 'Try adjusting your filters to see more results.'
+                  : 'Get started by adding your first employee.'
+                }
+              </p>
+              {Object.keys(filters).length > 0 ? (
+                <Button variant="outline" size="sm" onClick={clearFilters}>
+                  Clear Filters
+                </Button>
+              ) : (
+                <Link href="/hr/employees/new">
+                  <Button size="sm">Add Employee</Button>
+                </Link>
+              )}
+            </div>
+          )
         ) : (
           <DataTable
             columns={columns}
@@ -449,9 +400,9 @@ export default function EmployeesPage() {
               current: page,
               pageSize: limit,
               total: filteredEmployees.length,
-              onChange: (page, pageSize) => {
-                setPage(page)
-                setLimit(pageSize)
+              onChange: (p, ps) => {
+                setPage(p)
+                setLimit(ps)
               }
             }}
           />

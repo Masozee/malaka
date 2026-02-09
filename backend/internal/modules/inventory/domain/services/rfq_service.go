@@ -5,11 +5,10 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/google/uuid"
-
 	"malaka/internal/modules/inventory/domain/entities"
 	"malaka/internal/modules/inventory/domain/repositories"
 	"malaka/internal/shared/types"
+	"malaka/internal/shared/uuid"
 )
 
 // RFQService handles RFQ business logic
@@ -32,7 +31,7 @@ func (s *RFQService) CreateRFQ(ctx context.Context, req *CreateRFQRequest) (*ent
 
 	rfq := &entities.RFQ{
 		BaseModel: types.BaseModel{
-			ID:        uuid.New().String(),
+			ID:        uuid.New(),
 			CreatedAt: time.Now(),
 			UpdatedAt: time.Now(),
 		},
@@ -53,11 +52,11 @@ func (s *RFQService) CreateRFQ(ctx context.Context, req *CreateRFQRequest) (*ent
 	for _, itemReq := range req.Items {
 		item := &entities.RFQItem{
 			BaseModel: types.BaseModel{
-				ID:        uuid.New().String(),
+				ID:        uuid.New(),
 				CreatedAt: time.Now(),
 				UpdatedAt: time.Now(),
 			},
-			RFQID:         rfq.ID,
+			RFQID:         rfq.ID.String(),
 			ItemName:      itemReq.ItemName,
 			Description:   itemReq.Description,
 			Specification: itemReq.Specification,
@@ -75,11 +74,11 @@ func (s *RFQService) CreateRFQ(ctx context.Context, req *CreateRFQRequest) (*ent
 	for _, supplierID := range req.SupplierIDs {
 		rfqSupplier := &entities.RFQSupplier{
 			BaseModel: types.BaseModel{
-				ID:        uuid.New().String(),
+				ID:        uuid.New(),
 				CreatedAt: time.Now(),
 				UpdatedAt: time.Now(),
 			},
-			RFQID:      rfq.ID,
+			RFQID:      rfq.ID.String(),
 			SupplierID: supplierID,
 			InvitedAt:  time.Now(),
 			Status:     "invited",
@@ -91,7 +90,7 @@ func (s *RFQService) CreateRFQ(ctx context.Context, req *CreateRFQRequest) (*ent
 	}
 
 	// Return the created RFQ with related data
-	return s.rfqRepo.GetByID(ctx, rfq.ID)
+	return s.rfqRepo.GetByID(ctx, rfq.ID.String())
 }
 
 // GetRFQ retrieves an RFQ by ID
@@ -226,7 +225,7 @@ func (s *RFQService) AddRFQItem(ctx context.Context, rfqID string, req *CreateRF
 
 	item := &entities.RFQItem{
 		BaseModel: types.BaseModel{
-			ID:        uuid.New().String(),
+			ID:        uuid.New(),
 			CreatedAt: time.Now(),
 			UpdatedAt: time.Now(),
 		},
@@ -262,7 +261,7 @@ func (s *RFQService) InviteSupplier(ctx context.Context, rfqID, supplierID strin
 
 	rfqSupplier := &entities.RFQSupplier{
 		BaseModel: types.BaseModel{
-			ID:        uuid.New().String(),
+			ID:        uuid.New(),
 			CreatedAt: time.Now(),
 			UpdatedAt: time.Now(),
 		},

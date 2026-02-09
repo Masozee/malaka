@@ -6,11 +6,11 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"github.com/lib/pq"
 	"malaka/internal/modules/hr/domain/entities"
 	"malaka/internal/modules/hr/domain/repositories"
+	"malaka/internal/shared/uuid"
 )
 
 // trainingRepository implements TrainingRepository
@@ -50,7 +50,7 @@ func (r *trainingRepository) CreateProgram(ctx context.Context, program *entitie
 }
 
 // GetProgramByID retrieves a training program by ID
-func (r *trainingRepository) GetProgramByID(ctx context.Context, id uuid.UUID) (*entities.TrainingProgram, error) {
+func (r *trainingRepository) GetProgramByID(ctx context.Context, id uuid.ID) (*entities.TrainingProgram, error) {
 	query := `
 		SELECT id, program_title, description, category, training_type, duration_hours,
 			max_participants, enrolled_count, completed_count, instructor_name,
@@ -129,7 +129,7 @@ func (r *trainingRepository) UpdateProgram(ctx context.Context, program *entitie
 }
 
 // DeleteProgram deletes a training program
-func (r *trainingRepository) DeleteProgram(ctx context.Context, id uuid.UUID) error {
+func (r *trainingRepository) DeleteProgram(ctx context.Context, id uuid.ID) error {
 	query := `DELETE FROM training_programs WHERE id = $1`
 	_, err := r.db.ExecContext(ctx, query, id)
 	return err
@@ -191,7 +191,7 @@ func (r *trainingRepository) CreateEnrollment(ctx context.Context, enrollment *e
 }
 
 // GetEnrollmentByID retrieves an enrollment by ID
-func (r *trainingRepository) GetEnrollmentByID(ctx context.Context, id uuid.UUID) (*entities.TrainingEnrollment, error) {
+func (r *trainingRepository) GetEnrollmentByID(ctx context.Context, id uuid.ID) (*entities.TrainingEnrollment, error) {
 	query := `
 		SELECT id, employee_id, employee_name, department, program_id, program_title,
 			enrollment_date, completion_date, progress_percentage, enrollment_status,
@@ -239,7 +239,7 @@ func (r *trainingRepository) GetAllEnrollments(ctx context.Context, page, pageSi
 }
 
 // GetEnrollmentsByProgramID retrieves enrollments by program ID
-func (r *trainingRepository) GetEnrollmentsByProgramID(ctx context.Context, programID uuid.UUID) ([]*entities.TrainingEnrollment, error) {
+func (r *trainingRepository) GetEnrollmentsByProgramID(ctx context.Context, programID uuid.ID) ([]*entities.TrainingEnrollment, error) {
 	query := `
 		SELECT id, employee_id, employee_name, department, program_id, program_title,
 			enrollment_date, completion_date, progress_percentage, enrollment_status,
@@ -253,7 +253,7 @@ func (r *trainingRepository) GetEnrollmentsByProgramID(ctx context.Context, prog
 }
 
 // GetEnrollmentsByEmployeeID retrieves enrollments by employee ID
-func (r *trainingRepository) GetEnrollmentsByEmployeeID(ctx context.Context, employeeID uuid.UUID) ([]*entities.TrainingEnrollment, error) {
+func (r *trainingRepository) GetEnrollmentsByEmployeeID(ctx context.Context, employeeID uuid.ID) ([]*entities.TrainingEnrollment, error) {
 	query := `
 		SELECT id, employee_id, employee_name, department, program_id, program_title,
 			enrollment_date, completion_date, progress_percentage, enrollment_status,
@@ -284,7 +284,7 @@ func (r *trainingRepository) UpdateEnrollment(ctx context.Context, enrollment *e
 }
 
 // DeleteEnrollment deletes an enrollment
-func (r *trainingRepository) DeleteEnrollment(ctx context.Context, id uuid.UUID) error {
+func (r *trainingRepository) DeleteEnrollment(ctx context.Context, id uuid.ID) error {
 	query := `DELETE FROM training_enrollments WHERE id = $1`
 	_, err := r.db.ExecContext(ctx, query, id)
 	return err
@@ -354,21 +354,21 @@ func (r *trainingRepository) GetStatistics(ctx context.Context) (*entities.Train
 }
 
 // IncrementEnrolledCount increments the enrolled count for a program
-func (r *trainingRepository) IncrementEnrolledCount(ctx context.Context, programID uuid.UUID) error {
+func (r *trainingRepository) IncrementEnrolledCount(ctx context.Context, programID uuid.ID) error {
 	query := `UPDATE training_programs SET enrolled_count = enrolled_count + 1, updated_at = $2 WHERE id = $1`
 	_, err := r.db.ExecContext(ctx, query, programID, time.Now())
 	return err
 }
 
 // IncrementCompletedCount increments the completed count for a program
-func (r *trainingRepository) IncrementCompletedCount(ctx context.Context, programID uuid.UUID) error {
+func (r *trainingRepository) IncrementCompletedCount(ctx context.Context, programID uuid.ID) error {
 	query := `UPDATE training_programs SET completed_count = completed_count + 1, updated_at = $2 WHERE id = $1`
 	_, err := r.db.ExecContext(ctx, query, programID, time.Now())
 	return err
 }
 
 // DecrementEnrolledCount decrements the enrolled count for a program
-func (r *trainingRepository) DecrementEnrolledCount(ctx context.Context, programID uuid.UUID) error {
+func (r *trainingRepository) DecrementEnrolledCount(ctx context.Context, programID uuid.ID) error {
 	query := `UPDATE training_programs SET enrolled_count = GREATEST(enrolled_count - 1, 0), updated_at = $2 WHERE id = $1`
 	_, err := r.db.ExecContext(ctx, query, programID, time.Now())
 	return err

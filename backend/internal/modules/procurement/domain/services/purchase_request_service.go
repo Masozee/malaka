@@ -6,10 +6,10 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/google/uuid"
 	"malaka/internal/modules/procurement/domain/entities"
 	"malaka/internal/modules/procurement/domain/repositories"
 	"malaka/internal/shared/utils"
+	"malaka/internal/shared/uuid"
 )
 
 // PurchaseRequestService provides business logic for purchase request operations.
@@ -30,8 +30,8 @@ func (s *PurchaseRequestService) SetPurchaseOrderRepository(poRepo repositories.
 
 // Create creates a new purchase request.
 func (s *PurchaseRequestService) Create(ctx context.Context, pr *entities.PurchaseRequest) error {
-	if pr.ID == "" {
-		pr.ID = uuid.New().String()
+	if pr.ID.IsNil() {
+		pr.ID = uuid.New()
 	}
 
 	// Generate request number
@@ -99,7 +99,7 @@ func (s *PurchaseRequestService) GetAll(ctx context.Context, filter *repositorie
 
 // Update updates an existing purchase request.
 func (s *PurchaseRequestService) Update(ctx context.Context, pr *entities.PurchaseRequest) error {
-	existing, err := s.repo.GetByID(ctx, pr.ID)
+	existing, err := s.repo.GetByID(ctx, pr.ID.String())
 	if err != nil {
 		return err
 	}
@@ -176,7 +176,8 @@ func (s *PurchaseRequestService) Approve(ctx context.Context, id string, approve
 
 	now := utils.Now()
 	pr.Status = entities.PRStatusApproved
-	pr.ApprovedBy = &approverID
+	approverUUID, _ := uuid.Parse(approverID)
+	pr.ApprovedBy = &approverUUID
 	pr.ApprovedDate = &now
 	pr.UpdatedAt = now
 
@@ -244,7 +245,7 @@ func (s *PurchaseRequestService) GetStats(ctx context.Context) (*repositories.Pu
 // AddItem adds an item to a purchase request.
 func (s *PurchaseRequestService) AddItem(ctx context.Context, item *entities.PurchaseRequestItem) error {
 	// Verify PR exists and is in draft status
-	pr, err := s.repo.GetByID(ctx, item.PurchaseRequestID)
+	pr, err := s.repo.GetByID(ctx, item.PurchaseRequestID.String())
 	if err != nil {
 		return err
 	}
@@ -255,8 +256,8 @@ func (s *PurchaseRequestService) AddItem(ctx context.Context, item *entities.Pur
 		return errors.New("can only add items to draft purchase requests")
 	}
 
-	if item.ID == "" {
-		item.ID = uuid.New().String()
+	if item.ID.IsNil() {
+		item.ID = uuid.New()
 	}
 	item.CreatedAt = utils.Now()
 	item.UpdatedAt = utils.Now()
@@ -266,7 +267,7 @@ func (s *PurchaseRequestService) AddItem(ctx context.Context, item *entities.Pur
 	}
 
 	// Recalculate total and update PR
-	items, err := s.repo.GetItemsByRequestID(ctx, item.PurchaseRequestID)
+	items, err := s.repo.GetItemsByRequestID(ctx, item.PurchaseRequestID.String())
 	if err != nil {
 		return err
 	}
@@ -280,7 +281,7 @@ func (s *PurchaseRequestService) AddItem(ctx context.Context, item *entities.Pur
 // UpdateItem updates an item in a purchase request.
 func (s *PurchaseRequestService) UpdateItem(ctx context.Context, item *entities.PurchaseRequestItem) error {
 	// Verify PR exists and is in draft status
-	pr, err := s.repo.GetByID(ctx, item.PurchaseRequestID)
+	pr, err := s.repo.GetByID(ctx, item.PurchaseRequestID.String())
 	if err != nil {
 		return err
 	}
@@ -298,7 +299,7 @@ func (s *PurchaseRequestService) UpdateItem(ctx context.Context, item *entities.
 	}
 
 	// Recalculate total and update PR
-	items, err := s.repo.GetItemsByRequestID(ctx, item.PurchaseRequestID)
+	items, err := s.repo.GetItemsByRequestID(ctx, item.PurchaseRequestID.String())
 	if err != nil {
 		return err
 	}
@@ -362,22 +363,27 @@ func (s *PurchaseRequestService) ConvertToPO(ctx context.Context, prID string, s
 		return nil, fmt.Errorf("failed to generate PO number: %w", err)
 	}
 
+	// Parse IDs
+	supplierUUID, _ := uuid.Parse(supplierID)
+	createdByUUID, _ := uuid.Parse(createdBy)
+	prUUID := pr.ID
+
 	// Create the purchase order
 	now := utils.Now()
 	po := &entities.PurchaseOrder{
-		ID:              uuid.New().String(),
-		PONumber:        poNumber,
-		SupplierID:      supplierID,
-		PurchaseRequestID: &prID,
-		OrderDate:       now,
-		DeliveryAddress: deliveryAddress,
-		PaymentTerms:    paymentTerms,
-		Currency:        pr.Currency,
-		Status:          entities.PurchaseOrderStatusDraft,
-		PaymentStatus:   entities.PurchaseOrderPaymentUnpaid,
-		CreatedBy:       createdBy,
-		CreatedAt:       now,
-		UpdatedAt:       now,
+		ID:                uuid.New(),
+		PONumber:          poNumber,
+		SupplierID:        supplierUUID,
+		PurchaseRequestID: &prUUID,
+		OrderDate:         now,
+		DeliveryAddress:   deliveryAddress,
+		PaymentTerms:      paymentTerms,
+		Currency:          pr.Currency,
+		Status:            entities.PurchaseOrderStatusDraft,
+		PaymentStatus:     entities.PurchaseOrderPaymentUnpaid,
+		CreatedBy:         createdByUUID,
+		CreatedAt:         now,
+		UpdatedAt:         now,
 	}
 
 	// Set expected delivery date from PR required date
@@ -388,7 +394,7 @@ func (s *PurchaseRequestService) ConvertToPO(ctx context.Context, prID string, s
 	// Convert PR items to PO items
 	for _, prItem := range pr.Items {
 		poItem := entities.PurchaseOrderItem{
-			ID:              uuid.New().String(),
+			ID:              uuid.New(),
 			PurchaseOrderID: po.ID,
 			ItemName:        prItem.ItemName,
 			Quantity:        prItem.Quantity,

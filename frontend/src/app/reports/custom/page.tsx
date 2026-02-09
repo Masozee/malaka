@@ -15,13 +15,13 @@ export default function CustomReportsPage() {
   return (
     <TwoLevelLayout>
       <div className="flex-1 flex flex-col overflow-hidden">
-        <Header 
+        <Header
           title="Custom Reports"
           description="Build and manage custom report templates"
           breadcrumbs={breadcrumbs}
           actions={
             <div className="flex items-center space-x-3">
-              <Button size="sm">
+              <Button size="sm" aria-label="Create new custom report">
                 New Custom Report
               </Button>
             </div>
@@ -31,7 +31,7 @@ export default function CustomReportsPage() {
         <div className="flex-1 overflow-auto p-6 space-y-6">
           {/* Custom Reports List */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <Card className="hover: transition-shadow">
+            <Card className="hover:shadow-md transition-shadow">
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
                   <span>Monthly Sales by Region</span>
@@ -42,20 +42,20 @@ export default function CustomReportsPage() {
               </CardHeader>
               <CardContent>
                 <div className="flex space-x-2">
-                  <Button size="sm" className="flex-1">
+                  <Button size="sm" className="flex-1" aria-label="View Monthly Sales by Region report">
                     View
                   </Button>
-                  <Button size="sm" variant="outline">
+                  <Button size="sm" variant="outline" aria-label="Edit Monthly Sales by Region report">
                     Edit
                   </Button>
-                  <Button size="sm" variant="outline">
+                  <Button size="sm" variant="outline" aria-label="Download Monthly Sales by Region report">
                     Download
                   </Button>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="hover: transition-shadow">
+            <Card className="hover:shadow-md transition-shadow">
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
                   <span>Inventory Aging Report</span>
@@ -66,13 +66,13 @@ export default function CustomReportsPage() {
               </CardHeader>
               <CardContent>
                 <div className="flex space-x-2">
-                  <Button size="sm" className="flex-1">
+                  <Button size="sm" className="flex-1" aria-label="View Inventory Aging report">
                     View
                   </Button>
-                  <Button size="sm" variant="outline">
+                  <Button size="sm" variant="outline" aria-label="Edit Inventory Aging report">
                     Edit
                   </Button>
-                  <Button size="sm" variant="outline">
+                  <Button size="sm" variant="outline" aria-label="Download Inventory Aging report">
                     Download
                   </Button>
                 </div>
@@ -87,7 +87,7 @@ export default function CustomReportsPage() {
                   <p className="text-sm text-muted-foreground mb-4">
                     Build custom reports with drag-and-drop interface
                   </p>
-                  <Button>
+                  <Button aria-label="Get started creating a new custom report">
                     Get Started
                   </Button>
                 </div>

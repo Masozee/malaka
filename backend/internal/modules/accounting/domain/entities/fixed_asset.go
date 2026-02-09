@@ -3,7 +3,7 @@ package entities
 import (
 	"time"
 
-	"github.com/google/uuid"
+	"malaka/internal/shared/uuid"
 )
 
 // FixedAssetStatus represents the status of a fixed asset
@@ -29,7 +29,7 @@ const (
 
 // FixedAsset represents a fixed asset
 type FixedAsset struct {
-	ID                    uuid.UUID          `json:"id" db:"id"`
+	ID                    uuid.ID            `json:"id" db:"id"`
 	AssetCode             string             `json:"asset_code" db:"asset_code"`
 	AssetName             string             `json:"asset_name" db:"asset_name"`
 	AssetCategory         string             `json:"asset_category" db:"asset_category"`
@@ -61,32 +61,32 @@ type FixedAsset struct {
 
 // FixedAssetDepreciation represents a depreciation entry
 type FixedAssetDepreciation struct {
-	ID                    uuid.UUID `json:"id" db:"id"`
-	FixedAssetID          uuid.UUID `json:"fixed_asset_id" db:"fixed_asset_id"`
+	ID                    uuid.ID   `json:"id" db:"id"`
+	FixedAssetID          uuid.ID   `json:"fixed_asset_id" db:"fixed_asset_id"`
 	DepreciationDate      time.Time `json:"depreciation_date" db:"depreciation_date"`
 	DepreciationAmount    float64   `json:"depreciation_amount" db:"depreciation_amount"`
 	AccumulatedDepreciation float64 `json:"accumulated_depreciation" db:"accumulated_depreciation"`
 	BookValue             float64   `json:"book_value" db:"book_value"`
 	Period                string    `json:"period" db:"period"`                       // e.g., "2024-01"
-	JournalEntryID        *uuid.UUID `json:"journal_entry_id" db:"journal_entry_id"`
+	JournalEntryID        *uuid.ID  `json:"journal_entry_id" db:"journal_entry_id"`
 	CreatedBy             string    `json:"created_by" db:"created_by"`
 	CreatedAt             time.Time `json:"created_at" db:"created_at"`
 }
 
 // FixedAssetDisposal represents an asset disposal
 type FixedAssetDisposal struct {
-	ID               uuid.UUID        `json:"id" db:"id"`
-	FixedAssetID     uuid.UUID        `json:"fixed_asset_id" db:"fixed_asset_id"`
-	DisposalDate     time.Time        `json:"disposal_date" db:"disposal_date"`
-	DisposalMethod   string           `json:"disposal_method" db:"disposal_method"`     // SALE, SCRAP, DONATION, LOSS
-	DisposalPrice    float64          `json:"disposal_price" db:"disposal_price"`
-	BookValueAtDisposal float64       `json:"book_value_at_disposal" db:"book_value_at_disposal"`
-	GainLoss         float64          `json:"gain_loss" db:"gain_loss"`
-	Reason           string           `json:"reason" db:"reason"`
-	AuthorizedBy     string           `json:"authorized_by" db:"authorized_by"`
-	JournalEntryID   *uuid.UUID       `json:"journal_entry_id" db:"journal_entry_id"`
-	CreatedBy        string           `json:"created_by" db:"created_by"`
-	CreatedAt        time.Time        `json:"created_at" db:"created_at"`
+	ID               uuid.ID   `json:"id" db:"id"`
+	FixedAssetID     uuid.ID   `json:"fixed_asset_id" db:"fixed_asset_id"`
+	DisposalDate     time.Time `json:"disposal_date" db:"disposal_date"`
+	DisposalMethod   string    `json:"disposal_method" db:"disposal_method"`     // SALE, SCRAP, DONATION, LOSS
+	DisposalPrice    float64   `json:"disposal_price" db:"disposal_price"`
+	BookValueAtDisposal float64 `json:"book_value_at_disposal" db:"book_value_at_disposal"`
+	GainLoss         float64   `json:"gain_loss" db:"gain_loss"`
+	Reason           string    `json:"reason" db:"reason"`
+	AuthorizedBy     string    `json:"authorized_by" db:"authorized_by"`
+	JournalEntryID   *uuid.ID  `json:"journal_entry_id" db:"journal_entry_id"`
+	CreatedBy        string    `json:"created_by" db:"created_by"`
+	CreatedAt        time.Time `json:"created_at" db:"created_at"`
 }
 
 // CalculateBookValue calculates the current book value
@@ -208,7 +208,7 @@ func (fa *FixedAsset) Validate() error {
 
 // Validate checks if the depreciation entry is valid
 func (fad *FixedAssetDepreciation) Validate() error {
-	if fad.FixedAssetID == uuid.Nil {
+	if fad.FixedAssetID.IsNil() {
 		return NewValidationError("fixed_asset_id is required")
 	}
 	if fad.DepreciationDate.IsZero() {
@@ -226,7 +226,7 @@ func (fad *FixedAssetDepreciation) Validate() error {
 
 // Validate checks if the disposal entry is valid
 func (fad *FixedAssetDisposal) Validate() error {
-	if fad.FixedAssetID == uuid.Nil {
+	if fad.FixedAssetID.IsNil() {
 		return NewValidationError("fixed_asset_id is required")
 	}
 	if fad.DisposalDate.IsZero() {

@@ -5,11 +5,10 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"malaka/internal/modules/masterdata/domain/entities"
 	"malaka/internal/modules/masterdata/domain/services"
 	"malaka/internal/modules/masterdata/presentation/http/dto"
 	"malaka/internal/shared/response"
-	"malaka/internal/shared/types"
+	"malaka/internal/shared/uuid"
 )
 
 // ModelHandler handles HTTP requests for model operations.
@@ -30,18 +29,11 @@ func (h *ModelHandler) CreateModel(c *gin.Context) {
 		return
 	}
 
+	// Use DTO's ToEntity method which handles UUID conversion properly
+	model := req.ToEntity()
 	now := time.Now()
-	model := &entities.Model{
-		Code:        req.Code,
-		Name:        req.Name,
-		Description: req.Description,
-		ArticleID:   req.ArticleID,
-		Status:      req.Status,
-		BaseModel: types.BaseModel{
-			CreatedAt: now,
-			UpdatedAt: now,
-		},
-	}
+	model.CreatedAt = now
+	model.UpdatedAt = now
 
 	if err := h.service.CreateModel(c.Request.Context(), model); err != nil {
 		response.InternalServerError(c, err.Error(), nil)
@@ -54,7 +46,7 @@ func (h *ModelHandler) CreateModel(c *gin.Context) {
 // GetModelByID handles retrieving a model by its ID.
 func (h *ModelHandler) GetModelByID(c *gin.Context) {
 	id := c.Param("id")
-	model, err := h.service.GetModelByID(c.Request.Context(), id)
+	model, err := h.service.GetModelByID(c.Request.Context(), uuid.MustParse(id))
 	if err != nil {
 		response.InternalServerError(c, err.Error(), nil)
 		return
@@ -81,36 +73,40 @@ func (h *ModelHandler) GetAllModels(c *gin.Context) {
 // UpdateModel handles updating an existing model.
 func (h *ModelHandler) UpdateModel(c *gin.Context) {
 	id := c.Param("id")
+
+	// First, retrieve the existing model
+	existingModel, err := h.service.GetModelByID(c.Request.Context(), uuid.MustParse(id))
+	if err != nil {
+		response.InternalServerError(c, err.Error(), nil)
+		return
+	}
+	if existingModel == nil {
+		response.NotFound(c, "Model not found", nil)
+		return
+	}
+
 	var req dto.UpdateModelRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		response.BadRequest(c, err.Error(), nil)
 		return
 	}
 
-	model := &entities.Model{
-		Code:        req.Code,
-		Name:        req.Name,
-		Description: req.Description,
-		ArticleID:   req.ArticleID,
-		Status:      req.Status,
-		BaseModel: types.BaseModel{
-			UpdatedAt: time.Now(),
-		},
-	}
-	model.ID = id // Set the ID from the URL parameter
+	// Use DTO's ApplyToEntity method which handles UUID conversion properly
+	req.ApplyToEntity(existingModel)
+	existingModel.UpdatedAt = time.Now()
 
-	if err := h.service.UpdateModel(c.Request.Context(), model); err != nil {
+	if err := h.service.UpdateModel(c.Request.Context(), existingModel); err != nil {
 		response.InternalServerError(c, err.Error(), nil)
 		return
 	}
 
-	response.OK(c, "Model updated successfully", model)
+	response.OK(c, "Model updated successfully", existingModel)
 }
 
 // DeleteModel handles deleting a model by its ID.
 func (h *ModelHandler) DeleteModel(c *gin.Context) {
 	id := c.Param("id")
-	if err := h.service.DeleteModel(c.Request.Context(), id); err != nil {
+	if err := h.service.DeleteModel(c.Request.Context(), uuid.MustParse(id)); err != nil {
 		response.InternalServerError(c, err.Error(), nil)
 		return
 	}

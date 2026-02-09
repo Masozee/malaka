@@ -4,9 +4,9 @@ import (
 	"context"
 	"time"
 
-	"github.com/google/uuid"
 	"malaka/internal/modules/hr/domain/entities"
 	"malaka/internal/modules/hr/domain/repositories"
+	"malaka/internal/shared/uuid"
 )
 
 // EmployeeService provides business logic for employee operations.
@@ -28,7 +28,7 @@ func (s *EmployeeService) CreateEmployee(ctx context.Context, employee *entities
 }
 
 // GetEmployeeByID retrieves an employee by its ID.
-func (s *EmployeeService) GetEmployeeByID(ctx context.Context, id string) (*entities.Employee, error) {
+func (s *EmployeeService) GetEmployeeByID(ctx context.Context, id uuid.ID) (*entities.Employee, error) {
 	return s.repo.GetByID(ctx, id)
 }
 
@@ -45,6 +45,11 @@ func (s *EmployeeService) UpdateEmployee(ctx context.Context, employee *entities
 }
 
 // DeleteEmployee deletes an employee by its ID.
-func (s *EmployeeService) DeleteEmployee(ctx context.Context, id string) error {
+func (s *EmployeeService) DeleteEmployee(ctx context.Context, id uuid.ID) error {
 	return s.repo.Delete(ctx, id)
+}
+
+// GetEmployeeByUserID retrieves an employee by their linked user ID.
+func (s *EmployeeService) GetEmployeeByUserID(ctx context.Context, userID string) (*entities.Employee, error) {
+	return s.repo.GetByUserID(ctx, userID)
 }

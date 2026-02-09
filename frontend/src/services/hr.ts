@@ -113,13 +113,27 @@ export class HRService {
   static async deleteEmployee(id: string): Promise<void> {
     try {
       const response = await apiClient.delete<{success: boolean, message: string}>(`${this.BASE_URL}/employees/${id}`)
-      
+
       if (!response.success) {
         throw new Error(`API Error: ${response.message}`)
       }
     } catch (error) {
       console.error('Error deleting employee:', error)
       throw error
+    }
+  }
+
+  static async getEmployeeByUserId(userId: string): Promise<Employee | null> {
+    try {
+      const response = await apiClient.get<{success: boolean, message: string, data: Employee}>(`${this.BASE_URL}/employees/by-user/${userId}`)
+
+      if (!response.success || !response.data) {
+        return null
+      }
+
+      return response.data
+    } catch {
+      return null
     }
   }
 

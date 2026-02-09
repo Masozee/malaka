@@ -8,6 +8,7 @@ import (
 	"malaka/internal/modules/masterdata/domain/services"
 	"malaka/internal/modules/masterdata/presentation/http/dto"
 	"malaka/internal/shared/response"
+	"malaka/internal/shared/uuid"
 )
 
 // ClassificationHandler handles HTTP requests for classification operations.
@@ -43,7 +44,7 @@ func (h *ClassificationHandler) CreateClassification(c *gin.Context) {
 // GetClassificationByID handles retrieving a classification by its ID.
 func (h *ClassificationHandler) GetClassificationByID(c *gin.Context) {
 	id := c.Param("id")
-	classification, err := h.service.GetClassificationByID(c.Request.Context(), id)
+	classification, err := h.service.GetClassificationByID(c.Request.Context(), uuid.MustParse(id))
 	if err != nil {
 		response.InternalServerError(c, err.Error(), nil)
 		return
@@ -72,7 +73,7 @@ func (h *ClassificationHandler) UpdateClassification(c *gin.Context) {
 	id := c.Param("id")
 
 	// First, retrieve the existing classification
-	existingClassification, err := h.service.GetClassificationByID(c.Request.Context(), id)
+	existingClassification, err := h.service.GetClassificationByID(c.Request.Context(), uuid.MustParse(id))
 	if err != nil {
 		response.InternalServerError(c, err.Error(), nil)
 		return
@@ -103,7 +104,7 @@ func (h *ClassificationHandler) UpdateClassification(c *gin.Context) {
 // DeleteClassification handles deleting a classification by its ID.
 func (h *ClassificationHandler) DeleteClassification(c *gin.Context) {
 	id := c.Param("id")
-	if err := h.service.DeleteClassification(c.Request.Context(), id); err != nil {
+	if err := h.service.DeleteClassification(c.Request.Context(), uuid.MustParse(id)); err != nil {
 		response.InternalServerError(c, err.Error(), nil)
 		return
 	}

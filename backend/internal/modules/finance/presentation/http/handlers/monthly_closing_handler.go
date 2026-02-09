@@ -5,11 +5,11 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 
 	"malaka/internal/modules/finance/domain/services"
 	"malaka/internal/modules/finance/presentation/http/dto"
 	"malaka/internal/shared/response"
+	"malaka/internal/shared/uuid"
 )
 
 type MonthlyClosingHandler struct {
@@ -30,7 +30,7 @@ func (h *MonthlyClosingHandler) CreateMonthlyClosing(c *gin.Context) {
 	}
 
 	closing := dto.ToMonthlyClosingEntity(&req)
-	closing.ID = uuid.New().String()
+	closing.ID = uuid.New()
 	closing.CreatedAt = time.Now()
 	closing.UpdatedAt = time.Now()
 
@@ -45,7 +45,13 @@ func (h *MonthlyClosingHandler) CreateMonthlyClosing(c *gin.Context) {
 func (h *MonthlyClosingHandler) GetMonthlyClosingByID(c *gin.Context) {
 	id := c.Param("id")
 
-	closing, err := h.service.GetMonthlyClosingByID(c.Request.Context(), id)
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		response.BadRequest(c, "Invalid ID", err.Error())
+		return
+	}
+
+	closing, err := h.service.GetMonthlyClosingByID(c.Request.Context(), parsedID)
 	if err != nil {
 		response.NotFound(c, "Monthly closing not found", err.Error())
 		return
@@ -72,13 +78,19 @@ func (h *MonthlyClosingHandler) GetAllMonthlyClosings(c *gin.Context) {
 func (h *MonthlyClosingHandler) UpdateMonthlyClosing(c *gin.Context) {
 	id := c.Param("id")
 
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		response.BadRequest(c, "Invalid ID", err.Error())
+		return
+	}
+
 	var req dto.UpdateMonthlyClosingRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		response.BadRequest(c, "Invalid request", err.Error())
 		return
 	}
 
-	closing, err := h.service.GetMonthlyClosingByID(c.Request.Context(), id)
+	closing, err := h.service.GetMonthlyClosingByID(c.Request.Context(), parsedID)
 	if err != nil {
 		response.NotFound(c, "Monthly closing not found", err.Error())
 		return
@@ -105,7 +117,13 @@ func (h *MonthlyClosingHandler) UpdateMonthlyClosing(c *gin.Context) {
 func (h *MonthlyClosingHandler) DeleteMonthlyClosing(c *gin.Context) {
 	id := c.Param("id")
 
-	if err := h.service.DeleteMonthlyClosing(c.Request.Context(), id); err != nil {
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		response.BadRequest(c, "Invalid ID", err.Error())
+		return
+	}
+
+	if err := h.service.DeleteMonthlyClosing(c.Request.Context(), parsedID); err != nil {
 		response.InternalServerError(c, "Failed to delete monthly closing", err.Error())
 		return
 	}
@@ -141,42 +159,66 @@ func (h *MonthlyClosingHandler) GetMonthlyClosingByPeriod(c *gin.Context) {
 func (h *MonthlyClosingHandler) CloseMonth(c *gin.Context) {
 	id := c.Param("id")
 
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		response.BadRequest(c, "Invalid ID", err.Error())
+		return
+	}
+
 	var req dto.CloseMonthRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		response.BadRequest(c, "Invalid request", err.Error())
 		return
 	}
 
-	if err := h.service.CloseMonth(c.Request.Context(), id, req.ClosedBy); err != nil {
+	parsedClosedBy, err := uuid.Parse(req.ClosedBy)
+	if err != nil {
+		response.BadRequest(c, "Invalid ClosedBy ID", err.Error())
+		return
+	}
+
+	if err := h.service.CloseMonth(c.Request.Context(), parsedID, parsedClosedBy); err != nil {
 		response.InternalServerError(c, "Failed to close month", err.Error())
 		return
 	}
 
-	closing, _ := h.service.GetMonthlyClosingByID(c.Request.Context(), id)
+	closing, _ := h.service.GetMonthlyClosingByID(c.Request.Context(), parsedID)
 	response.OK(c, "Month closed successfully", dto.ToMonthlyClosingResponse(closing))
 }
 
 func (h *MonthlyClosingHandler) LockClosing(c *gin.Context) {
 	id := c.Param("id")
 
-	if err := h.service.LockClosing(c.Request.Context(), id); err != nil {
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		response.BadRequest(c, "Invalid ID", err.Error())
+		return
+	}
+
+	if err := h.service.LockClosing(c.Request.Context(), parsedID); err != nil {
 		response.InternalServerError(c, "Failed to lock closing", err.Error())
 		return
 	}
 
-	closing, _ := h.service.GetMonthlyClosingByID(c.Request.Context(), id)
+	closing, _ := h.service.GetMonthlyClosingByID(c.Request.Context(), parsedID)
 	response.OK(c, "Closing locked successfully", dto.ToMonthlyClosingResponse(closing))
 }
 
 func (h *MonthlyClosingHandler) UnlockClosing(c *gin.Context) {
 	id := c.Param("id")
 
-	if err := h.service.UnlockClosing(c.Request.Context(), id); err != nil {
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		response.BadRequest(c, "Invalid ID", err.Error())
+		return
+	}
+
+	if err := h.service.UnlockClosing(c.Request.Context(), parsedID); err != nil {
 		response.InternalServerError(c, "Failed to unlock closing", err.Error())
 		return
 	}
 
-	closing, _ := h.service.GetMonthlyClosingByID(c.Request.Context(), id)
+	closing, _ := h.service.GetMonthlyClosingByID(c.Request.Context(), parsedID)
 	response.OK(c, "Closing unlocked successfully", dto.ToMonthlyClosingResponse(closing))
 }
 

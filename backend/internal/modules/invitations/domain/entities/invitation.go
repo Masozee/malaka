@@ -4,6 +4,8 @@ import (
 	"database/sql/driver"
 	"encoding/json"
 	"time"
+
+	"malaka/internal/shared/uuid"
 )
 
 // JSONMetadata is a custom type for metadata that handles JSON serialization
@@ -55,18 +57,18 @@ const (
 
 // Invitation represents a user registration invitation
 type Invitation struct {
-	ID            string            `json:"id" db:"id"`
+	ID            uuid.ID           `json:"id" db:"id"`
 	Email         string            `json:"email" db:"email"`
 	Token         string            `json:"token,omitempty" db:"token"`
 	Role          string            `json:"role" db:"role"`
-	CompanyID     string            `json:"company_id" db:"company_id"`
-	InvitedBy     string            `json:"invited_by" db:"invited_by"`
+	CompanyID     uuid.ID           `json:"company_id" db:"company_id"`
+	InvitedBy     uuid.ID           `json:"invited_by" db:"invited_by"`
 	InvitedByName string            `json:"invited_by_name,omitempty" db:"invited_by_name"`
 	Status        InvitationStatus  `json:"status" db:"status"`
 	ExpiresAt     time.Time         `json:"expires_at" db:"expires_at"`
 	AcceptedAt    *time.Time        `json:"accepted_at,omitempty" db:"accepted_at"`
-	CreatedUserID *string           `json:"created_user_id,omitempty" db:"created_user_id"`
-	Metadata      JSONMetadata `json:"metadata,omitempty" db:"metadata"`
+	CreatedUserID *uuid.ID          `json:"created_user_id,omitempty" db:"created_user_id"`
+	Metadata      JSONMetadata      `json:"metadata,omitempty" db:"metadata"`
 	CreatedAt     time.Time         `json:"created_at" db:"created_at"`
 	UpdatedAt     time.Time         `json:"updated_at" db:"updated_at"`
 
@@ -128,7 +130,7 @@ type InvitationValidation struct {
 	Valid     bool      `json:"valid"`
 	Email     string    `json:"email,omitempty"`
 	Role      string    `json:"role,omitempty"`
-	CompanyID string    `json:"company_id,omitempty"`
+	CompanyID uuid.ID   `json:"company_id,omitempty"`
 	ExpiresAt time.Time `json:"expires_at,omitempty"`
 	Message   string    `json:"message,omitempty"`
 }

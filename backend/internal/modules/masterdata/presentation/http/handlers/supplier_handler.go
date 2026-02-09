@@ -7,6 +7,7 @@ import (
 	"malaka/internal/modules/masterdata/domain/services"
 	"malaka/internal/modules/masterdata/presentation/http/dto"
 	"malaka/internal/shared/response"
+	"malaka/internal/shared/uuid"
 )
 
 // SupplierHandler handles HTTP requests for supplier operations.
@@ -28,9 +29,10 @@ func (h *SupplierHandler) CreateSupplier(c *gin.Context) {
 	}
 
 	supplier := &entities.Supplier{
-		Name:    req.Name,
-		Address: req.Address,
-		Contact: req.Contact,
+		Name:      req.Name,
+		Address:   req.Address,
+		Contact:   req.Contact,
+		CompanyID: req.CompanyID,
 	}
 
 	if err := h.service.CreateSupplier(c.Request.Context(), supplier); err != nil {
@@ -44,7 +46,12 @@ func (h *SupplierHandler) CreateSupplier(c *gin.Context) {
 // GetSupplierByID handles retrieving a supplier by its ID.
 func (h *SupplierHandler) GetSupplierByID(c *gin.Context) {
 	id := c.Param("id")
-	supplier, err := h.service.GetSupplierByID(c.Request.Context(), id)
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		response.BadRequest(c, "Invalid ID format", nil)
+		return
+	}
+	supplier, err := h.service.GetSupplierByID(c.Request.Context(), parsedID)
 	if err != nil {
 		response.InternalServerError(c, err.Error(), nil)
 		return
@@ -78,11 +85,12 @@ func (h *SupplierHandler) UpdateSupplier(c *gin.Context) {
 	}
 
 	supplier := &entities.Supplier{
-		Name:    req.Name,
-		Address: req.Address,
-		Contact: req.Contact,
+		Name:      req.Name,
+		Address:   req.Address,
+		Contact:   req.Contact,
+		CompanyID: req.CompanyID,
 	}
-	supplier.ID = id // Set the ID from the URL parameter
+	supplier.ID = uuid.MustParse(id) // Set the ID from the URL parameter
 
 	if err := h.service.UpdateSupplier(c.Request.Context(), supplier); err != nil {
 		response.InternalServerError(c, err.Error(), nil)
@@ -95,7 +103,12 @@ func (h *SupplierHandler) UpdateSupplier(c *gin.Context) {
 // DeleteSupplier handles deleting a supplier by its ID.
 func (h *SupplierHandler) DeleteSupplier(c *gin.Context) {
 	id := c.Param("id")
-	if err := h.service.DeleteSupplier(c.Request.Context(), id); err != nil {
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		response.BadRequest(c, "Invalid ID format", nil)
+		return
+	}
+	if err := h.service.DeleteSupplier(c.Request.Context(), parsedID); err != nil {
 		response.InternalServerError(c, err.Error(), nil)
 		return
 	}

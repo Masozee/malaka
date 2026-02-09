@@ -5,7 +5,9 @@ import (
 	"database/sql"
 
 	"github.com/jmoiron/sqlx"
+
 	"malaka/internal/modules/finance/domain/entities"
+	"malaka/internal/shared/uuid"
 )
 
 // CashReceiptRepositoryImpl implements repositories.CashReceiptRepository.
@@ -20,13 +22,16 @@ func NewCashReceiptRepositoryImpl(db *sqlx.DB) *CashReceiptRepositoryImpl {
 
 // Create creates a new cash receipt in the database.
 func (r *CashReceiptRepositoryImpl) Create(ctx context.Context, cr *entities.CashReceipt) error {
+	if cr.ID.IsNil() {
+		cr.ID = uuid.New()
+	}
 	query := `INSERT INTO cash_receipts (id, receipt_date, amount, description, cash_bank_id, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7)`
 	_, err := r.db.ExecContext(ctx, query, cr.ID, cr.ReceiptDate, cr.Amount, cr.Description, cr.CashBankID, cr.CreatedAt, cr.UpdatedAt)
 	return err
 }
 
 // GetByID retrieves a cash receipt by its ID from the database.
-func (r *CashReceiptRepositoryImpl) GetByID(ctx context.Context, id string) (*entities.CashReceipt, error) {
+func (r *CashReceiptRepositoryImpl) GetByID(ctx context.Context, id uuid.ID) (*entities.CashReceipt, error) {
 	query := `SELECT id, receipt_date, amount, description, cash_bank_id, created_at, updated_at FROM cash_receipts WHERE id = $1`
 	row := r.db.QueryRowContext(ctx, query, id)
 
@@ -46,7 +51,7 @@ func (r *CashReceiptRepositoryImpl) Update(ctx context.Context, cr *entities.Cas
 }
 
 // Delete deletes a cash receipt by its ID from the database.
-func (r *CashReceiptRepositoryImpl) Delete(ctx context.Context, id string) error {
+func (r *CashReceiptRepositoryImpl) Delete(ctx context.Context, id uuid.ID) error {
 	query := `DELETE FROM cash_receipts WHERE id = $1`
 	_, err := r.db.ExecContext(ctx, query, id)
 	return err

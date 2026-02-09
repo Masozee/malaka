@@ -15,8 +15,8 @@ import (
 	userRepositories "malaka/internal/modules/masterdata/domain/repositories"
 	"malaka/internal/shared/email"
 	"malaka/internal/shared/types"
+	"malaka/internal/shared/uuid"
 
-	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -74,7 +74,7 @@ func generateToken() (string, error) {
 }
 
 // CreateInvitation creates a new invitation and sends email
-func (s *InvitationService) CreateInvitation(ctx context.Context, req *entities.CreateInvitationRequest, inviterID string) (*entities.Invitation, error) {
+func (s *InvitationService) CreateInvitation(ctx context.Context, req *entities.CreateInvitationRequest, inviterID uuid.ID) (*entities.Invitation, error) {
 	// Check if user already exists with this email
 	existingUser, err := s.userRepo.GetByEmail(ctx, req.Email)
 	if err != nil {
@@ -105,14 +105,20 @@ func (s *InvitationService) CreateInvitation(ctx context.Context, req *entities.
 		return nil, fmt.Errorf("failed to get inviter details: %w", err)
 	}
 
+	// Parse company ID
+	companyID, err := uuid.Parse(req.CompanyID)
+	if err != nil {
+		return nil, fmt.Errorf("invalid company ID: %w", err)
+	}
+
 	// Create invitation
 	now := time.Now()
 	invitation := &entities.Invitation{
-		ID:        uuid.New().String(),
+		ID:        uuid.New(),
 		Email:     req.Email,
 		Token:     token,
 		Role:      req.Role,
-		CompanyID: req.CompanyID,
+		CompanyID: companyID,
 		InvitedBy: inviterID,
 		Status:    entities.InvitationStatusPending,
 		ExpiresAt: now.Add(time.Duration(s.expiryHours) * time.Hour),
@@ -246,7 +252,7 @@ func (s *InvitationService) AcceptInvitation(ctx context.Context, req *entities.
 
 	user := &userEntities.User{
 		BaseModel: types.BaseModel{
-			ID:        uuid.New().String(),
+			ID:        uuid.New(),
 			CreatedAt: now,
 			UpdatedAt: now,
 		},
@@ -256,7 +262,7 @@ func (s *InvitationService) AcceptInvitation(ctx context.Context, req *entities.
 		Password:  string(hashedPassword),
 		Phone:     &phone,
 		Role:      invitation.Role,
-		CompanyID: invitation.CompanyID,
+		CompanyID: invitation.CompanyID.String(),
 		Status:    "active",
 	}
 
@@ -266,7 +272,8 @@ func (s *InvitationService) AcceptInvitation(ctx context.Context, req *entities.
 	}
 
 	// Mark invitation as accepted
-	if err := s.invitationRepo.MarkAsAccepted(ctx, invitation.ID, user.ID); err != nil {
+	userID := user.BaseModel.ID
+	if err := s.invitationRepo.MarkAsAccepted(ctx, invitation.ID, userID); err != nil {
 		// Log but don't fail - user is already created
 		fmt.Printf("Warning: failed to mark invitation as accepted: %v\n", err)
 	}
@@ -278,7 +285,7 @@ func (s *InvitationService) AcceptInvitation(ctx context.Context, req *entities.
 }
 
 // GetInvitationByID retrieves an invitation by ID
-func (s *InvitationService) GetInvitationByID(ctx context.Context, id string) (*entities.Invitation, error) {
+func (s *InvitationService) GetInvitationByID(ctx context.Context, id uuid.ID) (*entities.Invitation, error) {
 	return s.invitationRepo.GetByID(ctx, id)
 }
 
@@ -288,12 +295,12 @@ func (s *InvitationService) ListInvitations(ctx context.Context, filters map[str
 }
 
 // GetInvitationsByCompany retrieves all invitations for a company
-func (s *InvitationService) GetInvitationsByCompany(ctx context.Context, companyID string) ([]*entities.Invitation, error) {
+func (s *InvitationService) GetInvitationsByCompany(ctx context.Context, companyID uuid.ID) ([]*entities.Invitation, error) {
 	return s.invitationRepo.GetByCompany(ctx, companyID)
 }
 
 // RevokeInvitation revokes a pending invitation
-func (s *InvitationService) RevokeInvitation(ctx context.Context, id string) error {
+func (s *InvitationService) RevokeInvitation(ctx context.Context, id uuid.ID) error {
 	invitation, err := s.invitationRepo.GetByID(ctx, id)
 	if err != nil {
 		return fmt.Errorf("failed to get invitation: %w", err)
@@ -310,7 +317,7 @@ func (s *InvitationService) RevokeInvitation(ctx context.Context, id string) err
 }
 
 // ResendInvitation resends the invitation email
-func (s *InvitationService) ResendInvitation(ctx context.Context, id string, inviterID string) error {
+func (s *InvitationService) ResendInvitation(ctx context.Context, id uuid.ID, inviterID uuid.ID) error {
 	invitation, err := s.invitationRepo.GetByID(ctx, id)
 	if err != nil {
 		return fmt.Errorf("failed to get invitation: %w", err)
@@ -359,7 +366,7 @@ func (s *InvitationService) ResendInvitation(ctx context.Context, id string, inv
 }
 
 // DeleteInvitation deletes an invitation
-func (s *InvitationService) DeleteInvitation(ctx context.Context, id string) error {
+func (s *InvitationService) DeleteInvitation(ctx context.Context, id uuid.ID) error {
 	return s.invitationRepo.Delete(ctx, id)
 }
 

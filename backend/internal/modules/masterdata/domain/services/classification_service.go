@@ -4,9 +4,9 @@ import (
 	"context"
 	"errors"
 
-	"github.com/google/uuid"
 	"malaka/internal/modules/masterdata/domain/entities"
 	"malaka/internal/modules/masterdata/domain/repositories"
+	"malaka/internal/shared/uuid"
 )
 
 // ClassificationService provides business logic for classification operations.
@@ -21,14 +21,14 @@ func NewClassificationService(repo repositories.ClassificationRepository) *Class
 
 // CreateClassification creates a new classification.
 func (s *ClassificationService) CreateClassification(ctx context.Context, classification *entities.Classification) error {
-	if classification.ID == "" {
-		classification.ID = uuid.NewString()
+	if classification.ID.IsNil() {
+		classification.ID = uuid.New()
 	}
 	return s.repo.Create(ctx, classification)
 }
 
 // GetClassificationByID retrieves a classification by its ID.
-func (s *ClassificationService) GetClassificationByID(ctx context.Context, id string) (*entities.Classification, error) {
+func (s *ClassificationService) GetClassificationByID(ctx context.Context, id uuid.ID) (*entities.Classification, error) {
 	return s.repo.GetByID(ctx, id)
 }
 
@@ -51,7 +51,7 @@ func (s *ClassificationService) UpdateClassification(ctx context.Context, classi
 }
 
 // DeleteClassification deletes a classification by its ID.
-func (s *ClassificationService) DeleteClassification(ctx context.Context, id string) error {
+func (s *ClassificationService) DeleteClassification(ctx context.Context, id uuid.ID) error {
 	// Ensure the classification exists before deleting
 	existingClassification, err := s.repo.GetByID(ctx, id)
 	if err != nil {

@@ -3,7 +3,7 @@ package dto
 import (
 	"time"
 
-	"github.com/google/uuid"
+	"malaka/internal/shared/uuid"
 	"malaka/internal/modules/accounting/domain/entities"
 )
 
@@ -25,7 +25,7 @@ type FixedAssetRequest struct {
 
 // FixedAssetResponse represents the response structure for a FixedAsset
 type FixedAssetResponse struct {
-	ID              uuid.UUID               `json:"id"`
+	ID              uuid.ID               `json:"id"`
 	CompanyID       string                  `json:"company_id"`
 	AssetCode       string                  `json:"asset_code"`
 	AssetName       string                  `json:"asset_name"`
@@ -47,8 +47,8 @@ type FixedAssetResponse struct {
 
 // DepreciationEntryResponse represents the response structure for a DepreciationEntry
 type DepreciationEntryResponse struct {
-	ID          uuid.UUID `json:"id"`
-	AssetID     uuid.UUID `json:"asset_id"`
+	ID          uuid.ID `json:"id"`
+	AssetID     uuid.ID `json:"asset_id"`
 	Period      time.Time `json:"period"`
 	Amount      float64   `json:"amount"`
 	BookValue   float64   `json:"book_value"`

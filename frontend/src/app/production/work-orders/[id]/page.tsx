@@ -11,6 +11,7 @@ import { Separator } from '@/components/ui/separator'
 // import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 import Link from 'next/link'
+import { EntityShareButton } from '@/components/messaging/EntityShareButton'
 import { mockWorkOrders } from '@/services/production'
 import type { WorkOrder, WorkOrderOperation, WorkOrderMaterial } from '@/types/production'
 import { useParams } from 'next/navigation'
@@ -132,6 +133,15 @@ export default function WorkOrderDetailsPage() {
         breadcrumbs={breadcrumbs}
         actions={
           <div className="flex items-center space-x-3">
+            <EntityShareButton
+              entityType="work_order"
+              entityId={workOrder.id}
+              title={workOrder.workOrderNumber}
+              subtitle={workOrder.productName}
+              status={workOrder.status}
+              statusColor={workOrder.status === 'completed' ? 'green' : workOrder.status === 'in_progress' ? 'blue' : 'gray'}
+              url={`/production/work-orders/${workOrder.id}`}
+            />
             <Button variant="outline" size="sm" asChild>
               <Link href="/production/work-orders">
                 <ArrowLeft className="h-4 w-4 mr-2" />

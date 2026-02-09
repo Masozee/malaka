@@ -6,6 +6,7 @@ import (
 
 	"go.uber.org/zap"
 	"malaka/internal/shared/cache"
+	"malaka/internal/shared/uuid"
 )
 
 // CacheManager handles cache operations and warming for master data.
@@ -155,8 +156,8 @@ func (cm *CacheManager) GetCacheStats(ctx context.Context) map[string]interface{
 }
 
 // InvalidateArticleRelatedCaches invalidates caches that depend on article data.
-func (cm *CacheManager) InvalidateArticleRelatedCaches(ctx context.Context, articleID string) error {
-	cm.logger.Info("Invalidating article-related caches", zap.String("article_id", articleID))
+func (cm *CacheManager) InvalidateArticleRelatedCaches(ctx context.Context, articleID uuid.ID) error {
+	cm.logger.Info("Invalidating article-related caches", zap.String("article_id", articleID.String()))
 
 	if cm.articleRepo != nil {
 		return cm.articleRepo.InvalidateArticleCache(ctx, articleID)

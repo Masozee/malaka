@@ -3,7 +3,7 @@ package entities
 import (
 	"time"
 
-	"github.com/google/uuid"
+	"malaka/internal/shared/uuid"
 )
 
 // NotificationType represents the category of a notification
@@ -42,8 +42,8 @@ const (
 
 // Notification represents an in-app notification
 type Notification struct {
-	ID            string               `json:"id" db:"id"`
-	UserID        string               `json:"user_id" db:"user_id"`
+	ID            uuid.ID              `json:"id" db:"id"`
+	UserID        uuid.ID              `json:"user_id" db:"user_id"`
 	Title         string               `json:"title" db:"title"`
 	Message       string               `json:"message" db:"message"`
 	Type          NotificationType     `json:"type" db:"type"`
@@ -53,7 +53,7 @@ type Notification struct {
 	ReferenceType *string              `json:"reference_type,omitempty" db:"reference_type"`
 	ReferenceID   *string              `json:"reference_id,omitempty" db:"reference_id"`
 	Metadata      map[string]any       `json:"metadata,omitempty" db:"metadata"`
-	SenderID      *string              `json:"sender_id,omitempty" db:"sender_id"`
+	SenderID      *uuid.ID             `json:"sender_id,omitempty" db:"sender_id"`
 	CreatedAt     time.Time            `json:"created_at" db:"created_at"`
 	ReadAt        *time.Time           `json:"read_at,omitempty" db:"read_at"`
 	ArchivedAt    *time.Time           `json:"archived_at,omitempty" db:"archived_at"`
@@ -65,9 +65,9 @@ type Notification struct {
 }
 
 // NewNotification creates a new notification with default values
-func NewNotification(userID, title, message string, notifType NotificationType) *Notification {
+func NewNotification(userID uuid.ID, title, message string, notifType NotificationType) *Notification {
 	return &Notification{
-		ID:        uuid.New().String(),
+		ID:        uuid.New(),
 		UserID:    userID,
 		Title:     title,
 		Message:   message,
@@ -99,7 +99,7 @@ func (n *Notification) WithReference(refType, refID string) *Notification {
 }
 
 // WithSender sets the sender
-func (n *Notification) WithSender(senderID string) *Notification {
+func (n *Notification) WithSender(senderID uuid.ID) *Notification {
 	n.SenderID = &senderID
 	return n
 }
@@ -137,8 +137,8 @@ func (n *Notification) IsExpired() bool {
 
 // NotificationPreferences represents user notification settings
 type NotificationPreferences struct {
-	ID                       string     `json:"id" db:"id"`
-	UserID                   string     `json:"user_id" db:"user_id"`
+	ID                       uuid.ID    `json:"id" db:"id"`
+	UserID                   uuid.ID    `json:"user_id" db:"user_id"`
 	InAppEnabled             bool       `json:"in_app_enabled" db:"in_app_enabled"`
 	EmailEnabled             bool       `json:"email_enabled" db:"email_enabled"`
 	OrderNotifications       bool       `json:"order_notifications" db:"order_notifications"`
@@ -155,10 +155,10 @@ type NotificationPreferences struct {
 }
 
 // NewNotificationPreferences creates default preferences for a user
-func NewNotificationPreferences(userID string) *NotificationPreferences {
+func NewNotificationPreferences(userID uuid.ID) *NotificationPreferences {
 	now := time.Now()
 	return &NotificationPreferences{
-		ID:                       uuid.New().String(),
+		ID:                       uuid.New(),
 		UserID:                   userID,
 		InAppEnabled:             true,
 		EmailEnabled:             true,

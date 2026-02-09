@@ -3,10 +3,10 @@ package persistence
 import (
 	"context"
 
-	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"malaka/internal/modules/shipping/domain/entities"
 	"malaka/internal/modules/shipping/domain/repositories"
+	"malaka/internal/shared/uuid"
 )
 
 // ManifestRepositoryImpl implements repositories.ManifestRepository.
@@ -27,7 +27,7 @@ func (r *ManifestRepositoryImpl) Create(ctx context.Context, manifest *entities.
 }
 
 // GetByID retrieves a manifest by its ID from the database.
-func (r *ManifestRepositoryImpl) GetByID(ctx context.Context, id uuid.UUID) (*entities.Manifest, error) {
+func (r *ManifestRepositoryImpl) GetByID(ctx context.Context, id uuid.ID) (*entities.Manifest, error) {
 	var manifest entities.Manifest
 	query := `SELECT * FROM manifests WHERE id = $1`
 	err := r.db.GetContext(ctx, &manifest, query, id)
@@ -50,9 +50,8 @@ func (r *ManifestRepositoryImpl) Update(ctx context.Context, manifest *entities.
 }
 
 // Delete deletes a manifest by its ID from the database.
-func (r *ManifestRepositoryImpl) Delete(ctx context.Context, id uuid.UUID) error {
+func (r *ManifestRepositoryImpl) Delete(ctx context.Context, id uuid.ID) error {
 	query := `DELETE FROM manifests WHERE id = $1`
 	_, err := r.db.ExecContext(ctx, query, id)
 	return err
 }
-

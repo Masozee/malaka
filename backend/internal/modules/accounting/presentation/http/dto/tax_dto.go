@@ -3,7 +3,7 @@ package dto
 import (
 	"time"
 
-	"github.com/google/uuid"
+	"malaka/internal/shared/uuid"
 	"malaka/internal/modules/accounting/domain/entities"
 )
 
@@ -18,7 +18,7 @@ type TaxRequest struct {
 
 // TaxResponse represents the response structure for a Tax
 type TaxResponse struct {
-	ID        uuid.UUID       `json:"id"`
+	ID        uuid.ID       `json:"id"`
 	CompanyID string          `json:"company_id"`
 	Name      string          `json:"name"`
 	TaxType   entities.TaxType `json:"tax_type"`
@@ -30,7 +30,7 @@ type TaxResponse struct {
 
 // TaxRateRequest represents the request structure for creating/updating a TaxRate
 type TaxRateRequest struct {
-	TaxID         uuid.UUID `json:"tax_id" binding:"required"`
+	TaxID         uuid.ID `json:"tax_id" binding:"required"`
 	Rate          float64   `json:"rate" binding:"required"`
 	EffectiveDate time.Time `json:"effective_date" binding:"required"`
 	IsActive      bool      `json:"is_active"`
@@ -38,8 +38,8 @@ type TaxRateRequest struct {
 
 // TaxRateResponse represents the response structure for a TaxRate
 type TaxRateResponse struct {
-	ID            uuid.UUID `json:"id"`
-	TaxID         uuid.UUID `json:"tax_id"`
+	ID            uuid.ID `json:"id"`
+	TaxID         uuid.ID `json:"tax_id"`
 	Rate          float64   `json:"rate"`
 	EffectiveDate time.Time `json:"effective_date"`
 	IsActive      bool      `json:"is_active"`
@@ -50,25 +50,25 @@ type TaxRateResponse struct {
 // TaxTransactionRequest represents the request structure for recording a TaxTransaction
 type TaxTransactionRequest struct {
 	CompanyID     string    `json:"company_id" binding:"required"`
-	TaxID         uuid.UUID `json:"tax_id" binding:"required"`
+	TaxID         uuid.ID `json:"tax_id" binding:"required"`
 	TransactionDate time.Time `json:"transaction_date" binding:"required"`
 	BaseAmount    float64   `json:"base_amount" binding:"required"`
 	TaxAmount     float64   `json:"tax_amount" binding:"required"`
 	Description   string    `json:"description"`
-	ReferenceID   uuid.UUID `json:"reference_id"`
+	ReferenceID   uuid.ID `json:"reference_id"`
 	ReferenceType string    `json:"reference_type"`
 }
 
 // TaxTransactionResponse represents the response structure for a TaxTransaction
 type TaxTransactionResponse struct {
-	ID            uuid.UUID `json:"id"`
+	ID            uuid.ID `json:"id"`
 	CompanyID     string    `json:"company_id"`
-	TaxID         uuid.UUID `json:"tax_id"`
+	TaxID         uuid.ID `json:"tax_id"`
 	TransactionDate time.Time `json:"transaction_date"`
 	BaseAmount    float64   `json:"base_amount"`
 	TaxAmount     float64   `json:"tax_amount"`
 	Description   string    `json:"description"`
-	ReferenceID   uuid.UUID `json:"reference_id"`
+	ReferenceID   uuid.ID `json:"reference_id"`
 	ReferenceType string    `json:"reference_type"`
 	CreatedAt     time.Time `json:"created_at"`
 }

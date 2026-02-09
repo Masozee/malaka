@@ -8,6 +8,7 @@ import (
 	"malaka/internal/modules/finance/domain/services"
 	"malaka/internal/modules/finance/presentation/http/dto"
 	"malaka/internal/shared/response"
+	"malaka/internal/shared/uuid"
 )
 
 // BankTransferHandler handles HTTP requests for bank transfer operations.
@@ -46,7 +47,13 @@ func (h *BankTransferHandler) GetBankTransferByID(c *gin.Context) {
 		return
 	}
 
-	bankTransfer, err := h.service.GetBankTransferByID(c.Request.Context(), id)
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		response.Error(c, http.StatusBadRequest, "Invalid ID", err)
+		return
+	}
+
+	bankTransfer, err := h.service.GetBankTransferByID(c.Request.Context(), parsedID)
 	if err != nil {
 		response.Error(c, http.StatusNotFound, "Bank transfer not found", err)
 		return
@@ -70,8 +77,14 @@ func (h *BankTransferHandler) UpdateBankTransfer(c *gin.Context) {
 		return
 	}
 
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		response.Error(c, http.StatusBadRequest, "Invalid ID", err)
+		return
+	}
+
 	bankTransfer := req.ToBankTransferEntity()
-	bankTransfer.ID = id
+	bankTransfer.ID = parsedID
 
 	if err := h.service.UpdateBankTransfer(c.Request.Context(), bankTransfer); err != nil {
 		response.Error(c, http.StatusInternalServerError, "Failed to update bank transfer", err)
@@ -90,7 +103,13 @@ func (h *BankTransferHandler) DeleteBankTransfer(c *gin.Context) {
 		return
 	}
 
-	if err := h.service.DeleteBankTransfer(c.Request.Context(), id); err != nil {
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		response.Error(c, http.StatusBadRequest, "Invalid ID", err)
+		return
+	}
+
+	if err := h.service.DeleteBankTransfer(c.Request.Context(), parsedID); err != nil {
 		response.Error(c, http.StatusInternalServerError, "Failed to delete bank transfer", err)
 		return
 	}

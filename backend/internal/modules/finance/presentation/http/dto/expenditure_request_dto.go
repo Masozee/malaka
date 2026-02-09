@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"malaka/internal/modules/finance/domain/entities"
+	"malaka/internal/shared/uuid"
 )
 
 type CreateExpenditureRequestRequest struct {
@@ -60,18 +61,18 @@ type ExpenditureRequestResponse struct {
 
 func ToExpenditureRequestResponse(request *entities.ExpenditureRequest) *ExpenditureRequestResponse {
 	return &ExpenditureRequestResponse{
-		ID:             request.ID,
+		ID:             request.ID.String(),
 		RequestNumber:  request.RequestNumber,
 		RequestDate:    request.RequestDate,
-		RequestedBy:    request.RequestedBy,
-		CashBankID:     request.CashBankID,
+		RequestedBy:    request.RequestedBy.String(),
+		CashBankID:     request.CashBankID.String(),
 		Amount:         request.Amount,
 		Purpose:        request.Purpose,
 		Description:    request.Description,
 		Status:         request.Status,
-		ApprovedBy:     request.ApprovedBy,
+		ApprovedBy:     request.ApprovedBy.String(),
 		ApprovedAt:     request.ApprovedAt,
-		DisbursedBy:    request.DisbursedBy,
+		DisbursedBy:    request.DisbursedBy.String(),
 		DisbursedAt:    request.DisbursedAt,
 		RejectedReason: request.RejectedReason,
 		CreatedAt:      request.CreatedAt,
@@ -83,8 +84,8 @@ func ToExpenditureRequestEntity(req *CreateExpenditureRequestRequest) *entities.
 	return &entities.ExpenditureRequest{
 		RequestNumber: req.RequestNumber,
 		RequestDate:   req.RequestDate,
-		RequestedBy:   req.RequestedBy,
-		CashBankID:    req.CashBankID,
+		RequestedBy:   uuid.MustParse(req.RequestedBy),
+		CashBankID:    uuid.MustParse(req.CashBankID),
 		Amount:        req.Amount,
 		Purpose:       req.Purpose,
 		Description:   req.Description,

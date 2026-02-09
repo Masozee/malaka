@@ -6,16 +6,28 @@ import (
 
 	"malaka/internal/modules/notifications/domain/entities"
 	"malaka/internal/modules/notifications/domain/repositories"
+	"malaka/internal/shared/uuid"
 )
+
+// RealtimeNotifier pushes notifications to connected clients in real-time.
+type RealtimeNotifier interface {
+	NotifyUser(ctx context.Context, notification *entities.Notification) error
+}
 
 // NotificationService handles notification business logic
 type NotificationService struct {
-	repo repositories.NotificationRepository
+	repo     repositories.NotificationRepository
+	notifier RealtimeNotifier
 }
 
 // NewNotificationService creates a new notification service
 func NewNotificationService(repo repositories.NotificationRepository) *NotificationService {
 	return &NotificationService{repo: repo}
+}
+
+// SetNotifier sets the real-time notifier for pushing WebSocket notifications.
+func (s *NotificationService) SetNotifier(n RealtimeNotifier) {
+	s.notifier = n
 }
 
 // CreateNotification creates a new notification
@@ -32,13 +44,22 @@ func (s *NotificationService) CreateNotification(ctx context.Context, notificati
 		return nil
 	}
 
-	return s.repo.Create(ctx, notification)
+	if err := s.repo.Create(ctx, notification); err != nil {
+		return err
+	}
+
+	// Push real-time notification via WebSocket (best-effort, don't fail if WS is down)
+	if s.notifier != nil {
+		_ = s.notifier.NotifyUser(ctx, notification)
+	}
+
+	return nil
 }
 
 // SendNotification is a convenience method to create and send a notification
 func (s *NotificationService) SendNotification(
 	ctx context.Context,
-	userID, title, message string,
+	userID uuid.ID, title, message string,
 	notifType entities.NotificationType,
 	options ...NotificationOption,
 ) error {
@@ -76,7 +97,7 @@ func WithReference(refType, refID string) NotificationOption {
 }
 
 // WithSender sets the notification sender
-func WithSender(senderID string) NotificationOption {
+func WithSender(senderID uuid.ID) NotificationOption {
 	return func(n *entities.Notification) {
 		n.WithSender(senderID)
 	}
@@ -92,7 +113,7 @@ func WithMetadata(key string, value any) NotificationOption {
 // SendToMultipleUsers sends a notification to multiple users
 func (s *NotificationService) SendToMultipleUsers(
 	ctx context.Context,
-	userIDs []string,
+	userIDs []uuid.ID,
 	title, message string,
 	notifType entities.NotificationType,
 	options ...NotificationOption,
@@ -125,14 +146,14 @@ func (s *NotificationService) SendToMultipleUsers(
 }
 
 // GetNotification retrieves a notification by ID
-func (s *NotificationService) GetNotification(ctx context.Context, id string) (*entities.Notification, error) {
+func (s *NotificationService) GetNotification(ctx context.Context, id uuid.ID) (*entities.Notification, error) {
 	return s.repo.GetByID(ctx, id)
 }
 
 // ListNotifications retrieves notifications for a user
-func (s *NotificationService) ListNotifications(ctx context.Context, userID string, limit, offset int, includeRead bool) ([]*entities.Notification, error) {
+func (s *NotificationService) ListNotifications(ctx context.Context, userID uuid.ID, limit, offset int, includeRead bool) ([]*entities.Notification, error) {
 	filter := repositories.NotificationFilter{
-		UserID:      userID,
+		UserID:      userID.String(),
 		IncludeRead: includeRead,
 		Limit:       limit,
 		Offset:      offset,
@@ -141,9 +162,9 @@ func (s *NotificationService) ListNotifications(ctx context.Context, userID stri
 }
 
 // ListNotificationsByType retrieves notifications by type
-func (s *NotificationService) ListNotificationsByType(ctx context.Context, userID string, notifType entities.NotificationType, limit, offset int) ([]*entities.Notification, error) {
+func (s *NotificationService) ListNotificationsByType(ctx context.Context, userID uuid.ID, notifType entities.NotificationType, limit, offset int) ([]*entities.Notification, error) {
 	filter := repositories.NotificationFilter{
-		UserID:      userID,
+		UserID:      userID.String(),
 		Type:        &notifType,
 		IncludeRead: true,
 		Limit:       limit,
@@ -153,27 +174,27 @@ func (s *NotificationService) ListNotificationsByType(ctx context.Context, userI
 }
 
 // GetUnreadCount returns the count of unread notifications
-func (s *NotificationService) GetUnreadCount(ctx context.Context, userID string) (int64, error) {
+func (s *NotificationService) GetUnreadCount(ctx context.Context, userID uuid.ID) (int64, error) {
 	return s.repo.GetUnreadCount(ctx, userID)
 }
 
 // MarkAsRead marks a notification as read
-func (s *NotificationService) MarkAsRead(ctx context.Context, id string) error {
+func (s *NotificationService) MarkAsRead(ctx context.Context, id uuid.ID) error {
 	return s.repo.MarkAsRead(ctx, id)
 }
 
 // MarkAllAsRead marks all notifications as read for a user
-func (s *NotificationService) MarkAllAsRead(ctx context.Context, userID string) error {
+func (s *NotificationService) MarkAllAsRead(ctx context.Context, userID uuid.ID) error {
 	return s.repo.MarkAllAsRead(ctx, userID)
 }
 
 // ArchiveNotification archives a notification
-func (s *NotificationService) ArchiveNotification(ctx context.Context, id string) error {
+func (s *NotificationService) ArchiveNotification(ctx context.Context, id uuid.ID) error {
 	return s.repo.Archive(ctx, id)
 }
 
 // DeleteNotification deletes a notification
-func (s *NotificationService) DeleteNotification(ctx context.Context, id string) error {
+func (s *NotificationService) DeleteNotification(ctx context.Context, id uuid.ID) error {
 	return s.repo.Delete(ctx, id)
 }
 
@@ -183,7 +204,7 @@ func (s *NotificationService) CleanupExpiredNotifications(ctx context.Context) (
 }
 
 // GetPreferences retrieves user notification preferences
-func (s *NotificationService) GetPreferences(ctx context.Context, userID string) (*entities.NotificationPreferences, error) {
+func (s *NotificationService) GetPreferences(ctx context.Context, userID uuid.ID) (*entities.NotificationPreferences, error) {
 	prefs, err := s.repo.GetPreferences(ctx, userID)
 	if err != nil {
 		return nil, err
@@ -215,7 +236,7 @@ func (s *NotificationService) UpdatePreferences(ctx context.Context, prefs *enti
 }
 
 // NotifyPurchaseRequestApproved sends a notification when a purchase request is approved
-func (s *NotificationService) NotifyPurchaseRequestApproved(ctx context.Context, requestorID, prNumber, approverName string) error {
+func (s *NotificationService) NotifyPurchaseRequestApproved(ctx context.Context, requestorID uuid.ID, prNumber, approverName string) error {
 	return s.SendNotification(
 		ctx,
 		requestorID,
@@ -229,7 +250,7 @@ func (s *NotificationService) NotifyPurchaseRequestApproved(ctx context.Context,
 }
 
 // NotifyPurchaseRequestRejected sends a notification when a purchase request is rejected
-func (s *NotificationService) NotifyPurchaseRequestRejected(ctx context.Context, requestorID, prNumber, approverName, reason string) error {
+func (s *NotificationService) NotifyPurchaseRequestRejected(ctx context.Context, requestorID uuid.ID, prNumber, approverName, reason string) error {
 	return s.SendNotification(
 		ctx,
 		requestorID,
@@ -243,7 +264,7 @@ func (s *NotificationService) NotifyPurchaseRequestRejected(ctx context.Context,
 }
 
 // NotifyNewPurchaseOrder sends a notification when a new PO is created
-func (s *NotificationService) NotifyNewPurchaseOrder(ctx context.Context, vendorUserID, poNumber, buyerName string) error {
+func (s *NotificationService) NotifyNewPurchaseOrder(ctx context.Context, vendorUserID uuid.ID, poNumber, buyerName string) error {
 	return s.SendNotification(
 		ctx,
 		vendorUserID,
@@ -257,7 +278,7 @@ func (s *NotificationService) NotifyNewPurchaseOrder(ctx context.Context, vendor
 }
 
 // NotifyLowStock sends a low stock alert
-func (s *NotificationService) NotifyLowStock(ctx context.Context, warehouseManagerID, articleName string, currentStock, minStock int) error {
+func (s *NotificationService) NotifyLowStock(ctx context.Context, warehouseManagerID uuid.ID, articleName string, currentStock, minStock int) error {
 	return s.SendNotification(
 		ctx,
 		warehouseManagerID,
@@ -273,7 +294,7 @@ func (s *NotificationService) NotifyLowStock(ctx context.Context, warehouseManag
 }
 
 // NotifyPaymentReceived sends a notification when payment is received
-func (s *NotificationService) NotifyPaymentReceived(ctx context.Context, salesUserID, invoiceNumber string, amount float64) error {
+func (s *NotificationService) NotifyPaymentReceived(ctx context.Context, salesUserID uuid.ID, invoiceNumber string, amount float64) error {
 	return s.SendNotification(
 		ctx,
 		salesUserID,
@@ -287,7 +308,7 @@ func (s *NotificationService) NotifyPaymentReceived(ctx context.Context, salesUs
 }
 
 // NotifySystemMaintenance sends a system maintenance notification to all specified users
-func (s *NotificationService) NotifySystemMaintenance(ctx context.Context, userIDs []string, maintenanceTime, description string) error {
+func (s *NotificationService) NotifySystemMaintenance(ctx context.Context, userIDs []uuid.ID, maintenanceTime, description string) error {
 	return s.SendToMultipleUsers(
 		ctx,
 		userIDs,

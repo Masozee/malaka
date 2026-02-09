@@ -6,19 +6,20 @@ import (
 
 	"malaka/internal/modules/finance/domain/entities"
 	"malaka/internal/modules/finance/domain/repositories"
+	"malaka/internal/shared/uuid"
 )
 
 type CheckClearanceService interface {
 	CreateCheckClearance(ctx context.Context, check *entities.CheckClearance) error
-	GetCheckClearanceByID(ctx context.Context, id string) (*entities.CheckClearance, error)
+	GetCheckClearanceByID(ctx context.Context, id uuid.ID) (*entities.CheckClearance, error)
 	GetAllCheckClearances(ctx context.Context) ([]*entities.CheckClearance, error)
 	UpdateCheckClearance(ctx context.Context, check *entities.CheckClearance) error
-	DeleteCheckClearance(ctx context.Context, id string) error
+	DeleteCheckClearance(ctx context.Context, id uuid.ID) error
 	GetCheckClearancesByStatus(ctx context.Context, status string) ([]*entities.CheckClearance, error)
 	GetIncomingChecks(ctx context.Context) ([]*entities.CheckClearance, error)
 	GetOutgoingChecks(ctx context.Context) ([]*entities.CheckClearance, error)
-	ClearCheck(ctx context.Context, id string, clearanceDate time.Time) error
-	BounceCheck(ctx context.Context, id string) error
+	ClearCheck(ctx context.Context, id uuid.ID, clearanceDate time.Time) error
+	BounceCheck(ctx context.Context, id uuid.ID) error
 }
 
 type checkClearanceService struct {
@@ -38,7 +39,7 @@ func (s *checkClearanceService) CreateCheckClearance(ctx context.Context, check 
 	return s.repo.Create(ctx, check)
 }
 
-func (s *checkClearanceService) GetCheckClearanceByID(ctx context.Context, id string) (*entities.CheckClearance, error) {
+func (s *checkClearanceService) GetCheckClearanceByID(ctx context.Context, id uuid.ID) (*entities.CheckClearance, error) {
 	return s.repo.GetByID(ctx, id)
 }
 
@@ -50,7 +51,7 @@ func (s *checkClearanceService) UpdateCheckClearance(ctx context.Context, check 
 	return s.repo.Update(ctx, check)
 }
 
-func (s *checkClearanceService) DeleteCheckClearance(ctx context.Context, id string) error {
+func (s *checkClearanceService) DeleteCheckClearance(ctx context.Context, id uuid.ID) error {
 	return s.repo.Delete(ctx, id)
 }
 
@@ -66,7 +67,7 @@ func (s *checkClearanceService) GetOutgoingChecks(ctx context.Context) ([]*entit
 	return s.repo.GetOutgoingChecks(ctx)
 }
 
-func (s *checkClearanceService) ClearCheck(ctx context.Context, id string, clearanceDate time.Time) error {
+func (s *checkClearanceService) ClearCheck(ctx context.Context, id uuid.ID, clearanceDate time.Time) error {
 	check, err := s.repo.GetByID(ctx, id)
 	if err != nil {
 		return err
@@ -78,7 +79,7 @@ func (s *checkClearanceService) ClearCheck(ctx context.Context, id string, clear
 	return s.repo.Update(ctx, check)
 }
 
-func (s *checkClearanceService) BounceCheck(ctx context.Context, id string) error {
+func (s *checkClearanceService) BounceCheck(ctx context.Context, id uuid.ID) error {
 	check, err := s.repo.GetByID(ctx, id)
 	if err != nil {
 		return err

@@ -13,6 +13,7 @@ import { useToast } from '@/components/ui/toast'
 import type { PurchaseOrder } from '@/types/procurement'
 // PDF functions are loaded dynamically to reduce bundle size
 import Link from 'next/link'
+import { EntityShareButton } from '@/components/messaging/EntityShareButton'
 import { HugeiconsIcon } from '@hugeicons/react'
 import {
   PencilEdit01Icon,
@@ -179,6 +180,15 @@ export default function PurchaseOrderDetailPage() {
         breadcrumbs={breadcrumbs}
         actions={
           <div className="flex items-center gap-2">
+            <EntityShareButton
+              entityType="purchase_order"
+              entityId={order.id}
+              title={order.po_number}
+              subtitle={order.supplier_name || 'No supplier'}
+              status={order.status}
+              statusColor={order.status === 'confirmed' ? 'green' : order.status === 'draft' ? 'gray' : 'blue'}
+              url={`/procurement/purchase-orders/${order.id}`}
+            />
             {order.status === 'draft' && (
               <>
                 <Button

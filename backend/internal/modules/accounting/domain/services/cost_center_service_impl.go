@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/google/uuid"
+	"malaka/internal/shared/uuid"
 	"malaka/internal/modules/accounting/domain/entities"
 	"malaka/internal/modules/accounting/infrastructure/persistence"
 )
@@ -25,7 +25,7 @@ func (s *CostCenterServiceImpl) CreateCostCenter(ctx context.Context, costCenter
 	return s.repo.CreateSimple(ctx, costCenter)
 }
 
-func (s *CostCenterServiceImpl) GetCostCenterByID(ctx context.Context, id uuid.UUID) (*entities.CostCenter, error) {
+func (s *CostCenterServiceImpl) GetCostCenterByID(ctx context.Context, id uuid.ID) (*entities.CostCenter, error) {
 	costCenter, err := s.repo.GetByIDSimple(ctx, id)
 	if err != nil {
 		return nil, err
@@ -54,7 +54,7 @@ func (s *CostCenterServiceImpl) UpdateCostCenter(ctx context.Context, costCenter
 	return s.repo.UpdateSimple(ctx, costCenter)
 }
 
-func (s *CostCenterServiceImpl) DeleteCostCenter(ctx context.Context, id uuid.UUID) error {
+func (s *CostCenterServiceImpl) DeleteCostCenter(ctx context.Context, id uuid.ID) error {
 	return s.repo.DeleteSimple(ctx, id)
 }
 
@@ -177,11 +177,11 @@ func (s *CostCenterServiceImpl) CreateAllocation(ctx context.Context, allocation
 	return fmt.Errorf("cost center allocations not implemented in simple version")
 }
 
-func (s *CostCenterServiceImpl) GetAllocationByID(ctx context.Context, allocationID uuid.UUID) (*entities.CostCenterAllocation, error) {
+func (s *CostCenterServiceImpl) GetAllocationByID(ctx context.Context, allocationID uuid.ID) (*entities.CostCenterAllocation, error) {
 	return nil, fmt.Errorf("cost center allocations not implemented in simple version")
 }
 
-func (s *CostCenterServiceImpl) GetAllocationsByCostCenter(ctx context.Context, costCenterID uuid.UUID) ([]*entities.CostCenterAllocation, error) {
+func (s *CostCenterServiceImpl) GetAllocationsByCostCenter(ctx context.Context, costCenterID uuid.ID) ([]*entities.CostCenterAllocation, error) {
 	return []*entities.CostCenterAllocation{}, nil
 }
 
@@ -189,7 +189,7 @@ func (s *CostCenterServiceImpl) UpdateAllocation(ctx context.Context, allocation
 	return fmt.Errorf("cost center allocations not implemented in simple version")
 }
 
-func (s *CostCenterServiceImpl) DeleteAllocation(ctx context.Context, allocationID uuid.UUID) error {
+func (s *CostCenterServiceImpl) DeleteAllocation(ctx context.Context, allocationID uuid.ID) error {
 	return fmt.Errorf("cost center allocations not implemented in simple version")
 }
 
@@ -209,7 +209,7 @@ func (s *CostCenterServiceImpl) GetCostCentersByManager(ctx context.Context, man
 	return filtered, nil
 }
 
-func (s *CostCenterServiceImpl) GetCostCentersByParent(ctx context.Context, parentID uuid.UUID) ([]*entities.CostCenter, error) {
+func (s *CostCenterServiceImpl) GetCostCentersByParent(ctx context.Context, parentID uuid.ID) ([]*entities.CostCenter, error) {
 	// Basic schema doesn't support hierarchy
 	return []*entities.CostCenter{}, nil
 }
@@ -227,7 +227,7 @@ func (s *CostCenterServiceImpl) GetActiveCostCenters(ctx context.Context, compan
 	return s.GetActiveCostCentersByCompany(ctx, companyID)
 }
 
-func (s *CostCenterServiceImpl) DeactivateCostCenter(ctx context.Context, costCenterID uuid.UUID) error {
+func (s *CostCenterServiceImpl) DeactivateCostCenter(ctx context.Context, costCenterID uuid.ID) error {
 	costCenter, err := s.GetCostCenterByID(ctx, costCenterID)
 	if err != nil {
 		return err
@@ -237,7 +237,7 @@ func (s *CostCenterServiceImpl) DeactivateCostCenter(ctx context.Context, costCe
 	return s.UpdateCostCenter(ctx, costCenter)
 }
 
-func (s *CostCenterServiceImpl) ReactivateCostCenter(ctx context.Context, costCenterID uuid.UUID) error {
+func (s *CostCenterServiceImpl) ReactivateCostCenter(ctx context.Context, costCenterID uuid.ID) error {
 	costCenter, err := s.GetCostCenterByID(ctx, costCenterID)
 	if err != nil {
 		return err
@@ -248,19 +248,19 @@ func (s *CostCenterServiceImpl) ReactivateCostCenter(ctx context.Context, costCe
 }
 
 // All other interface methods return appropriate defaults or not-implemented errors
-func (s *CostCenterServiceImpl) GetActiveAllocations(ctx context.Context, costCenterID uuid.UUID, date time.Time) ([]*entities.CostCenterAllocation, error) {
+func (s *CostCenterServiceImpl) GetActiveAllocations(ctx context.Context, costCenterID uuid.ID, date time.Time) ([]*entities.CostCenterAllocation, error) {
 	return []*entities.CostCenterAllocation{}, nil
 }
 
-func (s *CostCenterServiceImpl) GetAllocationsByPeriod(ctx context.Context, costCenterID uuid.UUID, startDate, endDate time.Time) ([]*entities.CostCenterAllocation, error) {
+func (s *CostCenterServiceImpl) GetAllocationsByPeriod(ctx context.Context, costCenterID uuid.ID, startDate, endDate time.Time) ([]*entities.CostCenterAllocation, error) {
 	return []*entities.CostCenterAllocation{}, nil
 }
 
-func (s *CostCenterServiceImpl) ProcessAllAllocations(ctx context.Context, costCenterID uuid.UUID, period time.Time) error {
+func (s *CostCenterServiceImpl) ProcessAllAllocations(ctx context.Context, costCenterID uuid.ID, period time.Time) error {
 	return nil // No-op for simple version
 }
 
-func (s *CostCenterServiceImpl) GetCostCenterReport(ctx context.Context, costCenterID uuid.UUID, startDate, endDate time.Time) (*entities.CostCenterReport, error) {
+func (s *CostCenterServiceImpl) GetCostCenterReport(ctx context.Context, costCenterID uuid.ID, startDate, endDate time.Time) (*entities.CostCenterReport, error) {
 	costCenter, err := s.GetCostCenterByID(ctx, costCenterID)
 	if err != nil {
 		return nil, err
@@ -301,11 +301,11 @@ func (s *CostCenterServiceImpl) GetCostCenterPerformance(ctx context.Context, co
 	return reports, nil
 }
 
-func (s *CostCenterServiceImpl) GetVarianceReport(ctx context.Context, costCenterID uuid.UUID, period time.Time) (*entities.CostCenterReport, error) {
+func (s *CostCenterServiceImpl) GetVarianceReport(ctx context.Context, costCenterID uuid.ID, period time.Time) (*entities.CostCenterReport, error) {
 	return s.GetCostCenterReport(ctx, costCenterID, period.AddDate(0, -1, 0), period)
 }
 
-func (s *CostCenterServiceImpl) UpdateBudgetAmounts(ctx context.Context, costCenterID uuid.UUID, budgetAmount float64) error {
+func (s *CostCenterServiceImpl) UpdateBudgetAmounts(ctx context.Context, costCenterID uuid.ID, budgetAmount float64) error {
 	costCenter, err := s.GetCostCenterByID(ctx, costCenterID)
 	if err != nil {
 		return err
@@ -316,12 +316,12 @@ func (s *CostCenterServiceImpl) UpdateBudgetAmounts(ctx context.Context, costCen
 	return s.UpdateCostCenter(ctx, costCenter)
 }
 
-func (s *CostCenterServiceImpl) UpdateActualAmounts(ctx context.Context, costCenterID uuid.UUID, periodStart, periodEnd time.Time) error {
+func (s *CostCenterServiceImpl) UpdateActualAmounts(ctx context.Context, costCenterID uuid.ID, periodStart, periodEnd time.Time) error {
 	// No-op for simple version - actual amounts are generated in enhance function
 	return nil
 }
 
-func (s *CostCenterServiceImpl) GetBudgetVsActual(ctx context.Context, costCenterID uuid.UUID, period time.Time) (map[string]float64, error) {
+func (s *CostCenterServiceImpl) GetBudgetVsActual(ctx context.Context, costCenterID uuid.ID, period time.Time) (map[string]float64, error) {
 	costCenter, err := s.GetCostCenterByID(ctx, costCenterID)
 	if err != nil {
 		return nil, err
@@ -335,11 +335,11 @@ func (s *CostCenterServiceImpl) GetBudgetVsActual(ctx context.Context, costCente
 	}, nil
 }
 
-func (s *CostCenterServiceImpl) CalculateAllocatedCosts(ctx context.Context, costCenterID uuid.UUID, period time.Time) (float64, error) {
+func (s *CostCenterServiceImpl) CalculateAllocatedCosts(ctx context.Context, costCenterID uuid.ID, period time.Time) (float64, error) {
 	return 0, nil // No allocations in simple version
 }
 
-func (s *CostCenterServiceImpl) GetDirectCosts(ctx context.Context, costCenterID uuid.UUID, startDate, endDate time.Time) (float64, error) {
+func (s *CostCenterServiceImpl) GetDirectCosts(ctx context.Context, costCenterID uuid.ID, startDate, endDate time.Time) (float64, error) {
 	costCenter, err := s.GetCostCenterByID(ctx, costCenterID)
 	if err != nil {
 		return 0, err
@@ -347,7 +347,7 @@ func (s *CostCenterServiceImpl) GetDirectCosts(ctx context.Context, costCenterID
 	return costCenter.ActualAmount * 0.7, nil // 70% direct costs
 }
 
-func (s *CostCenterServiceImpl) GetIndirectCosts(ctx context.Context, costCenterID uuid.UUID, startDate, endDate time.Time) (float64, error) {
+func (s *CostCenterServiceImpl) GetIndirectCosts(ctx context.Context, costCenterID uuid.ID, startDate, endDate time.Time) (float64, error) {
 	costCenter, err := s.GetCostCenterByID(ctx, costCenterID)
 	if err != nil {
 		return 0, err
@@ -355,7 +355,7 @@ func (s *CostCenterServiceImpl) GetIndirectCosts(ctx context.Context, costCenter
 	return costCenter.ActualAmount * 0.3, nil // 30% indirect costs
 }
 
-func (s *CostCenterServiceImpl) GetTotalCosts(ctx context.Context, costCenterID uuid.UUID, startDate, endDate time.Time) (map[string]float64, error) {
+func (s *CostCenterServiceImpl) GetTotalCosts(ctx context.Context, costCenterID uuid.ID, startDate, endDate time.Time) (map[string]float64, error) {
 	costCenter, err := s.GetCostCenterByID(ctx, costCenterID)
 	if err != nil {
 		return nil, err
@@ -369,15 +369,15 @@ func (s *CostCenterServiceImpl) GetTotalCosts(ctx context.Context, costCenterID 
 }
 
 // All other methods return appropriate defaults or not-implemented errors
-func (s *CostCenterServiceImpl) GetCostCenterChildren(ctx context.Context, parentID uuid.UUID) ([]*entities.CostCenter, error) {
+func (s *CostCenterServiceImpl) GetCostCenterChildren(ctx context.Context, parentID uuid.ID) ([]*entities.CostCenter, error) {
 	return []*entities.CostCenter{}, nil
 }
 
-func (s *CostCenterServiceImpl) GetCostCenterDescendants(ctx context.Context, parentID uuid.UUID) ([]*entities.CostCenter, error) {
+func (s *CostCenterServiceImpl) GetCostCenterDescendants(ctx context.Context, parentID uuid.ID) ([]*entities.CostCenter, error) {
 	return []*entities.CostCenter{}, nil
 }
 
-func (s *CostCenterServiceImpl) GetCostCenterPath(ctx context.Context, costCenterID uuid.UUID) ([]*entities.CostCenter, error) {
+func (s *CostCenterServiceImpl) GetCostCenterPath(ctx context.Context, costCenterID uuid.ID) ([]*entities.CostCenter, error) {
 	cc, err := s.GetCostCenterByID(ctx, costCenterID)
 	if err != nil {
 		return nil, err
@@ -385,7 +385,7 @@ func (s *CostCenterServiceImpl) GetCostCenterPath(ctx context.Context, costCente
 	return []*entities.CostCenter{cc}, nil
 }
 
-func (s *CostCenterServiceImpl) GetCostCenterLevel(ctx context.Context, costCenterID uuid.UUID) (int, error) {
+func (s *CostCenterServiceImpl) GetCostCenterLevel(ctx context.Context, costCenterID uuid.ID) (int, error) {
 	return 0, nil // All at root level in simple version
 }
 
@@ -397,11 +397,11 @@ func (s *CostCenterServiceImpl) ValidateAllocation(ctx context.Context, allocati
 	return fmt.Errorf("allocations not supported in simple version")
 }
 
-func (s *CostCenterServiceImpl) CheckCircularReference(ctx context.Context, costCenterID, parentID uuid.UUID) error {
+func (s *CostCenterServiceImpl) CheckCircularReference(ctx context.Context, costCenterID, parentID uuid.ID) error {
 	return nil // No hierarchy, so no circular references
 }
 
-func (s *CostCenterServiceImpl) GetCostCenterEfficiency(ctx context.Context, costCenterID uuid.UUID, period time.Time) (map[string]float64, error) {
+func (s *CostCenterServiceImpl) GetCostCenterEfficiency(ctx context.Context, costCenterID uuid.ID, period time.Time) (map[string]float64, error) {
 	costCenter, err := s.GetCostCenterByID(ctx, costCenterID)
 	if err != nil {
 		return nil, err
@@ -418,8 +418,8 @@ func (s *CostCenterServiceImpl) GetCostCenterEfficiency(ctx context.Context, cos
 	}, nil
 }
 
-func (s *CostCenterServiceImpl) CompareCostCenters(ctx context.Context, costCenterIDs []uuid.UUID, startDate, endDate time.Time) (map[uuid.UUID]*entities.CostCenterReport, error) {
-	result := make(map[uuid.UUID]*entities.CostCenterReport)
+func (s *CostCenterServiceImpl) CompareCostCenters(ctx context.Context, costCenterIDs []uuid.ID, startDate, endDate time.Time) (map[uuid.ID]*entities.CostCenterReport, error) {
+	result := make(map[uuid.ID]*entities.CostCenterReport)
 	
 	for _, id := range costCenterIDs {
 		report, err := s.GetCostCenterReport(ctx, id, startDate, endDate)
@@ -451,7 +451,7 @@ func (s *CostCenterServiceImpl) GetUnderperformingCostCenters(ctx context.Contex
 	return []*entities.CostCenterReport{}, nil
 }
 
-func (s *CostCenterServiceImpl) ValidateAllocationPercentages(ctx context.Context, sourceCostCenterID uuid.UUID, period time.Time) error {
+func (s *CostCenterServiceImpl) ValidateAllocationPercentages(ctx context.Context, sourceCostCenterID uuid.ID, period time.Time) error {
 	return nil // No allocations to validate
 }
 
@@ -459,7 +459,7 @@ func (s *CostCenterServiceImpl) ProcessMonthlyAllocations(ctx context.Context, c
 	return nil // No-op
 }
 
-func (s *CostCenterServiceImpl) RecalculateAllocations(ctx context.Context, costCenterID uuid.UUID, period time.Time) error {
+func (s *CostCenterServiceImpl) RecalculateAllocations(ctx context.Context, costCenterID uuid.ID, period time.Time) error {
 	return nil // No-op
 }
 
@@ -472,14 +472,14 @@ func (s *CostCenterServiceImpl) CreateCostCenterHierarchy(ctx context.Context, h
 	return nil
 }
 
-func (s *CostCenterServiceImpl) MoveCostCenter(ctx context.Context, costCenterID, newParentID uuid.UUID) error {
+func (s *CostCenterServiceImpl) MoveCostCenter(ctx context.Context, costCenterID, newParentID uuid.ID) error {
 	return fmt.Errorf("hierarchy operations not supported in simple version")
 }
 
-func (s *CostCenterServiceImpl) MergeCostCenters(ctx context.Context, sourceCostCenterID, targetCostCenterID uuid.UUID) error {
+func (s *CostCenterServiceImpl) MergeCostCenters(ctx context.Context, sourceCostCenterID, targetCostCenterID uuid.ID) error {
 	return fmt.Errorf("merge operations not supported in simple version")
 }
 
-func (s *CostCenterServiceImpl) SplitCostCenter(ctx context.Context, costCenterID uuid.UUID, newCostCenters []*entities.CostCenter) error {
+func (s *CostCenterServiceImpl) SplitCostCenter(ctx context.Context, costCenterID uuid.ID, newCostCenters []*entities.CostCenter) error {
 	return fmt.Errorf("split operations not supported in simple version")
 }

@@ -8,6 +8,7 @@ import (
 	"malaka/internal/modules/finance/domain/services"
 	"malaka/internal/modules/finance/presentation/http/dto"
 	"malaka/internal/shared/response"
+	"malaka/internal/shared/uuid"
 )
 
 // CashOpeningBalanceHandler handles HTTP requests for cash opening balance operations.
@@ -46,7 +47,13 @@ func (h *CashOpeningBalanceHandler) GetCashOpeningBalanceByID(c *gin.Context) {
 		return
 	}
 
-	balance, err := h.service.GetCashOpeningBalanceByID(c.Request.Context(), id)
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		response.Error(c, http.StatusBadRequest, "Invalid ID", err)
+		return
+	}
+
+	balance, err := h.service.GetCashOpeningBalanceByID(c.Request.Context(), parsedID)
 	if err != nil {
 		response.Error(c, http.StatusNotFound, "Cash opening balance not found", err)
 		return
@@ -86,8 +93,14 @@ func (h *CashOpeningBalanceHandler) UpdateCashOpeningBalance(c *gin.Context) {
 		return
 	}
 
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		response.Error(c, http.StatusBadRequest, "Invalid ID", err)
+		return
+	}
+
 	balance := req.ToCashOpeningBalanceEntity()
-	balance.ID = id
+	balance.ID = parsedID
 
 	if err := h.service.UpdateCashOpeningBalance(c.Request.Context(), balance); err != nil {
 		response.Error(c, http.StatusInternalServerError, "Failed to update cash opening balance", err)
@@ -106,7 +119,13 @@ func (h *CashOpeningBalanceHandler) DeleteCashOpeningBalance(c *gin.Context) {
 		return
 	}
 
-	if err := h.service.DeleteCashOpeningBalance(c.Request.Context(), id); err != nil {
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		response.Error(c, http.StatusBadRequest, "Invalid ID", err)
+		return
+	}
+
+	if err := h.service.DeleteCashOpeningBalance(c.Request.Context(), parsedID); err != nil {
 		response.Error(c, http.StatusInternalServerError, "Failed to delete cash opening balance", err)
 		return
 	}

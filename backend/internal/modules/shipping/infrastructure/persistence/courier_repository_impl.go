@@ -6,6 +6,7 @@ import (
 
 	"github.com/jmoiron/sqlx"
 	"malaka/internal/modules/shipping/domain/entities"
+	"malaka/internal/shared/uuid"
 )
 
 // CourierRepositoryImpl implements repositories.CourierRepository.
@@ -20,18 +21,18 @@ func NewCourierRepositoryImpl(db *sqlx.DB) *CourierRepositoryImpl {
 
 // Create creates a new courier in the database.
 func (r *CourierRepositoryImpl) Create(ctx context.Context, courier *entities.Courier) error {
-	query := `INSERT INTO couriers (id, name, contact, created_at, updated_at) VALUES ($1, $2, $3, $4, $5)`
-	_, err := r.db.ExecContext(ctx, query, courier.ID, courier.Name, courier.Contact, courier.CreatedAt, courier.UpdatedAt)
+	query := `INSERT INTO couriers (id, name, contact, company_id, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6)`
+	_, err := r.db.ExecContext(ctx, query, courier.ID, courier.Name, courier.Contact, courier.CompanyID, courier.CreatedAt, courier.UpdatedAt)
 	return err
 }
 
 // GetByID retrieves a courier by its ID from the database.
-func (r *CourierRepositoryImpl) GetByID(ctx context.Context, id string) (*entities.Courier, error) {
-	query := `SELECT id, name, contact, created_at, updated_at FROM couriers WHERE id = $1`
+func (r *CourierRepositoryImpl) GetByID(ctx context.Context, id uuid.ID) (*entities.Courier, error) {
+	query := `SELECT id, name, contact, COALESCE(company_id::text, '') as company_id, created_at, updated_at FROM couriers WHERE id = $1`
 	row := r.db.QueryRowContext(ctx, query, id)
 
 	courier := &entities.Courier{}
-	err := row.Scan(&courier.ID, &courier.Name, &courier.Contact, &courier.CreatedAt, &courier.UpdatedAt)
+	err := row.Scan(&courier.ID, &courier.Name, &courier.Contact, &courier.CompanyID, &courier.CreatedAt, &courier.UpdatedAt)
 	if err == sql.ErrNoRows {
 		return nil, nil // Courier not found
 	}
@@ -40,7 +41,7 @@ func (r *CourierRepositoryImpl) GetByID(ctx context.Context, id string) (*entiti
 
 // GetAll retrieves all couriers from the database.
 func (r *CourierRepositoryImpl) GetAll(ctx context.Context) ([]*entities.Courier, error) {
-	query := `SELECT id, name, contact, created_at, updated_at FROM couriers ORDER BY name`
+	query := `SELECT id, name, contact, COALESCE(company_id::text, '') as company_id, created_at, updated_at FROM couriers ORDER BY name`
 	rows, err := r.db.QueryContext(ctx, query)
 	if err != nil {
 		return nil, err
@@ -50,7 +51,7 @@ func (r *CourierRepositoryImpl) GetAll(ctx context.Context) ([]*entities.Courier
 	var couriers []*entities.Courier
 	for rows.Next() {
 		courier := &entities.Courier{}
-		err := rows.Scan(&courier.ID, &courier.Name, &courier.Contact, &courier.CreatedAt, &courier.UpdatedAt)
+		err := rows.Scan(&courier.ID, &courier.Name, &courier.Contact, &courier.CompanyID, &courier.CreatedAt, &courier.UpdatedAt)
 		if err != nil {
 			return nil, err
 		}
@@ -62,13 +63,13 @@ func (r *CourierRepositoryImpl) GetAll(ctx context.Context) ([]*entities.Courier
 
 // Update updates an existing courier in the database.
 func (r *CourierRepositoryImpl) Update(ctx context.Context, courier *entities.Courier) error {
-	query := `UPDATE couriers SET name = $1, contact = $2, updated_at = $3 WHERE id = $4`
-	_, err := r.db.ExecContext(ctx, query, courier.Name, courier.Contact, courier.UpdatedAt, courier.ID)
+	query := `UPDATE couriers SET name = $1, contact = $2, company_id = $3, updated_at = $4 WHERE id = $5`
+	_, err := r.db.ExecContext(ctx, query, courier.Name, courier.Contact, courier.CompanyID, courier.UpdatedAt, courier.ID)
 	return err
 }
 
 // Delete deletes a courier by its ID from the database.
-func (r *CourierRepositoryImpl) Delete(ctx context.Context, id string) error {
+func (r *CourierRepositoryImpl) Delete(ctx context.Context, id uuid.ID) error {
 	query := `DELETE FROM couriers WHERE id = $1`
 	_, err := r.db.ExecContext(ctx, query, id)
 	return err

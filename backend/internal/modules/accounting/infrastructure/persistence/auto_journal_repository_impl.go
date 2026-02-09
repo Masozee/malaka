@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"time"
 
-	"github.com/google/uuid"
+	"malaka/internal/shared/uuid"
 	"malaka/internal/modules/accounting/domain/entities"
 	"malaka/internal/modules/accounting/domain/repositories"
 )
@@ -53,7 +53,7 @@ func (r *autoJournalRepositoryImpl) Create(ctx context.Context, config *entities
 }
 
 // GetByID retrieves an auto journal configuration by ID
-func (r *autoJournalRepositoryImpl) GetByID(ctx context.Context, id uuid.UUID) (*entities.AutoJournalConfig, error) {
+func (r *autoJournalRepositoryImpl) GetByID(ctx context.Context, id uuid.ID) (*entities.AutoJournalConfig, error) {
 	config := &entities.AutoJournalConfig{}
 	var mappingJSON string
 	
@@ -167,7 +167,7 @@ func (r *autoJournalRepositoryImpl) Update(ctx context.Context, config *entities
 }
 
 // Delete deletes an auto journal configuration
-func (r *autoJournalRepositoryImpl) Delete(ctx context.Context, id uuid.UUID) error {
+func (r *autoJournalRepositoryImpl) Delete(ctx context.Context, id uuid.ID) error {
 	query := `DELETE FROM auto_journal_config WHERE id = $1`
 	_, err := r.db.ExecContext(ctx, query, id)
 	return err
@@ -221,7 +221,7 @@ func (r *autoJournalRepositoryImpl) CreateLog(ctx context.Context, log *entities
 }
 
 // GetLogByID retrieves an auto journal log by ID
-func (r *autoJournalRepositoryImpl) GetLogByID(ctx context.Context, id uuid.UUID) (*entities.AutoJournalLog, error) {
+func (r *autoJournalRepositoryImpl) GetLogByID(ctx context.Context, id uuid.ID) (*entities.AutoJournalLog, error) {
 	log := &entities.AutoJournalLog{}
 	
 	query := `
@@ -260,7 +260,7 @@ func (r *autoJournalRepositoryImpl) GetLogByID(ctx context.Context, id uuid.UUID
 }
 
 // GetLogsByJournalEntry retrieves logs associated with a journal entry
-func (r *autoJournalRepositoryImpl) GetLogsByJournalEntry(ctx context.Context, journalEntryID uuid.UUID) ([]*entities.AutoJournalLog, error) {
+func (r *autoJournalRepositoryImpl) GetLogsByJournalEntry(ctx context.Context, journalEntryID uuid.ID) ([]*entities.AutoJournalLog, error) {
 	query := `
 		SELECT id, source_module, source_id, transaction_type, journal_entry_id,
 			   status, processing_message, error_details, processed_at,
@@ -312,7 +312,7 @@ func (r *autoJournalRepositoryImpl) GetPendingLogs(ctx context.Context, sourceMo
 }
 
 // UpdateLogStatus updates the status of an auto journal log
-func (r *autoJournalRepositoryImpl) UpdateLogStatus(ctx context.Context, logID uuid.UUID, status, errorMessage string) error {
+func (r *autoJournalRepositoryImpl) UpdateLogStatus(ctx context.Context, logID uuid.ID, status, errorMessage string) error {
 	now := time.Now()
 	
 	query := `

@@ -7,6 +7,7 @@ import (
 	"malaka/internal/modules/masterdata/domain/services"
 	"malaka/internal/modules/masterdata/presentation/http/dto"
 	"malaka/internal/shared/response"
+	"malaka/internal/shared/uuid"
 )
 
 // WarehouseHandler handles HTTP requests for warehouse operations.
@@ -38,6 +39,7 @@ func (h *WarehouseHandler) CreateWarehouse(c *gin.Context) {
 		Type:           entities.WarehouseType(req.Type),
 		Capacity:       req.Capacity,
 		CurrentStock:   req.CurrentStock,
+		CompanyID:      req.CompanyID,
 		Status:         entities.WarehouseStatus(req.Status),
 		Zones:          req.Zones,
 		OperatingHours: req.OperatingHours,
@@ -56,7 +58,12 @@ func (h *WarehouseHandler) CreateWarehouse(c *gin.Context) {
 // GetWarehouseByID handles retrieving a warehouse by its ID.
 func (h *WarehouseHandler) GetWarehouseByID(c *gin.Context) {
 	id := c.Param("id")
-	warehouse, err := h.service.GetWarehouseByID(c.Request.Context(), id)
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		response.BadRequest(c, "Invalid ID format", nil)
+		return
+	}
+	warehouse, err := h.service.GetWarehouseByID(c.Request.Context(), parsedID)
 	if err != nil {
 		response.InternalServerError(c, err.Error(), nil)
 		return
@@ -100,13 +107,14 @@ func (h *WarehouseHandler) UpdateWarehouse(c *gin.Context) {
 		Type:           entities.WarehouseType(req.Type),
 		Capacity:       req.Capacity,
 		CurrentStock:   req.CurrentStock,
+		CompanyID:      req.CompanyID,
 		Status:         entities.WarehouseStatus(req.Status),
 		Zones:          req.Zones,
 		OperatingHours: req.OperatingHours,
 		Facilities:     req.Facilities,
 		Coordinates:    req.Coordinates,
 	}
-	warehouse.ID = id // Set the ID from the URL parameter
+	warehouse.ID = uuid.MustParse(id) // Set the ID from the URL parameter
 
 	if err := h.service.UpdateWarehouse(c.Request.Context(), warehouse); err != nil {
 		response.InternalServerError(c, err.Error(), nil)
@@ -119,7 +127,12 @@ func (h *WarehouseHandler) UpdateWarehouse(c *gin.Context) {
 // DeleteWarehouse handles deleting a warehouse by its ID.
 func (h *WarehouseHandler) DeleteWarehouse(c *gin.Context) {
 	id := c.Param("id")
-	if err := h.service.DeleteWarehouse(c.Request.Context(), id); err != nil {
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		response.BadRequest(c, "Invalid ID format", nil)
+		return
+	}
+	if err := h.service.DeleteWarehouse(c.Request.Context(), parsedID); err != nil {
 		response.InternalServerError(c, err.Error(), nil)
 		return
 	}

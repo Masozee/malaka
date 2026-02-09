@@ -4,28 +4,28 @@ import (
 	"context"
 	"time"
 
-	"github.com/google/uuid"
 	"malaka/internal/modules/accounting/domain/entities"
 	"malaka/internal/modules/accounting/domain/repositories"
+	"malaka/internal/shared/uuid"
 )
 
 // JournalEntryService defines the interface for journal entry business logic
 type JournalEntryService interface {
 	// Basic CRUD operations
 	CreateJournalEntry(ctx context.Context, entry *entities.JournalEntry) error
-	GetJournalEntryByID(ctx context.Context, id uuid.UUID) (*entities.JournalEntry, error)
+	GetJournalEntryByID(ctx context.Context, id uuid.ID) (*entities.JournalEntry, error)
 	GetAllJournalEntries(ctx context.Context) ([]*entities.JournalEntry, error)
 	UpdateJournalEntry(ctx context.Context, entry *entities.JournalEntry) error
-	DeleteJournalEntry(ctx context.Context, id uuid.UUID) error
+	DeleteJournalEntry(ctx context.Context, id uuid.ID) error
 
 	// Line operations
-	AddLine(ctx context.Context, entryID uuid.UUID, line *entities.JournalEntryLine) error
+	AddLine(ctx context.Context, entryID uuid.ID, line *entities.JournalEntryLine) error
 	UpdateLine(ctx context.Context, line *entities.JournalEntryLine) error
-	DeleteLine(ctx context.Context, lineID uuid.UUID) error
+	DeleteLine(ctx context.Context, lineID uuid.ID) error
 
 	// Status operations
-	PostJournalEntry(ctx context.Context, entryID uuid.UUID, userID string) error
-	ReverseJournalEntry(ctx context.Context, entryID uuid.UUID, userID string) error
+	PostJournalEntry(ctx context.Context, entryID uuid.ID, userID string) error
+	ReverseJournalEntry(ctx context.Context, entryID uuid.ID, userID string) error
 	
 	// Query operations
 	GetJournalEntriesByStatus(ctx context.Context, status entities.JournalEntryStatus) ([]*entities.JournalEntry, error)
@@ -35,7 +35,7 @@ type JournalEntryService interface {
 
 	// Reporting operations
 	GetJournalRegister(ctx context.Context, companyID string, startDate, endDate time.Time) ([]*entities.JournalEntry, error)
-	GetEntriesForAccount(ctx context.Context, accountID uuid.UUID, startDate, endDate time.Time) ([]*entities.JournalEntry, error)
+	GetEntriesForAccount(ctx context.Context, accountID uuid.ID, startDate, endDate time.Time) ([]*entities.JournalEntry, error)
 
 	// Validation and business rules
 	ValidateJournalEntry(ctx context.Context, entry *entities.JournalEntry) error
@@ -93,7 +93,7 @@ func (s *journalEntryService) CreateJournalEntry(ctx context.Context, entry *ent
 }
 
 // GetJournalEntryByID retrieves a journal entry by ID
-func (s *journalEntryService) GetJournalEntryByID(ctx context.Context, id uuid.UUID) (*entities.JournalEntry, error) {
+func (s *journalEntryService) GetJournalEntryByID(ctx context.Context, id uuid.ID) (*entities.JournalEntry, error) {
 	return s.repo.GetByID(ctx, id)
 }
 
@@ -125,7 +125,7 @@ func (s *journalEntryService) UpdateJournalEntry(ctx context.Context, entry *ent
 }
 
 // DeleteJournalEntry deletes a journal entry
-func (s *journalEntryService) DeleteJournalEntry(ctx context.Context, id uuid.UUID) error {
+func (s *journalEntryService) DeleteJournalEntry(ctx context.Context, id uuid.ID) error {
 	// Check if entry can be deleted
 	entry, err := s.repo.GetByID(ctx, id)
 	if err != nil {
@@ -140,7 +140,7 @@ func (s *journalEntryService) DeleteJournalEntry(ctx context.Context, id uuid.UU
 }
 
 // AddLine adds a line to a journal entry
-func (s *journalEntryService) AddLine(ctx context.Context, entryID uuid.UUID, line *entities.JournalEntryLine) error {
+func (s *journalEntryService) AddLine(ctx context.Context, entryID uuid.ID, line *entities.JournalEntryLine) error {
 	// Validate the entry exists and is modifiable
 	entry, err := s.repo.GetByID(ctx, entryID)
 	if err != nil {
@@ -171,12 +171,12 @@ func (s *journalEntryService) UpdateLine(ctx context.Context, line *entities.Jou
 }
 
 // DeleteLine deletes a journal entry line
-func (s *journalEntryService) DeleteLine(ctx context.Context, lineID uuid.UUID) error {
+func (s *journalEntryService) DeleteLine(ctx context.Context, lineID uuid.ID) error {
 	return s.repo.DeleteLine(ctx, lineID)
 }
 
 // PostJournalEntry posts a journal entry
-func (s *journalEntryService) PostJournalEntry(ctx context.Context, entryID uuid.UUID, userID string) error {
+func (s *journalEntryService) PostJournalEntry(ctx context.Context, entryID uuid.ID, userID string) error {
 	entry, err := s.repo.GetByID(ctx, entryID)
 	if err != nil {
 		return err
@@ -190,7 +190,7 @@ func (s *journalEntryService) PostJournalEntry(ctx context.Context, entryID uuid
 }
 
 // ReverseJournalEntry reverses a journal entry
-func (s *journalEntryService) ReverseJournalEntry(ctx context.Context, entryID uuid.UUID, userID string) error {
+func (s *journalEntryService) ReverseJournalEntry(ctx context.Context, entryID uuid.ID, userID string) error {
 	entry, err := s.repo.GetByID(ctx, entryID)
 	if err != nil {
 		return err
@@ -229,7 +229,7 @@ func (s *journalEntryService) GetJournalRegister(ctx context.Context, companyID 
 }
 
 // GetEntriesForAccount retrieves entries affecting a specific account
-func (s *journalEntryService) GetEntriesForAccount(ctx context.Context, accountID uuid.UUID, startDate, endDate time.Time) ([]*entities.JournalEntry, error) {
+func (s *journalEntryService) GetEntriesForAccount(ctx context.Context, accountID uuid.ID, startDate, endDate time.Time) ([]*entities.JournalEntry, error) {
 	return s.repo.GetEntriesByAccount(ctx, accountID, startDate, endDate)
 }
 

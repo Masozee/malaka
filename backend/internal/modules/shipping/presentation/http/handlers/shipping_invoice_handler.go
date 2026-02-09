@@ -5,10 +5,10 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	"malaka/internal/modules/shipping/domain"
 	"malaka/internal/modules/shipping/domain/dtos"
 	"malaka/internal/shared/response"
+	"malaka/internal/shared/uuid"
 )
 
 // ShippingInvoiceHandler handles HTTP requests for shipping invoices.
@@ -160,9 +160,8 @@ func (h *ShippingInvoiceHandler) GetAllShippingInvoices(c *gin.Context) {
 
 	// Convert entities to response DTOs
 	for _, invoice := range invoices {
-		id, _ := uuid.Parse(invoice.ID)
 		responseData.Data = append(responseData.Data, dtos.ShippingInvoiceResponse{
-			ID:             id,
+			ID:             invoice.ID,
 			InvoiceNumber:  invoice.InvoiceNumber,
 			ShipmentID:     invoice.ShipmentID,
 			CourierID:      invoice.CourierID,

@@ -6,7 +6,7 @@ import (
 
 	"malaka/internal/modules/masterdata/domain/entities"
 	"malaka/internal/modules/masterdata/domain/repositories"
-	"malaka/internal/shared/utils"
+	"malaka/internal/shared/uuid"
 )
 
 // SupplierService provides business logic for supplier operations.
@@ -21,14 +21,14 @@ func NewSupplierService(repo repositories.SupplierRepository) *SupplierService {
 
 // CreateSupplier creates a new supplier.
 func (s *SupplierService) CreateSupplier(ctx context.Context, supplier *entities.Supplier) error {
-	if supplier.ID == "" {
-		supplier.ID = utils.RandomString(10) // Generate a random ID if not provided
+	if supplier.ID.IsNil() {
+		supplier.ID = uuid.New()
 	}
 	return s.repo.Create(ctx, supplier)
 }
 
 // GetSupplierByID retrieves a supplier by its ID.
-func (s *SupplierService) GetSupplierByID(ctx context.Context, id string) (*entities.Supplier, error) {
+func (s *SupplierService) GetSupplierByID(ctx context.Context, id uuid.ID) (*entities.Supplier, error) {
 	return s.repo.GetByID(ctx, id)
 }
 
@@ -51,7 +51,7 @@ func (s *SupplierService) UpdateSupplier(ctx context.Context, supplier *entities
 }
 
 // DeleteSupplier deletes a supplier by its ID.
-func (s *SupplierService) DeleteSupplier(ctx context.Context, id string) error {
+func (s *SupplierService) DeleteSupplier(ctx context.Context, id uuid.ID) error {
 	// Ensure the supplier exists before deleting
 	existingSupplier, err := s.repo.GetByID(ctx, id)
 	if err != nil {

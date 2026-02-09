@@ -33,7 +33,7 @@ func SlowRequestMiddleware(threshold time.Duration) gin.HandlerFunc {
 }
 
 // RequestMetricsMiddleware collects request metrics
-func RequestMetricsMiddleware(collector *MetricsCollector) gin.HandlerFunc {
+func RequestMetricsMiddleware(collector *RequestMetricsCollector) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		start := time.Now()
 
@@ -46,8 +46,8 @@ func RequestMetricsMiddleware(collector *MetricsCollector) gin.HandlerFunc {
 	}
 }
 
-// MetricsCollector collects request metrics
-type MetricsCollector struct {
+// RequestMetricsCollector collects request metrics
+type RequestMetricsCollector struct {
 	requests      []RequestMetric
 	maxRequests   int
 }
@@ -61,16 +61,16 @@ type RequestMetric struct {
 	Duration   time.Duration `json:"duration_ms"`
 }
 
-// NewMetricsCollector creates a new metrics collector
-func NewMetricsCollector(maxRequests int) *MetricsCollector {
-	return &MetricsCollector{
+// NewRequestMetricsCollector creates a new metrics collector
+func NewRequestMetricsCollector(maxRequests int) *RequestMetricsCollector {
+	return &RequestMetricsCollector{
 		requests:    make([]RequestMetric, 0, maxRequests),
 		maxRequests: maxRequests,
 	}
 }
 
 // RecordRequest records a request metric
-func (c *MetricsCollector) RecordRequest(method, path string, status int, duration time.Duration) {
+func (c *RequestMetricsCollector) RecordRequest(method, path string, status int, duration time.Duration) {
 	metric := RequestMetric{
 		Timestamp: time.Now(),
 		Method:    method,
@@ -86,7 +86,7 @@ func (c *MetricsCollector) RecordRequest(method, path string, status int, durati
 }
 
 // GetRecentRequests returns recent requests
-func (c *MetricsCollector) GetRecentRequests(limit int) []RequestMetric {
+func (c *RequestMetricsCollector) GetRecentRequests(limit int) []RequestMetric {
 	if limit <= 0 || limit > len(c.requests) {
 		limit = len(c.requests)
 	}
@@ -100,7 +100,7 @@ func (c *MetricsCollector) GetRecentRequests(limit int) []RequestMetric {
 }
 
 // GetSlowRequests returns requests slower than threshold
-func (c *MetricsCollector) GetSlowRequests(threshold time.Duration, limit int) []RequestMetric {
+func (c *RequestMetricsCollector) GetSlowRequests(threshold time.Duration, limit int) []RequestMetric {
 	var slow []RequestMetric
 	for i := len(c.requests) - 1; i >= 0 && len(slow) < limit; i-- {
 		if c.requests[i].Duration > threshold {
@@ -111,7 +111,7 @@ func (c *MetricsCollector) GetSlowRequests(threshold time.Duration, limit int) [
 }
 
 // GetStats returns aggregated statistics
-func (c *MetricsCollector) GetStats() map[string]interface{} {
+func (c *RequestMetricsCollector) GetStats() map[string]interface{} {
 	if len(c.requests) == 0 {
 		return map[string]interface{}{
 			"total_requests": 0,

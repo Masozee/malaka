@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"malaka/internal/modules/masterdata/domain/entities"
+	"malaka/internal/shared/uuid"
 )
 
 // DivisionRepositoryImpl implements repositories.DivisionRepository.
@@ -21,18 +21,18 @@ func NewDivisionRepository(db *sqlx.DB) *DivisionRepositoryImpl {
 
 // Create creates a new division in the database.
 func (r *DivisionRepositoryImpl) Create(ctx context.Context, division *entities.Division) error {
-	query := `INSERT INTO divisions (id, code, name, description, parent_id, level, sort_order, status, created_at, updated_at) 
-			  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW(), NOW())`
-	_, err := r.db.ExecContext(ctx, query, 
-		division.ID, division.Code, division.Name, division.Description, 
-		division.ParentID, division.Level, division.SortOrder, division.Status)
+	query := `INSERT INTO divisions (id, code, name, description, parent_id, level, sort_order, company_id, status, created_at, updated_at)
+			  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW(), NOW())`
+	_, err := r.db.ExecContext(ctx, query,
+		division.ID, division.Code, division.Name, division.Description,
+		division.ParentID, division.Level, division.SortOrder, division.CompanyID, division.Status)
 	return err
 }
 
 // GetByID retrieves a division by its ID from the database.
-func (r *DivisionRepositoryImpl) GetByID(ctx context.Context, id uuid.UUID) (*entities.Division, error) {
+func (r *DivisionRepositoryImpl) GetByID(ctx context.Context, id uuid.ID) (*entities.Division, error) {
 	division := &entities.Division{}
-	query := `SELECT id, code, name, description, parent_id, level, sort_order, status, created_at, updated_at 
+	query := `SELECT id, code, name, description, parent_id, level, sort_order, COALESCE(company_id::text, '') as company_id, status, created_at, updated_at
 			  FROM divisions WHERE id = $1`
 	err := r.db.GetContext(ctx, division, query, id)
 	if err != nil {
@@ -44,7 +44,7 @@ func (r *DivisionRepositoryImpl) GetByID(ctx context.Context, id uuid.UUID) (*en
 // GetAll retrieves all divisions from the database.
 func (r *DivisionRepositoryImpl) GetAll(ctx context.Context) ([]*entities.Division, error) {
 	var divisions []*entities.Division
-	query := `SELECT id, code, name, description, parent_id, level, sort_order, status, created_at, updated_at 
+	query := `SELECT id, code, name, description, parent_id, level, sort_order, COALESCE(company_id::text, '') as company_id, status, created_at, updated_at
 			  FROM divisions ORDER BY level, name`
 	err := r.db.SelectContext(ctx, &divisions, query)
 	return divisions, err
@@ -88,9 +88,9 @@ func (r *DivisionRepositoryImpl) GetAllWithPagination(ctx context.Context, limit
 	limitIndex := len(args) + 1
 	offsetIndex := len(args) + 2
 	
-	query := fmt.Sprintf(`SELECT id, code, name, description, parent_id, level, sort_order, status, created_at, updated_at 
-			  FROM divisions %s 
-			  %s 
+	query := fmt.Sprintf(`SELECT id, code, name, description, parent_id, level, sort_order, COALESCE(company_id::text, '') as company_id, status, created_at, updated_at
+			  FROM divisions %s
+			  %s
 			  LIMIT $%d OFFSET $%d`, whereClause, orderBy, limitIndex, offsetIndex)
 	
 	// Add limit and offset to args
@@ -108,7 +108,7 @@ func (r *DivisionRepositoryImpl) GetAllWithPagination(ctx context.Context, limit
 // GetByCode retrieves a division by its code from the database.
 func (r *DivisionRepositoryImpl) GetByCode(ctx context.Context, code string) (*entities.Division, error) {
 	division := &entities.Division{}
-	query := `SELECT id, code, name, description, parent_id, level, sort_order, status, created_at, updated_at 
+	query := `SELECT id, code, name, description, parent_id, level, sort_order, COALESCE(company_id::text, '') as company_id, status, created_at, updated_at
 			  FROM divisions WHERE code = $1`
 	err := r.db.GetContext(ctx, division, query, code)
 	if err != nil {
@@ -118,9 +118,9 @@ func (r *DivisionRepositoryImpl) GetByCode(ctx context.Context, code string) (*e
 }
 
 // GetByParentID retrieves all divisions under a parent division from the database.
-func (r *DivisionRepositoryImpl) GetByParentID(ctx context.Context, parentID uuid.UUID) ([]*entities.Division, error) {
+func (r *DivisionRepositoryImpl) GetByParentID(ctx context.Context, parentID uuid.ID) ([]*entities.Division, error) {
 	var divisions []*entities.Division
-	query := `SELECT id, code, name, description, parent_id, level, sort_order, status, created_at, updated_at 
+	query := `SELECT id, code, name, description, parent_id, level, sort_order, COALESCE(company_id::text, '') as company_id, status, created_at, updated_at
 			  FROM divisions WHERE parent_id = $1 ORDER BY name`
 	err := r.db.SelectContext(ctx, &divisions, query, parentID)
 	return divisions, err
@@ -129,7 +129,7 @@ func (r *DivisionRepositoryImpl) GetByParentID(ctx context.Context, parentID uui
 // GetRootDivisions retrieves all root divisions (level 1) from the database.
 func (r *DivisionRepositoryImpl) GetRootDivisions(ctx context.Context) ([]*entities.Division, error) {
 	var divisions []*entities.Division
-	query := `SELECT id, code, name, description, parent_id, level, sort_order, status, created_at, updated_at 
+	query := `SELECT id, code, name, description, parent_id, level, sort_order, COALESCE(company_id::text, '') as company_id, status, created_at, updated_at
 			  FROM divisions WHERE parent_id IS NULL ORDER BY name`
 	err := r.db.SelectContext(ctx, &divisions, query)
 	return divisions, err
@@ -137,18 +137,18 @@ func (r *DivisionRepositoryImpl) GetRootDivisions(ctx context.Context) ([]*entit
 
 // Update updates an existing division in the database.
 func (r *DivisionRepositoryImpl) Update(ctx context.Context, division *entities.Division) error {
-	query := `UPDATE divisions 
-			  SET code = $1, name = $2, description = $3, parent_id = $4, level = $5, 
-				  sort_order = $6, status = $7, updated_at = NOW() 
-			  WHERE id = $8`
-	_, err := r.db.ExecContext(ctx, query, 
-		division.Code, division.Name, division.Description, division.ParentID, 
-		division.Level, division.SortOrder, division.Status, division.ID)
+	query := `UPDATE divisions
+			  SET code = $1, name = $2, description = $3, parent_id = $4, level = $5,
+				  sort_order = $6, company_id = $7, status = $8, updated_at = NOW()
+			  WHERE id = $9`
+	_, err := r.db.ExecContext(ctx, query,
+		division.Code, division.Name, division.Description, division.ParentID,
+		division.Level, division.SortOrder, division.CompanyID, division.Status, division.ID)
 	return err
 }
 
 // Delete deletes a division by its ID from the database.
-func (r *DivisionRepositoryImpl) Delete(ctx context.Context, id uuid.UUID) error {
+func (r *DivisionRepositoryImpl) Delete(ctx context.Context, id uuid.ID) error {
 	query := `DELETE FROM divisions WHERE id = $1`
 	_, err := r.db.ExecContext(ctx, query, id)
 	return err

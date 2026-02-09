@@ -9,6 +9,7 @@ import (
 	"malaka/internal/modules/masterdata/domain/entities"
 	"malaka/internal/modules/masterdata/domain/repositories"
 	"malaka/internal/shared/cache"
+	"malaka/internal/shared/uuid"
 )
 
 const (
@@ -48,8 +49,8 @@ func (r *CachedArticleRepository) Create(ctx context.Context, article *entities.
 }
 
 // GetByID retrieves an article by ID with caching.
-func (r *CachedArticleRepository) GetByID(ctx context.Context, id string) (*entities.Article, error) {
-	cacheKey := fmt.Sprintf("%s%s", articleKeyPrefix, id)
+func (r *CachedArticleRepository) GetByID(ctx context.Context, id uuid.ID) (*entities.Article, error) {
+	cacheKey := fmt.Sprintf("%s%s", articleKeyPrefix, id.String())
 	
 	// Try to get from cache first
 	if cached, err := r.cache.Get(ctx, cacheKey); err == nil {
@@ -123,21 +124,21 @@ func (r *CachedArticleRepository) Update(ctx context.Context, article *entities.
 }
 
 // Delete deletes an article and invalidates related cache.
-func (r *CachedArticleRepository) Delete(ctx context.Context, id string) error {
+func (r *CachedArticleRepository) Delete(ctx context.Context, id uuid.ID) error {
 	if err := r.repo.Delete(ctx, id); err != nil {
 		return err
 	}
 
 	// Invalidate specific article cache
-	cacheKey := fmt.Sprintf("%s%s", articleKeyPrefix, id)
+	cacheKey := fmt.Sprintf("%s%s", articleKeyPrefix, id.String())
 	r.cache.Delete(ctx, cacheKey)
-	
+
 	// Invalidate list cache and search caches
 	r.cache.Delete(ctx, articleListKey)
 	r.invalidateSearchCaches(ctx)
-	
+
 	// Invalidate image cache
-	imageCacheKey := fmt.Sprintf("%s%s", articleImagePrefix, id)
+	imageCacheKey := fmt.Sprintf("%s%s", articleImagePrefix, id.String())
 	r.cache.Delete(ctx, imageCacheKey)
 	
 	return nil
@@ -177,8 +178,8 @@ func (r *CachedArticleRepository) SearchByName(ctx context.Context, query string
 }
 
 // GetArticleImages retrieves article images with caching.
-func (r *CachedArticleRepository) GetArticleImages(ctx context.Context, articleID string) ([]string, error) {
-	imageCacheKey := fmt.Sprintf("%s%s", articleImagePrefix, articleID)
+func (r *CachedArticleRepository) GetArticleImages(ctx context.Context, articleID uuid.ID) ([]string, error) {
+	imageCacheKey := fmt.Sprintf("%s%s", articleImagePrefix, articleID.String())
 	
 	// Try to get from cache first
 	if cached, err := r.cache.Get(ctx, imageCacheKey); err == nil {
@@ -222,13 +223,13 @@ func (r *CachedArticleRepository) GetArticleImages(ctx context.Context, articleI
 }
 
 // InvalidateArticleCache invalidates all article-related cache.
-func (r *CachedArticleRepository) InvalidateArticleCache(ctx context.Context, articleID string) error {
+func (r *CachedArticleRepository) InvalidateArticleCache(ctx context.Context, articleID uuid.ID) error {
 	// Invalidate specific article
-	cacheKey := fmt.Sprintf("%s%s", articleKeyPrefix, articleID)
+	cacheKey := fmt.Sprintf("%s%s", articleKeyPrefix, articleID.String())
 	r.cache.Delete(ctx, cacheKey)
-	
+
 	// Invalidate article images
-	imageCacheKey := fmt.Sprintf("%s%s", articleImagePrefix, articleID)
+	imageCacheKey := fmt.Sprintf("%s%s", articleImagePrefix, articleID.String())
 	r.cache.Delete(ctx, imageCacheKey)
 	
 	// Invalidate list cache

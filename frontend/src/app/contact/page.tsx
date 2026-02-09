@@ -15,7 +15,7 @@ export default function ContactPage() {
       {/* Hamburger Menu - Top Right */}
       <button
         onClick={() => setMenuOpen(!menuOpen)}
-        className="fixed top-6 right-6 z-50 w-12 h-12 flex items-center justify-center bg-white border border-gray-200 hover:border-[#09f] transition-colors"
+        className="fixed top-6 right-6 z-50 w-12 h-12 flex items-center justify-center bg-white border border-gray-200 hover:border-[#00979D] transition-colors"
       >
         <HugeiconsIcon icon={Menu11Icon} className="w-6 h-6 text-black" />
       </button>
@@ -42,14 +42,14 @@ export default function ContactPage() {
                 <Link
                   href="/dashboard"
                   onClick={() => setMenuOpen(false)}
-                  className="block px-4 py-3 text-sm font-medium text-gray-900 hover:bg-gray-50 hover:text-[#09f] transition-colors"
+                  className="block px-4 py-3 text-sm font-medium text-gray-900 hover:bg-gray-50 hover:text-[#00979D] transition-colors"
                 >
                   Overview
                 </Link>
                 <Link
                   href="/guidelines"
                   onClick={() => setMenuOpen(false)}
-                  className="block px-4 py-3 text-sm font-medium text-gray-900 hover:bg-gray-50 hover:text-[#09f] transition-colors"
+                  className="block px-4 py-3 text-sm font-medium text-gray-900 hover:bg-gray-50 hover:text-[#00979D] transition-colors"
                 >
                   Guidelines
                 </Link>
@@ -57,14 +57,14 @@ export default function ContactPage() {
                 <Link
                   href="/about"
                   onClick={() => setMenuOpen(false)}
-                  className="block px-4 py-3 text-sm font-medium text-gray-900 hover:bg-gray-50 hover:text-[#09f] transition-colors"
+                  className="block px-4 py-3 text-sm font-medium text-gray-900 hover:bg-gray-50 hover:text-[#00979D] transition-colors"
                 >
                   About
                 </Link>
                 <Link
                   href="/contact"
                   onClick={() => setMenuOpen(false)}
-                  className="block px-4 py-3 text-sm font-medium text-[#09f] bg-gray-50"
+                  className="block px-4 py-3 text-sm font-medium text-[#00979D] bg-gray-50"
                 >
                   Contact
                 </Link>
@@ -105,7 +105,7 @@ export default function ContactPage() {
                 />
                 <div>
                   <h1 className="text-3xl font-bold text-black">
-                    Malaka<span className="text-[#09f]">ERP</span>
+                    Malaka<span className="text-[#00979D]">ERP</span>
                   </h1>
                   <p className="text-sm text-gray-500">Enterprise Resource Planning</p>
                 </div>
@@ -171,13 +171,13 @@ export default function ContactPage() {
               <div className="flex items-center justify-between text-sm">
                 <Link
                   href="/dashboard"
-                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#09f] text-white font-medium hover:bg-[#0088e6] transition-colors"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#00979D] text-white font-medium hover:bg-[#007F84] transition-colors"
                 >
                   Get Started
                 </Link>
                 <div className="flex items-center gap-6">
-                  <Link href="/" className="text-gray-500 hover:text-[#09f] transition-colors">Home</Link>
-                  <Link href="/about" className="text-gray-500 hover:text-[#09f] transition-colors">About</Link>
+                  <Link href="/" className="text-gray-500 hover:text-[#00979D] transition-colors">Home</Link>
+                  <Link href="/about" className="text-gray-500 hover:text-[#00979D] transition-colors">About</Link>
                 </div>
               </div>
             </div>

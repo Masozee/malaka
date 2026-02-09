@@ -6,7 +6,7 @@ import (
 
 	"malaka/internal/modules/sales/domain/entities"
 	"malaka/internal/modules/sales/domain/repositories"
-	"malaka/internal/shared/utils"
+	"malaka/internal/shared/uuid"
 )
 
 // SalesInvoiceService provides business logic for sales invoice operations.
@@ -33,8 +33,8 @@ func NewSalesInvoiceService(repo repositories.SalesInvoiceRepository, itemRepo r
 }
 
 func (s *salesInvoiceServiceImpl) CreateSalesInvoice(ctx context.Context, invoice *entities.SalesInvoice, items []*entities.SalesInvoiceItem) error {
-	if invoice.ID == "" {
-		invoice.ID = utils.RandomString(10) // Generate a random ID if not provided
+	if invoice.ID.IsNil() {
+		invoice.ID = uuid.New()
 	}
 
 	// Calculate tax and grand total (example: 10% PPN)
@@ -47,9 +47,9 @@ func (s *salesInvoiceServiceImpl) CreateSalesInvoice(ctx context.Context, invoic
 	}
 
 	for _, item := range items {
-		item.SalesInvoiceID = invoice.ID
-		if item.ID == "" {
-			item.ID = utils.RandomString(10)
+		item.SalesInvoiceID = invoice.ID.String()
+		if item.ID.IsNil() {
+			item.ID = uuid.New()
 		}
 		// Create sales invoice item
 		if err := s.itemRepo.Create(ctx, item); err != nil {
@@ -70,7 +70,7 @@ func (s *salesInvoiceServiceImpl) GetSalesInvoiceByID(ctx context.Context, id st
 
 func (s *salesInvoiceServiceImpl) UpdateSalesInvoice(ctx context.Context, invoice *entities.SalesInvoice) error {
 	// Ensure the sales invoice exists before updating
-	existingInvoice, err := s.repo.GetByID(ctx, invoice.ID)
+	existingInvoice, err := s.repo.GetByID(ctx, invoice.ID.String())
 	if err != nil {
 		return err
 	}

@@ -3,7 +3,7 @@ package entities
 import (
 	"time"
 
-	"github.com/google/uuid"
+	"malaka/internal/shared/uuid"
 )
 
 // FinancialPeriodStatus represents the status of a financial period
@@ -16,7 +16,7 @@ const (
 
 // FinancialPeriod represents a financial/accounting period
 type FinancialPeriod struct {
-	ID          uuid.UUID             `json:"id"`
+	ID          uuid.ID               `json:"id"`
 	CompanyID   string                `json:"company_id"`
 	PeriodName  string                `json:"period_name"`
 	FiscalYear  int                   `json:"fiscal_year"`

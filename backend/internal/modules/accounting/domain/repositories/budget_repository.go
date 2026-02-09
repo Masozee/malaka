@@ -4,25 +4,25 @@ import (
 	"context"
 	"time"
 
-	"github.com/google/uuid"
 	"malaka/internal/modules/accounting/domain/entities"
+	"malaka/internal/shared/uuid"
 )
 
 // BudgetRepository defines methods for budget operations
 type BudgetRepository interface {
 	// Basic CRUD operations
 	Create(ctx context.Context, budget *entities.Budget) error
-	GetByID(ctx context.Context, id uuid.UUID) (*entities.Budget, error)
+	GetByID(ctx context.Context, id uuid.ID) (*entities.Budget, error)
 	GetAll(ctx context.Context) ([]*entities.Budget, error)
 	Update(ctx context.Context, budget *entities.Budget) error
-	Delete(ctx context.Context, id uuid.UUID) error
+	Delete(ctx context.Context, id uuid.ID) error
 
 	// Budget lines operations
 	CreateLine(ctx context.Context, line *entities.BudgetLine) error
-	GetLinesByBudgetID(ctx context.Context, budgetID uuid.UUID) ([]*entities.BudgetLine, error)
+	GetLinesByBudgetID(ctx context.Context, budgetID uuid.ID) ([]*entities.BudgetLine, error)
 	UpdateLine(ctx context.Context, line *entities.BudgetLine) error
-	DeleteLine(ctx context.Context, lineID uuid.UUID) error
-	DeleteLinesByBudgetID(ctx context.Context, budgetID uuid.UUID) error
+	DeleteLine(ctx context.Context, lineID uuid.ID) error
+	DeleteLinesByBudgetID(ctx context.Context, budgetID uuid.ID) error
 
 	// Query operations
 	GetByCode(ctx context.Context, budgetCode string) (*entities.Budget, error)
@@ -37,17 +37,17 @@ type BudgetRepository interface {
 	GetCurrentBudget(ctx context.Context, companyID string, budgetType entities.BudgetType) (*entities.Budget, error)
 	
 	// Budget management operations
-	Activate(ctx context.Context, budgetID uuid.UUID, userID string) error
-	Close(ctx context.Context, budgetID uuid.UUID) error
-	Revise(ctx context.Context, budgetID uuid.UUID, newBudget *entities.Budget) error
+	Activate(ctx context.Context, budgetID uuid.ID, userID string) error
+	Close(ctx context.Context, budgetID uuid.ID) error
+	Revise(ctx context.Context, budgetID uuid.ID, newBudget *entities.Budget) error
 	
 	// Budget comparison operations
-	GetBudgetComparison(ctx context.Context, budgetID uuid.UUID, asOfDate time.Time) ([]entities.BudgetComparison, error)
-	UpdateActualAmounts(ctx context.Context, budgetID uuid.UUID, periodStart, periodEnd time.Time) error
+	GetBudgetComparison(ctx context.Context, budgetID uuid.ID, asOfDate time.Time) ([]entities.BudgetComparison, error)
+	UpdateActualAmounts(ctx context.Context, budgetID uuid.ID, periodStart, periodEnd time.Time) error
 	
 	// Reporting operations
 	GetBudgetVarianceReport(ctx context.Context, companyID string, budgetType entities.BudgetType, asOfDate time.Time) ([]*entities.BudgetLine, error)
-	GetBudgetUtilization(ctx context.Context, budgetID uuid.UUID) (float64, error)
+	GetBudgetUtilization(ctx context.Context, budgetID uuid.ID) (float64, error)
 	GetBudgetPerformance(ctx context.Context, companyID string, fiscalYear int) (map[string]float64, error)
 	
 	// Batch operations
@@ -55,6 +55,6 @@ type BudgetRepository interface {
 	UpdateWithLines(ctx context.Context, budget *entities.Budget) error
 	
 	// Historical operations
-	GetBudgetHistory(ctx context.Context, companyID string, accountID uuid.UUID) ([]*entities.BudgetLine, error)
+	GetBudgetHistory(ctx context.Context, companyID string, accountID uuid.ID) ([]*entities.BudgetLine, error)
 	GetQuarterlyBudgets(ctx context.Context, companyID string, fiscalYear int) ([]*entities.Budget, error)
 }

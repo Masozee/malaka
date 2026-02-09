@@ -8,6 +8,7 @@ import (
 	"malaka/internal/modules/masterdata/domain/entities"
 	"malaka/internal/modules/masterdata/domain/repositories"
 	"malaka/internal/shared/cache"
+	"malaka/internal/shared/uuid"
 )
 
 const (
@@ -42,9 +43,9 @@ func (r *CachedColorRepository) Create(ctx context.Context, color *entities.Colo
 }
 
 // GetByID retrieves a color by ID with caching.
-func (r *CachedColorRepository) GetByID(ctx context.Context, id string) (*entities.Color, error) {
-	cacheKey := fmt.Sprintf("%s%s", colorKeyPrefix, id)
-	
+func (r *CachedColorRepository) GetByID(ctx context.Context, id uuid.ID) (*entities.Color, error) {
+	cacheKey := fmt.Sprintf("%s%s", colorKeyPrefix, id.String())
+
 	// Try to get from cache first
 	if cached, err := r.cache.Get(ctx, cacheKey); err == nil {
 		var color entities.Color
@@ -140,7 +141,7 @@ func (r *CachedColorRepository) Update(ctx context.Context, color *entities.Colo
 }
 
 // Delete deletes a color and invalidates related cache.
-func (r *CachedColorRepository) Delete(ctx context.Context, id string) error {
+func (r *CachedColorRepository) Delete(ctx context.Context, id uuid.ID) error {
 	// Get color first to get code for cache invalidation
 	color, err := r.repo.GetByID(ctx, id)
 	if err != nil {
@@ -152,7 +153,7 @@ func (r *CachedColorRepository) Delete(ctx context.Context, id string) error {
 	}
 
 	// Invalidate specific and list caches
-	cacheKey := fmt.Sprintf("%s%s", colorKeyPrefix, id)
+	cacheKey := fmt.Sprintf("%s%s", colorKeyPrefix, id.String())
 	codeKey := fmt.Sprintf("%scode:%s", colorKeyPrefix, color.Code)
 	r.cache.Delete(ctx, cacheKey)
 	r.cache.Delete(ctx, codeKey)

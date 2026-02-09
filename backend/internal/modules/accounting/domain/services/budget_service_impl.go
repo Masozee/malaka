@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/google/uuid"
 	"malaka/internal/modules/accounting/domain/entities"
 	"malaka/internal/modules/accounting/domain/repositories"
+	"malaka/internal/shared/uuid"
 )
 
 // budgetService implements BudgetService
@@ -62,7 +62,7 @@ func (s *budgetService) CreateBudget(ctx context.Context, budget *entities.Budge
 }
 
 // GetBudgetByID retrieves a budget by its ID
-func (s *budgetService) GetBudgetByID(ctx context.Context, id uuid.UUID) (*entities.Budget, error) {
+func (s *budgetService) GetBudgetByID(ctx context.Context, id uuid.ID) (*entities.Budget, error) {
 	return s.repo.GetByID(ctx, id)
 }
 
@@ -89,7 +89,7 @@ func (s *budgetService) UpdateBudget(ctx context.Context, budget *entities.Budge
 }
 
 // DeleteBudget deletes a budget by its ID
-func (s *budgetService) DeleteBudget(ctx context.Context, id uuid.UUID) error {
+func (s *budgetService) DeleteBudget(ctx context.Context, id uuid.ID) error {
 	// Ensure the budget exists before deleting
 	existingBudget, err := s.repo.GetByID(ctx, id)
 	if err != nil {
@@ -103,7 +103,7 @@ func (s *budgetService) DeleteBudget(ctx context.Context, id uuid.UUID) error {
 }
 
 // AddBudgetLine adds a new budget line to a budget
-func (s *budgetService) AddBudgetLine(ctx context.Context, budgetID uuid.UUID, line *entities.BudgetLine) error {
+func (s *budgetService) AddBudgetLine(ctx context.Context, budgetID uuid.ID, line *entities.BudgetLine) error {
 	// Placeholder for actual logic
 	return nil
 }
@@ -115,13 +115,13 @@ func (s *budgetService) UpdateBudgetLine(ctx context.Context, line *entities.Bud
 }
 
 // DeleteBudgetLine deletes a budget line
-func (s *budgetService) DeleteBudgetLine(ctx context.Context, lineID uuid.UUID) error {
+func (s *budgetService) DeleteBudgetLine(ctx context.Context, lineID uuid.ID) error {
 	// Placeholder for actual logic
 	return nil
 }
 
 // GetBudgetLines retrieves budget lines for a given budget
-func (s *budgetService) GetBudgetLines(ctx context.Context, budgetID uuid.UUID) ([]*entities.BudgetLine, error) {
+func (s *budgetService) GetBudgetLines(ctx context.Context, budgetID uuid.ID) ([]*entities.BudgetLine, error) {
 	// Placeholder for actual logic
 	return []*entities.BudgetLine{}, nil
 }
@@ -175,31 +175,31 @@ func (s *budgetService) GetCurrentBudget(ctx context.Context, companyID string, 
 }
 
 // ActivateBudget activates a budget
-func (s *budgetService) ActivateBudget(ctx context.Context, budgetID uuid.UUID, userID string) error {
+func (s *budgetService) ActivateBudget(ctx context.Context, budgetID uuid.ID, userID string) error {
 	// Placeholder for actual logic
 	return nil
 }
 
 // CloseBudget closes a budget
-func (s *budgetService) CloseBudget(ctx context.Context, budgetID uuid.UUID) error {
+func (s *budgetService) CloseBudget(ctx context.Context, budgetID uuid.ID) error {
 	// Placeholder for actual logic
 	return nil
 }
 
 // ReviseBudget revises a budget
-func (s *budgetService) ReviseBudget(ctx context.Context, budgetID uuid.UUID, newBudget *entities.Budget) error {
+func (s *budgetService) ReviseBudget(ctx context.Context, budgetID uuid.ID, newBudget *entities.Budget) error {
 	// Placeholder for actual logic
 	return nil
 }
 
 // GetBudgetComparison retrieves budget comparison
-func (s *budgetService) GetBudgetComparison(ctx context.Context, budgetID uuid.UUID, asOfDate time.Time) ([]entities.BudgetComparison, error) {
+func (s *budgetService) GetBudgetComparison(ctx context.Context, budgetID uuid.ID, asOfDate time.Time) ([]entities.BudgetComparison, error) {
 	// Placeholder for actual logic
 	return []entities.BudgetComparison{}, nil
 }
 
 // UpdateActualAmounts updates actual amounts for a budget
-func (s *budgetService) UpdateActualAmounts(ctx context.Context, budgetID uuid.UUID) error {
+func (s *budgetService) UpdateActualAmounts(ctx context.Context, budgetID uuid.ID) error {
 	// Placeholder for actual logic
 	return nil
 }
@@ -211,7 +211,7 @@ func (s *budgetService) GetBudgetVarianceReport(ctx context.Context, companyID s
 }
 
 // GetBudgetUtilization retrieves budget utilization
-func (s *budgetService) GetBudgetUtilization(ctx context.Context, budgetID uuid.UUID) (float64, error) {
+func (s *budgetService) GetBudgetUtilization(ctx context.Context, budgetID uuid.ID) (float64, error) {
 	// Placeholder for actual logic
 	return 0.0, nil
 }
@@ -235,7 +235,7 @@ func (s *budgetService) UpdateBudgetWithLines(ctx context.Context, budget *entit
 }
 
 // GetBudgetHistory retrieves budget history
-func (s *budgetService) GetBudgetHistory(ctx context.Context, companyID string, accountID uuid.UUID) ([]*entities.BudgetLine, error) {
+func (s *budgetService) GetBudgetHistory(ctx context.Context, companyID string, accountID uuid.ID) ([]*entities.BudgetLine, error) {
 	// Placeholder for actual logic
 	return []*entities.BudgetLine{}, nil
 }
@@ -253,19 +253,19 @@ func (s *budgetService) ValidateBudgetPeriod(ctx context.Context, companyID stri
 }
 
 // CheckBudgetOverlap checks for budget overlap
-func (s *budgetService) CheckBudgetOverlap(ctx context.Context, companyID string, budgetType entities.BudgetType, startDate, endDate time.Time, excludeBudgetID *uuid.UUID) error {
+func (s *budgetService) CheckBudgetOverlap(ctx context.Context, companyID string, budgetType entities.BudgetType, startDate, endDate time.Time, excludeBudgetID *uuid.ID) error {
 	// Placeholder for actual logic
 	return nil
 }
 
 // CalculateBudgetTotals calculates budget totals
-func (s *budgetService) CalculateBudgetTotals(ctx context.Context, budgetID uuid.UUID) error {
+func (s *budgetService) CalculateBudgetTotals(ctx context.Context, budgetID uuid.ID) error {
 	// Placeholder for actual logic
 	return nil
 }
 
 // ForecastBudget forecasts budget
-func (s *budgetService) ForecastBudget(ctx context.Context, budgetID uuid.UUID, projectionMonths int) (*entities.Budget, error) {
+func (s *budgetService) ForecastBudget(ctx context.Context, budgetID uuid.ID, projectionMonths int) (*entities.Budget, error) {
 	// Placeholder for actual logic
 	return &entities.Budget{}, nil
 }
@@ -285,7 +285,7 @@ func (s *budgetService) CreateCommitment(ctx context.Context, commitment *entiti
 }
 
 // GetCommitmentByReferenceID retrieves a commitment by reference ID
-func (s *budgetService) GetCommitmentByReferenceID(ctx context.Context, refType entities.BudgetCommitmentReferenceType, refID uuid.UUID) (*entities.BudgetCommitment, error) {
+func (s *budgetService) GetCommitmentByReferenceID(ctx context.Context, refType entities.BudgetCommitmentReferenceType, refID uuid.ID) (*entities.BudgetCommitment, error) {
 	if s.commitmentRepo == nil {
 		return nil, errors.New("commitment repository not configured")
 	}
@@ -293,7 +293,7 @@ func (s *budgetService) GetCommitmentByReferenceID(ctx context.Context, refType 
 }
 
 // ReleaseCommitment releases a budget commitment
-func (s *budgetService) ReleaseCommitment(ctx context.Context, commitmentID uuid.UUID, releasedBy uuid.UUID, reason string) error {
+func (s *budgetService) ReleaseCommitment(ctx context.Context, commitmentID uuid.ID, releasedBy uuid.ID, reason string) error {
 	if s.commitmentRepo == nil {
 		return errors.New("commitment repository not configured")
 	}
@@ -309,7 +309,7 @@ func (s *budgetService) CreateRealization(ctx context.Context, realization *enti
 }
 
 // CreateRealizationFromGR creates a budget realization from a goods receipt
-func (s *budgetService) CreateRealizationFromGR(ctx context.Context, grID uuid.UUID, grNumber string, amount float64, accountID uuid.UUID, transactionDate time.Time, realizedBy uuid.UUID, poID *uuid.UUID) error {
+func (s *budgetService) CreateRealizationFromGR(ctx context.Context, grID uuid.ID, grNumber string, amount float64, accountID uuid.ID, transactionDate time.Time, realizedBy uuid.ID, poID *uuid.ID) error {
 	if s.realizationRepo == nil {
 		return errors.New("realization repository not configured")
 	}
@@ -318,8 +318,8 @@ func (s *budgetService) CreateRealizationFromGR(ctx context.Context, grID uuid.U
 	}
 
 	// Try to find the commitment from the PO
-	var commitmentID *uuid.UUID
-	var budgetID uuid.UUID
+	var commitmentID *uuid.ID
+	var budgetID uuid.ID
 
 	if poID != nil {
 		commitment, err := s.commitmentRepo.GetByReferenceID(ctx, entities.BudgetCommitmentRefPurchaseOrder, *poID)
@@ -362,7 +362,7 @@ func (s *budgetService) CreateRealizationFromGR(ctx context.Context, grID uuid.U
 }
 
 // GetRealizationSummary retrieves budget realization summary
-func (s *budgetService) GetRealizationSummary(ctx context.Context, budgetID uuid.UUID) ([]*entities.BudgetRealizationSummary, error) {
+func (s *budgetService) GetRealizationSummary(ctx context.Context, budgetID uuid.ID) ([]*entities.BudgetRealizationSummary, error) {
 	if s.realizationRepo == nil {
 		return nil, errors.New("realization repository not configured")
 	}

@@ -27,6 +27,7 @@ type EmployeeCreateRequest struct {
 	Allowances       float64 `json:"allowances" binding:"gte=0"`
 	EmploymentStatus string  `json:"employment_status" binding:"required,oneof=ACTIVE INACTIVE TERMINATED"`
 	SupervisorID     *string `json:"supervisor_id"`
+	UserID           *string `json:"user_id"`
 }
 
 // ToEmployeeEntity converts EmployeeCreateRequest to entities.Employee.
@@ -65,6 +66,7 @@ func (req *EmployeeCreateRequest) ToEmployeeEntity() (*entities.Employee, error)
 		Allowances:       req.Allowances,
 		EmploymentStatus: req.EmploymentStatus,
 		SupervisorID:     req.SupervisorID,
+		UserID:           req.UserID,
 	}, nil
 }
 
@@ -89,6 +91,7 @@ type EmployeeUpdateRequest struct {
 	Allowances       *float64 `json:"allowances" binding:"omitempty,gte=0"`
 	EmploymentStatus *string `json:"employment_status" binding:"omitempty,oneof=ACTIVE INACTIVE TERMINATED"`
 	SupervisorID     *string `json:"supervisor_id"`
+	UserID           *string `json:"user_id"`
 }
 
 // ToEmployeeEntity converts EmployeeUpdateRequest to entities.Employee.
@@ -162,6 +165,13 @@ func (req *EmployeeUpdateRequest) ToEmployeeEntity(existing *entities.Employee) 
 	if req.SupervisorID != nil {
 		existing.SupervisorID = req.SupervisorID
 	}
+	if req.UserID != nil {
+		if *req.UserID != "" {
+			existing.UserID = req.UserID
+		} else {
+			existing.UserID = nil
+		}
+	}
 	return existing, nil
 }
 
@@ -188,6 +198,7 @@ type EmployeeResponse struct {
 	TotalSalary      float64    `json:"total_salary"`
 	EmploymentStatus string     `json:"employment_status"`
 	SupervisorID     *string    `json:"supervisor_id"`
+	UserID           *string    `json:"user_id,omitempty"`
 	CreatedAt        time.Time  `json:"created_at"`
 	UpdatedAt        time.Time  `json:"updated_at"`
 }
@@ -216,6 +227,7 @@ func FromEmployeeEntity(employee *entities.Employee) *EmployeeResponse {
 		TotalSalary:      employee.BasicSalary + employee.Allowances,
 		EmploymentStatus: employee.EmploymentStatus,
 		SupervisorID:     employee.SupervisorID,
+		UserID:           employee.UserID,
 		CreatedAt:        employee.CreatedAt,
 		UpdatedAt:        employee.UpdatedAt,
 	}

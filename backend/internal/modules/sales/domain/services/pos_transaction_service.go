@@ -9,7 +9,11 @@ import (
 	"malaka/internal/modules/sales/domain/entities"
 	"malaka/internal/modules/sales/domain/repositories"
 	"malaka/internal/shared/utils"
+	"malaka/internal/shared/uuid"
 )
+
+// Main warehouse ID - Gudang Pusat Jakarta
+var mainWarehouseID = uuid.MustParse("815eefd0-2291-44ac-9f9f-a2c932818315")
 
 // PosTransactionService provides business logic for POS transactions.
 type PosTransactionService struct {
@@ -29,8 +33,8 @@ func NewPosTransactionService(repo repositories.PosTransactionRepository, itemRe
 
 // CreatePosTransaction creates a new POS transaction and records stock movements.
 func (s *PosTransactionService) CreatePosTransaction(ctx context.Context, pt *entities.PosTransaction, items []*entities.PosItem) error {
-	if pt.ID == "" {
-		pt.ID = utils.RandomString(10) // Generate a random ID if not provided
+	if pt.ID.IsNil() {
+		pt.ID = uuid.New() // Generate a UUID v7
 	}
 
 	// Create the POS transaction
@@ -40,24 +44,24 @@ func (s *PosTransactionService) CreatePosTransaction(ctx context.Context, pt *en
 
 	for _, item := range items {
 		item.PosTransactionID = pt.ID
-		if item.ID == "" {
-			item.ID = utils.RandomString(10)
+		if item.ID.IsNil() {
+			item.ID = uuid.New()
 		}
 		// Create POS item
 		if err := s.itemRepo.Create(ctx, item); err != nil {
 			return err
 		}
 
-		// Record stock movement out of warehouse (assuming a default warehouse for now)
+		// Record stock movement out of warehouse (using main warehouse)
 		outMovement := &inventory_entities.StockMovement{
 			ArticleID:    item.ArticleID,
-			WarehouseID:  "default_warehouse_id", // TODO: Get actual warehouse ID
+			WarehouseID:  mainWarehouseID,
 			Quantity:     item.Quantity,
 			MovementType: "out",
 			MovementDate: utils.Now(),
 			ReferenceID:  pt.ID,
 		}
-				if err := s.stockService.RecordStockMovement(ctx, outMovement); err != nil {
+		if err := s.stockService.RecordStockMovement(ctx, outMovement); err != nil {
 			return err
 		}
 	}
@@ -70,9 +74,8 @@ func (s *PosTransactionService) GetAllPosTransactions(ctx context.Context) ([]*e
 	return s.repo.GetAll(ctx)
 }
 
-
 // GetPosTransactionByID retrieves a POS transaction by its ID.
-func (s *PosTransactionService) GetPosTransactionByID(ctx context.Context, id string) (*entities.PosTransaction, error) {
+func (s *PosTransactionService) GetPosTransactionByID(ctx context.Context, id uuid.ID) (*entities.PosTransaction, error) {
 	return s.repo.GetByID(ctx, id)
 }
 
@@ -90,7 +93,7 @@ func (s *PosTransactionService) UpdatePosTransaction(ctx context.Context, pt *en
 }
 
 // DeletePosTransaction deletes a POS transaction by its ID.
-func (s *PosTransactionService) DeletePosTransaction(ctx context.Context, id string) error {
+func (s *PosTransactionService) DeletePosTransaction(ctx context.Context, id uuid.ID) error {
 	// Ensure the POS transaction exists before deleting
 	existingPT, err := s.repo.GetByID(ctx, id)
 	if err != nil {

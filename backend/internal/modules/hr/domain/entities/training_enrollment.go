@@ -3,7 +3,7 @@ package entities
 import (
 	"time"
 
-	"github.com/google/uuid"
+	"malaka/internal/shared/uuid"
 )
 
 // EnrollmentStatus represents the status of a training enrollment
@@ -19,11 +19,11 @@ const (
 
 // TrainingEnrollment represents an employee's enrollment in a training program
 type TrainingEnrollment struct {
-	ID                 uuid.UUID        `json:"id" db:"id"`
-	EmployeeID         uuid.UUID        `json:"employee_id" db:"employee_id"`
+	ID                 uuid.ID          `json:"id" db:"id"`
+	EmployeeID         uuid.ID          `json:"employee_id" db:"employee_id"`
 	EmployeeName       string           `json:"employee_name" db:"employee_name"`
 	Department         string           `json:"department" db:"department"`
-	ProgramID          uuid.UUID        `json:"program_id" db:"program_id"`
+	ProgramID          uuid.ID          `json:"program_id" db:"program_id"`
 	ProgramTitle       string           `json:"program_title" db:"program_title"`
 	EnrollmentDate     time.Time        `json:"enrollment_date" db:"enrollment_date"`
 	CompletionDate     *time.Time       `json:"completion_date,omitempty" db:"completion_date"`

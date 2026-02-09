@@ -8,6 +8,7 @@ import (
 	"malaka/internal/modules/masterdata/domain/entities"
 	"malaka/internal/modules/masterdata/domain/repositories"
 	"malaka/internal/shared/cache"
+	"malaka/internal/shared/uuid"
 )
 
 const (
@@ -42,9 +43,9 @@ func (r *CachedCustomerRepository) Create(ctx context.Context, customer *entitie
 }
 
 // GetByID retrieves a customer by ID with caching.
-func (r *CachedCustomerRepository) GetByID(ctx context.Context, id string) (*entities.Customer, error) {
-	cacheKey := fmt.Sprintf("%s%s", customerKeyPrefix, id)
-	
+func (r *CachedCustomerRepository) GetByID(ctx context.Context, id uuid.ID) (*entities.Customer, error) {
+	cacheKey := fmt.Sprintf("%s%s", customerKeyPrefix, id.String())
+
 	// Try to get from cache first
 	if cached, err := r.cache.Get(ctx, cacheKey); err == nil {
 		var customer entities.Customer
@@ -112,13 +113,13 @@ func (r *CachedCustomerRepository) Update(ctx context.Context, customer *entitie
 }
 
 // Delete deletes a customer and invalidates related cache.
-func (r *CachedCustomerRepository) Delete(ctx context.Context, id string) error {
+func (r *CachedCustomerRepository) Delete(ctx context.Context, id uuid.ID) error {
 	if err := r.repo.Delete(ctx, id); err != nil {
 		return err
 	}
 
 	// Invalidate specific and list caches
-	cacheKey := fmt.Sprintf("%s%s", customerKeyPrefix, id)
+	cacheKey := fmt.Sprintf("%s%s", customerKeyPrefix, id.String())
 	r.cache.Delete(ctx, cacheKey)
 	r.cache.Delete(ctx, customerListKey)
 

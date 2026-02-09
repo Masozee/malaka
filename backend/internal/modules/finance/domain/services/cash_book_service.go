@@ -6,20 +6,21 @@ import (
 
 	"malaka/internal/modules/finance/domain/entities"
 	"malaka/internal/modules/finance/domain/repositories"
+	"malaka/internal/shared/uuid"
 )
 
 type CashBookService interface {
 	CreateCashBookEntry(ctx context.Context, entry *entities.CashBook) error
-	GetCashBookEntryByID(ctx context.Context, id string) (*entities.CashBook, error)
+	GetCashBookEntryByID(ctx context.Context, id uuid.ID) (*entities.CashBook, error)
 	GetAllCashBookEntries(ctx context.Context) ([]*entities.CashBook, error)
 	UpdateCashBookEntry(ctx context.Context, entry *entities.CashBook) error
-	DeleteCashBookEntry(ctx context.Context, id string) error
-	GetCashBookEntriesByCashBank(ctx context.Context, cashBankID string) ([]*entities.CashBook, error)
-	GetCashBookEntriesByDateRange(ctx context.Context, cashBankID string, startDate, endDate time.Time) ([]*entities.CashBook, error)
+	DeleteCashBookEntry(ctx context.Context, id uuid.ID) error
+	GetCashBookEntriesByCashBank(ctx context.Context, cashBankID uuid.ID) ([]*entities.CashBook, error)
+	GetCashBookEntriesByDateRange(ctx context.Context, cashBankID uuid.ID, startDate, endDate time.Time) ([]*entities.CashBook, error)
 	GetCashBookEntriesByType(ctx context.Context, transactionType string) ([]*entities.CashBook, error)
-	GetCashBalance(ctx context.Context, cashBankID string) (float64, error)
-	GetCashBalanceAtDate(ctx context.Context, cashBankID string, date time.Time) (float64, error)
-	RecalculateBalances(ctx context.Context, cashBankID string) error
+	GetCashBalance(ctx context.Context, cashBankID uuid.ID) (float64, error)
+	GetCashBalanceAtDate(ctx context.Context, cashBankID uuid.ID, date time.Time) (float64, error)
+	RecalculateBalances(ctx context.Context, cashBankID uuid.ID) error
 }
 
 type cashBookService struct {
@@ -50,7 +51,7 @@ func (s *cashBookService) CreateCashBookEntry(ctx context.Context, entry *entiti
 	return s.RecalculateBalances(ctx, entry.CashBankID)
 }
 
-func (s *cashBookService) GetCashBookEntryByID(ctx context.Context, id string) (*entities.CashBook, error) {
+func (s *cashBookService) GetCashBookEntryByID(ctx context.Context, id uuid.ID) (*entities.CashBook, error) {
 	return s.repo.GetByID(ctx, id)
 }
 
@@ -67,7 +68,7 @@ func (s *cashBookService) UpdateCashBookEntry(ctx context.Context, entry *entiti
 	return s.RecalculateBalances(ctx, entry.CashBankID)
 }
 
-func (s *cashBookService) DeleteCashBookEntry(ctx context.Context, id string) error {
+func (s *cashBookService) DeleteCashBookEntry(ctx context.Context, id uuid.ID) error {
 	entry, err := s.repo.GetByID(ctx, id)
 	if err != nil {
 		return err
@@ -81,11 +82,11 @@ func (s *cashBookService) DeleteCashBookEntry(ctx context.Context, id string) er
 	return s.RecalculateBalances(ctx, entry.CashBankID)
 }
 
-func (s *cashBookService) GetCashBookEntriesByCashBank(ctx context.Context, cashBankID string) ([]*entities.CashBook, error) {
+func (s *cashBookService) GetCashBookEntriesByCashBank(ctx context.Context, cashBankID uuid.ID) ([]*entities.CashBook, error) {
 	return s.repo.GetByCashBankID(ctx, cashBankID)
 }
 
-func (s *cashBookService) GetCashBookEntriesByDateRange(ctx context.Context, cashBankID string, startDate, endDate time.Time) ([]*entities.CashBook, error) {
+func (s *cashBookService) GetCashBookEntriesByDateRange(ctx context.Context, cashBankID uuid.ID, startDate, endDate time.Time) ([]*entities.CashBook, error) {
 	return s.repo.GetByDateRange(ctx, cashBankID, startDate, endDate)
 }
 
@@ -93,7 +94,7 @@ func (s *cashBookService) GetCashBookEntriesByType(ctx context.Context, transact
 	return s.repo.GetByTransactionType(ctx, transactionType)
 }
 
-func (s *cashBookService) GetCashBalance(ctx context.Context, cashBankID string) (float64, error) {
+func (s *cashBookService) GetCashBalance(ctx context.Context, cashBankID uuid.ID) (float64, error) {
 	entries, err := s.repo.GetByCashBankID(ctx, cashBankID)
 	if err != nil {
 		return 0, err
@@ -107,7 +108,7 @@ func (s *cashBookService) GetCashBalance(ctx context.Context, cashBankID string)
 	return entries[len(entries)-1].Balance, nil
 }
 
-func (s *cashBookService) GetCashBalanceAtDate(ctx context.Context, cashBankID string, date time.Time) (float64, error) {
+func (s *cashBookService) GetCashBalanceAtDate(ctx context.Context, cashBankID uuid.ID, date time.Time) (float64, error) {
 	entries, err := s.repo.GetByDateRange(ctx, cashBankID, time.Time{}, date)
 	if err != nil {
 		return 0, err
@@ -121,7 +122,7 @@ func (s *cashBookService) GetCashBalanceAtDate(ctx context.Context, cashBankID s
 	return entries[len(entries)-1].Balance, nil
 }
 
-func (s *cashBookService) RecalculateBalances(ctx context.Context, cashBankID string) error {
+func (s *cashBookService) RecalculateBalances(ctx context.Context, cashBankID uuid.ID) error {
 	entries, err := s.repo.GetByCashBankID(ctx, cashBankID)
 	if err != nil {
 		return err

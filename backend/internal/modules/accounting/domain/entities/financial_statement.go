@@ -3,7 +3,7 @@ package entities
 import (
 	"time"
 
-	"github.com/google/uuid"
+	"malaka/internal/shared/uuid"
 )
 
 // FinancialStatementType represents the type of financial statement
@@ -18,7 +18,7 @@ const (
 
 // FinancialStatement represents a financial statement
 type FinancialStatement struct {
-	ID          uuid.UUID              `json:"id" db:"id"`
+	ID          uuid.ID                `json:"id" db:"id"`
 	Type        FinancialStatementType `json:"type" db:"type"`
 	PeriodStart time.Time              `json:"period_start" db:"period_start"`
 	PeriodEnd   time.Time              `json:"period_end" db:"period_end"`
@@ -43,7 +43,7 @@ type FinancialStatementSection struct {
 
 // FinancialStatementItem represents an item in a financial statement
 type FinancialStatementItem struct {
-	AccountID       uuid.UUID `json:"account_id"`
+	AccountID       uuid.ID `json:"account_id"`
 	AccountCode     string    `json:"account_code"`
 	AccountName     string    `json:"account_name"`
 	Amount          float64   `json:"amount"`

@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"time"
 
-	"github.com/google/uuid"
+	"malaka/internal/shared/uuid"
 	"github.com/jmoiron/sqlx"
 	"malaka/internal/modules/accounting/domain/entities"
 	"malaka/internal/modules/accounting/domain/repositories"
@@ -53,7 +53,7 @@ func (r *fixedAssetRepository) Create(ctx context.Context, asset *entities.Fixed
 }
 
 // GetByID retrieves a fixed asset by ID
-func (r *fixedAssetRepository) GetByID(ctx context.Context, id uuid.UUID) (*entities.FixedAsset, error) {
+func (r *fixedAssetRepository) GetByID(ctx context.Context, id uuid.ID) (*entities.FixedAsset, error) {
 	query := `
 		SELECT id, asset_code, asset_name, asset_category, status,
 			   purchase_date, purchase_price, salvage_value, useful_life,
@@ -132,7 +132,7 @@ func (r *fixedAssetRepository) Update(ctx context.Context, asset *entities.Fixed
 }
 
 // Delete deletes a fixed asset
-func (r *fixedAssetRepository) Delete(ctx context.Context, id uuid.UUID) error {
+func (r *fixedAssetRepository) Delete(ctx context.Context, id uuid.ID) error {
 	query := `DELETE FROM fixed_assets WHERE id = $1`
 	_, err := r.db.ExecContext(ctx, query, id)
 	return err
@@ -157,7 +157,7 @@ func (r *fixedAssetRepository) CreateDepreciation(ctx context.Context, depreciat
 }
 
 // GetDepreciationByID retrieves a depreciation entry by ID
-func (r *fixedAssetRepository) GetDepreciationByID(ctx context.Context, id uuid.UUID) (*entities.FixedAssetDepreciation, error) {
+func (r *fixedAssetRepository) GetDepreciationByID(ctx context.Context, id uuid.ID) (*entities.FixedAssetDepreciation, error) {
 	query := `
 		SELECT id, fixed_asset_id, depreciation_date, depreciation_amount,
 			   accumulated_depreciation, book_value, period, journal_entry_id,
@@ -177,7 +177,7 @@ func (r *fixedAssetRepository) GetDepreciationByID(ctx context.Context, id uuid.
 }
 
 // GetDepreciationsByAsset retrieves all depreciations for an asset
-func (r *fixedAssetRepository) GetDepreciationsByAsset(ctx context.Context, assetID uuid.UUID) ([]*entities.FixedAssetDepreciation, error) {
+func (r *fixedAssetRepository) GetDepreciationsByAsset(ctx context.Context, assetID uuid.ID) ([]*entities.FixedAssetDepreciation, error) {
 	query := `
 		SELECT id, fixed_asset_id, depreciation_date, depreciation_amount,
 			   accumulated_depreciation, book_value, period, journal_entry_id,
@@ -209,7 +209,7 @@ func (r *fixedAssetRepository) UpdateDepreciation(ctx context.Context, depreciat
 }
 
 // DeleteDepreciation deletes a depreciation entry
-func (r *fixedAssetRepository) DeleteDepreciation(ctx context.Context, id uuid.UUID) error {
+func (r *fixedAssetRepository) DeleteDepreciation(ctx context.Context, id uuid.ID) error {
 	query := `DELETE FROM fixed_asset_depreciations WHERE id = $1`
 	_, err := r.db.ExecContext(ctx, query, id)
 	return err
@@ -234,7 +234,7 @@ func (r *fixedAssetRepository) CreateDisposal(ctx context.Context, disposal *ent
 }
 
 // GetDisposalByID retrieves a disposal entry by ID
-func (r *fixedAssetRepository) GetDisposalByID(ctx context.Context, id uuid.UUID) (*entities.FixedAssetDisposal, error) {
+func (r *fixedAssetRepository) GetDisposalByID(ctx context.Context, id uuid.ID) (*entities.FixedAssetDisposal, error) {
 	query := `
 		SELECT id, fixed_asset_id, disposal_date, disposal_method,
 			   disposal_price, book_value_at_disposal, gain_loss,
@@ -255,7 +255,7 @@ func (r *fixedAssetRepository) GetDisposalByID(ctx context.Context, id uuid.UUID
 }
 
 // GetDisposalByAsset retrieves the disposal for an asset
-func (r *fixedAssetRepository) GetDisposalByAsset(ctx context.Context, assetID uuid.UUID) (*entities.FixedAssetDisposal, error) {
+func (r *fixedAssetRepository) GetDisposalByAsset(ctx context.Context, assetID uuid.ID) (*entities.FixedAssetDisposal, error) {
 	query := `
 		SELECT id, fixed_asset_id, disposal_date, disposal_method,
 			   disposal_price, book_value_at_disposal, gain_loss,
@@ -295,7 +295,7 @@ func (r *fixedAssetRepository) UpdateDisposal(ctx context.Context, disposal *ent
 }
 
 // DeleteDisposal deletes a disposal entry
-func (r *fixedAssetRepository) DeleteDisposal(ctx context.Context, id uuid.UUID) error {
+func (r *fixedAssetRepository) DeleteDisposal(ctx context.Context, id uuid.ID) error {
 	query := `DELETE FROM fixed_asset_disposals WHERE id = $1`
 	_, err := r.db.ExecContext(ctx, query, id)
 	return err
@@ -551,7 +551,7 @@ func (r *fixedAssetRepository) ProcessMonthlyDepreciation(ctx context.Context, c
 }
 
 // GetDepreciationSchedule retrieves depreciation schedule for an asset
-func (r *fixedAssetRepository) GetDepreciationSchedule(ctx context.Context, assetID uuid.UUID) ([]*entities.FixedAssetDepreciation, error) {
+func (r *fixedAssetRepository) GetDepreciationSchedule(ctx context.Context, assetID uuid.ID) ([]*entities.FixedAssetDepreciation, error) {
 	return r.GetDepreciationsByAsset(ctx, assetID)
 }
 
@@ -579,21 +579,21 @@ func (r *fixedAssetRepository) GetAssetRegister(ctx context.Context, companyID s
 }
 
 // GetBookValues retrieves book values for assets
-func (r *fixedAssetRepository) GetBookValues(ctx context.Context, companyID string, asOfDate time.Time) (map[uuid.UUID]float64, error) {
+func (r *fixedAssetRepository) GetBookValues(ctx context.Context, companyID string, asOfDate time.Time) (map[uuid.ID]float64, error) {
 	query := `
 		SELECT id, book_value
 		FROM fixed_assets
 		WHERE company_id = $1
 	`
 	var results []struct {
-		ID        uuid.UUID `db:"id"`
+		ID        uuid.ID `db:"id"`
 		BookValue float64   `db:"book_value"`
 	}
 	err := r.db.SelectContext(ctx, &results, query, companyID)
 	if err != nil {
 		return nil, err
 	}
-	bookValues := make(map[uuid.UUID]float64)
+	bookValues := make(map[uuid.ID]float64)
 	for _, r := range results {
 		bookValues[r.ID] = r.BookValue
 	}
@@ -729,15 +729,15 @@ func (r *fixedAssetRepository) GetAssetAgeAnalysis(ctx context.Context, companyI
 }
 
 // GetAssetUtilization retrieves asset utilization (stub)
-func (r *fixedAssetRepository) GetAssetUtilization(ctx context.Context, companyID string) (map[uuid.UUID]float64, error) {
+func (r *fixedAssetRepository) GetAssetUtilization(ctx context.Context, companyID string) (map[uuid.ID]float64, error) {
 	// Simple implementation - returns 100% for all active assets
 	query := `SELECT id FROM fixed_assets WHERE company_id = $1 AND status = 'ACTIVE'`
-	var ids []uuid.UUID
+	var ids []uuid.ID
 	err := r.db.SelectContext(ctx, &ids, query, companyID)
 	if err != nil {
 		return nil, err
 	}
-	utilization := make(map[uuid.UUID]float64)
+	utilization := make(map[uuid.ID]float64)
 	for _, id := range ids {
 		utilization[id] = 100.0
 	}
@@ -764,7 +764,7 @@ func (r *fixedAssetRepository) GetDisposalReport(ctx context.Context, companyID 
 }
 
 // GetAssetHistory retrieves asset history (stub)
-func (r *fixedAssetRepository) GetAssetHistory(ctx context.Context, assetID uuid.UUID) (map[string]interface{}, error) {
+func (r *fixedAssetRepository) GetAssetHistory(ctx context.Context, assetID uuid.ID) (map[string]interface{}, error) {
 	asset, err := r.GetByID(ctx, assetID)
 	if err != nil {
 		return nil, err
@@ -856,7 +856,7 @@ func (r *fixedAssetRepository) UpdateBookValues(ctx context.Context, companyID s
 }
 
 // RecalculateDepreciation recalculates depreciation for an asset
-func (r *fixedAssetRepository) RecalculateDepreciation(ctx context.Context, assetID uuid.UUID) error {
+func (r *fixedAssetRepository) RecalculateDepreciation(ctx context.Context, assetID uuid.ID) error {
 	// Get total depreciation from entries
 	query := `
 		SELECT COALESCE(SUM(depreciation_amount), 0)

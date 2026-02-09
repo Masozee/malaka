@@ -6,7 +6,7 @@ import (
 
 	"malaka/internal/modules/inventory/domain/entities"
 	"malaka/internal/modules/inventory/domain/repositories"
-	"malaka/internal/shared/utils"
+	"malaka/internal/shared/uuid"
 )
 
 // GoodsReceiptService provides business logic for goods receipt operations.
@@ -27,8 +27,8 @@ type PostGoodsReceiptResult struct {
 
 // CreateGoodsReceipt creates a new goods receipt.
 func (s *GoodsReceiptService) CreateGoodsReceipt(ctx context.Context, gr *entities.GoodsReceipt) error {
-	if gr.ID == "" {
-		gr.ID = utils.RandomString(10) // Generate a random ID if not provided
+	if gr.ID.IsNil() {
+		gr.ID = uuid.New()
 	}
 	return s.repo.Create(ctx, gr)
 }
@@ -46,7 +46,7 @@ func (s *GoodsReceiptService) GetAllGoodsReceipts(ctx context.Context) ([]*entit
 // UpdateGoodsReceipt updates an existing goods receipt.
 func (s *GoodsReceiptService) UpdateGoodsReceipt(ctx context.Context, gr *entities.GoodsReceipt) error {
 	// Ensure the goods receipt exists before updating
-	existingGR, err := s.repo.GetByID(ctx, gr.ID)
+	existingGR, err := s.repo.GetByID(ctx, gr.ID.String())
 	if err != nil {
 		return err
 	}

@@ -3,7 +3,7 @@ package dto
 import (
 	"time"
 
-	"github.com/google/uuid"
+	"malaka/internal/shared/uuid"
 	"malaka/internal/modules/accounting/domain/entities"
 )
 
@@ -22,14 +22,14 @@ type BudgetRequest struct {
 
 // BudgetLineRequest represents the request structure for a BudgetLine
 type BudgetLineRequest struct {
-	AccountID   uuid.UUID `json:"account_id" binding:"required"`
+	AccountID   uuid.ID `json:"account_id" binding:"required"`
 	Amount      float64   `json:"amount" binding:"required"`
 	Description string    `json:"description"`
 }
 
 // BudgetResponse represents the response structure for a Budget
 type BudgetResponse struct {
-	ID          uuid.UUID          `json:"id"`
+	ID          uuid.ID          `json:"id"`
 	CompanyID   string             `json:"company_id"`
 	FiscalYear  int                `json:"fiscal_year"`
 	BudgetType  entities.BudgetType `json:"budget_type"`
@@ -45,9 +45,9 @@ type BudgetResponse struct {
 
 // BudgetLineResponse represents the response structure for a BudgetLine
 type BudgetLineResponse struct {
-	ID          uuid.UUID `json:"id"`
-	BudgetID    uuid.UUID `json:"budget_id"`
-	AccountID   uuid.UUID `json:"account_id"`
+	ID          uuid.ID `json:"id"`
+	BudgetID    uuid.ID `json:"budget_id"`
+	AccountID   uuid.ID `json:"account_id"`
 	Amount      float64   `json:"amount"`
 	ActualAmount float64   `json:"actual_amount"`
 	Description string    `json:"description"`

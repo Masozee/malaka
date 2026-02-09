@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"malaka/internal/modules/production/domain/entities"
+	"malaka/internal/shared/uuid"
 )
 
 // WorkOrderRequest represents the request payload for creating/updating work orders
@@ -68,7 +69,7 @@ type WorkOrderAssignmentRequest struct {
 
 // WorkOrderResponse represents the response payload for work orders
 type WorkOrderResponse struct {
-	ID               int                          `json:"id"`
+	ID               string                       `json:"id"`
 	WorkOrderNumber  string                       `json:"work_order_number"`
 	Type             entities.WorkOrderType       `json:"type"`
 	ProductID        string                       `json:"product_id"`
@@ -100,8 +101,8 @@ type WorkOrderResponse struct {
 
 // WorkOrderMaterialResponse represents material response data
 type WorkOrderMaterialResponse struct {
-	ID                int       `json:"id"`
-	WorkOrderID       int       `json:"work_order_id"`
+	ID                string    `json:"id"`
+	WorkOrderID       string    `json:"work_order_id"`
 	ArticleID         string    `json:"article_id"`
 	ArticleCode       string    `json:"article_code"`
 	ArticleName       string    `json:"article_name"`
@@ -117,8 +118,8 @@ type WorkOrderMaterialResponse struct {
 
 // WorkOrderOperationResponse represents operation response data
 type WorkOrderOperationResponse struct {
-	ID              int                     `json:"id"`
-	WorkOrderID     int                     `json:"work_order_id"`
+	ID              string                  `json:"id"`
+	WorkOrderID     string                  `json:"work_order_id"`
 	OperationNumber int                     `json:"operation_number"`
 	Name            string                  `json:"name"`
 	Description     *string                 `json:"description,omitempty"`
@@ -136,8 +137,8 @@ type WorkOrderOperationResponse struct {
 
 // WorkOrderAssignmentResponse represents assignment response data
 type WorkOrderAssignmentResponse struct {
-	ID          int       `json:"id"`
-	WorkOrderID int       `json:"work_order_id"`
+	ID          string    `json:"id"`
+	WorkOrderID string    `json:"work_order_id"`
 	EmployeeID  string    `json:"employee_id"`
 	Role        *string   `json:"role,omitempty"`
 	AssignedAt  time.Time `json:"assigned_at"`
@@ -217,7 +218,7 @@ func (req *WorkOrderRequest) ToEntity(createdBy string) *entities.WorkOrder {
 	workOrder := &entities.WorkOrder{
 		WorkOrderNumber:  req.WorkOrderNumber,
 		Type:             req.Type,
-		ProductID:        req.ProductID,
+		ProductID:        uuid.MustParse(req.ProductID),
 		ProductCode:      req.ProductCode,
 		ProductName:      req.ProductName,
 		Quantity:         req.Quantity,
@@ -227,14 +228,14 @@ func (req *WorkOrderRequest) ToEntity(createdBy string) *entities.WorkOrder {
 		ActualEndDate:    req.ActualEndDate,
 		Status:           req.Status,
 		Priority:         req.Priority,
-		WarehouseID:      req.WarehouseID,
+		WarehouseID:      uuid.MustParse(req.WarehouseID),
 		Supervisor:       req.Supervisor,
 		TotalCost:        req.TotalCost,
 		ActualCost:       req.ActualCost,
 		Efficiency:       req.Efficiency,
 		QualityScore:     req.QualityScore,
 		Notes:            req.Notes,
-		CreatedBy:        createdBy,
+		CreatedBy:        uuid.MustParse(createdBy),
 	}
 
 	// Set defaults if not provided
@@ -250,7 +251,7 @@ func (req *WorkOrderRequest) ToEntity(createdBy string) *entities.WorkOrder {
 		workOrder.Materials = make([]entities.WorkOrderMaterial, len(req.Materials))
 		for i, matReq := range req.Materials {
 			workOrder.Materials[i] = entities.WorkOrderMaterial{
-				ArticleID:         matReq.ArticleID,
+				ArticleID:         uuid.MustParse(matReq.ArticleID),
 				ArticleCode:       matReq.ArticleCode,
 				ArticleName:       matReq.ArticleName,
 				RequiredQuantity:  matReq.RequiredQuantity,
@@ -267,6 +268,18 @@ func (req *WorkOrderRequest) ToEntity(createdBy string) *entities.WorkOrder {
 	if len(req.Operations) > 0 {
 		workOrder.Operations = make([]entities.WorkOrderOperation, len(req.Operations))
 		for i, opReq := range req.Operations {
+			// Handle nullable UUID fields
+			var assignedTo *uuid.ID
+			if opReq.AssignedTo != nil {
+				id := uuid.MustParse(*opReq.AssignedTo)
+				assignedTo = &id
+			}
+			var machineID *uuid.ID
+			if opReq.MachineID != nil {
+				id := uuid.MustParse(*opReq.MachineID)
+				machineID = &id
+			}
+
 			workOrder.Operations[i] = entities.WorkOrderOperation{
 				OperationNumber: opReq.OperationNumber,
 				Name:            opReq.Name,
@@ -274,8 +287,8 @@ func (req *WorkOrderRequest) ToEntity(createdBy string) *entities.WorkOrder {
 				PlannedDuration: opReq.PlannedDuration,
 				ActualDuration:  opReq.ActualDuration,
 				Status:          opReq.Status,
-				AssignedTo:      opReq.AssignedTo,
-				MachineID:       opReq.MachineID,
+				AssignedTo:      assignedTo,
+				MachineID:       machineID,
 				StartTime:       opReq.StartTime,
 				EndTime:         opReq.EndTime,
 				Notes:           opReq.Notes,
@@ -292,7 +305,7 @@ func (req *WorkOrderRequest) ToEntity(createdBy string) *entities.WorkOrder {
 		workOrder.Assignments = make([]entities.WorkOrderAssignment, len(req.Assignments))
 		for i, assReq := range req.Assignments {
 			workOrder.Assignments[i] = entities.WorkOrderAssignment{
-				EmployeeID: assReq.EmployeeID,
+				EmployeeID: uuid.MustParse(assReq.EmployeeID),
 				Role:       assReq.Role,
 			}
 		}
@@ -302,11 +315,17 @@ func (req *WorkOrderRequest) ToEntity(createdBy string) *entities.WorkOrder {
 }
 
 func (req *WorkOrderFiltersRequest) ToEntity() entities.WorkOrderFilters {
+	var warehouseID *uuid.ID
+	if req.WarehouseID != nil {
+		id := uuid.MustParse(*req.WarehouseID)
+		warehouseID = &id
+	}
+
 	return entities.WorkOrderFilters{
 		Status:      req.Status,
 		Type:        req.Type,
 		Priority:    req.Priority,
-		WarehouseID: req.WarehouseID,
+		WarehouseID: warehouseID,
 		Supervisor:  req.Supervisor,
 		StartDate:   req.StartDate,
 		EndDate:     req.EndDate,
@@ -316,10 +335,10 @@ func (req *WorkOrderFiltersRequest) ToEntity() entities.WorkOrderFilters {
 
 func WorkOrderToResponse(workOrder *entities.WorkOrder) *WorkOrderResponse {
 	response := &WorkOrderResponse{
-		ID:               workOrder.ID,
+		ID:               workOrder.ID.String(),
 		WorkOrderNumber:  workOrder.WorkOrderNumber,
 		Type:             workOrder.Type,
-		ProductID:        workOrder.ProductID,
+		ProductID:        workOrder.ProductID.String(),
 		ProductCode:      workOrder.ProductCode,
 		ProductName:      workOrder.ProductName,
 		Quantity:         workOrder.Quantity,
@@ -329,14 +348,14 @@ func WorkOrderToResponse(workOrder *entities.WorkOrder) *WorkOrderResponse {
 		ActualEndDate:    workOrder.ActualEndDate,
 		Status:           workOrder.Status,
 		Priority:         workOrder.Priority,
-		WarehouseID:      workOrder.WarehouseID,
+		WarehouseID:      workOrder.WarehouseID.String(),
 		Supervisor:       workOrder.Supervisor,
 		TotalCost:        workOrder.TotalCost,
 		ActualCost:       workOrder.ActualCost,
 		Efficiency:       workOrder.Efficiency,
 		QualityScore:     workOrder.QualityScore,
 		Notes:            workOrder.Notes,
-		CreatedBy:        workOrder.CreatedBy,
+		CreatedBy:        workOrder.CreatedBy.String(),
 		CreatedAt:        workOrder.CreatedAt,
 		UpdatedAt:        workOrder.UpdatedAt,
 		Progress:         workOrder.CalculateProgress(),
@@ -348,9 +367,9 @@ func WorkOrderToResponse(workOrder *entities.WorkOrder) *WorkOrderResponse {
 		response.Materials = make([]WorkOrderMaterialResponse, len(workOrder.Materials))
 		for i, mat := range workOrder.Materials {
 			response.Materials[i] = WorkOrderMaterialResponse{
-				ID:                mat.ID,
-				WorkOrderID:       mat.WorkOrderID,
-				ArticleID:         mat.ArticleID,
+				ID:                mat.ID.String(),
+				WorkOrderID:       mat.WorkOrderID.String(),
+				ArticleID:         mat.ArticleID.String(),
 				ArticleCode:       mat.ArticleCode,
 				ArticleName:       mat.ArticleName,
 				RequiredQuantity:  mat.RequiredQuantity,
@@ -369,17 +388,29 @@ func WorkOrderToResponse(workOrder *entities.WorkOrder) *WorkOrderResponse {
 	if len(workOrder.Operations) > 0 {
 		response.Operations = make([]WorkOrderOperationResponse, len(workOrder.Operations))
 		for i, op := range workOrder.Operations {
+			// Handle nullable UUID fields
+			var assignedTo *string
+			if op.AssignedTo != nil {
+				s := op.AssignedTo.String()
+				assignedTo = &s
+			}
+			var machineID *string
+			if op.MachineID != nil {
+				s := op.MachineID.String()
+				machineID = &s
+			}
+
 			response.Operations[i] = WorkOrderOperationResponse{
-				ID:              op.ID,
-				WorkOrderID:     op.WorkOrderID,
+				ID:              op.ID.String(),
+				WorkOrderID:     op.WorkOrderID.String(),
 				OperationNumber: op.OperationNumber,
 				Name:            op.Name,
 				Description:     op.Description,
 				PlannedDuration: op.PlannedDuration,
 				ActualDuration:  op.ActualDuration,
 				Status:          op.Status,
-				AssignedTo:      op.AssignedTo,
-				MachineID:       op.MachineID,
+				AssignedTo:      assignedTo,
+				MachineID:       machineID,
 				StartTime:       op.StartTime,
 				EndTime:         op.EndTime,
 				Notes:           op.Notes,
@@ -394,9 +425,9 @@ func WorkOrderToResponse(workOrder *entities.WorkOrder) *WorkOrderResponse {
 		response.Assignments = make([]WorkOrderAssignmentResponse, len(workOrder.Assignments))
 		for i, ass := range workOrder.Assignments {
 			response.Assignments[i] = WorkOrderAssignmentResponse{
-				ID:          ass.ID,
-				WorkOrderID: ass.WorkOrderID,
-				EmployeeID:  ass.EmployeeID,
+				ID:          ass.ID.String(),
+				WorkOrderID: ass.WorkOrderID.String(),
+				EmployeeID:  ass.EmployeeID.String(),
 				Role:        ass.Role,
 				AssignedAt:  ass.AssignedAt,
 			}

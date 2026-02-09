@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/google/uuid"
+	"malaka/internal/shared/uuid"
 	"malaka/internal/modules/accounting/domain/entities"
 )
 
@@ -68,7 +68,7 @@ func (r *SimpleCostCenterRepository) GetAllSimple(ctx context.Context) ([]*entit
 }
 
 // GetByIDSimple retrieves a cost center by ID from the basic schema
-func (r *SimpleCostCenterRepository) GetByIDSimple(ctx context.Context, id uuid.UUID) (*entities.CostCenter, error) {
+func (r *SimpleCostCenterRepository) GetByIDSimple(ctx context.Context, id uuid.ID) (*entities.CostCenter, error) {
 	query := `
 		SELECT id, code, name, description, is_active, created_at, updated_at
 		FROM cost_centers 
@@ -206,7 +206,7 @@ func (r *SimpleCostCenterRepository) UpdateSimple(ctx context.Context, costCente
 }
 
 // DeleteSimple removes a cost center using the basic schema
-func (r *SimpleCostCenterRepository) DeleteSimple(ctx context.Context, id uuid.UUID) error {
+func (r *SimpleCostCenterRepository) DeleteSimple(ctx context.Context, id uuid.ID) error {
 	query := `DELETE FROM cost_centers WHERE id = $1`
 	
 	_, err := r.db.ExecContext(ctx, query, id)

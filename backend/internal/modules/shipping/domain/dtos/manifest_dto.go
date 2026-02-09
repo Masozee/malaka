@@ -3,20 +3,20 @@ package dtos
 import (
 	"time"
 
-	"github.com/google/uuid"
+	"malaka/internal/shared/uuid"
 )
 
 type CreateManifestRequest struct {
 	ManifestNumber string    `json:"manifest_number" binding:"required"`
 	ManifestDate   time.Time `json:"manifest_date" binding:"required"`
-	CourierID      uuid.UUID `json:"courier_id" binding:"required"`
+	CourierID      uuid.ID   `json:"courier_id" binding:"required"`
 	TotalShipments int       `json:"total_shipments" binding:"required"`
 }
 
 type UpdateManifestRequest struct {
-	ID             uuid.UUID `json:"id" binding:"required"`
+	ID             uuid.ID   `json:"id" binding:"required"`
 	ManifestNumber string    `json:"manifest_number" binding:"required"`
 	ManifestDate   time.Time `json:"manifest_date" binding:"required"`
-	CourierID      uuid.UUID `json:"courier_id" binding:"required"`
+	CourierID      uuid.ID   `json:"courier_id" binding:"required"`
 	TotalShipments int       `json:"total_shipments" binding:"required"`
 }

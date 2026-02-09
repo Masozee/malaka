@@ -12,6 +12,7 @@ import { purchaseRequestService } from '@/services/procurement'
 import type { PurchaseRequest } from '@/types/procurement'
 import { useAuth } from '@/contexts/auth-context'
 import Link from 'next/link'
+import { EntityShareButton } from '@/components/messaging/EntityShareButton'
 
 const statusColors: Record<string, string> = {
   draft: 'bg-gray-100 text-gray-800',
@@ -153,6 +154,15 @@ export default function PurchaseRequestDetailPage() {
         breadcrumbs={breadcrumbs}
         actions={
           <div className="flex items-center gap-2">
+            <EntityShareButton
+              entityType="purchase_request"
+              entityId={request.id}
+              title={request.request_number}
+              subtitle={request.title}
+              status={request.status}
+              statusColor={request.status === 'approved' ? 'green' : request.status === 'rejected' ? 'red' : request.status === 'pending' ? 'yellow' : 'gray'}
+              url={`/procurement/purchase-requests/${request.id}`}
+            />
             {/* Approve/Reject buttons only shown to users with approver role */}
             {request.status === 'pending' && canApprove() && (
               <>

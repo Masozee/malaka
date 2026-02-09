@@ -8,7 +8,7 @@ import (
 	"malaka/internal/modules/accounting/domain/entities"
 	"malaka/internal/modules/accounting/domain/repositories"
 
-	"github.com/google/uuid"
+	"malaka/internal/shared/uuid"
 	"go.uber.org/zap"
 )
 
@@ -61,7 +61,7 @@ func (s *TrialBalanceServiceImpl) CreateTrialBalance(ctx context.Context, trialB
 }
 
 // GetTrialBalanceByID retrieves a trial balance by ID
-func (s *TrialBalanceServiceImpl) GetTrialBalanceByID(ctx context.Context, id uuid.UUID) (*entities.TrialBalance, error) {
+func (s *TrialBalanceServiceImpl) GetTrialBalanceByID(ctx context.Context, id uuid.ID) (*entities.TrialBalance, error) {
 	trialBalance, err := s.trialBalanceRepo.GetByID(ctx, id)
 	if err != nil {
 		s.logger.Error("failed to get trial balance by ID",
@@ -125,7 +125,7 @@ func (s *TrialBalanceServiceImpl) UpdateTrialBalance(ctx context.Context, trialB
 }
 
 // DeleteTrialBalance deletes a trial balance
-func (s *TrialBalanceServiceImpl) DeleteTrialBalance(ctx context.Context, id uuid.UUID) error {
+func (s *TrialBalanceServiceImpl) DeleteTrialBalance(ctx context.Context, id uuid.ID) error {
 	// Verify the trial balance exists
 	_, err := s.trialBalanceRepo.GetByID(ctx, id)
 	if err != nil {
@@ -320,7 +320,7 @@ func (s *TrialBalanceServiceImpl) CalculateAccountBalances(ctx context.Context, 
 }
 
 // GetAccountBalance retrieves balance for a specific account
-func (s *TrialBalanceServiceImpl) GetAccountBalance(ctx context.Context, companyID string, accountID uuid.UUID, asOfDate time.Time) (*entities.TrialBalanceAccount, error) {
+func (s *TrialBalanceServiceImpl) GetAccountBalance(ctx context.Context, companyID string, accountID uuid.ID, asOfDate time.Time) (*entities.TrialBalanceAccount, error) {
 	if companyID == "" {
 		return nil, fmt.Errorf("company ID is required")
 	}
@@ -380,7 +380,7 @@ func (s *TrialBalanceServiceImpl) GetTrialBalanceSummary(ctx context.Context, co
 }
 
 // ValidateTrialBalance validates that a trial balance is balanced
-func (s *TrialBalanceServiceImpl) ValidateTrialBalance(ctx context.Context, trialBalanceID uuid.UUID) (bool, []string, error) {
+func (s *TrialBalanceServiceImpl) ValidateTrialBalance(ctx context.Context, trialBalanceID uuid.ID) (bool, []string, error) {
 	trialBalance, err := s.trialBalanceRepo.GetByID(ctx, trialBalanceID)
 	if err != nil {
 		s.logger.Error("failed to get trial balance for validation",
@@ -552,7 +552,7 @@ func (s *TrialBalanceServiceImpl) GetRevenuesAndExpenses(ctx context.Context, co
 }
 
 // GetTrialBalanceAuditTrail retrieves audit trail for a trial balance
-func (s *TrialBalanceServiceImpl) GetTrialBalanceAuditTrail(ctx context.Context, trialBalanceID uuid.UUID) ([]entities.AuditEntry, error) {
+func (s *TrialBalanceServiceImpl) GetTrialBalanceAuditTrail(ctx context.Context, trialBalanceID uuid.ID) ([]entities.AuditEntry, error) {
 	// Implementation would require creating AuditEntry entity and audit system
 	// This is a placeholder for the interface
 	return nil, fmt.Errorf("audit trail not implemented yet")
@@ -665,14 +665,14 @@ func (s *TrialBalanceServiceImpl) RegenerateHistoricalTrialBalances(ctx context.
 }
 
 // ExportTrialBalanceToCSV exports trial balance to CSV format
-func (s *TrialBalanceServiceImpl) ExportTrialBalanceToCSV(ctx context.Context, trialBalanceID uuid.UUID) ([]byte, error) {
+func (s *TrialBalanceServiceImpl) ExportTrialBalanceToCSV(ctx context.Context, trialBalanceID uuid.ID) ([]byte, error) {
 	// Implementation would require CSV generation logic
 	// This is a placeholder for the interface
 	return nil, fmt.Errorf("CSV export not implemented yet")
 }
 
 // ExportTrialBalanceToExcel exports trial balance to Excel format
-func (s *TrialBalanceServiceImpl) ExportTrialBalanceToExcel(ctx context.Context, trialBalanceID uuid.UUID) ([]byte, error) {
+func (s *TrialBalanceServiceImpl) ExportTrialBalanceToExcel(ctx context.Context, trialBalanceID uuid.ID) ([]byte, error) {
 	// Implementation would require Excel generation logic
 	// This is a placeholder for the interface
 	return nil, fmt.Errorf("Excel export not implemented yet")

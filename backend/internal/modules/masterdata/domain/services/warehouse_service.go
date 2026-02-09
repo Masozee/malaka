@@ -6,7 +6,7 @@ import (
 
 	"malaka/internal/modules/masterdata/domain/entities"
 	"malaka/internal/modules/masterdata/domain/repositories"
-	"malaka/internal/shared/utils"
+	"malaka/internal/shared/uuid"
 )
 
 // WarehouseService provides business logic for warehouse operations.
@@ -21,14 +21,14 @@ func NewWarehouseService(repo repositories.WarehouseRepository) *WarehouseServic
 
 // CreateWarehouse creates a new warehouse.
 func (s *WarehouseService) CreateWarehouse(ctx context.Context, warehouse *entities.Warehouse) error {
-	if warehouse.ID == "" {
-		warehouse.ID = utils.RandomString(10) // Generate a random ID if not provided
+	if warehouse.ID.IsNil() {
+		warehouse.ID = uuid.New()
 	}
 	return s.repo.Create(ctx, warehouse)
 }
 
 // GetWarehouseByID retrieves a warehouse by its ID.
-func (s *WarehouseService) GetWarehouseByID(ctx context.Context, id string) (*entities.Warehouse, error) {
+func (s *WarehouseService) GetWarehouseByID(ctx context.Context, id uuid.ID) (*entities.Warehouse, error) {
 	return s.repo.GetByID(ctx, id)
 }
 
@@ -51,7 +51,7 @@ func (s *WarehouseService) UpdateWarehouse(ctx context.Context, warehouse *entit
 }
 
 // DeleteWarehouse deletes a warehouse by its ID.
-func (s *WarehouseService) DeleteWarehouse(ctx context.Context, id string) error {
+func (s *WarehouseService) DeleteWarehouse(ctx context.Context, id uuid.ID) error {
 	// Ensure the warehouse exists before deleting
 	existingWarehouse, err := s.repo.GetByID(ctx, id)
 	if err != nil {

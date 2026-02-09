@@ -5,34 +5,34 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/google/uuid"
 	"malaka/internal/modules/production/domain/entities"
 	"malaka/internal/modules/production/domain/repositories"
+	"malaka/internal/shared/uuid"
 )
 
 // ProductionPlanService defines the interface for production plan business logic
 type ProductionPlanService interface {
 	// CRUD operations
 	CreatePlan(ctx context.Context, plan *entities.ProductionPlan) error
-	GetPlan(ctx context.Context, id uuid.UUID) (*entities.ProductionPlan, error)
+	GetPlan(ctx context.Context, id uuid.ID) (*entities.ProductionPlan, error)
 	GetPlanByNumber(ctx context.Context, planNumber string) (*entities.ProductionPlan, error)
 	UpdatePlan(ctx context.Context, plan *entities.ProductionPlan) error
-	DeletePlan(ctx context.Context, id uuid.UUID) error
+	DeletePlan(ctx context.Context, id uuid.ID) error
 
 	// List operations
 	GetAllPlans(ctx context.Context, limit, offset int, search, status, planType string) ([]*entities.ProductionPlan, int, error)
 
 	// Status management
-	ApprovePlan(ctx context.Context, id uuid.UUID, approverID string) error
-	ActivatePlan(ctx context.Context, id uuid.UUID) error
-	CompletePlan(ctx context.Context, id uuid.UUID) error
-	CancelPlan(ctx context.Context, id uuid.UUID, reason string) error
+	ApprovePlan(ctx context.Context, id uuid.ID, approverID uuid.ID) error
+	ActivatePlan(ctx context.Context, id uuid.ID) error
+	CompletePlan(ctx context.Context, id uuid.ID) error
+	CancelPlan(ctx context.Context, id uuid.ID, reason string) error
 
 	// Item management
-	AddItem(ctx context.Context, planID uuid.UUID, item *entities.ProductionPlanItem) error
+	AddItem(ctx context.Context, planID uuid.ID, item *entities.ProductionPlanItem) error
 	UpdateItem(ctx context.Context, item *entities.ProductionPlanItem) error
-	DeleteItem(ctx context.Context, itemID uuid.UUID) error
-	UpdateItemProgress(ctx context.Context, itemID uuid.UUID, producedQuantity int) error
+	DeleteItem(ctx context.Context, itemID uuid.ID) error
+	UpdateItemProgress(ctx context.Context, itemID uuid.ID, producedQuantity int) error
 
 	// Analytics
 	GetStatistics(ctx context.Context) (*entities.ProductionPlanStatistics, error)
@@ -93,7 +93,7 @@ func (s *ProductionPlanServiceImpl) CreatePlan(ctx context.Context, plan *entiti
 }
 
 // GetPlan retrieves a production plan by ID
-func (s *ProductionPlanServiceImpl) GetPlan(ctx context.Context, id uuid.UUID) (*entities.ProductionPlan, error) {
+func (s *ProductionPlanServiceImpl) GetPlan(ctx context.Context, id uuid.ID) (*entities.ProductionPlan, error) {
 	return s.repo.GetByID(ctx, id)
 }
 
@@ -141,7 +141,7 @@ func (s *ProductionPlanServiceImpl) UpdatePlan(ctx context.Context, plan *entiti
 }
 
 // DeletePlan deletes a production plan
-func (s *ProductionPlanServiceImpl) DeletePlan(ctx context.Context, id uuid.UUID) error {
+func (s *ProductionPlanServiceImpl) DeletePlan(ctx context.Context, id uuid.ID) error {
 	// Verify the plan exists
 	existingPlan, err := s.repo.GetByID(ctx, id)
 	if err != nil {
@@ -165,7 +165,7 @@ func (s *ProductionPlanServiceImpl) GetAllPlans(ctx context.Context, limit, offs
 }
 
 // ApprovePlan approves a production plan
-func (s *ProductionPlanServiceImpl) ApprovePlan(ctx context.Context, id uuid.UUID, approverID string) error {
+func (s *ProductionPlanServiceImpl) ApprovePlan(ctx context.Context, id uuid.ID, approverID uuid.ID) error {
 	plan, err := s.repo.GetByID(ctx, id)
 	if err != nil {
 		return err
@@ -184,7 +184,7 @@ func (s *ProductionPlanServiceImpl) ApprovePlan(ctx context.Context, id uuid.UUI
 }
 
 // ActivatePlan activates an approved production plan
-func (s *ProductionPlanServiceImpl) ActivatePlan(ctx context.Context, id uuid.UUID) error {
+func (s *ProductionPlanServiceImpl) ActivatePlan(ctx context.Context, id uuid.ID) error {
 	plan, err := s.repo.GetByID(ctx, id)
 	if err != nil {
 		return err
@@ -207,7 +207,7 @@ func (s *ProductionPlanServiceImpl) ActivatePlan(ctx context.Context, id uuid.UU
 }
 
 // CompletePlan marks a production plan as completed
-func (s *ProductionPlanServiceImpl) CompletePlan(ctx context.Context, id uuid.UUID) error {
+func (s *ProductionPlanServiceImpl) CompletePlan(ctx context.Context, id uuid.ID) error {
 	plan, err := s.repo.GetByID(ctx, id)
 	if err != nil {
 		return err
@@ -223,7 +223,7 @@ func (s *ProductionPlanServiceImpl) CompletePlan(ctx context.Context, id uuid.UU
 }
 
 // CancelPlan cancels a production plan
-func (s *ProductionPlanServiceImpl) CancelPlan(ctx context.Context, id uuid.UUID, reason string) error {
+func (s *ProductionPlanServiceImpl) CancelPlan(ctx context.Context, id uuid.ID, reason string) error {
 	plan, err := s.repo.GetByID(ctx, id)
 	if err != nil {
 		return err
@@ -241,7 +241,7 @@ func (s *ProductionPlanServiceImpl) CancelPlan(ctx context.Context, id uuid.UUID
 }
 
 // Item management
-func (s *ProductionPlanServiceImpl) AddItem(ctx context.Context, planID uuid.UUID, item *entities.ProductionPlanItem) error {
+func (s *ProductionPlanServiceImpl) AddItem(ctx context.Context, planID uuid.ID, item *entities.ProductionPlanItem) error {
 	// Verify the plan exists
 	plan, err := s.repo.GetByID(ctx, planID)
 	if err != nil {
@@ -291,7 +291,7 @@ func (s *ProductionPlanServiceImpl) UpdateItem(ctx context.Context, item *entiti
 	return s.repo.UpdateItem(ctx, item)
 }
 
-func (s *ProductionPlanServiceImpl) DeleteItem(ctx context.Context, itemID uuid.UUID) error {
+func (s *ProductionPlanServiceImpl) DeleteItem(ctx context.Context, itemID uuid.ID) error {
 	// Get the item to find the plan
 	item, err := s.repo.GetItemByID(ctx, itemID)
 	if err != nil {
@@ -320,7 +320,7 @@ func (s *ProductionPlanServiceImpl) DeleteItem(ctx context.Context, itemID uuid.
 	return s.repo.Update(ctx, plan)
 }
 
-func (s *ProductionPlanServiceImpl) UpdateItemProgress(ctx context.Context, itemID uuid.UUID, producedQuantity int) error {
+func (s *ProductionPlanServiceImpl) UpdateItemProgress(ctx context.Context, itemID uuid.ID, producedQuantity int) error {
 	// Get the item to find the plan
 	item, err := s.repo.GetItemByID(ctx, itemID)
 	if err != nil {

@@ -8,6 +8,10 @@ import { TwoLevelLayout } from '@/components/ui/two-level-layout'
 import { Header } from '@/components/ui/header'
 import { AdvancedDataTable } from '@/components/ui/advanced-data-table'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu'
+import { Input } from '@/components/ui/input'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { HugeiconsIcon } from '@hugeicons/react'
+import { Search01Icon } from '@hugeicons/core-free-icons'
 
 import Link from 'next/link'
 import { invoiceService } from '@/services/accounting'
@@ -56,6 +60,9 @@ export default function InvoicesPage() {
   const [loading, setLoading] = useState(false)
   const [invoices, setInvoices] = useState<Invoice[]>([])
   const [filteredInvoices, setFilteredInvoices] = useState<Invoice[]>([])
+  const [searchTerm, setSearchTerm] = useState('')
+  const [statusFilter, setStatusFilter] = useState<string>('all')
+  const [paymentStatusFilter, setPaymentStatusFilter] = useState<string>('all')
 
   useEffect(() => {
     setMounted(true)
@@ -78,6 +85,33 @@ export default function InvoicesPage() {
     }
   }
 
+  // Filter invoices based on search and status
+  useEffect(() => {
+    let filtered = invoices
+
+    // Apply search filter
+    if (searchTerm) {
+      const searchLower = searchTerm.toLowerCase()
+      filtered = filtered.filter(invoice =>
+        invoice.invoice_number.toLowerCase().includes(searchLower) ||
+        invoice.customer_name.toLowerCase().includes(searchLower) ||
+        invoice.customer_email?.toLowerCase().includes(searchLower)
+      )
+    }
+
+    // Apply status filter
+    if (statusFilter !== 'all') {
+      filtered = filtered.filter(invoice => invoice.status === statusFilter)
+    }
+
+    // Apply payment status filter
+    if (paymentStatusFilter !== 'all') {
+      filtered = filtered.filter(invoice => invoice.payment_status === paymentStatusFilter)
+    }
+
+    setFilteredInvoices(filtered)
+  }, [searchTerm, statusFilter, paymentStatusFilter, invoices])
+
   const formatCurrency = (amount?: number): string => {
     if (!mounted || typeof amount !== 'number' || isNaN(amount)) return ''
     return `Rp ${amount.toLocaleString('id-ID')}`
@@ -95,23 +129,23 @@ export default function InvoicesPage() {
 
   const getStatusBadge = (status: string) => {
     const config = {
-      draft: { variant: 'secondary' as const, label: 'Draft' },
-      sent: { variant: 'default' as const, label: 'Sent' },
-      paid: { variant: 'default' as const, label: 'Paid' },
-      overdue: { variant: 'destructive' as const, label: 'Overdue' },
-      cancelled: { variant: 'destructive' as const, label: 'Cancelled' }
+      draft: { variant: 'secondary' as const, label: 'Draft', className: '' },
+      sent: { variant: 'default' as const, label: 'Sent', className: '' },
+      paid: { variant: 'default' as const, label: 'Paid', className: '' },
+      overdue: { variant: 'destructive' as const, label: 'Overdue', className: 'text-white' },
+      cancelled: { variant: 'destructive' as const, label: 'Cancelled', className: 'text-white' }
     }
-    return config[status as keyof typeof config] || { variant: 'secondary' as const, label: status }
+    return config[status as keyof typeof config] || { variant: 'secondary' as const, label: status, className: '' }
   }
 
   const getPaymentStatusBadge = (status: string) => {
     const config = {
-      unpaid: { variant: 'destructive' as const, label: 'Unpaid' },
-      partial: { variant: 'secondary' as const, label: 'Partial' },
-      paid: { variant: 'default' as const, label: 'Paid' },
-      refunded: { variant: 'outline' as const, label: 'Refunded' }
+      unpaid: { variant: 'destructive' as const, label: 'Unpaid', className: 'text-white' },
+      partial: { variant: 'secondary' as const, label: 'Partial', className: '' },
+      paid: { variant: 'default' as const, label: 'Paid', className: '' },
+      refunded: { variant: 'outline' as const, label: 'Refunded', className: '' }
     }
-    return config[status as keyof typeof config] || { variant: 'secondary' as const, label: status }
+    return config[status as keyof typeof config] || { variant: 'secondary' as const, label: status, className: '' }
   }
 
   const columns = [
@@ -187,10 +221,10 @@ export default function InvoicesPage() {
       key: 'status' as keyof Invoice,
       title: 'Status',
       render: (value: unknown, invoice: Invoice) => {
-        const { variant, label } = getStatusBadge(invoice.status)
+        const { variant, label, className } = getStatusBadge(invoice.status)
         return (
           <div className="flex items-center space-x-2">
-            <Badge variant={variant}>{label}</Badge>
+            <Badge variant={variant} className={className}>{label}</Badge>
           </div>
         )
       }
@@ -199,8 +233,8 @@ export default function InvoicesPage() {
       key: 'payment_status' as keyof Invoice,
       title: 'Payment Status',
       render: (value: unknown, invoice: Invoice) => {
-        const { variant, label } = getPaymentStatusBadge(invoice.payment_status)
-        return <Badge variant={variant}>{label}</Badge>
+        const { variant, label, className } = getPaymentStatusBadge(invoice.payment_status)
+        return <Badge variant={variant} className={className}>{label}</Badge>
       }
     },
     {
@@ -264,30 +298,63 @@ export default function InvoicesPage() {
       />
 
       <div className="flex-1 p-6 space-y-6">
+        {/* Search and Filters */}
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          {/* Search - Left Side */}
+          <div className="relative w-full md:w-96">
+            <HugeiconsIcon
+              icon={Search01Icon}
+              className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground"
+            />
+            <Input
+              placeholder="Search invoices, customers..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10 bg-white dark:bg-zinc-900"
+            />
+          </div>
+
+          {/* Filters - Right Side */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-[130px] h-10 bg-white dark:bg-zinc-900">
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Status</SelectItem>
+                <SelectItem value="draft">Draft</SelectItem>
+                <SelectItem value="sent">Sent</SelectItem>
+                <SelectItem value="paid">Paid</SelectItem>
+                <SelectItem value="overdue">Overdue</SelectItem>
+                <SelectItem value="cancelled">Cancelled</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={paymentStatusFilter} onValueChange={setPaymentStatusFilter}>
+              <SelectTrigger className="w-[150px] h-10 bg-white dark:bg-zinc-900">
+                <SelectValue placeholder="Payment" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Payment</SelectItem>
+                <SelectItem value="unpaid">Unpaid</SelectItem>
+                <SelectItem value="partial">Partial</SelectItem>
+                <SelectItem value="paid">Paid</SelectItem>
+                <SelectItem value="refunded">Refunded</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
 
         {/* Invoices Table */}
         <AdvancedDataTable
           data={filteredInvoices}
           columns={columns}
           loading={loading}
-          searchPlaceholder="Search invoices..."
-          exportEnabled={true}
           pagination={{
             current: 1,
             pageSize: 10,
             total: filteredInvoices.length,
             onChange: () => { }
-          }}
-          onSearch={(filters) => {
-            const filtered = invoices.filter(invoice => {
-              if (filters.search) {
-                const searchLower = filters.search.toLowerCase()
-                return invoice.invoice_number.toLowerCase().includes(searchLower) ||
-                  invoice.customer_name.toLowerCase().includes(searchLower)
-              }
-              return true
-            })
-            setFilteredInvoices(filtered)
           }}
         />
 

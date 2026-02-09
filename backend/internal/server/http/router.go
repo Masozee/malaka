@@ -5,14 +5,15 @@ import (
 	"malaka/api/openapi/generated"
 	"malaka/internal/modules/shipping/presentation/http"
 	"malaka/internal/server/container"
+	"malaka/internal/shared/auth"
 
 	sales_handlers "malaka/internal/modules/sales/presentation/http/handlers"
 	sales_routes "malaka/internal/modules/sales/presentation/http/routes"
-	
+
 	// Accounting imports
 	accounting_handlers "malaka/internal/modules/accounting/presentation/http/handlers"
 	accounting_routes "malaka/internal/modules/accounting/presentation/http/routes"
-	
+
 	// Inventory imports
 	inventory_handlers "malaka/internal/modules/inventory/presentation/http/handlers"
 	inventory_routes "malaka/internal/modules/inventory/presentation/http/routes"
@@ -24,6 +25,10 @@ import (
 	// Notifications imports
 	notifications_handlers "malaka/internal/modules/notifications/presentation/http/handlers"
 	notifications_routes "malaka/internal/modules/notifications/presentation/http/routes"
+
+	// Messaging imports
+	messaging_handlers "malaka/internal/modules/messaging/presentation/http/handlers"
+	messaging_routes "malaka/internal/modules/messaging/presentation/http/routes"
 )
 
 // SetupRouter configures routes that don't require authentication
@@ -71,7 +76,7 @@ func SetupRouter(router *gin.Engine, c *container.Container) {
 
 // SetupProtectedRoutes configures routes that require authentication
 // This function receives a router group that already has auth middleware applied
-func SetupProtectedRoutes(protectedAPI *gin.RouterGroup, c *container.Container) {
+func SetupProtectedRoutes(protectedAPI *gin.RouterGroup, c *container.Container, rbacSvc *auth.RBACService) {
 	// Initialize sales handlers
 	salesOrderHandler := sales_handlers.NewSalesOrderHandler(c.SalesOrderService)
 	salesInvoiceHandler := sales_handlers.NewSalesInvoiceHandler(c.SalesInvoiceService)
@@ -86,7 +91,7 @@ func SetupProtectedRoutes(protectedAPI *gin.RouterGroup, c *container.Container)
 	salesRekonsiliasiHandler := sales_handlers.NewSalesRekonsiliasiHandler(c.SalesRekonsiliasiService)
 
 	// Register sales routes under v1 API (protected)
-	sales_routes.RegisterSalesRoutes(protectedAPI, salesOrderHandler, salesInvoiceHandler, posTransactionHandler, onlineOrderHandler, consignmentSalesHandler, salesReturnHandler, promotionHandler, salesTargetHandler, salesKompetitorHandler, prosesMarginHandler, salesRekonsiliasiHandler)
+	sales_routes.RegisterSalesRoutes(protectedAPI, salesOrderHandler, salesInvoiceHandler, posTransactionHandler, onlineOrderHandler, consignmentSalesHandler, salesReturnHandler, promotionHandler, salesTargetHandler, salesKompetitorHandler, prosesMarginHandler, salesRekonsiliasiHandler, rbacSvc)
 	
 	// Initialize accounting handlers
 	generalLedgerHandler := accounting_handlers.NewGeneralLedgerHandler(c.GeneralLedgerService)
@@ -108,19 +113,19 @@ func SetupProtectedRoutes(protectedAPI *gin.RouterGroup, c *container.Container)
 	// trialBalanceHandler := accounting_handlers.NewTrialBalanceHandler(c.TrialBalanceService)
 
 	// Register accounting routes under v1 API (protected)
-	accounting_routes.RegisterAccountingRoutes(protectedAPI, generalLedgerHandler, journalEntryHandler, nil, costCenterHandler, nil, autoJournalHandler, exchangeRateHandler, chartOfAccountHandler)
+	accounting_routes.RegisterAccountingRoutes(protectedAPI, generalLedgerHandler, journalEntryHandler, nil, costCenterHandler, nil, autoJournalHandler, exchangeRateHandler, chartOfAccountHandler, rbacSvc)
 
 	// Register budget routes under accounting
 	accountingGroup := protectedAPI.Group("/accounting")
-	accounting_routes.RegisterBudgetRoutes(accountingGroup, budgetHandler)
+	accounting_routes.RegisterBudgetRoutes(accountingGroup, budgetHandler, rbacSvc)
 
 	// Initialize financial period handler and register routes
 	financialPeriodHandler := accounting_handlers.NewFinancialPeriodHandler(c.FinancialPeriodService)
-	accounting_routes.RegisterFinancialPeriodRoutes(accountingGroup, financialPeriodHandler)
+	accounting_routes.RegisterFinancialPeriodRoutes(accountingGroup, financialPeriodHandler, rbacSvc)
 
 	// Initialize fixed asset handler and register routes
 	fixedAssetHandler := accounting_handlers.NewFixedAssetHandler(c.FixedAssetService)
-	accounting_routes.RegisterFixedAssetRoutes(accountingGroup, fixedAssetHandler)
+	accounting_routes.RegisterFixedAssetRoutes(accountingGroup, fixedAssetHandler, rbacSvc)
 
 	// Initialize inventory handlers
 	purchaseOrderHandler := inventory_handlers.NewPurchaseOrderHandler(c.PurchaseOrderService)
@@ -141,7 +146,7 @@ func SetupProtectedRoutes(protectedAPI *gin.RouterGroup, c *container.Container)
 	rfqHandler := inventory_handlers.NewRFQHandler(c.RFQService)
 
 	// Register inventory routes under v1 API (protected)
-	inventory_routes.RegisterInventoryRoutes(protectedAPI, purchaseOrderHandler, goodsReceiptHandler, stockHandler, transferHandler, draftOrderHandler, stockAdjustmentHandler, stockOpnameHandler, returnSupplierHandler, simpleGoodsIssueHandler, rfqHandler)
+	inventory_routes.RegisterInventoryRoutes(protectedAPI, purchaseOrderHandler, goodsReceiptHandler, stockHandler, transferHandler, draftOrderHandler, stockAdjustmentHandler, stockOpnameHandler, returnSupplierHandler, simpleGoodsIssueHandler, rfqHandler, rbacSvc)
 
 	// Initialize procurement handlers
 	purchaseRequestHandler := procurement_handlers.NewPurchaseRequestHandler(c.PurchaseRequestService, c.SqlxDB)
@@ -152,11 +157,17 @@ func SetupProtectedRoutes(protectedAPI *gin.RouterGroup, c *container.Container)
 	procurementRFQHandler := procurement_handlers.NewRFQHandler(c.ProcurementRFQService, c.SqlxDB)
 
 	// Register procurement routes under v1 API (protected)
-	procurement_routes.RegisterProcurementRoutes(protectedAPI, purchaseRequestHandler, procurementPurchaseOrderHandler, contractHandler, vendorEvaluationHandler, analyticsHandler, procurementRFQHandler)
+	procurement_routes.RegisterProcurementRoutes(protectedAPI, purchaseRequestHandler, procurementPurchaseOrderHandler, contractHandler, vendorEvaluationHandler, analyticsHandler, procurementRFQHandler, rbacSvc)
 
 	// Initialize notification handlers
 	notificationHandler := notifications_handlers.NewNotificationHandler(c.NotificationService)
 
 	// Register notification routes under v1 API (protected)
-	notifications_routes.RegisterNotificationRoutes(protectedAPI, notificationHandler)
+	notifications_routes.RegisterNotificationRoutes(protectedAPI, notificationHandler, rbacSvc)
+
+	// Initialize messaging handlers
+	messagingHandler := messaging_handlers.NewMessagingHandler(c.MessagingService)
+
+	// Register messaging routes under v1 API (protected)
+	messaging_routes.RegisterMessagingRoutes(protectedAPI, messagingHandler, rbacSvc)
 }

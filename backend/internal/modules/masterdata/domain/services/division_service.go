@@ -4,9 +4,9 @@ import (
 	"context"
 	"time"
 
-	"github.com/google/uuid"
 	"malaka/internal/modules/masterdata/domain/entities"
 	"malaka/internal/modules/masterdata/domain/repositories"
+	"malaka/internal/shared/uuid"
 )
 
 // DivisionService provides business logic for division operations.
@@ -40,7 +40,7 @@ func (s *DivisionService) CreateDivision(ctx context.Context, division *entities
 }
 
 // GetDivisionByID retrieves a division by its ID.
-func (s *DivisionService) GetDivisionByID(ctx context.Context, id uuid.UUID) (*entities.Division, error) {
+func (s *DivisionService) GetDivisionByID(ctx context.Context, id uuid.ID) (*entities.Division, error) {
 	return s.repo.GetByID(ctx, id)
 }
 
@@ -60,7 +60,7 @@ func (s *DivisionService) GetDivisionByCode(ctx context.Context, code string) (*
 }
 
 // GetDivisionsByParentID retrieves all divisions under a parent division.
-func (s *DivisionService) GetDivisionsByParentID(ctx context.Context, parentID uuid.UUID) ([]*entities.Division, error) {
+func (s *DivisionService) GetDivisionsByParentID(ctx context.Context, parentID uuid.ID) ([]*entities.Division, error) {
 	return s.repo.GetByParentID(ctx, parentID)
 }
 
@@ -88,6 +88,6 @@ func (s *DivisionService) UpdateDivision(ctx context.Context, division *entities
 }
 
 // DeleteDivision deletes a division by its ID.
-func (s *DivisionService) DeleteDivision(ctx context.Context, id uuid.UUID) error {
+func (s *DivisionService) DeleteDivision(ctx context.Context, id uuid.ID) error {
 	return s.repo.Delete(ctx, id)
 }

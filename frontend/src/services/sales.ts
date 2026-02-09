@@ -78,6 +78,30 @@ export interface SalesInvoice {
   updated_at: string
 }
 
+export interface CreatePosItemRequest {
+  article_id: string
+  quantity: number
+  unit_price: number
+  total_price: number
+}
+
+export interface CreatePosTransactionRequest {
+  total_amount: number
+  payment_method: string
+  cashier_id: string
+  items: CreatePosItemRequest[]
+}
+
+export interface PosTransaction {
+  id: string
+  transaction_date: string
+  total_amount: number
+  payment_method: string
+  cashier_id: string
+  created_at: string
+  updated_at: string
+}
+
 export interface CreateDirectSaleRequest {
   transaction_date: string
   total_amount: number
@@ -131,6 +155,11 @@ class SalesService {
 
   async createDirectSale(data: CreateDirectSaleRequest): Promise<DirectSale> {
     const response = await apiClient.post<{ data: DirectSale }>(`${this.baseUrl}/pos-transactions/`, data)
+    return response.data
+  }
+
+  async createPosTransaction(data: CreatePosTransactionRequest): Promise<PosTransaction> {
+    const response = await apiClient.post<{ data: PosTransaction }>(`${this.baseUrl}/pos-transactions/`, data)
     return response.data
   }
 

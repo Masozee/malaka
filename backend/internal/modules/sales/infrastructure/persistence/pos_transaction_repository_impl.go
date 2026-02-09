@@ -6,6 +6,7 @@ import (
 
 	"github.com/jmoiron/sqlx"
 	"malaka/internal/modules/sales/domain/entities"
+	"malaka/internal/shared/uuid"
 )
 
 // PosTransactionRepositoryImpl implements repositories.PosTransactionRepository.
@@ -26,7 +27,7 @@ func (r *PosTransactionRepositoryImpl) Create(ctx context.Context, pt *entities.
 }
 
 // GetByID retrieves a POS transaction by its ID from the database.
-func (r *PosTransactionRepositoryImpl) GetByID(ctx context.Context, id string) (*entities.PosTransaction, error) {
+func (r *PosTransactionRepositoryImpl) GetByID(ctx context.Context, id uuid.ID) (*entities.PosTransaction, error) {
 	query := `SELECT id, transaction_date, total_amount, payment_method, cashier_id, created_at, updated_at FROM pos_transactions WHERE id = $1`
 	row := r.db.QueryRowContext(ctx, query, id)
 
@@ -106,7 +107,7 @@ func (r *PosTransactionRepositoryImpl) Update(ctx context.Context, pt *entities.
 }
 
 // Delete deletes a POS transaction by its ID from the database.
-func (r *PosTransactionRepositoryImpl) Delete(ctx context.Context, id string) error {
+func (r *PosTransactionRepositoryImpl) Delete(ctx context.Context, id uuid.ID) error {
 	query := `DELETE FROM pos_transactions WHERE id = $1`
 	_, err := r.db.ExecContext(ctx, query, id)
 	return err

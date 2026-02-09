@@ -2,10 +2,11 @@ package services
 
 import (
 	"context"
+	"time"
 
 	"malaka/internal/modules/inventory/domain/entities"
 	"malaka/internal/modules/inventory/domain/repositories"
-	"malaka/internal/shared/utils"
+	"malaka/internal/shared/uuid"
 )
 
 // SimpleGoodsIssueService provides business logic for simple goods issue operations.
@@ -30,11 +31,12 @@ func NewSimpleGoodsIssueService(repo repositories.SimpleGoodsIssueRepository) Si
 
 // CreateGoodsIssue creates a new simple goods issue.
 func (s *simpleGoodsIssueServiceImpl) CreateGoodsIssue(ctx context.Context, goodsIssue *entities.SimpleGoodsIssue) error {
-	if goodsIssue.ID == "" {
-		goodsIssue.ID = utils.RandomString(10)
+	if goodsIssue.ID.IsNil() {
+		goodsIssue.ID = uuid.New()
 	}
-	goodsIssue.CreatedAt = utils.Now()
-	goodsIssue.UpdatedAt = utils.Now()
+	now := time.Now()
+	goodsIssue.CreatedAt = now
+	goodsIssue.UpdatedAt = now
 
 	return s.repo.Create(ctx, goodsIssue)
 }
@@ -51,7 +53,7 @@ func (s *simpleGoodsIssueServiceImpl) GetGoodsIssueByID(ctx context.Context, id 
 
 // UpdateGoodsIssue updates an existing simple goods issue.
 func (s *simpleGoodsIssueServiceImpl) UpdateGoodsIssue(ctx context.Context, goodsIssue *entities.SimpleGoodsIssue) error {
-	goodsIssue.UpdatedAt = utils.Now()
+	goodsIssue.UpdatedAt = time.Now()
 	return s.repo.Update(ctx, goodsIssue)
 }
 

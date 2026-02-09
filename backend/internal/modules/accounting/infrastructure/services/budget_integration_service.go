@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/google/uuid"
+	"malaka/internal/shared/uuid"
 	"github.com/jmoiron/sqlx"
 
 	"malaka/internal/shared/integration"

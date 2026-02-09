@@ -6,7 +6,7 @@ import (
 
 	"malaka/internal/modules/shipping/domain/entities"
 	"malaka/internal/modules/shipping/domain/repositories"
-	"malaka/internal/shared/utils"
+	"malaka/internal/shared/uuid"
 )
 
 // CourierService provides business logic for courier operations.
@@ -21,14 +21,14 @@ func NewCourierService(repo repositories.CourierRepository) *CourierService {
 
 // CreateCourier creates a new courier.
 func (s *CourierService) CreateCourier(ctx context.Context, courier *entities.Courier) error {
-	if courier.ID == "" {
-		courier.ID = utils.RandomString(10) // Generate a random ID if not provided
+	if courier.ID.IsNil() {
+		courier.ID = uuid.New()
 	}
 	return s.repo.Create(ctx, courier)
 }
 
 // GetCourierByID retrieves a courier by its ID.
-func (s *CourierService) GetCourierByID(ctx context.Context, id string) (*entities.Courier, error) {
+func (s *CourierService) GetCourierByID(ctx context.Context, id uuid.ID) (*entities.Courier, error) {
 	return s.repo.GetByID(ctx, id)
 }
 
@@ -51,7 +51,7 @@ func (s *CourierService) UpdateCourier(ctx context.Context, courier *entities.Co
 }
 
 // DeleteCourier deletes a courier by its ID.
-func (s *CourierService) DeleteCourier(ctx context.Context, id string) error {
+func (s *CourierService) DeleteCourier(ctx context.Context, id uuid.ID) error {
 	// Ensure the courier exists before deleting
 	existingCourier, err := s.repo.GetByID(ctx, id)
 	if err != nil {

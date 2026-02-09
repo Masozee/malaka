@@ -5,6 +5,7 @@ import (
 
 	"malaka/internal/modules/finance/domain/entities"
 	"malaka/internal/shared/types"
+	"malaka/internal/shared/uuid"
 )
 
 // AccountsPayableCreateRequest represents the request to create accounts payable.
@@ -50,8 +51,8 @@ type AccountsPayableResponse struct {
 func (req *AccountsPayableCreateRequest) ToAccountsPayableEntity() *entities.AccountsPayable {
 	return &entities.AccountsPayable{
 		BaseModel:  types.BaseModel{},
-		InvoiceID:  req.InvoiceID,
-		SupplierID: req.SupplierID,
+		InvoiceID:  uuid.MustParse(req.InvoiceID),
+		SupplierID: uuid.MustParse(req.SupplierID),
 		IssueDate:  req.IssueDate,
 		DueDate:    req.DueDate,
 		Amount:     req.Amount,
@@ -65,8 +66,8 @@ func (req *AccountsPayableCreateRequest) ToAccountsPayableEntity() *entities.Acc
 func (req *AccountsPayableUpdateRequest) ToAccountsPayableEntity() *entities.AccountsPayable {
 	return &entities.AccountsPayable{
 		BaseModel:  types.BaseModel{},
-		InvoiceID:  req.InvoiceID,
-		SupplierID: req.SupplierID,
+		InvoiceID:  uuid.MustParse(req.InvoiceID),
+		SupplierID: uuid.MustParse(req.SupplierID),
 		IssueDate:  req.IssueDate,
 		DueDate:    req.DueDate,
 		Amount:     req.Amount,
@@ -79,9 +80,9 @@ func (req *AccountsPayableUpdateRequest) ToAccountsPayableEntity() *entities.Acc
 // FromAccountsPayableEntity converts entities.AccountsPayable to AccountsPayableResponse.
 func FromAccountsPayableEntity(ap *entities.AccountsPayable) *AccountsPayableResponse {
 	return &AccountsPayableResponse{
-		ID:         ap.ID,
-		InvoiceID:  ap.InvoiceID,
-		SupplierID: ap.SupplierID,
+		ID:         ap.ID.String(),
+		InvoiceID:  ap.InvoiceID.String(),
+		SupplierID: ap.SupplierID.String(),
 		IssueDate:  ap.IssueDate,
 		DueDate:    ap.DueDate,
 		Amount:     ap.Amount,

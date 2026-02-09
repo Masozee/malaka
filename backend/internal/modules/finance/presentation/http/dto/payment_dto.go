@@ -5,6 +5,7 @@ import (
 
 	"malaka/internal/modules/finance/domain/entities"
 	"malaka/internal/shared/types"
+	"malaka/internal/shared/uuid"
 )
 
 // PaymentCreateRequest represents the request to create a payment.
@@ -41,11 +42,11 @@ type PaymentResponse struct {
 func (req *PaymentCreateRequest) ToPaymentEntity() *entities.Payment {
 	return &entities.Payment{
 		BaseModel:     types.BaseModel{},
-		InvoiceID:     req.InvoiceID,
+		InvoiceID:     uuid.MustParse(req.InvoiceID),
 		PaymentDate:   req.PaymentDate,
 		Amount:        req.Amount,
 		PaymentMethod: req.PaymentMethod,
-		CashBankID:    req.CashBankID,
+		CashBankID:    uuid.MustParse(req.CashBankID),
 	}
 }
 
@@ -53,23 +54,23 @@ func (req *PaymentCreateRequest) ToPaymentEntity() *entities.Payment {
 func (req *PaymentUpdateRequest) ToPaymentEntity() *entities.Payment {
 	return &entities.Payment{
 		BaseModel:     types.BaseModel{},
-		InvoiceID:     req.InvoiceID,
+		InvoiceID:     uuid.MustParse(req.InvoiceID),
 		PaymentDate:   req.PaymentDate,
 		Amount:        req.Amount,
 		PaymentMethod: req.PaymentMethod,
-		CashBankID:    req.CashBankID,
+		CashBankID:    uuid.MustParse(req.CashBankID),
 	}
 }
 
 // FromPaymentEntity converts entities.Payment to PaymentResponse.
 func FromPaymentEntity(p *entities.Payment) *PaymentResponse {
 	return &PaymentResponse{
-		ID:            p.ID,
-		InvoiceID:     p.InvoiceID,
+		ID:            p.ID.String(),
+		InvoiceID:     p.InvoiceID.String(),
 		PaymentDate:   p.PaymentDate,
 		Amount:        p.Amount,
 		PaymentMethod: p.PaymentMethod,
-		CashBankID:    p.CashBankID,
+		CashBankID:    p.CashBankID.String(),
 		CreatedAt:     p.CreatedAt.Format("2006-01-02T15:04:05Z"),
 		UpdatedAt:     p.UpdatedAt.Format("2006-01-02T15:04:05Z"),
 	}

@@ -51,11 +51,11 @@ type MonthlyClosingResponse struct {
 
 func ToMonthlyClosingResponse(closing *entities.MonthlyClosing) *MonthlyClosingResponse {
 	return &MonthlyClosingResponse{
-		ID:             closing.ID,
+		ID:             closing.ID.String(),
 		ClosingMonth:   closing.ClosingMonth,
 		ClosingYear:    closing.ClosingYear,
 		ClosingDate:    closing.ClosingDate,
-		ClosedBy:       closing.ClosedBy,
+		ClosedBy:       closing.ClosedBy.String(),
 		Status:         closing.Status,
 		OpeningBalance: closing.OpeningBalance,
 		ClosingBalance: closing.ClosingBalance,

@@ -3,12 +3,12 @@ package entities
 import (
 	"time"
 
-	"github.com/google/uuid"
+	"malaka/internal/shared/uuid"
 )
 
 // AutoJournalConfig represents configuration for automatic journal entry creation
 type AutoJournalConfig struct {
-	ID              uuid.UUID              `json:"id" db:"id"`
+	ID              uuid.ID                `json:"id" db:"id"`
 	SourceModule    string                 `json:"source_module" db:"source_module"`
 	TransactionType string                 `json:"transaction_type" db:"transaction_type"`
 	AccountMapping  map[string]interface{} `json:"account_mapping" db:"account_mapping"`
@@ -31,11 +31,11 @@ const (
 
 // AutoJournalLog represents a log of auto-generated journal entries
 type AutoJournalLog struct {
-	ID                uuid.UUID            `json:"id" db:"id"`
+	ID                uuid.ID              `json:"id" db:"id"`
 	SourceModule      string               `json:"source_module" db:"source_module"`
 	SourceID          string               `json:"source_id" db:"source_id"`
 	TransactionType   string               `json:"transaction_type" db:"transaction_type"`
-	JournalEntryID    *uuid.UUID           `json:"journal_entry_id,omitempty" db:"journal_entry_id"`
+	JournalEntryID    *uuid.ID             `json:"journal_entry_id,omitempty" db:"journal_entry_id"`
 	Status            AutoJournalLogStatus `json:"status" db:"status"`
 	ProcessingMessage string               `json:"processing_message" db:"processing_message"`
 	ErrorDetails      string               `json:"error_details,omitempty" db:"error_details"`
@@ -87,7 +87,7 @@ func (ajl *AutoJournalLog) MarkAsProcessing(message string) {
 }
 
 // MarkAsSuccess marks the log as successfully processed
-func (ajl *AutoJournalLog) MarkAsSuccess(journalEntryID uuid.UUID, message string) {
+func (ajl *AutoJournalLog) MarkAsSuccess(journalEntryID uuid.ID, message string) {
 	ajl.Status = AutoJournalLogStatusSuccess
 	ajl.JournalEntryID = &journalEntryID
 	ajl.ProcessingMessage = message

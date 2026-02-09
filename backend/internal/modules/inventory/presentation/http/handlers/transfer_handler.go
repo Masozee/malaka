@@ -1,13 +1,15 @@
 package handlers
 
 import (
+	"time"
+
 	"github.com/gin-gonic/gin"
 
 	"malaka/internal/modules/inventory/domain/entities"
 	"malaka/internal/modules/inventory/domain/services"
 	"malaka/internal/modules/inventory/presentation/http/dto"
 	"malaka/internal/shared/response"
-	"malaka/internal/shared/utils"
+	"malaka/internal/shared/uuid"
 )
 
 // TransferHandler handles HTTP requests for stock transfer operations.
@@ -28,10 +30,22 @@ func (h *TransferHandler) CreateTransferOrder(c *gin.Context) {
 		return
 	}
 
+	fromWarehouseID, err := uuid.Parse(req.FromWarehouseID)
+	if err != nil {
+		response.BadRequest(c, "Invalid from_warehouse_id format", nil)
+		return
+	}
+
+	toWarehouseID, err := uuid.Parse(req.ToWarehouseID)
+	if err != nil {
+		response.BadRequest(c, "Invalid to_warehouse_id format", nil)
+		return
+	}
+
 	to := &entities.TransferOrder{
-		FromWarehouseID: req.FromWarehouseID,
-		ToWarehouseID:   req.ToWarehouseID,
-		OrderDate:       utils.Now(),
+		FromWarehouseID: fromWarehouseID,
+		ToWarehouseID:   toWarehouseID,
+		OrderDate:       time.Now(),
 		Status:          "pending",
 	}
 
@@ -87,13 +101,31 @@ func (h *TransferHandler) UpdateTransferOrder(c *gin.Context) {
 		return
 	}
 
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		response.BadRequest(c, "Invalid ID format", nil)
+		return
+	}
+
+	fromWarehouseID, err := uuid.Parse(req.FromWarehouseID)
+	if err != nil {
+		response.BadRequest(c, "Invalid from_warehouse_id format", nil)
+		return
+	}
+
+	toWarehouseID, err := uuid.Parse(req.ToWarehouseID)
+	if err != nil {
+		response.BadRequest(c, "Invalid to_warehouse_id format", nil)
+		return
+	}
+
 	to := &entities.TransferOrder{
-		FromWarehouseID: req.FromWarehouseID,
-		ToWarehouseID:   req.ToWarehouseID,
-		OrderDate:       utils.Now(),
+		FromWarehouseID: fromWarehouseID,
+		ToWarehouseID:   toWarehouseID,
+		OrderDate:       time.Now(),
 		Status:          req.Status,
 	}
-	to.ID = id // Set the ID from the URL parameter
+	to.ID = parsedID
 
 	if err := h.service.UpdateTransferOrder(c.Request.Context(), to); err != nil {
 		response.InternalServerError(c, err.Error(), nil)

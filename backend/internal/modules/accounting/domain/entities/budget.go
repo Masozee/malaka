@@ -3,7 +3,7 @@ package entities
 import (
 	"time"
 
-	"github.com/google/uuid"
+	"malaka/internal/shared/uuid"
 )
 
 // BudgetStatus represents the status of a budget
@@ -27,7 +27,7 @@ const (
 
 // Budget represents a budget
 type Budget struct {
-	ID            uuid.UUID    `json:"id" db:"id"`
+	ID            uuid.ID      `json:"id" db:"id"`
 	BudgetCode    string       `json:"budget_code" db:"budget_code"`
 	BudgetName    string       `json:"budget_name" db:"budget_name"`
 	BudgetType    BudgetType   `json:"budget_type" db:"budget_type"`
@@ -53,9 +53,9 @@ type Budget struct {
 
 // BudgetLine represents a budget line item
 type BudgetLine struct {
-	ID                uuid.UUID `json:"id" db:"id"`
-	BudgetID          uuid.UUID `json:"budget_id" db:"budget_id"`
-	AccountID         uuid.UUID `json:"account_id" db:"account_id"`
+	ID                uuid.ID `json:"id" db:"id"`
+	BudgetID          uuid.ID `json:"budget_id" db:"budget_id"`
+	AccountID         uuid.ID `json:"account_id" db:"account_id"`
 	LineNumber        int       `json:"line_number" db:"line_number"`
 	Description       string    `json:"description" db:"description"`
 	BudgetedAmount    float64   `json:"budgeted_amount" db:"budgeted_amount"`
@@ -76,7 +76,7 @@ type BudgetLine struct {
 
 // BudgetComparison represents budget vs actual comparison
 type BudgetComparison struct {
-	AccountID        uuid.UUID `json:"account_id"`
+	AccountID        uuid.ID `json:"account_id"`
 	AccountCode      string    `json:"account_code"`
 	AccountName      string    `json:"account_name"`
 	BudgetedAmount   float64   `json:"budgeted_amount"`
@@ -189,10 +189,10 @@ func (b *Budget) Validate() error {
 
 // Validate checks if the budget line is valid
 func (bl *BudgetLine) Validate() error {
-	if bl.BudgetID == uuid.Nil {
+	if bl.BudgetID.IsNil() {
 		return NewValidationError("budget_id is required")
 	}
-	if bl.AccountID == uuid.Nil {
+	if bl.AccountID.IsNil() {
 		return NewValidationError("account_id is required")
 	}
 	if bl.LineNumber <= 0 {

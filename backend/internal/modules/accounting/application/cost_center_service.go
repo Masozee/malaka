@@ -6,7 +6,7 @@ import (
 	"malaka/internal/modules/accounting/infrastructure"
 	"time"
 
-	"github.com/google/uuid"
+	"malaka/internal/shared/uuid"
 )
 
 // CostCenterService provides application-level operations for Cost Centers.

@@ -8,9 +8,9 @@ import (
 	"malaka/internal/modules/hr/domain/services"
 	"malaka/internal/modules/hr/presentation/http/dto"
 	"malaka/internal/shared/response"
+	"malaka/internal/shared/uuid"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 )
 
 type LeaveHandler struct {
@@ -84,14 +84,14 @@ func (h *LeaveHandler) UpdateLeaveType(c *gin.Context) {
 		return
 	}
 
-	leaveTypeID, err := uuid.Parse(id)
+	parsedID, err := uuid.Parse(id)
 	if err != nil {
 		response.BadRequest(c, "Invalid leave type ID format", err.Error())
 		return
 	}
 
 	leaveType := &entities.LeaveType{
-		ID:               leaveTypeID,
+		ID:               parsedID,
 		Name:             req.Name,
 		Code:             req.Code,
 		Description:      req.Description,
@@ -203,13 +203,13 @@ func (h *LeaveHandler) UpdateLeaveRequest(c *gin.Context) {
 		response.BadRequest(c, "Invalid leave request ID format", err.Error())
 		return
 	}
-	
+
 	employeeID, err := uuid.Parse(req.EmployeeID)
 	if err != nil {
 		response.BadRequest(c, "Invalid employee ID format", err.Error())
 		return
 	}
-	
+
 	leaveTypeID, err := uuid.Parse(req.LeaveTypeID)
 	if err != nil {
 		response.BadRequest(c, "Invalid leave type ID format", err.Error())
@@ -217,9 +217,9 @@ func (h *LeaveHandler) UpdateLeaveRequest(c *gin.Context) {
 	}
 
 	leaveRequest := &entities.LeaveRequest{
-		ID:               requestID,
-		EmployeeID:       employeeID,
-		LeaveTypeID:      leaveTypeID,
+		ID:          requestID,
+		EmployeeID:  employeeID,
+		LeaveTypeID: leaveTypeID,
 		StartDate:        startDate,
 		EndDate:          endDate,
 		Reason:           req.Reason,

@@ -31,9 +31,11 @@ import (
 	production_handlers "malaka/internal/modules/production/presentation/http/handlers"
 	production_routes "malaka/internal/modules/production/presentation/http/routes"
 
+	"malaka/internal/shared/audit"
 	"malaka/internal/shared/auth"
 	"malaka/internal/shared/cache"
 	"malaka/internal/shared/logger"
+	ws "malaka/internal/shared/websocket"
 
 	// Invitations imports
 	invitations_handlers "malaka/internal/modules/invitations/presentation/http/handlers"
@@ -226,6 +228,9 @@ func (server *Server) setupRouter() {
 		}
 	}
 
+	// WebSocket endpoint (auth via query param, before middleware group)
+	apiV1.GET("/ws", ws.HandleWebSocket(server.container.WSHub, server.config.JWTSecret))
+
 	// ============================================================
 	// PROTECTED ROUTES (authentication required)
 	// ============================================================
@@ -233,179 +238,185 @@ func (server *Server) setupRouter() {
 	// Apply authentication middleware to protected API group
 	protectedAPI := apiV1.Group("")
 	protectedAPI.Use(authMiddleware)
+	protectedAPI.Use(auth.LoadPermissions(server.container.RBACService))
+	protectedAPI.Use(audit.Middleware(server.container.SqlxDB))
+
+	// RBAC service reference for route-level permission middleware
+	rbacSvc := server.container.RBACService
 
 	// Register protected masterdata routes
 	masterdata := protectedAPI.Group("/masterdata")
+	masterdata.Use(auth.RequireModuleAccess(rbacSvc, "masterdata"))
 	{
 		// Company routes
 		company := masterdata.Group("/companies")
 		{
-			company.POST("/", companyHandler.CreateCompany)
-			company.GET("/", companyHandler.GetAllCompanies)
-			company.GET("/:id", companyHandler.GetCompanyByID)
-			company.PUT("/:id", companyHandler.UpdateCompany)
-			company.DELETE("/:id", companyHandler.DeleteCompany)
+			company.POST("/", auth.RequirePermission(rbacSvc, "masterdata.company.create"), companyHandler.CreateCompany)
+			company.GET("/", auth.RequirePermission(rbacSvc, "masterdata.company.list"), companyHandler.GetAllCompanies)
+			company.GET("/:id", auth.RequirePermission(rbacSvc, "masterdata.company.read"), companyHandler.GetCompanyByID)
+			company.PUT("/:id", auth.RequirePermission(rbacSvc, "masterdata.company.update"), companyHandler.UpdateCompany)
+			company.DELETE("/:id", auth.RequirePermission(rbacSvc, "masterdata.company.delete"), companyHandler.DeleteCompany)
 		}
 
 		// User routes (authenticated operations)
 		user := masterdata.Group("/users")
 		{
-			user.POST("/", userHandler.CreateUser)
-			user.GET("/", userHandler.GetAllUsers)
-			user.GET("/:id", userHandler.GetUserByID)
-			user.PUT("/:id", userHandler.UpdateUser)
-			user.DELETE("/:id", userHandler.DeleteUser)
+			user.POST("/", auth.RequirePermission(rbacSvc, "masterdata.user.create"), userHandler.CreateUser)
+			user.GET("/", auth.RequirePermission(rbacSvc, "masterdata.user.list"), userHandler.GetAllUsers)
+			user.GET("/:id", auth.RequirePermission(rbacSvc, "masterdata.user.read"), userHandler.GetUserByID)
+			user.PUT("/:id", auth.RequirePermission(rbacSvc, "masterdata.user.update"), userHandler.UpdateUser)
+			user.DELETE("/:id", auth.RequirePermission(rbacSvc, "masterdata.user.delete"), userHandler.DeleteUser)
 		}
 
 		// Classification routes
 		classification := masterdata.Group("/classifications")
 		{
-			classification.POST("/", classificationHandler.CreateClassification)
-			classification.GET("/", classificationHandler.GetAllClassifications)
-			classification.GET("/:id", classificationHandler.GetClassificationByID)
-			classification.PUT("/:id", classificationHandler.UpdateClassification)
-			classification.DELETE("/:id", classificationHandler.DeleteClassification)
+			classification.POST("/", auth.RequirePermission(rbacSvc, "masterdata.classification.create"), classificationHandler.CreateClassification)
+			classification.GET("/", auth.RequirePermission(rbacSvc, "masterdata.classification.list"), classificationHandler.GetAllClassifications)
+			classification.GET("/:id", auth.RequirePermission(rbacSvc, "masterdata.classification.read"), classificationHandler.GetClassificationByID)
+			classification.PUT("/:id", auth.RequirePermission(rbacSvc, "masterdata.classification.update"), classificationHandler.UpdateClassification)
+			classification.DELETE("/:id", auth.RequirePermission(rbacSvc, "masterdata.classification.delete"), classificationHandler.DeleteClassification)
 		}
 
 		// Color routes
 		color := masterdata.Group("/colors")
 		{
-			color.POST("/", colorHandler.CreateColor)
-			color.GET("/", colorHandler.GetAllColors)
-			color.GET("/:id", colorHandler.GetColorByID)
-			color.PUT("/:id", colorHandler.UpdateColor)
-			color.DELETE("/:id", colorHandler.DeleteColor)
+			color.POST("/", auth.RequirePermission(rbacSvc, "masterdata.color.create"), colorHandler.CreateColor)
+			color.GET("/", auth.RequirePermission(rbacSvc, "masterdata.color.list"), colorHandler.GetAllColors)
+			color.GET("/:id", auth.RequirePermission(rbacSvc, "masterdata.color.read"), colorHandler.GetColorByID)
+			color.PUT("/:id", auth.RequirePermission(rbacSvc, "masterdata.color.update"), colorHandler.UpdateColor)
+			color.DELETE("/:id", auth.RequirePermission(rbacSvc, "masterdata.color.delete"), colorHandler.DeleteColor)
 		}
 
 		// Article routes
 		article := masterdata.Group("/articles")
 		{
-			article.POST("/", articleHandler.CreateArticle)
-			article.GET("/", articleHandler.GetAllArticles)
-			article.GET("/:id", articleHandler.GetArticleByID)
-			article.PUT("/:id", articleHandler.UpdateArticle)
-			article.DELETE("/:id", articleHandler.DeleteArticle)
-			article.POST("/:id/images/", articleHandler.UploadArticleImage)
-			article.DELETE("/:id/images/", articleHandler.DeleteArticleImage)
+			article.POST("/", auth.RequirePermission(rbacSvc, "masterdata.article.create"), articleHandler.CreateArticle)
+			article.GET("/", auth.RequirePermission(rbacSvc, "masterdata.article.list"), articleHandler.GetAllArticles)
+			article.GET("/:id", auth.RequirePermission(rbacSvc, "masterdata.article.read"), articleHandler.GetArticleByID)
+			article.PUT("/:id", auth.RequirePermission(rbacSvc, "masterdata.article.update"), articleHandler.UpdateArticle)
+			article.DELETE("/:id", auth.RequirePermission(rbacSvc, "masterdata.article.delete"), articleHandler.DeleteArticle)
+			article.POST("/:id/images/", auth.RequirePermission(rbacSvc, "masterdata.article.update"), articleHandler.UploadArticleImage)
+			article.DELETE("/:id/images/", auth.RequirePermission(rbacSvc, "masterdata.article.update"), articleHandler.DeleteArticleImage)
 		}
 
 		// Model routes
 		model := masterdata.Group("/models")
 		{
-			model.POST("/", modelHandler.CreateModel)
-			model.GET("/", modelHandler.GetAllModels)
-			model.GET("/:id", modelHandler.GetModelByID)
-			model.PUT("/:id", modelHandler.UpdateModel)
-			model.DELETE("/:id", modelHandler.DeleteModel)
+			model.POST("/", auth.RequirePermission(rbacSvc, "masterdata.model.create"), modelHandler.CreateModel)
+			model.GET("/", auth.RequirePermission(rbacSvc, "masterdata.model.list"), modelHandler.GetAllModels)
+			model.GET("/:id", auth.RequirePermission(rbacSvc, "masterdata.model.read"), modelHandler.GetModelByID)
+			model.PUT("/:id", auth.RequirePermission(rbacSvc, "masterdata.model.update"), modelHandler.UpdateModel)
+			model.DELETE("/:id", auth.RequirePermission(rbacSvc, "masterdata.model.delete"), modelHandler.DeleteModel)
 		}
 
 		// Size routes
 		size := masterdata.Group("/sizes")
 		{
-			size.POST("/", sizeHandler.CreateSize)
-			size.GET("/", sizeHandler.GetAllSizes)
-			size.GET("/:id", sizeHandler.GetSizeByID)
-			size.PUT("/:id", sizeHandler.UpdateSize)
-			size.DELETE("/:id", sizeHandler.DeleteSize)
+			size.POST("/", auth.RequirePermission(rbacSvc, "masterdata.size.create"), sizeHandler.CreateSize)
+			size.GET("/", auth.RequirePermission(rbacSvc, "masterdata.size.list"), sizeHandler.GetAllSizes)
+			size.GET("/:id", auth.RequirePermission(rbacSvc, "masterdata.size.read"), sizeHandler.GetSizeByID)
+			size.PUT("/:id", auth.RequirePermission(rbacSvc, "masterdata.size.update"), sizeHandler.UpdateSize)
+			size.DELETE("/:id", auth.RequirePermission(rbacSvc, "masterdata.size.delete"), sizeHandler.DeleteSize)
 		}
 
 		// Barcode routes
 		barcode := masterdata.Group("/barcodes")
 		{
-			barcode.POST("/", barcodeHandler.CreateBarcode)
-			barcode.GET("/", barcodeHandler.GetAllBarcodes)
-			barcode.GET("/:id", barcodeHandler.GetBarcodeByID)
-			barcode.PUT("/:id", barcodeHandler.UpdateBarcode)
-			barcode.DELETE("/:id", barcodeHandler.DeleteBarcode)
-			
+			barcode.POST("/", auth.RequirePermission(rbacSvc, "masterdata.barcode.create"), barcodeHandler.CreateBarcode)
+			barcode.GET("/", auth.RequirePermission(rbacSvc, "masterdata.barcode.list"), barcodeHandler.GetAllBarcodes)
+			barcode.GET("/:id", auth.RequirePermission(rbacSvc, "masterdata.barcode.read"), barcodeHandler.GetBarcodeByID)
+			barcode.PUT("/:id", auth.RequirePermission(rbacSvc, "masterdata.barcode.update"), barcodeHandler.UpdateBarcode)
+			barcode.DELETE("/:id", auth.RequirePermission(rbacSvc, "masterdata.barcode.delete"), barcodeHandler.DeleteBarcode)
+
 			// Barcode generation endpoints
-			barcode.POST("/generate", barcodeHandler.GenerateBarcode)
-			barcode.POST("/generate/batch", barcodeHandler.GenerateBatchBarcodes)
-			barcode.POST("/generate/articles", barcodeHandler.GenerateArticleBarcodes)
+			barcode.POST("/generate", auth.RequirePermission(rbacSvc, "masterdata.barcode.create"), barcodeHandler.GenerateBarcode)
+			barcode.POST("/generate/batch", auth.RequirePermission(rbacSvc, "masterdata.barcode.create"), barcodeHandler.GenerateBatchBarcodes)
+			barcode.POST("/generate/articles", auth.RequirePermission(rbacSvc, "masterdata.barcode.create"), barcodeHandler.GenerateArticleBarcodes)
 		}
 
 		// Price routes
 		price := masterdata.Group("/prices")
 		{
-			price.POST("/", priceHandler.CreatePrice)
-			price.GET("/", priceHandler.GetAllPrices)
-			price.GET("/:id", priceHandler.GetPriceByID)
-			price.PUT("/:id", priceHandler.UpdatePrice)
-			price.DELETE("/:id", priceHandler.DeletePrice)
+			price.POST("/", auth.RequirePermission(rbacSvc, "masterdata.price.create"), priceHandler.CreatePrice)
+			price.GET("/", auth.RequirePermission(rbacSvc, "masterdata.price.list"), priceHandler.GetAllPrices)
+			price.GET("/:id", auth.RequirePermission(rbacSvc, "masterdata.price.read"), priceHandler.GetPriceByID)
+			price.PUT("/:id", auth.RequirePermission(rbacSvc, "masterdata.price.update"), priceHandler.UpdatePrice)
+			price.DELETE("/:id", auth.RequirePermission(rbacSvc, "masterdata.price.delete"), priceHandler.DeletePrice)
 		}
 
 		// Supplier routes
 		supplier := masterdata.Group("/suppliers")
 		{
-			supplier.POST("/", supplierHandler.CreateSupplier)
-			supplier.GET("/", supplierHandler.GetAllSuppliers)
-			supplier.GET("/:id", supplierHandler.GetSupplierByID)
-			supplier.PUT("/:id", supplierHandler.UpdateSupplier)
-			supplier.DELETE("/:id", supplierHandler.DeleteSupplier)
+			supplier.POST("/", auth.RequirePermission(rbacSvc, "masterdata.supplier.create"), supplierHandler.CreateSupplier)
+			supplier.GET("/", auth.RequirePermission(rbacSvc, "masterdata.supplier.list"), supplierHandler.GetAllSuppliers)
+			supplier.GET("/:id", auth.RequirePermission(rbacSvc, "masterdata.supplier.read"), supplierHandler.GetSupplierByID)
+			supplier.PUT("/:id", auth.RequirePermission(rbacSvc, "masterdata.supplier.update"), supplierHandler.UpdateSupplier)
+			supplier.DELETE("/:id", auth.RequirePermission(rbacSvc, "masterdata.supplier.delete"), supplierHandler.DeleteSupplier)
 		}
 
 		// Customer routes
 		customer := masterdata.Group("/customers")
 		{
-			customer.POST("/", customerHandler.CreateCustomer)
-			customer.GET("/", customerHandler.GetAllCustomers)
-			customer.GET("/:id", customerHandler.GetCustomerByID)
-			customer.PUT("/:id", customerHandler.UpdateCustomer)
-			customer.DELETE("/:id", customerHandler.DeleteCustomer)
+			customer.POST("/", auth.RequirePermission(rbacSvc, "masterdata.customer.create"), customerHandler.CreateCustomer)
+			customer.GET("/", auth.RequirePermission(rbacSvc, "masterdata.customer.list"), customerHandler.GetAllCustomers)
+			customer.GET("/:id", auth.RequirePermission(rbacSvc, "masterdata.customer.read"), customerHandler.GetCustomerByID)
+			customer.PUT("/:id", auth.RequirePermission(rbacSvc, "masterdata.customer.update"), customerHandler.UpdateCustomer)
+			customer.DELETE("/:id", auth.RequirePermission(rbacSvc, "masterdata.customer.delete"), customerHandler.DeleteCustomer)
 		}
 
 		// Warehouse routes
 		warehouse := masterdata.Group("/warehouses")
 		{
-			warehouse.POST("/", warehouseHandler.CreateWarehouse)
-			warehouse.GET("/", warehouseHandler.GetAllWarehouses)
-			warehouse.GET("/:id", warehouseHandler.GetWarehouseByID)
-			warehouse.PUT("/:id", warehouseHandler.UpdateWarehouse)
-			warehouse.DELETE("/:id", warehouseHandler.DeleteWarehouse)
+			warehouse.POST("/", auth.RequirePermission(rbacSvc, "masterdata.warehouse.create"), warehouseHandler.CreateWarehouse)
+			warehouse.GET("/", auth.RequirePermission(rbacSvc, "masterdata.warehouse.list"), warehouseHandler.GetAllWarehouses)
+			warehouse.GET("/:id", auth.RequirePermission(rbacSvc, "masterdata.warehouse.read"), warehouseHandler.GetWarehouseByID)
+			warehouse.PUT("/:id", auth.RequirePermission(rbacSvc, "masterdata.warehouse.update"), warehouseHandler.UpdateWarehouse)
+			warehouse.DELETE("/:id", auth.RequirePermission(rbacSvc, "masterdata.warehouse.delete"), warehouseHandler.DeleteWarehouse)
 		}
 
 		// Gallery Image routes
 		galleryImage := masterdata.Group("/gallery-images")
 		{
-			galleryImage.POST("/", galleryImageHandler.CreateGalleryImage)
-			galleryImage.GET("/", galleryImageHandler.GetAllGalleryImages)
-			galleryImage.GET("/:id", galleryImageHandler.GetGalleryImageByID)
-			galleryImage.PUT("/:id", galleryImageHandler.UpdateGalleryImage)
-			galleryImage.DELETE("/:id", galleryImageHandler.DeleteGalleryImage)
-			galleryImage.GET("/article/:article_id", galleryImageHandler.GetGalleryImagesByArticleID)
+			galleryImage.POST("/", auth.RequirePermission(rbacSvc, "masterdata.gallery-image.create"), galleryImageHandler.CreateGalleryImage)
+			galleryImage.GET("/", auth.RequirePermission(rbacSvc, "masterdata.gallery-image.list"), galleryImageHandler.GetAllGalleryImages)
+			galleryImage.GET("/:id", auth.RequirePermission(rbacSvc, "masterdata.gallery-image.read"), galleryImageHandler.GetGalleryImageByID)
+			galleryImage.PUT("/:id", auth.RequirePermission(rbacSvc, "masterdata.gallery-image.update"), galleryImageHandler.UpdateGalleryImage)
+			galleryImage.DELETE("/:id", auth.RequirePermission(rbacSvc, "masterdata.gallery-image.delete"), galleryImageHandler.DeleteGalleryImage)
+			galleryImage.GET("/article/:article_id", auth.RequirePermission(rbacSvc, "masterdata.gallery-image.list"), galleryImageHandler.GetGalleryImagesByArticleID)
 		}
 
 		// Courier Rate routes
 		courierRate := masterdata.Group("/courier-rates")
 		{
-			courierRate.POST("/", courierRateHandler.CreateCourierRate)
-			courierRate.GET("/:id", courierRateHandler.GetCourierRateByID)
-			courierRate.PUT("/:id", courierRateHandler.UpdateCourierRate)
-			courierRate.DELETE("/:id", courierRateHandler.DeleteCourierRate)
+			courierRate.POST("/", auth.RequirePermission(rbacSvc, "masterdata.courier-rate.create"), courierRateHandler.CreateCourierRate)
+			courierRate.GET("/:id", auth.RequirePermission(rbacSvc, "masterdata.courier-rate.read"), courierRateHandler.GetCourierRateByID)
+			courierRate.PUT("/:id", auth.RequirePermission(rbacSvc, "masterdata.courier-rate.update"), courierRateHandler.UpdateCourierRate)
+			courierRate.DELETE("/:id", auth.RequirePermission(rbacSvc, "masterdata.courier-rate.delete"), courierRateHandler.DeleteCourierRate)
 		}
 
 		// Department Store routes
 		depstore := masterdata.Group("/depstores")
 		{
-			depstore.POST("/", depstoreHandler.CreateDepstore)
-			depstore.GET("/", depstoreHandler.GetAllDepstores)
-			depstore.GET("/:id", depstoreHandler.GetDepstoreByID)
-			depstore.GET("/code/:code", depstoreHandler.GetDepstoreByCode)
-			depstore.PUT("/:id", depstoreHandler.UpdateDepstore)
-			depstore.DELETE("/:id", depstoreHandler.DeleteDepstore)
+			depstore.POST("/", auth.RequirePermission(rbacSvc, "masterdata.depstore.create"), depstoreHandler.CreateDepstore)
+			depstore.GET("/", auth.RequirePermission(rbacSvc, "masterdata.depstore.list"), depstoreHandler.GetAllDepstores)
+			depstore.GET("/:id", auth.RequirePermission(rbacSvc, "masterdata.depstore.read"), depstoreHandler.GetDepstoreByID)
+			depstore.GET("/code/:code", auth.RequirePermission(rbacSvc, "masterdata.depstore.read"), depstoreHandler.GetDepstoreByCode)
+			depstore.PUT("/:id", auth.RequirePermission(rbacSvc, "masterdata.depstore.update"), depstoreHandler.UpdateDepstore)
+			depstore.DELETE("/:id", auth.RequirePermission(rbacSvc, "masterdata.depstore.delete"), depstoreHandler.DeleteDepstore)
 		}
 
 		// Division routes
 		division := masterdata.Group("/divisions")
 		{
-			division.POST("/", divisionHandler.CreateDivision)
-			division.GET("/", divisionHandler.GetAllDivisions)
-			division.GET("/:id", divisionHandler.GetDivisionByID)
-			division.GET("/code/:code", divisionHandler.GetDivisionByCode)
-			division.GET("/parent/:parentId", divisionHandler.GetDivisionsByParentID)
-			division.GET("/root", divisionHandler.GetRootDivisions)
-			division.PUT("/:id", divisionHandler.UpdateDivision)
-			division.DELETE("/:id", divisionHandler.DeleteDivision)
+			division.POST("/", auth.RequirePermission(rbacSvc, "masterdata.division.create"), divisionHandler.CreateDivision)
+			division.GET("/", auth.RequirePermission(rbacSvc, "masterdata.division.list"), divisionHandler.GetAllDivisions)
+			division.GET("/:id", auth.RequirePermission(rbacSvc, "masterdata.division.read"), divisionHandler.GetDivisionByID)
+			division.GET("/code/:code", auth.RequirePermission(rbacSvc, "masterdata.division.read"), divisionHandler.GetDivisionByCode)
+			division.GET("/parent/:parentId", auth.RequirePermission(rbacSvc, "masterdata.division.list"), divisionHandler.GetDivisionsByParentID)
+			division.GET("/root", auth.RequirePermission(rbacSvc, "masterdata.division.list"), divisionHandler.GetRootDivisions)
+			division.PUT("/:id", auth.RequirePermission(rbacSvc, "masterdata.division.update"), divisionHandler.UpdateDivision)
+			division.DELETE("/:id", auth.RequirePermission(rbacSvc, "masterdata.division.delete"), divisionHandler.DeleteDivision)
 		}
 	}
 
@@ -422,7 +433,7 @@ func (server *Server) setupRouter() {
 	shippingInvoiceHandler := shipping_handlers.NewShippingInvoiceHandler(server.container.ShippingInvoiceService)
 
 	// Register shipping routes (protected)
-	shipping_routes.RegisterShippingRoutes(protectedAPI, courierHandler, shipmentHandler, airwaybillHandler, manifestHandler, shippingInvoiceHandler)
+	shipping_routes.RegisterShippingRoutes(protectedAPI, courierHandler, shipmentHandler, airwaybillHandler, manifestHandler, shippingInvoiceHandler, rbacSvc)
 
 	// Initialize finance handlers
 	cashBankHandler := finance_handlers.NewCashBankHandler(server.container.CashBankService)
@@ -441,25 +452,25 @@ func (server *Server) setupRouter() {
 	cashBookHandler := finance_handlers.NewCashBookHandler(server.container.CashBookService)
 
 	// Register finance routes (protected)
-	finance_routes.RegisterFinanceRoutes(protectedAPI, cashBankHandler, paymentHandler, financeInvoiceHandler, accountsPayableHandler, accountsReceivableHandler, cashDisbursementHandler, cashReceiptHandler, bankTransferHandler, cashOpeningBalanceHandler, purchaseVoucherHandler, expenditureRequestHandler, checkClearanceHandler, monthlyClosingHandler, cashBookHandler)
+	finance_routes.RegisterFinanceRoutes(protectedAPI, cashBankHandler, paymentHandler, financeInvoiceHandler, accountsPayableHandler, accountsReceivableHandler, cashDisbursementHandler, cashReceiptHandler, bankTransferHandler, cashOpeningBalanceHandler, purchaseVoucherHandler, expenditureRequestHandler, checkClearanceHandler, monthlyClosingHandler, cashBookHandler, rbacSvc)
 
 	// Initialize HR handlers
 	employeeHandler := hr_handlers.NewEmployeeHandler(server.container.EmployeeService)
 	payrollHandler := hr_handlers.NewPayrollHandler(server.container.PayrollService)
-	attendanceHandler := hr_handlers.NewAttendanceHandler()
+	attendanceHandler := hr_handlers.NewAttendanceHandler(server.container.DB)
 	leaveHandler := hr_handlers.NewLeaveHandler(server.container.LeaveService)
 	performanceReviewHandler := hr_handlers.NewPerformanceReviewHandler(server.container.PerformanceReviewService)
 	trainingHandler := hr_handlers.NewTrainingHandler(server.container.TrainingService)
 
 	// Register HR routes (protected)
-	hr_routes.RegisterHRRoutes(protectedAPI, employeeHandler, payrollHandler, attendanceHandler, leaveHandler, performanceReviewHandler, trainingHandler)
+	hr_routes.RegisterHRRoutes(protectedAPI, employeeHandler, payrollHandler, attendanceHandler, leaveHandler, performanceReviewHandler, trainingHandler, rbacSvc)
 
 	// Initialize calendar handlers
 	eventHandler := calendar_handlers.NewEventHandler(server.container.EventService)
 	attendeeHandler := calendar_handlers.NewAttendeeHandler(server.container.EventService)
 
 	// Register calendar routes with authentication (already handles its own auth internally)
-	calendar_routes.RegisterCalendarRoutes(apiV1, eventHandler, attendeeHandler, server.config.JWTSecret)
+	calendar_routes.RegisterCalendarRoutes(apiV1, eventHandler, attendeeHandler, server.config.JWTSecret, rbacSvc)
 
 	// Initialize settings handlers
 	settingHandler := settings_handlers.NewSettingHandler(server.container.SettingService)
@@ -483,21 +494,22 @@ func (server *Server) setupRouter() {
 	// Protected settings routes
 	protectedSettings := protectedAPI.Group("/settings")
 	{
-		protectedSettings.GET("/user", settingHandler.GetUserSettings)
-		protectedSettings.GET("/category/:category", settingHandler.GetSettingsByCategory)
-		protectedSettings.PUT("/:category/:key", settingHandler.UpdateSetting)
-		protectedSettings.PUT("/bulk", settingHandler.UpdateBulkSettings)
-		protectedSettings.GET("/audit/:category/:key", settingHandler.GetAuditLog)
-		protectedSettings.GET("/permissions", settingHandler.GetSettingPermissions)
+		protectedSettings.GET("/user", auth.RequirePermission(rbacSvc, "settings.setting.read"), settingHandler.GetUserSettings)
+		protectedSettings.GET("/category/:category", auth.RequirePermission(rbacSvc, "settings.setting.list"), settingHandler.GetSettingsByCategory)
+		protectedSettings.PUT("/:category/:key", auth.RequirePermission(rbacSvc, "settings.setting.update"), settingHandler.UpdateSetting)
+		protectedSettings.PUT("/bulk", auth.RequirePermission(rbacSvc, "settings.setting.update"), settingHandler.UpdateBulkSettings)
+		protectedSettings.GET("/audit/:category/:key", auth.RequirePermission(rbacSvc, "settings.setting.audit"), settingHandler.GetAuditLog)
+		protectedSettings.GET("/permissions", auth.RequirePermission(rbacSvc, "settings.setting.read"), settingHandler.GetSettingPermissions)
 	}
 
 	// Register production routes (protected)
 	production := protectedAPI.Group("/production")
+	production.Use(auth.RequireModuleAccess(rbacSvc, "production"))
 	{
-		production_routes.SetupProductionDashboardRoutes(production, productionDashboardHandler)
-		production_routes.SetupWorkOrderRoutes(production, workOrderHandler)
-		production_routes.SetupQualityControlRoutes(production, qualityControlHandler)
-		production_routes.SetupProductionPlanRoutes(production, productionPlanHandler)
+		production_routes.SetupProductionDashboardRoutes(production, productionDashboardHandler, rbacSvc)
+		production_routes.SetupWorkOrderRoutes(production, workOrderHandler, rbacSvc)
+		production_routes.SetupQualityControlRoutes(production, qualityControlHandler, rbacSvc)
+		production_routes.SetupProductionPlanRoutes(production, productionPlanHandler, rbacSvc)
 	}
 
 	// Register cache health/monitoring routes (protected)
@@ -508,12 +520,12 @@ func (server *Server) setupRouter() {
 	// Register protected invitation routes (admin management)
 	protectedInvitations := protectedAPI.Group("/invitations")
 	{
-		protectedInvitations.POST("", invitationHandler.CreateInvitation)
-		protectedInvitations.GET("", invitationHandler.ListInvitations)
-		protectedInvitations.GET("/:id", invitationHandler.GetInvitation)
-		protectedInvitations.POST("/:id/revoke", invitationHandler.RevokeInvitation)
-		protectedInvitations.POST("/:id/resend", invitationHandler.ResendInvitation)
-		protectedInvitations.DELETE("/:id", invitationHandler.DeleteInvitation)
+		protectedInvitations.POST("", auth.RequirePermission(rbacSvc, "invitations.invitation.create"), invitationHandler.CreateInvitation)
+		protectedInvitations.GET("", auth.RequirePermission(rbacSvc, "invitations.invitation.list"), invitationHandler.ListInvitations)
+		protectedInvitations.GET("/:id", auth.RequirePermission(rbacSvc, "invitations.invitation.read"), invitationHandler.GetInvitation)
+		protectedInvitations.POST("/:id/revoke", auth.RequirePermission(rbacSvc, "invitations.invitation.revoke"), invitationHandler.RevokeInvitation)
+		protectedInvitations.POST("/:id/resend", auth.RequirePermission(rbacSvc, "invitations.invitation.resend"), invitationHandler.ResendInvitation)
+		protectedInvitations.DELETE("/:id", auth.RequirePermission(rbacSvc, "invitations.invitation.delete"), invitationHandler.DeleteInvitation)
 	}
 
 	// Initialize profile handler and register routes
@@ -521,47 +533,95 @@ func (server *Server) setupRouter() {
 		profileHandler := profile_handlers.NewProfileHandler(server.container.ProfileService, server.container.StorageService)
 		profile := protectedAPI.Group("/profile")
 		{
-			profile.GET("", profileHandler.GetProfile)
-			profile.PUT("", profileHandler.UpdateProfile)
-			profile.POST("/avatar", profileHandler.UploadAvatar)
-			profile.DELETE("/avatar", profileHandler.DeleteAvatar)
+			profile.GET("", auth.RequirePermission(rbacSvc, "profile.profile.read"), profileHandler.GetProfile)
+			profile.PUT("", auth.RequirePermission(rbacSvc, "profile.profile.update"), profileHandler.UpdateProfile)
+			profile.POST("/avatar", auth.RequirePermission(rbacSvc, "profile.profile.update"), profileHandler.UploadAvatar)
+			profile.DELETE("/avatar", auth.RequirePermission(rbacSvc, "profile.profile.update"), profileHandler.DeleteAvatar)
 
 			// Profile settings
 			settings := profile.Group("/settings")
 			{
-				settings.GET("/notifications", profileHandler.GetNotificationSettings)
-				settings.PUT("/notifications", profileHandler.UpdateNotificationSettings)
-				settings.GET("/privacy", profileHandler.GetPrivacySettings)
-				settings.PUT("/privacy", profileHandler.UpdatePrivacySettings)
-				settings.GET("/security", profileHandler.GetSecuritySettings)
-				settings.PUT("/security", profileHandler.UpdateSecuritySettings)
-				settings.GET("/appearance", profileHandler.GetAppearanceSettings)
-				settings.PUT("/appearance", profileHandler.UpdateAppearanceSettings)
-				settings.GET("/language", profileHandler.GetLanguageSettings)
-				settings.PUT("/language", profileHandler.UpdateLanguageSettings)
+				settings.GET("/notifications", auth.RequirePermission(rbacSvc, "profile.profile.read"), profileHandler.GetNotificationSettings)
+				settings.PUT("/notifications", auth.RequirePermission(rbacSvc, "profile.profile.update"), profileHandler.UpdateNotificationSettings)
+				settings.GET("/privacy", auth.RequirePermission(rbacSvc, "profile.profile.read"), profileHandler.GetPrivacySettings)
+				settings.PUT("/privacy", auth.RequirePermission(rbacSvc, "profile.profile.update"), profileHandler.UpdatePrivacySettings)
+				settings.GET("/security", auth.RequirePermission(rbacSvc, "profile.profile.read"), profileHandler.GetSecuritySettings)
+				settings.PUT("/security", auth.RequirePermission(rbacSvc, "profile.profile.update"), profileHandler.UpdateSecuritySettings)
+				settings.GET("/appearance", auth.RequirePermission(rbacSvc, "profile.profile.read"), profileHandler.GetAppearanceSettings)
+				settings.PUT("/appearance", auth.RequirePermission(rbacSvc, "profile.profile.update"), profileHandler.UpdateAppearanceSettings)
+				settings.GET("/language", auth.RequirePermission(rbacSvc, "profile.profile.read"), profileHandler.GetLanguageSettings)
+				settings.PUT("/language", auth.RequirePermission(rbacSvc, "profile.profile.update"), profileHandler.UpdateLanguageSettings)
 			}
 
 			// Security operations
-			profile.POST("/change-password", profileHandler.ChangePassword)
+			profile.POST("/change-password", auth.RequirePermission(rbacSvc, "profile.profile.update"), profileHandler.ChangePassword)
 			security := profile.Group("/security")
 			{
-				security.POST("/2fa/enable", profileHandler.EnableTwoFactorAuth)
-				security.POST("/2fa/disable", profileHandler.DisableTwoFactorAuth)
-				security.DELETE("/sessions/:sessionId", profileHandler.TerminateSession)
+				security.POST("/2fa/enable", auth.RequirePermission(rbacSvc, "profile.profile.update"), profileHandler.EnableTwoFactorAuth)
+				security.POST("/2fa/disable", auth.RequirePermission(rbacSvc, "profile.profile.update"), profileHandler.DisableTwoFactorAuth)
+				security.DELETE("/sessions/:sessionId", auth.RequirePermission(rbacSvc, "profile.profile.update"), profileHandler.TerminateSession)
 			}
 
 			// Account operations
-			profile.GET("/stats", profileHandler.GetProfileStats)
-			profile.GET("/export", profileHandler.ExportProfileData)
-			profile.DELETE("/delete-account", profileHandler.DeleteAccount)
+			profile.GET("/stats", auth.RequirePermission(rbacSvc, "profile.profile.read"), profileHandler.GetProfileStats)
+			profile.GET("/export", auth.RequirePermission(rbacSvc, "profile.profile.read"), profileHandler.ExportProfileData)
+			profile.DELETE("/delete-account", auth.RequirePermission(rbacSvc, "profile.profile.update"), profileHandler.DeleteAccount)
 		}
 	}
+
+	// Register admin RBAC management routes
+	rbacHandler := auth.NewRBACHandler(server.container.RBACService)
+	adminRBAC := protectedAPI.Group("/admin/rbac")
+	adminRBAC.Use(auth.RequireModuleAccess(rbacSvc, "admin"))
+	{
+		// Roles management
+		adminRBAC.GET("/roles", auth.RequirePermission(rbacSvc, "admin.role.list"), rbacHandler.ListRoles)
+		adminRBAC.POST("/roles", auth.RequirePermission(rbacSvc, "admin.role.create"), rbacHandler.CreateRole)
+		adminRBAC.GET("/roles/:id", auth.RequirePermission(rbacSvc, "admin.role.read"), rbacHandler.GetRole)
+		adminRBAC.PUT("/roles/:id", auth.RequirePermission(rbacSvc, "admin.role.update"), rbacHandler.UpdateRole)
+		adminRBAC.DELETE("/roles/:id", auth.RequirePermission(rbacSvc, "admin.role.delete"), rbacHandler.DeleteRole)
+
+		// Permissions management
+		adminRBAC.GET("/permissions", auth.RequirePermission(rbacSvc, "admin.permission.list"), rbacHandler.ListPermissions)
+
+		// Role-Permission assignments
+		adminRBAC.POST("/roles/:id/permissions", auth.RequirePermission(rbacSvc, "admin.permission.assign"), rbacHandler.AssignPermissionsToRole)
+		adminRBAC.DELETE("/roles/:id/permissions/:permId", auth.RequirePermission(rbacSvc, "admin.permission.revoke"), rbacHandler.RevokePermissionFromRole)
+
+		// User-Role assignments
+		adminRBAC.GET("/users/:id/roles", auth.RequirePermission(rbacSvc, "admin.user-role.list"), rbacHandler.GetUserRoles)
+		adminRBAC.POST("/users/:id/roles", auth.RequirePermission(rbacSvc, "admin.user-role.assign"), rbacHandler.AssignRoleToUser)
+		adminRBAC.DELETE("/users/:id/roles/:roleId", auth.RequirePermission(rbacSvc, "admin.user-role.revoke"), rbacHandler.RevokeRoleFromUser)
+
+		// User-Permission direct assignments
+		adminRBAC.GET("/users/:id/permissions", auth.RequirePermission(rbacSvc, "admin.user-role.list"), rbacHandler.GetUserDirectPermissions)
+		adminRBAC.POST("/users/:id/permissions", auth.RequirePermission(rbacSvc, "admin.user-role.assign"), rbacHandler.GrantPermissionsToUser)
+		adminRBAC.DELETE("/users/:id/permissions/:permId", auth.RequirePermission(rbacSvc, "admin.user-role.revoke"), rbacHandler.RevokePermissionFromUser)
+
+		// User audit log
+		adminRBAC.GET("/users/:id/audit-log", auth.RequirePermission(rbacSvc, "admin.audit.list"), rbacHandler.GetUserAuditLog)
+
+		// Audit log
+		adminRBAC.GET("/audit-log", auth.RequirePermission(rbacSvc, "admin.audit.list"), rbacHandler.GetAuditLog)
+	}
+
+	// Register admin audit log routes (general activity audit)
+	auditHandler := audit.NewHandler(server.container.SqlxDB)
+	adminAudit := protectedAPI.Group("/admin/audit")
+	adminAudit.Use(auth.RequireModuleAccess(rbacSvc, "admin"))
+	{
+		adminAudit.GET("", auth.RequirePermission(rbacSvc, "admin.audit.list"), auditHandler.GetAuditLog)
+		adminAudit.GET("/users/:id", auth.RequirePermission(rbacSvc, "admin.audit.list"), auditHandler.GetUserAuditLog)
+	}
+
+	// Current user permissions endpoint (accessible to any authenticated user)
+	protectedAPI.GET("/auth/permissions", rbacHandler.GetMyPermissions)
 
 	// Setup public routes (API documentation, etc.)
 	SetupRouter(router, server.container)
 
 	// Setup protected routes (sales, accounting, inventory, procurement)
-	SetupProtectedRoutes(protectedAPI, server.container)
+	SetupProtectedRoutes(protectedAPI, server.container, rbacSvc)
 
 	server.router = router
 }

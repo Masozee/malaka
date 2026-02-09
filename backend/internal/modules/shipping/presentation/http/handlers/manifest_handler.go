@@ -2,11 +2,11 @@ package handlers
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 
 	"malaka/internal/modules/shipping/domain"
 	"malaka/internal/modules/shipping/domain/dtos"
 	"malaka/internal/shared/response"
+	"malaka/internal/shared/uuid"
 )
 
 type ManifestHandler struct {

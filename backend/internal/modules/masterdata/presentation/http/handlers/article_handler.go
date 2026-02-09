@@ -5,11 +5,11 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"malaka/internal/modules/masterdata/domain/entities"
 	"malaka/internal/modules/masterdata/domain/services"
 	"malaka/internal/modules/masterdata/presentation/http/dto"
 	"malaka/internal/shared/response"
 	"malaka/internal/shared/storage"
+	"malaka/internal/shared/uuid"
 )
 
 // ArticleHandler handles HTTP requests for article operations.
@@ -34,31 +34,8 @@ func (h *ArticleHandler) CreateArticle(c *gin.Context) {
 		return
 	}
 
-	// Set default status if not provided
-	status := req.Status
-	if status == "" {
-		status = "active"
-	}
-
-	article := &entities.Article{
-		Code:             req.Code,
-		Name:             req.Name,
-		Brand:            req.Brand,
-		Category:         req.Category,
-		Gender:           req.Gender,
-		Description:      req.Description,
-		ClassificationID: req.ClassificationID,
-		ColorID:          req.ColorID,
-		ModelID:          req.ModelID,
-		SizeID:           req.SizeID,
-		SupplierID:       req.SupplierID,
-		Barcode:          req.Barcode,
-		Price:            req.Price,
-		Status:           status,
-		ImageURL:         req.ImageURL,
-		ImageURLs:        req.ImageURLs,
-		ThumbnailURL:     req.ThumbnailURL,
-	}
+	// Use DTO's ToEntity method which handles UUID conversion properly
+	article := req.ToEntity()
 
 	if err := h.service.CreateArticle(c.Request.Context(), article); err != nil {
 		response.InternalServerError(c, err.Error(), nil)
@@ -71,7 +48,7 @@ func (h *ArticleHandler) CreateArticle(c *gin.Context) {
 // GetArticleByID handles retrieving an article by its ID.
 func (h *ArticleHandler) GetArticleByID(c *gin.Context) {
 	id := c.Param("id")
-	article, err := h.service.GetArticleByID(c.Request.Context(), id)
+	article, err := h.service.GetArticleByID(c.Request.Context(), uuid.MustParse(id))
 	if err != nil {
 		response.InternalServerError(c, err.Error(), nil)
 		return
@@ -106,7 +83,7 @@ func (h *ArticleHandler) UpdateArticle(c *gin.Context) {
 	}
 
 	// Fetch existing article first for partial update
-	article, err := h.service.GetArticleByID(c.Request.Context(), id)
+	article, err := h.service.GetArticleByID(c.Request.Context(), uuid.MustParse(id))
 	if err != nil {
 		response.InternalServerError(c, err.Error(), nil)
 		return
@@ -116,58 +93,8 @@ func (h *ArticleHandler) UpdateArticle(c *gin.Context) {
 		return
 	}
 
-	// Only update fields that are provided (non-empty)
-	if req.Code != "" {
-		article.Code = req.Code
-	}
-	if req.Name != "" {
-		article.Name = req.Name
-	}
-	if req.Brand != "" {
-		article.Brand = req.Brand
-	}
-	if req.Category != "" {
-		article.Category = req.Category
-	}
-	if req.Gender != "" {
-		article.Gender = req.Gender
-	}
-	if req.Description != "" {
-		article.Description = req.Description
-	}
-	if req.ClassificationID != "" {
-		article.ClassificationID = req.ClassificationID
-	}
-	if req.ColorID != "" {
-		article.ColorID = req.ColorID
-	}
-	if req.ModelID != "" {
-		article.ModelID = req.ModelID
-	}
-	if req.SizeID != "" {
-		article.SizeID = req.SizeID
-	}
-	if req.SupplierID != "" {
-		article.SupplierID = req.SupplierID
-	}
-	if req.Barcode != "" {
-		article.Barcode = req.Barcode
-	}
-	if req.Price > 0 {
-		article.Price = req.Price
-	}
-	if req.Status != "" {
-		article.Status = req.Status
-	}
-	if req.ImageURL != "" {
-		article.ImageURL = req.ImageURL
-	}
-	if len(req.ImageURLs) > 0 {
-		article.ImageURLs = req.ImageURLs
-	}
-	if req.ThumbnailURL != "" {
-		article.ThumbnailURL = req.ThumbnailURL
-	}
+	// Use DTO's ApplyToEntity method which handles UUID conversion properly
+	req.ApplyToEntity(article)
 
 	if err := h.service.UpdateArticle(c.Request.Context(), article); err != nil {
 		response.InternalServerError(c, err.Error(), nil)
@@ -180,7 +107,7 @@ func (h *ArticleHandler) UpdateArticle(c *gin.Context) {
 // DeleteArticle handles deleting an article by its ID.
 func (h *ArticleHandler) DeleteArticle(c *gin.Context) {
 	id := c.Param("id")
-	if err := h.service.DeleteArticle(c.Request.Context(), id); err != nil {
+	if err := h.service.DeleteArticle(c.Request.Context(), uuid.MustParse(id)); err != nil {
 		response.InternalServerError(c, err.Error(), nil)
 		return
 	}
@@ -197,7 +124,7 @@ func (h *ArticleHandler) UploadArticleImage(c *gin.Context) {
 	}
 
 	// Check if article exists
-	article, err := h.service.GetArticleByID(c.Request.Context(), articleID)
+	article, err := h.service.GetArticleByID(c.Request.Context(), uuid.MustParse(articleID))
 	if err != nil {
 		response.InternalServerError(c, err.Error(), nil)
 		return
@@ -305,7 +232,7 @@ func (h *ArticleHandler) DeleteArticleImage(c *gin.Context) {
 	}
 
 	// Get article
-	article, err := h.service.GetArticleByID(c.Request.Context(), articleID)
+	article, err := h.service.GetArticleByID(c.Request.Context(), uuid.MustParse(articleID))
 	if err != nil {
 		response.InternalServerError(c, err.Error(), nil)
 		return

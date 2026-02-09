@@ -57,7 +57,7 @@ func (req *CashBankUpdateRequest) ToCashBankEntity() *entities.CashBank {
 // FromCashBankEntity converts entities.CashBank to CashBankResponse.
 func FromCashBankEntity(cb *entities.CashBank) *CashBankResponse {
 	return &CashBankResponse{
-		ID:        cb.ID,
+		ID:        cb.ID.String(),
 		Name:      cb.Name,
 		AccountNo: cb.AccountNo,
 		Balance:   cb.Balance,

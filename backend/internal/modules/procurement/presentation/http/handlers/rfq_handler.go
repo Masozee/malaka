@@ -12,6 +12,7 @@ import (
 	"malaka/internal/modules/procurement/domain/services"
 	"malaka/internal/modules/procurement/presentation/http/dto"
 	"malaka/internal/shared/response"
+	"malaka/internal/shared/uuid"
 )
 
 // RFQHandler handles HTTP requests for RFQ operations
@@ -76,7 +77,7 @@ func (h *RFQHandler) Create(c *gin.Context) {
 	}
 
 	// Reload the RFQ to get complete data
-	createdRFQ, err := h.service.GetByID(c.Request.Context(), rfq.ID)
+	createdRFQ, err := h.service.GetByID(c.Request.Context(), rfq.ID.String())
 	if err != nil {
 		response.InternalServerError(c, "RFQ created but failed to reload: "+err.Error(), nil)
 		return
@@ -290,6 +291,7 @@ func (h *RFQHandler) UpdateItem(c *gin.Context) {
 		return
 	}
 
+	itemUUID, _ := uuid.Parse(itemID)
 	item := &entities.RFQItem{
 		RFQID:         rfqID,
 		ItemName:      req.ItemName,
@@ -299,7 +301,7 @@ func (h *RFQHandler) UpdateItem(c *gin.Context) {
 		Unit:          req.Unit,
 		TargetPrice:   req.TargetPrice,
 	}
-	item.ID = itemID
+	item.ID = itemUUID
 
 	if err := h.service.UpdateItem(c.Request.Context(), item); err != nil {
 		response.BadRequest(c, err.Error(), nil)
@@ -372,7 +374,7 @@ func (h *RFQHandler) SubmitResponse(c *gin.Context) {
 	}
 
 	// Reload response with all data
-	loadedResponse, err := h.service.GetResponse(c.Request.Context(), rfqResponse.ID)
+	loadedResponse, err := h.service.GetResponse(c.Request.Context(), rfqResponse.ID.String())
 	if err != nil {
 		response.InternalServerError(c, "Response submitted but failed to reload: "+err.Error(), nil)
 		return

@@ -6,6 +6,7 @@ import (
 
 	"github.com/jmoiron/sqlx"
 	"malaka/internal/modules/shipping/domain/entities"
+	"malaka/internal/shared/uuid"
 )
 
 // ShipmentItemRepositoryImpl implements repositories.ShipmentItemRepository.
@@ -26,7 +27,7 @@ func (r *ShipmentItemRepositoryImpl) Create(ctx context.Context, item *entities.
 }
 
 // GetByID retrieves a shipment item by its ID from the database.
-func (r *ShipmentItemRepositoryImpl) GetByID(ctx context.Context, id string) (*entities.ShipmentItem, error) {
+func (r *ShipmentItemRepositoryImpl) GetByID(ctx context.Context, id uuid.ID) (*entities.ShipmentItem, error) {
 	query := `SELECT id, shipment_id, article_id, quantity, created_at, updated_at FROM shipment_items WHERE id = $1`
 	row := r.db.QueryRowContext(ctx, query, id)
 
@@ -46,7 +47,7 @@ func (r *ShipmentItemRepositoryImpl) Update(ctx context.Context, item *entities.
 }
 
 // Delete deletes a shipment item by its ID from the database.
-func (r *ShipmentItemRepositoryImpl) Delete(ctx context.Context, id string) error {
+func (r *ShipmentItemRepositoryImpl) Delete(ctx context.Context, id uuid.ID) error {
 	query := `DELETE FROM shipment_items WHERE id = $1`
 	_, err := r.db.ExecContext(ctx, query, id)
 	return err

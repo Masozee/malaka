@@ -6,6 +6,7 @@ import (
 
 	"github.com/jmoiron/sqlx"
 	"malaka/internal/modules/masterdata/domain/entities"
+	"malaka/internal/shared/uuid"
 )
 
 // UserRepositoryImpl implements repositories.UserRepository.
@@ -28,7 +29,7 @@ func (r *UserRepositoryImpl) Create(ctx context.Context, user *entities.User) er
 }
 
 // GetByID retrieves a user by its ID from the database.
-func (r *UserRepositoryImpl) GetByID(ctx context.Context, id string) (*entities.User, error) {
+func (r *UserRepositoryImpl) GetByID(ctx context.Context, id uuid.ID) (*entities.User, error) {
 	query := `SELECT id, username, password, email, full_name, phone, company_id, role, status, last_login, created_at, updated_at FROM users WHERE id = $1`
 	row := r.db.QueryRowContext(ctx, query, id)
 
@@ -48,7 +49,7 @@ func (r *UserRepositoryImpl) Update(ctx context.Context, user *entities.User) er
 }
 
 // Delete deletes a user by its ID from the database.
-func (r *UserRepositoryImpl) Delete(ctx context.Context, id string) error {
+func (r *UserRepositoryImpl) Delete(ctx context.Context, id uuid.ID) error {
 	query := `DELETE FROM users WHERE id = $1`
 	_, err := r.db.ExecContext(ctx, query, id)
 	return err

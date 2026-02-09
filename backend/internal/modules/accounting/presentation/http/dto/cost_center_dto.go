@@ -3,7 +3,7 @@ package dto
 import (
 	"time"
 
-	"github.com/google/uuid"
+	"malaka/internal/shared/uuid"
 	"malaka/internal/modules/accounting/domain/entities"
 )
 
@@ -15,20 +15,20 @@ type CostCenterRequest struct {
 	Description string               `json:"description"`
 	Type        entities.CostCenterType `json:"type"`
 	ManagerID   string               `json:"manager_id"`
-	ParentID    *uuid.UUID           `json:"parent_id"`
+	ParentID    *uuid.ID           `json:"parent_id"`
 	IsActive    bool                 `json:"is_active"`
 }
 
 // CostCenterResponse represents the response structure for a CostCenter
 type CostCenterResponse struct {
-	ID             uuid.UUID            `json:"id"`
+	ID             uuid.ID            `json:"id"`
 	CompanyID      string               `json:"company_id"`
 	Code           string               `json:"code"`
 	Name           string               `json:"name"`
 	Description    string               `json:"description"`
 	Type           entities.CostCenterType `json:"type"`
 	ManagerID      string               `json:"manager_id"`
-	ParentID       *uuid.UUID           `json:"parent_id"`
+	ParentID       *uuid.ID           `json:"parent_id"`
 	IsActive       bool                 `json:"is_active"`
 	BudgetAmount   float64              `json:"budget_amount"`
 	ActualAmount   float64              `json:"actual_amount"`
@@ -39,17 +39,17 @@ type CostCenterResponse struct {
 
 // CostCenterAllocationRequest represents the request structure for creating/updating a CostCenterAllocation
 type CostCenterAllocationRequest struct {
-	CostCenterID uuid.UUID `json:"cost_center_id" binding:"required"`
-	AccountID    uuid.UUID `json:"account_id" binding:"required"`
+	CostCenterID uuid.ID `json:"cost_center_id" binding:"required"`
+	AccountID    uuid.ID `json:"account_id" binding:"required"`
 	Percentage   float64   `json:"percentage" binding:"required"`
 	EffectiveDate time.Time `json:"effective_date" binding:"required"`
 }
 
 // CostCenterAllocationResponse represents the response structure for a CostCenterAllocation
 type CostCenterAllocationResponse struct {
-	ID           uuid.UUID `json:"id"`
-	CostCenterID uuid.UUID `json:"cost_center_id"`
-	AccountID    uuid.UUID `json:"account_id"`
+	ID           uuid.ID `json:"id"`
+	CostCenterID uuid.ID `json:"cost_center_id"`
+	AccountID    uuid.ID `json:"account_id"`
 	Percentage   float64   `json:"percentage"`
 	EffectiveDate time.Time `json:"effective_date"`
 	CreatedAt    time.Time `json:"created_at"`

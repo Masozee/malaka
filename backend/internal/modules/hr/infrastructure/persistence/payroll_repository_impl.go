@@ -4,9 +4,9 @@ import (
 	"context"
 	"database/sql"
 
-	"github.com/google/uuid"
 	"malaka/internal/modules/hr/domain/entities"
 	"malaka/internal/modules/hr/domain/repositories"
+	"malaka/internal/shared/uuid"
 )
 
 // PostgreSQLPayrollPeriodRepository implements the PayrollPeriodRepository interface
@@ -21,12 +21,12 @@ func NewPostgreSQLPayrollPeriodRepository(db *sql.DB) repositories.PayrollPeriod
 
 func (r *PostgreSQLPayrollPeriodRepository) Create(ctx context.Context, period *entities.PayrollPeriod) error {
 	query := `
-		INSERT INTO salary_posting (id, period_year, period_month, total_employees, 
-			total_gross_salary, total_net_salary, total_deductions, posting_date, 
+		INSERT INTO salary_posting (id, period_year, period_month, total_employees,
+			total_gross_salary, total_net_salary, total_deductions, posting_date,
 			journal_number, posted_by, approved_by, approved_at, status, created_at)
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)`
 
-	if period.ID == uuid.Nil {
+	if period.ID.IsNil() {
 		period.ID = uuid.New()
 	}
 
@@ -39,7 +39,7 @@ func (r *PostgreSQLPayrollPeriodRepository) Create(ctx context.Context, period *
 	return err
 }
 
-func (r *PostgreSQLPayrollPeriodRepository) GetByID(ctx context.Context, id string) (*entities.PayrollPeriod, error) {
+func (r *PostgreSQLPayrollPeriodRepository) GetByID(ctx context.Context, id uuid.ID) (*entities.PayrollPeriod, error) {
 	query := `
 		SELECT id, period_year, period_month, total_employees, total_gross_salary,
 			total_net_salary, total_deductions, posting_date, journal_number,
@@ -65,7 +65,7 @@ func (r *PostgreSQLPayrollPeriodRepository) GetAll(ctx context.Context) ([]*enti
 		SELECT id, period_year, period_month, total_employees, total_gross_salary,
 			total_net_salary, total_deductions, posting_date, journal_number,
 			posted_by, approved_by, approved_at, status, created_at
-		FROM salary_posting 
+		FROM salary_posting
 		ORDER BY period_year DESC, period_month DESC`
 
 	rows, err := r.db.QueryContext(ctx, query)
@@ -128,7 +128,7 @@ func (r *PostgreSQLPayrollPeriodRepository) Update(ctx context.Context, period *
 	return err
 }
 
-func (r *PostgreSQLPayrollPeriodRepository) Delete(ctx context.Context, id string) error {
+func (r *PostgreSQLPayrollPeriodRepository) Delete(ctx context.Context, id uuid.ID) error {
 	query := `DELETE FROM salary_posting WHERE id = $1`
 	_, err := r.db.ExecContext(ctx, query, id)
 	return err
@@ -153,7 +153,7 @@ func (r *PostgreSQLSalaryCalculationRepository) Create(ctx context.Context, calc
 			calculated_at, created_at)
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20)`
 
-	if calculation.ID == uuid.Nil {
+	if calculation.ID.IsNil() {
 		calculation.ID = uuid.New()
 	}
 
@@ -168,7 +168,7 @@ func (r *PostgreSQLSalaryCalculationRepository) Create(ctx context.Context, calc
 	return err
 }
 
-func (r *PostgreSQLSalaryCalculationRepository) GetByID(ctx context.Context, id string) (*entities.SalaryCalculation, error) {
+func (r *PostgreSQLSalaryCalculationRepository) GetByID(ctx context.Context, id uuid.ID) (*entities.SalaryCalculation, error) {
 	query := `
 		SELECT sc.id, sc.employee_id, sc.period_year, sc.period_month,
 			sc.basic_salary, sc.allowances, sc.overtime_amount, sc.commission_amount,
@@ -242,7 +242,7 @@ func (r *PostgreSQLSalaryCalculationRepository) GetAll(ctx context.Context) ([]*
 	return calculations, nil
 }
 
-func (r *PostgreSQLSalaryCalculationRepository) GetByEmployee(ctx context.Context, employeeID string) ([]*entities.SalaryCalculation, error) {
+func (r *PostgreSQLSalaryCalculationRepository) GetByEmployee(ctx context.Context, employeeID uuid.ID) ([]*entities.SalaryCalculation, error) {
 	query := `
 		SELECT sc.id, sc.employee_id, sc.period_year, sc.period_month,
 			sc.basic_salary, sc.allowances, sc.overtime_amount, sc.commission_amount,
@@ -328,7 +328,7 @@ func (r *PostgreSQLSalaryCalculationRepository) GetByPeriod(ctx context.Context,
 	return calculations, nil
 }
 
-func (r *PostgreSQLSalaryCalculationRepository) GetByEmployeeAndPeriod(ctx context.Context, employeeID string, year, month int) (*entities.SalaryCalculation, error) {
+func (r *PostgreSQLSalaryCalculationRepository) GetByEmployeeAndPeriod(ctx context.Context, employeeID uuid.ID, year, month int) (*entities.SalaryCalculation, error) {
 	query := `
 		SELECT sc.id, sc.employee_id, sc.period_year, sc.period_month,
 			sc.basic_salary, sc.allowances, sc.overtime_amount, sc.commission_amount,
@@ -380,7 +380,7 @@ func (r *PostgreSQLSalaryCalculationRepository) Update(ctx context.Context, calc
 	return err
 }
 
-func (r *PostgreSQLSalaryCalculationRepository) Delete(ctx context.Context, id string) error {
+func (r *PostgreSQLSalaryCalculationRepository) Delete(ctx context.Context, id uuid.ID) error {
 	query := `DELETE FROM salary_calculation WHERE id = $1`
 	_, err := r.db.ExecContext(ctx, query, id)
 	return err

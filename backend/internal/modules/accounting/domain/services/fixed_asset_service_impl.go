@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/google/uuid"
+	"malaka/internal/shared/uuid"
 	"malaka/internal/modules/accounting/domain/entities"
 	"malaka/internal/modules/accounting/domain/repositories"
 )
@@ -49,7 +49,7 @@ func (s *fixedAssetServiceImpl) CreateFixedAsset(ctx context.Context, asset *ent
 }
 
 // GetFixedAssetByID retrieves a fixed asset by ID
-func (s *fixedAssetServiceImpl) GetFixedAssetByID(ctx context.Context, id uuid.UUID) (*entities.FixedAsset, error) {
+func (s *fixedAssetServiceImpl) GetFixedAssetByID(ctx context.Context, id uuid.ID) (*entities.FixedAsset, error) {
 	asset, err := s.repo.GetByID(ctx, id)
 	if err != nil {
 		return nil, err
@@ -80,7 +80,7 @@ func (s *fixedAssetServiceImpl) UpdateFixedAsset(ctx context.Context, asset *ent
 }
 
 // DeleteFixedAsset deletes a fixed asset
-func (s *fixedAssetServiceImpl) DeleteFixedAsset(ctx context.Context, id uuid.UUID) error {
+func (s *fixedAssetServiceImpl) DeleteFixedAsset(ctx context.Context, id uuid.ID) error {
 	// Check if asset exists
 	asset, err := s.repo.GetByID(ctx, id)
 	if err != nil {
@@ -134,7 +134,7 @@ func (s *fixedAssetServiceImpl) GetActiveFixedAssetsByCompany(ctx context.Contex
 }
 
 // ProcessDepreciation processes depreciation for a single asset
-func (s *fixedAssetServiceImpl) ProcessDepreciation(ctx context.Context, assetID uuid.UUID) (*entities.FixedAssetDepreciation, error) {
+func (s *fixedAssetServiceImpl) ProcessDepreciation(ctx context.Context, assetID uuid.ID) (*entities.FixedAssetDepreciation, error) {
 	asset, err := s.repo.GetByID(ctx, assetID)
 	if err != nil {
 		return nil, err
@@ -192,7 +192,7 @@ func (s *fixedAssetServiceImpl) ProcessDepreciation(ctx context.Context, assetID
 }
 
 // GetDepreciationSchedule retrieves depreciation schedule for an asset
-func (s *fixedAssetServiceImpl) GetDepreciationSchedule(ctx context.Context, assetID uuid.UUID) ([]*entities.FixedAssetDepreciation, error) {
+func (s *fixedAssetServiceImpl) GetDepreciationSchedule(ctx context.Context, assetID uuid.ID) ([]*entities.FixedAssetDepreciation, error) {
 	return s.repo.GetDepreciationSchedule(ctx, assetID)
 }
 
@@ -263,7 +263,7 @@ func (s *fixedAssetServiceImpl) DisposeAsset(ctx context.Context, disposal *enti
 }
 
 // GetDisposalByAsset retrieves the disposal record for an asset
-func (s *fixedAssetServiceImpl) GetDisposalByAsset(ctx context.Context, assetID uuid.UUID) (*entities.FixedAssetDisposal, error) {
+func (s *fixedAssetServiceImpl) GetDisposalByAsset(ctx context.Context, assetID uuid.ID) (*entities.FixedAssetDisposal, error) {
 	return s.repo.GetDisposalByAsset(ctx, assetID)
 }
 

@@ -6,7 +6,7 @@ import (
 
 	"malaka/internal/modules/finance/domain/entities"
 	"malaka/internal/modules/finance/domain/repositories"
-	"malaka/internal/shared/utils"
+	"malaka/internal/shared/uuid"
 )
 
 // CashOpeningBalanceService provides business logic for cash opening balance operations.
@@ -21,14 +21,14 @@ func NewCashOpeningBalanceService(repo repositories.CashOpeningBalanceRepository
 
 // CreateCashOpeningBalance creates a new cash opening balance.
 func (s *CashOpeningBalanceService) CreateCashOpeningBalance(ctx context.Context, balance *entities.CashOpeningBalance) error {
-	if balance.ID == "" {
-		balance.ID = utils.RandomString(10)
+	if balance.ID.IsNil() {
+		balance.ID = uuid.New()
 	}
 	return s.repo.Create(ctx, balance)
 }
 
 // GetCashOpeningBalanceByID retrieves a cash opening balance by its ID.
-func (s *CashOpeningBalanceService) GetCashOpeningBalanceByID(ctx context.Context, id string) (*entities.CashOpeningBalance, error) {
+func (s *CashOpeningBalanceService) GetCashOpeningBalanceByID(ctx context.Context, id uuid.ID) (*entities.CashOpeningBalance, error) {
 	return s.repo.GetByID(ctx, id)
 }
 
@@ -50,7 +50,7 @@ func (s *CashOpeningBalanceService) UpdateCashOpeningBalance(ctx context.Context
 }
 
 // DeleteCashOpeningBalance deletes a cash opening balance by its ID.
-func (s *CashOpeningBalanceService) DeleteCashOpeningBalance(ctx context.Context, id string) error {
+func (s *CashOpeningBalanceService) DeleteCashOpeningBalance(ctx context.Context, id uuid.ID) error {
 	existingBalance, err := s.repo.GetByID(ctx, id)
 	if err != nil {
 		return err

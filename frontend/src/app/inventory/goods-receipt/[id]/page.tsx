@@ -27,6 +27,7 @@ import {
   InformationCircleIcon
 } from '@hugeicons/core-free-icons';
 import { goodsReceiptService, GoodsReceipt, GoodsReceiptItem } from '@/services/inventory';
+import { EntityShareButton } from '@/components/messaging/EntityShareButton';
 import { useToast } from '@/components/ui/toast';
 
 const getStatusBadge = (status?: 'pending' | 'approved' | 'completed') => {
@@ -258,6 +259,15 @@ export default function GoodsReceiptDetailPage() {
         ]}
         actions={
           <div className="flex items-center gap-2">
+            <EntityShareButton
+              entityType="goods_receipt"
+              entityId={receipt.id}
+              title={receipt.receiptNumber || `GR-${receipt.id?.slice(-8)}`}
+              subtitle={receipt.supplierName || 'No supplier'}
+              status={receipt.status}
+              statusColor={receipt.status === 'completed' ? 'green' : receipt.status === 'pending' ? 'yellow' : 'gray'}
+              url={`/inventory/goods-receipt/${receipt.id}`}
+            />
             <Button variant="outline" size="sm" onClick={() => window.print()}>
               <HugeiconsIcon icon={PrinterIcon} className="w-4 h-4 mr-2" />
               Print

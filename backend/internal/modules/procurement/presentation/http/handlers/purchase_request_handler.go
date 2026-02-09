@@ -5,7 +5,6 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 
 	"malaka/internal/modules/procurement/domain/entities"
@@ -14,6 +13,7 @@ import (
 	"malaka/internal/modules/procurement/presentation/http/dto"
 	"malaka/internal/shared/response"
 	"malaka/internal/shared/utils"
+	"malaka/internal/shared/uuid"
 )
 
 // PurchaseRequestHandler handles HTTP requests for purchase request operations.
@@ -73,10 +73,11 @@ func (h *PurchaseRequestHandler) Create(c *gin.Context) {
 	}
 
 	// Convert DTO to entity
+	requesterUUID, _ := uuid.Parse(requesterID)
 	pr := &entities.PurchaseRequest{
 		Title:        req.Title,
 		Description:  req.Description,
-		RequesterID:  requesterID,
+		RequesterID:  requesterUUID,
 		Department:   req.Department,
 		Priority:     req.Priority,
 		RequiredDate: req.RequiredDate,
@@ -102,7 +103,8 @@ func (h *PurchaseRequestHandler) Create(c *gin.Context) {
 			item.Specification = &itemDTO.Specification
 		}
 		if itemDTO.SupplierID != "" {
-			item.SupplierID = &itemDTO.SupplierID
+			supplierUUID, _ := uuid.Parse(itemDTO.SupplierID)
+			item.SupplierID = &supplierUUID
 		}
 		if item.Unit == "" {
 			item.Unit = "pcs"
@@ -110,7 +112,7 @@ func (h *PurchaseRequestHandler) Create(c *gin.Context) {
 		if item.Currency == "" {
 			item.Currency = "IDR"
 		}
-		item.ID = uuid.New().String()
+		item.ID = uuid.New()
 		item.CreatedAt = utils.Now()
 		item.UpdatedAt = utils.Now()
 		pr.Items = append(pr.Items, item)
@@ -317,8 +319,9 @@ func (h *PurchaseRequestHandler) AddItem(c *gin.Context) {
 		return
 	}
 
+	prUUID, _ := uuid.Parse(prID)
 	item := &entities.PurchaseRequestItem{
-		PurchaseRequestID: prID,
+		PurchaseRequestID: prUUID,
 		ItemName:          req.ItemName,
 		Quantity:          req.Quantity,
 		Unit:              req.Unit,
@@ -332,7 +335,8 @@ func (h *PurchaseRequestHandler) AddItem(c *gin.Context) {
 		item.Specification = &req.Specification
 	}
 	if req.SupplierID != "" {
-		item.SupplierID = &req.SupplierID
+		supplierUUID, _ := uuid.Parse(req.SupplierID)
+		item.SupplierID = &supplierUUID
 	}
 	if item.Unit == "" {
 		item.Unit = "pcs"

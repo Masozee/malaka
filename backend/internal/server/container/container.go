@@ -66,6 +66,11 @@ import (
 	notifications_services "malaka/internal/modules/notifications/domain/services"
 	notifications_persistence "malaka/internal/modules/notifications/infrastructure/persistence"
 
+	// Messaging imports
+	messaging_services "malaka/internal/modules/messaging/domain/services"
+	messaging_persistence "malaka/internal/modules/messaging/infrastructure/persistence"
+	messaging_infra "malaka/internal/modules/messaging/infrastructure"
+
 	// Invitations imports
 	invitations_services "malaka/internal/modules/invitations/domain/services"
 	invitations_persistence "malaka/internal/modules/invitations/infrastructure/persistence"
@@ -84,6 +89,9 @@ import (
 	// Event-driven architecture imports
 	"malaka/internal/shared/events"
 	"malaka/internal/shared/integration"
+
+	// WebSocket imports
+	ws "malaka/internal/shared/websocket"
 
 	// Application layer imports for event handlers
 	finance_app "malaka/internal/modules/finance/application"
@@ -221,6 +229,9 @@ type Container struct {
 	// Notification services
 	NotificationService *notifications_services.NotificationService
 
+	// Messaging services
+	MessagingService *messaging_services.MessagingService
+
 	// Invitation services
 	InvitationService *invitations_services.InvitationService
 
@@ -232,6 +243,12 @@ type Container struct {
 
 	// Integration services
 	BudgetIntegrationService integration.BudgetIntegrationService
+
+	// WebSocket hub
+	WSHub *ws.Hub
+
+	// RBAC services
+	RBACService *auth.RBACService
 }
 
 // NewContainer creates a new dependency container.
@@ -544,8 +561,15 @@ func NewContainer(cfg *config.Config, logger *zap.Logger, db *sql.DB, gormDB *go
 	vendorEvaluationRepo := procurement_persistence.NewVendorEvaluationRepositoryImpl(sqlxDB)
 	procurementRFQRepo := procurement_persistence.NewRFQRepository(sqlxDB)
 
-	// Initialize shared services
-	rbacService := auth.NewRBACService(sqlxDB)
+	// Initialize RBAC services
+	rbacRepo := auth.NewRBACRepositoryImpl(sqlxDB)
+	var rbacCache auth.RBACCache
+	if redisCache != nil {
+		rbacCache = auth.NewRedisRBACCache(redisCache.(*cache.RedisCache).Client())
+	} else {
+		rbacCache = auth.NewNoOpRBACCache()
+	}
+	rbacService := auth.NewRBACService(sqlxDB, rbacRepo, rbacCache)
 
 	// Initialize procurement services
 	purchaseRequestService := procurement_services.NewPurchaseRequestService(purchaseRequestRepo)
@@ -573,6 +597,19 @@ func NewContainer(cfg *config.Config, logger *zap.Logger, db *sql.DB, gormDB *go
 	// Initialize notification repository and service
 	notificationRepo := notifications_persistence.NewPostgresNotificationRepository(sqlxDB)
 	notificationService := notifications_services.NewNotificationService(notificationRepo)
+
+	// Initialize WebSocket hub and wire real-time notifier
+	wsHub := ws.NewHub(logger)
+	go wsHub.Run()
+	notificationService.SetNotifier(ws.NewRealtimeNotifier(wsHub))
+	logger.Info("WebSocket hub initialized")
+
+	// Initialize messaging module
+	messagingRepo := messaging_persistence.NewPostgresMessagingRepository(sqlxDB)
+	messagingService := messaging_services.NewMessagingService(messagingRepo, storageService)
+	messagingService.SetMessenger(ws.NewRealtimeChatMessenger(wsHub))
+	messagingService.SetOfflineNotifier(messaging_infra.NewOfflineMessageNotifier(notificationService))
+	logger.Info("Messaging service initialized with E2E encryption support")
 
 	// Initialize email service
 	emailService := email.NewEmailServiceFromEnv()
@@ -712,6 +749,9 @@ func NewContainer(cfg *config.Config, logger *zap.Logger, db *sql.DB, gormDB *go
 		// Notification services
 		NotificationService: notificationService,
 
+		// Messaging services
+		MessagingService: messagingService,
+
 		// Invitation services
 		InvitationService: invitationService,
 
@@ -723,6 +763,12 @@ func NewContainer(cfg *config.Config, logger *zap.Logger, db *sql.DB, gormDB *go
 
 		// Integration services
 		BudgetIntegrationService: budgetIntegrationService,
+
+		// WebSocket hub
+		WSHub: wsHub,
+
+		// RBAC services
+		RBACService: rbacService,
 	}
 }
 

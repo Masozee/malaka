@@ -7,6 +7,7 @@ import (
 
 	"github.com/jmoiron/sqlx"
 	"malaka/internal/modules/masterdata/domain/entities"
+	"malaka/internal/shared/uuid"
 )
 
 // WarehouseRepositoryImpl implements repositories.WarehouseRepository.
@@ -27,39 +28,39 @@ func (r *WarehouseRepositoryImpl) Create(ctx context.Context, warehouse *entitie
 	coordinatesJSON, _ := json.Marshal(warehouse.Coordinates)
 
 	query := `INSERT INTO warehouses (
-		id, code, name, address, city, phone, manager, email, 
+		id, code, name, address, city, phone, manager, email,
 		type, capacity, current_stock, status,
-		zones, operating_hours, facilities, coordinates, 
-		created_at, updated_at
-	) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)`
-	
+		zones, operating_hours, facilities, coordinates,
+		company_id, created_at, updated_at
+	) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)`
+
 	_, err := r.db.ExecContext(ctx, query,
 		warehouse.ID, warehouse.Code, warehouse.Name, warehouse.Address,
 		warehouse.City, warehouse.Phone, warehouse.Manager, warehouse.Email,
 		warehouse.Type, warehouse.Capacity, warehouse.CurrentStock, warehouse.Status,
 		zonesJSON, operatingHoursJSON, facilitiesJSON, coordinatesJSON,
-		warehouse.CreatedAt, warehouse.UpdatedAt)
+		warehouse.CompanyID, warehouse.CreatedAt, warehouse.UpdatedAt)
 	return err
 }
 
 // GetByID retrieves a warehouse by its ID from the database.
-func (r *WarehouseRepositoryImpl) GetByID(ctx context.Context, id string) (*entities.Warehouse, error) {
-	query := `SELECT id, code, name, address, city, phone, manager, email, 
+func (r *WarehouseRepositoryImpl) GetByID(ctx context.Context, id uuid.ID) (*entities.Warehouse, error) {
+	query := `SELECT id, code, name, address, city, phone, manager, email,
 		type, capacity, current_stock, status,
 		zones, operating_hours, facilities, coordinates,
-		created_at, updated_at 
+		COALESCE(company_id::text, '') as company_id, created_at, updated_at
 		FROM warehouses WHERE id = $1`
 	row := r.db.QueryRowContext(ctx, query, id)
 
 	warehouse := &entities.Warehouse{}
 	var zonesJSON, operatingHoursJSON, facilitiesJSON, coordinatesJSON []byte
-	
+
 	err := row.Scan(
 		&warehouse.ID, &warehouse.Code, &warehouse.Name, &warehouse.Address,
 		&warehouse.City, &warehouse.Phone, &warehouse.Manager, &warehouse.Email,
 		&warehouse.Type, &warehouse.Capacity, &warehouse.CurrentStock, &warehouse.Status,
 		&zonesJSON, &operatingHoursJSON, &facilitiesJSON, &coordinatesJSON,
-		&warehouse.CreatedAt, &warehouse.UpdatedAt)
+		&warehouse.CompanyID, &warehouse.CreatedAt, &warehouse.UpdatedAt)
 	
 	if err == sql.ErrNoRows {
 		return nil, nil // Warehouse not found
@@ -92,29 +93,29 @@ func (r *WarehouseRepositoryImpl) Update(ctx context.Context, warehouse *entitie
 	facilitiesJSON, _ := json.Marshal(warehouse.Facilities)
 	coordinatesJSON, _ := json.Marshal(warehouse.Coordinates)
 
-	query := `UPDATE warehouses SET 
-		code = $1, name = $2, address = $3, city = $4, phone = $5, 
-		manager = $6, email = $7, type = $8, capacity = $9, 
+	query := `UPDATE warehouses SET
+		code = $1, name = $2, address = $3, city = $4, phone = $5,
+		manager = $6, email = $7, type = $8, capacity = $9,
 		current_stock = $10, status = $11,
 		zones = $12, operating_hours = $13, facilities = $14, coordinates = $15,
-		updated_at = $16 
-		WHERE id = $17`
-	
+		company_id = $16, updated_at = $17
+		WHERE id = $18`
+
 	_, err := r.db.ExecContext(ctx, query,
 		warehouse.Code, warehouse.Name, warehouse.Address, warehouse.City,
 		warehouse.Phone, warehouse.Manager, warehouse.Email, warehouse.Type,
 		warehouse.Capacity, warehouse.CurrentStock, warehouse.Status,
 		zonesJSON, operatingHoursJSON, facilitiesJSON, coordinatesJSON,
-		warehouse.UpdatedAt, warehouse.ID)
+		warehouse.CompanyID, warehouse.UpdatedAt, warehouse.ID)
 	return err
 }
 
 // GetAll retrieves all warehouses from the database.
 func (r *WarehouseRepositoryImpl) GetAll(ctx context.Context) ([]*entities.Warehouse, error) {
-	query := `SELECT id, code, name, address, city, phone, manager, email, 
+	query := `SELECT id, code, name, address, city, phone, manager, email,
 		type, capacity, current_stock, status,
 		zones, operating_hours, facilities, coordinates,
-		created_at, updated_at 
+		COALESCE(company_id::text, '') as company_id, created_at, updated_at
 		FROM warehouses ORDER BY created_at DESC`
 	rows, err := r.db.QueryContext(ctx, query)
 	if err != nil {
@@ -132,7 +133,7 @@ func (r *WarehouseRepositoryImpl) GetAll(ctx context.Context) ([]*entities.Wareh
 			&warehouse.City, &warehouse.Phone, &warehouse.Manager, &warehouse.Email,
 			&warehouse.Type, &warehouse.Capacity, &warehouse.CurrentStock, &warehouse.Status,
 			&zonesJSON, &operatingHoursJSON, &facilitiesJSON, &coordinatesJSON,
-			&warehouse.CreatedAt, &warehouse.UpdatedAt)
+			&warehouse.CompanyID, &warehouse.CreatedAt, &warehouse.UpdatedAt)
 		if err != nil {
 			return nil, err
 		}
@@ -157,7 +158,7 @@ func (r *WarehouseRepositoryImpl) GetAll(ctx context.Context) ([]*entities.Wareh
 }
 
 // Delete deletes a warehouse by its ID from the database.
-func (r *WarehouseRepositoryImpl) Delete(ctx context.Context, id string) error {
+func (r *WarehouseRepositoryImpl) Delete(ctx context.Context, id uuid.ID) error {
 	query := `DELETE FROM warehouses WHERE id = $1`
 	_, err := r.db.ExecContext(ctx, query, id)
 	return err

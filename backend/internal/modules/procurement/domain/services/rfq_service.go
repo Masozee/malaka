@@ -4,11 +4,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/google/uuid"
-
 	"malaka/internal/modules/procurement/domain/entities"
 	"malaka/internal/modules/procurement/domain/repositories"
 	"malaka/internal/shared/utils"
+	"malaka/internal/shared/uuid"
 )
 
 // RFQService handles RFQ business logic
@@ -50,8 +49,8 @@ func (s *RFQService) Create(ctx context.Context, rfq *entities.RFQ) error {
 
 	// Set defaults
 	now := utils.Now()
-	if rfq.ID == "" {
-		rfq.ID = uuid.New().String()
+	if rfq.ID.IsNil() {
+		rfq.ID = uuid.New()
 	}
 	rfq.RFQNumber = rfqNumber
 	rfq.Status = "draft"
@@ -65,9 +64,9 @@ func (s *RFQService) Create(ctx context.Context, rfq *entities.RFQ) error {
 
 	// Create items
 	for _, item := range rfq.Items {
-		item.RFQID = rfq.ID
-		if item.ID == "" {
-			item.ID = uuid.New().String()
+		item.RFQID = rfq.ID.String()
+		if item.ID.IsNil() {
+			item.ID = uuid.New()
 		}
 		item.CreatedAt = now
 		item.UpdatedAt = now
@@ -79,9 +78,9 @@ func (s *RFQService) Create(ctx context.Context, rfq *entities.RFQ) error {
 
 	// Invite suppliers if provided
 	for _, supplier := range rfq.Suppliers {
-		supplier.RFQID = rfq.ID
-		if supplier.ID == "" {
-			supplier.ID = uuid.New().String()
+		supplier.RFQID = rfq.ID.String()
+		if supplier.ID.IsNil() {
+			supplier.ID = uuid.New()
 		}
 		supplier.InvitedAt = now
 		supplier.Status = "invited"
@@ -120,7 +119,7 @@ func (s *RFQService) GetAll(ctx context.Context, filter *repositories.RFQFilter)
 
 // Update updates an existing RFQ (only drafts)
 func (s *RFQService) Update(ctx context.Context, rfq *entities.RFQ) error {
-	existing, err := s.repo.GetByID(ctx, rfq.ID)
+	existing, err := s.repo.GetByID(ctx, rfq.ID.String())
 	if err != nil {
 		return fmt.Errorf("failed to get RFQ: %w", err)
 	}
@@ -240,8 +239,8 @@ func (s *RFQService) AddItem(ctx context.Context, item *entities.RFQItem) error 
 	}
 
 	now := utils.Now()
-	if item.ID == "" {
-		item.ID = uuid.New().String()
+	if item.ID.IsNil() {
+		item.ID = uuid.New()
 	}
 	item.CreatedAt = now
 	item.UpdatedAt = now
@@ -361,8 +360,8 @@ func (s *RFQService) SubmitResponse(ctx context.Context, response *entities.RFQR
 	}
 
 	now := utils.Now()
-	if response.ID == "" {
-		response.ID = uuid.New().String()
+	if response.ID.IsNil() {
+		response.ID = uuid.New()
 	}
 	response.ResponseDate = now
 	response.Status = "submitted"
@@ -375,9 +374,9 @@ func (s *RFQService) SubmitResponse(ctx context.Context, response *entities.RFQR
 
 	// Create response items
 	for _, item := range response.ResponseItems {
-		item.RFQResponseID = response.ID
-		if item.ID == "" {
-			item.ID = uuid.New().String()
+		item.RFQResponseID = response.ID.String()
+		if item.ID.IsNil() {
+			item.ID = uuid.New()
 		}
 		item.CreatedAt = now
 		item.UpdatedAt = now
@@ -479,7 +478,9 @@ func (s *RFQService) ConvertToPO(ctx context.Context, responseID, createdBy, del
 	}
 
 	// Create Purchase Order from RFQ response
-	po := entities.NewPurchaseOrder(response.SupplierID, createdBy)
+	supplierUUID, _ := uuid.Parse(response.SupplierID)
+	createdByUUID, _ := uuid.Parse(createdBy)
+	po := entities.NewPurchaseOrder(supplierUUID, createdByUUID)
 	po.PONumber = poNumber
 	po.TotalAmount = response.TotalAmount
 	po.Currency = response.Currency
@@ -499,7 +500,7 @@ func (s *RFQService) ConvertToPO(ctx context.Context, responseID, createdBy, del
 
 		if hasResponseItems {
 			for _, respItem := range response.ResponseItems {
-				if respItem.RFQItemID == rfqItem.ID {
+				if respItem.RFQItemID == rfqItem.ID.String() {
 					unitPrice = respItem.UnitPrice
 					lineTotal = respItem.TotalPrice
 					foundPricing = true

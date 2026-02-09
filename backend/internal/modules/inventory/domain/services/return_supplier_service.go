@@ -2,10 +2,11 @@ package services
 
 import (
 	"context"
+	"time"
 
 	"malaka/internal/modules/inventory/domain/entities"
 	"malaka/internal/modules/inventory/domain/repositories"
-	"malaka/internal/shared/utils"
+	"malaka/internal/shared/uuid"
 )
 
 // ReturnSupplierService provides business logic for return supplier operations.
@@ -30,11 +31,12 @@ func NewReturnSupplierService(repo repositories.ReturnSupplierRepository) Return
 
 // CreateReturnSupplier creates a new return supplier.
 func (s *returnSupplierServiceImpl) CreateReturnSupplier(ctx context.Context, returnSupplier *entities.ReturnSupplier) error {
-	if returnSupplier.ID == "" {
-		returnSupplier.ID = utils.RandomString(10)
+	if returnSupplier.ID.IsNil() {
+		returnSupplier.ID = uuid.New()
 	}
-	returnSupplier.CreatedAt = utils.Now()
-	returnSupplier.UpdatedAt = utils.Now()
+	now := time.Now()
+	returnSupplier.CreatedAt = now
+	returnSupplier.UpdatedAt = now
 
 	return s.repo.Create(ctx, returnSupplier)
 }
@@ -51,7 +53,7 @@ func (s *returnSupplierServiceImpl) GetReturnSupplierByID(ctx context.Context, i
 
 // UpdateReturnSupplier updates an existing return supplier.
 func (s *returnSupplierServiceImpl) UpdateReturnSupplier(ctx context.Context, returnSupplier *entities.ReturnSupplier) error {
-	returnSupplier.UpdatedAt = utils.Now()
+	returnSupplier.UpdatedAt = time.Now()
 	return s.repo.Update(ctx, returnSupplier)
 }
 

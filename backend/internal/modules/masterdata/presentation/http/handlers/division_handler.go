@@ -5,12 +5,11 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
-	"malaka/internal/modules/masterdata/domain/entities"
 	"malaka/internal/modules/masterdata/domain/services"
 	"malaka/internal/modules/masterdata/presentation/http/dto"
 	"malaka/internal/shared/response"
 	"malaka/internal/shared/types"
+	"malaka/internal/shared/uuid"
 )
 
 // DivisionHandler handles HTTP requests for division operations.
@@ -31,35 +30,14 @@ func (h *DivisionHandler) CreateDivision(c *gin.Context) {
 		return
 	}
 
-	division := &entities.Division{
-		Code:        req.Code,
-		Name:        req.Name,
-		Description: req.Description,
-		ParentID:    req.ParentID,
-		Level:       req.Level,
-		SortOrder:   req.SortOrder,
-		Status:      req.Status,
-	}
+	division := req.ToEntity()
 
 	if err := h.service.CreateDivision(c.Request.Context(), division); err != nil {
 		response.InternalServerError(c, err.Error(), nil)
 		return
 	}
 
-	resp := dto.DivisionResponse{
-		ID:          division.ID,
-		Code:        division.Code,
-		Name:        division.Name,
-		Description: division.Description,
-		ParentID:    division.ParentID,
-		Level:       division.Level,
-		SortOrder:   division.SortOrder,
-		Status:      division.Status,
-		CreatedAt:   division.CreatedAt,
-		UpdatedAt:   division.UpdatedAt,
-	}
-
-	response.Created(c, "Division created successfully", resp)
+	response.Created(c, "Division created successfully", dto.DivisionResponseFromEntity(division))
 }
 
 // GetDivisionByID handles retrieving a division by ID.
@@ -76,20 +54,7 @@ func (h *DivisionHandler) GetDivisionByID(c *gin.Context) {
 		return
 	}
 
-	resp := dto.DivisionResponse{
-		ID:          division.ID,
-		Code:        division.Code,
-		Name:        division.Name,
-		Description: division.Description,
-		ParentID:    division.ParentID,
-		Level:       division.Level,
-		SortOrder:   division.SortOrder,
-		Status:      division.Status,
-		CreatedAt:   division.CreatedAt,
-		UpdatedAt:   division.UpdatedAt,
-	}
-
-	response.OK(c, "Division retrieved successfully", resp)
+	response.OK(c, "Division retrieved successfully", dto.DivisionResponseFromEntity(division))
 }
 
 // GetAllDivisions handles retrieving all divisions with pagination support.
@@ -120,20 +85,9 @@ func (h *DivisionHandler) GetAllDivisions(c *gin.Context) {
 	}
 	
 	// Convert to response DTOs
-	var responses []dto.DivisionResponse
+	var responses []*dto.DivisionResponse
 	for _, division := range divisions {
-		responses = append(responses, dto.DivisionResponse{
-			ID:          division.ID,
-			Code:        division.Code,
-			Name:        division.Name,
-			Description: division.Description,
-			ParentID:    division.ParentID,
-			Level:       division.Level,
-			SortOrder:   division.SortOrder,
-			Status:      division.Status,
-			CreatedAt:   division.CreatedAt,
-			UpdatedAt:   division.UpdatedAt,
-		})
+		responses = append(responses, dto.DivisionResponseFromEntity(division))
 	}
 	
 	// Calculate total pages
@@ -162,20 +116,7 @@ func (h *DivisionHandler) GetDivisionByCode(c *gin.Context) {
 		return
 	}
 
-	resp := dto.DivisionResponse{
-		ID:          division.ID,
-		Code:        division.Code,
-		Name:        division.Name,
-		Description: division.Description,
-		ParentID:    division.ParentID,
-		Level:       division.Level,
-		SortOrder:   division.SortOrder,
-		Status:      division.Status,
-		CreatedAt:   division.CreatedAt,
-		UpdatedAt:   division.UpdatedAt,
-	}
-
-	response.OK(c, "Division retrieved successfully", resp)
+	response.OK(c, "Division retrieved successfully", dto.DivisionResponseFromEntity(division))
 }
 
 // GetDivisionsByParentID handles retrieving divisions by parent ID.
@@ -192,19 +133,9 @@ func (h *DivisionHandler) GetDivisionsByParentID(c *gin.Context) {
 		return
 	}
 
-	var responses []dto.DivisionResponse
+	var responses []*dto.DivisionResponse
 	for _, division := range divisions {
-		responses = append(responses, dto.DivisionResponse{
-			ID:          division.ID,
-			Code:        division.Code,
-			Name:        division.Name,
-			Description: division.Description,
-			ParentID:    division.ParentID,
-			Level:       division.Level,
-			Status:      division.Status,
-			CreatedAt:   division.CreatedAt,
-			UpdatedAt:   division.UpdatedAt,
-		})
+		responses = append(responses, dto.DivisionResponseFromEntity(division))
 	}
 
 	response.OK(c, "Divisions retrieved successfully", responses)
@@ -218,19 +149,9 @@ func (h *DivisionHandler) GetRootDivisions(c *gin.Context) {
 		return
 	}
 
-	var responses []dto.DivisionResponse
+	var responses []*dto.DivisionResponse
 	for _, division := range divisions {
-		responses = append(responses, dto.DivisionResponse{
-			ID:          division.ID,
-			Code:        division.Code,
-			Name:        division.Name,
-			Description: division.Description,
-			ParentID:    division.ParentID,
-			Level:       division.Level,
-			Status:      division.Status,
-			CreatedAt:   division.CreatedAt,
-			UpdatedAt:   division.UpdatedAt,
-		})
+		responses = append(responses, dto.DivisionResponseFromEntity(division))
 	}
 
 	response.OK(c, "Root divisions retrieved successfully", responses)
@@ -257,48 +178,15 @@ func (h *DivisionHandler) UpdateDivision(c *gin.Context) {
 		return
 	}
 
-	// Update fields if provided
-	if req.Code != "" {
-		division.Code = req.Code
-	}
-	if req.Name != "" {
-		division.Name = req.Name
-	}
-	if req.Description != "" {
-		division.Description = req.Description
-	}
-		if req.ParentID != nil {
-		division.ParentID = req.ParentID
-	}
-	if req.Level != 0 {
-		division.Level = req.Level
-	}
-	if req.SortOrder != 0 {
-		division.SortOrder = req.SortOrder
-	}
-	if req.Status != "" {
-		division.Status = req.Status
-	}
+	// Apply updates using the DTO helper
+	req.ApplyToEntity(division)
 
 	if err := h.service.UpdateDivision(c.Request.Context(), division); err != nil {
 		response.InternalServerError(c, err.Error(), nil)
 		return
 	}
 
-	resp := dto.DivisionResponse{
-		ID:          division.ID,
-		Code:        division.Code,
-		Name:        division.Name,
-		Description: division.Description,
-		ParentID:    division.ParentID,
-		Level:       division.Level,
-		SortOrder:   division.SortOrder,
-		Status:      division.Status,
-		CreatedAt:   division.CreatedAt,
-		UpdatedAt:   division.UpdatedAt,
-	}
-
-	response.OK(c, "Division updated successfully", resp)
+	response.OK(c, "Division updated successfully", dto.DivisionResponseFromEntity(division))
 }
 
 // DeleteDivision handles deleting a division.

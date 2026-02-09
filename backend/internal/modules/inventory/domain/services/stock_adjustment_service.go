@@ -2,10 +2,11 @@ package services
 
 import (
 	"context"
+	"time"
 
 	"malaka/internal/modules/inventory/domain/entities"
 	"malaka/internal/modules/inventory/domain/repositories"
-	"malaka/internal/shared/utils"
+	"malaka/internal/shared/uuid"
 )
 
 // StockAdjustmentService provides business logic for stock adjustment operations.
@@ -30,11 +31,12 @@ func NewStockAdjustmentService(repo repositories.StockAdjustmentRepository) Stoc
 
 // CreateStockAdjustment creates a new stock adjustment.
 func (s *stockAdjustmentServiceImpl) CreateStockAdjustment(ctx context.Context, adjustment *entities.StockAdjustment) error {
-	if adjustment.ID == "" {
-		adjustment.ID = utils.RandomString(10)
+	if adjustment.ID.IsNil() {
+		adjustment.ID = uuid.New()
 	}
-	adjustment.CreatedAt = utils.Now()
-	adjustment.UpdatedAt = utils.Now()
+	now := time.Now()
+	adjustment.CreatedAt = now
+	adjustment.UpdatedAt = now
 
 	return s.repo.Create(ctx, adjustment)
 }
@@ -51,7 +53,7 @@ func (s *stockAdjustmentServiceImpl) GetStockAdjustmentByID(ctx context.Context,
 
 // UpdateStockAdjustment updates an existing stock adjustment.
 func (s *stockAdjustmentServiceImpl) UpdateStockAdjustment(ctx context.Context, adjustment *entities.StockAdjustment) error {
-	adjustment.UpdatedAt = utils.Now()
+	adjustment.UpdatedAt = time.Now()
 	return s.repo.Update(ctx, adjustment)
 }
 

@@ -30,7 +30,7 @@ func NewSalesKompetitorService(repo repositories.SalesKompetitorRepository) Sale
 // CreateSalesKompetitor creates a new sales competitor entry.
 func (s *salesKompetitorService) CreateSalesKompetitor(ctx context.Context, sk *entities.SalesKompetitor) error {
 	if sk.ID == "" {
-		sk.ID = utils.RandomString(10) // Generate a random ID if not provided
+		sk.ID = utils.RandomString(10)
 	}
 	return s.repo.Create(ctx, sk)
 }

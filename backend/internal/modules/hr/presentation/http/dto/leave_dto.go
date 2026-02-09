@@ -2,8 +2,8 @@ package dto
 
 import (
 	"malaka/internal/modules/hr/domain/entities"
+	"malaka/internal/shared/uuid"
 	"time"
-	"github.com/google/uuid"
 )
 
 // Leave Type DTOs

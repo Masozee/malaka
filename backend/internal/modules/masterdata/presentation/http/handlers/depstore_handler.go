@@ -3,14 +3,15 @@ package handlers
 import (
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	"malaka/internal/modules/masterdata/domain/entities"
 	"malaka/internal/modules/masterdata/domain/services"
 	"malaka/internal/modules/masterdata/presentation/http/dto"
 	"malaka/internal/shared/response"
 	"malaka/internal/shared/types"
+	"malaka/internal/shared/uuid"
 )
 
 // DepstoreHandler handles HTTP requests for department store operations.
@@ -40,6 +41,7 @@ func (h *DepstoreHandler) CreateDepstore(c *gin.Context) {
 		ContactPerson:   req.ContactPerson,
 		CommissionRate:  req.CommissionRate,
 		PaymentTerms:    req.PaymentTerms,
+		CompanyID:       req.CompanyID,
 		Status:          req.Status,
 	}
 
@@ -49,7 +51,7 @@ func (h *DepstoreHandler) CreateDepstore(c *gin.Context) {
 	}
 
 	resp := dto.DepstoreResponse{
-		ID:              depstore.ID,
+		ID:              depstore.ID.String(),
 		Code:            depstore.Code,
 		Name:            depstore.Name,
 		Address:         depstore.Address,
@@ -58,9 +60,10 @@ func (h *DepstoreHandler) CreateDepstore(c *gin.Context) {
 		ContactPerson:   depstore.ContactPerson,
 		CommissionRate:  depstore.CommissionRate,
 		PaymentTerms:    depstore.PaymentTerms,
+		CompanyID:       depstore.CompanyID,
 		Status:          depstore.Status,
-		CreatedAt:       depstore.CreatedAt,
-		UpdatedAt:       depstore.UpdatedAt,
+		CreatedAt:       depstore.CreatedAt.Format(time.RFC3339),
+		UpdatedAt:       depstore.UpdatedAt.Format(time.RFC3339),
 	}
 
 	response.Created(c, "Department store created successfully", resp)
@@ -81,7 +84,7 @@ func (h *DepstoreHandler) GetDepstoreByID(c *gin.Context) {
 	}
 
 	resp := dto.DepstoreResponse{
-		ID:              depstore.ID,
+		ID:              depstore.ID.String(),
 		Code:            depstore.Code,
 		Name:            depstore.Name,
 		Address:         depstore.Address,
@@ -90,9 +93,10 @@ func (h *DepstoreHandler) GetDepstoreByID(c *gin.Context) {
 		ContactPerson:   depstore.ContactPerson,
 		CommissionRate:  depstore.CommissionRate,
 		PaymentTerms:    depstore.PaymentTerms,
+		CompanyID:       depstore.CompanyID,
 		Status:          depstore.Status,
-		CreatedAt:       depstore.CreatedAt,
-		UpdatedAt:       depstore.UpdatedAt,
+		CreatedAt:       depstore.CreatedAt.Format(time.RFC3339),
+		UpdatedAt:       depstore.UpdatedAt.Format(time.RFC3339),
 	}
 
 	response.OK(c, "Department store retrieved successfully", resp)
@@ -128,7 +132,7 @@ func (h *DepstoreHandler) GetAllDepstores(c *gin.Context) {
 	var responses []dto.DepstoreResponse
 	for _, depstore := range depstores {
 		responses = append(responses, dto.DepstoreResponse{
-			ID:              depstore.ID,
+			ID:              depstore.ID.String(),
 			Code:            depstore.Code,
 			Name:            depstore.Name,
 			Address:         depstore.Address,
@@ -137,9 +141,10 @@ func (h *DepstoreHandler) GetAllDepstores(c *gin.Context) {
 			ContactPerson:   depstore.ContactPerson,
 			CommissionRate:  depstore.CommissionRate,
 			PaymentTerms:    depstore.PaymentTerms,
+			CompanyID:       depstore.CompanyID,
 			Status:          depstore.Status,
-			CreatedAt:       depstore.CreatedAt,
-			UpdatedAt:       depstore.UpdatedAt,
+			CreatedAt:       depstore.CreatedAt.Format(time.RFC3339),
+			UpdatedAt:       depstore.UpdatedAt.Format(time.RFC3339),
 		})
 	}
 	
@@ -170,7 +175,7 @@ func (h *DepstoreHandler) GetDepstoreByCode(c *gin.Context) {
 	}
 
 	resp := dto.DepstoreResponse{
-		ID:              depstore.ID,
+		ID:              depstore.ID.String(),
 		Code:            depstore.Code,
 		Name:            depstore.Name,
 		Address:         depstore.Address,
@@ -179,9 +184,10 @@ func (h *DepstoreHandler) GetDepstoreByCode(c *gin.Context) {
 		ContactPerson:   depstore.ContactPerson,
 		CommissionRate:  depstore.CommissionRate,
 		PaymentTerms:    depstore.PaymentTerms,
+		CompanyID:       depstore.CompanyID,
 		Status:          depstore.Status,
-		CreatedAt:       depstore.CreatedAt,
-		UpdatedAt:       depstore.UpdatedAt,
+		CreatedAt:       depstore.CreatedAt.Format(time.RFC3339),
+		UpdatedAt:       depstore.UpdatedAt.Format(time.RFC3339),
 	}
 
 	response.OK(c, "Department store retrieved successfully", resp)
@@ -243,7 +249,7 @@ func (h *DepstoreHandler) UpdateDepstore(c *gin.Context) {
 	}
 
 	resp := dto.DepstoreResponse{
-		ID:              depstore.ID,
+		ID:              depstore.ID.String(),
 		Code:            depstore.Code,
 		Name:            depstore.Name,
 		Address:         depstore.Address,
@@ -252,9 +258,10 @@ func (h *DepstoreHandler) UpdateDepstore(c *gin.Context) {
 		ContactPerson:   depstore.ContactPerson,
 		CommissionRate:  depstore.CommissionRate,
 		PaymentTerms:    depstore.PaymentTerms,
+		CompanyID:       depstore.CompanyID,
 		Status:          depstore.Status,
-		CreatedAt:       depstore.CreatedAt,
-		UpdatedAt:       depstore.UpdatedAt,
+		CreatedAt:       depstore.CreatedAt.Format(time.RFC3339),
+		UpdatedAt:       depstore.UpdatedAt.Format(time.RFC3339),
 	}
 
 	response.OK(c, "Department store updated successfully", resp)

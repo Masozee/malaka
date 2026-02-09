@@ -24,6 +24,7 @@ export interface Employee {
   total_salary: number
   employment_status: 'ACTIVE' | 'INACTIVE' | 'TERMINATED'
   supervisor_id?: string
+  user_id?: string
   profile_image_url?: string
   createdAt: string
   updatedAt: string

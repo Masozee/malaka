@@ -8,6 +8,7 @@ import (
 	"malaka/internal/modules/hr/domain/services"
 	"malaka/internal/modules/hr/presentation/http/dto"
 	"malaka/internal/shared/response"
+	"malaka/internal/shared/uuid"
 )
 
 // EmployeeHandler handles HTTP requests for employee operations.
@@ -45,7 +46,12 @@ func (h *EmployeeHandler) CreateEmployee(c *gin.Context) {
 
 // GetEmployeeByID handles the retrieval of an employee by ID.
 func (h *EmployeeHandler) GetEmployeeByID(c *gin.Context) {
-	id := c.Param("id")
+	idStr := c.Param("id")
+	id, err := uuid.Parse(idStr)
+	if err != nil {
+		response.Error(c, http.StatusBadRequest, "Invalid ID format", nil)
+		return
+	}
 
 	employee, err := h.service.GetEmployeeByID(c.Request.Context(), id)
 	if err != nil {
@@ -81,7 +87,12 @@ func (h *EmployeeHandler) GetAllEmployees(c *gin.Context) {
 
 // UpdateEmployee handles the update of an existing employee.
 func (h *EmployeeHandler) UpdateEmployee(c *gin.Context) {
-	id := c.Param("id")
+	idStr := c.Param("id")
+	id, err := uuid.Parse(idStr)
+	if err != nil {
+		response.Error(c, http.StatusBadRequest, "Invalid ID format", nil)
+		return
+	}
 
 	existingEmployee, err := h.service.GetEmployeeByID(c.Request.Context(), id)
 	if err != nil {
@@ -116,7 +127,12 @@ func (h *EmployeeHandler) UpdateEmployee(c *gin.Context) {
 
 // DeleteEmployee handles the deletion of an employee by ID.
 func (h *EmployeeHandler) DeleteEmployee(c *gin.Context) {
-	id := c.Param("id")
+	idStr := c.Param("id")
+	id, err := uuid.Parse(idStr)
+	if err != nil {
+		response.Error(c, http.StatusBadRequest, "Invalid ID format", nil)
+		return
+	}
 
 	if err := h.service.DeleteEmployee(c.Request.Context(), id); err != nil {
 		response.Error(c, http.StatusInternalServerError, err.Error(), nil)
@@ -124,4 +140,26 @@ func (h *EmployeeHandler) DeleteEmployee(c *gin.Context) {
 	}
 
 	response.Success(c, http.StatusNoContent, "Employee deleted successfully", nil)
+}
+
+// GetEmployeeByUserID handles the retrieval of an employee by their linked user ID.
+func (h *EmployeeHandler) GetEmployeeByUserID(c *gin.Context) {
+	userID := c.Param("userId")
+	if userID == "" {
+		response.Error(c, http.StatusBadRequest, "User ID is required", nil)
+		return
+	}
+
+	employee, err := h.service.GetEmployeeByUserID(c.Request.Context(), userID)
+	if err != nil {
+		response.Error(c, http.StatusInternalServerError, err.Error(), nil)
+		return
+	}
+	if employee == nil {
+		response.Error(c, http.StatusNotFound, "No employee linked to this user", nil)
+		return
+	}
+
+	resp := dto.FromEmployeeEntity(employee)
+	response.Success(c, http.StatusOK, "Employee retrieved successfully", resp)
 }

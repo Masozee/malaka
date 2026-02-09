@@ -6,7 +6,7 @@ import (
 
 	"malaka/internal/modules/sales/domain/entities"
 	"malaka/internal/modules/sales/domain/repositories"
-	"malaka/internal/shared/utils"
+	"malaka/internal/shared/uuid"
 )
 
 // OnlineOrderService provides business logic for online order operations.
@@ -21,8 +21,8 @@ func NewOnlineOrderService(repo repositories.OnlineOrderRepository) *OnlineOrder
 
 // CreateOnlineOrder creates a new online order.
 func (s *OnlineOrderService) CreateOnlineOrder(ctx context.Context, order *entities.OnlineOrder) error {
-	if order.ID == "" {
-		order.ID = utils.RandomString(10) // Generate a random ID if not provided
+	if order.ID.IsNil() {
+		order.ID = uuid.New()
 	}
 	return s.repo.Create(ctx, order)
 }
@@ -40,7 +40,7 @@ func (s *OnlineOrderService) GetOnlineOrderByID(ctx context.Context, id string) 
 // UpdateOnlineOrder updates an existing online order.
 func (s *OnlineOrderService) UpdateOnlineOrder(ctx context.Context, order *entities.OnlineOrder) error {
 	// Ensure the online order exists before updating
-	existingOrder, err := s.repo.GetByID(ctx, order.ID)
+	existingOrder, err := s.repo.GetByID(ctx, order.ID.String())
 	if err != nil {
 		return err
 	}

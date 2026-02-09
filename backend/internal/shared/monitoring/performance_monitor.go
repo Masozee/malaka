@@ -2,7 +2,6 @@ package monitoring
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"sync"
 	"time"
@@ -388,7 +387,7 @@ func (p *PerformanceMonitor) collectCacheMetrics(ctx context.Context) (*CacheMet
 	}
 
 	// Get Redis INFO stats
-	info, err := p.redis.Info(ctx, "stats", "memory", "keyspace").Result()
+	_, err := p.redis.Info(ctx, "stats", "memory", "keyspace").Result()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get Redis info: %w", err)
 	}
@@ -562,10 +561,10 @@ func (p *PerformanceMonitor) GetAlerts() <-chan Alert {
 }
 
 // GeneratePerformanceReport creates a comprehensive performance report
-func (p *PerformanceMonitor) GeneratePerformanceReport() *PerformanceReport {
+func (p *PerformanceMonitor) GeneratePerformanceReport() *SystemPerformanceReport {
 	metrics := p.GetCurrentMetrics()
-	
-	return &PerformanceReport{
+
+	return &SystemPerformanceReport{
 		Timestamp:       time.Now(),
 		OverallHealth:   p.calculateOverallHealth(metrics),
 		DatabaseHealth:  p.calculateDatabaseHealth(metrics.DatabaseMetrics),
@@ -576,7 +575,7 @@ func (p *PerformanceMonitor) GeneratePerformanceReport() *PerformanceReport {
 	}
 }
 
-type PerformanceReport struct {
+type SystemPerformanceReport struct {
 	Timestamp       time.Time             `json:"timestamp"`
 	OverallHealth   HealthStatus          `json:"overall_health"`
 	DatabaseHealth  HealthStatus          `json:"database_health"`

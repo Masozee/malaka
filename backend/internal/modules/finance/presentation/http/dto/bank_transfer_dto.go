@@ -5,6 +5,7 @@ import (
 
 	"malaka/internal/modules/finance/domain/entities"
 	"malaka/internal/shared/types"
+	"malaka/internal/shared/uuid"
 )
 
 // BankTransferCreateRequest represents the request to create bank transfer.
@@ -42,8 +43,8 @@ func (req *BankTransferCreateRequest) ToBankTransferEntity() *entities.BankTrans
 	return &entities.BankTransfer{
 		BaseModel:      types.BaseModel{},
 		TransferDate:   req.TransferDate,
-		FromCashBankID: req.FromCashBankID,
-		ToCashBankID:   req.ToCashBankID,
+		FromCashBankID: uuid.MustParse(req.FromCashBankID),
+		ToCashBankID:   uuid.MustParse(req.ToCashBankID),
 		Amount:         req.Amount,
 		Description:    req.Description,
 	}
@@ -54,8 +55,8 @@ func (req *BankTransferUpdateRequest) ToBankTransferEntity() *entities.BankTrans
 	return &entities.BankTransfer{
 		BaseModel:      types.BaseModel{},
 		TransferDate:   req.TransferDate,
-		FromCashBankID: req.FromCashBankID,
-		ToCashBankID:   req.ToCashBankID,
+		FromCashBankID: uuid.MustParse(req.FromCashBankID),
+		ToCashBankID:   uuid.MustParse(req.ToCashBankID),
 		Amount:         req.Amount,
 		Description:    req.Description,
 	}
@@ -64,10 +65,10 @@ func (req *BankTransferUpdateRequest) ToBankTransferEntity() *entities.BankTrans
 // FromBankTransferEntity converts entities.BankTransfer to BankTransferResponse.
 func FromBankTransferEntity(bt *entities.BankTransfer) *BankTransferResponse {
 	return &BankTransferResponse{
-		ID:             bt.ID,
+		ID:             bt.ID.String(),
 		TransferDate:   bt.TransferDate,
-		FromCashBankID: bt.FromCashBankID,
-		ToCashBankID:   bt.ToCashBankID,
+		FromCashBankID: bt.FromCashBankID.String(),
+		ToCashBankID:   bt.ToCashBankID.String(),
 		Amount:         bt.Amount,
 		Description:    bt.Description,
 		CreatedAt:      bt.CreatedAt.Format("2006-01-02T15:04:05Z"),

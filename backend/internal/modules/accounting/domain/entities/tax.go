@@ -3,7 +3,7 @@ package entities
 import (
 	"time"
 
-	"github.com/google/uuid"
+	"malaka/internal/shared/uuid"
 )
 
 // TaxType represents the type of tax
@@ -31,7 +31,7 @@ const (
 
 // Tax represents a tax configuration
 type Tax struct {
-	ID              uuid.UUID `json:"id" db:"id"`
+	ID              uuid.ID   `json:"id" db:"id"`
 	TaxCode         string    `json:"tax_code" db:"tax_code"`
 	TaxName         string    `json:"tax_name" db:"tax_name"`
 	TaxType         TaxType   `json:"tax_type" db:"tax_type"`
@@ -40,8 +40,8 @@ type Tax struct {
 	IsActive        bool      `json:"is_active" db:"is_active"`
 	EffectiveDate   time.Time `json:"effective_date" db:"effective_date"`
 	ExpiryDate      *time.Time `json:"expiry_date" db:"expiry_date"`
-	TaxAccountID    *uuid.UUID `json:"tax_account_id" db:"tax_account_id"`    // Account for tax payable
-	ExpenseAccountID *uuid.UUID `json:"expense_account_id" db:"expense_account_id"` // Account for tax expense
+	TaxAccountID    *uuid.ID  `json:"tax_account_id" db:"tax_account_id"`    // Account for tax payable
+	ExpenseAccountID *uuid.ID `json:"expense_account_id" db:"expense_account_id"` // Account for tax expense
 	CompanyID       string    `json:"company_id" db:"company_id"`
 	CreatedBy       string    `json:"created_by" db:"created_by"`
 	CreatedAt       time.Time `json:"created_at" db:"created_at"`
@@ -50,8 +50,8 @@ type Tax struct {
 
 // TaxTransaction represents a tax transaction
 type TaxTransaction struct {
-	ID               uuid.UUID `json:"id" db:"id"`
-	TaxID            uuid.UUID `json:"tax_id" db:"tax_id"`
+	ID               uuid.ID   `json:"id" db:"id"`
+	TaxID            uuid.ID   `json:"tax_id" db:"tax_id"`
 	TransactionDate  time.Time `json:"transaction_date" db:"transaction_date"`
 	TransactionType  string    `json:"transaction_type" db:"transaction_type"` // SALE, PURCHASE, WITHHOLDING
 	BaseAmount       float64   `json:"base_amount" db:"base_amount"`           // Taxable amount
@@ -62,7 +62,7 @@ type TaxTransaction struct {
 	ReferenceNumber  string    `json:"reference_number" db:"reference_number"`
 	CustomerID       string    `json:"customer_id" db:"customer_id"`
 	SupplierID       string    `json:"supplier_id" db:"supplier_id"`
-	JournalEntryID   *uuid.UUID `json:"journal_entry_id" db:"journal_entry_id"`
+	JournalEntryID   *uuid.ID  `json:"journal_entry_id" db:"journal_entry_id"`
 	CompanyID        string    `json:"company_id" db:"company_id"`
 	CreatedBy        string    `json:"created_by" db:"created_by"`
 	CreatedAt        time.Time `json:"created_at" db:"created_at"`
@@ -71,7 +71,7 @@ type TaxTransaction struct {
 
 // TaxReturn represents a tax return/filing
 type TaxReturn struct {
-	ID              uuid.UUID `json:"id" db:"id"`
+	ID              uuid.ID `json:"id" db:"id"`
 	ReturnNumber    string    `json:"return_number" db:"return_number"`
 	TaxType         TaxType   `json:"tax_type" db:"tax_type"`
 	PeriodStart     time.Time `json:"period_start" db:"period_start"`
@@ -218,7 +218,7 @@ func (t *Tax) Validate() error {
 
 // Validate checks if the tax transaction is valid
 func (tt *TaxTransaction) Validate() error {
-	if tt.TaxID == uuid.Nil {
+	if tt.TaxID.IsNil() {
 		return NewValidationError("tax_id is required")
 	}
 	if tt.TransactionDate.IsZero() {

@@ -1,6 +1,8 @@
 package dto
 
-import "malaka/internal/modules/masterdata/domain/entities"
+import (
+	"malaka/internal/modules/masterdata/domain/entities"
+)
 
 // CreateSizeRequest represents the request body for creating a new size.
 type CreateSizeRequest struct {
@@ -9,6 +11,7 @@ type CreateSizeRequest struct {
 	Description  *string `json:"description"`
 	SizeCategory string  `json:"size_category"`
 	SortOrder    int     `json:"sort_order"`
+	CompanyID    string  `json:"company_id"`
 	Status       string  `json:"status"`
 }
 
@@ -20,6 +23,7 @@ func (r *CreateSizeRequest) ToEntity() *entities.Size {
 		Description:  r.Description,
 		SizeCategory: r.SizeCategory,
 		SortOrder:    r.SortOrder,
+		CompanyID:    r.CompanyID,
 		Status:       r.Status,
 	}
 
@@ -74,20 +78,22 @@ type SizeResponse struct {
 	Description  *string `json:"description,omitempty"`
 	SizeCategory string  `json:"size_category"`
 	SortOrder    int     `json:"sort_order"`
+	CompanyID    string  `json:"company_id"`
 	Status       string  `json:"status"`
 	CreatedAt    string  `json:"created_at"`
 	UpdatedAt    string  `json:"updated_at"`
 }
 
-// FromEntity converts entities.Size to SizeResponse.
+// SizeResponseFromEntity converts entities.Size to SizeResponse.
 func SizeResponseFromEntity(size *entities.Size) *SizeResponse {
 	return &SizeResponse{
-		ID:           size.ID,
+		ID:           size.ID.String(),
 		Code:         size.Code,
 		Name:         size.Name,
 		Description:  size.Description,
 		SizeCategory: size.SizeCategory,
 		SortOrder:    size.SortOrder,
+		CompanyID:    size.CompanyID,
 		Status:       size.Status,
 		CreatedAt:    size.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
 		UpdatedAt:    size.UpdatedAt.Format("2006-01-02T15:04:05Z07:00"),

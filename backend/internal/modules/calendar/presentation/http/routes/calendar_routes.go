@@ -7,33 +7,35 @@ import (
 )
 
 // RegisterCalendarRoutes registers all calendar-related routes
-func RegisterCalendarRoutes(router *gin.RouterGroup, eventHandler *handlers.EventHandler, attendeeHandler *handlers.AttendeeHandler, jwtSecret string) {
+func RegisterCalendarRoutes(router *gin.RouterGroup, eventHandler *handlers.EventHandler, attendeeHandler *handlers.AttendeeHandler, jwtSecret string, rbacSvc *auth.RBACService) {
 	// Calendar routes group
 	calendar := router.Group("/calendar")
-	
+
 	// Event routes
 	events := calendar.Group("/events")
 	{
 		// Public routes (no authentication required)
-		events.GET("", eventHandler.ListEvents)          // GET /calendar/events (with filtering) - allows public holiday access
-		events.GET("/month/:year/:month", eventHandler.GetEventsByMonth) // GET /calendar/events/month/{year}/{month} - allows public holiday access
-		
+		events.GET("", eventHandler.ListEvents)                            // GET /calendar/events (with filtering) - allows public holiday access
+		events.GET("/month/:year/:month", eventHandler.GetEventsByMonth)   // GET /calendar/events/month/{year}/{month} - allows public holiday access
+
 		// Protected routes (authentication required)
 		eventsAuth := events.Group("", auth.Middleware(jwtSecret))
+		eventsAuth.Use(auth.LoadPermissions(rbacSvc))
 		{
-			eventsAuth.POST("", eventHandler.CreateEvent)         // POST /calendar/events
-			eventsAuth.GET("/:id", eventHandler.GetEvent)        // GET /calendar/events/{id}
-			eventsAuth.PUT("/:id", eventHandler.UpdateEvent)     // PUT /calendar/events/{id}
-			eventsAuth.DELETE("/:id", eventHandler.DeleteEvent)  // DELETE /calendar/events/{id}
-			eventsAuth.GET("/user/:userId", eventHandler.GetUserEvents)          // GET /calendar/events/user/{userId}
+			eventsAuth.POST("", auth.RequirePermission(rbacSvc, "calendar.event.create"), eventHandler.CreateEvent)
+			eventsAuth.GET("/:id", auth.RequirePermission(rbacSvc, "calendar.event.read"), eventHandler.GetEvent)
+			eventsAuth.PUT("/:id", auth.RequirePermission(rbacSvc, "calendar.event.update"), eventHandler.UpdateEvent)
+			eventsAuth.DELETE("/:id", auth.RequirePermission(rbacSvc, "calendar.event.delete"), eventHandler.DeleteEvent)
+			eventsAuth.GET("/user/:userId", auth.RequirePermission(rbacSvc, "calendar.event.list"), eventHandler.GetUserEvents)
 		}
 	}
-	
+
 	// Attendee routes (all require authentication)
 	attendees := calendar.Group("/attendees", auth.Middleware(jwtSecret))
+	attendees.Use(auth.LoadPermissions(rbacSvc))
 	{
-		attendees.POST("/events/:eventId", attendeeHandler.AddAttendee)        // POST /calendar/attendees/events/{eventId}
-		attendees.DELETE("/:attendeeId", attendeeHandler.RemoveAttendee)       // DELETE /calendar/attendees/{attendeeId}
-		attendees.PUT("/:attendeeId/status", attendeeHandler.UpdateAttendeeStatus) // PUT /calendar/attendees/{attendeeId}/status
+		attendees.POST("/events/:eventId", auth.RequirePermission(rbacSvc, "calendar.attendee.create"), attendeeHandler.AddAttendee)
+		attendees.DELETE("/:attendeeId", auth.RequirePermission(rbacSvc, "calendar.attendee.delete"), attendeeHandler.RemoveAttendee)
+		attendees.PUT("/:attendeeId/status", auth.RequirePermission(rbacSvc, "calendar.attendee.update"), attendeeHandler.UpdateAttendeeStatus)
 	}
 }

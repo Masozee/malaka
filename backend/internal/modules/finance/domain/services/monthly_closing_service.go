@@ -6,18 +6,19 @@ import (
 
 	"malaka/internal/modules/finance/domain/entities"
 	"malaka/internal/modules/finance/domain/repositories"
+	"malaka/internal/shared/uuid"
 )
 
 type MonthlyClosingService interface {
 	CreateMonthlyClosing(ctx context.Context, closing *entities.MonthlyClosing) error
-	GetMonthlyClosingByID(ctx context.Context, id string) (*entities.MonthlyClosing, error)
+	GetMonthlyClosingByID(ctx context.Context, id uuid.ID) (*entities.MonthlyClosing, error)
 	GetAllMonthlyClosings(ctx context.Context) ([]*entities.MonthlyClosing, error)
 	UpdateMonthlyClosing(ctx context.Context, closing *entities.MonthlyClosing) error
-	DeleteMonthlyClosing(ctx context.Context, id string) error
+	DeleteMonthlyClosing(ctx context.Context, id uuid.ID) error
 	GetMonthlyClosingByPeriod(ctx context.Context, month, year int) (*entities.MonthlyClosing, error)
-	CloseMonth(ctx context.Context, id string, closedBy string) error
-	LockClosing(ctx context.Context, id string) error
-	UnlockClosing(ctx context.Context, id string) error
+	CloseMonth(ctx context.Context, id uuid.ID, closedBy uuid.ID) error
+	LockClosing(ctx context.Context, id uuid.ID) error
+	UnlockClosing(ctx context.Context, id uuid.ID) error
 	GetOpenPeriods(ctx context.Context) ([]*entities.MonthlyClosing, error)
 }
 
@@ -35,14 +36,14 @@ func (s *monthlyClosingService) CreateMonthlyClosing(ctx context.Context, closin
 	if closing.Status == "" {
 		closing.Status = "open"
 	}
-	
+
 	// Calculate net income
 	closing.NetIncome = closing.TotalIncome - closing.TotalExpense
-	
+
 	return s.repo.Create(ctx, closing)
 }
 
-func (s *monthlyClosingService) GetMonthlyClosingByID(ctx context.Context, id string) (*entities.MonthlyClosing, error) {
+func (s *monthlyClosingService) GetMonthlyClosingByID(ctx context.Context, id uuid.ID) (*entities.MonthlyClosing, error) {
 	return s.repo.GetByID(ctx, id)
 }
 
@@ -53,11 +54,11 @@ func (s *monthlyClosingService) GetAllMonthlyClosings(ctx context.Context) ([]*e
 func (s *monthlyClosingService) UpdateMonthlyClosing(ctx context.Context, closing *entities.MonthlyClosing) error {
 	// Recalculate net income
 	closing.NetIncome = closing.TotalIncome - closing.TotalExpense
-	
+
 	return s.repo.Update(ctx, closing)
 }
 
-func (s *monthlyClosingService) DeleteMonthlyClosing(ctx context.Context, id string) error {
+func (s *monthlyClosingService) DeleteMonthlyClosing(ctx context.Context, id uuid.ID) error {
 	return s.repo.Delete(ctx, id)
 }
 
@@ -65,7 +66,7 @@ func (s *monthlyClosingService) GetMonthlyClosingByPeriod(ctx context.Context, m
 	return s.repo.GetByMonth(ctx, month, year)
 }
 
-func (s *monthlyClosingService) CloseMonth(ctx context.Context, id string, closedBy string) error {
+func (s *monthlyClosingService) CloseMonth(ctx context.Context, id uuid.ID, closedBy uuid.ID) error {
 	closing, err := s.repo.GetByID(ctx, id)
 	if err != nil {
 		return err
@@ -78,7 +79,7 @@ func (s *monthlyClosingService) CloseMonth(ctx context.Context, id string, close
 	return s.repo.Update(ctx, closing)
 }
 
-func (s *monthlyClosingService) LockClosing(ctx context.Context, id string) error {
+func (s *monthlyClosingService) LockClosing(ctx context.Context, id uuid.ID) error {
 	closing, err := s.repo.GetByID(ctx, id)
 	if err != nil {
 		return err
@@ -90,7 +91,7 @@ func (s *monthlyClosingService) LockClosing(ctx context.Context, id string) erro
 	return s.repo.Update(ctx, closing)
 }
 
-func (s *monthlyClosingService) UnlockClosing(ctx context.Context, id string) error {
+func (s *monthlyClosingService) UnlockClosing(ctx context.Context, id uuid.ID) error {
 	closing, err := s.repo.GetByID(ctx, id)
 	if err != nil {
 		return err

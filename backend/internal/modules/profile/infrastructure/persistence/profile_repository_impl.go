@@ -8,11 +8,11 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"golang.org/x/crypto/bcrypt"
 
 	"malaka/internal/modules/profile/domain/entities"
+	"malaka/internal/shared/uuid"
 )
 
 // ProfileRepositoryImpl implements the ProfileRepository interface
@@ -99,8 +99,9 @@ func (r *ProfileRepositoryImpl) GetProfile(ctx context.Context, userID string) (
 		return nil, fmt.Errorf("failed to get profile: %w", err)
 	}
 
+	id, _ := uuid.Parse(row.ID)
 	profile := &entities.UserProfile{
-		ID:        row.ID,
+		ID:        id,
 		Username:  row.Username,
 		Email:     row.Email,
 		CreatedAt: row.CreatedAt,
@@ -327,7 +328,7 @@ func (r *ProfileRepositoryImpl) UpdateAvatar(ctx context.Context, userID string,
 			`INSERT INTO employees (id, user_id, avatar, created_at, updated_at)
 			 VALUES ($1, $2, $3, $4, $5)
 			 ON CONFLICT (user_id) DO UPDATE SET avatar = $3, updated_at = $5`,
-			uuid.New().String(), userID, avatarURL, time.Now(), time.Now())
+			uuid.New(), userID, avatarURL, time.Now(), time.Now())
 		if err != nil {
 			return fmt.Errorf("failed to create employee record for avatar: %w", err)
 		}
@@ -416,7 +417,7 @@ func (r *ProfileRepositoryImpl) UpdateUserSettings(ctx context.Context, userID s
 			VALUES ($1, $2, $3, $4, $5, $6, $6)
 			ON CONFLICT (user_id, category, setting_key)
 			DO UPDATE SET setting_value = $5, updated_at = $6
-		`, uuid.New().String(), userID, category, key, value, time.Now())
+		`, uuid.New(), userID, category, key, value, time.Now())
 		if err != nil {
 			return fmt.Errorf("failed to update setting %s: %w", key, err)
 		}

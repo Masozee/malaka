@@ -1,14 +1,12 @@
 package handlers
 
 import (
-	"time"
-
 	"github.com/gin-gonic/gin"
 
-	"malaka/internal/modules/masterdata/domain/entities"
 	"malaka/internal/modules/masterdata/domain/services"
 	"malaka/internal/modules/masterdata/presentation/http/dto"
 	"malaka/internal/shared/response"
+	"malaka/internal/shared/uuid"
 )
 
 // PriceHandler handles HTTP requests for price operations.
@@ -29,17 +27,11 @@ func (h *PriceHandler) CreatePrice(c *gin.Context) {
 		return
 	}
 
-	effectiveDate, err := time.Parse(time.RFC3339, req.EffectiveDate)
+	// Use DTO's ToEntity method which handles UUID and date conversion properly
+	price, err := req.ToEntity()
 	if err != nil {
 		response.BadRequest(c, "Invalid effective date format", nil)
 		return
-	}
-
-	price := &entities.Price{
-		ArticleID: req.ArticleID,
-		Amount:    req.Amount,
-		Currency:  req.Currency,
-		EffectiveDate: effectiveDate,
 	}
 
 	if err := h.service.CreatePrice(c.Request.Context(), price); err != nil {
@@ -53,7 +45,7 @@ func (h *PriceHandler) CreatePrice(c *gin.Context) {
 // GetPriceByID handles retrieving a price by its ID.
 func (h *PriceHandler) GetPriceByID(c *gin.Context) {
 	id := c.Param("id")
-	price, err := h.service.GetPriceByID(c.Request.Context(), id)
+	price, err := h.service.GetPriceByID(c.Request.Context(), uuid.MustParse(id))
 	if err != nil {
 		response.InternalServerError(c, err.Error(), nil)
 		return
@@ -80,38 +72,42 @@ func (h *PriceHandler) GetAllPrices(c *gin.Context) {
 // UpdatePrice handles updating an existing price.
 func (h *PriceHandler) UpdatePrice(c *gin.Context) {
 	id := c.Param("id")
+
+	// First, retrieve the existing price
+	existingPrice, err := h.service.GetPriceByID(c.Request.Context(), uuid.MustParse(id))
+	if err != nil {
+		response.InternalServerError(c, err.Error(), nil)
+		return
+	}
+	if existingPrice == nil {
+		response.NotFound(c, "Price not found", nil)
+		return
+	}
+
 	var req dto.UpdatePriceRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		response.BadRequest(c, err.Error(), nil)
 		return
 	}
 
-	effectiveDate, err := time.Parse(time.RFC3339, req.EffectiveDate)
-	if err != nil {
+	// Use DTO's ApplyToEntity method which handles UUID and date conversion properly
+	if err := req.ApplyToEntity(existingPrice); err != nil {
 		response.BadRequest(c, "Invalid effective date format", nil)
 		return
 	}
 
-	price := &entities.Price{
-		ArticleID: req.ArticleID,
-		Amount:    req.Amount,
-		Currency:  req.Currency,
-		EffectiveDate: effectiveDate,
-	}
-	price.ID = id // Set the ID from the URL parameter
-
-	if err := h.service.UpdatePrice(c.Request.Context(), price); err != nil {
+	if err := h.service.UpdatePrice(c.Request.Context(), existingPrice); err != nil {
 		response.InternalServerError(c, err.Error(), nil)
 		return
 	}
 
-	response.OK(c, "Price updated successfully", price)
+	response.OK(c, "Price updated successfully", existingPrice)
 }
 
 // DeletePrice handles deleting a price by its ID.
 func (h *PriceHandler) DeletePrice(c *gin.Context) {
 	id := c.Param("id")
-	if err := h.service.DeletePrice(c.Request.Context(), id); err != nil {
+	if err := h.service.DeletePrice(c.Request.Context(), uuid.MustParse(id)); err != nil {
 		response.InternalServerError(c, err.Error(), nil)
 		return
 	}

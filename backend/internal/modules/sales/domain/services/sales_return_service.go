@@ -6,7 +6,7 @@ import (
 
 	"malaka/internal/modules/sales/domain/entities"
 	"malaka/internal/modules/sales/domain/repositories"
-	"malaka/internal/shared/utils"
+	"malaka/internal/shared/uuid"
 )
 
 // SalesReturnService provides business logic for sales return operations.
@@ -21,8 +21,8 @@ func NewSalesReturnService(repo repositories.SalesReturnRepository) *SalesReturn
 
 // CreateSalesReturn creates a new sales return.
 func (s *SalesReturnService) CreateSalesReturn(ctx context.Context, sr *entities.SalesReturn) error {
-	if sr.ID == "" {
-		sr.ID = utils.RandomString(10) // Generate a random ID if not provided
+	if sr.ID.IsNil() {
+		sr.ID = uuid.New()
 	}
 	return s.repo.Create(ctx, sr)
 }
@@ -40,7 +40,7 @@ func (s *SalesReturnService) GetSalesReturnByID(ctx context.Context, id string) 
 // UpdateSalesReturn updates an existing sales return.
 func (s *SalesReturnService) UpdateSalesReturn(ctx context.Context, sr *entities.SalesReturn) error {
 	// Ensure the sales return exists before updating
-	existingSR, err := s.repo.GetByID(ctx, sr.ID)
+	existingSR, err := s.repo.GetByID(ctx, sr.ID.String())
 	if err != nil {
 		return err
 	}

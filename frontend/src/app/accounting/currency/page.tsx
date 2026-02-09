@@ -10,6 +10,13 @@ import { AdvancedDataTable } from '@/components/ui/advanced-data-table'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { HugeiconsIcon } from '@hugeicons/react'
+import {
+  Money01Icon,
+  CoinsDollarIcon,
+  TradeUpIcon,
+  Clock01Icon
+} from '@hugeicons/core-free-icons'
 
 import Link from 'next/link'
 import { currencyService, type CurrencyData } from '@/services/currency'
@@ -77,8 +84,6 @@ export default function CurrencyPage() {
   const [mounted, setMounted] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
-  const [activeView, setActiveView] = useState<'cards' | 'table'>('table')
-  const [activeTab, setActiveTab] = useState<'currencies' | 'rates'>('currencies')
   const [currencies, setCurrencies] = useState<Currency[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -220,8 +225,8 @@ export default function CurrencyPage() {
         if (!currency) return null
         return (
           <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-              <span className="text-xs font-bold text-blue-600">{currency.code}</span>
+            <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
+              <span className="text-lg font-bold text-foreground">{currency.symbol}</span>
             </div>
             <div>
               <div className="font-medium">{currency.code}</div>
@@ -229,14 +234,6 @@ export default function CurrencyPage() {
             </div>
           </div>
         )
-      }
-    },
-    {
-      key: 'symbol' as keyof Currency,
-      title: 'Symbol',
-      render: (value: unknown, currency: Currency) => {
-        if (!currency) return null
-        return <div className="text-lg font-medium">{currency.symbol}</div>
       }
     },
     {
@@ -462,7 +459,9 @@ export default function CurrencyPage() {
                     <p className="text-2xl font-bold mt-1">{summaryStats.totalCurrencies}</p>
                     <p className="text-sm text-blue-600 mt-1">{summaryStats.activeCurrencies} active</p>
                   </div>
-                  <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center" />
+                  <div className="h-10 w-10 bg-zinc-100 dark:bg-zinc-800 rounded-lg flex items-center justify-center">
+                    <HugeiconsIcon icon={Money01Icon} className="h-5 w-5 text-foreground" aria-hidden="true" />
+                  </div>
                 </div>
               </Card>
 
@@ -473,7 +472,9 @@ export default function CurrencyPage() {
                     <p className="text-2xl font-bold mt-1">{summaryStats.baseCurrency}</p>
                     <p className="text-sm text-green-600 mt-1">Primary currency</p>
                   </div>
-                  <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center" />
+                  <div className="h-10 w-10 bg-zinc-100 dark:bg-zinc-800 rounded-lg flex items-center justify-center">
+                    <HugeiconsIcon icon={CoinsDollarIcon} className="h-5 w-5 text-foreground" aria-hidden="true" />
+                  </div>
                 </div>
               </Card>
 
@@ -491,7 +492,9 @@ export default function CurrencyPage() {
                       }
                     </p>
                   </div>
-                  <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center" />
+                  <div className="h-10 w-10 bg-zinc-100 dark:bg-zinc-800 rounded-lg flex items-center justify-center">
+                    <HugeiconsIcon icon={TradeUpIcon} className="h-5 w-5 text-foreground" aria-hidden="true" />
+                  </div>
                 </div>
               </Card>
 
@@ -504,7 +507,9 @@ export default function CurrencyPage() {
                     </p>
                     <p className="text-sm text-purple-600 mt-1">Bank Indonesia rates</p>
                   </div>
-                  <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center" />
+                  <div className="h-10 w-10 bg-zinc-100 dark:bg-zinc-800 rounded-lg flex items-center justify-center">
+                    <HugeiconsIcon icon={Clock01Icon} className="h-5 w-5 text-foreground" aria-hidden="true" />
+                  </div>
                 </div>
               </Card>
             </div>
@@ -524,8 +529,19 @@ export default function CurrencyPage() {
               </div>
 
               <div className="flex items-center gap-2">
+                <Select defaultValue="name">
+                  <SelectTrigger className="w-44 h-10 bg-white dark:bg-zinc-900" aria-label="Sort by">
+                    <SelectValue placeholder="Sort by" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="name">Sort by Name</SelectItem>
+                    <SelectItem value="rate">Sort by Rate</SelectItem>
+                    <SelectItem value="change">Sort by Change</SelectItem>
+                  </SelectContent>
+                </Select>
+
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger className="w-32" aria-label="Filter by status">
+                  <SelectTrigger className="w-32 h-10 bg-white dark:bg-zinc-900" aria-label="Filter by status">
                     <SelectValue placeholder="Status" />
                   </SelectTrigger>
                   <SelectContent>
@@ -537,99 +553,20 @@ export default function CurrencyPage() {
               </div>
             </div>
 
-            {/* View Toggle & Sort */}
-            <div className="flex justify-between items-center">
-              <div className="flex items-center gap-4">
-                <div className="flex space-x-1 bg-muted p-1 rounded-lg">
-                  <Button
-                    variant={activeView === 'cards' ? 'default' : 'ghost'}
-                    size="sm"
-                    onClick={() => setActiveView('cards')}
-                  >
-                    Cards
-                  </Button>
-                  <Button
-                    variant={activeView === 'table' ? 'default' : 'ghost'}
-                    size="sm"
-                    onClick={() => setActiveView('table')}
-                  >
-                    Table
-                  </Button>
-                </div>
-                <Select defaultValue="name">
-                  <SelectTrigger className="w-44" aria-label="Sort by">
-                    <SelectValue placeholder="Sort by" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="name">Sort by Name</SelectItem>
-                    <SelectItem value="rate">Sort by Rate</SelectItem>
-                    <SelectItem value="change">Sort by Change</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="text-sm text-muted-foreground">
-                {filteredCurrencies.length} of {currencies.length} currencies
-              </div>
-            </div>
-
-            {/* Content */}
-            {activeView === 'cards' ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {filteredCurrencies.map((currency) => (
-                  <Card key={currency.id} className="p-4">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                          <span className="text-xs font-bold text-blue-600">{currency.code}</span>
-                        </div>
-                        <div>
-                          <div className="font-medium">{currency.code}</div>
-                          <div className="text-sm text-muted-foreground">{currency.name}</div>
-                        </div>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Badge variant={currency.is_active ? 'default' : 'secondary'}>
-                          {currency.is_active ? 'Active' : 'Inactive'}
-                        </Badge>
-                        {currency.is_base && <Badge variant="outline">Base</Badge>}
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <div>
-                        <span className="text-sm text-muted-foreground">Rate: </span>
-                        <span className="font-medium">
-                          {currency.is_base ? '1.00' : formatCurrency(currency.middle_rate || currency.exchange_rate, 'IDR')}
-                        </span>
-                      </div>
-                      {!currency.is_base && (
-                        <div>
-                          <span className="text-sm text-muted-foreground">24H Change: </span>
-                          <span className={getRateChangeColor(currency.rate_change_24h)}>
-                            {currency.rate_change_24h > 0 ? '+' : ''}{formatCurrency(currency.rate_change_24h, 'IDR')}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  </Card>
-                ))}
-              </div>
-            ) : (
-              <AdvancedDataTable
-                data={filteredCurrencies}
-                columns={currencyColumns}
-                loading={loading}
-                pagination={{
-                  current: 1,
-                  pageSize: 10,
-                  total: filteredCurrencies.length,
-                  onChange: (page: number, pageSize: number) => {
-                    console.log('Pagination change:', page, pageSize)
-                  }
-                }}
-                searchPlaceholder="Search currencies..."
-                exportEnabled={true}
-              />
-            )}
+            {/* Content - Table Only */}
+            <AdvancedDataTable
+              data={filteredCurrencies}
+              columns={currencyColumns}
+              loading={loading}
+              pagination={{
+                current: 1,
+                pageSize: 10,
+                total: filteredCurrencies.length,
+                onChange: (page: number, pageSize: number) => {
+                  console.log('Pagination change:', page, pageSize)
+                }
+              }}
+            />
           </>
         )}
       </div>

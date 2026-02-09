@@ -1,13 +1,15 @@
 package handlers
 
 import (
+	"time"
+
 	"github.com/gin-gonic/gin"
 
 	"malaka/internal/modules/inventory/domain/entities"
 	"malaka/internal/modules/inventory/domain/services"
 	"malaka/internal/modules/inventory/presentation/http/dto"
 	"malaka/internal/shared/response"
-	"malaka/internal/shared/utils"
+	"malaka/internal/shared/uuid"
 )
 
 // PurchaseOrderHandler handles HTTP requests for purchase order operations.
@@ -28,9 +30,15 @@ func (h *PurchaseOrderHandler) CreatePurchaseOrder(c *gin.Context) {
 		return
 	}
 
+	supplierID, err := uuid.Parse(req.SupplierID)
+	if err != nil {
+		response.BadRequest(c, "Invalid supplier ID format", nil)
+		return
+	}
+
 	po := &entities.PurchaseOrder{
-		SupplierID:  req.SupplierID,
-		OrderDate:   utils.Now(),
+		SupplierID:  supplierID,
+		OrderDate:   time.Now(),
 		Status:      "pending",
 		TotalAmount: req.TotalAmount,
 	}
@@ -79,13 +87,25 @@ func (h *PurchaseOrderHandler) UpdatePurchaseOrder(c *gin.Context) {
 		return
 	}
 
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		response.BadRequest(c, "Invalid ID format", nil)
+		return
+	}
+
+	supplierID, err := uuid.Parse(req.SupplierID)
+	if err != nil {
+		response.BadRequest(c, "Invalid supplier ID format", nil)
+		return
+	}
+
 	po := &entities.PurchaseOrder{
-		SupplierID:  req.SupplierID,
-		OrderDate:   utils.Now(),
+		SupplierID:  supplierID,
+		OrderDate:   time.Now(),
 		Status:      req.Status,
 		TotalAmount: req.TotalAmount,
 	}
-	po.ID = id // Set the ID from the URL parameter
+	po.ID = parsedID
 
 	if err := h.service.UpdatePurchaseOrder(c.Request.Context(), po); err != nil {
 		response.InternalServerError(c, err.Error(), nil)

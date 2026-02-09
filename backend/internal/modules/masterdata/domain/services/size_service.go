@@ -4,9 +4,9 @@ import (
 	"context"
 	"errors"
 
-	"github.com/google/uuid"
 	"malaka/internal/modules/masterdata/domain/entities"
 	"malaka/internal/modules/masterdata/domain/repositories"
+	"malaka/internal/shared/uuid"
 )
 
 // SizeService provides business logic for size operations.
@@ -21,14 +21,14 @@ func NewSizeService(repo repositories.SizeRepository) *SizeService {
 
 // CreateSize creates a new size.
 func (s *SizeService) CreateSize(ctx context.Context, size *entities.Size) error {
-	if size.ID == "" {
-		size.ID = uuid.NewString()
+	if size.ID.IsNil() {
+		size.ID = uuid.New()
 	}
 	return s.repo.Create(ctx, size)
 }
 
 // GetSizeByID retrieves a size by its ID.
-func (s *SizeService) GetSizeByID(ctx context.Context, id string) (*entities.Size, error) {
+func (s *SizeService) GetSizeByID(ctx context.Context, id uuid.ID) (*entities.Size, error) {
 	return s.repo.GetByID(ctx, id)
 }
 
@@ -51,7 +51,7 @@ func (s *SizeService) UpdateSize(ctx context.Context, size *entities.Size) error
 }
 
 // DeleteSize deletes a size by its ID.
-func (s *SizeService) DeleteSize(ctx context.Context, id string) error {
+func (s *SizeService) DeleteSize(ctx context.Context, id uuid.ID) error {
 	// Ensure the size exists before deleting
 	existingSize, err := s.repo.GetByID(ctx, id)
 	if err != nil {

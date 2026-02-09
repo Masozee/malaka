@@ -5,7 +5,9 @@ import (
 	"database/sql"
 
 	"github.com/jmoiron/sqlx"
+
 	"malaka/internal/modules/finance/domain/entities"
+	"malaka/internal/shared/uuid"
 )
 
 // CashBankRepositoryImpl implements repositories.CashBankRepository.
@@ -20,13 +22,16 @@ func NewCashBankRepositoryImpl(db *sqlx.DB) *CashBankRepositoryImpl {
 
 // Create creates a new cash/bank account in the database.
 func (r *CashBankRepositoryImpl) Create(ctx context.Context, cb *entities.CashBank) error {
+	if cb.ID.IsNil() {
+		cb.ID = uuid.New()
+	}
 	query := `INSERT INTO cash_banks (id, name, account_no, balance, currency, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7)`
 	_, err := r.db.ExecContext(ctx, query, cb.ID, cb.Name, cb.AccountNo, cb.Balance, cb.Currency, cb.CreatedAt, cb.UpdatedAt)
 	return err
 }
 
 // GetByID retrieves a cash/bank account by its ID from the database.
-func (r *CashBankRepositoryImpl) GetByID(ctx context.Context, id string) (*entities.CashBank, error) {
+func (r *CashBankRepositoryImpl) GetByID(ctx context.Context, id uuid.ID) (*entities.CashBank, error) {
 	query := `SELECT id, name, account_no, balance, currency, created_at, updated_at FROM cash_banks WHERE id = $1`
 	row := r.db.QueryRowContext(ctx, query, id)
 
@@ -46,7 +51,7 @@ func (r *CashBankRepositoryImpl) Update(ctx context.Context, cb *entities.CashBa
 }
 
 // Delete deletes a cash/bank account by its ID from the database.
-func (r *CashBankRepositoryImpl) Delete(ctx context.Context, id string) error {
+func (r *CashBankRepositoryImpl) Delete(ctx context.Context, id uuid.ID) error {
 	query := `DELETE FROM cash_banks WHERE id = $1`
 	_, err := r.db.ExecContext(ctx, query, id)
 	return err

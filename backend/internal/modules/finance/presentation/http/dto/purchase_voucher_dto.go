@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"malaka/internal/modules/finance/domain/entities"
+	"malaka/internal/shared/uuid"
 )
 
 type CreatePurchaseVoucherRequest struct {
@@ -55,18 +56,18 @@ type PurchaseVoucherResponse struct {
 
 func ToPurchaseVoucherResponse(voucher *entities.PurchaseVoucher) *PurchaseVoucherResponse {
 	return &PurchaseVoucherResponse{
-		ID:            voucher.ID,
+		ID:            voucher.ID.String(),
 		VoucherNumber: voucher.VoucherNumber,
 		VoucherDate:   voucher.VoucherDate,
-		SupplierID:    voucher.SupplierID,
-		InvoiceID:     voucher.InvoiceID,
+		SupplierID:    voucher.SupplierID.String(),
+		InvoiceID:     voucher.InvoiceID.String(),
 		TotalAmount:   voucher.TotalAmount,
 		TaxAmount:     voucher.TaxAmount,
 		GrandTotal:    voucher.GrandTotal,
 		DueDate:       voucher.DueDate,
 		Status:        voucher.Status,
 		Description:   voucher.Description,
-		ApprovedBy:    voucher.ApprovedBy,
+		ApprovedBy:    voucher.ApprovedBy.String(),
 		ApprovedAt:    voucher.ApprovedAt,
 		CreatedAt:     voucher.CreatedAt,
 		UpdatedAt:     voucher.UpdatedAt,
@@ -77,8 +78,8 @@ func ToPurchaseVoucherEntity(req *CreatePurchaseVoucherRequest) *entities.Purcha
 	return &entities.PurchaseVoucher{
 		VoucherNumber: req.VoucherNumber,
 		VoucherDate:   req.VoucherDate,
-		SupplierID:    req.SupplierID,
-		InvoiceID:     req.InvoiceID,
+		SupplierID:    uuid.MustParse(req.SupplierID),
+		InvoiceID:     uuid.MustParse(req.InvoiceID),
 		TotalAmount:   req.TotalAmount,
 		TaxAmount:     req.TaxAmount,
 		GrandTotal:    req.GrandTotal,

@@ -6,10 +6,10 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/google/uuid"
 	"malaka/internal/modules/procurement/domain/entities"
 	"malaka/internal/modules/procurement/domain/repositories"
 	"malaka/internal/shared/utils"
+	"malaka/internal/shared/uuid"
 )
 
 // ContractService provides business logic for contract operations.
@@ -24,8 +24,8 @@ func NewContractService(repo repositories.ContractRepository) *ContractService {
 
 // Create creates a new contract.
 func (s *ContractService) Create(ctx context.Context, contract *entities.Contract) error {
-	if contract.ID == "" {
-		contract.ID = uuid.New().String()
+	if contract.ID.IsNil() {
+		contract.ID = uuid.New()
 	}
 
 	// Generate contract number
@@ -83,7 +83,7 @@ func (s *ContractService) GetAll(ctx context.Context, filter *repositories.Contr
 
 // Update updates an existing contract.
 func (s *ContractService) Update(ctx context.Context, contract *entities.Contract) error {
-	existing, err := s.repo.GetByID(ctx, contract.ID)
+	existing, err := s.repo.GetByID(ctx, contract.ID.String())
 	if err != nil {
 		return err
 	}

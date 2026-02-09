@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/google/uuid"
+	"malaka/internal/shared/uuid"
 	"malaka/internal/modules/accounting/domain/entities"
 	"malaka/internal/modules/accounting/domain/repositories"
 )
@@ -54,7 +54,7 @@ func (r *BudgetRepositoryImpl) Create(ctx context.Context, budget *entities.Budg
 }
 
 // GetByID retrieves a budget by its ID
-func (r *BudgetRepositoryImpl) GetByID(ctx context.Context, id uuid.UUID) (*entities.Budget, error) {
+func (r *BudgetRepositoryImpl) GetByID(ctx context.Context, id uuid.ID) (*entities.Budget, error) {
 	query := `
 		SELECT id, budget_code, budget_name, budget_type, status, fiscal_year,
 			period_start, period_end, total_budget, total_actual, total_variance,
@@ -182,7 +182,7 @@ func (r *BudgetRepositoryImpl) Update(ctx context.Context, budget *entities.Budg
 }
 
 // Delete removes a budget from the database
-func (r *BudgetRepositoryImpl) Delete(ctx context.Context, id uuid.UUID) error {
+func (r *BudgetRepositoryImpl) Delete(ctx context.Context, id uuid.ID) error {
 	// First delete all budget lines
 	if err := r.DeleteLinesByBudgetID(ctx, id); err != nil {
 		return err
@@ -233,7 +233,7 @@ func (r *BudgetRepositoryImpl) CreateLine(ctx context.Context, line *entities.Bu
 }
 
 // GetLinesByBudgetID retrieves all budget lines for a budget
-func (r *BudgetRepositoryImpl) GetLinesByBudgetID(ctx context.Context, budgetID uuid.UUID) ([]*entities.BudgetLine, error) {
+func (r *BudgetRepositoryImpl) GetLinesByBudgetID(ctx context.Context, budgetID uuid.ID) ([]*entities.BudgetLine, error) {
 	query := `
 		SELECT id, budget_id, account_id, line_number, description,
 			budgeted_amount, actual_amount, variance_amount, variance_percent,
@@ -303,7 +303,7 @@ func (r *BudgetRepositoryImpl) UpdateLine(ctx context.Context, line *entities.Bu
 }
 
 // DeleteLine removes a budget line
-func (r *BudgetRepositoryImpl) DeleteLine(ctx context.Context, lineID uuid.UUID) error {
+func (r *BudgetRepositoryImpl) DeleteLine(ctx context.Context, lineID uuid.ID) error {
 	query := `DELETE FROM budget_lines WHERE id = $1`
 	_, err := r.db.ExecContext(ctx, query, lineID)
 	if err != nil {
@@ -313,7 +313,7 @@ func (r *BudgetRepositoryImpl) DeleteLine(ctx context.Context, lineID uuid.UUID)
 }
 
 // DeleteLinesByBudgetID removes all budget lines for a budget
-func (r *BudgetRepositoryImpl) DeleteLinesByBudgetID(ctx context.Context, budgetID uuid.UUID) error {
+func (r *BudgetRepositoryImpl) DeleteLinesByBudgetID(ctx context.Context, budgetID uuid.ID) error {
 	query := `DELETE FROM budget_lines WHERE budget_id = $1`
 	_, err := r.db.ExecContext(ctx, query, budgetID)
 	if err != nil {
@@ -684,7 +684,7 @@ func (r *BudgetRepositoryImpl) GetCurrentBudget(ctx context.Context, companyID s
 }
 
 // Activate activates a budget
-func (r *BudgetRepositoryImpl) Activate(ctx context.Context, budgetID uuid.UUID, userID string) error {
+func (r *BudgetRepositoryImpl) Activate(ctx context.Context, budgetID uuid.ID, userID string) error {
 	budget, err := r.GetByID(ctx, budgetID)
 	if err != nil {
 		return err
@@ -698,7 +698,7 @@ func (r *BudgetRepositoryImpl) Activate(ctx context.Context, budgetID uuid.UUID,
 }
 
 // Close closes a budget
-func (r *BudgetRepositoryImpl) Close(ctx context.Context, budgetID uuid.UUID) error {
+func (r *BudgetRepositoryImpl) Close(ctx context.Context, budgetID uuid.ID) error {
 	budget, err := r.GetByID(ctx, budgetID)
 	if err != nil {
 		return err
@@ -712,7 +712,7 @@ func (r *BudgetRepositoryImpl) Close(ctx context.Context, budgetID uuid.UUID) er
 }
 
 // Revise creates a revised version of a budget
-func (r *BudgetRepositoryImpl) Revise(ctx context.Context, budgetID uuid.UUID, newBudget *entities.Budget) error {
+func (r *BudgetRepositoryImpl) Revise(ctx context.Context, budgetID uuid.ID, newBudget *entities.Budget) error {
 	// Get original budget
 	originalBudget, err := r.GetByID(ctx, budgetID)
 	if err != nil {
@@ -732,7 +732,7 @@ func (r *BudgetRepositoryImpl) Revise(ctx context.Context, budgetID uuid.UUID, n
 }
 
 // GetBudgetComparison retrieves budget vs actual comparison
-func (r *BudgetRepositoryImpl) GetBudgetComparison(ctx context.Context, budgetID uuid.UUID, asOfDate time.Time) ([]entities.BudgetComparison, error) {
+func (r *BudgetRepositoryImpl) GetBudgetComparison(ctx context.Context, budgetID uuid.ID, asOfDate time.Time) ([]entities.BudgetComparison, error) {
 	query := `
 		SELECT bl.account_id, coa.account_code, coa.account_name,
 			bl.budgeted_amount, bl.actual_amount,
@@ -769,7 +769,7 @@ func (r *BudgetRepositoryImpl) GetBudgetComparison(ctx context.Context, budgetID
 }
 
 // UpdateActualAmounts updates actual amounts for budget lines
-func (r *BudgetRepositoryImpl) UpdateActualAmounts(ctx context.Context, budgetID uuid.UUID, periodStart, periodEnd time.Time) error {
+func (r *BudgetRepositoryImpl) UpdateActualAmounts(ctx context.Context, budgetID uuid.ID, periodStart, periodEnd time.Time) error {
 	query := `
 		UPDATE budget_lines bl
 		SET actual_amount = COALESCE((
@@ -851,7 +851,7 @@ func (r *BudgetRepositoryImpl) GetBudgetVarianceReport(ctx context.Context, comp
 }
 
 // GetBudgetUtilization retrieves budget utilization percentage
-func (r *BudgetRepositoryImpl) GetBudgetUtilization(ctx context.Context, budgetID uuid.UUID) (float64, error) {
+func (r *BudgetRepositoryImpl) GetBudgetUtilization(ctx context.Context, budgetID uuid.ID) (float64, error) {
 	query := `
 		SELECT 
 			CASE 
@@ -970,7 +970,7 @@ func (r *BudgetRepositoryImpl) UpdateWithLines(ctx context.Context, budget *enti
 }
 
 // GetBudgetHistory retrieves budget history for an account
-func (r *BudgetRepositoryImpl) GetBudgetHistory(ctx context.Context, companyID string, accountID uuid.UUID) ([]*entities.BudgetLine, error) {
+func (r *BudgetRepositoryImpl) GetBudgetHistory(ctx context.Context, companyID string, accountID uuid.ID) ([]*entities.BudgetLine, error) {
 	query := `
 		SELECT bl.id, bl.budget_id, bl.account_id, bl.line_number, bl.description,
 			bl.budgeted_amount, bl.actual_amount, bl.variance_amount, bl.variance_percent,

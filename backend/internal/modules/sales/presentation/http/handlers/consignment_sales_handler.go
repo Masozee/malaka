@@ -8,6 +8,7 @@ import (
 	"malaka/internal/modules/sales/presentation/http/dto"
 	"malaka/internal/shared/response"
 	"malaka/internal/shared/utils"
+	"malaka/internal/shared/uuid"
 )
 
 // ConsignmentSalesHandler handles HTTP requests for consignment sales operations.
@@ -79,13 +80,19 @@ func (h *ConsignmentSalesHandler) UpdateConsignmentSales(c *gin.Context) {
 		return
 	}
 
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		response.BadRequest(c, "Invalid ID format", nil)
+		return
+	}
+
 	cs := &entities.ConsignmentSales{
 		ConsigneeID: req.ConsigneeID,
 		SalesDate:   utils.Now(),
 		TotalAmount: req.TotalAmount,
 		Status:      req.Status,
 	}
-	cs.ID = id // Set the ID from the URL parameter
+	cs.ID = parsedID // Set the ID from the URL parameter
 
 	if err := h.service.UpdateConsignmentSales(c.Request.Context(), cs); err != nil {
 		response.InternalServerError(c, err.Error(), nil)

@@ -5,7 +5,9 @@ import (
 	"database/sql"
 
 	"github.com/jmoiron/sqlx"
+
 	"malaka/internal/modules/finance/domain/entities"
+	"malaka/internal/shared/uuid"
 )
 
 // AccountsPayableRepositoryImpl implements repositories.AccountsPayableRepository.
@@ -20,13 +22,16 @@ func NewAccountsPayableRepositoryImpl(db *sqlx.DB) *AccountsPayableRepositoryImp
 
 // Create creates a new accounts payable record in the database.
 func (r *AccountsPayableRepositoryImpl) Create(ctx context.Context, ap *entities.AccountsPayable) error {
+	if ap.ID.IsNil() {
+		ap.ID = uuid.New()
+	}
 	query := `INSERT INTO accounts_payable (id, invoice_id, supplier_id, issue_date, due_date, amount, paid_amount, balance, status, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`
 	_, err := r.db.ExecContext(ctx, query, ap.ID, ap.InvoiceID, ap.SupplierID, ap.IssueDate, ap.DueDate, ap.Amount, ap.PaidAmount, ap.Balance, ap.Status, ap.CreatedAt, ap.UpdatedAt)
 	return err
 }
 
 // GetByID retrieves an accounts payable record by its ID from the database.
-func (r *AccountsPayableRepositoryImpl) GetByID(ctx context.Context, id string) (*entities.AccountsPayable, error) {
+func (r *AccountsPayableRepositoryImpl) GetByID(ctx context.Context, id uuid.ID) (*entities.AccountsPayable, error) {
 	query := `SELECT id, invoice_id, supplier_id, issue_date, due_date, amount, paid_amount, balance, status, created_at, updated_at FROM accounts_payable WHERE id = $1`
 	row := r.db.QueryRowContext(ctx, query, id)
 
@@ -46,7 +51,7 @@ func (r *AccountsPayableRepositoryImpl) Update(ctx context.Context, ap *entities
 }
 
 // Delete deletes an accounts payable record by its ID from the database.
-func (r *AccountsPayableRepositoryImpl) Delete(ctx context.Context, id string) error {
+func (r *AccountsPayableRepositoryImpl) Delete(ctx context.Context, id uuid.ID) error {
 	query := `DELETE FROM accounts_payable WHERE id = $1`
 	_, err := r.db.ExecContext(ctx, query, id)
 	return err

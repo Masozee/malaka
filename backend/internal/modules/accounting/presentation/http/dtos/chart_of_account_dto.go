@@ -3,12 +3,12 @@ package dtos
 import (
 	"time"
 
-	"github.com/google/uuid"
+	"malaka/internal/shared/uuid"
 )
 
 // CreateChartOfAccountRequest represents the request body for creating a new ChartOfAccount.
 type CreateChartOfAccountRequest struct {
-	ParentID    *uuid.UUID `json:"parent_id"`
+	ParentID    *uuid.ID `json:"parent_id"`
 	AccountCode string     `json:"account_code" binding:"required"`
 	AccountName string     `json:"account_name" binding:"required"`
 	AccountType string     `json:"account_type" binding:"required"`
@@ -19,7 +19,7 @@ type CreateChartOfAccountRequest struct {
 
 // UpdateChartOfAccountRequest represents the request body for updating an existing ChartOfAccount.
 type UpdateChartOfAccountRequest struct {
-	ParentID    *uuid.UUID `json:"parent_id"`
+	ParentID    *uuid.ID `json:"parent_id"`
 	AccountCode string     `json:"account_code" binding:"required"`
 	AccountName string     `json:"account_name" binding:"required"`
 	AccountType string     `json:"account_type" binding:"required"`
@@ -30,8 +30,8 @@ type UpdateChartOfAccountRequest struct {
 
 // ChartOfAccountResponse represents the response body for a ChartOfAccount.
 type ChartOfAccountResponse struct {
-	ID           uuid.UUID  `json:"id"`
-	ParentID     *uuid.UUID `json:"parent_id"`
+	ID           uuid.ID  `json:"id"`
+	ParentID     *uuid.ID `json:"parent_id"`
 	AccountCode  string     `json:"account_code"`
 	AccountName  string     `json:"account_name"`
 	AccountType  string     `json:"account_type"`

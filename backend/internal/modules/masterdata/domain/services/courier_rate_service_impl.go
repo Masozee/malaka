@@ -3,9 +3,9 @@ package services
 import (
 	"context"
 
-	"github.com/google/uuid"
 	"malaka/internal/modules/masterdata/domain/entities"
 	"malaka/internal/modules/masterdata/domain/repositories"
+	"malaka/internal/shared/uuid"
 )
 
 
@@ -21,7 +21,7 @@ func (s *courierRateServiceImpl) CreateCourierRate(ctx context.Context, courierR
 	return s.repo.Create(ctx, courierRate)
 }
 
-func (s *courierRateServiceImpl) GetCourierRateByID(ctx context.Context, id uuid.UUID) (*entities.CourierRate, error) {
+func (s *courierRateServiceImpl) GetCourierRateByID(ctx context.Context, id uuid.ID) (*entities.CourierRate, error) {
 	return s.repo.GetByID(ctx, id)
 }
 
@@ -29,6 +29,6 @@ func (s *courierRateServiceImpl) UpdateCourierRate(ctx context.Context, courierR
 	return s.repo.Update(ctx, courierRate)
 }
 
-func (s *courierRateServiceImpl) DeleteCourierRate(ctx context.Context, id uuid.UUID) error {
+func (s *courierRateServiceImpl) DeleteCourierRate(ctx context.Context, id uuid.ID) error {
 	return s.repo.Delete(ctx, id)
 }

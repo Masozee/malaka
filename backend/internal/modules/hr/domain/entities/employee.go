@@ -3,14 +3,14 @@ package entities
 import (
 	"time"
 
-	"github.com/google/uuid"
+	"malaka/internal/shared/uuid"
 )
 
 // Employee represents an employee entity.
 type Employee struct {
-	ID        uuid.UUID `json:"id" db:"id"`
-	CreatedAt time.Time `json:"created_at" db:"created_at"`
-	UpdatedAt time.Time `json:"updated_at" db:"updated_at"`
+	ID               uuid.ID    `json:"id" db:"id"`
+	CreatedAt        time.Time  `json:"created_at" db:"created_at"`
+	UpdatedAt        time.Time  `json:"updated_at" db:"updated_at"`
 	EmployeeCode     string     `json:"employee_code" db:"employee_code"`
 	EmployeeName     string     `json:"employee_name" db:"employee_name"`
 	Position         string     `json:"position" db:"position"`
@@ -30,6 +30,7 @@ type Employee struct {
 	Allowances       float64    `json:"allowances" db:"allowances"`
 	EmploymentStatus string     `json:"employment_status" db:"employment_status"`
 	SupervisorID     *string    `json:"supervisor_id" db:"supervisor_id"`
+	UserID           *string    `json:"user_id,omitempty" db:"user_id"`
 }
 
 // TableName returns the table name for the Employee entity.

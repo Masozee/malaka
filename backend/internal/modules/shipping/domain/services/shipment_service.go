@@ -3,11 +3,11 @@ package services
 import (
 	"context"
 
-	"github.com/google/uuid"
 	"malaka/internal/modules/shipping/domain"
 	"malaka/internal/modules/shipping/domain/dtos"
 	"malaka/internal/modules/shipping/domain/entities"
 	"malaka/internal/modules/shipping/domain/repositories"
+	"malaka/internal/shared/uuid"
 )
 
 type shipmentService struct {
@@ -27,7 +27,7 @@ func (s *shipmentService) CreateShipment(ctx context.Context, req *dtos.CreateSh
 	return s.repo.Create(ctx, shipment)
 }
 
-func (s *shipmentService) GetShipmentByID(ctx context.Context, id uuid.UUID) (*entities.Shipment, error) {
+func (s *shipmentService) GetShipmentByID(ctx context.Context, id uuid.ID) (*entities.Shipment, error) {
 	return s.repo.GetByID(ctx, id)
 }
 
@@ -48,7 +48,6 @@ func (s *shipmentService) UpdateShipment(ctx context.Context, req *dtos.UpdateSh
 	return s.repo.Update(ctx, shipment)
 }
 
-func (s *shipmentService) DeleteShipment(ctx context.Context, id uuid.UUID) error {
+func (s *shipmentService) DeleteShipment(ctx context.Context, id uuid.ID) error {
 	return s.repo.Delete(ctx, id)
 }
-
