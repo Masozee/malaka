@@ -20,10 +20,11 @@ type CreateSimpleGoodsIssueRequest struct {
 
 // UpdateSimpleGoodsIssueRequest represents the request payload for updating a simple goods issue.
 type UpdateSimpleGoodsIssueRequest struct {
-	WarehouseID string    `json:"warehouse_id"`
-	IssueDate   time.Time `json:"issue_date"`
-	Status      string    `json:"status"`
-	Notes       string    `json:"notes"`
+	WarehouseID string                        `json:"warehouse_id"`
+	IssueDate   time.Time                     `json:"issue_date"`
+	Status      string                        `json:"status"`
+	Notes       string                        `json:"notes"`
+	Items       []CreateGoodsIssueItemRequest `json:"items"`
 }
 
 // SimpleGoodsIssueResponse represents the response payload for simple goods issue operations.

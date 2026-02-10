@@ -28,19 +28,21 @@ export class HRService {
       )
       
       const response = await apiClient.get<{success: boolean, message: string, data: Employee[]}>(`${this.BASE_URL}/employees/`, filteredParams)
-      
-      if (!response.success || !response.data) {
+
+      if (!response.success) {
         throw new Error(`API Error: ${response.message}`)
       }
 
+      const records = response.data || []
+
       // Convert to paginated response format
       return {
-        data: response.data,
+        data: records,
         pagination: {
           page: params.page || 1,
           limit: params.limit || 10,
-          total: response.data.length,
-          totalPages: Math.ceil(response.data.length / (params.limit || 10))
+          total: records.length,
+          totalPages: Math.ceil(records.length / (params.limit || 10))
         }
       }
     } catch (error) {
@@ -155,19 +157,21 @@ export class HRService {
   ): Promise<PaginatedResponse<PayrollPeriod>> {
     try {
       const response = await apiClient.get<{success: boolean, message: string, data: PayrollPeriod[]}>(`${this.BASE_URL}/payroll/periods/`, params)
-      
-      if (!response.success || !response.data) {
+
+      if (!response.success) {
         throw new Error(`API Error: ${response.message}`)
       }
 
+      const records = response.data || []
+
       // Convert to paginated response format
       return {
-        data: response.data,
+        data: records,
         pagination: {
           page: params.page || 1,
           limit: params.limit || 10,
-          total: response.data.length,
-          totalPages: Math.ceil(response.data.length / (params.limit || 10))
+          total: records.length,
+          totalPages: Math.ceil(records.length / (params.limit || 10))
         }
       }
     } catch (error) {
@@ -210,19 +214,21 @@ export class HRService {
       )
       
       const response = await apiClient.get<{success: boolean, message: string, data: PayrollItem[]}>(`${this.BASE_URL}/payroll/items/`, filteredParams)
-      
-      if (!response.success || !response.data) {
+
+      if (!response.success) {
         throw new Error(`API Error: ${response.message}`)
       }
 
+      const records = response.data || []
+
       // Convert to paginated response format
       return {
-        data: response.data,
+        data: records,
         pagination: {
           page: params.page || 1,
           limit: params.limit || 10,
-          total: response.data.length,
-          totalPages: Math.ceil(response.data.length / (params.limit || 10))
+          total: records.length,
+          totalPages: Math.ceil(records.length / (params.limit || 10))
         }
       }
     } catch (error) {
@@ -274,19 +280,21 @@ export class HRService {
       )
       
       const response = await apiClient.get<{success: boolean, message: string, data: any[]}>(`${this.BASE_URL}/attendance/`, filteredParams)
-      
-      if (!response.success || !response.data) {
+
+      if (!response.success) {
         throw new Error(`API Error: ${response.message}`)
       }
 
+      const records = response.data || []
+
       // Convert to paginated response format
       return {
-        data: response.data,
+        data: records,
         pagination: {
           page: params.page || 1,
           limit: params.limit || 100,
-          total: response.data.length,
-          totalPages: Math.ceil(response.data.length / (params.limit || 100))
+          total: records.length,
+          totalPages: Math.ceil(records.length / (params.limit || 100))
         }
       }
     } catch (error) {
@@ -307,19 +315,21 @@ export class HRService {
       )
       
       const response = await apiClient.get<{success: boolean, message: string, data: any[]}>(`${this.BASE_URL}/leave/requests/`, filteredParams)
-      
-      if (!response.success || !response.data) {
+
+      if (!response.success) {
         throw new Error(`API Error: ${response.message}`)
       }
 
+      const records = response.data || []
+
       // Convert to paginated response format
       return {
-        data: response.data,
+        data: records,
         pagination: {
           page: params.page || 1,
           limit: params.limit || 10,
-          total: response.data.length,
-          totalPages: Math.ceil(response.data.length / (params.limit || 10))
+          total: records.length,
+          totalPages: Math.ceil(records.length / (params.limit || 10))
         }
       }
     } catch (error) {
@@ -402,12 +412,12 @@ export class HRService {
   static async getLeaveTypes(): Promise<any[]> {
     try {
       const response = await apiClient.get<{success: boolean, message: string, data: any[]}>(`${this.BASE_URL}/leave/types/`)
-      
-      if (!response.success || !response.data) {
+
+      if (!response.success) {
         throw new Error(`API Error: ${response.message}`)
       }
 
-      return response.data
+      return response.data || []
     } catch (error) {
       console.error('Error fetching leave types:', error)
       throw error
@@ -439,19 +449,19 @@ export class HRService {
       )
       
       const response = await apiClient.get<{success: boolean, message: string, data: {data: any[], total: number, page: number, page_size: number, total_pages: number}}>(`${this.BASE_URL}/performance/reviews/`, filteredParams)
-      
-      if (!response.success || !response.data) {
+
+      if (!response.success) {
         throw new Error(`API Error: ${response.message}`)
       }
 
       // Convert to paginated response format
       return {
-        data: response.data.data,
+        data: response.data?.data || [],
         pagination: {
-          page: response.data.page || 1,
-          limit: response.data.page_size || 50,
-          total: response.data.total,
-          totalPages: response.data.total_pages || 1
+          page: response.data?.page || 1,
+          limit: response.data?.page_size || 50,
+          total: response.data?.total || 0,
+          totalPages: response.data?.total_pages || 1
         }
       }
     } catch (error) {
@@ -470,19 +480,19 @@ export class HRService {
       )
       
       const response = await apiClient.get<{success: boolean, message: string, data: {data: any[], total: number, page: number, page_size: number, total_pages: number}}>(`${this.BASE_URL}/training/programs/`, filteredParams)
-      
-      if (!response.success || !response.data) {
+
+      if (!response.success) {
         throw new Error(`API Error: ${response.message}`)
       }
 
       // Convert to paginated response format
       return {
-        data: response.data.data,
+        data: response.data?.data || [],
         pagination: {
-          page: response.data.page || 1,
-          limit: response.data.page_size || 50,
-          total: response.data.total,
-          totalPages: response.data.total_pages || 1
+          page: response.data?.page || 1,
+          limit: response.data?.page_size || 50,
+          total: response.data?.total || 0,
+          totalPages: response.data?.total_pages || 1
         }
       }
     } catch (error) {
@@ -558,19 +568,21 @@ export class HRService {
       )
       
       const response = await apiClient.get<{success: boolean, message: string, data: any[]}>(`${this.BASE_URL}/training/enrollments/`, filteredParams)
-      
-      if (!response.success || !response.data) {
+
+      if (!response.success) {
         throw new Error(`API Error: ${response.message}`)
       }
 
+      const records = response.data || []
+
       // Convert to paginated response format
       return {
-        data: response.data,
+        data: records,
         pagination: {
           page: params.page || 1,
           limit: params.limit || 10,
-          total: response.data.length,
-          totalPages: Math.ceil(response.data.length / (params.limit || 10))
+          total: records.length,
+          totalPages: Math.ceil(records.length / (params.limit || 10))
         }
       }
     } catch (error) {

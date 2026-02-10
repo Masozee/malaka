@@ -12,7 +12,7 @@ import { supplierService } from '@/services/masterdata'
 import type { Supplier } from '@/types/masterdata'
 import Link from 'next/link'
 
-const statusColors = {
+const statusColors: Record<string, string> = {
   active: 'bg-green-100 text-green-800',
   inactive: 'bg-gray-100 text-gray-800',
 }
@@ -128,8 +128,8 @@ export default function SupplierDetailPage() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <Card className="p-4">
             <p className="text-sm font-medium text-muted-foreground">Status</p>
-            <Badge className={statusColors[supplier.status]}>
-              {supplier.status.charAt(0).toUpperCase() + supplier.status.slice(1)}
+            <Badge className={statusColors[supplier.status || 'active'] || statusColors.active}>
+              {(supplier.status || 'active').charAt(0).toUpperCase() + (supplier.status || 'active').slice(1)}
             </Badge>
           </Card>
 
@@ -160,7 +160,8 @@ export default function SupplierDetailPage() {
           <div className="lg:col-span-2 space-y-6">
             {/* Basic Information */}
             <Card className="p-6">
-              <h3 className="text-lg font-semibold mb-4">Basic Information</h3>
+              <h3 className="text-lg font-semibold">Basic Information</h3>
+              <p className="text-sm text-muted-foreground mb-4">General details about this supplier</p>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-sm text-muted-foreground">Supplier Code</p>
@@ -183,7 +184,8 @@ export default function SupplierDetailPage() {
 
             {/* Contact Information */}
             <Card className="p-6">
-              <h3 className="text-lg font-semibold mb-4">Contact Information</h3>
+              <h3 className="text-lg font-semibold">Contact Information</h3>
+              <p className="text-sm text-muted-foreground mb-4">Phone, email, and address details</p>
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
@@ -224,7 +226,8 @@ export default function SupplierDetailPage() {
           <div className="space-y-6">
             {/* Quick Actions */}
             <Card className="p-6">
-              <h3 className="text-lg font-semibold mb-4">Quick Actions</h3>
+              <h3 className="text-lg font-semibold">Quick Actions</h3>
+              <p className="text-sm text-muted-foreground mb-4">Manage this supplier</p>
               <div className="space-y-3">
                 <Link href={`/procurement/suppliers/${supplier.id}/edit`} className="w-full">
                   <Button variant="outline" className="w-full justify-start">
@@ -258,7 +261,8 @@ export default function SupplierDetailPage() {
 
             {/* Timeline */}
             <Card className="p-6">
-              <h3 className="text-lg font-semibold mb-4">Timeline</h3>
+              <h3 className="text-lg font-semibold">Timeline</h3>
+              <p className="text-sm text-muted-foreground mb-4">Key dates and status changes</p>
               <div className="space-y-4">
                 <div className="flex items-start space-x-3">
                   <div className="h-2 w-2 bg-blue-500 rounded-full mt-2" />

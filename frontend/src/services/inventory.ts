@@ -109,6 +109,7 @@ export interface UpdateGoodsIssueRequest {
   issue_date?: string
   status?: string
   notes?: string
+  items?: { article_id: string, quantity: number, notes?: string }[]
 }
 
 // ===== Stock Transfer (enriched by backend DTO) =====
@@ -176,6 +177,22 @@ export interface StockAdjustment {
   updatedAt: string
 }
 
+export interface CreateStockAdjustmentRequest {
+  article_id: string
+  warehouse_id: string
+  quantity: number
+  adjustment_date: string
+  reason: string
+}
+
+export interface UpdateStockAdjustmentRequest {
+  article_id?: string
+  warehouse_id?: string
+  quantity?: number
+  adjustment_date?: string
+  reason?: string
+}
+
 // ===== Stock Opname (enriched by backend DTO) =====
 export interface StockOpname {
   id: string
@@ -185,11 +202,51 @@ export interface StockOpname {
   warehouseCode: string
   opnameDate: string
   status: string
+  notes: string
+  totalItems: number
   createdAt: string
   updatedAt: string
 }
 
-// ===== Return Supplier (matches backend entity) =====
+export interface StockOpnameItem {
+  id: string
+  articleId: string
+  articleName: string
+  articleCode: string
+  systemQty: number
+  actualQty: number
+  variance: number
+  notes: string
+}
+
+export interface StockOpnameDetail extends StockOpname {
+  items: StockOpnameItem[]
+}
+
+export interface WarehouseStockItem {
+  articleId: string
+  articleName: string
+  articleCode: string
+  quantity: number
+}
+
+export interface CreateStockOpnameRequest {
+  warehouse_id: string
+  opname_date: string
+  status: string
+  notes?: string
+  items?: { article_id: string, actual_qty: number, notes?: string }[]
+}
+
+export interface UpdateStockOpnameRequest {
+  warehouse_id?: string
+  opname_date?: string
+  status?: string
+  notes?: string
+  items?: { article_id: string, actual_qty: number, notes?: string }[]
+}
+
+// ===== Return Supplier (matches backend enriched DTO) =====
 export interface ReturnSupplier {
   id: string
   returnNumber: string
@@ -197,8 +254,42 @@ export interface ReturnSupplier {
   supplierName: string
   returnDate: string
   reason: string
+  status: string
+  notes: string
+  totalItems: number
   createdAt: string
   updatedAt: string
+}
+
+export interface ReturnSupplierItem {
+  id: string
+  articleId: string
+  articleName: string
+  articleCode: string
+  quantity: number
+  notes: string
+}
+
+export interface ReturnSupplierDetail extends ReturnSupplier {
+  items: ReturnSupplierItem[]
+}
+
+export interface CreateReturnSupplierRequest {
+  supplier_id: string
+  return_date: string
+  reason?: string
+  status?: string
+  notes?: string
+  items?: { article_id: string, quantity: number, notes?: string }[]
+}
+
+export interface UpdateReturnSupplierRequest {
+  supplier_id?: string
+  return_date?: string
+  reason?: string
+  status?: string
+  notes?: string
+  items?: { article_id: string, quantity: number, notes?: string }[]
 }
 
 // ===== Purchase Order (deprecated - use procurement module) =====
@@ -434,6 +525,24 @@ class StockAdjustmentService extends BaseInventoryService<StockAdjustment> {
   constructor() {
     super('adjustments')
   }
+
+  async createAdjustment(data: CreateStockAdjustmentRequest): Promise<StockAdjustment> {
+    const payload: Record<string, unknown> = { ...data }
+    if (data.adjustment_date) {
+      payload.adjustment_date = new Date(data.adjustment_date + 'T00:00:00Z').toISOString()
+    }
+    const response = await apiClient.post<{ success: boolean, data: StockAdjustment }>(`/api/v1/inventory/adjustments/`, payload)
+    return response.data
+  }
+
+  async updateAdjustment(id: string, data: UpdateStockAdjustmentRequest): Promise<StockAdjustment> {
+    const payload: Record<string, unknown> = { ...data }
+    if (data.adjustment_date) {
+      payload.adjustment_date = new Date(data.adjustment_date + 'T00:00:00Z').toISOString()
+    }
+    const response = await apiClient.put<{ success: boolean, data: StockAdjustment }>(`/api/v1/inventory/adjustments/${id}`, payload)
+    return response.data
+  }
 }
 
 class PurchaseOrderService extends BaseInventoryService<PurchaseOrder> {
@@ -465,11 +574,62 @@ class ReturnSupplierService extends BaseInventoryService<ReturnSupplier> {
   constructor() {
     super('return-suppliers')
   }
+
+  async getDetail(id: string): Promise<ReturnSupplierDetail> {
+    const response = await apiClient.get<{ success: boolean, data: ReturnSupplierDetail }>(`/api/v1/inventory/return-suppliers/${id}`)
+    return response.data
+  }
+
+  async createReturn(data: CreateReturnSupplierRequest): Promise<ReturnSupplier> {
+    const payload = {
+      ...data,
+      return_date: data.return_date ? new Date(data.return_date + 'T00:00:00Z').toISOString() : undefined,
+    }
+    const response = await apiClient.post<{ success: boolean, data: ReturnSupplier }>('/api/v1/inventory/return-suppliers/', payload)
+    return response.data
+  }
+
+  async updateReturn(id: string, data: UpdateReturnSupplierRequest): Promise<ReturnSupplier> {
+    const payload = {
+      ...data,
+      return_date: data.return_date ? new Date(data.return_date + 'T00:00:00Z').toISOString() : undefined,
+    }
+    const response = await apiClient.put<{ success: boolean, data: ReturnSupplier }>(`/api/v1/inventory/return-suppliers/${id}`, payload)
+    return response.data
+  }
 }
 
 class StockOpnameService extends BaseInventoryService<StockOpname> {
   constructor() {
     super('opnames')
+  }
+
+  async getWarehouseStock(warehouseId: string): Promise<WarehouseStockItem[]> {
+    const response = await apiClient.get<{ success: boolean, data: WarehouseStockItem[] }>(`/api/v1/inventory/opnames/warehouse-stock`, { warehouse_id: warehouseId } as Record<string, unknown>)
+    return response.data || []
+  }
+
+  async getDetail(id: string): Promise<StockOpnameDetail> {
+    const response = await apiClient.get<{ success: boolean, data: StockOpnameDetail }>(`/api/v1/inventory/opnames/${id}`)
+    return response.data
+  }
+
+  async createOpname(data: CreateStockOpnameRequest): Promise<StockOpname> {
+    const payload: Record<string, unknown> = { ...data }
+    if (data.opname_date) {
+      payload.opname_date = new Date(data.opname_date + 'T00:00:00Z').toISOString()
+    }
+    const response = await apiClient.post<{ success: boolean, data: StockOpname }>('/api/v1/inventory/opnames/', payload)
+    return response.data
+  }
+
+  async updateOpname(id: string, data: UpdateStockOpnameRequest): Promise<StockOpname> {
+    const payload: Record<string, unknown> = { ...data }
+    if (data.opname_date) {
+      payload.opname_date = new Date(data.opname_date + 'T00:00:00Z').toISOString()
+    }
+    const response = await apiClient.put<{ success: boolean, data: StockOpname }>(`/api/v1/inventory/opnames/${id}`, payload)
+    return response.data
   }
 }
 

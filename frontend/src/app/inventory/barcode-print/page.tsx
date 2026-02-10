@@ -199,10 +199,12 @@ export default function BarcodePrintPage() {
                     { label: 'Barcode Print' }
                 ]}
                 actions={
-                    <Button>
-                        <HugeiconsIcon icon={PlusSignIcon} className="h-4 w-4 mr-2" />
-                        New Print Job
-                    </Button>
+                    <Link href="/inventory/barcode-print/new">
+                        <Button>
+                            <HugeiconsIcon icon={PlusSignIcon} className="h-4 w-4 mr-2" />
+                            New Print Job
+                        </Button>
+                    </Link>
                 }
             />
 

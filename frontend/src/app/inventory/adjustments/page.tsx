@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { TwoLevelLayout } from '@/components/ui/two-level-layout'
 import { Header } from '@/components/ui/header'
-import { Card, CardContent } from '@/components/ui/card'
+import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { TanStackDataTable, TanStackColumn } from '@/components/ui/tanstack-data-table'
@@ -179,38 +179,38 @@ export default function StockAdjustmentsPage() {
             <div className="flex-1 p-6 space-y-6">
                 {/* Stats */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <Card>
-                        <CardContent className="p-4 flex items-center justify-between">
+                    <Card className="p-4">
+                        <div className="flex items-center space-x-3">
+                            <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
+                                <HugeiconsIcon icon={Settings01Icon} className="h-5 w-5 text-foreground" />
+                            </div>
                             <div>
                                 <p className="text-sm font-medium text-muted-foreground">Total Adjustments</p>
                                 <p className="text-2xl font-bold">{stats.total}</p>
                             </div>
-                            <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
-                                <HugeiconsIcon icon={Settings01Icon} className="h-5 w-5 text-foreground" />
-                            </div>
-                        </CardContent>
+                        </div>
                     </Card>
-                    <Card>
-                        <CardContent className="p-4 flex items-center justify-between">
-                            <div>
-                                <p className="text-sm font-medium text-muted-foreground">With Reason</p>
-                                <p className="text-2xl font-bold text-blue-600">{stats.withReason}</p>
-                            </div>
+                    <Card className="p-4">
+                        <div className="flex items-center space-x-3">
                             <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
                                 <HugeiconsIcon icon={CheckmarkCircle01Icon} className="h-5 w-5 text-foreground" />
                             </div>
-                        </CardContent>
-                    </Card>
-                    <Card>
-                        <CardContent className="p-4 flex items-center justify-between">
                             <div>
-                                <p className="text-sm font-medium text-muted-foreground">No Reason</p>
-                                <p className="text-2xl font-bold text-yellow-600">{stats.noReason}</p>
+                                <p className="text-sm font-medium text-muted-foreground">With Reason</p>
+                                <p className="text-2xl font-bold">{stats.withReason}</p>
                             </div>
+                        </div>
+                    </Card>
+                    <Card className="p-4">
+                        <div className="flex items-center space-x-3">
                             <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
                                 <HugeiconsIcon icon={Clock01Icon} className="h-5 w-5 text-foreground" />
                             </div>
-                        </CardContent>
+                            <div>
+                                <p className="text-sm font-medium text-muted-foreground">No Reason</p>
+                                <p className="text-2xl font-bold">{stats.noReason}</p>
+                            </div>
+                        </div>
                     </Card>
                 </div>
 

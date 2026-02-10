@@ -11,5 +11,6 @@ type StockOpname struct {
 	types.BaseModel
 	WarehouseID string    `json:"warehouse_id"`
 	OpnameDate  time.Time `json:"opname_date"`
-	Status      string    `json:"status"` // e.g., "pending", "completed"
+	Status      string    `json:"status"` // e.g., "planned", "in_progress", "completed"
+	Notes       string    `json:"notes"`
 }

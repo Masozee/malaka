@@ -171,6 +171,18 @@ func SetupProtectedRoutes(protectedAPI *gin.RouterGroup, c *container.Container,
 		rawMaterials.DELETE("/:id", rawMaterialsHandler.Delete)
 	}
 
+	// Barcode Print Jobs routes (standalone handler using sqlx)
+	barcodePrintJobHandler := NewBarcodePrintJobHandler(c.SqlxDB)
+	barcodeJobs := protectedAPI.Group("/inventory/barcode-jobs")
+	barcodeJobs.Use(auth.RequireModuleAccess(rbacSvc, "inventory"))
+	{
+		barcodeJobs.GET("/", barcodePrintJobHandler.GetAll)
+		barcodeJobs.GET("/:id", barcodePrintJobHandler.GetByID)
+		barcodeJobs.POST("/", barcodePrintJobHandler.Create)
+		barcodeJobs.PUT("/:id", barcodePrintJobHandler.Update)
+		barcodeJobs.DELETE("/:id", barcodePrintJobHandler.Delete)
+	}
+
 	// Initialize procurement handlers
 	purchaseRequestHandler := procurement_handlers.NewPurchaseRequestHandler(c.PurchaseRequestService, c.SqlxDB, c.NotificationService)
 	procurementPurchaseOrderHandler := procurement_handlers.NewPurchaseOrderHandler(

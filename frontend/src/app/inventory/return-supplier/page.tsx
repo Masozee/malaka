@@ -7,6 +7,7 @@ import { TwoLevelLayout } from '@/components/ui/two-level-layout'
 import { Header } from '@/components/ui/header'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { TanStackDataTable, TanStackColumn } from '@/components/ui/tanstack-data-table'
 import { returnSupplierService, ReturnSupplier } from '@/services/inventory'
@@ -17,8 +18,17 @@ import {
     PlusSignIcon,
     ReloadIcon,
     EyeIcon,
-    PencilEdit01Icon
+    PencilEdit01Icon,
+    Package01Icon,
+    CheckmarkCircle01Icon
 } from '@hugeicons/core-free-icons'
+
+const statusBadge: Record<string, string> = {
+    draft: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200',
+    pending: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-200',
+    completed: 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-200',
+    cancelled: 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-200',
+}
 
 export default function ReturnSupplierPage() {
     const router = useRouter()
@@ -56,15 +66,19 @@ export default function ReturnSupplierPage() {
 
     const stats = useMemo(() => {
         const total = data.length
-        return { total }
+        const draft = data.filter(d => d.status === 'draft').length
+        const completed = data.filter(d => d.status === 'completed').length
+        return { total, draft, completed }
     }, [data])
 
     const handleBatchExport = (items: ReturnSupplier[]) => {
-        const headers = ['Return Number', 'Supplier', 'Reason', 'Return Date']
+        const headers = ['Return Number', 'Supplier', 'Reason', 'Status', 'Items', 'Return Date']
         const rows = items.map(item => [
             item.returnNumber,
             item.supplierName || '-',
             item.reason || '-',
+            item.status || '-',
+            String(item.totalItems || 0),
             item.returnDate ? new Date(item.returnDate).toLocaleDateString('id-ID') : '-'
         ])
         const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n')
@@ -119,20 +133,25 @@ export default function ReturnSupplierPage() {
             )
         },
         {
-            id: 'date',
-            accessorKey: 'returnDate',
-            header: 'Return Date',
+            id: 'totalItems',
+            accessorKey: 'totalItems',
+            header: 'Items',
             cell: ({ row }) => (
-                <span className="text-sm text-muted-foreground whitespace-nowrap">
-                    {mounted && row.original.returnDate
-                        ? new Date(row.original.returnDate).toLocaleDateString('id-ID', {
-                            year: 'numeric',
-                            month: 'short',
-                            day: 'numeric',
-                        })
-                        : '-'}
-                </span>
+                <span className="text-sm">{row.original.totalItems || 0}</span>
             )
+        },
+        {
+            id: 'status',
+            accessorKey: 'status',
+            header: 'Status',
+            cell: ({ row }) => {
+                const s = row.original.status || 'draft'
+                return (
+                    <Badge className={`${statusBadge[s] || statusBadge.draft} border-0 capitalize`}>
+                        {s.replace('_', ' ')}
+                    </Badge>
+                )
+            }
         }
     ], [mounted])
 
@@ -140,7 +159,7 @@ export default function ReturnSupplierPage() {
         <TwoLevelLayout>
             <Header
                 title="Return to Supplier"
-                description="Manage returns and refunds from suppliers"
+                description="Manage returns and refunds to suppliers"
                 breadcrumbs={[
                     { label: 'Inventory', href: '/inventory' },
                     { label: 'Return Supplier' }
@@ -155,19 +174,41 @@ export default function ReturnSupplierPage() {
                 }
             />
 
-            <div className="flex-1 p-6 space-y-6">
+            <div className="flex-1 overflow-auto p-6 space-y-6">
                 {/* Stats */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <Card>
-                        <CardContent className="p-4 flex items-center justify-between">
+                    <Card className="p-4">
+                        <div className="flex items-center space-x-3">
+                            <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
+                                <HugeiconsIcon icon={ReloadIcon} className="h-5 w-5 text-foreground" />
+                            </div>
                             <div>
                                 <p className="text-sm font-medium text-muted-foreground">Total Returns</p>
                                 <p className="text-2xl font-bold">{stats.total}</p>
                             </div>
+                        </div>
+                    </Card>
+                    <Card className="p-4">
+                        <div className="flex items-center space-x-3">
                             <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
-                                <HugeiconsIcon icon={ReloadIcon} className="h-5 w-5 text-foreground" />
+                                <HugeiconsIcon icon={Package01Icon} className="h-5 w-5 text-foreground" />
                             </div>
-                        </CardContent>
+                            <div>
+                                <p className="text-sm font-medium text-muted-foreground">Draft</p>
+                                <p className="text-2xl font-bold">{stats.draft}</p>
+                            </div>
+                        </div>
+                    </Card>
+                    <Card className="p-4">
+                        <div className="flex items-center space-x-3">
+                            <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
+                                <HugeiconsIcon icon={CheckmarkCircle01Icon} className="h-5 w-5 text-foreground" />
+                            </div>
+                            <div>
+                                <p className="text-sm font-medium text-muted-foreground">Completed</p>
+                                <p className="text-2xl font-bold">{stats.completed}</p>
+                            </div>
+                        </div>
                     </Card>
                 </div>
 

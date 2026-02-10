@@ -84,6 +84,7 @@ func RegisterInventoryRoutes(router *gin.RouterGroup, poHandler *handlers.Purcha
 		{
 			opname.POST("/", auth.RequirePermission(rbacSvc, "inventory.opname.create"), stockOpnameHandler.CreateStockOpname)
 			opname.GET("/", auth.RequirePermission(rbacSvc, "inventory.opname.list"), stockOpnameHandler.GetAllStockOpnames)
+			opname.GET("/warehouse-stock", auth.RequirePermission(rbacSvc, "inventory.opname.read"), stockOpnameHandler.GetWarehouseStock)
 			opname.GET("/:id", auth.RequirePermission(rbacSvc, "inventory.opname.read"), stockOpnameHandler.GetStockOpnameByID)
 			opname.PUT("/:id", auth.RequirePermission(rbacSvc, "inventory.opname.update"), stockOpnameHandler.UpdateStockOpname)
 			opname.DELETE("/:id", auth.RequirePermission(rbacSvc, "inventory.opname.delete"), stockOpnameHandler.DeleteStockOpname)

@@ -1,6 +1,8 @@
 'use client'
 
 import { useState, useCallback } from 'react'
+import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { TwoLevelLayout } from '@/components/ui/two-level-layout'
 import { Header } from '@/components/ui/header'
 import { Card } from '@/components/ui/card'
@@ -142,6 +144,7 @@ interface SuppliersListProps {
 }
 
 export default function SuppliersList({ initialData }: SuppliersListProps) {
+    const router = useRouter()
     const [viewMode, setViewMode] = useState<'cards' | 'table'>('table')
     const [searchQuery, setSearchQuery] = useState('')
     const [suppliers, setSuppliers] = useState<SupplierDisplay[]>(
@@ -184,13 +187,11 @@ export default function SuppliersList({ initialData }: SuppliersListProps) {
 
     // Action handlers
     const handleViewDetails = (supplier: SupplierDisplay) => {
-        // TODO: Navigate to supplier details page
-        console.log('View details for supplier:', supplier.name)
+        router.push(`/procurement/suppliers/${supplier.id}`)
     }
 
     const handleCreateOrder = (supplier: SupplierDisplay) => {
-        // TODO: Navigate to create purchase order with pre-selected supplier
-        console.log('Create order for supplier:', supplier.name)
+        router.push(`/procurement/purchase-orders/new?supplier=${supplier.id}`)
     }
 
     const columns = [
@@ -200,7 +201,9 @@ export default function SuppliersList({ initialData }: SuppliersListProps) {
             sortable: true,
             render: (value: unknown, record: SupplierDisplay) => (
                 <div>
-                    <div className="font-medium">{record.name}</div>
+                    <Link href={`/procurement/suppliers/${record.id}`} className="font-medium text-foreground hover:underline">
+                        {record.name}
+                    </Link>
                     <div className="text-xs text-gray-500">{record.code} • {record.contact_person || 'No contact'}</div>
                 </div>
             )
@@ -317,7 +320,9 @@ export default function SuppliersList({ initialData }: SuppliersListProps) {
         <Card className="p-4">
             <div className="flex items-start justify-between mb-3">
                 <div>
-                    <h3 className="font-semibold text-gray-900">{supplier.name}</h3>
+                    <Link href={`/procurement/suppliers/${supplier.id}`} className="font-semibold text-gray-900 hover:underline">
+                        {supplier.name}
+                    </Link>
                     <p className="text-sm text-gray-500">{supplier.code} • {supplier.contact_person}</p>
                 </div>
                 <div className="text-right">
@@ -408,11 +413,11 @@ export default function SuppliersList({ initialData }: SuppliersListProps) {
             </div>
 
             <div className="flex space-x-2 mt-4">
-                <Button size="sm" variant="outline" className="flex-1">
+                <Button size="sm" variant="outline" className="flex-1" onClick={() => handleViewDetails(supplier)}>
                     <HugeiconsIcon icon={UserIcon} className="h-4 w-4 mr-1" />
                     View Details
                 </Button>
-                <Button size="sm" className="flex-1">
+                <Button size="sm" className="flex-1" onClick={() => handleCreateOrder(supplier)}>
                     <HugeiconsIcon icon={Package01Icon} className="h-4 w-4 mr-1" />
                     Create Order
                 </Button>

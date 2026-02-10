@@ -270,7 +270,8 @@ export default function RFQDetailPage() {
           <div className="lg:col-span-2 space-y-6">
             {/* RFQ Details */}
             <Card className="p-6">
-              <h3 className="text-lg font-semibold mb-4">RFQ Details</h3>
+              <h3 className="text-lg font-semibold">RFQ Details</h3>
+              <p className="text-sm text-muted-foreground mb-4">General information about this request for quotation</p>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-sm text-muted-foreground">RFQ Number</p>
@@ -305,7 +306,8 @@ export default function RFQDetailPage() {
 
             {/* Items */}
             <Card className="p-6">
-              <h3 className="text-lg font-semibold mb-4">Requested Items</h3>
+              <h3 className="text-lg font-semibold">Requested Items</h3>
+              <p className="text-sm text-muted-foreground mb-4">Items and quantities included in this RFQ</p>
               <div className="space-y-4">
                 {rfq.items?.map((item) => (
                   <div key={item.id} className="border rounded-lg p-4">
@@ -341,7 +343,8 @@ export default function RFQDetailPage() {
             {/* Supplier Responses */}
             {rfq.responses && rfq.responses.length > 0 && (
               <Card className="p-6">
-                <h3 className="text-lg font-semibold mb-4">Supplier Responses</h3>
+                <h3 className="text-lg font-semibold">Supplier Responses</h3>
+                <p className="text-sm text-muted-foreground mb-4">Quotations received from invited suppliers</p>
                 <div className="space-y-4">
                   {rfq.responses.map((response) => (
                     <div key={response.id} className="border rounded-lg p-4">
@@ -429,32 +432,34 @@ export default function RFQDetailPage() {
           <div className="space-y-6">
             {/* Quick Actions */}
             <Card className="p-6">
-              <h3 className="text-lg font-semibold mb-4">Quick Actions</h3>
+              <h3 className="text-lg font-semibold">Quick Actions</h3>
+              <p className="text-sm text-muted-foreground mb-4">Manage and export this RFQ</p>
               <div className="space-y-3">
                 {rfq.status === 'draft' && (
                   <Link href={`/procurement/rfq/${rfq.id}/edit`} className="w-full">
-                    <Button variant="outline" className="w-full justify-start">
+                    <Button variant="outline" size="sm" className="w-full justify-start">
                       Edit RFQ
                     </Button>
                   </Link>
                 )}
 
-                <Button variant="outline" className="w-full justify-start">
+                <Button variant="outline" size="sm" className="w-full justify-start">
                   Export PDF
                 </Button>
 
                 {rfq.status === 'closed' && (
                   <Link href={`/procurement/purchase-orders/new?rfq=${rfq.id}`} className="w-full">
-                    <Button variant="outline" className="w-full justify-start">
+                    <Button variant="outline" size="sm" className="w-full justify-start">
                       Create Purchase Order
                     </Button>
                   </Link>
                 )}
 
-                <Separator className="my-3" />
+                <Separator className="my-2" />
 
                 <Button
                   variant="outline"
+                  size="sm"
                   className="w-full justify-start text-red-600 border-red-200 hover:bg-red-50"
                   onClick={handleDelete}
                   disabled={rfq.status !== 'draft'}
@@ -466,7 +471,8 @@ export default function RFQDetailPage() {
 
             {/* Invited Suppliers */}
             <Card className="p-6">
-              <h3 className="text-lg font-semibold mb-4">Invited Suppliers</h3>
+              <h3 className="text-lg font-semibold">Invited Suppliers</h3>
+              <p className="text-sm text-muted-foreground mb-4">Suppliers invited to submit quotations</p>
               {rfq.suppliers && rfq.suppliers.length > 0 ? (
                 <div className="space-y-3">
                   {rfq.suppliers.map((supplier) => (
@@ -492,7 +498,8 @@ export default function RFQDetailPage() {
 
             {/* Timeline */}
             <Card className="p-6">
-              <h3 className="text-lg font-semibold mb-4">Timeline</h3>
+              <h3 className="text-lg font-semibold">Timeline</h3>
+              <p className="text-sm text-muted-foreground mb-4">Key dates and status changes</p>
               <div className="space-y-4">
                 {rfq.closed_at && (
                   <div className="flex items-start space-x-3">

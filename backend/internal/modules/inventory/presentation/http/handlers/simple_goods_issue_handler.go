@@ -140,6 +140,10 @@ INSERT INTO simple_goods_issue_items (goods_issue_id, article_id, quantity, note
 VALUES ($1, $2, $3, $4)
 `
 
+const deleteGoodsIssueItemsSQL = `
+DELETE FROM simple_goods_issue_items WHERE goods_issue_id = $1
+`
+
 // CreateGoodsIssue handles the creation of a new simple goods issue with items.
 func (h *SimpleGoodsIssueHandler) CreateGoodsIssue(c *gin.Context) {
 	var req dto.CreateSimpleGoodsIssueRequest
@@ -291,6 +295,37 @@ func (h *SimpleGoodsIssueHandler) UpdateGoodsIssue(c *gin.Context) {
 	if err := h.service.UpdateGoodsIssue(c.Request.Context(), goodsIssue); err != nil {
 		response.InternalServerError(c, err.Error(), nil)
 		return
+	}
+
+	// Replace items if provided
+	if h.db != nil && len(req.Items) > 0 {
+		ctx := c.Request.Context()
+		tx, err := h.db.BeginTxx(ctx, nil)
+		if err != nil {
+			response.InternalServerError(c, "Failed to start transaction: "+err.Error(), nil)
+			return
+		}
+
+		// Delete existing items
+		if _, err := tx.ExecContext(ctx, deleteGoodsIssueItemsSQL, id); err != nil {
+			tx.Rollback()
+			response.InternalServerError(c, "Failed to delete existing items: "+err.Error(), nil)
+			return
+		}
+
+		// Insert new items
+		for _, item := range req.Items {
+			if _, err := tx.ExecContext(ctx, insertGoodsIssueItemSQL, id, item.ArticleID, item.Quantity, item.Notes); err != nil {
+				tx.Rollback()
+				response.InternalServerError(c, "Failed to insert item: "+err.Error(), nil)
+				return
+			}
+		}
+
+		if err := tx.Commit(); err != nil {
+			response.InternalServerError(c, "Failed to commit items: "+err.Error(), nil)
+			return
+		}
 	}
 
 	response.OK(c, "Goods issue updated successfully", goodsIssue)

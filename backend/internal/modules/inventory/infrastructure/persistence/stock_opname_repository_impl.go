@@ -20,18 +20,18 @@ func NewStockOpnameRepositoryImpl(db *sqlx.DB) *StockOpnameRepositoryImpl {
 
 // Create creates a new stock opname in the database.
 func (r *StockOpnameRepositoryImpl) Create(ctx context.Context, so *entities.StockOpname) error {
-	query := `INSERT INTO stock_opnames (id, warehouse_id, opname_date, status, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6)`
-	_, err := r.db.ExecContext(ctx, query, so.ID, so.WarehouseID, so.OpnameDate, so.Status, so.CreatedAt, so.UpdatedAt)
+	query := `INSERT INTO stock_opnames (id, warehouse_id, opname_date, status, notes, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7)`
+	_, err := r.db.ExecContext(ctx, query, so.ID, so.WarehouseID, so.OpnameDate, so.Status, so.Notes, so.CreatedAt, so.UpdatedAt)
 	return err
 }
 
 // GetByID retrieves a stock opname by its ID from the database.
 func (r *StockOpnameRepositoryImpl) GetByID(ctx context.Context, id string) (*entities.StockOpname, error) {
-	query := `SELECT id, warehouse_id, opname_date, status, created_at, updated_at FROM stock_opnames WHERE id = $1`
+	query := `SELECT id, warehouse_id, opname_date, status, COALESCE(notes, '') as notes, created_at, updated_at FROM stock_opnames WHERE id = $1`
 	row := r.db.QueryRowContext(ctx, query, id)
 
 	so := &entities.StockOpname{}
-	err := row.Scan(&so.ID, &so.WarehouseID, &so.OpnameDate, &so.Status, &so.CreatedAt, &so.UpdatedAt)
+	err := row.Scan(&so.ID, &so.WarehouseID, &so.OpnameDate, &so.Status, &so.Notes, &so.CreatedAt, &so.UpdatedAt)
 	if err == sql.ErrNoRows {
 		return nil, nil // Stock opname not found
 	}
@@ -40,14 +40,14 @@ func (r *StockOpnameRepositoryImpl) GetByID(ctx context.Context, id string) (*en
 
 // Update updates an existing stock opname in the database.
 func (r *StockOpnameRepositoryImpl) Update(ctx context.Context, so *entities.StockOpname) error {
-	query := `UPDATE stock_opnames SET warehouse_id = $1, opname_date = $2, status = $3, updated_at = $4 WHERE id = $5`
-	_, err := r.db.ExecContext(ctx, query, so.WarehouseID, so.OpnameDate, so.Status, so.UpdatedAt, so.ID)
+	query := `UPDATE stock_opnames SET warehouse_id = $1, opname_date = $2, status = $3, notes = $4, updated_at = $5 WHERE id = $6`
+	_, err := r.db.ExecContext(ctx, query, so.WarehouseID, so.OpnameDate, so.Status, so.Notes, so.UpdatedAt, so.ID)
 	return err
 }
 
 // GetAll retrieves all stock opnames from the database.
 func (r *StockOpnameRepositoryImpl) GetAll(ctx context.Context) ([]*entities.StockOpname, error) {
-	query := `SELECT id, warehouse_id, opname_date, status, created_at, updated_at FROM stock_opnames ORDER BY opname_date DESC, created_at DESC`
+	query := `SELECT id, warehouse_id, opname_date, status, COALESCE(notes, '') as notes, created_at, updated_at FROM stock_opnames ORDER BY opname_date DESC, created_at DESC`
 	rows, err := r.db.QueryContext(ctx, query)
 	if err != nil {
 		return nil, err
@@ -57,7 +57,7 @@ func (r *StockOpnameRepositoryImpl) GetAll(ctx context.Context) ([]*entities.Sto
 	var stockOpnames []*entities.StockOpname
 	for rows.Next() {
 		so := &entities.StockOpname{}
-		err := rows.Scan(&so.ID, &so.WarehouseID, &so.OpnameDate, &so.Status, &so.CreatedAt, &so.UpdatedAt)
+		err := rows.Scan(&so.ID, &so.WarehouseID, &so.OpnameDate, &so.Status, &so.Notes, &so.CreatedAt, &so.UpdatedAt)
 		if err != nil {
 			return nil, err
 		}
