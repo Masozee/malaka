@@ -47,7 +47,7 @@ func (r *StockAdjustmentRepositoryImpl) Update(ctx context.Context, sa *entities
 
 // GetAll retrieves all stock adjustments from the database.
 func (r *StockAdjustmentRepositoryImpl) GetAll(ctx context.Context) ([]*entities.StockAdjustment, error) {
-	query := `SELECT id, article_id, warehouse_id, quantity, adjustment_date, reason, created_at, updated_at FROM stock_adjustments ORDER BY created_at DESC`
+	query := `SELECT id, article_id, warehouse_id, quantity, adjustment_date, reason, created_at, updated_at FROM stock_adjustments ORDER BY adjustment_date DESC, created_at DESC`
 	rows, err := r.db.QueryContext(ctx, query)
 	if err != nil {
 		return nil, err

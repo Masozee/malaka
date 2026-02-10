@@ -130,7 +130,7 @@ func (r *RFQRepositoryImpl) GetAll(ctx context.Context, filter *repositories.RFQ
 	` + baseQuery
 
 	// Sorting
-	sortBy := "r.created_at"
+	sortBy := "r.due_date"
 	sortOrder := "DESC"
 	if filter != nil {
 		if filter.SortBy != "" {

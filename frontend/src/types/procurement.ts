@@ -65,6 +65,8 @@ export interface PurchaseOrder extends BaseEntity {
   created_by?: string
   created_by_name?: string
   created_by_position?: string
+  approved_by?: string
+  approved_at?: string
   items?: PurchaseOrderItem[]
 }
 

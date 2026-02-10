@@ -8,10 +8,19 @@ import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { purchaseOrderService } from '@/services/procurement'
 import { useToast } from '@/components/ui/toast'
 import type { PurchaseOrder } from '@/types/procurement'
-// PDF functions are loaded dynamically to reduce bundle size
 import Link from 'next/link'
 import { EntityShareButton } from '@/components/messaging/EntityShareButton'
 import { HugeiconsIcon } from '@hugeicons/react'
@@ -25,13 +34,14 @@ import {
   LoadingIcon,
   CancelIcon,
   ShoppingCartIcon,
-  Calendar01Icon,
   Dollar01Icon,
   DeliveryTruckIcon,
 } from '@hugeicons/core-free-icons'
 
 const statusColors: Record<string, string> = {
   draft: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200',
+  pending_approval: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
+  approved: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200',
   sent: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
   confirmed: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200',
   shipped: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
@@ -45,6 +55,11 @@ const paymentStatusColors: Record<string, string> = {
   paid: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
 }
 
+const statusLabel = (status: string) => {
+  if (status === 'pending_approval') return 'Pending Approval'
+  return status.charAt(0).toUpperCase() + status.slice(1)
+}
+
 export default function PurchaseOrderDetailPage() {
   const params = useParams()
   const router = useRouter()
@@ -53,6 +68,11 @@ export default function PurchaseOrderDetailPage() {
   const [loading, setLoading] = useState(true)
   const [mounted, setMounted] = useState(false)
   const [actionLoading, setActionLoading] = useState<string | null>(null)
+
+  // Dialog states
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false)
+  const [cancelReason, setCancelReason] = useState('')
+  const [receiveDialogOpen, setReceiveDialogOpen] = useState(false)
 
   useEffect(() => {
     setMounted(true)
@@ -91,6 +111,36 @@ export default function PurchaseOrderDetailPage() {
     }
   }
 
+  const handleSubmit = async () => {
+    if (!order) return
+    setActionLoading('submit')
+    try {
+      await purchaseOrderService.submit(order.id)
+      addToast({ type: 'success', title: 'Purchase order submitted for approval' })
+      loadOrder()
+    } catch (error) {
+      console.error('Error submitting order:', error)
+      addToast({ type: 'error', title: 'Failed to submit order' })
+    } finally {
+      setActionLoading(null)
+    }
+  }
+
+  const handleApprove = async () => {
+    if (!order) return
+    setActionLoading('approve')
+    try {
+      await purchaseOrderService.approve(order.id)
+      addToast({ type: 'success', title: 'Purchase order approved' })
+      loadOrder()
+    } catch (error) {
+      console.error('Error approving order:', error)
+      addToast({ type: 'error', title: 'Failed to approve order' })
+    } finally {
+      setActionLoading(null)
+    }
+  }
+
   const handleSend = async () => {
     if (!order) return
     setActionLoading('send')
@@ -111,11 +161,62 @@ export default function PurchaseOrderDetailPage() {
     setActionLoading('confirm')
     try {
       await purchaseOrderService.confirm(order.id)
-      addToast({ type: 'success', title: 'Purchase order confirmed' })
+      addToast({ type: 'success', title: 'Purchase order confirmed by supplier' })
       loadOrder()
     } catch (error) {
       console.error('Error confirming order:', error)
       addToast({ type: 'error', title: 'Failed to confirm order' })
+    } finally {
+      setActionLoading(null)
+    }
+  }
+
+  const handleShip = async () => {
+    if (!order) return
+    setActionLoading('ship')
+    try {
+      await purchaseOrderService.ship(order.id)
+      addToast({ type: 'success', title: 'Purchase order marked as shipped' })
+      loadOrder()
+    } catch (error) {
+      console.error('Error marking as shipped:', error)
+      addToast({ type: 'error', title: 'Failed to mark as shipped' })
+    } finally {
+      setActionLoading(null)
+    }
+  }
+
+  const handleReceive = async () => {
+    if (!order || !order.items) return
+    setActionLoading('receive')
+    try {
+      const receivedItems = order.items.map((item) => ({
+        item_id: item.id,
+        quantity: item.quantity,
+      }))
+      await purchaseOrderService.receive(order.id, receivedItems)
+      addToast({ type: 'success', title: 'Goods received successfully' })
+      setReceiveDialogOpen(false)
+      loadOrder()
+    } catch (error) {
+      console.error('Error receiving order:', error)
+      addToast({ type: 'error', title: 'Failed to receive order' })
+    } finally {
+      setActionLoading(null)
+    }
+  }
+
+  const handleCancel = async () => {
+    if (!order || !cancelReason.trim()) return
+    setActionLoading('cancel')
+    try {
+      await purchaseOrderService.cancel(order.id, cancelReason.trim())
+      addToast({ type: 'success', title: 'Purchase order cancelled' })
+      setCancelDialogOpen(false)
+      loadOrder()
+    } catch (error) {
+      console.error('Error cancelling order:', error)
+      addToast({ type: 'error', title: 'Failed to cancel order' })
     } finally {
       setActionLoading(null)
     }
@@ -186,18 +287,18 @@ export default function PurchaseOrderDetailPage() {
               title={order.po_number}
               subtitle={order.supplier_name || 'No supplier'}
               status={order.status}
-              statusColor={order.status === 'confirmed' ? 'green' : order.status === 'draft' ? 'gray' : 'blue'}
+              statusColor={order.status === 'approved' ? 'green' : order.status === 'draft' ? 'gray' : 'blue'}
               url={`/procurement/purchase-orders/${order.id}`}
             />
             {order.status === 'draft' && (
               <>
                 <Button
                   variant="outline"
-                  onClick={handleSend}
-                  disabled={actionLoading === 'send'}
+                  onClick={handleSubmit}
+                  disabled={actionLoading === 'submit'}
                 >
                   <HugeiconsIcon icon={SentIcon} className="h-4 w-4 mr-2" />
-                  {actionLoading === 'send' ? 'Sending...' : 'Send to Supplier'}
+                  {actionLoading === 'submit' ? 'Submitting...' : 'Submit for Approval'}
                 </Button>
                 <Link href={`/procurement/purchase-orders/${order.id}/edit`}>
                   <Button>
@@ -207,10 +308,34 @@ export default function PurchaseOrderDetailPage() {
                 </Link>
               </>
             )}
+            {order.status === 'pending_approval' && (
+              <Button onClick={handleApprove} disabled={actionLoading === 'approve'}>
+                <HugeiconsIcon icon={CheckmarkCircle01Icon} className="h-4 w-4 mr-2" />
+                {actionLoading === 'approve' ? 'Approving...' : 'Approve'}
+              </Button>
+            )}
+            {order.status === 'approved' && (
+              <Button onClick={handleSend} disabled={actionLoading === 'send'}>
+                <HugeiconsIcon icon={SentIcon} className="h-4 w-4 mr-2" />
+                {actionLoading === 'send' ? 'Sending...' : 'Send to Supplier'}
+              </Button>
+            )}
             {order.status === 'sent' && (
               <Button onClick={handleConfirm} disabled={actionLoading === 'confirm'}>
                 <HugeiconsIcon icon={CheckmarkCircle01Icon} className="h-4 w-4 mr-2" />
                 {actionLoading === 'confirm' ? 'Confirming...' : 'Mark as Confirmed'}
+              </Button>
+            )}
+            {order.status === 'confirmed' && (
+              <Button onClick={handleShip} disabled={actionLoading === 'ship'}>
+                <HugeiconsIcon icon={DeliveryTruckIcon} className="h-4 w-4 mr-2" />
+                {actionLoading === 'ship' ? 'Updating...' : 'Mark as Shipped'}
+              </Button>
+            )}
+            {order.status === 'shipped' && (
+              <Button onClick={() => setReceiveDialogOpen(true)} disabled={actionLoading === 'receive'}>
+                <HugeiconsIcon icon={CheckmarkCircle01Icon} className="h-4 w-4 mr-2" />
+                Receive Goods
               </Button>
             )}
           </div>
@@ -227,8 +352,8 @@ export default function PurchaseOrderDetailPage() {
               </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Order Status</p>
-                <Badge className={statusColors[order.status]}>
-                  {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                <Badge className={statusColors[order.status] || statusColors.draft}>
+                  {statusLabel(order.status)}
                 </Badge>
               </div>
             </div>
@@ -308,6 +433,20 @@ export default function PurchaseOrderDetailPage() {
                   <p className="text-sm text-muted-foreground">Delivery Address</p>
                   <p className="font-medium">{order.delivery_address}</p>
                 </div>
+                {order.approved_by && (
+                  <div>
+                    <p className="text-sm text-muted-foreground">Approved By</p>
+                    <p className="font-medium">{order.approved_by}</p>
+                  </div>
+                )}
+                {order.approved_at && (
+                  <div>
+                    <p className="text-sm text-muted-foreground">Approved At</p>
+                    <p className="font-medium">
+                      {mounted ? new Date(order.approved_at).toLocaleDateString('id-ID') : ''}
+                    </p>
+                  </div>
+                )}
               </div>
             </Card>
 
@@ -448,17 +587,30 @@ export default function PurchaseOrderDetailPage() {
                   {actionLoading === 'download' ? 'Downloading...' : 'Export PDF'}
                 </Button>
 
-                <Separator className="my-3" />
-
-                <Button
-                  variant="outline"
-                  className="w-full justify-start text-red-600 border-red-200 hover:bg-red-50 dark:border-red-800 dark:hover:bg-red-900/20"
-                  onClick={handleDelete}
-                  disabled={order.status !== 'draft' || actionLoading === 'delete'}
-                >
-                  <HugeiconsIcon icon={DeleteIcon} className="h-4 w-4 mr-2" />
-                  {actionLoading === 'delete' ? 'Deleting...' : 'Delete Order'}
-                </Button>
+                {!['received', 'cancelled'].includes(order.status) && (
+                  <>
+                    <Separator className="my-3" />
+                    <Button
+                      variant="outline"
+                      className="w-full justify-start text-red-600 border-red-200 hover:bg-red-50 dark:border-red-800 dark:hover:bg-red-900/20"
+                      onClick={() => {
+                        if (order.status === 'draft') {
+                          handleDelete()
+                        } else {
+                          setCancelReason('')
+                          setCancelDialogOpen(true)
+                        }
+                      }}
+                      disabled={actionLoading === 'delete' || actionLoading === 'cancel'}
+                    >
+                      <HugeiconsIcon icon={order.status === 'draft' ? DeleteIcon : CancelIcon} className="h-4 w-4 mr-2" />
+                      {order.status === 'draft'
+                        ? (actionLoading === 'delete' ? 'Deleting...' : 'Delete Order')
+                        : (actionLoading === 'cancel' ? 'Cancelling...' : 'Cancel Order')
+                      }
+                    </Button>
+                  </>
+                )}
               </div>
             </Card>
 
@@ -471,7 +623,7 @@ export default function PurchaseOrderDetailPage() {
                     <div className="h-2 w-2 bg-green-500 rounded-full mt-2" />
                     <div>
                       <p className="text-sm font-medium">Received</p>
-                      <p className="text-xs text-muted-foreground">Order completed</p>
+                      <p className="text-xs text-muted-foreground">Goods received at warehouse</p>
                     </div>
                   </div>
                 )}
@@ -480,7 +632,7 @@ export default function PurchaseOrderDetailPage() {
                     <div className="h-2 w-2 bg-purple-500 rounded-full mt-2" />
                     <div>
                       <p className="text-sm font-medium">Shipped</p>
-                      <p className="text-xs text-muted-foreground">In transit</p>
+                      <p className="text-xs text-muted-foreground">Supplier shipped the goods</p>
                     </div>
                   </div>
                 )}
@@ -489,7 +641,7 @@ export default function PurchaseOrderDetailPage() {
                     <div className="h-2 w-2 bg-indigo-500 rounded-full mt-2" />
                     <div>
                       <p className="text-sm font-medium">Confirmed</p>
-                      <p className="text-xs text-muted-foreground">Supplier confirmed</p>
+                      <p className="text-xs text-muted-foreground">Supplier confirmed the order</p>
                     </div>
                   </div>
                 )}
@@ -497,8 +649,39 @@ export default function PurchaseOrderDetailPage() {
                   <div className="flex items-start space-x-3">
                     <div className="h-2 w-2 bg-blue-500 rounded-full mt-2" />
                     <div>
-                      <p className="text-sm font-medium">Sent</p>
-                      <p className="text-xs text-muted-foreground">Sent to supplier</p>
+                      <p className="text-sm font-medium">Sent to Supplier</p>
+                      <p className="text-xs text-muted-foreground">PO sent to supplier</p>
+                    </div>
+                  </div>
+                )}
+                {['approved', 'sent', 'confirmed', 'shipped', 'received'].includes(order.status) && (
+                  <div className="flex items-start space-x-3">
+                    <div className="h-2 w-2 bg-emerald-500 rounded-full mt-2" />
+                    <div>
+                      <p className="text-sm font-medium">Approved</p>
+                      <p className="text-xs text-muted-foreground">
+                        {mounted && order.approved_at
+                          ? new Date(order.approved_at).toLocaleDateString('id-ID')
+                          : 'Order approved'}
+                      </p>
+                    </div>
+                  </div>
+                )}
+                {['pending_approval', 'approved', 'sent', 'confirmed', 'shipped', 'received'].includes(order.status) && (
+                  <div className="flex items-start space-x-3">
+                    <div className="h-2 w-2 bg-yellow-500 rounded-full mt-2" />
+                    <div>
+                      <p className="text-sm font-medium">Submitted</p>
+                      <p className="text-xs text-muted-foreground">Submitted for approval</p>
+                    </div>
+                  </div>
+                )}
+                {order.status === 'cancelled' && (
+                  <div className="flex items-start space-x-3">
+                    <div className="h-2 w-2 bg-red-500 rounded-full mt-2" />
+                    <div>
+                      <p className="text-sm font-medium">Cancelled</p>
+                      <p className="text-xs text-muted-foreground">Order was cancelled</p>
                     </div>
                   </div>
                 )}
@@ -516,6 +699,75 @@ export default function PurchaseOrderDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* Cancel Dialog */}
+      <Dialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Cancel Purchase Order</DialogTitle>
+            <DialogDescription>
+              Cancel {order.po_number}. This action cannot be undone. Please provide a reason.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="cancel-reason">Reason for Cancellation</Label>
+              <Textarea
+                id="cancel-reason"
+                placeholder="Enter the reason for cancelling this order..."
+                value={cancelReason}
+                onChange={(e) => setCancelReason(e.target.value)}
+                rows={3}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setCancelDialogOpen(false)} disabled={actionLoading === 'cancel'}>
+              Back
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleCancel}
+              disabled={!cancelReason.trim() || actionLoading === 'cancel'}
+            >
+              {actionLoading === 'cancel' ? 'Cancelling...' : 'Cancel Order'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Receive Goods Dialog */}
+      <Dialog open={receiveDialogOpen} onOpenChange={setReceiveDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Receive Goods</DialogTitle>
+            <DialogDescription>
+              Confirm receipt of all items for {order.po_number} from {order.supplier_name}.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 py-4">
+            {order.items?.map((item) => (
+              <div key={item.id} className="flex items-center justify-between p-3 border rounded-lg">
+                <div>
+                  <p className="font-medium">{item.item_name}</p>
+                  <p className="text-sm text-muted-foreground">{item.quantity} {item.unit}</p>
+                </div>
+                <Badge className="bg-green-100 text-green-800">
+                  Receiving {item.quantity} {item.unit}
+                </Badge>
+              </div>
+            ))}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setReceiveDialogOpen(false)} disabled={actionLoading === 'receive'}>
+              Cancel
+            </Button>
+            <Button onClick={handleReceive} disabled={actionLoading === 'receive'}>
+              {actionLoading === 'receive' ? 'Processing...' : 'Confirm Receipt'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </TwoLevelLayout>
   )
 }

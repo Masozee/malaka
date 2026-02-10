@@ -209,7 +209,7 @@ func (r *PurchaseOrderRepositoryImpl) GetAll(ctx context.Context, filter reposit
 	}
 
 	// Sort
-	sortBy := "po.created_at"
+	sortBy := "po.order_date"
 	if filter.SortBy != "" {
 		sortBy = "po." + filter.SortBy
 	}

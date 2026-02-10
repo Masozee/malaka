@@ -25,3 +25,15 @@ type ReturnSupplierResponse struct {
 	CreatedAt  time.Time `json:"created_at"`
 	UpdatedAt  time.Time `json:"updated_at"`
 }
+
+// ReturnSupplierListResponse is the enriched response for list/detail endpoints.
+type ReturnSupplierListResponse struct {
+	ID           string `json:"id"`
+	ReturnNumber string `json:"returnNumber"`
+	SupplierID   string `json:"supplierId"`
+	SupplierName string `json:"supplierName"`
+	ReturnDate   string `json:"returnDate"`
+	Reason       string `json:"reason"`
+	CreatedAt    string `json:"createdAt"`
+	UpdatedAt    string `json:"updatedAt"`
+}

@@ -283,10 +283,12 @@ export default function PurchaseRequestsList({ initialData }: PurchaseRequestsLi
                             {record.status === 'pending' && (
                                 <>
                                     <DropdownMenuSeparator />
-                                    <DropdownMenuItem onClick={() => handleApprove(record)}>
-                                        <HugeiconsIcon icon={CheckmarkCircle01Icon} className="mr-2 h-4 w-4" />
-                                        Approve
-                                    </DropdownMenuItem>
+                                    {canApprove() && (
+                                        <DropdownMenuItem onClick={() => handleApprove(record)}>
+                                            <HugeiconsIcon icon={CheckmarkCircle01Icon} className="mr-2 h-4 w-4" />
+                                            Approve
+                                        </DropdownMenuItem>
+                                    )}
                                     <DropdownMenuItem onClick={() => handleCancel(record)}>
                                         <HugeiconsIcon icon={CancelIcon} className="mr-2 h-4 w-4" />
                                         Cancel

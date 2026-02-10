@@ -17,6 +17,7 @@ import {
   QrCodeIcon,
   BarCode01Icon,
   SettingsIcon,
+  Download01Icon,
 } from "@hugeicons/core-free-icons"
 import {
   useReactTable,
@@ -109,10 +110,12 @@ export interface TanStackDataTableProps<T> {
   onBatchDelete?: (records: T[]) => void
   onBatchBarcode?: (records: T[]) => void
   onBatchQRCode?: (records: T[]) => void
+  onBatchExport?: (records: T[]) => void
 
   // Customization
   className?: string
   getRowId?: (row: T) => string
+  showColumnToggle?: boolean
 }
 
 export function TanStackDataTable<T extends { id: string }>({
@@ -134,8 +137,10 @@ export function TanStackDataTable<T extends { id: string }>({
   onBatchDelete,
   onBatchBarcode,
   onBatchQRCode,
+  onBatchExport,
   className = "",
   getRowId = (row) => row.id,
+  showColumnToggle = true,
 }: TanStackDataTableProps<T>) {
   // Table state
   const [sorting, setSorting] = React.useState<SortingState>([])
@@ -426,6 +431,12 @@ export function TanStackDataTable<T extends { id: string }>({
                     QR Codes
                   </Button>
                 )}
+                {onBatchExport && (
+                  <Button variant="outline" size="sm" onClick={() => onBatchExport(selectedRows)}>
+                    <HugeiconsIcon icon={Download01Icon} className="h-4 w-4 mr-1" />
+                    Export
+                  </Button>
+                )}
               </div>
             </div>
           )}
@@ -446,28 +457,30 @@ export function TanStackDataTable<T extends { id: string }>({
 
         <div className="flex items-center space-x-2">
           {/* Column visibility */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm">
-                <HugeiconsIcon icon={SettingsIcon} className="h-4 w-4 mr-1" />
-                Columns
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              {table
-                .getAllColumns()
-                .filter((column) => column.getCanHide())
-                .map((column) => (
-                  <DropdownMenuCheckboxItem
-                    key={column.id}
-                    checked={column.getIsVisible()}
-                    onCheckedChange={(value) => column.toggleVisibility(!!value)}
-                  >
-                    {column.id}
-                  </DropdownMenuCheckboxItem>
-                ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
+          {showColumnToggle && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <HugeiconsIcon icon={SettingsIcon} className="h-4 w-4 mr-1" />
+                  Columns
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                {table
+                  .getAllColumns()
+                  .filter((column) => column.getCanHide())
+                  .map((column) => (
+                    <DropdownMenuCheckboxItem
+                      key={column.id}
+                      checked={column.getIsVisible()}
+                      onCheckedChange={(value) => column.toggleVisibility(!!value)}
+                    >
+                      {column.id}
+                    </DropdownMenuCheckboxItem>
+                  ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
 
           {/* Add button */}
           {onAdd && (
@@ -491,7 +504,7 @@ export function TanStackDataTable<T extends { id: string }>({
                     <th
                       key={header.id}
                       scope="col"
-                      className="px-4 py-2 text-left text-sm font-medium text-gray-700 dark:text-white"
+                      className="px-4 py-3 text-left text-sm font-semibold text-gray-700 dark:text-white"
                       style={
                         header.column.getSize() !== 150
                           ? { width: header.column.getSize() }

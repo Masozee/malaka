@@ -95,6 +95,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { useAuth } from "@/contexts/auth-context"
 import { useSessionActivity } from "@/hooks/useSessionActivity"
+import { useActionItems } from "@/hooks/useActionItems"
 
 interface LayoutProps {
   children: React.ReactNode
@@ -333,6 +334,7 @@ function TwoLevelLayoutInner({ children }: LayoutProps) {
   const [activeMenu, setActiveMenu] = React.useState<string | null>(null)
   const [isSecondSidebarCollapsed, setIsSecondSidebarCollapsed] = React.useState(false)
   const { slotContent } = useSecondarySidebarSlot()
+  const { getModuleTotal, getItemCount } = useActionItems()
 
   // Initialize session activity tracking
   useSessionActivity({
@@ -394,6 +396,7 @@ function TwoLevelLayoutInner({ children }: LayoutProps) {
           <ul className="space-y-2">
             {menuData.map((menu) => {
               const isActive = activeMenu === menu.id || (menu.href && pathname === menu.href)
+              const moduleTotal = getModuleTotal(menu.id)
 
               return (
                 <li key={menu.id}>
@@ -404,24 +407,30 @@ function TwoLevelLayoutInner({ children }: LayoutProps) {
                         setActiveMenu(menu.id)
                         setIsSecondSidebarCollapsed(false)
                       }}
-                      className={`flex items-center justify-center p-2 rounded-md transition-colors ${isActive
+                      className={`relative flex items-center justify-center p-2 rounded-md transition-colors ${isActive
                         ? 'bg-blue-600 dark:bg-blue-400'
                         : 'hover:bg-gray-200 dark:hover:bg-gray-700'
                         }`}
                       title={menu.label}
                     >
                       <Icon icon={menu.icon} className={`h-[18px] w-[18px] ${isActive ? 'text-white dark:text-gray-950' : 'text-gray-600 dark:text-gray-300'}`} strokeWidth={2} />
+                      {moduleTotal > 0 && (
+                        <span className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 bg-red-500 rounded-full border border-gray-100 dark:border-gray-800" />
+                      )}
                     </Link>
                   ) : (
                     <button
                       onClick={() => handleMenuClick(menu.id)}
-                      className={`w-full flex items-center justify-center p-2 rounded-md transition-colors ${isActive
+                      className={`relative w-full flex items-center justify-center p-2 rounded-md transition-colors ${isActive
                         ? 'bg-blue-600 dark:bg-blue-400'
                         : 'hover:bg-gray-200 dark:hover:bg-gray-700'
                         }`}
                       title={menu.label}
                     >
                       <Icon icon={menu.icon} className={`h-[18px] w-[18px] ${isActive ? 'text-white dark:text-gray-950' : 'text-gray-600 dark:text-gray-300'}`} strokeWidth={2} />
+                      {moduleTotal > 0 && (
+                        <span className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 bg-red-500 rounded-full border border-gray-100 dark:border-gray-800" />
+                      )}
                     </button>
                   )}
                 </li>
@@ -527,6 +536,7 @@ function TwoLevelLayoutInner({ children }: LayoutProps) {
             <ul className="space-y-1">
               {activeMenuData.items.map((item) => {
                 const isActive = pathname === item.href
+                const badgeCount = activeMenu ? getItemCount(activeMenu, item.id) : 0
 
                 return (
                   <li key={item.id}>
@@ -545,11 +555,17 @@ function TwoLevelLayoutInner({ children }: LayoutProps) {
                           <span className="text-sm font-medium">{item.label}</span>
                         )}
                       </div>
-                      {!isSecondSidebarCollapsed && item.count && (
+                      {!isSecondSidebarCollapsed && badgeCount > 0 ? (
+                        <span className={`flex items-center justify-center min-w-[18px] h-[18px] text-[10px] font-bold rounded-full px-1 ${
+                          isActive ? 'bg-white text-blue-600' : 'bg-red-500 text-white'
+                        }`}>
+                          {badgeCount}
+                        </span>
+                      ) : !isSecondSidebarCollapsed && item.count ? (
                         <span className="text-xs text-gray-500 dark:text-gray-400 font-normal">
                           {formatCount(item.count)}
                         </span>
-                      )}
+                      ) : null}
                     </Link>
                   </li>
                 )

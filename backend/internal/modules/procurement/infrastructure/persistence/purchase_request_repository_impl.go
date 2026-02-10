@@ -173,7 +173,7 @@ func (r *PurchaseRequestRepositoryImpl) GetAll(ctx context.Context, filter *repo
 	}
 
 	// Build order clause
-	orderBy := "pr.created_at DESC"
+	orderBy := "pr.requested_date DESC, pr.created_at DESC"
 	if filter.SortBy != "" {
 		order := "ASC"
 		if strings.ToUpper(filter.SortOrder) == "DESC" {

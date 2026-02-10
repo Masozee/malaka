@@ -3,7 +3,7 @@ export interface RawMaterial {
   materialCode: string;
   materialName: string;
   description?: string;
-  category: RawMaterialCategory;
+  category: string;
   unit: string;
   currentStock: number;
   minStock: number;
@@ -11,27 +11,16 @@ export interface RawMaterial {
   unitCost: number;
   totalValue: number;
   supplier: string;
-  supplierCode?: string;
+  supplierId?: string;
   leadTime: number;
   status: RawMaterialStatus;
   location: string;
-  batchNumber?: string;
-  expiryDate?: string;
-  lastUpdated: string;
+  isActive: boolean;
   createdAt: string;
   updatedAt: string;
 }
 
-export type RawMaterialCategory = 
-  | 'leather'
-  | 'fabric'
-  | 'sole'
-  | 'thread'
-  | 'adhesive'
-  | 'hardware'
-  | 'packaging'
-  | 'chemical'
-  | 'other';
+export type RawMaterialCategory = string;
 
 export type RawMaterialStatus = 
   | 'in_stock'
@@ -55,17 +44,14 @@ export interface RawMaterialFormData {
   materialCode: string;
   materialName: string;
   description?: string;
-  category: RawMaterialCategory;
+  category: string;
   unit: string;
   minStock: number;
   maxStock: number;
   unitCost: number;
-  supplier: string;
-  supplierCode?: string;
+  supplierId?: string;
   leadTime: number;
   location: string;
-  batchNumber?: string;
-  expiryDate?: string;
 }
 
 export interface RawMaterialMovement {

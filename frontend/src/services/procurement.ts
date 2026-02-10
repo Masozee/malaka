@@ -187,6 +187,16 @@ class PurchaseOrderService {
     await apiClient.delete<{ success: boolean; message: string }>(`${this.baseUrl}/${id}`)
   }
 
+  async submit(id: string): Promise<PurchaseOrder> {
+    const response = await apiClient.post<{ success: boolean; message: string; data: PurchaseOrder }>(`${this.baseUrl}/${id}/submit`)
+    return response.data
+  }
+
+  async approve(id: string): Promise<PurchaseOrder> {
+    const response = await apiClient.post<{ success: boolean; message: string; data: PurchaseOrder }>(`${this.baseUrl}/${id}/approve`)
+    return response.data
+  }
+
   async send(id: string): Promise<PurchaseOrder> {
     const response = await apiClient.post<{ success: boolean; message: string; data: PurchaseOrder }>(`${this.baseUrl}/${id}/send`)
     return response.data
@@ -197,8 +207,18 @@ class PurchaseOrderService {
     return response.data
   }
 
+  async ship(id: string): Promise<PurchaseOrder> {
+    const response = await apiClient.post<{ success: boolean; message: string; data: PurchaseOrder }>(`${this.baseUrl}/${id}/ship`)
+    return response.data
+  }
+
   async receive(id: string, receivedItems: { item_id: string; quantity: number }[]): Promise<PurchaseOrder> {
     const response = await apiClient.post<{ success: boolean; message: string; data: PurchaseOrder }>(`${this.baseUrl}/${id}/receive`, { items: receivedItems })
+    return response.data
+  }
+
+  async cancel(id: string, reason: string): Promise<PurchaseOrder> {
+    const response = await apiClient.post<{ success: boolean; message: string; data: PurchaseOrder }>(`${this.baseUrl}/${id}/cancel`, { reason })
     return response.data
   }
 }

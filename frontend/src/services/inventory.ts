@@ -1,17 +1,18 @@
 /**
- * Inventory API Services  
+ * Inventory API Services
  * Type-safe API calls for all Inventory endpoints
  */
 
 import { apiClient } from '@/lib/api'
 
-// Base inventory interfaces
+// ===== Stock Control (enriched by backend DTO) =====
 export interface StockItem {
   id: string
   code: string
   name: string
   category?: string
   warehouse?: string
+  warehouse_code?: string
   currentStock: number
   minStock?: number
   maxStock?: number
@@ -19,8 +20,24 @@ export interface StockItem {
   totalValue?: number
   lastUpdated?: string
   status: 'in_stock' | 'low_stock' | 'out_of_stock' | 'overstock'
+  article_details?: {
+    id: string
+    name: string
+    description: string
+    barcode: string
+    price: number
+  }
+  warehouse_details?: {
+    id: string
+    code: string
+    name: string
+    city: string
+    type: string
+    status: string
+  }
 }
 
+// ===== Goods Receipt (enriched by backend DTO) =====
 export interface GoodsReceipt {
   id: string
   purchase_order_id: string
@@ -28,19 +45,17 @@ export interface GoodsReceipt {
   warehouse_id: string
   created_at?: string
   updated_at?: string
-  // Calculated/joined fields from backend
+  // Enriched fields from backend DTO (camelCase)
   receiptNumber?: string
   supplierName?: string
-  status?: 'pending' | 'approved' | 'completed'
+  status?: string
   totalAmount?: number
   totalItems?: number
   items?: GoodsReceiptItem[]
-  // Additional display fields
   poNumber?: string
-  expectedDate?: string
-  receivedBy?: string
   warehouse?: string
   notes?: string
+  receivedBy?: string
 }
 
 export interface GoodsReceiptItem {
@@ -52,63 +67,141 @@ export interface GoodsReceiptItem {
   totalPrice: number
 }
 
+// ===== Goods Issue (enriched by backend DTO) =====
 export interface GoodsIssue {
   id: string
   issueNumber: string
+  warehouseId: string
+  warehouseName: string
+  warehouseCode: string
   issueDate: string
-  status: 'pending' | 'approved' | 'completed'
+  status: string
+  notes: string
   totalItems: number
-  destination?: string
-  items: GoodsIssueItem[]
+  totalQuantity: number
+  createdAt: string
+  updatedAt: string
 }
 
 export interface GoodsIssueItem {
   id: string
-  productCode: string
-  productName: string
+  articleId: string
+  articleName: string
+  articleCode: string
   quantity: number
-  unitCost: number
-  totalCost: number
+  notes: string
 }
 
+export interface GoodsIssueDetail extends GoodsIssue {
+  items: GoodsIssueItem[]
+}
+
+export interface CreateGoodsIssueRequest {
+  warehouse_id: string
+  issue_date: string
+  status: string
+  notes?: string
+  items?: { article_id: string, quantity: number, notes?: string }[]
+}
+
+export interface UpdateGoodsIssueRequest {
+  warehouse_id?: string
+  issue_date?: string
+  status?: string
+  notes?: string
+}
+
+// ===== Stock Transfer (enriched by backend DTO) =====
 export interface StockTransfer {
   id: string
   transferNumber: string
-  transferDate: string
+  fromWarehouseId: string
   fromWarehouse: string
+  fromCode: string
+  toWarehouseId: string
   toWarehouse: string
-  status: 'pending' | 'in_transit' | 'completed'
+  toCode: string
+  orderDate: string
+  status: string
+  notes: string
   totalItems: number
-  items: StockTransferItem[]
+  totalQuantity: number
+  shippedDate?: string
+  receivedDate?: string
+  approvedDate?: string
+  cancelledDate?: string
+  shippedBy?: string
+  receivedBy?: string
+  approvedBy?: string
+  cancelledBy?: string
+  createdBy?: string
+  shippedByName?: string
+  receivedByName?: string
+  approvedByName?: string
+  cancelledByName?: string
+  createdByName?: string
+  cancelReason?: string
+  createdAt: string
+  updatedAt: string
 }
 
 export interface StockTransferItem {
   id: string
-  productCode: string
-  productName: string
+  articleId: string
+  articleName: string
+  articleCode: string
   quantity: number
+  receivedQuantity: number
+  hasDiscrepancy: boolean
 }
 
+export interface StockTransferDetail extends StockTransfer {
+  items: StockTransferItem[]
+}
+
+// ===== Stock Adjustment (enriched by backend DTO) =====
 export interface StockAdjustment {
   id: string
   adjustmentNumber: string
+  articleId: string
+  articleName: string
+  articleCode: string
+  warehouseId: string
+  warehouseName: string
+  warehouseCode: string
+  quantity: number
   adjustmentDate: string
   reason: string
-  status: 'pending' | 'approved' | 'completed'
-  totalItems: number
-  items: StockAdjustmentItem[]
+  createdAt: string
+  updatedAt: string
 }
 
-export interface StockAdjustmentItem {
+// ===== Stock Opname (enriched by backend DTO) =====
+export interface StockOpname {
   id: string
-  productCode: string
-  productName: string
-  currentStock: number
-  adjustedStock: number
-  difference: number
-  reason: string
+  opnameNumber: string
+  warehouseId: string
+  warehouseName: string
+  warehouseCode: string
+  opnameDate: string
+  status: string
+  createdAt: string
+  updatedAt: string
 }
 
+// ===== Return Supplier (matches backend entity) =====
+export interface ReturnSupplier {
+  id: string
+  returnNumber: string
+  supplierId: string
+  supplierName: string
+  returnDate: string
+  reason: string
+  createdAt: string
+  updatedAt: string
+}
+
+// ===== Purchase Order (deprecated - use procurement module) =====
 export interface PurchaseOrder {
   id: string
   supplier_id: string
@@ -117,7 +210,6 @@ export interface PurchaseOrder {
   total_amount: number
   created_at?: string
   updated_at?: string
-  // Related data populated by backend
   supplier?: {
     id: string
     name: string
@@ -137,7 +229,6 @@ export interface PurchaseOrderItem {
   quantity: number
   unit_price: number
   total_price: number
-  // Related data populated by backend
   article?: {
     id: string
     code: string
@@ -146,40 +237,7 @@ export interface PurchaseOrderItem {
   }
 }
 
-export interface StockOpname {
-  id: string
-  opnameNumber: string
-  date: string
-  warehouseId: string
-  warehouseName: string
-  status: 'planned' | 'in_progress' | 'completed' | 'cancelled'
-  notes?: string
-  totalItems: number
-  totalVariance: number
-  items?: StockOpnameItem[]
-  createdBy?: string
-}
-
-export interface StockOpnameItem {
-  id: string
-  productCode: string
-  productName: string
-  systemStock: number
-  actualStock: number
-  variance: number
-  notes?: string
-}
-
-export interface InventoryFilters {
-  page?: number
-  limit?: number
-  search?: string
-  warehouse?: string
-  status?: string
-  category?: string
-  [key: string]: any
-}
-
+// ===== Barcode Print Job (no backend endpoint yet) =====
 export interface BarcodePrintJob {
   id: string
   jobNumber: string
@@ -201,22 +259,14 @@ export interface BarcodePrintJob {
   notes?: string
 }
 
-export interface ReturnSupplier {
-  id: string
-  returnNumber: string
-  supplierName: string
-  supplierCode: string
-  originalPO: string
-  returnDate: string
-  returnReason: 'defective' | 'wrong-specification' | 'overshipped' | 'damaged' | 'expired' | 'quality-issue'
-  status: 'initiated' | 'approved' | 'shipped' | 'received' | 'processed' | 'rejected'
-  totalItems: number
-  totalQuantity: number
-  totalValue: number
-  returnedBy: string
-  notes?: string
-  expectedRefund: number
-  refundStatus: 'pending' | 'partial' | 'completed' | 'disputed'
+export interface InventoryFilters {
+  page?: number
+  limit?: number
+  search?: string
+  warehouse?: string
+  status?: string
+  category?: string
+  [key: string]: any
 }
 
 // Base CRUD service class for inventory
@@ -228,7 +278,7 @@ abstract class BaseInventoryService<T> {
   }
 
   async getAll(filters?: InventoryFilters): Promise<{ data: T[], total: number, page: number, limit: number }> {
-    const response = await apiClient.get<{ success: boolean, message: string, data: T[] }>(`/api/v1/inventory/${this.endpoint}`, filters)
+    const response = await apiClient.get<{ success: boolean, message: string, data: T[] }>(`/api/v1/inventory/${this.endpoint}/`, filters)
     return {
       data: response.data || [],
       total: response.data?.length || 0,
@@ -243,7 +293,7 @@ abstract class BaseInventoryService<T> {
   }
 
   async create(data: Partial<T>): Promise<T> {
-    const response = await apiClient.post<{ success: boolean, message: string, data: T }>(`/api/v1/inventory/${this.endpoint}`, data)
+    const response = await apiClient.post<{ success: boolean, message: string, data: T }>(`/api/v1/inventory/${this.endpoint}/`, data)
     return response.data
   }
 
@@ -261,6 +311,12 @@ abstract class BaseInventoryService<T> {
 class StockService extends BaseInventoryService<StockItem> {
   constructor() {
     super('stock/balance')
+  }
+
+  // Override getById to use the stock control endpoint
+  async getById(id: string): Promise<StockItem> {
+    const response = await apiClient.get<{ success: boolean, message: string, data: StockItem }>(`/api/v1/inventory/stock/control/${id}`)
+    return response.data
   }
 
   // Override getAll to use the stock control endpoint
@@ -311,7 +367,6 @@ class GoodsReceiptService extends BaseInventoryService<GoodsReceipt> {
       totalItems: receipt.totalItems || 0,
       poNumber: receipt.poNumber || receipt.purchase_order_id,
       warehouse: receipt.warehouse || 'Main Warehouse',
-      expectedDate: receipt.expectedDate || receipt.receipt_date,
       receivedBy: receipt.receivedBy || '',
       notes: receipt.notes || ''
     }))
@@ -329,11 +384,49 @@ class GoodsIssueService extends BaseInventoryService<GoodsIssue> {
   constructor() {
     super('goods-issues')
   }
+
+  async createIssue(data: CreateGoodsIssueRequest): Promise<GoodsIssue> {
+    const payload = {
+      ...data,
+      issue_date: data.issue_date ? new Date(data.issue_date + 'T00:00:00Z').toISOString() : undefined,
+    }
+    const response = await apiClient.post<{ success: boolean, data: GoodsIssue }>('/api/v1/inventory/goods-issues/', payload)
+    return response.data
+  }
+
+  async updateIssue(id: string, data: UpdateGoodsIssueRequest): Promise<GoodsIssue> {
+    const payload: any = { ...data }
+    if (data.issue_date) {
+      payload.issue_date = new Date(data.issue_date + 'T00:00:00Z').toISOString()
+    }
+    const response = await apiClient.put<{ success: boolean, data: GoodsIssue }>(`/api/v1/inventory/goods-issues/${id}`, payload)
+    return response.data
+  }
 }
 
 class StockTransferService extends BaseInventoryService<StockTransfer> {
   constructor() {
     super('transfers')
+  }
+
+  async approve(id: string): Promise<StockTransfer> {
+    const response = await apiClient.post<{ success: boolean, data: StockTransfer }>(`/api/v1/inventory/transfers/${id}/approve`, {})
+    return response.data
+  }
+
+  async ship(id: string): Promise<StockTransfer> {
+    const response = await apiClient.post<{ success: boolean, data: StockTransfer }>(`/api/v1/inventory/transfers/${id}/ship`, {})
+    return response.data
+  }
+
+  async receive(id: string, items: { item_id: string, received_quantity: number }[]): Promise<StockTransfer> {
+    const response = await apiClient.post<{ success: boolean, data: StockTransfer }>(`/api/v1/inventory/transfers/${id}/receive`, { items })
+    return response.data
+  }
+
+  async cancel(id: string, reason: string): Promise<StockTransfer> {
+    const response = await apiClient.post<{ success: boolean, data: StockTransfer }>(`/api/v1/inventory/transfers/${id}/cancel`, { reason })
+    return response.data
   }
 }
 
@@ -376,7 +469,7 @@ class ReturnSupplierService extends BaseInventoryService<ReturnSupplier> {
 
 class StockOpnameService extends BaseInventoryService<StockOpname> {
   constructor() {
-    super('stock-opname')
+    super('opnames')
   }
 }
 

@@ -156,3 +156,60 @@ func (r *StockBalanceRepositoryImpl) GetAllWithDetails(ctx context.Context) ([]*
 	}
 	return items, rows.Err()
 }
+
+// GetByIDWithDetails retrieves a single stock balance with article and warehouse details by stock balance ID.
+func (r *StockBalanceRepositoryImpl) GetByIDWithDetails(ctx context.Context, id uuid.ID) (*repositories.StockControlItem, error) {
+	query := `
+		SELECT
+			sb.id as stock_balance_id,
+			sb.article_id,
+			sb.warehouse_id,
+			sb.quantity,
+			sb.created_at as stock_created_at,
+			sb.updated_at as stock_updated_at,
+			a.name as article_name,
+			a.barcode as article_code,
+			a.description as article_description,
+			a.barcode as article_barcode,
+			a.price as article_price,
+			COALESCE(c.name, 'General') as article_category,
+			w.name as warehouse_name,
+			w.code as warehouse_code,
+			w.address as warehouse_address,
+			w.city as warehouse_city,
+			w.type as warehouse_type,
+			w.status as warehouse_status
+		FROM stock_balances sb
+		INNER JOIN articles a ON sb.article_id = a.id
+		INNER JOIN warehouses w ON sb.warehouse_id = w.id
+		LEFT JOIN classifications c ON a.classification_id = c.id
+		WHERE sb.id = $1
+	`
+
+	row := r.db.QueryRowContext(ctx, query, id)
+	item := &repositories.StockControlItem{}
+	err := row.Scan(
+		&item.StockBalanceID,
+		&item.ArticleID,
+		&item.WarehouseID,
+		&item.Quantity,
+		&item.StockCreatedAt,
+		&item.StockUpdatedAt,
+		&item.ArticleName,
+		&item.ArticleCode,
+		&item.ArticleDescription,
+		&item.ArticleBarcode,
+		&item.ArticlePrice,
+		&item.ArticleCategory,
+		&item.WarehouseName,
+		&item.WarehouseCode,
+		&item.WarehouseAddress,
+		&item.WarehouseCity,
+		&item.WarehouseType,
+		&item.WarehouseStatus,
+	)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	return item, err
+}

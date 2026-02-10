@@ -31,3 +31,20 @@ type StockAdjustmentResponse struct {
 	CreatedAt      time.Time `json:"created_at"`
 	UpdatedAt      time.Time `json:"updated_at"`
 }
+
+// StockAdjustmentListResponse is the enriched JSON response for stock adjustment list.
+type StockAdjustmentListResponse struct {
+	ID             string `json:"id"`
+	AdjustmentNumber string `json:"adjustmentNumber"`
+	ArticleID      string `json:"articleId"`
+	ArticleName    string `json:"articleName"`
+	ArticleCode    string `json:"articleCode"`
+	WarehouseID    string `json:"warehouseId"`
+	WarehouseName  string `json:"warehouseName"`
+	WarehouseCode  string `json:"warehouseCode"`
+	Quantity       int    `json:"quantity"`
+	AdjustmentDate string `json:"adjustmentDate"`
+	Reason         string `json:"reason"`
+	CreatedAt      string `json:"createdAt"`
+	UpdatedAt      string `json:"updatedAt"`
+}

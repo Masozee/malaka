@@ -47,7 +47,7 @@ func (r *StockOpnameRepositoryImpl) Update(ctx context.Context, so *entities.Sto
 
 // GetAll retrieves all stock opnames from the database.
 func (r *StockOpnameRepositoryImpl) GetAll(ctx context.Context) ([]*entities.StockOpname, error) {
-	query := `SELECT id, warehouse_id, opname_date, status, created_at, updated_at FROM stock_opnames ORDER BY created_at DESC`
+	query := `SELECT id, warehouse_id, opname_date, status, created_at, updated_at FROM stock_opnames ORDER BY opname_date DESC, created_at DESC`
 	rows, err := r.db.QueryContext(ctx, query)
 	if err != nil {
 		return nil, err

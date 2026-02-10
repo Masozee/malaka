@@ -318,3 +318,187 @@ func (s *NotificationService) NotifySystemMaintenance(ctx context.Context, userI
 		WithPriority(entities.NotificationPriorityHigh),
 	)
 }
+
+// NotifyPurchaseRequestSubmitted notifies approvers when a PR is submitted for approval
+func (s *NotificationService) NotifyPurchaseRequestSubmitted(ctx context.Context, approverIDs []uuid.ID, prID, prNumber, requesterName string) error {
+	return s.SendToMultipleUsers(
+		ctx,
+		approverIDs,
+		"Purchase Request Pending Approval",
+		fmt.Sprintf("A purchase request %s has been submitted by %s and requires your approval", prNumber, requesterName),
+		entities.NotificationTypeProcurement,
+		WithPriority(entities.NotificationPriorityNormal),
+		WithActionURL(fmt.Sprintf("/procurement/purchase-requests/%s", prID)),
+		WithReference("purchase_request", prID),
+	)
+}
+
+// NotifyPurchaseOrderSubmitted notifies approvers when a PO is submitted for approval
+func (s *NotificationService) NotifyPurchaseOrderSubmitted(ctx context.Context, approverIDs []uuid.ID, poID, poNumber, requesterName string) error {
+	return s.SendToMultipleUsers(
+		ctx,
+		approverIDs,
+		"Purchase Order Pending Approval",
+		fmt.Sprintf("Purchase order %s has been submitted by %s and requires your approval", poNumber, requesterName),
+		entities.NotificationTypeProcurement,
+		WithPriority(entities.NotificationPriorityNormal),
+		WithActionURL(fmt.Sprintf("/procurement/purchase-orders/%s", poID)),
+		WithReference("purchase_order", poID),
+	)
+}
+
+// NotifyPurchaseOrderApproved notifies the PO creator when their PO is approved
+func (s *NotificationService) NotifyPurchaseOrderApproved(ctx context.Context, creatorID uuid.ID, poID, poNumber, approverName string) error {
+	return s.SendNotification(
+		ctx,
+		creatorID,
+		"Purchase Order Approved",
+		fmt.Sprintf("Your purchase order %s has been approved by %s", poNumber, approverName),
+		entities.NotificationTypeProcurement,
+		WithPriority(entities.NotificationPriorityNormal),
+		WithActionURL(fmt.Sprintf("/procurement/purchase-orders/%s", poID)),
+		WithReference("purchase_order", poID),
+	)
+}
+
+// NotifyPurchaseOrderSent notifies the PO creator that the PO was sent to the supplier
+func (s *NotificationService) NotifyPurchaseOrderSent(ctx context.Context, creatorID uuid.ID, poID, poNumber string) error {
+	return s.SendNotification(
+		ctx,
+		creatorID,
+		"Purchase Order Sent",
+		fmt.Sprintf("Purchase order %s has been sent to the supplier", poNumber),
+		entities.NotificationTypeProcurement,
+		WithPriority(entities.NotificationPriorityNormal),
+		WithActionURL(fmt.Sprintf("/procurement/purchase-orders/%s", poID)),
+		WithReference("purchase_order", poID),
+	)
+}
+
+// NotifyPurchaseOrderReceived notifies the PO creator that goods were received
+func (s *NotificationService) NotifyPurchaseOrderReceived(ctx context.Context, creatorID uuid.ID, poID, poNumber string) error {
+	return s.SendNotification(
+		ctx,
+		creatorID,
+		"Goods Received",
+		fmt.Sprintf("Goods for purchase order %s have been received", poNumber),
+		entities.NotificationTypeProcurement,
+		WithPriority(entities.NotificationPriorityNormal),
+		WithActionURL(fmt.Sprintf("/procurement/purchase-orders/%s", poID)),
+		WithReference("purchase_order", poID),
+	)
+}
+
+// NotifyPurchaseOrderCancelled notifies the PO creator that the PO was cancelled
+func (s *NotificationService) NotifyPurchaseOrderCancelled(ctx context.Context, creatorID uuid.ID, poID, poNumber, reason string) error {
+	msg := fmt.Sprintf("Purchase order %s has been cancelled", poNumber)
+	if reason != "" {
+		msg += fmt.Sprintf(". Reason: %s", reason)
+	}
+	return s.SendNotification(
+		ctx,
+		creatorID,
+		"Purchase Order Cancelled",
+		msg,
+		entities.NotificationTypeProcurement,
+		WithPriority(entities.NotificationPriorityHigh),
+		WithActionURL(fmt.Sprintf("/procurement/purchase-orders/%s", poID)),
+		WithReference("purchase_order", poID),
+	)
+}
+
+// NotifyRFQPublished notifies the RFQ creator that their RFQ has been published
+func (s *NotificationService) NotifyRFQPublished(ctx context.Context, creatorID uuid.ID, rfqID, rfqNumber string) error {
+	return s.SendNotification(
+		ctx,
+		creatorID,
+		"RFQ Published",
+		fmt.Sprintf("Your RFQ %s has been published and is now open for supplier responses", rfqNumber),
+		entities.NotificationTypeProcurement,
+		WithPriority(entities.NotificationPriorityNormal),
+		WithActionURL(fmt.Sprintf("/procurement/rfq/%s", rfqID)),
+		WithReference("rfq", rfqID),
+	)
+}
+
+// NotifyRFQResponseAccepted notifies the RFQ creator when a response is accepted
+func (s *NotificationService) NotifyRFQResponseAccepted(ctx context.Context, creatorID uuid.ID, rfqID, rfqNumber, supplierName string) error {
+	return s.SendNotification(
+		ctx,
+		creatorID,
+		"RFQ Response Accepted",
+		fmt.Sprintf("A supplier response for RFQ %s from %s has been accepted", rfqNumber, supplierName),
+		entities.NotificationTypeProcurement,
+		WithPriority(entities.NotificationPriorityNormal),
+		WithActionURL(fmt.Sprintf("/procurement/rfq/%s", rfqID)),
+		WithReference("rfq", rfqID),
+	)
+}
+
+// --- Stock Transfer Notifications ---
+
+// NotifyTransferApproved notifies the transfer creator that the transfer was approved.
+func (s *NotificationService) NotifyTransferApproved(ctx context.Context, creatorID uuid.ID, transferID, transferNumber, approverName string) error {
+	return s.SendNotification(
+		ctx,
+		creatorID,
+		"Transfer Order Approved",
+		fmt.Sprintf("Transfer order %s has been approved by %s", transferNumber, approverName),
+		entities.NotificationTypeInventory,
+		WithPriority(entities.NotificationPriorityNormal),
+		WithActionURL(fmt.Sprintf("/inventory/stock-transfer/%s", transferID)),
+		WithReference("transfer_order", transferID),
+	)
+}
+
+// NotifyTransferShipped notifies relevant users that a transfer is now in transit.
+func (s *NotificationService) NotifyTransferShipped(ctx context.Context, userIDs []uuid.ID, transferID, transferNumber, shipperName string) error {
+	return s.SendToMultipleUsers(
+		ctx,
+		userIDs,
+		"Transfer Order Shipped",
+		fmt.Sprintf("Transfer order %s has been shipped by %s and is now in transit", transferNumber, shipperName),
+		entities.NotificationTypeInventory,
+		WithPriority(entities.NotificationPriorityNormal),
+		WithActionURL(fmt.Sprintf("/inventory/stock-transfer/%s", transferID)),
+		WithReference("transfer_order", transferID),
+	)
+}
+
+// NotifyTransferReceived notifies the creator and shipper that goods were received.
+func (s *NotificationService) NotifyTransferReceived(ctx context.Context, userIDs []uuid.ID, transferID, transferNumber, receiverName string, hasDiscrepancy bool) error {
+	msg := fmt.Sprintf("Transfer order %s has been received by %s", transferNumber, receiverName)
+	priority := entities.NotificationPriorityNormal
+	if hasDiscrepancy {
+		msg += " (discrepancy detected - some items received less than shipped)"
+		priority = entities.NotificationPriorityHigh
+	}
+	return s.SendToMultipleUsers(
+		ctx,
+		userIDs,
+		"Transfer Order Received",
+		msg,
+		entities.NotificationTypeInventory,
+		WithPriority(priority),
+		WithActionURL(fmt.Sprintf("/inventory/stock-transfer/%s", transferID)),
+		WithReference("transfer_order", transferID),
+	)
+}
+
+// NotifyTransferCancelled notifies the creator that a transfer was cancelled.
+func (s *NotificationService) NotifyTransferCancelled(ctx context.Context, creatorID uuid.ID, transferID, transferNumber, cancellerName, reason string) error {
+	msg := fmt.Sprintf("Transfer order %s has been cancelled by %s", transferNumber, cancellerName)
+	if reason != "" {
+		msg += fmt.Sprintf(". Reason: %s", reason)
+	}
+	return s.SendNotification(
+		ctx,
+		creatorID,
+		"Transfer Order Cancelled",
+		msg,
+		entities.NotificationTypeInventory,
+		WithPriority(entities.NotificationPriorityHigh),
+		WithActionURL(fmt.Sprintf("/inventory/stock-transfer/%s", transferID)),
+		WithReference("transfer_order", transferID),
+	)
+}

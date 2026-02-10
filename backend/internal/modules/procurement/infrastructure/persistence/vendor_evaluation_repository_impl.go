@@ -184,7 +184,7 @@ func (r *VendorEvaluationRepositoryImpl) GetAll(ctx context.Context, filter *rep
 	}
 
 	// Build order clause
-	orderBy := "ve.created_at DESC"
+	orderBy := "ve.evaluation_period_end DESC, ve.created_at DESC"
 	if filter.SortBy != "" {
 		order := "ASC"
 		if strings.ToUpper(filter.SortOrder) == "DESC" {

@@ -1,12 +1,15 @@
 package handlers
 
 import (
+	"context"
 	"database/sql"
+	"log"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jmoiron/sqlx"
 
+	notification_services "malaka/internal/modules/notifications/domain/services"
 	"malaka/internal/modules/procurement/domain/entities"
 	"malaka/internal/modules/procurement/domain/repositories"
 	"malaka/internal/modules/procurement/domain/services"
@@ -17,13 +20,14 @@ import (
 
 // RFQHandler handles HTTP requests for RFQ operations
 type RFQHandler struct {
-	service *services.RFQService
-	db      *sqlx.DB
+	service             *services.RFQService
+	db                  *sqlx.DB
+	notificationService *notification_services.NotificationService
 }
 
 // NewRFQHandler creates a new RFQHandler
-func NewRFQHandler(service *services.RFQService, db *sqlx.DB) *RFQHandler {
-	return &RFQHandler{service: service, db: db}
+func NewRFQHandler(service *services.RFQService, db *sqlx.DB, notificationService *notification_services.NotificationService) *RFQHandler {
+	return &RFQHandler{service: service, db: db, notificationService: notificationService}
 }
 
 // getDefaultUserID retrieves a default admin user ID from the database for development/testing
@@ -215,6 +219,18 @@ func (h *RFQHandler) Publish(c *gin.Context) {
 		return
 	}
 
+	// Notify RFQ creator asynchronously
+	if h.notificationService != nil {
+		go func() {
+			creatorID, _ := uuid.Parse(rfq.CreatedBy)
+			if err := h.notificationService.NotifyRFQPublished(
+				context.Background(), creatorID, rfq.ID.String(), rfq.RFQNumber,
+			); err != nil {
+				log.Printf("Failed to send RFQ published notification: %v", err)
+			}
+		}()
+	}
+
 	response.OK(c, "RFQ published successfully", dto.ToRFQResponse(rfq))
 }
 
@@ -402,6 +418,7 @@ func (h *RFQHandler) GetResponse(c *gin.Context) {
 
 // AcceptResponse handles accepting an RFQ response
 func (h *RFQHandler) AcceptResponse(c *gin.Context) {
+	rfqID := c.Param("id")
 	responseID := c.Param("responseId")
 
 	rfqResponse, err := h.service.AcceptResponse(c.Request.Context(), responseID)
@@ -412,6 +429,26 @@ func (h *RFQHandler) AcceptResponse(c *gin.Context) {
 		}
 		response.BadRequest(c, err.Error(), nil)
 		return
+	}
+
+	// Notify RFQ creator asynchronously
+	if h.notificationService != nil {
+		go func() {
+			// Look up the RFQ to get the creator
+			rfq, err := h.service.GetByID(context.Background(), rfqID)
+			if err == nil && rfq != nil {
+				creatorID, _ := uuid.Parse(rfq.CreatedBy)
+				supplierName := rfqResponse.SupplierName
+				if supplierName == "" {
+					supplierName = "a supplier"
+				}
+				if err := h.notificationService.NotifyRFQResponseAccepted(
+					context.Background(), creatorID, rfq.ID.String(), rfq.RFQNumber, supplierName,
+				); err != nil {
+					log.Printf("Failed to send RFQ response accepted notification: %v", err)
+				}
+			}
+		}()
 	}
 
 	response.OK(c, "Response accepted successfully", dto.ToRFQResponseDetail(rfqResponse))

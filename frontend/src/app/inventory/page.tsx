@@ -15,98 +15,150 @@ import {
   Settings01Icon,
   ClipboardIcon,
   AlertCircleIcon,
-  ArrowUpRight01Icon,
-  ArrowDownRight01Icon,
   Coins01Icon
 } from '@hugeicons/core-free-icons'
+import {
+  stockService,
+  goodsReceiptService,
+  goodsIssueService,
+  stockTransferService,
+  stockAdjustmentService,
+  stockOpnameService
+} from '@/services/inventory'
 
 const inventoryModules = [
   {
     title: 'Stock Control',
     href: '/inventory/stock-control',
     description: 'Monitor and manage inventory levels across all locations',
-    stats: '1.2k items',
     icon: PackageIcon,
-    color: 'bg-gray-100 text-gray-600'
   },
   {
     title: 'Goods Receipt',
     href: '/inventory/goods-receipt',
     description: 'Record incoming inventory and supplier deliveries',
-    stats: '34 pending',
     icon: TruckDeliveryIcon,
-    color: 'bg-gray-100 text-gray-600'
   },
   {
     title: 'Goods Issue',
     href: '/inventory/goods-issue',
     description: 'Process outgoing inventory and shipments',
-    stats: '78 today',
     icon: ShippingTruck01Icon,
-    color: 'bg-gray-100 text-gray-600'
   },
   {
     title: 'Stock Transfer',
     href: '/inventory/stock-transfer',
     description: 'Transfer stock between warehouses and locations',
-    stats: '16 active',
     icon: Exchange01Icon,
-    color: 'bg-gray-100 text-gray-600'
   },
   {
     title: 'Stock Adjustments',
     href: '/inventory/adjustments',
     description: 'Adjust inventory levels for discrepancies',
-    stats: '5 this week',
     icon: Settings01Icon,
-    color: 'bg-gray-100 text-gray-600'
   },
   {
     title: 'Stock Opname',
     href: '/inventory/stock-opname',
     description: 'Physical inventory counting and reconciliation',
-    stats: '3 scheduled',
     icon: ClipboardIcon,
-    color: 'bg-gray-100 text-gray-600'
   }
 ]
 
-const quickStats = [
-  {
-    title: 'Total Items',
-    value: '1,245',
-    change: '+12%',
-    trend: 'up',
-    icon: PackageIcon,
-    iconColor: 'text-gray-600 bg-gray-100 dark:text-gray-300 dark:bg-gray-700/50'
-  },
-  {
-    title: 'Low Stock Items',
-    value: '23',
-    change: '-5%',
-    trend: 'down',
-    icon: AlertCircleIcon,
-    iconColor: 'text-gray-600 bg-gray-100 dark:text-gray-300 dark:bg-gray-700/50'
-  },
-  {
-    title: 'Pending Receipts',
-    value: '34',
-    change: '+8%',
-    trend: 'up',
-    icon: TruckDeliveryIcon,
-    iconColor: 'text-gray-600 bg-gray-100 dark:text-gray-300 dark:bg-gray-700/50'
-  },
-  {
-    title: 'Stock Value',
-    value: '$487K',
-    change: '+15%',
-    trend: 'up',
-    icon: Coins01Icon,
-    iconColor: 'text-gray-600 bg-gray-100 dark:text-gray-300 dark:bg-gray-700/50'
-  }
-]
+interface DashboardStats {
+  totalItems: number
+  lowStockItems: number
+  pendingReceipts: number
+  stockValue: number
+  moduleStats: Record<string, string>
+}
 
 export default function InventoryPage() {
+  const [mounted, setMounted] = React.useState(false)
+  const [stats, setStats] = React.useState<DashboardStats>({
+    totalItems: 0,
+    lowStockItems: 0,
+    pendingReceipts: 0,
+    stockValue: 0,
+    moduleStats: {}
+  })
+  const [loading, setLoading] = React.useState(true)
+
+  React.useEffect(() => {
+    setMounted(true)
+    fetchDashboardData()
+  }, [])
+
+  const fetchDashboardData = async () => {
+    try {
+      setLoading(true)
+
+      // Fetch data from multiple endpoints in parallel
+      const [stockRes, grRes, giRes, transferRes, adjRes, opnameRes] = await Promise.allSettled([
+        stockService.getAll(),
+        goodsReceiptService.getAll(),
+        goodsIssueService.getAll(),
+        stockTransferService.getAll(),
+        stockAdjustmentService.getAll(),
+        stockOpnameService.getAll(),
+      ])
+
+      const stockData = stockRes.status === 'fulfilled' ? stockRes.value.data : []
+      const grData = grRes.status === 'fulfilled' ? grRes.value.data : []
+      const giData = giRes.status === 'fulfilled' ? giRes.value.data : []
+      const transferData = transferRes.status === 'fulfilled' ? transferRes.value.data : []
+      const adjData = adjRes.status === 'fulfilled' ? adjRes.value.data : []
+      const opnameData = opnameRes.status === 'fulfilled' ? opnameRes.value.data : []
+
+      const totalItems = stockData.length
+      const lowStockItems = stockData.filter(i => i.status === 'low_stock' || i.status === 'out_of_stock').length
+      const pendingReceipts = grData.filter(r => r.status === 'DRAFT' || r.status === 'draft').length
+      const stockValue = stockData.reduce((acc, item) => acc + (item.totalValue || 0), 0)
+
+      setStats({
+        totalItems,
+        lowStockItems,
+        pendingReceipts,
+        stockValue,
+        moduleStats: {
+          'Stock Control': `${totalItems} items`,
+          'Goods Receipt': `${grData.length} total`,
+          'Goods Issue': `${giData.length} total`,
+          'Stock Transfer': `${transferData.length} total`,
+          'Stock Adjustments': `${adjData.length} total`,
+          'Stock Opname': `${opnameData.length} sessions`,
+        }
+      })
+    } catch (error) {
+      console.error('Failed to fetch dashboard data:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const quickStats = [
+    {
+      title: 'Total Items',
+      value: stats.totalItems.toLocaleString(),
+      icon: PackageIcon,
+    },
+    {
+      title: 'Low Stock Items',
+      value: stats.lowStockItems.toString(),
+      icon: AlertCircleIcon,
+    },
+    {
+      title: 'Pending Receipts',
+      value: stats.pendingReceipts.toString(),
+      icon: TruckDeliveryIcon,
+    },
+    {
+      title: 'Stock Value',
+      value: mounted ? `Rp ${(stats.stockValue / 1000000).toFixed(1)}M` : '-',
+      icon: Coins01Icon,
+    }
+  ]
+
   return (
     <TwoLevelLayout>
       <Header
@@ -129,27 +181,12 @@ export default function InventoryPage() {
                       {stat.title}
                     </p>
                     <p className="text-2xl font-bold mt-2 text-gray-900 dark:text-gray-100">
-                      {stat.value}
+                      {loading ? '-' : stat.value}
                     </p>
                   </div>
-                  <div className={`p-3 rounded-xl ${stat.iconColor}`}>
-                    <HugeiconsIcon icon={stat.icon} className="h-6 w-6" />
+                  <div className="p-3 rounded-xl bg-muted">
+                    <HugeiconsIcon icon={stat.icon} className="h-6 w-6 text-foreground" />
                   </div>
-                </div>
-                <div className="mt-4 flex items-center">
-                  <span className={`flex items-center text-sm font-medium ${stat.trend === 'up'
-                    ? 'text-gray-900 dark:text-gray-100' // Changed to neutral from green/red
-                    : 'text-gray-900 dark:text-gray-100'
-                    }`}>
-                    <HugeiconsIcon
-                      icon={stat.trend === 'up' ? ArrowUpRight01Icon : ArrowDownRight01Icon}
-                      className="h-4 w-4 mr-1 text-gray-500" // Icon color neutral
-                    />
-                    {stat.change}
-                  </span>
-                  <span className="text-sm text-gray-500 ml-2">
-                    from last month
-                  </span>
                 </div>
               </CardContent>
             </Card>
@@ -168,8 +205,8 @@ export default function InventoryPage() {
                   <CardHeader>
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-lg text-gray-900 dark:text-gray-100">{module.title}</CardTitle>
-                      <div className={`p-2.5 rounded-lg ${module.color} dark:bg-gray-700/50 dark:text-gray-300`}>
-                        <HugeiconsIcon icon={module.icon} className="h-5 w-5" />
+                      <div className="p-2.5 rounded-lg bg-muted">
+                        <HugeiconsIcon icon={module.icon} className="h-5 w-5 text-foreground" />
                       </div>
                     </div>
                   </CardHeader>
@@ -179,7 +216,7 @@ export default function InventoryPage() {
                     </p>
                     <div className="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-gray-700">
                       <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                        {module.stats}
+                        {loading ? '...' : (stats.moduleStats[module.title] || '0')}
                       </span>
                       <Button variant="ghost" size="sm" className="text-xs text-gray-500 dark:text-gray-400">
                         Manage &rarr;
@@ -190,51 +227,6 @@ export default function InventoryPage() {
               </Link>
             ))}
           </div>
-        </div>
-
-        {/* Recent Activity - Neutralized */}
-        <div>
-          <h2 className="text-lg font-semibold mb-6 text-gray-900 dark:text-gray-100">
-            Recent Activity
-          </h2>
-          <Card>
-            <CardContent className="p-0">
-              <div className="divide-y divide-gray-100 dark:divide-gray-800">
-                {[
-                  { action: 'Goods Receipt', item: 'Nike Air Force 1 - White', qty: '+50', time: '2 hours ago', icon: TruckDeliveryIcon },
-                  { action: 'Stock Issue', item: 'Adidas Ultraboost - Black', qty: '-25', time: '4 hours ago', icon: ShippingTruck01Icon },
-                  { action: 'Stock Transfer', item: 'Puma Suede - Red', qty: '10', time: '6 hours ago', icon: Exchange01Icon },
-                  { action: 'Stock Adjustment', item: 'Converse Chuck Taylor', qty: '+5', time: '1 day ago', icon: Settings01Icon }
-                ].map((activity, index) => (
-                  <div key={index} className="flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-900/50 transition-colors">
-                    <div className="flex items-center space-x-4">
-                      {/* Neutral Icon Backgrounds */}
-                      <div className="p-2 rounded-full bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300">
-                        <HugeiconsIcon icon={activity.icon} className="h-5 w-5" />
-                      </div>
-                      <div>
-                        <p className="font-medium text-sm text-gray-900 dark:text-gray-100">
-                          {activity.action}
-                        </p>
-                        <p className="text-xs text-gray-500 mt-0.5">
-                          {activity.item}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      {/* Neutral text for Quantity */}
-                      <p className="font-medium text-sm text-gray-900 dark:text-gray-100">
-                        {activity.qty} units
-                      </p>
-                      <p className="text-xs text-gray-500 mt-0.5">
-                        {activity.time}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
         </div>
       </div>
     </TwoLevelLayout>

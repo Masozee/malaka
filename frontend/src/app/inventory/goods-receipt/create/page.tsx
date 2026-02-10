@@ -14,27 +14,39 @@ import { HugeiconsIcon } from '@hugeicons/react';
 import {
   PackageIcon,
   Calendar01Icon,
-  UserIcon,
   File01Icon,
   ArrowLeft01Icon,
   FloppyDiskIcon
 } from '@hugeicons/core-free-icons';
 import { goodsReceiptService } from '@/services/inventory';
+import { apiClient } from '@/lib/api';
 
 interface GoodsReceiptFormData {
   purchase_order_id: string;
   warehouse_id: string;
+  supplier_name: string;
   receipt_date: string;
-  notes?: string;
-  received_by?: string;
+  notes: string;
+  po_number: string;
 }
 
-interface PurchaseOrder {
+interface ProcurementPO {
   id: string;
+  po_number: string;
+  supplier_id: string;
   supplier_name: string;
-  order_date: string;
   total_amount: number;
+  currency: string;
   status: string;
+  order_date: string;
+  payment_terms: string;
+  items?: Array<{
+    id: string;
+    item_name: string;
+    quantity: number;
+    unit_price: number;
+    unit: string;
+  }>;
 }
 
 interface Warehouse {
@@ -47,60 +59,45 @@ export default function CreateGoodsReceiptPage() {
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [warehouses, setWarehouses] = useState<Warehouse[]>([]);
+  const [purchaseOrders, setPurchaseOrders] = useState<ProcurementPO[]>([]);
   const [formData, setFormData] = useState<GoodsReceiptFormData>({
     purchase_order_id: '',
     warehouse_id: '',
+    supplier_name: '',
     receipt_date: new Date().toISOString().split('T')[0],
     notes: '',
-    received_by: ''
+    po_number: '',
   });
-
-  // Mock data for dropdowns - in real app these would be fetched from API
-  const [purchaseOrders] = useState<PurchaseOrder[]>([
-    {
-      id: 'po-001',
-      supplier_name: 'PT Sepatu Nusantara',
-      order_date: '2024-01-15',
-      total_amount: 4500000,
-      status: 'approved'
-    },
-    {
-      id: 'po-002',
-      supplier_name: 'CV Kulit Berkualitas',
-      order_date: '2024-01-16',
-      total_amount: 3200000,
-      status: 'approved'
-    },
-    {
-      id: 'po-003',
-      supplier_name: 'UD Bahan Jaya',
-      order_date: '2024-01-17',
-      total_amount: 5800000,
-      status: 'approved'
-    }
-  ]);
-
-  const [warehouses] = useState<Warehouse[]>([
-    {
-      id: 'wh-001',
-      name: 'Jakarta Central Warehouse',
-      address: 'Jl. Sudirman No. 123, Jakarta Pusat'
-    },
-    {
-      id: 'wh-002',
-      name: 'Surabaya Distribution Center',
-      address: 'Jl. Pahlawan No. 456, Surabaya'
-    },
-    {
-      id: 'wh-003',
-      name: 'Bandung Storage Facility',
-      address: 'Jl. Asia Afrika No. 789, Bandung'
-    }
-  ]);
 
   useEffect(() => {
     setMounted(true);
+    fetchWarehouses();
+    fetchPurchaseOrders();
   }, []);
+
+  const fetchWarehouses = async () => {
+    try {
+      const response = await apiClient.get<{ success: boolean; data: Warehouse[] }>('/api/v1/masterdata/warehouses/');
+      setWarehouses(response.data || []);
+    } catch (error) {
+      console.error('Failed to fetch warehouses:', error);
+    }
+  };
+
+  const fetchPurchaseOrders = async () => {
+    try {
+      const response = await apiClient.get<{ success: boolean; data: { data: ProcurementPO[] } }>('/api/v1/procurement/purchase-orders/');
+      const pos = response.data?.data || [];
+      // Show POs that can receive goods (approved, sent, confirmed, shipped)
+      const receivablePOs = pos.filter(po =>
+        ['approved', 'sent', 'confirmed', 'shipped', 'received'].includes(po.status)
+      );
+      setPurchaseOrders(receivablePOs);
+    } catch (error) {
+      console.error('Failed to fetch purchase orders:', error);
+    }
+  };
 
   const handleInputChange = (field: keyof GoodsReceiptFormData, value: string) => {
     setFormData(prev => ({
@@ -109,27 +106,51 @@ export default function CreateGoodsReceiptPage() {
     }));
   };
 
+  const handlePOSelect = (poId: string) => {
+    if (poId === '_none') {
+      setFormData(prev => ({
+        ...prev,
+        purchase_order_id: '',
+        supplier_name: '',
+        po_number: '',
+      }));
+      return;
+    }
+
+    const selectedPO = purchaseOrders.find(po => po.id === poId);
+    if (selectedPO) {
+      setFormData(prev => ({
+        ...prev,
+        purchase_order_id: selectedPO.id,
+        supplier_name: selectedPO.supplier_name,
+        po_number: selectedPO.po_number,
+      }));
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.purchase_order_id || !formData.warehouse_id) {
-      alert('Please fill in all required fields');
+    if (!formData.warehouse_id) {
+      alert('Please select a warehouse');
       return;
     }
 
     try {
       setLoading(true);
 
-      const submitData = {
-        purchase_order_id: formData.purchase_order_id,
-        warehouse_id: formData.warehouse_id
+      const submitData: Record<string, unknown> = {
+        warehouse_id: formData.warehouse_id,
+        supplier_name: formData.supplier_name,
+        receipt_date: formData.receipt_date,
+        notes: formData.notes,
       };
 
-      console.log('Creating goods receipt with data:', submitData);
-      await goodsReceiptService.create(submitData);
+      if (formData.purchase_order_id) {
+        submitData.purchase_order_id = formData.purchase_order_id;
+      }
 
-      // Navigate using text/toast instead of alert in production
-      // alert('Goods receipt created successfully!'); 
+      await goodsReceiptService.create(submitData);
       router.push('/inventory/goods-receipt');
     } catch (error) {
       console.error('Error creating goods receipt:', error);
@@ -160,7 +181,6 @@ export default function CreateGoodsReceiptPage() {
 
       <div className="flex-1 p-6">
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Basic Information */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-lg">
@@ -172,27 +192,28 @@ export default function CreateGoodsReceiptPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="purchase_order_id">
-                    Purchase Order <span className="text-red-500">*</span>
+                    Purchase Order
                   </Label>
                   <Select
-                    value={formData.purchase_order_id}
-                    onValueChange={(value) => handleInputChange('purchase_order_id', value)}
+                    value={formData.purchase_order_id || '_none'}
+                    onValueChange={handlePOSelect}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select purchase order" />
+                      <SelectValue placeholder="Select purchase order (optional)" />
                     </SelectTrigger>
                     <SelectContent>
+                      <SelectItem value="_none">-- No PO (Manual Receipt) --</SelectItem>
                       {mounted && purchaseOrders.map((po) => (
                         <SelectItem key={po.id} value={po.id}>
-                          {po.supplier_name} - {mounted ? new Date(po.order_date).toLocaleDateString('id-ID') : ''}
-                          ({mounted ? `Rp ${po.total_amount.toLocaleString('id-ID')}` : ''})
+                          {po.po_number} - {po.supplier_name}
+                          {mounted ? ` (${po.currency} ${po.total_amount.toLocaleString('id-ID')})` : ''}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                   {selectedPO && (
                     <div className="text-sm text-muted-foreground mt-1">
-                      Supplier: {selectedPO.supplier_name} • Status: {selectedPO.status}
+                      Status: <span className="capitalize">{selectedPO.status}</span> | Payment: {selectedPO.payment_terms}
                     </div>
                   )}
                 </div>
@@ -216,11 +237,26 @@ export default function CreateGoodsReceiptPage() {
                       ))}
                     </SelectContent>
                   </Select>
-                  {selectedWarehouse && (
+                  {selectedWarehouse?.address && (
                     <div className="text-sm text-gray-500 mt-1">
                       {selectedWarehouse.address}
                     </div>
                   )}
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="supplier_name">
+                    Supplier Name {!selectedPO && <span className="text-muted-foreground text-xs">(auto-filled from PO)</span>}
+                  </Label>
+                  <Input
+                    id="supplier_name"
+                    type="text"
+                    placeholder="Enter supplier name"
+                    value={formData.supplier_name}
+                    onChange={(e) => handleInputChange('supplier_name', e.target.value)}
+                    className="w-full"
+                    readOnly={!!selectedPO}
+                  />
                 </div>
 
                 <div className="space-y-2">
@@ -233,21 +269,6 @@ export default function CreateGoodsReceiptPage() {
                     type="date"
                     value={formData.receipt_date}
                     onChange={(e) => handleInputChange('receipt_date', e.target.value)}
-                    className="w-full"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="received_by" className="flex items-center gap-2">
-                    <HugeiconsIcon icon={UserIcon} className="w-4 h-4 text-gray-500" />
-                    Received By
-                  </Label>
-                  <Input
-                    id="received_by"
-                    type="text"
-                    placeholder="Enter receiver name"
-                    value={formData.received_by}
-                    onChange={(e) => handleInputChange('received_by', e.target.value)}
                     className="w-full"
                   />
                 </div>
@@ -271,7 +292,7 @@ export default function CreateGoodsReceiptPage() {
           </Card>
 
           {/* Preview Section */}
-          {(formData.purchase_order_id || formData.warehouse_id) && (
+          {(selectedPO || selectedWarehouse) && (
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg">Receipt Preview</CardTitle>
@@ -280,15 +301,11 @@ export default function CreateGoodsReceiptPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                   {selectedPO && (
                     <div className="space-y-1 p-4 bg-muted rounded-lg">
-                      <div className="font-semibold text-foreground">Purchase Order Details</div>
+                      <div className="font-semibold text-foreground">Purchase Order</div>
+                      <div className="text-muted-foreground">PO Number: {selectedPO.po_number}</div>
+                      <div className="text-muted-foreground">Supplier: {selectedPO.supplier_name}</div>
                       <div className="text-muted-foreground">
-                        Supplier: {selectedPO.supplier_name}
-                      </div>
-                      <div className="text-muted-foreground">
-                        Order Date: {mounted ? new Date(selectedPO.order_date).toLocaleDateString('id-ID') : ''}
-                      </div>
-                      <div className="text-muted-foreground">
-                        Amount: {mounted ? `Rp ${selectedPO.total_amount.toLocaleString('id-ID')}` : ''}
+                        Amount: {mounted ? `${selectedPO.currency} ${selectedPO.total_amount.toLocaleString('id-ID')}` : ''}
                       </div>
                       <div className="text-muted-foreground">
                         Status: <span className="capitalize">{selectedPO.status}</span>
@@ -297,12 +314,13 @@ export default function CreateGoodsReceiptPage() {
                   )}
                   {selectedWarehouse && (
                     <div className="space-y-1 p-4 bg-muted rounded-lg">
-                      <div className="font-semibold text-foreground">Warehouse Details</div>
+                      <div className="font-semibold text-foreground">Warehouse</div>
+                      <div className="text-muted-foreground">{selectedWarehouse.name}</div>
+                      {selectedWarehouse.address && (
+                        <div className="text-muted-foreground">{selectedWarehouse.address}</div>
+                      )}
                       <div className="text-muted-foreground">
-                        Name: {selectedWarehouse.name}
-                      </div>
-                      <div className="text-muted-foreground">
-                        Address: {selectedWarehouse.address}
+                        Date: {mounted ? new Date(formData.receipt_date).toLocaleDateString('id-ID') : formData.receipt_date}
                       </div>
                     </div>
                   )}
@@ -324,7 +342,7 @@ export default function CreateGoodsReceiptPage() {
             </Button>
             <Button
               type="submit"
-              disabled={loading || !formData.purchase_order_id || !formData.warehouse_id}
+              disabled={loading || !formData.warehouse_id}
             >
               {loading ? (
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>

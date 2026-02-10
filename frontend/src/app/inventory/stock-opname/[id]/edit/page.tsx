@@ -2,66 +2,56 @@
 
 import React, { useState, useEffect, useMemo } from 'react'
 import { useRouter, useParams } from 'next/navigation'
-import Link from 'next/link'
 import { TwoLevelLayout } from '@/components/ui/two-level-layout'
 import { Header } from '@/components/ui/header'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Badge } from '@/components/ui/badge'
 import { TanStackDataTable, TanStackColumn } from '@/components/ui/tanstack-data-table'
 import { useToast } from '@/components/ui/toast'
 import { HugeiconsIcon } from '@hugeicons/react'
 import {
-    ArrowLeft01Icon,
     FloppyDiskIcon,
     CheckmarkCircle01Icon,
-    Search01Icon,
-    AlertCircleIcon
+    Search01Icon
 } from '@hugeicons/core-free-icons'
-import { stockOpnameService, StockOpname, StockOpnameItem } from '@/services/inventory'
+import { stockOpnameService, StockOpname } from '@/services/inventory'
+
+// Local interface for opname items (editing view)
+interface OpnameItem {
+    id: string
+    product_code: string
+    product_name: string
+    system_stock: number
+    actual_stock: number
+    variance: number
+}
 
 export default function EditStockOpnamePage() {
     const router = useRouter()
     const params = useParams()
     const { addToast } = useToast()
+    const [mounted, setMounted] = useState(false)
     const [loading, setLoading] = useState(true)
     const [saving, setSaving] = useState(false)
     const [session, setSession] = useState<StockOpname | null>(null)
-    const [items, setItems] = useState<StockOpnameItem[]>([])
+    const [items, setItems] = useState<OpnameItem[]>([])
     const [searchQuery, setSearchQuery] = useState('')
+
+    useEffect(() => {
+        setMounted(true)
+    }, [])
 
     useEffect(() => {
         const fetchSession = async () => {
             if (!params.id) return
             try {
                 setLoading(true)
-                // In a real app, fetch by ID
-                // const data = await stockOpnameService.getById(params.id as string)
-
-                // Mock data for now since we don't know if the ID exists in backend
-                const mockSession: StockOpname = {
-                    id: params.id as string,
-                    opnameNumber: 'OPN-2024-001',
-                    date: new Date().toISOString(),
-                    warehouseId: 'WH-001',
-                    warehouseName: 'Main Warehouse Jakarta',
-                    status: 'in_progress',
-                    totalItems: 5,
-                    totalVariance: 0,
-                    notes: 'Quarterly stock count'
-                }
-
-                const mockItems: StockOpnameItem[] = [
-                    { id: '1', productCode: 'PRD-001', productName: 'Running Shoes A', systemStock: 100, actualStock: 100, variance: 0 },
-                    { id: '2', productCode: 'PRD-002', productName: 'Running Shoes B', systemStock: 50, actualStock: 48, variance: -2 },
-                    { id: '3', productCode: 'PRD-003', productName: 'T-Shirt C', systemStock: 200, actualStock: 200, variance: 0 },
-                    { id: '4', productCode: 'PRD-004', productName: 'Socks D', systemStock: 500, actualStock: 505, variance: 5 },
-                    { id: '5', productCode: 'PRD-005', productName: 'Hat E', systemStock: 75, actualStock: 75, variance: 0 },
-                ]
-
-                setSession(mockSession)
-                setItems(mockItems)
+                const data = await stockOpnameService.getById(params.id as string)
+                setSession(data)
+                // Items would come from a separate endpoint or nested in the response
+                // For now, the backend only returns the opname header
+                setItems([])
             } catch (error) {
                 console.error('Failed to fetch session:', error)
                 addToast({ type: 'error', title: 'Failed to load session details' })
@@ -77,8 +67,8 @@ export default function EditStockOpnamePage() {
             if (item.id === id) {
                 return {
                     ...item,
-                    actualStock: newQty,
-                    variance: newQty - item.systemStock
+                    actual_stock: newQty,
+                    variance: newQty - item.system_stock
                 }
             }
             return item
@@ -88,8 +78,12 @@ export default function EditStockOpnamePage() {
     const handleSave = async (complete: boolean = false) => {
         try {
             setSaving(true)
-            // Save logic here
-            await new Promise(resolve => setTimeout(resolve, 1000))
+            // Save logic here - update opname with counted items
+            if (session) {
+                await stockOpnameService.update(session.id, {
+                    status: complete ? 'completed' : session.status
+                })
+            }
             addToast({ type: 'success', title: complete ? 'Session completed' : 'Progress saved' })
             if (complete) {
                 router.push('/inventory/stock-opname')
@@ -105,42 +99,42 @@ export default function EditStockOpnamePage() {
         if (!searchQuery) return items
         const lower = searchQuery.toLowerCase()
         return items.filter(i =>
-            i.productName.toLowerCase().includes(lower) ||
-            i.productCode.toLowerCase().includes(lower)
+            i.product_name.toLowerCase().includes(lower) ||
+            i.product_code.toLowerCase().includes(lower)
         )
     }, [items, searchQuery])
 
-    const columns: TanStackColumn<StockOpnameItem>[] = useMemo(() => [
+    const columns: TanStackColumn<OpnameItem>[] = useMemo(() => [
         {
             id: 'product',
             header: 'Product',
-            accessorKey: 'productName',
+            accessorKey: 'product_name',
             cell: ({ row }) => (
                 <div className="flex flex-col">
-                    <span className="font-bold text-sm">{row.original.productName}</span>
-                    <span className="text-[10px] text-muted-foreground">{row.original.productCode}</span>
+                    <span className="font-bold text-sm">{row.original.product_name}</span>
+                    <span className="text-[10px] text-muted-foreground">{row.original.product_code}</span>
                 </div>
             )
         },
         {
             id: 'system',
             header: 'System Qty',
-            accessorKey: 'systemStock',
+            accessorKey: 'system_stock',
             cell: ({ row }) => (
                 <div className="text-center font-medium bg-gray-50 dark:bg-gray-800 py-1 rounded">
-                    {row.original.systemStock}
+                    {row.original.system_stock}
                 </div>
             )
         },
         {
             id: 'actual',
             header: 'Actual Qty',
-            accessorKey: 'actualStock',
+            accessorKey: 'actual_stock',
             cell: ({ row }) => (
                 <Input
                     type="number"
                     className="w-24 text-center mx-auto"
-                    value={row.original.actualStock}
+                    value={row.original.actual_stock}
                     onChange={(e) => handleQuantityChange(row.original.id, parseInt(e.target.value) || 0)}
                 />
             )
@@ -162,13 +156,33 @@ export default function EditStockOpnamePage() {
         }
     ], [items])
 
-    if (loading || !session) return <div className="p-6">Loading...</div>
+    if (loading) return <div className="p-6">Loading...</div>
+
+    if (!session) {
+        return (
+            <TwoLevelLayout>
+                <Header
+                    title="Session Not Found"
+                    breadcrumbs={[
+                        { label: 'Inventory', href: '/inventory' },
+                        { label: 'Stock Opname', href: '/inventory/stock-opname' },
+                    ]}
+                />
+                <div className="flex flex-col justify-center items-center h-64 p-6">
+                    <p className="text-muted-foreground">Session not found</p>
+                    <Button variant="outline" className="mt-4" onClick={() => router.push('/inventory/stock-opname')}>
+                        Back to List
+                    </Button>
+                </div>
+            </TwoLevelLayout>
+        )
+    }
 
     return (
         <TwoLevelLayout>
             <Header
-                title={`Edit Session: ${session.opnameNumber}`}
-                description={`${session.warehouseName} • ${new Date(session.date).toLocaleDateString()}`}
+                title={`Edit Opname: ${session.opnameNumber}`}
+                description={`${session.warehouseName} (${session.warehouseCode}) ${mounted && session.opnameDate ? `• ${new Date(session.opnameDate).toLocaleDateString('id-ID')}` : ''}`}
                 breadcrumbs={[
                     { label: 'Inventory', href: '/inventory' },
                     { label: 'Stock Opname', href: '/inventory/stock-opname' },
@@ -211,18 +225,26 @@ export default function EditStockOpnamePage() {
                     </div>
                 </div>
 
-                <Card>
-                    <TanStackDataTable
-                        data={filteredItems}
-                        columns={columns}
-                        pagination={{
-                            pageSize: 50,
-                            pageIndex: 0,
-                            totalRows: filteredItems.length,
-                            onPageChange: () => { }
-                        }}
-                    />
-                </Card>
+                {items.length === 0 ? (
+                    <Card>
+                        <CardContent className="p-12 text-center text-muted-foreground">
+                            No opname items to count. Items will appear once the backend supports opname item data.
+                        </CardContent>
+                    </Card>
+                ) : (
+                    <Card>
+                        <TanStackDataTable
+                            data={filteredItems}
+                            columns={columns}
+                            pagination={{
+                                pageSize: 50,
+                                pageIndex: 0,
+                                totalRows: filteredItems.length,
+                                onPageChange: () => { }
+                            }}
+                        />
+                    </Card>
+                )}
             </div>
         </TwoLevelLayout>
     )

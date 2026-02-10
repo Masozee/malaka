@@ -1,14 +1,14 @@
 'use client'
 
-import React, { useState, useMemo } from 'react'
+import React, { useMemo } from 'react'
+import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import {
     TanStackDataTable,
     TanStackColumn
 } from '@/components/ui/tanstack-data-table'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { EyeIcon, PencilEdit01Icon, Store01Icon } from '@hugeicons/core-free-icons'
-import { HugeiconsIcon } from '@hugeicons/react'
+import { EyeIcon, PencilEdit01Icon } from '@hugeicons/core-free-icons'
 import { StockItem } from '@/services/inventory'
 
 // Extended interface for display
@@ -20,6 +20,7 @@ export interface StockItemDisplay extends StockItem {
 interface StockControlListProps {
     data: StockItemDisplay[]
     onEdit: (item: StockItemDisplay) => void
+    onBatchExport: (items: StockItemDisplay[]) => void
 }
 
 const statusConfig = {
@@ -29,7 +30,8 @@ const statusConfig = {
     overstock: { label: 'Overstock', color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400' }
 }
 
-export default function StockControlList({ data, onEdit }: StockControlListProps) {
+export default function StockControlList({ data, onEdit, onBatchExport }: StockControlListProps) {
+    const router = useRouter()
 
     const columns: TanStackColumn<StockItemDisplay>[] = useMemo(() => [
         {
@@ -37,7 +39,12 @@ export default function StockControlList({ data, onEdit }: StockControlListProps
             header: 'Code',
             accessorKey: 'code',
             cell: ({ row }) => (
-                <span className="font-mono text-xs">{row.original.code}</span>
+                <Link
+                    href={`/inventory/stock-control/${row.original.id}`}
+                    className="font-mono text-sm text-blue-600 dark:text-blue-400 hover:underline"
+                >
+                    {row.original.code}
+                </Link>
             )
         },
         {
@@ -46,7 +53,7 @@ export default function StockControlList({ data, onEdit }: StockControlListProps
             accessorKey: 'name',
             cell: ({ row }) => (
                 <div className="flex flex-col">
-                    <span className="font-medium text-blue-600 dark:text-blue-400">{row.original.name}</span>
+                    <span className="font-medium text-sm">{row.original.name}</span>
                     <span className="text-xs text-muted-foreground">{row.original.category}</span>
                 </div>
             )
@@ -56,10 +63,9 @@ export default function StockControlList({ data, onEdit }: StockControlListProps
             header: 'Warehouse',
             accessorKey: 'warehouse',
             cell: ({ row }) => (
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <HugeiconsIcon icon={Store01Icon} className="h-3 w-3" />
+                <span className="text-sm text-muted-foreground">
                     {row.original.warehouse}
-                </div>
+                </span>
             )
         },
         {
@@ -68,10 +74,10 @@ export default function StockControlList({ data, onEdit }: StockControlListProps
             accessorKey: 'currentStock',
             cell: ({ row }) => (
                 <div className="text-center">
-                    <div className="font-bold text-xs bg-muted py-1 rounded-md mb-1">
+                    <div className="font-bold text-sm">
                         {row.original.currentStock.toLocaleString()}
                     </div>
-                    <div className="text-[10px] text-muted-foreground whitespace-nowrap">
+                    <div className="text-xs text-muted-foreground whitespace-nowrap">
                         Min: {row.original.minStock} | Max: {row.original.maxStock}
                     </div>
                 </div>
@@ -82,7 +88,7 @@ export default function StockControlList({ data, onEdit }: StockControlListProps
             header: 'Unit Cost',
             accessorKey: 'unitCost',
             cell: ({ row }) => (
-                <div className="text-right font-medium text-xs">
+                <div className="text-right font-medium text-sm">
                     {(row.original.unitCost || 0).toLocaleString('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 })}
                 </div>
             )
@@ -92,7 +98,7 @@ export default function StockControlList({ data, onEdit }: StockControlListProps
             header: 'Total Value',
             accessorKey: 'totalValue',
             cell: ({ row }) => (
-                <div className="text-right font-medium text-xs">
+                <div className="text-right font-medium text-sm">
                     {(row.original.totalValue || 0).toLocaleString('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 })}
                 </div>
             )
@@ -109,33 +115,28 @@ export default function StockControlList({ data, onEdit }: StockControlListProps
                     </Badge>
                 )
             }
-        },
-        {
-            id: 'actions',
-            header: '',
-            cell: ({ row }) => (
-                <div className="flex justify-end gap-1">
-                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                        <HugeiconsIcon icon={EyeIcon} className="h-4 w-4 text-muted-foreground" />
-                    </Button>
-                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => onEdit(row.original)}>
-                        <HugeiconsIcon icon={PencilEdit01Icon} className="h-4 w-4 text-muted-foreground" />
-                    </Button>
-                </div>
-            )
         }
-    ], [onEdit])
+    ], [])
 
     return (
         <TanStackDataTable
             data={data}
             columns={columns}
-            pagination={{
-                pageSize: 10,
-                pageIndex: 0,
-                totalRows: data.length,
-                onPageChange: () => { }
-            }}
+            enableRowSelection
+            showColumnToggle={false}
+            onBatchExport={onBatchExport}
+            customActions={[
+                {
+                    label: 'View',
+                    icon: EyeIcon,
+                    onClick: (item) => router.push(`/inventory/stock-control/${item.id}`),
+                },
+                {
+                    label: 'Edit',
+                    icon: PencilEdit01Icon,
+                    onClick: (item) => onEdit(item),
+                }
+            ]}
         />
     )
 }

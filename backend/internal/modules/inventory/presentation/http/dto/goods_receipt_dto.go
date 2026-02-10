@@ -4,8 +4,12 @@ import "time"
 
 // CreateGoodsReceiptRequest represents the request body for creating a new goods receipt.
 type CreateGoodsReceiptRequest struct {
-	PurchaseOrderID string `json:"purchase_order_id" binding:"required"`
-	WarehouseID     string `json:"warehouse_id" binding:"required"`
+	PurchaseOrderID *string `json:"purchase_order_id"`
+	WarehouseID     string  `json:"warehouse_id" binding:"required"`
+	SupplierName    string  `json:"supplier_name"`
+	Notes           string  `json:"notes"`
+	ReceivedBy      string  `json:"received_by"`
+	ReceiptDate     string  `json:"receipt_date"`
 }
 
 // UpdateGoodsReceiptRequest represents the request body for updating an existing goods receipt.

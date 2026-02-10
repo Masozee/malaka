@@ -8,56 +8,62 @@ import { Header } from '@/components/ui/header'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Input } from '@/components/ui/input'
 import { TanStackDataTable, TanStackColumn } from '@/components/ui/tanstack-data-table'
-import { useToast } from '@/components/ui/toast'
 import { HugeiconsIcon } from '@hugeicons/react'
 import {
     PencilEdit01Icon,
     PrinterIcon,
     Download01Icon,
     Search01Icon,
-    ArrowLeft01Icon
+    ArrowLeft01Icon,
+    CheckmarkCircle01Icon,
+    Clock01Icon,
+    AlertCircleIcon,
+    Calendar01Icon
 } from '@hugeicons/core-free-icons'
-import { stockOpnameService, StockOpname, StockOpnameItem } from '@/services/inventory'
+import { stockOpnameService, StockOpname } from '@/services/inventory'
+
+// Local interface for opname items (not available from backend list endpoint)
+interface OpnameItem {
+    id: string
+    product_code: string
+    product_name: string
+    system_stock: number
+    actual_stock: number
+    variance: number
+}
+
+const statusConfig: Record<string, { label: string, color: string, icon: any }> = {
+    draft: { label: 'Draft', color: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200', icon: Clock01Icon },
+    in_progress: { label: 'In Progress', color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-200', icon: Clock01Icon },
+    completed: { label: 'Completed', color: 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-200', icon: CheckmarkCircle01Icon },
+    cancelled: { label: 'Cancelled', color: 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-200', icon: AlertCircleIcon }
+}
 
 export default function StockOpnameDetailPage() {
     const router = useRouter()
     const params = useParams()
+    const [mounted, setMounted] = useState(false)
     const [loading, setLoading] = useState(true)
     const [session, setSession] = useState<StockOpname | null>(null)
-    const [items, setItems] = useState<StockOpnameItem[]>([])
+    const [items, setItems] = useState<OpnameItem[]>([])
     const [searchQuery, setSearchQuery] = useState('')
+
+    useEffect(() => {
+        setMounted(true)
+    }, [])
 
     useEffect(() => {
         const fetchSession = async () => {
             if (!params.id) return
             try {
                 setLoading(true)
-                // In a real app, fetch by ID
-
-                // Mock data
-                const mockSession: StockOpname = {
-                    id: params.id as string,
-                    opnameNumber: 'OPN-2024-001',
-                    date: new Date().toISOString(),
-                    warehouseId: 'WH-001',
-                    warehouseName: 'Main Warehouse Jakarta',
-                    status: 'completed',
-                    totalItems: 5,
-                    totalVariance: 3,
-                    notes: 'Quarterly stock count - Completed'
-                }
-
-                const mockItems: StockOpnameItem[] = [
-                    { id: '1', productCode: 'PRD-001', productName: 'Running Shoes A', systemStock: 100, actualStock: 100, variance: 0 },
-                    { id: '2', productCode: 'PRD-002', productName: 'Running Shoes B', systemStock: 50, actualStock: 48, variance: -2 },
-                    { id: '3', productCode: 'PRD-003', productName: 'T-Shirt C', systemStock: 200, actualStock: 200, variance: 0 },
-                    { id: '4', productCode: 'PRD-004', productName: 'Socks D', systemStock: 500, actualStock: 505, variance: 5 },
-                    { id: '5', productCode: 'PRD-005', productName: 'Hat E', systemStock: 75, actualStock: 75, variance: 0 },
-                ]
-
-                setSession(mockSession)
-                setItems(mockItems)
+                const data = await stockOpnameService.getById(params.id as string)
+                setSession(data)
+                // Items would come from a separate endpoint or nested in the response
+                // For now, the backend only returns the opname header
+                setItems([])
             } catch (error) {
                 console.error('Failed to fetch session:', error)
             } finally {
@@ -71,37 +77,37 @@ export default function StockOpnameDetailPage() {
         if (!searchQuery) return items
         const lower = searchQuery.toLowerCase()
         return items.filter(i =>
-            i.productName.toLowerCase().includes(lower) ||
-            i.productCode.toLowerCase().includes(lower)
+            i.product_name.toLowerCase().includes(lower) ||
+            i.product_code.toLowerCase().includes(lower)
         )
     }, [items, searchQuery])
 
-    const columns: TanStackColumn<StockOpnameItem>[] = useMemo(() => [
+    const columns: TanStackColumn<OpnameItem>[] = useMemo(() => [
         {
             id: 'product',
             header: 'Product',
-            accessorKey: 'productName',
+            accessorKey: 'product_name',
             cell: ({ row }) => (
                 <div className="flex flex-col">
-                    <span className="font-bold text-sm">{row.original.productName}</span>
-                    <span className="text-[10px] text-muted-foreground">{row.original.productCode}</span>
+                    <span className="font-bold text-sm">{row.original.product_name}</span>
+                    <span className="text-[10px] text-muted-foreground">{row.original.product_code}</span>
                 </div>
             )
         },
         {
             id: 'system',
             header: 'System',
-            accessorKey: 'systemStock',
+            accessorKey: 'system_stock',
             cell: ({ row }) => (
-                <div className="text-center">{row.original.systemStock}</div>
+                <div className="text-center">{row.original.system_stock}</div>
             )
         },
         {
             id: 'actual',
             header: 'Actual',
-            accessorKey: 'actualStock',
+            accessorKey: 'actual_stock',
             cell: ({ row }) => (
-                <div className="text-center font-medium">{row.original.actualStock}</div>
+                <div className="text-center font-medium">{row.original.actual_stock}</div>
             )
         },
         {
@@ -121,13 +127,50 @@ export default function StockOpnameDetailPage() {
         }
     ], [])
 
-    if (loading || !session) return <div className="p-6">Loading...</div>
+    if (loading) {
+        return (
+            <TwoLevelLayout>
+                <Header
+                    title="Stock Opname"
+                    breadcrumbs={[
+                        { label: 'Inventory', href: '/inventory' },
+                        { label: 'Stock Opname', href: '/inventory/stock-opname' },
+                    ]}
+                />
+                <div className="flex justify-center items-center h-64">
+                    <div className="text-muted-foreground">Loading...</div>
+                </div>
+            </TwoLevelLayout>
+        )
+    }
+
+    if (!session) {
+        return (
+            <TwoLevelLayout>
+                <Header
+                    title="Stock Opname Not Found"
+                    breadcrumbs={[
+                        { label: 'Inventory', href: '/inventory' },
+                        { label: 'Stock Opname', href: '/inventory/stock-opname' },
+                    ]}
+                />
+                <div className="flex flex-col justify-center items-center h-64 p-6">
+                    <p className="text-muted-foreground">Session not found</p>
+                    <Button variant="outline" className="mt-4" onClick={() => router.push('/inventory/stock-opname')}>
+                        Back to List
+                    </Button>
+                </div>
+            </TwoLevelLayout>
+        )
+    }
+
+    const status = statusConfig[session.status] || statusConfig.draft
 
     return (
         <TwoLevelLayout>
             <Header
-                title={`${session.opnameNumber}`}
-                description={`${session.warehouseName} • ${new Date(session.date).toLocaleDateString()}`}
+                title={session.opnameNumber}
+                description={`${session.warehouseName} (${session.warehouseCode}) ${mounted && session.opnameDate ? `• ${new Date(session.opnameDate).toLocaleDateString('id-ID')}` : ''}`}
                 breadcrumbs={[
                     { label: 'Inventory', href: '/inventory' },
                     { label: 'Stock Opname', href: '/inventory/stock-opname' },
@@ -152,6 +195,37 @@ export default function StockOpnameDetailPage() {
             />
 
             <div className="flex-1 p-6 space-y-6">
+                {/* Session Info */}
+                <Card>
+                    <CardContent className="p-4">
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div>
+                                <p className="text-xs text-muted-foreground uppercase tracking-wider">Status</p>
+                                <Badge className={`${status.color} mt-1 border-0 flex items-center gap-1 w-fit`}>
+                                    <HugeiconsIcon icon={status.icon} className="h-3 w-3" />
+                                    {status.label}
+                                </Badge>
+                            </div>
+                            <div>
+                                <p className="text-xs text-muted-foreground uppercase tracking-wider">Warehouse</p>
+                                <p className="text-sm font-medium mt-1">{session.warehouseName}</p>
+                                <p className="text-xs text-muted-foreground">{session.warehouseCode}</p>
+                            </div>
+                            <div>
+                                <p className="text-xs text-muted-foreground uppercase tracking-wider">Date</p>
+                                <p className="text-sm mt-1">
+                                    {mounted && session.opnameDate ? new Date(session.opnameDate).toLocaleDateString('id-ID') : '-'}
+                                </p>
+                            </div>
+                            <div>
+                                <p className="text-xs text-muted-foreground uppercase tracking-wider">Total Items</p>
+                                <p className="text-2xl font-bold">{items.length}</p>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                {/* Stats */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <Card>
                         <CardContent className="p-4 text-center">
@@ -179,6 +253,7 @@ export default function StockOpnameDetailPage() {
                     </Card>
                 </div>
 
+                {/* Search & Items Table */}
                 <div className="flex items-center justify-between gap-4">
                     <div className="relative flex-1 max-w-md">
                         <HugeiconsIcon icon={Search01Icon} className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -195,18 +270,26 @@ export default function StockOpnameDetailPage() {
                     </Button>
                 </div>
 
-                <Card>
-                    <TanStackDataTable
-                        data={filteredItems}
-                        columns={columns}
-                        pagination={{
-                            pageSize: 20,
-                            pageIndex: 0,
-                            totalRows: filteredItems.length,
-                            onPageChange: () => { }
-                        }}
-                    />
-                </Card>
+                {items.length === 0 ? (
+                    <Card>
+                        <CardContent className="p-12 text-center text-muted-foreground">
+                            No opname items recorded yet.
+                        </CardContent>
+                    </Card>
+                ) : (
+                    <Card>
+                        <TanStackDataTable
+                            data={filteredItems}
+                            columns={columns}
+                            pagination={{
+                                pageSize: 20,
+                                pageIndex: 0,
+                                totalRows: filteredItems.length,
+                                onPageChange: () => { }
+                            }}
+                        />
+                    </Card>
+                )}
             </div>
         </TwoLevelLayout>
     )

@@ -107,6 +107,71 @@ func (h *StockHandler) GetStockMovements(c *gin.Context) {
 	response.OK(c, "Stock movements retrieved successfully", movements)
 }
 
+// GetStockControlByID handles retrieving a single stock balance with article and warehouse details.
+func (h *StockHandler) GetStockControlByID(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := uuid.Parse(idStr)
+	if err != nil {
+		response.BadRequest(c, "Invalid stock balance ID format", nil)
+		return
+	}
+
+	item, err := h.service.GetStockControlDataByID(c.Request.Context(), id)
+	if err != nil {
+		response.InternalServerError(c, err.Error(), nil)
+		return
+	}
+	if item == nil {
+		response.NotFound(c, "Stock item not found", nil)
+		return
+	}
+
+	status := "in_stock"
+	if item.Quantity == 0 {
+		status = "out_of_stock"
+	} else if item.Quantity <= 10 {
+		status = "low_stock"
+	} else if item.Quantity > 500 {
+		status = "overstock"
+	}
+
+	unitCost := item.ArticlePrice
+	totalValue := float64(item.Quantity) * unitCost
+
+	stockItem := dto.StockControlResponse{
+		ID:            item.StockBalanceID.String(),
+		Code:          item.ArticleCode,
+		Name:          item.ArticleName,
+		Category:      item.ArticleCategory,
+		Warehouse:     item.WarehouseName,
+		WarehouseCode: item.WarehouseCode,
+		CurrentStock:  item.Quantity,
+		MinStock:      10,
+		MaxStock:      500,
+		UnitCost:      unitCost,
+		TotalValue:    totalValue,
+		LastUpdated:   item.StockUpdatedAt,
+		Status:        status,
+		ArticleDetails: dto.ArticleDetails{
+			ID:          item.ArticleID.String(),
+			Name:        item.ArticleName,
+			Description: item.ArticleDescription,
+			Barcode:     item.ArticleBarcode,
+			Price:       item.ArticlePrice,
+		},
+		WarehouseDetails: dto.WarehouseDetails{
+			ID:     item.WarehouseID.String(),
+			Code:   item.WarehouseCode,
+			Name:   item.WarehouseName,
+			City:   item.WarehouseCity,
+			Type:   item.WarehouseType,
+			Status: item.WarehouseStatus,
+		},
+	}
+
+	response.OK(c, "Stock control item retrieved successfully", stockItem)
+}
+
 // GetStockControl handles retrieving all stock balances with article and warehouse details for stock control page.
 func (h *StockHandler) GetStockControl(c *gin.Context) {
 	stockControlItems, err := h.service.GetStockControlData(c.Request.Context())

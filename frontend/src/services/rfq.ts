@@ -226,6 +226,33 @@ export class RFQService {
   }
 
   /**
+   * Accept a supplier response
+   */
+  async acceptResponse(rfqId: string, responseId: string): Promise<RFQResponse> {
+    const response = await api.post<{ data: RFQResponse }>(`${this.baseUrl}${rfqId}/responses/${responseId}/accept`);
+    return response.data;
+  }
+
+  /**
+   * Reject a supplier response
+   */
+  async rejectResponse(rfqId: string, responseId: string, reason: string): Promise<RFQResponse> {
+    const response = await api.post<{ data: RFQResponse }>(`${this.baseUrl}${rfqId}/responses/${responseId}/reject`, { reason });
+    return response.data;
+  }
+
+  /**
+   * Convert an accepted response to a Purchase Order
+   */
+  async convertResponseToPO(rfqId: string, responseId: string, deliveryAddress: string, paymentTerms: string): Promise<unknown> {
+    const response = await api.post<{ data: unknown }>(`${this.baseUrl}${rfqId}/responses/${responseId}/convert-to-po`, {
+      delivery_address: deliveryAddress,
+      payment_terms: paymentTerms,
+    });
+    return response.data;
+  }
+
+  /**
    * Get RFQ statistics
    */
   async getRFQStats(): Promise<RFQStats> {

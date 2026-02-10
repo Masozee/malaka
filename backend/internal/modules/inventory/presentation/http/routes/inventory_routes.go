@@ -40,6 +40,7 @@ func RegisterInventoryRoutes(router *gin.RouterGroup, poHandler *handlers.Purcha
 			stock.GET("/movements", auth.RequirePermission(rbacSvc, "inventory.stock.list"), stockHandler.GetStockMovements)
 			stock.GET("/balance", auth.RequirePermission(rbacSvc, "inventory.stock.read"), stockHandler.GetStockBalance)
 			stock.GET("/control", auth.RequirePermission(rbacSvc, "inventory.stock.read"), stockHandler.GetStockControl)
+		stock.GET("/control/:id", auth.RequirePermission(rbacSvc, "inventory.stock.read"), stockHandler.GetStockControlByID)
 		}
 
 		// Transfer routes
@@ -50,6 +51,12 @@ func RegisterInventoryRoutes(router *gin.RouterGroup, poHandler *handlers.Purcha
 			transfer.GET("/:id", auth.RequirePermission(rbacSvc, "inventory.transfer.read"), transferHandler.GetTransferOrderByID)
 			transfer.PUT("/:id", auth.RequirePermission(rbacSvc, "inventory.transfer.update"), transferHandler.UpdateTransferOrder)
 			transfer.DELETE("/:id", auth.RequirePermission(rbacSvc, "inventory.transfer.delete"), transferHandler.DeleteTransferOrder)
+
+			// Workflow actions
+			transfer.POST("/:id/approve", auth.RequirePermission(rbacSvc, "inventory.transfer.update"), transferHandler.ApproveTransferOrder)
+			transfer.POST("/:id/ship", auth.RequirePermission(rbacSvc, "inventory.transfer.update"), transferHandler.ShipTransferOrder)
+			transfer.POST("/:id/receive", auth.RequirePermission(rbacSvc, "inventory.transfer.update"), transferHandler.ReceiveTransferOrder)
+			transfer.POST("/:id/cancel", auth.RequirePermission(rbacSvc, "inventory.transfer.update"), transferHandler.CancelTransferOrderWorkflow)
 		}
 
 		// Draft Order routes

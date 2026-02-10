@@ -47,7 +47,7 @@ func (r *SimpleGoodsIssueRepositoryImpl) Update(ctx context.Context, goodsIssue 
 
 // GetAll retrieves all simple goods issues from the database.
 func (r *SimpleGoodsIssueRepositoryImpl) GetAll(ctx context.Context) ([]*entities.SimpleGoodsIssue, error) {
-	query := `SELECT id, warehouse_id, issue_date, status, notes, created_at, updated_at FROM simple_goods_issues ORDER BY created_at DESC`
+	query := `SELECT id, warehouse_id, issue_date, status, notes, created_at, updated_at FROM simple_goods_issues ORDER BY issue_date DESC, created_at DESC`
 	rows, err := r.db.QueryContext(ctx, query)
 	if err != nil {
 		return nil, err

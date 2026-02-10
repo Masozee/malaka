@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/dialog"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useToast, toast } from "@/components/ui/toast"
+import { useAuth } from "@/contexts/auth-context"
 import { userService, companyService } from "@/services/masterdata"
 import { invitationService, Invitation } from "@/services/invitations"
 import { rbacService, Role } from "@/services/rbac"
@@ -56,6 +57,7 @@ import {
 
 export default function UsersPage() {
   const router = useRouter()
+  const { user: currentUser } = useAuth()
   const [mounted, setMounted] = React.useState(false)
   const [users, setUsers] = React.useState<User[]>([])
   const [companies, setCompanies] = React.useState<Company[]>([])
@@ -74,7 +76,7 @@ export default function UsersPage() {
   const [inviteForm, setInviteForm] = React.useState({
     email: '',
     role: 'user',
-    company_id: '',
+    company_id: currentUser?.company_id || '',
     message: ''
   })
   const [isSubmitting, setIsSubmitting] = React.useState(false)
@@ -86,6 +88,13 @@ export default function UsersPage() {
   React.useEffect(() => {
     setMounted(true)
   }, [])
+
+  // Sync company_id from current user when it becomes available
+  React.useEffect(() => {
+    if (currentUser?.company_id && !inviteForm.company_id) {
+      setInviteForm(prev => ({ ...prev, company_id: currentUser.company_id! }))
+    }
+  }, [currentUser?.company_id])
 
   // Define table columns
   const columns = [
@@ -307,7 +316,7 @@ export default function UsersPage() {
       })
       addToast(toast.success("Invitation sent", `An invitation has been sent to ${inviteForm.email}`))
       setShowInviteDialog(false)
-      setInviteForm({ email: '', role: 'user', company_id: '', message: '' })
+      setInviteForm({ email: '', role: 'user', company_id: currentUser?.company_id || '', message: '' })
       fetchInvitations()
     } catch (error: unknown) {
       const err = error as { response?: { data?: { message?: string } }; message?: string }
@@ -764,22 +773,13 @@ export default function UsersPage() {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="company">Company *</Label>
-                  <Select
-                    value={inviteForm.company_id}
-                    onValueChange={(value) => setInviteForm(prev => ({ ...prev, company_id: value }))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a company" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {companies.map((company) => (
-                        <SelectItem key={company.id} value={company.id}>
-                          {company.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Label htmlFor="company">Company</Label>
+                  <Input
+                    id="company"
+                    value={companies.find(c => c.id === inviteForm.company_id)?.name || 'Your company'}
+                    disabled
+                    className="bg-muted"
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="message">Personal Message (Optional)</Label>

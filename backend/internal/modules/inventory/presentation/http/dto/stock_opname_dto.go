@@ -25,3 +25,16 @@ type StockOpnameResponse struct {
 	CreatedAt   time.Time `json:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at"`
 }
+
+// StockOpnameListResponse is the enriched JSON response for stock opname list.
+type StockOpnameListResponse struct {
+	ID            string `json:"id"`
+	OpnameNumber  string `json:"opnameNumber"`
+	WarehouseID   string `json:"warehouseId"`
+	WarehouseName string `json:"warehouseName"`
+	WarehouseCode string `json:"warehouseCode"`
+	OpnameDate    string `json:"opnameDate"`
+	Status        string `json:"status"`
+	CreatedAt     string `json:"createdAt"`
+	UpdatedAt     string `json:"updatedAt"`
+}

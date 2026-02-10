@@ -47,7 +47,7 @@ func (r *ReturnSupplierRepositoryImpl) Update(ctx context.Context, rs *entities.
 
 // GetAll retrieves all returns to suppliers from the database.
 func (r *ReturnSupplierRepositoryImpl) GetAll(ctx context.Context) ([]*entities.ReturnSupplier, error) {
-	query := `SELECT id, supplier_id, return_date, reason, created_at, updated_at FROM return_suppliers ORDER BY created_at DESC`
+	query := `SELECT id, supplier_id, return_date, reason, created_at, updated_at FROM return_suppliers ORDER BY return_date DESC, created_at DESC`
 	rows, err := r.db.QueryContext(ctx, query)
 	if err != nil {
 		return nil, err

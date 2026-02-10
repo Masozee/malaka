@@ -40,4 +40,5 @@ type StockBalanceRepository interface {
 	GetByArticleAndWarehouse(ctx context.Context, articleID, warehouseID uuid.ID) (*entities.StockBalance, error)
 	GetAll(ctx context.Context) ([]*entities.StockBalance, error)
 	GetAllWithDetails(ctx context.Context) ([]*StockControlItem, error)
+	GetByIDWithDetails(ctx context.Context, id uuid.ID) (*StockControlItem, error)
 }

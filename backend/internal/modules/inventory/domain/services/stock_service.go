@@ -86,3 +86,8 @@ func (s *StockService) GetAllStockBalances(ctx context.Context) ([]*entities.Sto
 func (s *StockService) GetStockControlData(ctx context.Context) ([]*repositories.StockControlItem, error) {
 	return s.stockBalanceRepo.GetAllWithDetails(ctx)
 }
+
+// GetStockControlDataByID retrieves a single stock balance with article and warehouse details.
+func (s *StockService) GetStockControlDataByID(ctx context.Context, id uuid.ID) (*repositories.StockControlItem, error) {
+	return s.stockBalanceRepo.GetByIDWithDetails(ctx, id)
+}

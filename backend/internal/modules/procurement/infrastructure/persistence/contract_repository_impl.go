@@ -178,7 +178,7 @@ func (r *ContractRepositoryImpl) GetAll(ctx context.Context, filter *repositorie
 	}
 
 	// Build order clause
-	orderBy := "c.created_at DESC"
+	orderBy := "c.start_date DESC, c.created_at DESC"
 	if filter.SortBy != "" {
 		order := "ASC"
 		if strings.ToUpper(filter.SortOrder) == "DESC" {

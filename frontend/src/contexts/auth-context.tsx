@@ -1,6 +1,6 @@
 'use client'
 
-import React, { createContext, useContext, useEffect, useState } from 'react'
+import React, { createContext, useContext, useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { authService } from '@/services/auth'
 import { apiClient } from '@/lib/api'
@@ -13,8 +13,11 @@ interface User {
   company_id?: string
 }
 
-// Roles that can approve/reject purchase requests and orders
-const APPROVER_ROLES = ['admin', 'approver', 'manager']
+interface UserPermissions {
+  permissions: Record<string, boolean>
+  roles: string[]
+  is_superadmin: boolean
+}
 
 interface AuthContextType {
   user: User | null
@@ -26,6 +29,7 @@ interface AuthContextType {
   refreshSession: () => Promise<boolean>
   canApprove: () => boolean
   hasRole: (roles: string[]) => boolean
+  hasPermission: (code: string) => boolean
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -45,9 +49,25 @@ interface AuthProviderProps {
 export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [userPermissions, setUserPermissions] = useState<UserPermissions | null>(null)
   const router = useRouter()
 
   const isAuthenticated = !!user
+
+  // Fetch actual RBAC permissions from backend
+  const loadPermissions = useCallback(async () => {
+    try {
+      const res = await apiClient.get<{ data: { user_id: string; roles: string[]; permissions: Record<string, boolean>; is_superadmin: boolean } }>('/api/v1/auth/permissions')
+      setUserPermissions({
+        permissions: res.data.permissions || {},
+        roles: res.data.roles || [],
+        is_superadmin: res.data.is_superadmin || false,
+      })
+    } catch (err) {
+      console.error('Failed to load RBAC permissions:', err)
+      setUserPermissions(null)
+    }
+  }, [])
 
   const checkAuth = async (): Promise<boolean> => {
     try {
@@ -88,18 +108,21 @@ export function AuthProvider({ children }: AuthProviderProps) {
         console.log('Setting user data:', userData) // Debug log
         setUser(userData)
         apiClient.setCompanyId(userData.company_id)
+        loadPermissions()
         return true
       } catch (tokenError) {
         console.error('Token parsing error:', tokenError)
         // Invalid token format, clear it
         authService.logout()
         setUser(null)
+        setUserPermissions(null)
         apiClient.setToken('')
         return false
       }
     } catch (error) {
       console.error('Auth check failed:', error)
       setUser(null)
+      setUserPermissions(null)
       apiClient.setToken('')
       return false
     }
@@ -133,6 +156,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           console.log('Setting user data after login:', userData) // Debug log
           setUser(userData)
           apiClient.setCompanyId(userData.company_id)
+          loadPermissions()
 
           // Clear auth attempt cookie on successful login
           if (typeof window !== 'undefined') {
@@ -186,6 +210,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const logout = () => {
     authService.logout()
     setUser(null)
+    setUserPermissions(null)
     apiClient.setToken('')
     apiClient.setCompanyId(undefined)
 
@@ -232,6 +257,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
             apiClient.setToken(token)
             apiClient.setCompanyId(userData.company_id)
             authService.initializeAuth() // Set cookie
+            loadPermissions()
           } catch (tokenError) {
             // Fallback to full checkAuth if parsing fails
             await checkAuth()
@@ -252,15 +278,25 @@ export function AuthProvider({ children }: AuthProviderProps) {
     initializeAuth()
   }, [])
 
-  // Check if current user has one of the specified roles
+  // Check if current user has one of the specified roles (checks RBAC roles first, falls back to JWT role)
   const hasRole = (roles: string[]): boolean => {
+    if (userPermissions?.is_superadmin) return true
+    if (userPermissions?.roles?.length) {
+      return userPermissions.roles.some(r => roles.includes(r.toLowerCase()))
+    }
     if (!user?.role) return false
     return roles.includes(user.role)
   }
 
-  // Check if current user can approve/reject
+  // Check if current user has a specific RBAC permission
+  const hasPermission = (code: string): boolean => {
+    if (userPermissions?.is_superadmin) return true
+    return userPermissions?.permissions?.[code] === true
+  }
+
+  // Check if current user can approve/reject purchase requests
   const canApprove = (): boolean => {
-    return hasRole(APPROVER_ROLES)
+    return hasPermission('procurement.purchase-request.approve')
   }
 
   const value = {
@@ -272,7 +308,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
     checkAuth,
     refreshSession,
     canApprove,
-    hasRole
+    hasRole,
+    hasPermission,
   }
 
   // Set up automatic session refresh for authenticated users

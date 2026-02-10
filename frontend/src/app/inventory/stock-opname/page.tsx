@@ -13,35 +13,33 @@ import { TanStackDataTable, TanStackColumn } from '@/components/ui/tanstack-data
 import { HugeiconsIcon } from '@hugeicons/react'
 import {
     Search01Icon,
-    FilterIcon,
     Download01Icon,
     PlusSignIcon,
     EyeIcon,
     PencilEdit01Icon,
     CheckmarkCircle01Icon,
     Clock01Icon,
-    AlertCircleIcon,
     Calendar01Icon,
-    ArrowRight01Icon,
-    NoteIcon,
     FileIcon
 } from '@hugeicons/core-free-icons'
 import { stockOpnameService, StockOpname } from '@/services/inventory'
 
-const statusConfig: Record<string, { label: string, color: string, icon: any }> = {
-    planned: { label: 'Planned', color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-200', icon: Calendar01Icon },
-    in_progress: { label: 'In Progress', color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-200', icon: Clock01Icon },
-    completed: { label: 'Completed', color: 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-200', icon: CheckmarkCircle01Icon },
-    cancelled: { label: 'Cancelled', color: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200', icon: AlertCircleIcon }
+const statusConfig: Record<string, { label: string, color: string }> = {
+    planned: { label: 'Planned', color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-200' },
+    in_progress: { label: 'In Progress', color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-200' },
+    completed: { label: 'Completed', color: 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-200' },
+    cancelled: { label: 'Cancelled', color: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200' }
 }
 
 export default function StockOpnameListPage() {
     const router = useRouter()
+    const [mounted, setMounted] = useState(false)
     const [data, setData] = useState<StockOpname[]>([])
     const [loading, setLoading] = useState(true)
     const [searchQuery, setSearchQuery] = useState('')
 
     useEffect(() => {
+        setMounted(true)
         const fetchData = async () => {
             try {
                 setLoading(true)
@@ -60,12 +58,13 @@ export default function StockOpnameListPage() {
         if (!searchQuery) return data
         const lower = searchQuery.toLowerCase()
         return data.filter(item =>
-            item.opnameNumber.toLowerCase().includes(lower) ||
-            item.warehouseName.toLowerCase().includes(lower)
+            (item.opnameNumber && item.opnameNumber.toLowerCase().includes(lower)) ||
+            (item.warehouseName && item.warehouseName.toLowerCase().includes(lower)) ||
+            (item.warehouseCode && item.warehouseCode.toLowerCase().includes(lower)) ||
+            (item.status && item.status.toLowerCase().includes(lower))
         )
     }, [data, searchQuery])
 
-    // Stats
     const stats = useMemo(() => {
         const total = data.length
         const planned = data.filter(i => i.status === 'planned').length
@@ -74,23 +73,42 @@ export default function StockOpnameListPage() {
         return { total, planned, inProgress, completed }
     }, [data])
 
+    const handleBatchExport = (items: StockOpname[]) => {
+        const headers = ['Opname Number', 'Warehouse', 'Opname Date', 'Status']
+        const rows = items.map(item => [
+            item.opnameNumber,
+            `${item.warehouseName} (${item.warehouseCode})`,
+            item.opnameDate ? new Date(item.opnameDate).toLocaleDateString('id-ID') : '-',
+            item.status
+        ])
+        const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n')
+        const blob = new Blob([csv], { type: 'text/csv' })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `stock-opname-${new Date().toISOString().slice(0, 10)}.csv`
+        a.click()
+        URL.revokeObjectURL(url)
+    }
+
     const columns: TanStackColumn<StockOpname>[] = useMemo(() => [
         {
-            id: 'opnameInfo',
+            id: 'opnameNumber',
             header: 'Session',
             accessorKey: 'opnameNumber',
             cell: ({ row }) => (
                 <div className="flex flex-col">
                     <Link
                         href={`/inventory/stock-opname/${row.original.id}`}
-                        className="font-bold text-xs text-blue-600 dark:text-blue-400 hover:underline"
+                        className="font-medium text-sm text-blue-600 dark:text-blue-400 hover:underline"
                     >
                         {row.original.opnameNumber}
                     </Link>
-                    <div className="flex items-center gap-1 text-[10px] text-muted-foreground mt-0.5">
-                        <HugeiconsIcon icon={Calendar01Icon} className="h-3 w-3" />
-                        {new Date(row.original.date).toLocaleDateString()}
-                    </div>
+                    {row.original.opnameDate && (
+                        <span className="text-xs text-muted-foreground">
+                            {mounted ? new Date(row.original.opnameDate).toLocaleDateString('id-ID') : ''}
+                        </span>
+                    )}
                 </div>
             )
         },
@@ -99,65 +117,42 @@ export default function StockOpnameListPage() {
             header: 'Warehouse',
             accessorKey: 'warehouseName',
             cell: ({ row }) => (
-                <span className="text-xs font-medium">{row.original.warehouseName}</span>
-            )
-        },
-        {
-            id: 'items',
-            header: 'Items',
-            accessorKey: 'totalItems',
-            cell: ({ row }) => (
-                <div className="text-center">
-                    <span className="font-medium text-xs">{row.original.totalItems}</span>
+                <div className="flex flex-col">
+                    <span className="text-sm font-medium">{row.original.warehouseName || '-'}</span>
+                    <span className="text-xs text-muted-foreground">{row.original.warehouseCode}</span>
                 </div>
             )
         },
         {
-            id: 'variance',
-            header: 'Variance',
-            accessorKey: 'totalVariance',
-            cell: ({ row }) => {
-                const variance = row.original.totalVariance
-                const isNegative = variance < 0
-                const isPositive = variance > 0
-                const color = isNegative ? 'text-red-600' : isPositive ? 'text-green-600' : 'text-gray-500'
-
-                return (
-                    <div className={`text-right font-medium ${color}`}>
-                        {variance > 0 ? '+' : ''}{variance}
-                    </div>
-                )
-            }
+            id: 'date',
+            header: 'Opname Date',
+            accessorKey: 'opnameDate',
+            cell: ({ row }) => (
+                <span className="text-sm">
+                    {mounted && row.original.opnameDate
+                        ? new Date(row.original.opnameDate).toLocaleDateString('id-ID', {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric',
+                        })
+                        : '-'}
+                </span>
+            )
         },
         {
             id: 'status',
             header: 'Status',
             accessorKey: 'status',
             cell: ({ row }) => {
-                const config = statusConfig[row.original.status]
+                const config = statusConfig[row.original.status] || statusConfig.planned
                 return (
-                    <Badge className={`${config.color} border-0 capitalize flex w-fit items-center gap-1.5`}>
-                        <HugeiconsIcon icon={config.icon} className="h-3 w-3" />
+                    <Badge className={`${config.color} border-0 whitespace-nowrap`}>
                         {config.label}
                     </Badge>
                 )
             }
-        },
-        {
-            id: 'actions',
-            header: '',
-            cell: ({ row }) => (
-                <div className="flex justify-end gap-2">
-                    <Button variant="ghost" size="sm" onClick={() => router.push(`/inventory/stock-opname/${row.original.id}`)}>
-                        <HugeiconsIcon icon={EyeIcon} className="h-4 w-4 text-muted-foreground" />
-                    </Button>
-                    <Button variant="ghost" size="sm" onClick={() => router.push(`/inventory/stock-opname/${row.original.id}/edit`)}>
-                        <HugeiconsIcon icon={PencilEdit01Icon} className="h-4 w-4 text-muted-foreground" />
-                    </Button>
-                </div>
-            )
         }
-    ], [router])
+    ], [mounted])
 
     return (
         <TwoLevelLayout>
@@ -187,8 +182,8 @@ export default function StockOpnameListPage() {
                                 <p className="text-sm font-medium text-muted-foreground">Total Sessions</p>
                                 <p className="text-2xl font-bold">{stats.total}</p>
                             </div>
-                            <div className="h-10 w-10 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center text-gray-600">
-                                <HugeiconsIcon icon={FileIcon} className="h-6 w-6" />
+                            <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
+                                <HugeiconsIcon icon={FileIcon} className="h-5 w-5 text-foreground" />
                             </div>
                         </CardContent>
                     </Card>
@@ -198,8 +193,8 @@ export default function StockOpnameListPage() {
                                 <p className="text-sm font-medium text-muted-foreground">Planned</p>
                                 <p className="text-2xl font-bold text-blue-600">{stats.planned}</p>
                             </div>
-                            <div className="h-10 w-10 bg-blue-100 dark:bg-blue-900/20 rounded-lg flex items-center justify-center text-blue-600">
-                                <HugeiconsIcon icon={Calendar01Icon} className="h-6 w-6" />
+                            <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
+                                <HugeiconsIcon icon={Calendar01Icon} className="h-5 w-5 text-foreground" />
                             </div>
                         </CardContent>
                     </Card>
@@ -209,8 +204,8 @@ export default function StockOpnameListPage() {
                                 <p className="text-sm font-medium text-muted-foreground">In Progress</p>
                                 <p className="text-2xl font-bold text-yellow-600">{stats.inProgress}</p>
                             </div>
-                            <div className="h-10 w-10 bg-yellow-100 dark:bg-yellow-900/20 rounded-lg flex items-center justify-center text-yellow-600">
-                                <HugeiconsIcon icon={Clock01Icon} className="h-6 w-6" />
+                            <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
+                                <HugeiconsIcon icon={Clock01Icon} className="h-5 w-5 text-foreground" />
                             </div>
                         </CardContent>
                     </Card>
@@ -220,46 +215,58 @@ export default function StockOpnameListPage() {
                                 <p className="text-sm font-medium text-muted-foreground">Completed</p>
                                 <p className="text-2xl font-bold text-green-600">{stats.completed}</p>
                             </div>
-                            <div className="h-10 w-10 bg-green-100 dark:bg-green-900/20 rounded-lg flex items-center justify-center text-green-600">
-                                <HugeiconsIcon icon={CheckmarkCircle01Icon} className="h-6 w-6" />
+                            <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
+                                <HugeiconsIcon icon={CheckmarkCircle01Icon} className="h-5 w-5 text-foreground" />
                             </div>
                         </CardContent>
                     </Card>
                 </div>
 
-
                 {/* Filters */}
-                <div className="flex items-center justify-end gap-2">
-                    <div className="relative">
+                <div className="flex items-center justify-between gap-2">
+                    <div className="relative w-64">
                         <HugeiconsIcon icon={Search01Icon} className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                         <Input
                             placeholder="Search sessions..."
-                            className="pl-9 w-64"
+                            className="pl-9 h-9 bg-white dark:bg-gray-900"
                             value={searchQuery}
                             onChange={e => setSearchQuery(e.target.value)}
                         />
                     </div>
-                    <Button variant="outline" size="sm">
-                        <HugeiconsIcon icon={FilterIcon} className="h-4 w-4 mr-2" />
-                        Filters
-                    </Button>
-                    <Button variant="outline" size="sm">
-                        <HugeiconsIcon icon={Download01Icon} className="h-4 w-4 mr-2" />
-                        Export
-                    </Button>
+                    <div className="flex items-center gap-2">
+                        <Button variant="outline" className="h-9" onClick={() => handleBatchExport(filteredData)}>
+                            <HugeiconsIcon icon={Download01Icon} className="h-4 w-4 mr-2" />
+                            Export All
+                        </Button>
+                    </div>
                 </div>
 
                 {/* Table */}
-                <TanStackDataTable
-                    data={filteredData}
-                    columns={columns}
-                    pagination={{
-                        pageSize: 10,
-                        pageIndex: 0,
-                        totalRows: filteredData.length,
-                        onPageChange: () => { }
-                    }}
-                />
+                {loading ? (
+                    <div className="flex items-center justify-center py-12">
+                        <div className="text-muted-foreground">Loading stock opname sessions...</div>
+                    </div>
+                ) : (
+                    <TanStackDataTable
+                        data={filteredData}
+                        columns={columns}
+                        enableRowSelection
+                        showColumnToggle={false}
+                        onBatchExport={handleBatchExport}
+                        customActions={[
+                            {
+                                label: 'View',
+                                icon: EyeIcon,
+                                onClick: (item) => router.push(`/inventory/stock-opname/${item.id}`),
+                            },
+                            {
+                                label: 'Edit',
+                                icon: PencilEdit01Icon,
+                                onClick: (item) => router.push(`/inventory/stock-opname/${item.id}/edit`),
+                            }
+                        ]}
+                    />
+                )}
             </div>
         </TwoLevelLayout>
     )

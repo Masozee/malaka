@@ -8,15 +8,37 @@ import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
-import { rfqService, RFQ } from '@/services/rfq'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { rfqService, RFQ, RFQResponse } from '@/services/rfq'
+import { useToast } from '@/components/ui/toast'
 import Link from 'next/link'
 
 export default function RFQDetailPage() {
   const params = useParams()
   const router = useRouter()
+  const { addToast } = useToast()
   const [rfq, setRfq] = useState<RFQ | null>(null)
   const [loading, setLoading] = useState(true)
   const [mounted, setMounted] = useState(false)
+
+  // Dialog states
+  const [rejectDialogOpen, setRejectDialogOpen] = useState(false)
+  const [convertDialogOpen, setConvertDialogOpen] = useState(false)
+  const [selectedResponse, setSelectedResponse] = useState<RFQResponse | null>(null)
+  const [rejectReason, setRejectReason] = useState('')
+  const [deliveryAddress, setDeliveryAddress] = useState('')
+  const [paymentTerms, setPaymentTerms] = useState('')
+  const [actionLoading, setActionLoading] = useState(false)
 
   useEffect(() => {
     setMounted(true)
@@ -44,7 +66,7 @@ export default function RFQDetailPage() {
         router.push('/procurement/rfq')
       } catch (error) {
         console.error('Error deleting RFQ:', error)
-        alert('Failed to delete RFQ. Please try again.')
+        addToast({ type: 'error', title: 'Error', description: 'Failed to delete RFQ.' })
       }
     }
   }
@@ -53,10 +75,11 @@ export default function RFQDetailPage() {
     if (!rfq) return
     try {
       await rfqService.publishRFQ(rfq.id)
+      addToast({ type: 'success', title: 'Success', description: 'RFQ published successfully.' })
       loadRFQ()
     } catch (error) {
       console.error('Error publishing RFQ:', error)
-      alert('Failed to publish RFQ. Please try again.')
+      addToast({ type: 'error', title: 'Error', description: 'Failed to publish RFQ.' })
     }
   }
 
@@ -64,10 +87,71 @@ export default function RFQDetailPage() {
     if (!rfq) return
     try {
       await rfqService.closeRFQ(rfq.id)
+      addToast({ type: 'success', title: 'Success', description: 'RFQ closed successfully.' })
       loadRFQ()
     } catch (error) {
       console.error('Error closing RFQ:', error)
-      alert('Failed to close RFQ. Please try again.')
+      addToast({ type: 'error', title: 'Error', description: 'Failed to close RFQ.' })
+    }
+  }
+
+  const handleAcceptResponse = async (response: RFQResponse) => {
+    if (!rfq) return
+    setActionLoading(true)
+    try {
+      await rfqService.acceptResponse(rfq.id, response.id)
+      addToast({ type: 'success', title: 'Success', description: `Response from ${response.supplier?.name || response.supplier_name || 'supplier'} accepted.` })
+      loadRFQ()
+    } catch (error) {
+      console.error('Error accepting response:', error)
+      addToast({ type: 'error', title: 'Error', description: 'Failed to accept response.' })
+    } finally {
+      setActionLoading(false)
+    }
+  }
+
+  const openRejectDialog = (response: RFQResponse) => {
+    setSelectedResponse(response)
+    setRejectReason('')
+    setRejectDialogOpen(true)
+  }
+
+  const handleRejectResponse = async () => {
+    if (!rfq || !selectedResponse || !rejectReason.trim()) return
+    setActionLoading(true)
+    try {
+      await rfqService.rejectResponse(rfq.id, selectedResponse.id, rejectReason.trim())
+      addToast({ type: 'success', title: 'Success', description: `Response from ${selectedResponse.supplier?.name || selectedResponse.supplier_name || 'supplier'} rejected.` })
+      setRejectDialogOpen(false)
+      loadRFQ()
+    } catch (error) {
+      console.error('Error rejecting response:', error)
+      addToast({ type: 'error', title: 'Error', description: 'Failed to reject response.' })
+    } finally {
+      setActionLoading(false)
+    }
+  }
+
+  const openConvertDialog = (response: RFQResponse) => {
+    setSelectedResponse(response)
+    setDeliveryAddress('')
+    setPaymentTerms('')
+    setConvertDialogOpen(true)
+  }
+
+  const handleConvertToPO = async () => {
+    if (!rfq || !selectedResponse || !deliveryAddress.trim() || !paymentTerms.trim()) return
+    setActionLoading(true)
+    try {
+      await rfqService.convertResponseToPO(rfq.id, selectedResponse.id, deliveryAddress.trim(), paymentTerms.trim())
+      addToast({ type: 'success', title: 'Success', description: 'Response converted to Purchase Order successfully.' })
+      setConvertDialogOpen(false)
+      loadRFQ()
+    } catch (error) {
+      console.error('Error converting to PO:', error)
+      addToast({ type: 'error', title: 'Error', description: 'Failed to convert response to Purchase Order.' })
+    } finally {
+      setActionLoading(false)
     }
   }
 
@@ -123,6 +207,8 @@ export default function RFQDetailPage() {
     { label: 'RFQ', href: '/procurement/rfq' },
     { label: rfq.rfq_number },
   ]
+
+  const canManageResponses = rfq.status === 'published' || rfq.status === 'closed'
 
   return (
     <TwoLevelLayout>
@@ -197,14 +283,14 @@ export default function RFQDetailPage() {
                 <div>
                   <p className="text-sm text-muted-foreground">Created Date</p>
                   <p className="font-medium">
-                    {rfqService.formatDate(rfq.created_at)}
+                    {mounted ? rfqService.formatDate(rfq.created_at) : '-'}
                   </p>
                 </div>
                 {rfq.published_at && (
                   <div>
                     <p className="text-sm text-muted-foreground">Published Date</p>
                     <p className="font-medium">
-                      {rfqService.formatDate(rfq.published_at)}
+                      {mounted ? rfqService.formatDate(rfq.published_at) : '-'}
                     </p>
                   </div>
                 )}
@@ -221,7 +307,7 @@ export default function RFQDetailPage() {
             <Card className="p-6">
               <h3 className="text-lg font-semibold mb-4">Requested Items</h3>
               <div className="space-y-4">
-                {rfq.items?.map((item, index) => (
+                {rfq.items?.map((item) => (
                   <div key={item.id} className="border rounded-lg p-4">
                     <div className="flex items-start justify-between">
                       <div>
@@ -263,7 +349,7 @@ export default function RFQDetailPage() {
                         <div>
                           <h4 className="font-medium">{response.supplier?.name || response.supplier_name || 'Unknown Supplier'}</h4>
                           <p className="text-sm text-muted-foreground">
-                            Responded on {rfqService.formatDate(response.response_date)}
+                            Responded on {mounted ? rfqService.formatDate(response.response_date) : '-'}
                           </p>
                         </div>
                         <div className="text-right">
@@ -275,7 +361,7 @@ export default function RFQDetailPage() {
                             response.status === 'rejected' ? 'bg-red-100 text-red-800' :
                             'bg-yellow-100 text-yellow-800'
                           }>
-                            {response.status.charAt(0).toUpperCase() + response.status.slice(1)}
+                            {response.status.charAt(0).toUpperCase() + response.status.slice(1).replace('_', ' ')}
                           </Badge>
                         </div>
                       </div>
@@ -286,7 +372,52 @@ export default function RFQDetailPage() {
                         <div>
                           <span className="text-muted-foreground">Validity:</span> {response.validity_period} days
                         </div>
+                        {response.notes && (
+                          <div className="col-span-2">
+                            <span className="text-muted-foreground">Notes:</span> {response.notes}
+                          </div>
+                        )}
+                        {response.terms_conditions && (
+                          <div className="col-span-2">
+                            <span className="text-muted-foreground">Terms:</span> {response.terms_conditions}
+                          </div>
+                        )}
                       </div>
+
+                      {/* Action Buttons */}
+                      {canManageResponses && (response.status === 'submitted' || response.status === 'under_review') && (
+                        <div className="mt-4 flex items-center gap-2 pt-3 border-t">
+                          <Button
+                            size="sm"
+                            onClick={() => handleAcceptResponse(response)}
+                            disabled={actionLoading}
+                          >
+                            Accept
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="text-red-600 border-red-200 hover:bg-red-50"
+                            onClick={() => openRejectDialog(response)}
+                            disabled={actionLoading}
+                          >
+                            Reject
+                          </Button>
+                        </div>
+                      )}
+
+                      {/* Convert to PO button for accepted responses */}
+                      {response.status === 'accepted' && (
+                        <div className="mt-4 flex items-center gap-2 pt-3 border-t">
+                          <Button
+                            size="sm"
+                            onClick={() => openConvertDialog(response)}
+                            disabled={actionLoading}
+                          >
+                            Convert to Purchase Order
+                          </Button>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -369,7 +500,7 @@ export default function RFQDetailPage() {
                     <div>
                       <p className="text-sm font-medium">Closed</p>
                       <p className="text-xs text-muted-foreground">
-                        {rfqService.formatDate(rfq.closed_at)}
+                        {mounted ? rfqService.formatDate(rfq.closed_at) : '-'}
                       </p>
                     </div>
                   </div>
@@ -380,7 +511,7 @@ export default function RFQDetailPage() {
                     <div>
                       <p className="text-sm font-medium">Published</p>
                       <p className="text-xs text-muted-foreground">
-                        {rfqService.formatDate(rfq.published_at)}
+                        {mounted ? rfqService.formatDate(rfq.published_at) : '-'}
                       </p>
                     </div>
                   </div>
@@ -390,7 +521,7 @@ export default function RFQDetailPage() {
                   <div>
                     <p className="text-sm font-medium">Created</p>
                     <p className="text-xs text-muted-foreground">
-                      {rfqService.formatDate(rfq.created_at)}
+                      {mounted ? rfqService.formatDate(rfq.created_at) : '-'}
                     </p>
                   </div>
                 </div>
@@ -399,6 +530,86 @@ export default function RFQDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* Reject Response Dialog */}
+      <Dialog open={rejectDialogOpen} onOpenChange={setRejectDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Reject Response</DialogTitle>
+            <DialogDescription>
+              Reject the response from {selectedResponse?.supplier?.name || selectedResponse?.supplier_name || 'this supplier'}. Please provide a reason.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="reject-reason">Reason for Rejection</Label>
+              <Textarea
+                id="reject-reason"
+                placeholder="Enter the reason for rejecting this response..."
+                value={rejectReason}
+                onChange={(e) => setRejectReason(e.target.value)}
+                rows={3}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setRejectDialogOpen(false)} disabled={actionLoading}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleRejectResponse}
+              disabled={!rejectReason.trim() || actionLoading}
+            >
+              {actionLoading ? 'Rejecting...' : 'Reject Response'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Convert to PO Dialog */}
+      <Dialog open={convertDialogOpen} onOpenChange={setConvertDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Convert to Purchase Order</DialogTitle>
+            <DialogDescription>
+              Create a Purchase Order from the accepted response by {selectedResponse?.supplier?.name || selectedResponse?.supplier_name || 'this supplier'} ({selectedResponse ? rfqService.formatCurrency(selectedResponse.total_amount, selectedResponse.currency) : ''}).
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="delivery-address">Delivery Address</Label>
+              <Textarea
+                id="delivery-address"
+                placeholder="Enter the delivery address..."
+                value={deliveryAddress}
+                onChange={(e) => setDeliveryAddress(e.target.value)}
+                rows={2}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="payment-terms">Payment Terms</Label>
+              <Input
+                id="payment-terms"
+                placeholder="e.g., Net 30, COD, 50% advance..."
+                value={paymentTerms}
+                onChange={(e) => setPaymentTerms(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setConvertDialogOpen(false)} disabled={actionLoading}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleConvertToPO}
+              disabled={!deliveryAddress.trim() || !paymentTerms.trim() || actionLoading}
+            >
+              {actionLoading ? 'Creating PO...' : 'Create Purchase Order'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </TwoLevelLayout>
   )
 }

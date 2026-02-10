@@ -77,6 +77,10 @@ func SetupRouter(router *gin.Engine, c *container.Container) {
 // SetupProtectedRoutes configures routes that require authentication
 // This function receives a router group that already has auth middleware applied
 func SetupProtectedRoutes(protectedAPI *gin.RouterGroup, c *container.Container, rbacSvc *auth.RBACService) {
+	// Action items endpoint for sidebar badges
+	actionItemsHandler := NewActionItemsHandler(c.SqlxDB)
+	protectedAPI.GET("/action-items", actionItemsHandler.GetActionItems)
+
 	// Initialize sales handlers
 	salesOrderHandler := sales_handlers.NewSalesOrderHandler(c.SalesOrderService)
 	salesInvoiceHandler := sales_handlers.NewSalesInvoiceHandler(c.SalesInvoiceService)
@@ -136,25 +140,47 @@ func SetupProtectedRoutes(protectedAPI *gin.RouterGroup, c *container.Container,
 	goodsReceiptHandler.SetStockService(c.StockService)
 	// Wire up BudgetService for budget realization on GR posting
 	goodsReceiptHandler.SetBudgetService(c.BudgetService)
+	// Wire up DB for GR number generation and PO lookup
+	goodsReceiptHandler.SetDB(c.SqlxDB)
 	stockHandler := inventory_handlers.NewStockHandler(c.StockService)
-	transferHandler := inventory_handlers.NewTransferHandler(c.TransferService)
+	transferHandler := inventory_handlers.NewTransferHandler(c.TransferService, c.NotificationService)
+	transferHandler.SetDB(c.SqlxDB)
 	draftOrderHandler := inventory_handlers.NewDraftOrderHandler(c.DraftOrderService)
 	stockAdjustmentHandler := inventory_handlers.NewStockAdjustmentHandler(c.StockAdjustmentService)
+	stockAdjustmentHandler.SetDB(c.SqlxDB)
 	stockOpnameHandler := inventory_handlers.NewStockOpnameHandler(c.StockOpnameService)
+	stockOpnameHandler.SetDB(c.SqlxDB)
 	returnSupplierHandler := inventory_handlers.NewReturnSupplierHandler(c.ReturnSupplierService)
+	returnSupplierHandler.SetDB(c.SqlxDB)
 	simpleGoodsIssueHandler := inventory_handlers.NewSimpleGoodsIssueHandler(c.SimpleGoodsIssueService)
+	simpleGoodsIssueHandler.SetDB(c.SqlxDB)
 	rfqHandler := inventory_handlers.NewRFQHandler(c.RFQService)
 
 	// Register inventory routes under v1 API (protected)
 	inventory_routes.RegisterInventoryRoutes(protectedAPI, purchaseOrderHandler, goodsReceiptHandler, stockHandler, transferHandler, draftOrderHandler, stockAdjustmentHandler, stockOpnameHandler, returnSupplierHandler, simpleGoodsIssueHandler, rfqHandler, rbacSvc)
 
+	// Raw Materials routes (standalone handler using sqlx)
+	rawMaterialsHandler := NewRawMaterialsHandler(c.SqlxDB)
+	rawMaterials := protectedAPI.Group("/inventory/raw-materials")
+	rawMaterials.Use(auth.RequireModuleAccess(rbacSvc, "inventory"))
+	{
+		rawMaterials.GET("", rawMaterialsHandler.GetAll)
+		rawMaterials.GET("/:id", rawMaterialsHandler.GetByID)
+		rawMaterials.POST("", rawMaterialsHandler.Create)
+		rawMaterials.PUT("/:id", rawMaterialsHandler.Update)
+		rawMaterials.DELETE("/:id", rawMaterialsHandler.Delete)
+	}
+
 	// Initialize procurement handlers
-	purchaseRequestHandler := procurement_handlers.NewPurchaseRequestHandler(c.PurchaseRequestService, c.SqlxDB)
-	procurementPurchaseOrderHandler := procurement_handlers.NewPurchaseOrderHandler(c.ProcurementPurchaseOrderService, c.SqlxDB)
+	purchaseRequestHandler := procurement_handlers.NewPurchaseRequestHandler(c.PurchaseRequestService, c.SqlxDB, c.NotificationService)
+	procurementPurchaseOrderHandler := procurement_handlers.NewPurchaseOrderHandler(
+		c.ProcurementPurchaseOrderService, c.SqlxDB, c.NotificationService,
+		c.GoodsReceiptService, c.JournalEntryService, c.StockService, c.BudgetService,
+	)
 	contractHandler := procurement_handlers.NewContractHandler(c.ContractService)
 	vendorEvaluationHandler := procurement_handlers.NewVendorEvaluationHandler(c.VendorEvaluationService, c.SqlxDB)
 	analyticsHandler := procurement_handlers.NewAnalyticsHandler(c.ProcurementAnalyticsService)
-	procurementRFQHandler := procurement_handlers.NewRFQHandler(c.ProcurementRFQService, c.SqlxDB)
+	procurementRFQHandler := procurement_handlers.NewRFQHandler(c.ProcurementRFQService, c.SqlxDB, c.NotificationService)
 
 	// Register procurement routes under v1 API (protected)
 	procurement_routes.RegisterProcurementRoutes(protectedAPI, purchaseRequestHandler, procurementPurchaseOrderHandler, contractHandler, vendorEvaluationHandler, analyticsHandler, procurementRFQHandler, rbacSvc)

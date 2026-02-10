@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	googleuuid "github.com/google/uuid"
+	"github.com/jmoiron/sqlx"
 
 	accounting_entities "malaka/internal/modules/accounting/domain/entities"
 	accounting_services "malaka/internal/modules/accounting/domain/services"
@@ -22,6 +23,7 @@ type GoodsReceiptHandler struct {
 	journalEntryService accounting_services.JournalEntryService
 	stockService        *services.StockService
 	budgetService       accounting_services.BudgetService
+	db                  *sqlx.DB
 }
 
 // NewGoodsReceiptHandler creates a new GoodsReceiptHandler.
@@ -44,6 +46,11 @@ func (h *GoodsReceiptHandler) SetBudgetService(bs accounting_services.BudgetServ
 	h.budgetService = bs
 }
 
+// SetDB sets the database connection for GR number generation
+func (h *GoodsReceiptHandler) SetDB(db *sqlx.DB) {
+	h.db = db
+}
+
 // CreateGoodsReceipt handles the creation of a new goods receipt.
 func (h *GoodsReceiptHandler) CreateGoodsReceipt(c *gin.Context) {
 	var req dto.CreateGoodsReceiptRequest
@@ -52,10 +59,69 @@ func (h *GoodsReceiptHandler) CreateGoodsReceipt(c *gin.Context) {
 		return
 	}
 
+	receiptDate := time.Now()
+	if req.ReceiptDate != "" {
+		if parsed, err := time.Parse("2006-01-02", req.ReceiptDate); err == nil {
+			receiptDate = parsed
+		}
+	}
+
+	// Use current user ID as received_by
+	userID, _ := c.Get("user_id")
+	receivedBy, _ := userID.(string)
+
+	// Generate GR number
+	var grNumber string
+	if h.db != nil {
+		if err := h.db.QueryRow("SELECT generate_gr_number()").Scan(&grNumber); err != nil {
+			grNumber = fmt.Sprintf("GR-%s", time.Now().Format("20060102-150405"))
+		}
+	}
+
+	// Get warehouse name
+	var warehouseName string
+	if h.db != nil && req.WarehouseID != "" {
+		_ = h.db.QueryRow("SELECT COALESCE(name, '') FROM warehouses WHERE id = $1", req.WarehouseID).Scan(&warehouseName)
+	}
+
 	gr := &entities.GoodsReceipt{
-		PurchaseOrderID: req.PurchaseOrderID,
-		ReceiptDate:     time.Now(),
-		WarehouseID:     req.WarehouseID,
+		GRNumber:      grNumber,
+		ReceiptDate:   receiptDate,
+		WarehouseID:   req.WarehouseID,
+		WarehouseName: warehouseName,
+		SupplierName:  req.SupplierName,
+		Notes:         req.Notes,
+		ReceivedBy:    receivedBy,
+		Status:        entities.GoodsReceiptStatusDraft,
+		Currency:      "IDR",
+	}
+
+	// If linked to a PO, fetch PO details
+	if req.PurchaseOrderID != nil && *req.PurchaseOrderID != "" {
+		gr.PurchaseOrderID = *req.PurchaseOrderID
+		if h.db != nil {
+			var poNumber, supplierName, currency, paymentTerms string
+			var totalAmount float64
+			err := h.db.QueryRow(`
+				SELECT COALESCE(po.po_number, ''),
+					COALESCE(s.name, ''),
+					COALESCE(po.currency, 'IDR'),
+					COALESCE(po.payment_terms, ''),
+					COALESCE(po.total_amount, 0)
+				FROM procurement_purchase_orders po
+				LEFT JOIN suppliers s ON po.supplier_id = s.id
+				WHERE po.id = $1
+			`, *req.PurchaseOrderID).Scan(&poNumber, &supplierName, &currency, &paymentTerms, &totalAmount)
+			if err == nil {
+				gr.PONumber = poNumber
+				if gr.SupplierName == "" {
+					gr.SupplierName = supplierName
+				}
+				gr.Currency = currency
+				gr.PaymentTerms = paymentTerms
+				gr.TotalAmount = totalAmount
+			}
+		}
 	}
 
 	if err := h.service.CreateGoodsReceipt(c.Request.Context(), gr); err != nil {

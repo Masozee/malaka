@@ -1,15 +1,18 @@
 package handlers
 
 import (
+	"context"
 	"database/sql"
+	"log"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jmoiron/sqlx"
 
+	"malaka/internal/modules/notifications/domain/services"
 	"malaka/internal/modules/procurement/domain/entities"
 	"malaka/internal/modules/procurement/domain/repositories"
-	"malaka/internal/modules/procurement/domain/services"
+	procurement_services "malaka/internal/modules/procurement/domain/services"
 	"malaka/internal/modules/procurement/presentation/http/dto"
 	"malaka/internal/shared/response"
 	"malaka/internal/shared/utils"
@@ -18,13 +21,39 @@ import (
 
 // PurchaseRequestHandler handles HTTP requests for purchase request operations.
 type PurchaseRequestHandler struct {
-	service *services.PurchaseRequestService
-	db      *sqlx.DB
+	service             *procurement_services.PurchaseRequestService
+	db                  *sqlx.DB
+	notificationService *services.NotificationService
 }
 
 // NewPurchaseRequestHandler creates a new PurchaseRequestHandler.
-func NewPurchaseRequestHandler(service *services.PurchaseRequestService, db *sqlx.DB) *PurchaseRequestHandler {
-	return &PurchaseRequestHandler{service: service, db: db}
+func NewPurchaseRequestHandler(service *procurement_services.PurchaseRequestService, db *sqlx.DB, notificationService *services.NotificationService) *PurchaseRequestHandler {
+	return &PurchaseRequestHandler{service: service, db: db, notificationService: notificationService}
+}
+
+// getUsersWithPermission looks up user IDs that have a specific RBAC permission
+func (h *PurchaseRequestHandler) getUsersWithPermission(permissionCode string) []uuid.ID {
+	query := `
+		SELECT DISTINCT u.id FROM users u
+		JOIN user_roles ur ON ur.user_id = u.id
+		JOIN role_permissions rp ON rp.role_id = ur.role_id
+		JOIN permissions p ON p.id = rp.permission_id
+		WHERE p.code = $1
+		UNION
+		SELECT DISTINCT u.id FROM users u
+		JOIN user_permissions up ON up.user_id = u.id
+		JOIN permissions p ON p.id = up.permission_id
+		WHERE p.code = $1`
+	var ids []uuid.ID
+	_ = h.db.Select(&ids, query, permissionCode)
+	return ids
+}
+
+// getUserName looks up a username by user ID
+func (h *PurchaseRequestHandler) getUserName(userID string) string {
+	var name string
+	_ = h.db.QueryRow(`SELECT COALESCE(username, email) FROM users WHERE id = $1`, userID).Scan(&name)
+	return name
 }
 
 // getDefaultUserID retrieves a default admin user ID from the database for development/testing.
@@ -238,6 +267,21 @@ func (h *PurchaseRequestHandler) Submit(c *gin.Context) {
 		return
 	}
 
+	// Notify approvers asynchronously
+	if h.notificationService != nil {
+		go func() {
+			approverIDs := h.getUsersWithPermission("procurement.purchase-request.approve")
+			if len(approverIDs) > 0 {
+				requesterName := h.getUserName(pr.RequesterID.String())
+				if err := h.notificationService.NotifyPurchaseRequestSubmitted(
+					context.Background(), approverIDs, pr.ID.String(), pr.RequestNumber, requesterName,
+				); err != nil {
+					log.Printf("Failed to send PR submitted notification: %v", err)
+				}
+			}
+		}()
+	}
+
 	response.OK(c, "Purchase request submitted successfully", pr)
 }
 
@@ -266,6 +310,18 @@ func (h *PurchaseRequestHandler) Approve(c *gin.Context) {
 		return
 	}
 
+	// Notify requester asynchronously
+	if h.notificationService != nil {
+		go func() {
+			approverName := h.getUserName(approverID)
+			if err := h.notificationService.NotifyPurchaseRequestApproved(
+				context.Background(), pr.RequesterID, pr.RequestNumber, approverName,
+			); err != nil {
+				log.Printf("Failed to send PR approved notification: %v", err)
+			}
+		}()
+	}
+
 	response.OK(c, "Purchase request approved successfully", pr)
 }
 
@@ -278,10 +334,23 @@ func (h *PurchaseRequestHandler) Reject(c *gin.Context) {
 		return
 	}
 
+	rejectorID := c.GetString("user_id")
 	pr, err := h.service.Reject(c.Request.Context(), id, req.Reason)
 	if err != nil {
 		response.BadRequest(c, err.Error(), nil)
 		return
+	}
+
+	// Notify requester asynchronously
+	if h.notificationService != nil {
+		go func() {
+			rejectorName := h.getUserName(rejectorID)
+			if err := h.notificationService.NotifyPurchaseRequestRejected(
+				context.Background(), pr.RequesterID, pr.RequestNumber, rejectorName, req.Reason,
+			); err != nil {
+				log.Printf("Failed to send PR rejected notification: %v", err)
+			}
+		}()
 	}
 
 	response.OK(c, "Purchase request rejected successfully", pr)

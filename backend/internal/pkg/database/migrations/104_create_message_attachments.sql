@@ -16,9 +16,9 @@ CREATE TABLE IF NOT EXISTS message_attachments (
     deleted_at TIMESTAMPTZ
 );
 
-CREATE INDEX idx_message_attachments_message_id ON message_attachments(message_id) WHERE deleted_at IS NULL;
-CREATE INDEX idx_message_attachments_conversation_id ON message_attachments(conversation_id) WHERE deleted_at IS NULL;
-CREATE INDEX idx_message_attachments_uploader_id ON message_attachments(uploader_id);
+CREATE INDEX IF NOT EXISTS idx_message_attachments_message_id ON message_attachments(message_id) WHERE deleted_at IS NULL;
+CREATE INDEX IF NOT EXISTS idx_message_attachments_conversation_id ON message_attachments(conversation_id) WHERE deleted_at IS NULL;
+CREATE INDEX IF NOT EXISTS idx_message_attachments_uploader_id ON message_attachments(uploader_id);
 
 -- +goose Down
 DROP TABLE IF EXISTS message_attachments;

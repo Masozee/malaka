@@ -25,18 +25,32 @@ func (r *GoodsReceiptRepositoryImpl) Create(ctx context.Context, gr *entities.Go
 		id, purchase_order_id, receipt_date, warehouse_id,
 		gr_number, status, supplier_id, supplier_name, total_amount,
 		currency, procurement_type, notes, received_by,
+		po_number, warehouse_name, payment_terms,
 		created_at, updated_at
-	) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)`
+	) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)`
 
 	status := gr.Status
 	if status == "" {
 		status = entities.GoodsReceiptStatusDraft
 	}
 
+	// Convert empty strings to nil for nullable UUID fields
+	var purchaseOrderID, supplierID, receivedBy interface{}
+	if gr.PurchaseOrderID != "" {
+		purchaseOrderID = gr.PurchaseOrderID
+	}
+	if gr.SupplierID != "" {
+		supplierID = gr.SupplierID
+	}
+	if gr.ReceivedBy != "" {
+		receivedBy = gr.ReceivedBy
+	}
+
 	_, err := r.db.ExecContext(ctx, query,
-		gr.ID, gr.PurchaseOrderID, gr.ReceiptDate, gr.WarehouseID,
-		gr.GRNumber, status, gr.SupplierID, gr.SupplierName, gr.TotalAmount,
-		gr.Currency, gr.ProcurementType, gr.Notes, gr.ReceivedBy,
+		gr.ID, purchaseOrderID, gr.ReceiptDate, gr.WarehouseID,
+		gr.GRNumber, status, supplierID, gr.SupplierName, gr.TotalAmount,
+		gr.Currency, gr.ProcurementType, gr.Notes, receivedBy,
+		gr.PONumber, gr.WarehouseName, gr.PaymentTerms,
 		gr.CreatedAt, gr.UpdatedAt)
 	return err
 }
@@ -115,11 +129,27 @@ func (r *GoodsReceiptRepositoryImpl) Update(ctx context.Context, gr *entities.Go
 
 	gr.UpdatedAt = time.Now()
 
+	// Convert empty strings to nil for nullable UUID fields
+	var purchaseOrderID, supplierID, receivedBy interface{}
+	if gr.PurchaseOrderID != "" {
+		purchaseOrderID = gr.PurchaseOrderID
+	}
+	if gr.SupplierID != "" {
+		supplierID = gr.SupplierID
+	}
+	if gr.ReceivedBy != "" {
+		receivedBy = gr.ReceivedBy
+	}
+	var postedBy interface{}
+	if gr.PostedBy != nil && *gr.PostedBy != "" {
+		postedBy = *gr.PostedBy
+	}
+
 	_, err := r.db.ExecContext(ctx, query,
-		gr.PurchaseOrderID, gr.ReceiptDate, gr.WarehouseID,
-		gr.GRNumber, gr.Status, gr.SupplierID, gr.SupplierName,
+		purchaseOrderID, gr.ReceiptDate, gr.WarehouseID,
+		gr.GRNumber, gr.Status, supplierID, gr.SupplierName,
 		gr.TotalAmount, gr.Currency, gr.ProcurementType, gr.Notes,
-		gr.ReceivedBy, gr.PostedAt, gr.PostedBy,
+		receivedBy, gr.PostedAt, postedBy,
 		gr.APCreated, gr.APID, gr.JournalEntryID,
 		gr.UpdatedAt, gr.ID)
 	return err
@@ -127,7 +157,7 @@ func (r *GoodsReceiptRepositoryImpl) Update(ctx context.Context, gr *entities.Go
 
 // GetAll retrieves all goods receipts from the database.
 func (r *GoodsReceiptRepositoryImpl) GetAll(ctx context.Context) ([]*entities.GoodsReceipt, error) {
-	query := `SELECT id, purchase_order_id, receipt_date, warehouse_id, created_at, updated_at FROM goods_receipts ORDER BY created_at DESC`
+	query := `SELECT id, purchase_order_id, receipt_date, warehouse_id, created_at, updated_at FROM goods_receipts ORDER BY receipt_date DESC, created_at DESC`
 	rows, err := r.db.QueryContext(ctx, query)
 	if err != nil {
 		return nil, err
@@ -156,34 +186,35 @@ func (r *GoodsReceiptRepositoryImpl) Delete(ctx context.Context, id string) erro
 // GetAllWithDetails retrieves all goods receipts with related supplier, warehouse, and items information
 func (r *GoodsReceiptRepositoryImpl) GetAllWithDetails(ctx context.Context) ([]map[string]interface{}, error) {
 	query := `
-		SELECT 
+		SELECT
 			gr.id,
-			gr.purchase_order_id,
+			COALESCE(gr.purchase_order_id::text, '') as purchase_order_id,
 			gr.receipt_date,
 			gr.warehouse_id,
 			gr.created_at,
 			gr.updated_at,
-			s.name as supplier_name,
-			w.name as warehouse_name,
-			po.total_amount,
-			po.status as po_status,
+			COALESCE(gr.gr_number, 'GR-' || RIGHT(gr.id::text, 8)) as gr_number,
+			COALESCE(gr.supplier_name, '') as supplier_name,
+			COALESCE(gr.warehouse_name, w.name, '') as warehouse_name,
+			COALESCE(gr.total_amount, 0) as total_amount,
+			COALESCE(gr.status, 'DRAFT') as status,
+			COALESCE(gr.po_number, '') as po_number,
+			COALESCE(gr.currency, 'IDR') as currency,
 			COALESCE(item_counts.total_items, 0) as total_items,
 			COALESCE(item_counts.total_quantity, 0) as total_quantity
 		FROM goods_receipts gr
-		JOIN purchase_orders po ON gr.purchase_order_id = po.id
-		JOIN suppliers s ON po.supplier_id = s.id
-		JOIN warehouses w ON gr.warehouse_id = w.id
+		LEFT JOIN warehouses w ON gr.warehouse_id = w.id
 		LEFT JOIN (
-			SELECT 
+			SELECT
 				goods_receipt_id,
 				COUNT(*) as total_items,
 				SUM(quantity) as total_quantity
-			FROM goods_receipt_items 
+			FROM goods_receipt_items
 			GROUP BY goods_receipt_id
 		) item_counts ON gr.id = item_counts.goods_receipt_id
-		ORDER BY gr.receipt_date DESC
+		ORDER BY gr.receipt_date DESC, gr.created_at DESC
 	`
-	
+
 	rows, err := r.db.QueryContext(ctx, query)
 	if err != nil {
 		return nil, err
@@ -193,85 +224,87 @@ func (r *GoodsReceiptRepositoryImpl) GetAllWithDetails(ctx context.Context) ([]m
 	var results []map[string]interface{}
 	for rows.Next() {
 		var (
-			id, purchaseOrderID, warehouseID, supplierName, warehouseName, poStatus string
-			receiptDate, createdAt, updatedAt time.Time
-			totalAmount float64
-			totalItems, totalQuantity int
+			id, purchaseOrderID, warehouseID, grNumber, supplierName, warehouseName, status, poNumber, currency string
+			receiptDate, createdAt, updatedAt                                                                   time.Time
+			totalAmount                                                                                         float64
+			totalItems, totalQuantity                                                                           int
 		)
-		
+
 		err := rows.Scan(
 			&id, &purchaseOrderID, &receiptDate, &warehouseID, &createdAt, &updatedAt,
-			&supplierName, &warehouseName, &totalAmount, &poStatus, &totalItems, &totalQuantity,
+			&grNumber, &supplierName, &warehouseName, &totalAmount, &status, &poNumber, &currency,
+			&totalItems, &totalQuantity,
 		)
 		if err != nil {
 			return nil, err
 		}
 
-		// Determine status based on receipt date and PO status
-		status := "pending"
-		if receiptDate.Before(time.Now()) {
-			if poStatus == "completed" {
-				status = "completed"
-			} else {
-				status = "approved"
-			}
+		result := map[string]interface{}{
+			"id":                id,
+			"purchase_order_id": purchaseOrderID,
+			"receipt_date":      receiptDate,
+			"warehouse_id":      warehouseID,
+			"created_at":        createdAt,
+			"updated_at":        updatedAt,
+			"receiptNumber":     grNumber,
+			"gr_number":         grNumber,
+			"supplierName":      supplierName,
+			"poNumber":          poNumber,
+			"warehouse":         warehouseName,
+			"status":            status,
+			"totalAmount":       totalAmount,
+			"currency":          currency,
+			"totalItems":        totalItems,
+			"items":             []interface{}{},
 		}
 
-		result := map[string]interface{}{
-			"id":              id,
-			"purchase_order_id": purchaseOrderID,
-			"receipt_date":    receiptDate,
-			"warehouse_id":    warehouseID,
-			"created_at":      createdAt,
-			"updated_at":      updatedAt,
-			"receiptNumber":   "GR-" + id[len(id)-8:],
-			"supplierName":    supplierName,
-			"poNumber":        purchaseOrderID[len(purchaseOrderID)-8:],
-			"warehouse":       warehouseName,
-			"status":          status,
-			"totalAmount":     totalAmount,
-			"totalItems":      totalItems,
-			"items":          []interface{}{}, // Will be populated separately if needed
-		}
-		
 		results = append(results, result)
 	}
-	
+
 	return results, rows.Err()
 }
 
 // GetByIDWithDetails retrieves a goods receipt by ID with related information
 func (r *GoodsReceiptRepositoryImpl) GetByIDWithDetails(ctx context.Context, id string) (map[string]interface{}, error) {
 	query := `
-		SELECT 
+		SELECT
 			gr.id,
-			gr.purchase_order_id,
+			COALESCE(gr.purchase_order_id::text, '') as purchase_order_id,
 			gr.receipt_date,
 			gr.warehouse_id,
 			gr.created_at,
 			gr.updated_at,
-			s.name as supplier_name,
-			w.name as warehouse_name,
-			po.total_amount,
-			po.status as po_status
+			COALESCE(gr.gr_number, 'GR-' || RIGHT(gr.id::text, 8)) as gr_number,
+			COALESCE(gr.supplier_name, '') as supplier_name,
+			COALESCE(gr.warehouse_name, w.name, '') as warehouse_name,
+			COALESCE(gr.total_amount, 0) as total_amount,
+			COALESCE(gr.status, 'DRAFT') as status,
+			COALESCE(gr.po_number, '') as po_number,
+			COALESCE(gr.currency, 'IDR') as currency,
+			COALESCE(gr.procurement_type, 'RAW_MATERIAL') as procurement_type,
+			COALESCE(gr.notes, '') as notes,
+			gr.posted_at,
+			gr.journal_entry_id
 		FROM goods_receipts gr
-		JOIN purchase_orders po ON gr.purchase_order_id = po.id
-		JOIN suppliers s ON po.supplier_id = s.id
-		JOIN warehouses w ON gr.warehouse_id = w.id
+		LEFT JOIN warehouses w ON gr.warehouse_id = w.id
 		WHERE gr.id = $1
 	`
-	
+
 	row := r.db.QueryRowContext(ctx, query, id)
-	
+
 	var (
-		grID, purchaseOrderID, warehouseID, supplierName, warehouseName, poStatus string
-		receiptDate, createdAt, updatedAt time.Time
-		totalAmount float64
+		grID, purchaseOrderID, warehouseID, grNumber, supplierName, warehouseName string
+		status, poNumber, currency, procurementType, notes                        string
+		receiptDate, createdAt, updatedAt                                         time.Time
+		totalAmount                                                               float64
+		postedAt                                                                  sql.NullTime
+		journalEntryID                                                            sql.NullString
 	)
-	
+
 	err := row.Scan(
 		&grID, &purchaseOrderID, &receiptDate, &warehouseID, &createdAt, &updatedAt,
-		&supplierName, &warehouseName, &totalAmount, &poStatus,
+		&grNumber, &supplierName, &warehouseName, &totalAmount, &status, &poNumber, &currency,
+		&procurementType, &notes, &postedAt, &journalEntryID,
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -282,20 +315,20 @@ func (r *GoodsReceiptRepositoryImpl) GetByIDWithDetails(ctx context.Context, id 
 
 	// Get items for this receipt
 	itemsQuery := `
-		SELECT 
+		SELECT
 			gri.id,
 			gri.quantity,
-			a.name as product_name,
+			COALESCE(gri.item_name, COALESCE(a.name, 'Unknown')) as product_name,
 			COALESCE(a.barcode, 'N/A') as product_code,
-			COALESCE(poi.unit_price, 0) as unit_price,
-			COALESCE(poi.unit_price * gri.quantity, 0) as total_price
+			COALESCE(gri.unit_price, 0) as unit_price,
+			COALESCE(gri.line_total, gri.unit_price * gri.quantity, 0) as total_price,
+			COALESCE(gri.unit, 'pcs') as unit
 		FROM goods_receipt_items gri
-		JOIN articles a ON gri.article_id = a.id
-		LEFT JOIN purchase_order_items poi ON poi.purchase_order_id = $1 AND poi.article_id = gri.article_id
-		WHERE gri.goods_receipt_id = $2
+		LEFT JOIN articles a ON gri.article_id = a.id
+		WHERE gri.goods_receipt_id = $1
 	`
-	
-	itemRows, err := r.db.QueryContext(ctx, itemsQuery, purchaseOrderID, id)
+
+	itemRows, err := r.db.QueryContext(ctx, itemsQuery, id)
 	if err != nil {
 		return nil, err
 	}
@@ -305,53 +338,55 @@ func (r *GoodsReceiptRepositoryImpl) GetByIDWithDetails(ctx context.Context, id 
 	totalItems := 0
 	for itemRows.Next() {
 		var (
-			itemID, productName, productCode string
-			quantity int
-			unitPrice, totalPrice float64
+			itemID, productName, productCode, unit string
+			quantity                               int
+			unitPrice, totalPrice                  float64
 		)
-		
-		err := itemRows.Scan(&itemID, &quantity, &productName, &productCode, &unitPrice, &totalPrice)
+
+		err := itemRows.Scan(&itemID, &quantity, &productName, &productCode, &unitPrice, &totalPrice, &unit)
 		if err != nil {
 			return nil, err
 		}
-		
+
 		items = append(items, map[string]interface{}{
 			"id":          itemID,
 			"productCode": productCode,
 			"productName": productName,
-			"quantity":    quantity,
-			"unitPrice":   unitPrice,
-			"totalPrice":  totalPrice,
+			"quantity":     quantity,
+			"unitPrice":    unitPrice,
+			"totalPrice":   totalPrice,
+			"unit":         unit,
 		})
 		totalItems++
 	}
 
-	// Determine status
-	status := "pending"
-	if receiptDate.Before(time.Now()) {
-		if poStatus == "completed" {
-			status = "completed"
-		} else {
-			status = "approved"
-		}
+	result := map[string]interface{}{
+		"id":                id,
+		"purchase_order_id": purchaseOrderID,
+		"receipt_date":      receiptDate,
+		"warehouse_id":      warehouseID,
+		"created_at":        createdAt,
+		"updated_at":        updatedAt,
+		"receiptNumber":     grNumber,
+		"gr_number":         grNumber,
+		"supplierName":      supplierName,
+		"poNumber":          poNumber,
+		"warehouse":         warehouseName,
+		"status":            status,
+		"totalAmount":       totalAmount,
+		"currency":          currency,
+		"procurementType":   procurementType,
+		"notes":             notes,
+		"totalItems":        totalItems,
+		"items":             items,
 	}
 
-	result := map[string]interface{}{
-		"id":              grID,
-		"purchase_order_id": purchaseOrderID,
-		"receipt_date":    receiptDate,
-		"warehouse_id":    warehouseID,
-		"created_at":      createdAt,
-		"updated_at":      updatedAt,
-		"receiptNumber":   "GR-" + grID[len(grID)-8:],
-		"supplierName":    supplierName,
-		"poNumber":        purchaseOrderID[len(purchaseOrderID)-8:],
-		"warehouse":       warehouseName,
-		"status":          status,
-		"totalAmount":     totalAmount,
-		"totalItems":      totalItems,
-		"items":          items,
+	if postedAt.Valid {
+		result["posted_at"] = postedAt.Time
 	}
-	
+	if journalEntryID.Valid {
+		result["journal_entry_id"] = journalEntryID.String
+	}
+
 	return result, nil
 }

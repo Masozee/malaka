@@ -1,470 +1,512 @@
 'use client'
 
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { TwoLevelLayout } from '@/components/ui/two-level-layout'
 import { Header } from '@/components/ui/header'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { TanStackDataTable, TanStackColumn } from '@/components/ui/tanstack-data-table'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { useToast } from '@/components/ui/toast'
 import { HugeiconsIcon } from '@hugeicons/react'
 import {
   ArrowLeft01Icon,
-  Download01Icon,
-  PencilEdit01Icon,
-  PrinterIcon,
-  ArrowRight01Icon,
-  Store01Icon,
-  Calendar01Icon,
-  TruckDeliveryIcon,
-  CheckmarkCircle01Icon,
-  Clock01Icon,
   AlertCircleIcon,
-  UserIcon,
-  File01Icon,
-  PackageIcon,
-  InformationCircleIcon
+  Cancel01Icon,
+  Tick01Icon,
+  PrinterIcon,
+  Download01Icon,
 } from '@hugeicons/core-free-icons'
+import { StockTransferDetail, stockTransferService } from '@/services/inventory'
 
-// Mock transfer item interface
-interface TransferItem {
-  id: string
-  product_code: string
-  product_name: string
-  category: string
-  size: string
-  color: string
-  quantity: number
-  unit_cost: number
-  total_cost: number
-  status: 'pending' | 'transferred' | 'received'
+const statusConfig: Record<string, { label: string; color: string }> = {
+  draft: { label: 'Draft', color: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200' },
+  pending: { label: 'Pending', color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-200' },
+  approved: { label: 'Approved', color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-200' },
+  in_transit: { label: 'In Transit', color: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/40 dark:text-indigo-200' },
+  completed: { label: 'Completed', color: 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-200' },
+  cancelled: { label: 'Cancelled', color: 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-200' },
 }
 
-// Extended transfer interface for detail view
-interface StockTransferDetail {
-  id: string
-  transfer_number: string
-  transfer_type: 'warehouse_to_warehouse' | 'warehouse_to_store' | 'store_to_store' | 'return_to_warehouse'
-  from_location: string
-  from_location_code: string
-  from_address?: string
-  to_location: string
-  to_location_code: string
-  to_address?: string
-  transfer_date: string
-  requested_by: string
-  approved_by?: string
-  received_by?: string
-  status: 'draft' | 'pending' | 'approved' | 'in_transit' | 'completed' | 'cancelled'
-  priority: 'low' | 'medium' | 'high' | 'urgent'
-  total_items: number
-  total_quantity: number
-  estimated_value: number
-  actual_delivery_date?: string
-  notes?: string
-  reason: string
-  created_by: string
-  updated_by: string
-  created_at: string
-  updated_at: string
-  items: TransferItem[]
-}
+const workflowSteps = [
+  { key: 'draft', label: 'Created' },
+  { key: 'approved', label: 'Approved' },
+  { key: 'in_transit', label: 'Shipped' },
+  { key: 'completed', label: 'Received' },
+]
 
-// Mock data for transfer detail
-const mockTransferDetail: StockTransferDetail = {
-  id: '1',
-  transfer_number: 'TRF-2024-001',
-  transfer_type: 'warehouse_to_store',
-  from_location: 'Main Warehouse Jakarta',
-  from_location_code: 'WH-JKT-001',
-  from_address: 'Jl. Industri Raya No. 123, Jakarta Barat 11510',
-  to_location: 'Store Plaza Indonesia',
-  to_location_code: 'ST-PI-001',
-  to_address: 'Plaza Indonesia, Jl. M.H. Thamrin Kav. 28-30, Jakarta Pusat 10350',
-  transfer_date: '2024-07-25T08:00:00Z',
-  requested_by: 'Ahmad Store Manager',
-  approved_by: 'Budi Warehouse Manager',
-  received_by: '',
-  status: 'in_transit',
-  priority: 'high',
-  total_items: 15,
-  total_quantity: 245,
-  estimated_value: 125750000,
-  reason: 'Stock replenishment for weekend sale',
-  notes: 'Handle with care - contains premium items',
-  created_by: 'Ahmad Store',
-  updated_by: 'Budi Warehouse',
-  created_at: '2024-07-24T14:30:00Z',
-  updated_at: '2024-07-25T09:15:00Z',
-  items: [
-    {
-      id: '1',
-      product_code: 'SPT-001-BLK-42',
-      product_name: 'Sport Running Shoes Black',
-      category: 'Sports Shoes',
-      size: '42',
-      color: 'Black',
-      quantity: 25,
-      unit_cost: 450000,
-      total_cost: 11250000,
-      status: 'transferred'
-    },
-    {
-      id: '2',
-      product_code: 'CAS-002-BRN-40',
-      product_name: 'Casual Leather Shoes Brown',
-      category: 'Casual Shoes',
-      size: '40',
-      color: 'Brown',
-      quantity: 18,
-      unit_cost: 650000,
-      total_cost: 11700000,
-      status: 'transferred'
-    },
-    {
-      id: '3',
-      product_code: 'FML-003-BLK-38',
-      product_name: 'Formal Office Shoes Black',
-      category: 'Formal Shoes',
-      size: '38',
-      color: 'Black',
-      quantity: 12,
-      unit_cost: 750000,
-      total_cost: 9000000,
-      status: 'transferred'
-    },
-    {
-      id: '4',
-      product_code: 'SPT-004-WHT-41',
-      product_name: 'Sport Tennis Shoes White',
-      category: 'Sports Shoes',
-      size: '41',
-      color: 'White',
-      quantity: 30,
-      unit_cost: 520000,
-      total_cost: 15600000,
-      status: 'pending'
-    },
-    {
-      id: '5',
-      product_code: 'BOT-005-BLK-43',
-      product_name: 'Work Boots Black',
-      category: 'Boots',
-      size: '43',
-      color: 'Black',
-      quantity: 15,
-      unit_cost: 850000,
-      total_cost: 12750000,
-      status: 'pending'
-    }
-  ]
-}
-
-const statusConfig = {
-  draft: { label: 'Draft', color: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200', icon: Clock01Icon },
-  pending: { label: 'Pending', color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-200', icon: Clock01Icon },
-  approved: { label: 'Approved', color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-200', icon: CheckmarkCircle01Icon },
-  in_transit: { label: 'In Transit', color: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/40 dark:text-indigo-200', icon: TruckDeliveryIcon },
-  completed: { label: 'Completed', color: 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-200', icon: CheckmarkCircle01Icon },
-  cancelled: { label: 'Cancelled', color: 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-200', icon: AlertCircleIcon }
-}
-
-const priorityConfig = {
-  low: { label: 'Low', color: 'bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300' },
-  medium: { label: 'Medium', color: 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300' },
-  high: { label: 'High', color: 'bg-orange-50 text-orange-700 dark:bg-orange-900/20 dark:text-orange-300' },
-  urgent: { label: 'Urgent', color: 'bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-300' }
+function getStepIndex(status: string): number {
+  if (status === 'cancelled') return -1
+  const idx = workflowSteps.findIndex(s => s.key === status)
+  return idx >= 0 ? idx : 0
 }
 
 export default function StockTransferDetailPage() {
   const params = useParams()
   const router = useRouter()
+  const { addToast } = useToast()
   const [mounted, setMounted] = useState(false)
   const [transfer, setTransfer] = useState<StockTransferDetail | null>(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [actionLoading, setActionLoading] = useState(false)
+
+  // Cancel dialog
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false)
+  const [cancelReason, setCancelReason] = useState('')
+
+  // Receive dialog
+  const [receiveDialogOpen, setReceiveDialogOpen] = useState(false)
+  const [receivedQuantities, setReceivedQuantities] = useState<Record<string, number>>({})
+
+  const transferId = params.id as string
 
   useEffect(() => {
     setMounted(true)
   }, [])
 
-  // Fetch transfer detail data
-  const fetchTransferDetail = async () => {
+  useEffect(() => {
+    if (transferId) {
+      fetchDetail()
+    }
+  }, [transferId])
+
+  const fetchDetail = async () => {
     try {
       setLoading(true)
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 500))
-      setTransfer(mockTransferDetail)
-    } catch (error) {
-      console.error('Error fetching transfer detail:', error)
-      setTransfer(mockTransferDetail) // Fallback to mock data
+      setError(null)
+      const data = await stockTransferService.getById(transferId) as StockTransferDetail
+      setTransfer(data)
+    } catch (err) {
+      console.error('Error fetching transfer detail:', err)
+      setError('Failed to load transfer details')
+      setTransfer(null)
     } finally {
       setLoading(false)
     }
   }
 
-  useEffect(() => {
-    if (params.id) {
-      fetchTransferDetail()
-    }
-  }, [params.id])
+  const handleBack = () => {
+    router.push('/inventory/stock-transfer')
+  }
 
-  const itemColumns: TanStackColumn<TransferItem>[] = useMemo(() => [
-    {
-      id: 'product',
-      header: 'Product',
-      accessorKey: 'product_code',
-      cell: ({ row }) => (
-        <div className="flex flex-col">
-          <span className="font-medium text-blue-600 dark:text-blue-400">{row.original.product_name}</span>
-          <span className="text-xs text-muted-foreground">{row.original.product_code}</span>
-        </div>
-      )
-    },
-    {
-      id: 'category',
-      header: 'Category',
-      accessorKey: 'category',
-      cell: ({ row }) => (
-        <div className="text-sm">{row.original.category}</div>
-      )
-    },
-    {
-      id: 'size_color',
-      header: 'Size / Color',
-      accessorKey: 'size',
-      cell: ({ row }) => (
-        <div className="text-sm">
-          {row.original.size} / {row.original.color}
-        </div>
-      )
-    },
-    {
-      id: 'quantity',
-      header: 'Quantity',
-      accessorKey: 'quantity',
-      cell: ({ row }) => (
-        <div className="text-center font-medium bg-muted py-1 rounded-md">{row.original.quantity}</div>
-      )
-    },
-    {
-      id: 'cost',
-      header: 'Total Cost',
-      accessorKey: 'total_cost',
-      cell: ({ row }) => (
-        <div className="text-right font-medium">
-          {((row.original.total_cost || 0)).toLocaleString('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 })}
-        </div>
-      )
-    },
-    {
-      id: 'status',
-      header: 'Status',
-      accessorKey: 'status',
-      cell: ({ row }) => {
-        const isPending = row.original.status === 'pending'
-        return (
-          <Badge variant={isPending ? 'outline' : 'default'} className="capitalize">
-            {row.original.status}
-          </Badge>
-        )
-      }
+  const handleApprove = async () => {
+    try {
+      setActionLoading(true)
+      await stockTransferService.approve(transferId)
+      addToast({ type: 'success', title: 'Transfer approved successfully' })
+      await fetchDetail()
+    } catch (err) {
+      console.error('Error approving transfer:', err)
+      addToast({ type: 'error', title: 'Failed to approve transfer' })
+    } finally {
+      setActionLoading(false)
     }
-  ], [])
+  }
+
+  const handleShip = async () => {
+    try {
+      setActionLoading(true)
+      await stockTransferService.ship(transferId)
+      addToast({ type: 'success', title: 'Transfer shipped successfully. Stock deducted from origin warehouse.' })
+      await fetchDetail()
+    } catch (err) {
+      console.error('Error shipping transfer:', err)
+      addToast({ type: 'error', title: 'Failed to ship transfer' })
+    } finally {
+      setActionLoading(false)
+    }
+  }
+
+  const openReceiveDialog = () => {
+    if (transfer?.items) {
+      const initial: Record<string, number> = {}
+      transfer.items.forEach(item => {
+        initial[item.id] = item.quantity
+      })
+      setReceivedQuantities(initial)
+    }
+    setReceiveDialogOpen(true)
+  }
+
+  const handleReceive = async () => {
+    if (!transfer?.items) return
+    try {
+      setActionLoading(true)
+      const items = transfer.items.map(item => ({
+        item_id: item.id,
+        received_quantity: receivedQuantities[item.id] ?? 0,
+      }))
+      await stockTransferService.receive(transferId, items)
+      addToast({ type: 'success', title: 'Goods received successfully. Stock added to destination warehouse.' })
+      setReceiveDialogOpen(false)
+      await fetchDetail()
+    } catch (err) {
+      console.error('Error receiving transfer:', err)
+      addToast({ type: 'error', title: 'Failed to receive goods' })
+    } finally {
+      setActionLoading(false)
+    }
+  }
+
+  const handleCancel = async () => {
+    try {
+      setActionLoading(true)
+      await stockTransferService.cancel(transferId, cancelReason)
+      addToast({ type: 'success', title: 'Transfer cancelled' })
+      setCancelDialogOpen(false)
+      setCancelReason('')
+      await fetchDetail()
+    } catch (err) {
+      console.error('Error cancelling transfer:', err)
+      addToast({ type: 'error', title: 'Failed to cancel transfer' })
+    } finally {
+      setActionLoading(false)
+    }
+  }
+
+  const formatDate = (dateStr?: string) => {
+    if (!mounted || !dateStr) return '-'
+    return new Date(dateStr).toLocaleDateString('id-ID', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    })
+  }
+
+  const formatDateLong = (dateStr?: string) => {
+    if (!mounted || !dateStr) return '-'
+    return new Date(dateStr).toLocaleDateString('id-ID', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    })
+  }
 
   if (loading) {
     return (
       <TwoLevelLayout>
         <Header
-          title="Stock Transfer"
-          breadcrumbs={[{ label: 'Inventory' }, { label: 'Stock Transfer' }]}
+          title="Transfer Details"
+          description="Loading transfer information..."
+          breadcrumbs={[
+            { label: 'Inventory', href: '/inventory' },
+            { label: 'Stock Transfer', href: '/inventory/stock-transfer' },
+            { label: 'Details' },
+          ]}
         />
-        <div className="flex justify-center items-center h-64">
+        <div className="flex-1 p-6 flex justify-center items-center h-64">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
         </div>
       </TwoLevelLayout>
     )
   }
 
-  if (!transfer) {
+  if (error || !transfer) {
     return (
       <TwoLevelLayout>
         <Header
-          title="Stock Transfer Not Found"
-          breadcrumbs={[{ label: 'Inventory' }, { label: 'Stock Transfer' }]}
+          title="Transfer Details"
+          description="Error loading transfer information"
+          breadcrumbs={[
+            { label: 'Inventory', href: '/inventory' },
+            { label: 'Stock Transfer', href: '/inventory/stock-transfer' },
+            { label: 'Details' },
+          ]}
         />
-        <div className="flex flex-col justify-center items-center h-64 p-6">
-          <HugeiconsIcon icon={InformationCircleIcon} className="h-12 w-12 text-muted-foreground mb-4" />
-          <p className="text-muted-foreground">Transfer not found</p>
-          <Button variant="outline" className="mt-4" onClick={() => router.push('/inventory/stock-transfer')}>
-            Back to List
-          </Button>
+        <div className="flex-1 p-6">
+          <Card>
+            <CardContent className="p-12 text-center">
+              <HugeiconsIcon icon={AlertCircleIcon} className="w-12 h-12 text-red-500 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-foreground mb-2">
+                {error || 'Transfer Order Not Found'}
+              </h3>
+              <p className="text-muted-foreground mb-6">
+                The transfer order you are looking for could not be found or loaded.
+              </p>
+              <Button onClick={handleBack} variant="outline">
+                <HugeiconsIcon icon={ArrowLeft01Icon} className="w-4 h-4 mr-2" />
+                Back to Stock Transfer
+              </Button>
+            </CardContent>
+          </Card>
         </div>
       </TwoLevelLayout>
     )
   }
 
-  const status = statusConfig[transfer.status] || statusConfig.pending
-  const priority = priorityConfig[transfer.priority] || priorityConfig.medium
+  const statusBadge = statusConfig[transfer.status] || statusConfig.draft
+  const currentStep = getStepIndex(transfer.status)
+  const isCancelled = transfer.status === 'cancelled'
+  const isTerminal = transfer.status === 'completed' || transfer.status === 'cancelled'
 
   return (
     <TwoLevelLayout>
       <Header
-        title={transfer.transfer_number}
-        description="Stock transfer details and item tracking"
+        title={transfer.transferNumber}
         breadcrumbs={[
           { label: 'Inventory', href: '/inventory' },
           { label: 'Stock Transfer', href: '/inventory/stock-transfer' },
-          { label: transfer.transfer_number }
+          { label: transfer.transferNumber },
         ]}
-        actions={
-          <div className="flex items-center space-x-2">
-            <Button variant="outline" size="sm">
-              <HugeiconsIcon icon={PrinterIcon} className="h-4 w-4 mr-2" />
-              Print
-            </Button>
-            <Button variant="outline" size="sm">
-              <HugeiconsIcon icon={Download01Icon} className="h-4 w-4 mr-2" />
-              Export
-            </Button>
-            {transfer.status !== 'completed' && transfer.status !== 'cancelled' && (
-              <Link href={`/inventory/stock-transfer/${transfer.id}/edit`}>
-                <Button size="sm">
-                  <HugeiconsIcon icon={PencilEdit01Icon} className="h-4 w-4 mr-2" />
-                  Edit Transfer
-                </Button>
-              </Link>
-            )}
-            <Button variant="outline" size="sm" onClick={() => router.push('/inventory/stock-transfer')}>
-              <HugeiconsIcon icon={ArrowLeft01Icon} className="h-4 w-4 mr-2" />
-              Back
-            </Button>
-          </div>
-        }
+        compact
       />
 
-      <div className="flex-1 p-6 space-y-6">
-        {/* Transfer Overview */}
+      <div className="flex-1 overflow-auto p-6 space-y-6">
+        {/* Back link */}
+        <button
+          onClick={handleBack}
+          className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <HugeiconsIcon icon={ArrowLeft01Icon} className="w-4 h-4" />
+          Back to Stock Transfer
+        </button>
+
+        {/* Page title + actions */}
+        <div className="flex items-start justify-between -mt-2">
+          <div>
+            <div className="flex items-center gap-3">
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">{transfer.transferNumber}</h1>
+              <Badge className={`${statusBadge.color} border-0`}>{statusBadge.label}</Badge>
+            </div>
+            <p className="text-gray-600 dark:text-gray-400 mt-1">Stock transfer details and item tracking</p>
+          </div>
+          <div className="inline-flex items-center rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 overflow-hidden">
+            <button
+              onClick={() => window.print()}
+              className="inline-flex items-center justify-center gap-2 w-28 py-1.5 text-sm font-medium hover:bg-gray-100 dark:hover:bg-gray-800 active:bg-gray-200 dark:active:bg-gray-700 transition-colors"
+            >
+              <HugeiconsIcon icon={PrinterIcon} className="w-4 h-4" />
+              Print
+            </button>
+            <div className="w-px h-6 bg-gray-200 dark:bg-gray-700" />
+            <button
+              className="inline-flex items-center justify-center gap-2 w-28 py-1.5 text-sm font-medium hover:bg-gray-100 dark:hover:bg-gray-800 active:bg-gray-200 dark:active:bg-gray-700 transition-colors"
+            >
+              <HugeiconsIcon icon={Download01Icon} className="w-4 h-4" />
+              Export
+            </button>
+          </div>
+        </div>
+
+        {/* Transfer Info + Summary + Timeline */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Basic Information */}
+          {/* Transfer Information */}
           <Card className="lg:col-span-2">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <HugeiconsIcon icon={ArrowRight01Icon} className="h-5 w-5 text-blue-600" />
-                Transfer Information
-              </CardTitle>
+              <CardTitle className="text-lg">Transfer Information</CardTitle>
+              <CardDescription>Order details, dates, and warehouse route</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
                 <div>
                   <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Transfer Number</label>
-                  <p className="mt-1 font-mono text-sm font-semibold">{transfer.transfer_number}</p>
+                  <p className="mt-1 font-mono text-sm font-semibold">{transfer.transferNumber}</p>
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Status</label>
-                  <div className="mt-1">
-                    <Badge className={`${status.color} border-0 flex items-center gap-1 w-fit`}>
-                      <HugeiconsIcon icon={status.icon} className="h-3 w-3" />
-                      {status.label}
-                    </Badge>
-                  </div>
+                  <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Order Date</label>
+                  <p className="mt-1 text-sm">{formatDateLong(transfer.orderDate)}</p>
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Type</label>
-                  <p className="mt-1 text-sm capitalize">{transfer.transfer_type.replace(/_/g, ' ')}</p>
-                </div>
-                <div>
-                  <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Priority</label>
-                  <div className="mt-1">
-                    <Badge className={`${priority.color} border-0 hover:bg-opacity-80`}>
-                      {priority.label}
-                    </Badge>
-                  </div>
+                  <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Created</label>
+                  <p className="mt-1 text-sm">{formatDate(transfer.createdAt)}</p>
                 </div>
 
-                <div className="col-span-1 md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6 p-4 bg-muted/50 rounded-lg border border-dashed">
-                  <div>
-                    <div className="flex items-center gap-2 mb-2">
-                      <HugeiconsIcon icon={Store01Icon} className="h-4 w-4 text-blue-600" />
-                      <span className="text-sm font-semibold text-blue-700 dark:text-blue-300">Origin</span>
-                    </div>
-                    <p className="text-sm font-medium">{transfer.from_location}</p>
-                    <p className="text-xs text-muted-foreground">{transfer.from_location_code}</p>
-                    {transfer.from_address && <p className="text-xs text-muted-foreground mt-1 max-w-xs">{transfer.from_address}</p>}
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2 mb-2">
-                      <HugeiconsIcon icon={Store01Icon} className="h-4 w-4 text-green-600" />
-                      <span className="text-sm font-semibold text-green-700 dark:text-green-300">Destination</span>
-                    </div>
-                    <p className="text-sm font-medium">{transfer.to_location}</p>
-                    <p className="text-xs text-muted-foreground">{transfer.to_location_code}</p>
-                    {transfer.to_address && <p className="text-xs text-muted-foreground mt-1 max-w-xs">{transfer.to_address}</p>}
-                  </div>
-                </div>
-
-                {transfer.reason && (
+                {transfer.notes && (
                   <div className="col-span-1 md:col-span-2">
-                    <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Reason</label>
-                    <p className="mt-1 text-sm">{transfer.reason}</p>
+                    <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Notes</label>
+                    <p className="mt-1 text-sm">{transfer.notes}</p>
                   </div>
                 )}
+
+                {isCancelled && transfer.cancelReason && (
+                  <div className="col-span-1 md:col-span-2 p-3 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                    <label className="text-xs font-medium text-red-600 dark:text-red-400 uppercase tracking-wider">Cancel Reason</label>
+                    <p className="mt-1 text-sm text-red-800 dark:text-red-200">{transfer.cancelReason}</p>
+                  </div>
+                )}
+
+                {/* Warehouse Route */}
+                <div className="col-span-1 md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6 p-4 bg-muted/50 rounded-lg border border-dashed">
+                  <div>
+                    <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Origin</span>
+                    <p className="mt-1 text-sm font-medium">{transfer.fromWarehouse}</p>
+                    <p className="text-xs text-muted-foreground">{transfer.fromCode}</p>
+                  </div>
+                  <div>
+                    <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Destination</span>
+                    <p className="mt-1 text-sm font-medium">{transfer.toWarehouse}</p>
+                    <p className="text-xs text-muted-foreground">{transfer.toCode}</p>
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* Details & People */}
+          {/* Sidebar: Summary + Actions + Timeline */}
           <div className="space-y-6">
+            {/* Workflow Actions */}
+            {!isTerminal && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Actions</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {(transfer.status === 'draft' || transfer.status === 'pending') && (
+                    <Button className="w-full" onClick={handleApprove} disabled={actionLoading}>
+                      Approve
+                    </Button>
+                  )}
+                  {transfer.status === 'approved' && (
+                    <Button className="w-full" onClick={handleShip} disabled={actionLoading}>
+                      Ship Transfer
+                    </Button>
+                  )}
+                  {transfer.status === 'in_transit' && (
+                    <Button className="w-full" onClick={openReceiveDialog} disabled={actionLoading}>
+                      Receive Goods
+                    </Button>
+                  )}
+                  {transfer.status === 'draft' && (
+                    <Link href={`/inventory/stock-transfer/${transfer.id}/edit`} className="block">
+                      <Button variant="outline" className="w-full">
+                        Edit
+                      </Button>
+                    </Link>
+                  )}
+                  <Button
+                    variant="destructive"
+                    className="w-full"
+                    onClick={() => setCancelDialogOpen(true)}
+                    disabled={actionLoading}
+                  >
+                    Cancel Transfer
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Summary */}
             <Card>
               <CardHeader>
-                <CardTitle className="text-base">Summary</CardTitle>
+                <CardTitle className="text-lg">Summary</CardTitle>
+                <CardDescription>Items and quantity overview</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">Total Items</span>
-                  <span className="font-semibold">{transfer.total_items} types</span>
+                <div className="flex justify-between items-center p-3 bg-muted rounded-lg border">
+                  <span className="text-sm font-medium text-muted-foreground">Total Items</span>
+                  <span className="text-xl font-bold">{transfer.totalItems}</span>
                 </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">Total Quantity</span>
-                  <span className="font-semibold">{transfer.total_quantity} units</span>
+                <div className="flex justify-between items-center p-3 bg-muted rounded-lg border">
+                  <span className="text-sm font-medium text-muted-foreground">Total Quantity</span>
+                  <span className="text-xl font-bold">{transfer.totalQuantity}</span>
                 </div>
-                <div className="flex justify-between items-center pt-2 border-t">
-                  <span className="text-sm text-muted-foreground">Estimated Value</span>
-                  <span className="font-bold text-green-600 dark:text-green-400">
-                    {((transfer.estimated_value || 0)).toLocaleString('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 })}
+                <div className="flex justify-between items-center p-3 bg-muted rounded-lg border">
+                  <span className="text-sm font-medium text-muted-foreground">Last Updated</span>
+                  <span className="text-xs text-muted-foreground font-mono">
+                    {formatDate(transfer.updatedAt)}
                   </span>
                 </div>
               </CardContent>
             </Card>
 
+            {/* Workflow Timeline */}
             <Card>
               <CardHeader>
-                <CardTitle className="text-base">Details</CardTitle>
+                <CardTitle className="text-lg">Timeline</CardTitle>
+                <CardDescription>Workflow progress and history</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4 text-sm">
-                <div className="flex items-center gap-2">
-                  <HugeiconsIcon icon={Calendar01Icon} className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-muted-foreground w-24">Date:</span>
-                  <span>{new Date(transfer.transfer_date).toLocaleDateString()}</span>
-                </div>
-                {transfer.actual_delivery_date && (
-                  <div className="flex items-center gap-2">
-                    <HugeiconsIcon icon={TruckDeliveryIcon} className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-muted-foreground w-24">Delivered:</span>
-                    <span>{new Date(transfer.actual_delivery_date).toLocaleDateString()}</span>
+              <CardContent>
+                {isCancelled ? (
+                  <div className="space-y-4">
+                    <div className="flex items-start gap-3">
+                      <div className="w-6 h-6 rounded-full bg-red-100 dark:bg-red-900/40 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <HugeiconsIcon icon={Cancel01Icon} className="w-3 h-3 text-red-600" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-red-600">Cancelled</p>
+                        <p className="text-xs text-muted-foreground">{formatDate(transfer.cancelledDate)}</p>
+                        {transfer.cancelledByName && (
+                          <p className="text-xs text-muted-foreground">by {transfer.cancelledByName}</p>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                )}
-                <div className="flex items-center gap-2">
-                  <HugeiconsIcon icon={UserIcon} className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-muted-foreground w-24">Requested:</span>
-                  <span className="truncate">{transfer.requested_by}</span>
-                </div>
-                {transfer.approved_by && (
-                  <div className="flex items-center gap-2">
-                    <HugeiconsIcon icon={CheckmarkCircle01Icon} className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-muted-foreground w-24">Approved:</span>
-                    <span className="truncate">{transfer.approved_by}</span>
+                ) : (
+                  <div className="relative">
+                    {workflowSteps.map((step, idx) => {
+                      const isCompleted = idx <= currentStep
+                      const isCurrent = idx === currentStep
+                      const isLast = idx === workflowSteps.length - 1
+                      const nextCompleted = idx < currentStep
+                      const dateMap: Record<string, string | undefined> = {
+                        draft: transfer.createdAt,
+                        approved: transfer.approvedDate,
+                        in_transit: transfer.shippedDate,
+                        completed: transfer.receivedDate,
+                      }
+                      const nameMap: Record<string, string | undefined> = {
+                        draft: transfer.createdByName,
+                        approved: transfer.approvedByName,
+                        in_transit: transfer.shippedByName,
+                        completed: transfer.receivedByName,
+                      }
+                      const date = dateMap[step.key]
+                      const byName = nameMap[step.key]
+
+                      return (
+                        <div key={step.key} className="flex items-start gap-3 relative">
+                          {/* Vertical connector line */}
+                          <div className="flex flex-col items-center flex-shrink-0">
+                            <div className={`w-6 h-6 rounded-full flex items-center justify-center z-10 ${
+                              isCompleted
+                                ? 'bg-green-100 dark:bg-green-900/40'
+                                : 'bg-gray-100 dark:bg-gray-800'
+                            }`}>
+                              {isCompleted ? (
+                                <HugeiconsIcon icon={Tick01Icon} className="w-3 h-3 text-green-600" />
+                              ) : (
+                                <div className="w-2 h-2 rounded-full bg-gray-300 dark:bg-gray-600" />
+                              )}
+                            </div>
+                            {!isLast && (
+                              <div className={`w-px h-8 ${
+                                nextCompleted
+                                  ? 'bg-green-300 dark:bg-green-700'
+                                  : 'bg-gray-200 dark:bg-gray-700'
+                              }`} />
+                            )}
+                          </div>
+                          <div className="flex-1 pb-8 last:pb-0">
+                            <p className={`text-sm font-medium ${
+                              isCurrent ? 'text-foreground' : isCompleted ? 'text-muted-foreground' : 'text-muted-foreground/50'
+                            }`}>
+                              {step.label}
+                            </p>
+                            {isCompleted && date && (
+                              <p className="text-xs text-muted-foreground">{formatDate(date)}</p>
+                            )}
+                            {isCompleted && byName && (
+                              <p className="text-xs text-muted-foreground">by {byName}</p>
+                            )}
+                          </div>
+                        </div>
+                      )
+                    })}
                   </div>
                 )}
               </CardContent>
@@ -475,25 +517,167 @@ export default function StockTransferDetailPage() {
         {/* Transfer Items */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <HugeiconsIcon icon={PackageIcon} className="h-5 w-5 text-gray-500" />
-              Transfer Items
-            </CardTitle>
+            <CardTitle className="text-lg">Transfer Items ({transfer.items?.length || 0})</CardTitle>
+            <CardDescription>Articles included in this transfer order</CardDescription>
           </CardHeader>
           <CardContent>
-            <TanStackDataTable
-              data={transfer.items}
-              columns={itemColumns}
-              pagination={{
-                pageSize: 20,
-                pageIndex: 0,
-                totalRows: transfer.items.length,
-                onPageChange: () => { }
-              }}
-            />
+            {transfer.items && transfer.items.length > 0 ? (
+              <div className="overflow-x-auto">
+                <table className="w-full text-[14px]">
+                  <thead>
+                    <tr className="border-b border-gray-200 dark:border-gray-700">
+                      <th className="text-left py-3 px-4 text-[15px] font-semibold text-muted-foreground">Article Code</th>
+                      <th className="text-left py-3 px-4 text-[15px] font-semibold text-muted-foreground">Article Name</th>
+                      <th className="text-right py-3 px-4 text-[15px] font-semibold text-muted-foreground">Shipped Qty</th>
+                      {transfer.status === 'completed' && (
+                        <>
+                          <th className="text-right py-3 px-4 text-[15px] font-semibold text-muted-foreground">Received Qty</th>
+                          <th className="text-center py-3 px-4 text-[15px] font-semibold text-muted-foreground">Status</th>
+                        </>
+                      )}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {transfer.items.map((item) => (
+                      <tr key={item.id} className="border-b border-gray-100 dark:border-gray-800">
+                        <td className="py-3 px-4 font-mono text-[13px]">{item.articleCode || '-'}</td>
+                        <td className="py-3 px-4">{item.articleName || '-'}</td>
+                        <td className="py-3 px-4 text-right font-semibold">{item.quantity}</td>
+                        {transfer.status === 'completed' && (
+                          <>
+                            <td className={`py-3 px-4 text-right font-semibold ${
+                              item.hasDiscrepancy ? 'text-amber-600 dark:text-amber-400' : ''
+                            }`}>
+                              {item.receivedQuantity}
+                            </td>
+                            <td className="py-3 px-4 text-center">
+                              {item.hasDiscrepancy ? (
+                                <Badge className="bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200 border-0">
+                                  Short ({item.quantity - item.receivedQuantity})
+                                </Badge>
+                              ) : (
+                                <Badge className="bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-200 border-0">
+                                  OK
+                                </Badge>
+                              )}
+                            </td>
+                          </>
+                        )}
+                      </tr>
+                    ))}
+                  </tbody>
+                  <tfoot>
+                    <tr className="border-t-2 border-gray-300 dark:border-gray-600">
+                      <td colSpan={2} className="py-3 px-4 font-semibold">Total</td>
+                      <td className="py-3 px-4 text-right font-bold">{transfer.totalQuantity}</td>
+                      {transfer.status === 'completed' && (
+                        <>
+                          <td className="py-3 px-4 text-right font-bold">
+                            {transfer.items.reduce((sum, item) => sum + item.receivedQuantity, 0)}
+                          </td>
+                          <td />
+                        </>
+                      )}
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                No items found for this transfer order.
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
+
+      {/* Receive Dialog */}
+      <Dialog open={receiveDialogOpen} onOpenChange={setReceiveDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Receive Goods</DialogTitle>
+            <DialogDescription>
+              Enter the actual received quantity for each item. Items with less than shipped quantity will be flagged as discrepancy.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 max-h-96 overflow-y-auto">
+            {transfer?.items?.map((item) => {
+              const received = receivedQuantities[item.id] ?? 0
+              const isShort = received < item.quantity
+              return (
+                <div key={item.id} className={`p-4 rounded-lg border ${
+                  isShort ? 'bg-amber-50 dark:bg-amber-900/10 border-amber-200 dark:border-amber-800' : 'bg-muted/50'
+                }`}>
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate">{item.articleName}</p>
+                      <p className="text-xs text-muted-foreground font-mono">{item.articleCode}</p>
+                      <p className="text-xs text-muted-foreground mt-1">Shipped: {item.quantity}</p>
+                    </div>
+                    <div className="w-32">
+                      <Label className="text-xs text-muted-foreground">Received Qty</Label>
+                      <Input
+                        type="number"
+                        min={0}
+                        max={item.quantity}
+                        value={received}
+                        onChange={(e) => {
+                          const val = parseInt(e.target.value) || 0
+                          setReceivedQuantities(prev => ({ ...prev, [item.id]: val }))
+                        }}
+                        className={isShort ? 'border-amber-400' : ''}
+                      />
+                    </div>
+                  </div>
+                  {isShort && (
+                    <p className="text-xs text-amber-600 dark:text-amber-400 mt-2">
+                      Discrepancy: {item.quantity - received} unit(s) short
+                    </p>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setReceiveDialogOpen(false)} disabled={actionLoading}>
+              Cancel
+            </Button>
+            <Button onClick={handleReceive} disabled={actionLoading}>
+              {actionLoading ? 'Processing...' : 'Confirm Receipt'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Cancel Dialog */}
+      <Dialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Cancel Transfer</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to cancel this transfer?
+              {transfer?.status === 'in_transit' && ' Stock that was deducted from the origin warehouse will be reversed.'}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2">
+            <Label>Reason for cancellation</Label>
+            <Textarea
+              placeholder="Enter the reason for cancellation..."
+              value={cancelReason}
+              onChange={(e) => setCancelReason(e.target.value)}
+              rows={3}
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setCancelDialogOpen(false); setCancelReason('') }} disabled={actionLoading}>
+              Keep Transfer
+            </Button>
+            <Button variant="destructive" onClick={handleCancel} disabled={actionLoading}>
+              {actionLoading ? 'Cancelling...' : 'Cancel Transfer'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </TwoLevelLayout>
   )
 }

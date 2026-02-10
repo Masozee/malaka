@@ -1,7 +1,12 @@
 package handlers
 
 import (
+	"database/sql"
+	"fmt"
+	"time"
+
 	"github.com/gin-gonic/gin"
+	"github.com/jmoiron/sqlx"
 
 	"malaka/internal/modules/inventory/domain/entities"
 	"malaka/internal/modules/inventory/domain/services"
@@ -12,12 +17,68 @@ import (
 // StockOpnameHandler handles HTTP requests for stock opname operations.
 type StockOpnameHandler struct {
 	service services.StockOpnameService
+	db      *sqlx.DB
 }
 
 // NewStockOpnameHandler creates a new StockOpnameHandler.
 func NewStockOpnameHandler(service services.StockOpnameService) *StockOpnameHandler {
 	return &StockOpnameHandler{service: service}
 }
+
+// SetDB sets the database connection for enriched queries.
+func (h *StockOpnameHandler) SetDB(db *sqlx.DB) {
+	h.db = db
+}
+
+// stockOpnameRow is used for scanning enriched list queries.
+type stockOpnameRow struct {
+	ID            string    `db:"id"`
+	WarehouseID   string    `db:"warehouse_id"`
+	WarehouseName string    `db:"warehouse_name"`
+	WarehouseCode string    `db:"warehouse_code"`
+	OpnameDate    time.Time `db:"opname_date"`
+	Status        string    `db:"status"`
+	CreatedAt     time.Time `db:"created_at"`
+	UpdatedAt     time.Time `db:"updated_at"`
+}
+
+func toStockOpnameResponse(r stockOpnameRow) dto.StockOpnameListResponse {
+	return dto.StockOpnameListResponse{
+		ID:            r.ID,
+		OpnameNumber:  fmt.Sprintf("OPN-%s", r.ID[len(r.ID)-8:]),
+		WarehouseID:   r.WarehouseID,
+		WarehouseName: r.WarehouseName,
+		WarehouseCode: r.WarehouseCode,
+		OpnameDate:    r.OpnameDate.Format(time.RFC3339),
+		Status:        r.Status,
+		CreatedAt:     r.CreatedAt.Format(time.RFC3339),
+		UpdatedAt:     r.UpdatedAt.Format(time.RFC3339),
+	}
+}
+
+const listStockOpnamesSQL = `
+SELECT
+    so.id, so.warehouse_id, so.opname_date,
+    COALESCE(so.status, '') as status,
+    so.created_at, so.updated_at,
+    COALESCE(w.name, '') as warehouse_name,
+    COALESCE(w.code, '') as warehouse_code
+FROM stock_opnames so
+LEFT JOIN warehouses w ON so.warehouse_id = w.id
+ORDER BY so.opname_date DESC, so.created_at DESC
+`
+
+const getStockOpnameByIDSQL = `
+SELECT
+    so.id, so.warehouse_id, so.opname_date,
+    COALESCE(so.status, '') as status,
+    so.created_at, so.updated_at,
+    COALESCE(w.name, '') as warehouse_name,
+    COALESCE(w.code, '') as warehouse_code
+FROM stock_opnames so
+LEFT JOIN warehouses w ON so.warehouse_id = w.id
+WHERE so.id = $1
+`
 
 // CreateStockOpname handles the creation of a new stock opname.
 func (h *StockOpnameHandler) CreateStockOpname(c *gin.Context) {
@@ -41,8 +102,24 @@ func (h *StockOpnameHandler) CreateStockOpname(c *gin.Context) {
 	response.OK(c, "Stock opname created successfully", opname)
 }
 
-// GetAllStockOpnames handles retrieving all stock opnames.
+// GetAllStockOpnames handles retrieving all stock opnames with enriched data.
 func (h *StockOpnameHandler) GetAllStockOpnames(c *gin.Context) {
+	if h.db != nil {
+		ctx := c.Request.Context()
+		var rows []stockOpnameRow
+		if err := h.db.SelectContext(ctx, &rows, listStockOpnamesSQL); err != nil {
+			response.InternalServerError(c, "Failed to fetch stock opnames: "+err.Error(), nil)
+			return
+		}
+		result := make([]dto.StockOpnameListResponse, 0, len(rows))
+		for _, r := range rows {
+			result = append(result, toStockOpnameResponse(r))
+		}
+		response.OK(c, "Stock opnames retrieved successfully", result)
+		return
+	}
+
+	// Fallback to raw entity
 	opnames, err := h.service.GetAllStockOpnames(c.Request.Context())
 	if err != nil {
 		response.InternalServerError(c, err.Error(), nil)
@@ -52,9 +129,25 @@ func (h *StockOpnameHandler) GetAllStockOpnames(c *gin.Context) {
 	response.OK(c, "Stock opnames retrieved successfully", opnames)
 }
 
-// GetStockOpnameByID handles retrieving a stock opname by its ID.
+// GetStockOpnameByID handles retrieving a stock opname by its ID with enriched data.
 func (h *StockOpnameHandler) GetStockOpnameByID(c *gin.Context) {
 	id := c.Param("id")
+
+	if h.db != nil {
+		ctx := c.Request.Context()
+		var row stockOpnameRow
+		if err := h.db.GetContext(ctx, &row, getStockOpnameByIDSQL, id); err != nil {
+			if err == sql.ErrNoRows {
+				response.NotFound(c, "Stock opname not found", nil)
+				return
+			}
+			response.InternalServerError(c, "Failed to fetch stock opname: "+err.Error(), nil)
+			return
+		}
+		response.OK(c, "Stock opname retrieved successfully", toStockOpnameResponse(row))
+		return
+	}
+
 	opname, err := h.service.GetStockOpnameByID(c.Request.Context(), id)
 	if err != nil {
 		response.InternalServerError(c, err.Error(), nil)
