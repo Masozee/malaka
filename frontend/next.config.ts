@@ -47,7 +47,13 @@ const nextConfig: NextConfig = {
   },
   // Image optimization
   images: {
-    domains: ['localhost'],
+    remotePatterns: [
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '8080',
+      },
+    ],
     formats: ['image/webp', 'image/avif'],
   },
   // Compression
