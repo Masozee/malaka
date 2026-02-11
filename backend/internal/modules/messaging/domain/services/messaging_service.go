@@ -317,6 +317,10 @@ func (s *MessagingService) ClearMessages(ctx context.Context, conversationID, us
 	return s.repo.ClearMessages(ctx, conversationID)
 }
 
+func (s *MessagingService) DeleteMessage(ctx context.Context, messageID, userID uuid.ID) error {
+	return s.repo.SoftDeleteMessage(ctx, messageID, userID)
+}
+
 func (s *MessagingService) ArchiveConversation(ctx context.Context, conversationID, userID uuid.ID) error {
 	ok, err := s.repo.IsParticipant(ctx, conversationID, userID)
 	if err != nil {

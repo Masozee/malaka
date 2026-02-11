@@ -41,7 +41,7 @@ import { Textarea } from '@/components/ui/textarea'
 // Permission modules for grouping
 const MODULES = [
   'masterdata', 'accounting', 'inventory', 'sales', 'shipping',
-  'finance', 'hr', 'procurement', 'production', 'calendar',
+  'finance', 'tax', 'hr', 'procurement', 'production', 'calendar',
   'notifications', 'invitations', 'profile', 'settings', 'admin',
 ]
 

@@ -41,6 +41,13 @@ type Config struct {
 
 	// Local Storage Configuration
 	MediaPath string `mapstructure:"MEDIA_PATH"` // Path to store media files (default: ./media)
+
+	// ClickHouse Analytical Database
+	ClickHouseEnabled  bool   `mapstructure:"CLICKHOUSE_ENABLED"`
+	ClickHouseAddr     string `mapstructure:"CLICKHOUSE_ADDR"`
+	ClickHouseDatabase string `mapstructure:"CLICKHOUSE_DATABASE"`
+	ClickHouseUsername string `mapstructure:"CLICKHOUSE_USERNAME"`
+	ClickHousePassword string `mapstructure:"CLICKHOUSE_PASSWORD"`
 }
 
 // GetMediaPath returns the media storage path with default of ./media

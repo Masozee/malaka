@@ -431,8 +431,8 @@ export default function InventoryReportsPage() {
             )}
 
             <Select>
-              <SelectTrigger className="w-36">
-                <HugeiconsIcon icon={Download01Icon} className="h-4 w-4 mr-2" />
+              <SelectTrigger className="w-36" aria-label="Export format">
+                <HugeiconsIcon icon={Download01Icon} className="h-4 w-4 mr-2" aria-hidden="true" />
                 <SelectValue placeholder="Export" />
               </SelectTrigger>
               <SelectContent>
@@ -445,9 +445,9 @@ export default function InventoryReportsPage() {
         </div>
 
         {loading ? (
-          <div className="flex justify-center items-center py-12">
+          <div className="flex justify-center items-center py-12" role="status" aria-live="polite">
             <div className="text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4" aria-hidden="true"></div>
               <p className="text-muted-foreground">Loading inventory reports...</p>
             </div>
           </div>

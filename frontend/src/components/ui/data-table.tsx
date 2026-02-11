@@ -116,7 +116,7 @@ export function DataTable<T extends { id: string }>({
       setSelectAll(false)
     }
     setSelectedIds(newSelectedIds)
-    
+
     // Update select all state
     if (newSelectedIds.size === data.length && data.length > 0) {
       setSelectAll(true)
@@ -170,8 +170,8 @@ export function DataTable<T extends { id: string }>({
               </span>
               <div className="flex items-center space-x-2">
                 {onBatchDelete && (
-                  <Button 
-                    variant="destructive" 
+                  <Button
+                    variant="destructive"
                     size="sm"
                     onClick={handleBatchDelete}
                     className="flex items-center space-x-1"
@@ -181,8 +181,8 @@ export function DataTable<T extends { id: string }>({
                   </Button>
                 )}
                 {onBatchBarcode && (
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     size="sm"
                     onClick={() => {
                       const selectedRecords = data.filter(item => selectedIds.has(item.id))
@@ -195,8 +195,8 @@ export function DataTable<T extends { id: string }>({
                   </Button>
                 )}
                 {onBatchQRCode && (
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     size="sm"
                     onClick={() => {
                       const selectedRecords = data.filter(item => selectedIds.has(item.id))
@@ -213,7 +213,7 @@ export function DataTable<T extends { id: string }>({
           )}
           {onSearch && (
             <div className="relative">
-              <HugeiconsIcon icon={Search01Icon} className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <HugeiconsIcon icon={Search01Icon} className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" aria-hidden="true" />
               <Input
                 placeholder={searchPlaceholder}
                 value={searchValue}
@@ -288,7 +288,7 @@ export function DataTable<T extends { id: string }>({
                     )}
                     {columns.map((column) => (
                       <td key={String(column.key)} className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">
-                        {column.render 
+                        {column.render
                           ? column.render(record[column.key], record)
                           : String(record[column.key] || '-')
                         }

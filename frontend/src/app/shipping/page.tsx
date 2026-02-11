@@ -140,7 +140,8 @@ export default function ShippingPage() {
 
           {/* Shipping Modules */}
           <div>
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Shipping Modules</h2>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1">Shipping Modules</h2>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">Shipment tracking, courier management, and delivery logistics</p>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {shippingModules.map((module) => (
                 <Card key={module.title} className="p-6 hover:shadow-md transition-shadow duration-200">

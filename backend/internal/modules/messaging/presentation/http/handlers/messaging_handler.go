@@ -412,6 +412,28 @@ func (h *MessagingHandler) ClearMessages(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"success": true})
 }
 
+func (h *MessagingHandler) DeleteMessage(c *gin.Context) {
+	userIDStr, _ := c.Get("user_id")
+	userID, err := uuid.Parse(userIDStr.(string))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+		return
+	}
+
+	msgID, err := uuid.Parse(c.Param("messageId"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid message ID"})
+		return
+	}
+
+	if err := h.service.DeleteMessage(c.Request.Context(), msgID, userID); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"success": true})
+}
+
 func (h *MessagingHandler) ArchiveConversation(c *gin.Context) {
 	userIDStr, _ := c.Get("user_id")
 	userID, err := uuid.Parse(userIDStr.(string))

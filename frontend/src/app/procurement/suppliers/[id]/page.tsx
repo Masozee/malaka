@@ -9,7 +9,9 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { supplierService } from '@/services/masterdata'
+import { purchaseOrderService } from '@/services/procurement'
 import type { Supplier } from '@/types/masterdata'
+import type { PurchaseOrder } from '@/types/procurement'
 import Link from 'next/link'
 
 const statusColors: Record<string, string> = {
@@ -17,10 +19,23 @@ const statusColors: Record<string, string> = {
   inactive: 'bg-gray-100 text-gray-800',
 }
 
+const poStatusColors: Record<string, string> = {
+  draft: 'bg-gray-100 text-gray-800',
+  pending_approval: 'bg-yellow-100 text-yellow-800',
+  approved: 'bg-blue-100 text-blue-800',
+  sent: 'bg-indigo-100 text-indigo-800',
+  confirmed: 'bg-cyan-100 text-cyan-800',
+  shipped: 'bg-purple-100 text-purple-800',
+  received: 'bg-green-100 text-green-800',
+  cancelled: 'bg-red-100 text-red-800',
+}
+
 export default function SupplierDetailPage() {
   const params = useParams()
   const router = useRouter()
   const [supplier, setSupplier] = useState<Supplier | null>(null)
+  const [purchaseOrders, setPurchaseOrders] = useState<PurchaseOrder[]>([])
+  const [loadingPOs, setLoadingPOs] = useState(false)
   const [loading, setLoading] = useState(true)
   const [mounted, setMounted] = useState(false)
 
@@ -34,11 +49,24 @@ export default function SupplierDetailPage() {
       setLoading(true)
       const data = await supplierService.getById(params.id as string)
       setSupplier(data)
+      if (data) loadPurchaseOrders(data.id)
     } catch (error) {
       console.error('Error loading supplier:', error)
       setSupplier(null)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const loadPurchaseOrders = async (supplierId: string) => {
+    try {
+      setLoadingPOs(true)
+      const result = await purchaseOrderService.getAll({ supplier_id: supplierId, limit: 10, sortBy: 'order_date', sortOrder: 'desc' })
+      setPurchaseOrders(result.data || [])
+    } catch (error) {
+      console.error('Error loading purchase orders:', error)
+    } finally {
+      setLoadingPOs(false)
     }
   }
 
@@ -125,26 +153,29 @@ export default function SupplierDetailPage() {
 
       <div className="flex-1 overflow-auto p-6 space-y-6">
         {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
           <Card className="p-4">
             <p className="text-sm font-medium text-muted-foreground">Status</p>
-            <Badge className={statusColors[supplier.status || 'active'] || statusColors.active}>
+            <Badge className={`mt-1 ${statusColors[supplier.status || 'active'] || statusColors.active}`}>
               {(supplier.status || 'active').charAt(0).toUpperCase() + (supplier.status || 'active').slice(1)}
             </Badge>
           </Card>
 
           <Card className="p-4">
-            <p className="text-sm font-medium text-muted-foreground">Payment Terms</p>
-            <p className="text-lg font-semibold">{supplier.payment_terms || 'N/A'}</p>
+            <p className="text-sm font-medium text-muted-foreground">Total Orders</p>
+            <p className="text-2xl font-bold">{purchaseOrders.length}</p>
           </Card>
 
           <Card className="p-4">
-            <p className="text-sm font-medium text-muted-foreground">Credit Limit</p>
+            <p className="text-sm font-medium text-muted-foreground">Total Value</p>
             <p className="text-lg font-semibold">
-              {mounted && supplier.credit_limit
-                ? `Rp ${supplier.credit_limit.toLocaleString('id-ID')}`
-                : 'N/A'}
+              {mounted ? purchaseOrders.reduce((sum, po) => sum + (po.total_amount || 0), 0).toLocaleString('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }) : '-'}
             </p>
+          </Card>
+
+          <Card className="p-4">
+            <p className="text-sm font-medium text-muted-foreground">Payment Terms</p>
+            <p className="text-lg font-semibold">{supplier.payment_terms || 'N/A'}</p>
           </Card>
 
           <Card className="p-4">
@@ -219,6 +250,52 @@ export default function SupplierDetailPage() {
                   <p className="font-medium">{supplier.address || 'N/A'}</p>
                 </div>
               </div>
+            </Card>
+
+            {/* Transaction History */}
+            <Card className="p-6">
+              <div className="flex items-center justify-between mb-1">
+                <h3 className="text-lg font-semibold">Transaction History</h3>
+                <Link href={`/procurement/purchase-orders?supplier_id=${supplier.id}`}>
+                  <Button variant="outline" size="sm">View All</Button>
+                </Link>
+              </div>
+              <p className="text-sm text-muted-foreground mb-4">Recent purchase orders with this supplier</p>
+
+              {loadingPOs ? (
+                <div className="text-sm text-muted-foreground py-8 text-center">Loading transactions...</div>
+              ) : purchaseOrders.length === 0 ? (
+                <div className="text-center py-8">
+                  <p className="text-sm text-muted-foreground mb-3">No purchase orders found for this supplier</p>
+                  <Link href={`/procurement/purchase-orders/new?supplier=${supplier.id}`}>
+                    <Button size="sm">Create First Order</Button>
+                  </Link>
+                </div>
+              ) : (
+                <div className="space-y-0">
+                  {purchaseOrders.map((po, index) => (
+                    <div
+                      key={po.id}
+                      className={`flex items-center justify-between py-3 ${index < purchaseOrders.length - 1 ? 'border-b border-gray-100 dark:border-gray-700' : ''}`}
+                    >
+                      <div>
+                        <Link href={`/procurement/purchase-orders/${po.id}`} className="font-medium text-foreground hover:underline">
+                          {po.po_number}
+                        </Link>
+                        <p className="text-sm text-muted-foreground">
+                          {mounted && po.order_date ? new Date(po.order_date).toLocaleDateString('id-ID') : '-'}
+                          {po.total_amount ? ` - ${po.total_amount.toLocaleString('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 })}` : ''}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge className={poStatusColors[po.status] || 'bg-gray-100 text-gray-800'}>
+                          {(po.status || '').replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                        </Badge>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </Card>
           </div>
 

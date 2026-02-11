@@ -15,10 +15,12 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	gormlogger "gorm.io/gorm/logger"
+	analytics_services "malaka/internal/modules/analytics/domain/services"
 	"malaka/internal/config"
 	"malaka/internal/server/container"
 	httpserver "malaka/internal/server/http"
 	"malaka/internal/shared/cache"
+	chdb "malaka/internal/shared/clickhouse"
 	"malaka/internal/shared/database"
 	"malaka/internal/shared/logger"
 )
@@ -190,8 +192,49 @@ func main() {
 	redisCache := cache.NewRedisCache(cfg.RedisAddr, cfg.RedisPassword, cfg.RedisDB)
 	zapLogger.Info("Redis cache initialized", zap.String("address", cfg.RedisAddr))
 
+	// Initialize ClickHouse analytical database (optional)
+	var clickhouseDB *chdb.ClickHouseDB
+	if cfg.ClickHouseEnabled {
+		chConfig := &chdb.Config{
+			Enabled:  cfg.ClickHouseEnabled,
+			Addr:     cfg.ClickHouseAddr,
+			Database: cfg.ClickHouseDatabase,
+			Username: cfg.ClickHouseUsername,
+			Password: cfg.ClickHousePassword,
+		}
+		var chErr error
+		clickhouseDB, chErr = chdb.NewClickHouseDB(chConfig, zapLogger)
+		if chErr != nil {
+			zapLogger.Warn("ClickHouse initialization failed, analytics will fall back to PostgreSQL",
+				zap.Error(chErr))
+		} else if clickhouseDB != nil {
+			zapLogger.Info("ClickHouse connection established",
+				zap.String("address", cfg.ClickHouseAddr),
+				zap.String("database", cfg.ClickHouseDatabase))
+
+			// Run ClickHouse schema migrations
+			if migErr := chdb.RunMigrations(clickhouseDB, zapLogger); migErr != nil {
+				zapLogger.Warn("ClickHouse schema migration failed", zap.Error(migErr))
+			}
+		}
+	} else {
+		zapLogger.Info("ClickHouse is disabled, analytics will use PostgreSQL fallback")
+	}
+
 	// Create application container
 	appContainer := container.NewContainer(&cfg, zapLogger, conn.DB, gormDB, redisCache)
+
+	// Set optional ClickHouse connection
+	if clickhouseDB != nil {
+		appContainer.ClickHouseDB = clickhouseDB
+		zapLogger.Info("ClickHouse registered in application container")
+	}
+
+	// Initialize analytics query service (works with or without ClickHouse)
+	analyticsQueryService := analytics_services.NewAnalyticsQueryService(clickhouseDB, sqlx.NewDb(conn.DB, "postgres"), zapLogger)
+	appContainer.AnalyticsQueryService = analyticsQueryService
+	zapLogger.Info("Analytics query service initialized",
+		zap.Bool("clickhouse_enabled", clickhouseDB != nil))
 
 	// Create HTTP server with Gin router
 	ginServer, err := httpserver.NewServer(&cfg, zapLogger, appContainer)
@@ -274,6 +317,15 @@ func main() {
 	case <-cacheWarmupDone:
 	case <-time.After(5 * time.Second):
 		zapLogger.Warn("Cache warmup did not complete in time")
+	}
+
+	// Close ClickHouse connection
+	if clickhouseDB != nil {
+		if err := clickhouseDB.Close(); err != nil {
+			zapLogger.Error("Error closing ClickHouse connection", zap.Error(err))
+		} else {
+			zapLogger.Info("ClickHouse connection closed")
+		}
 	}
 
 	// Close database connection (handled by defer, but log it)

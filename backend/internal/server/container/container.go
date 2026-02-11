@@ -15,6 +15,8 @@ import (
 	"malaka/internal/modules/shipping/infrastructure/persistence"
 	"malaka/internal/shared/auth"
 	"malaka/internal/shared/cache"
+	analytics_services "malaka/internal/modules/analytics/domain/services"
+	chdb "malaka/internal/shared/clickhouse"
 
 	// Masterdata imports
 	masterdata_services "malaka/internal/modules/masterdata/domain/services"
@@ -249,6 +251,12 @@ type Container struct {
 
 	// RBAC services
 	RBACService *auth.RBACService
+
+	// Analytics services
+	AnalyticsQueryService *analytics_services.AnalyticsQueryService
+
+	// ClickHouse analytical database (optional, nil when disabled)
+	ClickHouseDB *chdb.ClickHouseDB
 }
 
 // NewContainer creates a new dependency container.

@@ -37,6 +37,7 @@ type MessagingRepository interface {
 	ListMessages(ctx context.Context, conversationID uuid.ID, limit, offset int) ([]*entities.Message, error)
 	GetUnreadCountForUser(ctx context.Context, userID uuid.ID) (int64, error)
 	ClearMessages(ctx context.Context, conversationID uuid.ID) error
+	SoftDeleteMessage(ctx context.Context, messageID, senderID uuid.ID) error
 
 	// Conversation actions
 	ArchiveConversation(ctx context.Context, conversationID, userID uuid.ID) error

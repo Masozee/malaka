@@ -274,6 +274,7 @@ export default function CompetitorsList({ initialData }: CompetitorsListProps) {
                         <HugeiconsIcon
                             icon={Search01Icon}
                             className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground"
+                            aria-hidden="true"
                         />
                         <Input
                             placeholder="Search competitors..."
@@ -282,12 +283,12 @@ export default function CompetitorsList({ initialData }: CompetitorsListProps) {
                             onChange={(e) => setSearchQuery(e.target.value)}
                         />
                     </div>
-                    <Button variant="outline" size="sm">
-                        <HugeiconsIcon icon={FilterIcon} className="h-4 w-4 mr-2" />
+                    <Button variant="outline" size="sm" aria-label="Filter competitors">
+                        <HugeiconsIcon icon={FilterIcon} className="h-4 w-4 mr-2" aria-hidden="true" />
                         Filters
                     </Button>
-                    <Button variant="outline" size="sm">
-                        <HugeiconsIcon icon={Download01Icon} className="h-4 w-4 mr-2" />
+                    <Button variant="outline" size="sm" aria-label="Export competitor data">
+                        <HugeiconsIcon icon={Download01Icon} className="h-4 w-4 mr-2" aria-hidden="true" />
                         Export
                     </Button>
                 </div>

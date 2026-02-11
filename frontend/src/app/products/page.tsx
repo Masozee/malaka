@@ -115,7 +115,8 @@ export default function ProductsPage() {
 
           {/* Product Modules */}
           <div>
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Product Modules</h2>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1">Product Modules</h2>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">Manage your product catalog, variants, pricing, and media assets</p>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {productModules.map((module) => (
                 <Card key={module.title} className="p-6 hover:shadow-md transition-shadow duration-200">
@@ -139,7 +140,8 @@ export default function ProductsPage() {
 
           {/* Quick Actions */}
           <div>
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Quick Actions</h2>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1">Quick Actions</h2>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">Frequently used shortcuts for product management</p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <Card className="p-4">
                 <div className="flex items-center justify-between">

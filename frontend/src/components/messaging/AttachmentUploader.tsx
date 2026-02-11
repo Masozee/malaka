@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import type { AttachmentMeta } from '@/services/messaging'
 import { formatFileSize } from '@/services/messaging'
 
@@ -16,6 +16,7 @@ interface AttachmentUploaderProps {
   onUploadComplete: (attachments: AttachmentMeta[]) => void
   onUploading: (isUploading: boolean) => void
   uploadAttachment: (conversationId: string, file: File) => Promise<AttachmentMeta | null>
+  triggerRef?: React.MutableRefObject<(() => void) | null>
   accentColor?: 'blue' | 'purple'
 }
 
@@ -27,10 +28,19 @@ export function AttachmentUploader({
   onUploadComplete,
   onUploading,
   uploadAttachment,
+  triggerRef,
   accentColor = 'blue',
 }: AttachmentUploaderProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [pendingFiles, setPendingFiles] = useState<PendingFile[]>([])
+
+  // Expose file picker trigger to parent
+  useEffect(() => {
+    if (triggerRef) {
+      triggerRef.current = () => fileInputRef.current?.click()
+      return () => { triggerRef.current = null }
+    }
+  }, [triggerRef])
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || [])
@@ -96,12 +106,9 @@ export function AttachmentUploader({
     setPendingFiles([])
   }
 
-  const accentClasses = accentColor === 'purple'
-    ? 'text-purple-500 hover:text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20'
-    : 'text-blue-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20'
-
   return (
-    <div>
+    <>
+      {/* Hidden file input */}
       <input
         ref={fileInputRef}
         type="file"
@@ -110,20 +117,10 @@ export function AttachmentUploader({
         onChange={handleFileSelect}
         className="hidden"
       />
-      <button
-        type="button"
-        onClick={() => fileInputRef.current?.click()}
-        className={`p-2 rounded-lg transition-colors ${accentClasses}`}
-        title="Attach file"
-      >
-        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
-        </svg>
-      </button>
 
       {/* Pending attachments strip */}
       {pendingFiles.length > 0 && (
-        <div className="flex items-center gap-2 mt-2 flex-wrap">
+        <div className="flex items-center gap-2 mb-2 flex-wrap">
           {pendingFiles.map((pf, i) => (
             <div
               key={i}
@@ -166,6 +163,6 @@ export function AttachmentUploader({
           )}
         </div>
       )}
-    </div>
+    </>
   )
 }

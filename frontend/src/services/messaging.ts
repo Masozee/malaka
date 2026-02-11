@@ -287,6 +287,18 @@ class MessagingService {
     }
   }
 
+  // --- Message actions ---
+
+  async deleteMessage(messageId: string): Promise<boolean> {
+    try {
+      await apiClient.post(`${this.baseUrl}/messages/${messageId}/delete`)
+      return true
+    } catch (error) {
+      console.error('Failed to delete message:', error)
+      return false
+    }
+  }
+
   // --- Conversation actions ---
 
   async clearMessages(conversationId: string): Promise<boolean> {

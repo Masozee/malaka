@@ -5,10 +5,11 @@ import { cn } from "@/lib/utils"
 
 interface ProgressProps extends React.HTMLAttributes<HTMLDivElement> {
   value?: number
+  indicatorClassName?: string
 }
 
 const Progress = React.forwardRef<HTMLDivElement, ProgressProps>(
-  ({ className, value = 0, ...props }, ref) => (
+  ({ className, value, indicatorClassName, ...props }, ref) => (
     <div
       ref={ref}
       role="progressbar"
@@ -22,8 +23,8 @@ const Progress = React.forwardRef<HTMLDivElement, ProgressProps>(
       {...props}
     >
       <div
-        className="h-full bg-primary transition-all duration-300 ease-in-out"
-        style={{ width: `${Math.min(Math.max(value, 0), 100)}%` }}
+        className={cn("h-full w-full flex-1 bg-primary transition-all", indicatorClassName)}
+        style={{ transform: `translateX(-${100 - (value || 0)}%)` }}
       />
     </div>
   )

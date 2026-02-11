@@ -39,6 +39,7 @@ export default function EditSupplierPage() {
       payment_terms: 'Net 30',
       credit_limit: 0,
       status: 'active',
+      company_id: '',
     },
     onSubmit: async ({ value }) => {
       if (!supplier) return
@@ -75,6 +76,7 @@ export default function EditSupplierPage() {
       form.setFieldValue('payment_terms', data.payment_terms || 'Net 30')
       form.setFieldValue('credit_limit', data.credit_limit || 0)
       form.setFieldValue('status', data.status || 'active')
+      form.setFieldValue('company_id', data.company_id || '')
     } catch (error) {
       console.error('Error loading supplier:', error)
       setSupplier(null)

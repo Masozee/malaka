@@ -19,14 +19,48 @@ export function useMessaging(type?: 'personal' | 'group') {
 
   const typingTimeoutsRef = useRef<Map<string, NodeJS.Timeout>>(new Map())
   const conversationsRef = useRef<Conversation[]>([])
+  const initialLoadDoneRef = useRef(false)
+
+  const playNotificationSound = useCallback(() => {
+    try {
+      const audio = new Audio('/notifications.wav')
+      audio.volume = 0.5
+      audio.play().catch(() => {})
+    } catch {
+      // Audio not supported
+    }
+  }, [])
 
   // Load conversations
   const loadConversations = useCallback(async () => {
-    setIsLoading(true)
-    const convs = await messagingService.listConversations(type)
+    // Only show loading spinner on initial load to prevent flickering
+    if (!initialLoadDoneRef.current) {
+      setIsLoading(true)
+    }
+    let convs: Conversation[] = []
+
+    if (type) {
+      convs = await messagingService.listConversations(type)
+    } else {
+      // Fetch both types if no specific type is requested
+      const [personal, groups] = await Promise.all([
+        messagingService.listConversations('personal'),
+        messagingService.listConversations('group')
+      ])
+      // Use a Map to deduplicate by ID just in case
+      const convMap = new Map<string, Conversation>()
+      personal.forEach(c => convMap.set(c.id, c))
+      groups.forEach(c => convMap.set(c.id, c))
+      convs = Array.from(convMap.values())
+    }
+
+    // Sort by updated_at desc
+    convs.sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
+
     conversationsRef.current = convs
     setConversations(convs)
     setIsLoading(false)
+    initialLoadDoneRef.current = true
   }, [type])
 
   // Load unread count
@@ -95,13 +129,14 @@ export function useMessaging(type?: 'personal' | 'group') {
     _recipientId: string,
     plaintext: string,
     attachmentIds?: string[],
-    entityRefs?: EntityRef[]
+    entityRefs?: EntityRef[],
+    attachmentMetas?: AttachmentMeta[]
   ): Promise<boolean> => {
     const content = buildMessageContent(plaintext, attachmentIds, entityRefs)
     const sent = await messagingService.sendMessage(conversationId, content, attachmentIds)
     if (sent) {
       const parsed_content = parseMessageContent(content)
-      const decrypted: DecryptedMessage = { ...sent, plaintext: content, parsed_content }
+      const decrypted: DecryptedMessage = { ...sent, plaintext: content, parsed_content, attachment_metas: attachmentMetas }
       setMessages(prev => [...prev, decrypted])
       loadConversations()
       return true
@@ -154,6 +189,11 @@ export function useMessaging(type?: 'personal' | 'group') {
         messagingService.markConversationRead(data.conversation_id)
       }
 
+      // Play notification sound for messages from others
+      if (data.sender_id !== user.id) {
+        playNotificationSound()
+      }
+
       // Refresh conversation list and unread count
       loadConversations()
       loadUnreadCount()
@@ -161,7 +201,7 @@ export function useMessaging(type?: 'personal' | 'group') {
 
     subscribe('chat_message', handleChatMessage)
     return () => unsubscribe('chat_message', handleChatMessage)
-  }, [subscribe, unsubscribe, activeConversationId, user?.id, loadConversations, loadUnreadCount])
+  }, [subscribe, unsubscribe, activeConversationId, user?.id, loadConversations, loadUnreadCount, playNotificationSound])
 
   // Handle typing indicators via WebSocket
   useEffect(() => {
@@ -204,6 +244,18 @@ export function useMessaging(type?: 'personal' | 'group') {
   const sendTypingIndicator = useCallback((conversationId: string, isTyping: boolean) => {
     wsSend('typing_indicator', { conversation_id: conversationId, is_typing: isTyping })
   }, [wsSend])
+
+  // Soft-delete a single message
+  const deleteMessage = useCallback(async (messageId: string): Promise<boolean> => {
+    const success = await messagingService.deleteMessage(messageId)
+    if (success) {
+      setMessages(prev => prev.map(m =>
+        m.id === messageId ? { ...m, deleted_at: new Date().toISOString() } : m
+      ))
+      loadConversations()
+    }
+    return success
+  }, [loadConversations])
 
   // Clear all messages in a conversation
   const clearChat = useCallback(async (conversationId: string): Promise<boolean> => {
@@ -313,6 +365,7 @@ export function useMessaging(type?: 'personal' | 'group') {
     sendTypingIndicator,
     startConversation,
     loadConversations,
+    deleteMessage,
     clearChat,
     archiveConversation,
     deleteConversation,

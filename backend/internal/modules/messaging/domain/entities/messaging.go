@@ -63,7 +63,7 @@ type Message struct {
 	Nonce             string     `json:"nonce" db:"nonce"`
 	SenderPublicKeyID *uuid.ID   `json:"sender_public_key_id,omitempty" db:"sender_public_key_id"`
 	CreatedAt         time.Time  `json:"created_at" db:"created_at"`
-	DeletedAt         *time.Time `json:"-" db:"deleted_at"`
+	DeletedAt         *time.Time `json:"deleted_at,omitempty" db:"deleted_at"`
 
 	// Joined fields
 	SenderUsername string               `json:"sender_username,omitempty" db:"sender_username"`

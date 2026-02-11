@@ -163,7 +163,8 @@ export default function MasterDataPage() {
 
           {/* Master Data Modules */}
           <div>
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Master Data Modules</h2>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1">Master Data Modules</h2>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">Core business entities, product catalogs, and partner configurations</p>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {masterDataModules.map((module) => (
                 <Card key={module.title} className="p-6 hover:shadow-md transition-shadow duration-200">
@@ -187,7 +188,8 @@ export default function MasterDataPage() {
 
           {/* Quick Actions */}
           <div>
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Quick Actions</h2>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1">Quick Actions</h2>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">Common tasks and shortcuts for managing master data</p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <Card className="p-4">
                 <div className="flex items-center justify-between">

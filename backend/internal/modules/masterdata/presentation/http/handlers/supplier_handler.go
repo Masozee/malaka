@@ -3,7 +3,6 @@ package handlers
 import (
 	"github.com/gin-gonic/gin"
 
-	"malaka/internal/modules/masterdata/domain/entities"
 	"malaka/internal/modules/masterdata/domain/services"
 	"malaka/internal/modules/masterdata/presentation/http/dto"
 	"malaka/internal/shared/response"
@@ -28,19 +27,14 @@ func (h *SupplierHandler) CreateSupplier(c *gin.Context) {
 		return
 	}
 
-	supplier := &entities.Supplier{
-		Name:      req.Name,
-		Address:   req.Address,
-		Contact:   req.Contact,
-		CompanyID: req.CompanyID,
-	}
+	supplier := req.ToEntity()
 
 	if err := h.service.CreateSupplier(c.Request.Context(), supplier); err != nil {
 		response.InternalServerError(c, err.Error(), nil)
 		return
 	}
 
-	response.OK(c, "Supplier created successfully", supplier)
+	response.OK(c, "Supplier created successfully", dto.SupplierResponseFromEntity(supplier))
 }
 
 // GetSupplierByID handles retrieving a supplier by its ID.
@@ -78,26 +72,38 @@ func (h *SupplierHandler) GetAllSuppliers(c *gin.Context) {
 // UpdateSupplier handles updating an existing supplier.
 func (h *SupplierHandler) UpdateSupplier(c *gin.Context) {
 	id := c.Param("id")
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		response.BadRequest(c, "Invalid ID format", nil)
+		return
+	}
+
 	var req dto.UpdateSupplierRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		response.BadRequest(c, err.Error(), nil)
 		return
 	}
 
-	supplier := &entities.Supplier{
-		Name:      req.Name,
-		Address:   req.Address,
-		Contact:   req.Contact,
-		CompanyID: req.CompanyID,
+	// Get existing supplier first
+	existing, err := h.service.GetSupplierByID(c.Request.Context(), parsedID)
+	if err != nil {
+		response.InternalServerError(c, err.Error(), nil)
+		return
 	}
-	supplier.ID = uuid.MustParse(id) // Set the ID from the URL parameter
+	if existing == nil {
+		response.NotFound(c, "Supplier not found", nil)
+		return
+	}
 
-	if err := h.service.UpdateSupplier(c.Request.Context(), supplier); err != nil {
+	// Apply changes from request
+	req.ApplyToEntity(existing)
+
+	if err := h.service.UpdateSupplier(c.Request.Context(), existing); err != nil {
 		response.InternalServerError(c, err.Error(), nil)
 		return
 	}
 
-	response.OK(c, "Supplier updated successfully", supplier)
+	response.OK(c, "Supplier updated successfully", dto.SupplierResponseFromEntity(existing))
 }
 
 // DeleteSupplier handles deleting a supplier by its ID.

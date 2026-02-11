@@ -137,7 +137,8 @@ export default function SalesPage() {
 
           {/* Sales Modules */}
           <div>
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Sales Modules</h2>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1">Sales Modules</h2>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">All sales channels, order management, and customer operations</p>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {salesModules.map((module) => {
                 return (
@@ -163,7 +164,8 @@ export default function SalesPage() {
 
           {/* Quick Actions */}
           <div>
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Quick Actions</h2>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1">Quick Actions</h2>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">Start transactions and access reports quickly</p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <Card className="p-4">
                 <div className="flex items-center justify-between">
@@ -205,7 +207,8 @@ export default function SalesPage() {
 
           {/* Recent Activity */}
           <div>
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Recent Sales Activity</h2>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1">Recent Sales Activity</h2>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">Latest transactions, orders, and updates across all channels</p>
             <Card className="p-6">
               <div className="space-y-4">
                 <div className="flex items-center justify-between py-3 border-b border-gray-100 dark:border-gray-700">

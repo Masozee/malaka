@@ -168,3 +168,7 @@ macos-app/**/.build/
 macos-app/**/*.app/
 macos-app/**/*.bin
 macos-app/**/*.dSYM/
+
+# ClickHouse binary and data
+backend/clickhouse
+clickhouse-data/

@@ -403,11 +403,11 @@ func (r *PostgresMessagingRepository) CreateMessageWithAttachments(ctx context.C
 func (r *PostgresMessagingRepository) ListMessages(ctx context.Context, conversationID uuid.ID, limit, offset int) ([]*entities.Message, error) {
 	query := `
 		SELECT m.id, m.conversation_id, m.sender_id, m.encrypted_content, m.nonce,
-			m.sender_public_key_id, m.created_at,
+			m.sender_public_key_id, m.created_at, m.deleted_at,
 			COALESCE(u.username, '') as sender_username
 		FROM messages m
 		LEFT JOIN users u ON u.id = m.sender_id
-		WHERE m.conversation_id = $1 AND m.deleted_at IS NULL
+		WHERE m.conversation_id = $1
 		ORDER BY m.created_at DESC
 		LIMIT $2 OFFSET $3
 	`
@@ -459,6 +459,21 @@ func (r *PostgresMessagingRepository) ClearMessages(ctx context.Context, convers
 		time.Now(), conversationID,
 	)
 	return err
+}
+
+func (r *PostgresMessagingRepository) SoftDeleteMessage(ctx context.Context, messageID, senderID uuid.ID) error {
+	res, err := r.db.ExecContext(ctx,
+		`UPDATE messages SET deleted_at = $1 WHERE id = $2 AND sender_id = $3 AND deleted_at IS NULL`,
+		time.Now(), messageID, senderID,
+	)
+	if err != nil {
+		return err
+	}
+	rows, _ := res.RowsAffected()
+	if rows == 0 {
+		return fmt.Errorf("message not found or already deleted")
+	}
+	return nil
 }
 
 func (r *PostgresMessagingRepository) ArchiveConversation(ctx context.Context, conversationID, userID uuid.ID) error {

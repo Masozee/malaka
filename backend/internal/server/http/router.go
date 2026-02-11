@@ -29,6 +29,10 @@ import (
 	// Messaging imports
 	messaging_handlers "malaka/internal/modules/messaging/presentation/http/handlers"
 	messaging_routes "malaka/internal/modules/messaging/presentation/http/routes"
+
+	// Analytics imports
+	analytics_handlers "malaka/internal/modules/analytics/presentation/http/handlers"
+	analytics_routes "malaka/internal/modules/analytics/presentation/http/routes"
 )
 
 // SetupRouter configures routes that don't require authentication
@@ -208,4 +212,10 @@ func SetupProtectedRoutes(protectedAPI *gin.RouterGroup, c *container.Container,
 
 	// Register messaging routes under v1 API (protected)
 	messaging_routes.RegisterMessagingRoutes(protectedAPI, messagingHandler, rbacSvc)
+
+	// Initialize analytics handler and register routes
+	if c.AnalyticsQueryService != nil {
+		analyticsHandler := analytics_handlers.NewAnalyticsHandler(c.AnalyticsQueryService)
+		analytics_routes.RegisterAnalyticsRoutes(protectedAPI, analyticsHandler, rbacSvc)
+	}
 }

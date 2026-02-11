@@ -147,6 +147,17 @@ func (server *Server) setupRouter() {
 			checks["storage"] = gin.H{"status": "not_configured"}
 		}
 
+		// Check ClickHouse analytical database
+		if server.container.ClickHouseDB != nil {
+			if server.container.ClickHouseDB.IsAvailable() {
+				checks["clickhouse"] = gin.H{"status": "healthy"}
+			} else {
+				checks["clickhouse"] = gin.H{"status": "unhealthy"}
+			}
+		} else {
+			checks["clickhouse"] = gin.H{"status": "not_configured"}
+		}
+
 		status := "healthy"
 		statusCode := 200
 		if !healthy {
