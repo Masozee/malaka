@@ -66,7 +66,7 @@ func (r *expenditureRequestRepositoryImpl) GetAll(ctx context.Context) ([]*entit
 		SELECT id, request_number, request_date, requested_by, cash_bank_id,
 			   amount, purpose, description, status, approved_by, approved_at,
 			   disbursed_by, disbursed_at, rejected_reason, created_at, updated_at
-		FROM expenditure_requests ORDER BY created_at DESC`
+		FROM expenditure_requests ORDER BY created_at DESC LIMIT 500`
 
 	rows, err := r.db.QueryContext(ctx, query)
 	if err != nil {

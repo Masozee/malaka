@@ -70,163 +70,94 @@ type RecentPO struct {
 }
 
 // GetOverview retrieves the procurement dashboard overview.
+// Consolidated from 17 separate queries into 3 queries using CTEs.
 func (s *AnalyticsService) GetOverview(ctx context.Context) (*ProcurementOverview, error) {
 	overview := &ProcurementOverview{}
 
-	// Get Purchase Request stats
-	err := s.db.GetContext(ctx, &overview.TotalPurchaseRequests,
-		`SELECT COUNT(*) FROM purchase_requests`)
+	// Query 1: All scalar stats in a single query using sub-selects
+	type overviewStats struct {
+		TotalPR      int64   `db:"total_pr"`
+		PendingPR    int64   `db:"pending_pr"`
+		ApprovedPR   int64   `db:"approved_pr"`
+		TotalPO      int64   `db:"total_po"`
+		DraftPO      int64   `db:"draft_po"`
+		PendingPO    int64   `db:"pending_po"`
+		SentPO       int64   `db:"sent_po"`
+		ReceivedPO   int64   `db:"received_po"`
+		TotalPOValue float64 `db:"total_po_value"`
+		TotalPRValue float64 `db:"total_pr_value"`
+		PendingPay   float64 `db:"pending_payments"`
+		TotalContr   int64   `db:"total_contracts"`
+		ActiveContr  int64   `db:"active_contracts"`
+		ExpiringC    int64   `db:"expiring_contracts"`
+		TotalEvals   int64   `db:"total_evaluations"`
+		AvgScore     float64 `db:"avg_score"`
+	}
+	var stats overviewStats
+	err := s.db.GetContext(ctx, &stats, `
+		SELECT
+			(SELECT COUNT(*) FROM purchase_requests) as total_pr,
+			(SELECT COUNT(*) FROM purchase_requests WHERE status = 'pending') as pending_pr,
+			(SELECT COUNT(*) FROM purchase_requests WHERE status = 'approved') as approved_pr,
+			(SELECT COUNT(*) FROM procurement_purchase_orders) as total_po,
+			(SELECT COUNT(*) FROM procurement_purchase_orders WHERE status = 'draft') as draft_po,
+			(SELECT COUNT(*) FROM procurement_purchase_orders WHERE status = 'pending_approval') as pending_po,
+			(SELECT COUNT(*) FROM procurement_purchase_orders WHERE status = 'sent') as sent_po,
+			(SELECT COUNT(*) FROM procurement_purchase_orders WHERE status = 'received') as received_po,
+			(SELECT COALESCE(SUM(total_amount), 0) FROM procurement_purchase_orders) as total_po_value,
+			(SELECT COALESCE(SUM(total_amount), 0) FROM purchase_requests) as total_pr_value,
+			(SELECT COALESCE(SUM(total_amount), 0) FROM procurement_purchase_orders
+			 WHERE payment_status IN ('unpaid', 'partial') AND status != 'cancelled') as pending_payments,
+			(SELECT COUNT(*) FROM contracts) as total_contracts,
+			(SELECT COUNT(*) FROM contracts WHERE status = 'active') as active_contracts,
+			(SELECT COUNT(*) FROM contracts
+			 WHERE status = 'active' AND end_date <= NOW() + INTERVAL '30 days') as expiring_contracts,
+			(SELECT COUNT(*) FROM vendor_evaluations) as total_evaluations,
+			(SELECT COALESCE(AVG(overall_score), 0) FROM vendor_evaluations) as avg_score
+	`)
 	if err != nil {
 		return nil, err
 	}
 
-	err = s.db.GetContext(ctx, &overview.PendingPurchaseRequests,
-		`SELECT COUNT(*) FROM purchase_requests WHERE status = 'pending'`)
-	if err != nil {
-		return nil, err
-	}
+	overview.TotalPurchaseRequests = stats.TotalPR
+	overview.PendingPurchaseRequests = stats.PendingPR
+	overview.ApprovedPurchaseRequests = stats.ApprovedPR
+	overview.TotalPurchaseOrders = stats.TotalPO
+	overview.DraftPurchaseOrders = stats.DraftPO
+	overview.PendingApprovalOrders = stats.PendingPO
+	overview.SentPurchaseOrders = stats.SentPO
+	overview.ReceivedPurchaseOrders = stats.ReceivedPO
+	overview.TotalPOValue = stats.TotalPOValue
+	overview.TotalPRValue = stats.TotalPRValue
+	overview.PendingPayments = stats.PendingPay
+	overview.TotalContracts = stats.TotalContr
+	overview.ActiveContracts = stats.ActiveContr
+	overview.ExpiringContracts = stats.ExpiringC
+	overview.TotalVendorEvaluations = stats.TotalEvals
+	overview.AverageVendorScore = stats.AvgScore
 
-	err = s.db.GetContext(ctx, &overview.ApprovedPurchaseRequests,
-		`SELECT COUNT(*) FROM purchase_requests WHERE status = 'approved'`)
-	if err != nil {
-		return nil, err
-	}
-
-	// Get Purchase Order stats
-	err = s.db.GetContext(ctx, &overview.TotalPurchaseOrders,
-		`SELECT COUNT(*) FROM procurement_purchase_orders`)
-	if err != nil {
-		return nil, err
-	}
-
-	err = s.db.GetContext(ctx, &overview.DraftPurchaseOrders,
-		`SELECT COUNT(*) FROM procurement_purchase_orders WHERE status = 'draft'`)
-	if err != nil {
-		return nil, err
-	}
-
-	err = s.db.GetContext(ctx, &overview.PendingApprovalOrders,
-		`SELECT COUNT(*) FROM procurement_purchase_orders WHERE status = 'pending_approval'`)
-	if err != nil {
-		return nil, err
-	}
-
-	err = s.db.GetContext(ctx, &overview.SentPurchaseOrders,
-		`SELECT COUNT(*) FROM procurement_purchase_orders WHERE status = 'sent'`)
-	if err != nil {
-		return nil, err
-	}
-
-	err = s.db.GetContext(ctx, &overview.ReceivedPurchaseOrders,
-		`SELECT COUNT(*) FROM procurement_purchase_orders WHERE status = 'received'`)
-	if err != nil {
-		return nil, err
-	}
-
-	// Get Financial stats
-	var totalPOValue *float64
-	err = s.db.GetContext(ctx, &totalPOValue,
-		`SELECT COALESCE(SUM(total_amount), 0) FROM procurement_purchase_orders`)
-	if err != nil {
-		return nil, err
-	}
-	if totalPOValue != nil {
-		overview.TotalPOValue = *totalPOValue
-	}
-
-	var totalPRValue *float64
-	err = s.db.GetContext(ctx, &totalPRValue,
-		`SELECT COALESCE(SUM(total_amount), 0) FROM purchase_requests`)
-	if err != nil {
-		return nil, err
-	}
-	if totalPRValue != nil {
-		overview.TotalPRValue = *totalPRValue
-	}
-
-	var pendingPayments *float64
-	err = s.db.GetContext(ctx, &pendingPayments,
-		`SELECT COALESCE(SUM(total_amount), 0) FROM procurement_purchase_orders
-		 WHERE payment_status IN ('unpaid', 'partial') AND status != 'cancelled'`)
-	if err != nil {
-		return nil, err
-	}
-	if pendingPayments != nil {
-		overview.PendingPayments = *pendingPayments
-	}
-
-	// Get Contract stats
-	err = s.db.GetContext(ctx, &overview.TotalContracts,
-		`SELECT COUNT(*) FROM contracts`)
-	if err != nil {
-		return nil, err
-	}
-
-	err = s.db.GetContext(ctx, &overview.ActiveContracts,
-		`SELECT COUNT(*) FROM contracts WHERE status = 'active'`)
-	if err != nil {
-		return nil, err
-	}
-
-	err = s.db.GetContext(ctx, &overview.ExpiringContracts,
-		`SELECT COUNT(*) FROM contracts
-		 WHERE status = 'active' AND end_date <= NOW() + INTERVAL '30 days'`)
-	if err != nil {
-		return nil, err
-	}
-
-	// Get Vendor Evaluation stats
-	err = s.db.GetContext(ctx, &overview.TotalVendorEvaluations,
-		`SELECT COUNT(*) FROM vendor_evaluations`)
-	if err != nil {
-		return nil, err
-	}
-
-	var avgScore *float64
-	err = s.db.GetContext(ctx, &avgScore,
-		`SELECT COALESCE(AVG(overall_score), 0) FROM vendor_evaluations`)
-	if err != nil {
-		return nil, err
-	}
-	if avgScore != nil {
-		overview.AverageVendorScore = *avgScore
-	}
-
-	// Get Top Suppliers (by total PO value)
+	// Query 2: Top Suppliers
 	topSuppliers := []TopSupplier{}
 	err = s.db.SelectContext(ctx, &topSuppliers, `
-		SELECT
-			po.supplier_id,
-			COALESCE(s.name, 'Unknown') as supplier_name,
-			COUNT(*) as total_orders,
-			COALESCE(SUM(po.total_amount), 0) as total_value
+		SELECT po.supplier_id, COALESCE(s.name, 'Unknown') as supplier_name,
+		       COUNT(*) as total_orders, COALESCE(SUM(po.total_amount), 0) as total_value
 		FROM procurement_purchase_orders po
 		LEFT JOIN suppliers s ON po.supplier_id = s.id
 		WHERE po.supplier_id IS NOT NULL
-		GROUP BY po.supplier_id, s.name
-		ORDER BY total_value DESC
-		LIMIT 5
-	`)
+		GROUP BY po.supplier_id, s.name ORDER BY total_value DESC LIMIT 5`)
 	if err != nil {
 		return nil, err
 	}
 	overview.TopSuppliers = topSuppliers
 
-	// Get Recent Purchase Orders
+	// Query 3: Recent Purchase Orders
 	recentPOs := []RecentPO{}
 	err = s.db.SelectContext(ctx, &recentPOs, `
-		SELECT
-			po.id,
-			po.po_number,
-			COALESCE(s.name, 'Unknown') as supplier_name,
-			po.total_amount,
-			po.status,
-			TO_CHAR(po.created_at, 'YYYY-MM-DD HH24:MI') as created_at
+		SELECT po.id, po.po_number, COALESCE(s.name, 'Unknown') as supplier_name,
+		       po.total_amount, po.status, TO_CHAR(po.created_at, 'YYYY-MM-DD HH24:MI') as created_at
 		FROM procurement_purchase_orders po
 		LEFT JOIN suppliers s ON po.supplier_id = s.id
-		ORDER BY po.created_at DESC
-		LIMIT 5
-	`)
+		ORDER BY po.created_at DESC LIMIT 5`)
 	if err != nil {
 		return nil, err
 	}
@@ -281,54 +212,63 @@ type LargestOrder struct {
 func (s *AnalyticsService) GetSpendAnalytics(ctx context.Context, startDate, endDate string) (*SpendAnalytics, error) {
 	analytics := &SpendAnalytics{}
 
-	// Build date filter
-	dateFilter := ""
-	if startDate != "" && endDate != "" {
-		dateFilter = " AND po.order_date BETWEEN '" + startDate + "' AND '" + endDate + "'"
-	}
+	// Use parameterized queries to prevent SQL injection
+	hasDateFilter := startDate != "" && endDate != ""
 
-	// Get total spend
-	var totalSpend *float64
-	query := `SELECT COALESCE(SUM(po.total_amount), 0) FROM procurement_purchase_orders po WHERE po.status != 'cancelled'` + dateFilter
-	err := s.db.GetContext(ctx, &totalSpend, query)
-	if err != nil {
-		return nil, err
+	// Get total spend and average order value in one query
+	type spendSummary struct {
+		TotalSpend      float64 `db:"total_spend"`
+		AverageOrderVal float64 `db:"avg_value"`
 	}
-	if totalSpend != nil {
-		analytics.TotalSpend = *totalSpend
+	var summary spendSummary
+	if hasDateFilter {
+		err := s.db.GetContext(ctx, &summary, `
+			SELECT COALESCE(SUM(po.total_amount), 0) as total_spend,
+			       COALESCE(AVG(po.total_amount), 0) as avg_value
+			FROM procurement_purchase_orders po
+			WHERE po.status != 'cancelled' AND po.order_date BETWEEN $1 AND $2`, startDate, endDate)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		err := s.db.GetContext(ctx, &summary, `
+			SELECT COALESCE(SUM(po.total_amount), 0) as total_spend,
+			       COALESCE(AVG(po.total_amount), 0) as avg_value
+			FROM procurement_purchase_orders po
+			WHERE po.status != 'cancelled'`)
+		if err != nil {
+			return nil, err
+		}
 	}
-
-	// Get average order value
-	var avgValue *float64
-	query = `SELECT COALESCE(AVG(po.total_amount), 0) FROM procurement_purchase_orders po WHERE po.status != 'cancelled'` + dateFilter
-	err = s.db.GetContext(ctx, &avgValue, query)
-	if err != nil {
-		return nil, err
-	}
-	if avgValue != nil {
-		analytics.AverageOrderValue = *avgValue
-	}
+	analytics.TotalSpend = summary.TotalSpend
+	analytics.AverageOrderValue = summary.AverageOrderVal
 
 	// Get spend by supplier (top 10)
 	spendBySupplier := []SpendBySupplier{}
-	query = `
-		SELECT
-			po.supplier_id,
-			COALESCE(s.name, 'Unknown') as supplier_name,
-			COALESCE(SUM(po.total_amount), 0) as total_spend,
-			COUNT(*) as order_count
-		FROM procurement_purchase_orders po
-		LEFT JOIN suppliers s ON po.supplier_id = s.id
-		WHERE po.status != 'cancelled' AND po.supplier_id IS NOT NULL` + dateFilter + `
-		GROUP BY po.supplier_id, s.name
-		ORDER BY total_spend DESC
-		LIMIT 10
-	`
-	err = s.db.SelectContext(ctx, &spendBySupplier, query)
-	if err != nil {
-		return nil, err
+	if hasDateFilter {
+		err := s.db.SelectContext(ctx, &spendBySupplier, `
+			SELECT po.supplier_id, COALESCE(s.name, 'Unknown') as supplier_name,
+			       COALESCE(SUM(po.total_amount), 0) as total_spend, COUNT(*) as order_count
+			FROM procurement_purchase_orders po
+			LEFT JOIN suppliers s ON po.supplier_id = s.id
+			WHERE po.status != 'cancelled' AND po.supplier_id IS NOT NULL
+			  AND po.order_date BETWEEN $1 AND $2
+			GROUP BY po.supplier_id, s.name ORDER BY total_spend DESC LIMIT 10`, startDate, endDate)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		err := s.db.SelectContext(ctx, &spendBySupplier, `
+			SELECT po.supplier_id, COALESCE(s.name, 'Unknown') as supplier_name,
+			       COALESCE(SUM(po.total_amount), 0) as total_spend, COUNT(*) as order_count
+			FROM procurement_purchase_orders po
+			LEFT JOIN suppliers s ON po.supplier_id = s.id
+			WHERE po.status != 'cancelled' AND po.supplier_id IS NOT NULL
+			GROUP BY po.supplier_id, s.name ORDER BY total_spend DESC LIMIT 10`)
+		if err != nil {
+			return nil, err
+		}
 	}
-	// Calculate percentages
 	for i := range spendBySupplier {
 		if analytics.TotalSpend > 0 {
 			spendBySupplier[i].Percentage = (spendBySupplier[i].TotalSpend / analytics.TotalSpend) * 100
@@ -338,17 +278,12 @@ func (s *AnalyticsService) GetSpendAnalytics(ctx context.Context, startDate, end
 
 	// Get spend by month (last 12 months)
 	spendByMonth := []SpendByMonth{}
-	err = s.db.SelectContext(ctx, &spendByMonth, `
-		SELECT
-			TO_CHAR(order_date, 'YYYY-MM') as month,
-			COALESCE(SUM(total_amount), 0) as total_spend,
-			COUNT(*) as order_count
+	err := s.db.SelectContext(ctx, &spendByMonth, `
+		SELECT TO_CHAR(order_date, 'YYYY-MM') as month,
+		       COALESCE(SUM(total_amount), 0) as total_spend, COUNT(*) as order_count
 		FROM procurement_purchase_orders
-		WHERE status != 'cancelled'
-			AND order_date >= NOW() - INTERVAL '12 months'
-		GROUP BY TO_CHAR(order_date, 'YYYY-MM')
-		ORDER BY month DESC
-	`)
+		WHERE status != 'cancelled' AND order_date >= NOW() - INTERVAL '12 months'
+		GROUP BY TO_CHAR(order_date, 'YYYY-MM') ORDER BY month DESC`)
 	if err != nil {
 		return nil, err
 	}
@@ -356,17 +291,18 @@ func (s *AnalyticsService) GetSpendAnalytics(ctx context.Context, startDate, end
 
 	// Get spend by status
 	spendByStatus := []SpendByStatus{}
-	query = `
-		SELECT
-			po.status,
-			COALESCE(SUM(po.total_amount), 0) as total_spend,
-			COUNT(*) as order_count
-		FROM procurement_purchase_orders po
-		WHERE 1=1` + dateFilter + `
-		GROUP BY po.status
-		ORDER BY total_spend DESC
-	`
-	err = s.db.SelectContext(ctx, &spendByStatus, query)
+	if hasDateFilter {
+		err = s.db.SelectContext(ctx, &spendByStatus, `
+			SELECT po.status, COALESCE(SUM(po.total_amount), 0) as total_spend, COUNT(*) as order_count
+			FROM procurement_purchase_orders po
+			WHERE po.order_date BETWEEN $1 AND $2
+			GROUP BY po.status ORDER BY total_spend DESC`, startDate, endDate)
+	} else {
+		err = s.db.SelectContext(ctx, &spendByStatus, `
+			SELECT po.status, COALESCE(SUM(po.total_amount), 0) as total_spend, COUNT(*) as order_count
+			FROM procurement_purchase_orders po
+			GROUP BY po.status ORDER BY total_spend DESC`)
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -374,20 +310,23 @@ func (s *AnalyticsService) GetSpendAnalytics(ctx context.Context, startDate, end
 
 	// Get largest order
 	largestOrder := &LargestOrder{}
-	query = `
-		SELECT
-			po.id,
-			po.po_number,
-			COALESCE(s.name, 'Unknown') as supplier_name,
-			po.total_amount,
-			TO_CHAR(po.order_date, 'YYYY-MM-DD') as order_date
-		FROM procurement_purchase_orders po
-		LEFT JOIN suppliers s ON po.supplier_id = s.id
-		WHERE po.status != 'cancelled'` + dateFilter + `
-		ORDER BY po.total_amount DESC
-		LIMIT 1
-	`
-	err = s.db.GetContext(ctx, largestOrder, query)
+	if hasDateFilter {
+		err = s.db.GetContext(ctx, largestOrder, `
+			SELECT po.id, po.po_number, COALESCE(s.name, 'Unknown') as supplier_name,
+			       po.total_amount, TO_CHAR(po.order_date, 'YYYY-MM-DD') as order_date
+			FROM procurement_purchase_orders po
+			LEFT JOIN suppliers s ON po.supplier_id = s.id
+			WHERE po.status != 'cancelled' AND po.order_date BETWEEN $1 AND $2
+			ORDER BY po.total_amount DESC LIMIT 1`, startDate, endDate)
+	} else {
+		err = s.db.GetContext(ctx, largestOrder, `
+			SELECT po.id, po.po_number, COALESCE(s.name, 'Unknown') as supplier_name,
+			       po.total_amount, TO_CHAR(po.order_date, 'YYYY-MM-DD') as order_date
+			FROM procurement_purchase_orders po
+			LEFT JOIN suppliers s ON po.supplier_id = s.id
+			WHERE po.status != 'cancelled'
+			ORDER BY po.total_amount DESC LIMIT 1`)
+	}
 	if err == nil && largestOrder.ID != "" {
 		analytics.LargestOrder = largestOrder
 	}

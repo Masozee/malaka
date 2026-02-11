@@ -33,7 +33,7 @@ func (r *shipmentRepository) GetByID(ctx context.Context, id uuid.ID) (*entities
 
 func (r *shipmentRepository) GetAll(ctx context.Context) ([]entities.Shipment, error) {
 	var shipments []entities.Shipment
-	query := `SELECT * FROM shipments`
+	query := `SELECT * FROM shipments ORDER BY created_at DESC LIMIT 500`
 	err := r.db.SelectContext(ctx, &shipments, query)
 	return shipments, err
 }

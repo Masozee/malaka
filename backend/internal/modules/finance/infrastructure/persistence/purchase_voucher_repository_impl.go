@@ -66,7 +66,7 @@ func (r *purchaseVoucherRepositoryImpl) GetAll(ctx context.Context) ([]*entities
 		SELECT id, voucher_number, voucher_date, supplier_id, invoice_id,
 			   total_amount, tax_amount, grand_total, due_date, status,
 			   description, approved_by, approved_at, created_at, updated_at
-		FROM purchase_vouchers ORDER BY created_at DESC`
+		FROM purchase_vouchers ORDER BY created_at DESC LIMIT 500`
 
 	rows, err := r.db.QueryContext(ctx, query)
 	if err != nil {

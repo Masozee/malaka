@@ -66,7 +66,7 @@ func (r *checkClearanceRepositoryImpl) GetAll(ctx context.Context) ([]*entities.
 		SELECT id, check_number, check_date, bank_name, amount, payee_id,
 			   payee_name, cash_bank_id, clearance_date, status, description,
 			   is_incoming, created_at, updated_at
-		FROM check_clearance ORDER BY created_at DESC`
+		FROM check_clearance ORDER BY created_at DESC LIMIT 500`
 
 	rows, err := r.db.QueryContext(ctx, query)
 	if err != nil {

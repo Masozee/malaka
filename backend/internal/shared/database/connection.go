@@ -63,6 +63,14 @@ func ConnectWithConfig(connStr string, config PoolConfig) (*sqlx.DB, error) {
 	return db, nil
 }
 
+// Apply configures the given sqlx.DB with this pool config
+func (c PoolConfig) Apply(db *sqlx.DB) {
+	db.SetMaxOpenConns(c.MaxOpenConns)
+	db.SetMaxIdleConns(c.MaxIdleConns)
+	db.SetConnMaxLifetime(c.ConnMaxLifetime)
+	db.SetConnMaxIdleTime(c.ConnMaxIdleTime)
+}
+
 // Helper functions for Go < 1.21 compatibility
 func min(a, b int) int {
 	if a < b {

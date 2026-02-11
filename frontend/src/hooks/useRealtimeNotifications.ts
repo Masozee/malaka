@@ -38,6 +38,18 @@ export function useRealtimeNotifications(limit = 20): UseRealtimeNotificationsRe
     }
   }, [limit])
 
+  // Play notification sound (skip for chat-related notifications to avoid doubling with messaging sound)
+  const playNotificationSound = useCallback((referenceType?: string) => {
+    if (referenceType === 'conversation') return
+    try {
+      const audio = new Audio('/notifications.wav')
+      audio.volume = 0.5
+      audio.play().catch(() => {})
+    } catch {
+      // Audio not supported
+    }
+  }, [])
+
   // Listen for real-time notifications via WebSocket
   useEffect(() => {
     const handler = (payload: unknown) => {
@@ -62,11 +74,14 @@ export function useRealtimeNotifications(limit = 20): UseRealtimeNotificationsRe
 
       setNotifications((prev) => [newNotification, ...prev].slice(0, limit))
       setUnreadCount((prev) => prev + 1)
+
+      // Play sound for non-chat notifications (chat has its own sound via useMessaging)
+      playNotificationSound(notif.reference_type)
     }
 
     subscribe('notification', handler)
     return () => unsubscribe('notification', handler)
-  }, [subscribe, unsubscribe, limit])
+  }, [subscribe, unsubscribe, limit, playNotificationSound])
 
   // Initial fetch
   useEffect(() => {

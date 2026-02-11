@@ -157,7 +157,7 @@ func (r *GoodsReceiptRepositoryImpl) Update(ctx context.Context, gr *entities.Go
 
 // GetAll retrieves all goods receipts from the database.
 func (r *GoodsReceiptRepositoryImpl) GetAll(ctx context.Context) ([]*entities.GoodsReceipt, error) {
-	query := `SELECT id, purchase_order_id, receipt_date, warehouse_id, created_at, updated_at FROM goods_receipts ORDER BY receipt_date DESC, created_at DESC`
+	query := `SELECT id, purchase_order_id, receipt_date, warehouse_id, created_at, updated_at FROM goods_receipts ORDER BY receipt_date DESC, created_at DESC LIMIT 500`
 	rows, err := r.db.QueryContext(ctx, query)
 	if err != nil {
 		return nil, err

@@ -131,16 +131,73 @@ func (r *PurchaseOrderRepositoryImpl) GetAll(ctx context.Context) ([]*entities.P
 		purchaseOrders = append(purchaseOrders, po)
 	}
 
-	// Load items for each purchase order
-	for _, po := range purchaseOrders {
-		items, err := r.getPurchaseOrderItems(ctx, po.ID.String())
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	// Batch-load items for all purchase orders in a single query
+	if len(purchaseOrders) > 0 {
+		poIDs := make([]string, len(purchaseOrders))
+		for i, po := range purchaseOrders {
+			poIDs[i] = po.ID.String()
+		}
+
+		itemQuery, args, err := sqlx.In(`
+			SELECT
+				poi.id, poi.purchase_order_id, poi.article_id, poi.quantity, poi.unit_price, poi.total_price,
+				a.id, a.name, a.description
+			FROM purchase_order_items poi
+			LEFT JOIN articles a ON poi.article_id = a.id
+			WHERE poi.purchase_order_id IN (?)
+			ORDER BY poi.created_at ASC
+		`, poIDs)
 		if err != nil {
 			return nil, err
 		}
-		po.Items = items
+		itemQuery = r.db.Rebind(itemQuery)
+
+		itemRows, err := r.db.QueryContext(ctx, itemQuery, args...)
+		if err != nil {
+			return nil, err
+		}
+		defer itemRows.Close()
+
+		// Group items by purchase order ID
+		itemsByPO := make(map[string][]*entities.PurchaseOrderItem)
+		for itemRows.Next() {
+			item := &entities.PurchaseOrderItem{}
+			article := &entities.Article{}
+			var articleID, articleName, articleDescription sql.NullString
+
+			err := itemRows.Scan(
+				&item.ID, &item.PurchaseOrderID, &item.ArticleID, &item.Quantity, &item.UnitPrice, &item.TotalPrice,
+				&articleID, &articleName, &articleDescription,
+			)
+			if err != nil {
+				return nil, err
+			}
+
+			if articleID.Valid {
+				article.ID, _ = uuid.Parse(articleID.String)
+				article.Name = articleName.String
+				article.Description = articleDescription.String
+				item.Article = article
+			}
+
+			poID := item.PurchaseOrderID.String()
+			itemsByPO[poID] = append(itemsByPO[poID], item)
+		}
+		if err := itemRows.Err(); err != nil {
+			return nil, err
+		}
+
+		// Assign items to their purchase orders
+		for _, po := range purchaseOrders {
+			po.Items = itemsByPO[po.ID.String()]
+		}
 	}
-	
-	return purchaseOrders, rows.Err()
+
+	return purchaseOrders, nil
 }
 
 // Delete deletes a purchase order by its ID from the database.

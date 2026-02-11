@@ -73,7 +73,7 @@ func (r *TransferOrderRepositoryImpl) GetAll(ctx context.Context) ([]*entities.T
 		shipped_by, received_by, approved_by, cancelled_by, created_by,
 		COALESCE(cancel_reason, '') as cancel_reason,
 		created_at, updated_at
-	FROM transfer_orders ORDER BY order_date DESC, created_at DESC`
+	FROM transfer_orders ORDER BY order_date DESC, created_at DESC LIMIT 500`
 	rows, err := r.db.QueryContext(ctx, query)
 	if err != nil {
 		return nil, err

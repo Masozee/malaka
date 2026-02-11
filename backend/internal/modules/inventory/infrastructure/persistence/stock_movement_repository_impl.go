@@ -48,7 +48,7 @@ func (r *StockMovementRepositoryImpl) Update(ctx context.Context, sm *entities.S
 
 // GetAll retrieves all stock movements from the database.
 func (r *StockMovementRepositoryImpl) GetAll(ctx context.Context) ([]*entities.StockMovement, error) {
-	query := `SELECT id, article_id, warehouse_id, quantity, movement_type, movement_date, reference_id, created_at, updated_at FROM stock_movements ORDER BY created_at DESC`
+	query := `SELECT id, article_id, warehouse_id, quantity, movement_type, movement_date, reference_id, created_at, updated_at FROM stock_movements ORDER BY created_at DESC LIMIT 500`
 	rows, err := r.db.QueryContext(ctx, query)
 	if err != nil {
 		return nil, err

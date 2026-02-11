@@ -21,16 +21,6 @@ export function useMessaging(type?: 'personal' | 'group') {
   const conversationsRef = useRef<Conversation[]>([])
   const initialLoadDoneRef = useRef(false)
 
-  const playNotificationSound = useCallback(() => {
-    try {
-      const audio = new Audio('/notifications.wav')
-      audio.volume = 0.5
-      audio.play().catch(() => {})
-    } catch {
-      // Audio not supported
-    }
-  }, [])
-
   // Load conversations
   const loadConversations = useCallback(async () => {
     // Only show loading spinner on initial load to prevent flickering
@@ -189,11 +179,6 @@ export function useMessaging(type?: 'personal' | 'group') {
         messagingService.markConversationRead(data.conversation_id)
       }
 
-      // Play notification sound for messages from others
-      if (data.sender_id !== user.id) {
-        playNotificationSound()
-      }
-
       // Refresh conversation list and unread count
       loadConversations()
       loadUnreadCount()
@@ -201,7 +186,7 @@ export function useMessaging(type?: 'personal' | 'group') {
 
     subscribe('chat_message', handleChatMessage)
     return () => unsubscribe('chat_message', handleChatMessage)
-  }, [subscribe, unsubscribe, activeConversationId, user?.id, loadConversations, loadUnreadCount, playNotificationSound])
+  }, [subscribe, unsubscribe, activeConversationId, user?.id, loadConversations, loadUnreadCount])
 
   // Handle typing indicators via WebSocket
   useEffect(() => {

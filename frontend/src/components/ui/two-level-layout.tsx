@@ -110,7 +110,6 @@ import { useAuth } from "@/contexts/auth-context"
 import { useWebSocket } from "@/contexts/websocket-context"
 import { useSessionActivity } from "@/hooks/useSessionActivity"
 import { useActionItems } from "@/hooks/useActionItems"
-import { messagingService } from "@/services/messaging"
 
 interface LayoutProps {
   children: React.ReactNode
@@ -359,7 +358,7 @@ export function TwoLevelLayout({ children }: LayoutProps) {
 
 function TwoLevelLayoutInner({ children }: LayoutProps) {
   const pathname = usePathname()
-  useAuth() // Keep auth context active for session management
+  const { user } = useAuth()
   const { subscribe, unsubscribe } = useWebSocket()
   const [activeMenu, setActiveMenu] = React.useState<string | null>(null)
   const [isSecondSidebarCollapsed, setIsSecondSidebarCollapsed] = React.useState(false)
@@ -374,22 +373,44 @@ function TwoLevelLayoutInner({ children }: LayoutProps) {
   })
 
   // Fetch unread message count on mount, on route change, and on WebSocket events
+  // Also play notification sound for incoming chat messages (centralized here since this layout is always mounted)
   React.useEffect(() => {
-    const fetchUnread = () => {
-      messagingService.getUnreadCount().then(setMsgUnreadCount).catch(() => {})
+    const fetchUnread = async () => {
+      try {
+        const token = typeof window !== 'undefined' ? localStorage.getItem('malaka_auth_token') : null
+        if (!token) return
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'}/api/v1/messaging/unread-count`, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        if (res.ok) {
+          const json = await res.json()
+          setMsgUnreadCount(json.data?.count ?? json.count ?? 0)
+        }
+      } catch { /* ignore */ }
     }
     fetchUnread()
     // Poll every 60s as a fallback
     const interval = setInterval(fetchUnread, 60000)
 
-    const handleChatMessage = () => { fetchUnread() }
+    const handleChatMessage = (payload: unknown) => {
+      fetchUnread()
+      // Play sound for messages from others
+      const data = payload as { sender_id?: string }
+      if (data.sender_id && data.sender_id !== user?.id) {
+        try {
+          const audio = new Audio('/notifications.wav')
+          audio.volume = 0.5
+          audio.play().catch(() => {})
+        } catch { /* Audio not supported */ }
+      }
+    }
     subscribe('chat_message', handleChatMessage)
 
     return () => {
       clearInterval(interval)
       unsubscribe('chat_message', handleChatMessage)
     }
-  }, [subscribe, unsubscribe, pathname])
+  }, [subscribe, unsubscribe, pathname, user?.id])
 
   // Auto-set active menu based on pathname
   React.useEffect(() => {

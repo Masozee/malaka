@@ -156,15 +156,14 @@ func main() {
 		}
 	}(conn)
 
-	// Configure connection pool for production
-	conn.SetMaxOpenConns(25)
-	conn.SetMaxIdleConns(10)
-	conn.SetConnMaxLifetime(5 * time.Minute)
-	conn.SetConnMaxIdleTime(2 * time.Minute)
+	// Apply optimized connection pool settings (based on CPU cores)
+	poolCfg := database.DefaultPoolConfig()
+	poolCfg.Apply(conn)
 
 	zapLogger.Info("Database connection established",
-		zap.Int("max_open_conns", 25),
-		zap.Int("max_idle_conns", 10),
+		zap.Int("max_open_conns", poolCfg.MaxOpenConns),
+		zap.Int("max_idle_conns", poolCfg.MaxIdleConns),
+		zap.Duration("conn_max_lifetime", poolCfg.ConnMaxLifetime),
 	)
 
 	// Initialize GORM with production-optimized settings

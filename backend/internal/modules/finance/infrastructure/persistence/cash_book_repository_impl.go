@@ -67,7 +67,7 @@ func (r *cashBookRepositoryImpl) GetAll(ctx context.Context) ([]*entities.CashBo
 		SELECT id, cash_bank_id, transaction_date, reference_number, description,
 			   debit_amount, credit_amount, balance, transaction_type, source_module,
 			   source_id, created_by, created_at, updated_at
-		FROM cash_books ORDER BY transaction_date ASC, created_at ASC`
+		FROM cash_books ORDER BY transaction_date DESC, created_at DESC LIMIT 500`
 
 	rows, err := r.db.QueryContext(ctx, query)
 	if err != nil {

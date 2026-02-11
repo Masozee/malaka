@@ -37,7 +37,7 @@ func (r *AirwaybillRepositoryImpl) GetByID(ctx context.Context, id uuid.ID) (*en
 // GetAll retrieves all airwaybills from the database.
 func (r *AirwaybillRepositoryImpl) GetAll(ctx context.Context) ([]entities.Airwaybill, error) {
 	var awbs []entities.Airwaybill
-	query := `SELECT * FROM airwaybills`
+	query := `SELECT * FROM airwaybills ORDER BY created_at DESC LIMIT 500`
 	err := r.db.SelectContext(ctx, &awbs, query)
 	return awbs, err
 }

@@ -37,7 +37,7 @@ func (r *ManifestRepositoryImpl) GetByID(ctx context.Context, id uuid.ID) (*enti
 // GetAll retrieves all manifests from the database.
 func (r *ManifestRepositoryImpl) GetAll(ctx context.Context) ([]entities.Manifest, error) {
 	var manifests []entities.Manifest
-	query := `SELECT * FROM manifests`
+	query := `SELECT * FROM manifests ORDER BY created_at DESC LIMIT 500`
 	err := r.db.SelectContext(ctx, &manifests, query)
 	return manifests, err
 }
