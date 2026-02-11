@@ -1,12 +1,33 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import { TwoLevelLayout } from '@/components/ui/two-level-layout'
 import { Header } from '@/components/ui/header'
-import { Card } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { AdvancedDataTable, AdvancedColumn } from '@/components/ui/advanced-data-table'
+import { Input } from '@/components/ui/input'
+import { TanStackDataTable, type TanStackColumn } from '@/components/ui/tanstack-data-table'
 import { Badge } from '@/components/ui/badge'
+import { HugeiconsIcon } from '@hugeicons/react'
+import {
+  Location01Icon,
+  ChartLineData01Icon,
+  Call02Icon,
+  Clock01Icon,
+  UserIcon,
+  Store01Icon,
+  UserGroupIcon,
+  CheckmarkCircle01Icon,
+  AlertCircleIcon,
+  Coins01Icon,
+  Award01Icon,
+  Download01Icon,
+  PlusSignIcon,
+  MapsIcon,
+  Search01Icon,
+  FilterHorizontalIcon
+} from '@hugeicons/core-free-icons'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 interface SPGAssignment {
   id: string
@@ -237,6 +258,8 @@ const contractColors = {
 export default function SPGStoresPage() {
   const [mounted, setMounted] = useState(false)
   const [viewMode, setViewMode] = useState<'cards' | 'table'>('table')
+  const [searchTerm, setSearchTerm] = useState('')
+  const [statusFilter, setStatusFilter] = useState<string>('all')
 
   useEffect(() => {
     setMounted(true)
@@ -248,44 +271,66 @@ export default function SPGStoresPage() {
   ]
 
   // Calculate statistics
-  const totalSPG = mockSPGData.length
-  const activeSPG = mockSPGData.filter(spg => spg.status === 'active').length
-  const onLeaveSPG = mockSPGData.filter(spg => spg.status === 'on-leave').length
-  const totalSales = mockSPGData.reduce((sum, spg) => sum + spg.monthlySales, 0)
-  const totalTargets = mockSPGData.reduce((sum, spg) => sum + spg.targetSales, 0)
-  const totalCommission = mockSPGData.reduce((sum, spg) => sum + spg.commission, 0)
-  const avgPerformance = mockSPGData.reduce((sum, spg) => sum + spg.performance, 0) / totalSPG
-  const achievementRate = (totalSales / totalTargets) * 100
+  const stats = useMemo(() => {
+    const totalSPG = mockSPGData.length
+    const activeSPG = mockSPGData.filter(spg => spg.status === 'active').length
+    const onLeaveSPG = mockSPGData.filter(spg => spg.status === 'on-leave').length
+    const totalSales = mockSPGData.reduce((sum, spg) => sum + spg.monthlySales, 0)
+    const totalTargets = mockSPGData.reduce((sum, spg) => sum + spg.targetSales, 0)
+    const achievementRate = totalTargets > 0 ? (totalSales / totalTargets) * 100 : 0
 
-  const columns: AdvancedColumn<SPGAssignment>[] = [
+    return { totalSPG, activeSPG, onLeaveSPG, totalSales, achievementRate }
+  }, [])
+
+  // Filter Data
+  const filteredData = useMemo(() => {
+    let data = mockSPGData
+    if (searchTerm) {
+      const lower = searchTerm.toLowerCase()
+      data = data.filter(item =>
+        item.spgName.toLowerCase().includes(lower) ||
+        item.storeName.toLowerCase().includes(lower) ||
+        item.storeLocation.toLowerCase().includes(lower)
+      )
+    }
+    if (statusFilter !== 'all') {
+      data = data.filter(item => item.status === statusFilter)
+    }
+    return data
+  }, [searchTerm, statusFilter])
+
+  const columns: TanStackColumn<SPGAssignment>[] = [
     {
-      key: 'spgName',
-      title: 'SPG Name',
-      render: (_value: unknown, record: SPGAssignment) => (
+      id: 'spg',
+      header: 'SPG Name',
+      accessorKey: 'spgName',
+      cell: ({ row }) => (
         <div>
-          <div className="font-medium">{record.spgName}</div>
-          <div className="text-xs text-gray-500">{record.spgId}</div>
+          <div className="font-medium">{row.original.spgName}</div>
+          <div className="text-xs text-muted-foreground">{row.original.spgId}</div>
         </div>
       )
     },
     {
-      key: 'storeName',
-      title: 'Store',
-      render: (_value: unknown, record: SPGAssignment) => (
+      id: 'store',
+      header: 'Store',
+      accessorKey: 'storeName',
+      cell: ({ row }) => (
         <div>
-          <div className="font-medium text-xs">{record.storeName}</div>
-          <div className="text-xs text-gray-500 flex items-center">
-            <MapPin className="h-3 w-3 mr-1" />
-            {record.storeLocation}
+          <div className="font-medium text-xs">{row.original.storeName}</div>
+          <div className="text-xs text-muted-foreground flex items-center">
+            <HugeiconsIcon icon={Location01Icon} className="h-3 w-3 mr-1" />
+            {row.original.storeLocation}
           </div>
         </div>
       )
     },
     {
-      key: 'storeType',
-      title: 'Store Type',
-      render: (_value: unknown, record: SPGAssignment) => {
-        const type = record.storeType as keyof typeof storeTypeColors
+      id: 'storeType',
+      header: 'Store Type',
+      accessorKey: 'storeType',
+      cell: ({ row }) => {
+        const type = row.original.storeType as keyof typeof storeTypeColors
         return (
           <Badge className={storeTypeColors[type]}>
             {type.charAt(0).toUpperCase() + type.slice(1)}
@@ -294,10 +339,11 @@ export default function SPGStoresPage() {
       }
     },
     {
-      key: 'assignment',
-      title: 'Assignment',
-      render: (_value: unknown, record: SPGAssignment) => {
-        const assignment = record.assignment as keyof typeof assignmentColors
+      id: 'assignment',
+      header: 'Assignment',
+      accessorKey: 'assignment',
+      cell: ({ row }) => {
+        const assignment = row.original.assignment as keyof typeof assignmentColors
         return (
           <Badge className={assignmentColors[assignment]}>
             {assignment.charAt(0).toUpperCase() + assignment.slice(1)}
@@ -306,11 +352,12 @@ export default function SPGStoresPage() {
       }
     },
     {
-      key: 'monthlySales',
-      title: 'Monthly Sales',
-      render: (_value: unknown, record: SPGAssignment) => {
-        const sales = record.monthlySales
-        const target = record.targetSales
+      id: 'sales',
+      header: 'Monthly Sales',
+      accessorKey: 'monthlySales',
+      cell: ({ row }) => {
+        const sales = row.original.monthlySales
+        const target = row.original.targetSales
         const achievement = (sales / target) * 100
         const color = achievement >= 100 ? 'text-green-600' : achievement >= 90 ? 'text-yellow-600' : 'text-red-600'
 
@@ -319,39 +366,42 @@ export default function SPGStoresPage() {
             <div className={`font-medium ${color}`}>
               {mounted ? sales.toLocaleString('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }) : ''}
             </div>
-            <div className="text-xs text-gray-500">{achievement.toFixed(0)}% of target</div>
+            <div className="text-xs text-muted-foreground">{achievement.toFixed(0)}% of target</div>
           </div>
         )
       }
     },
     {
-      key: 'performance',
-      title: 'Performance',
-      render: (_value: unknown, record: SPGAssignment) => {
-        const performance = record.performance
+      id: 'performance',
+      header: 'Performance',
+      accessorKey: 'performance',
+      cell: ({ row }) => {
+        const performance = row.original.performance
         const color = performance >= 100 ? 'text-green-600' : performance >= 90 ? 'text-yellow-600' : 'text-red-600'
         return (
           <div className={`font-bold ${color} flex items-center`}>
-            <TrendUp className="h-4 w-4 mr-1" />
+            <HugeiconsIcon icon={ChartLineData01Icon} className="h-4 w-4 mr-1" />
             {performance}%
           </div>
         )
       }
     },
     {
-      key: 'commission',
-      title: 'Commission',
-      render: (_value: unknown, record: SPGAssignment) => (
+      id: 'commission',
+      header: 'Commission',
+      accessorKey: 'commission',
+      cell: ({ row }) => (
         <div className="text-xs font-medium">
-          {mounted ? record.commission.toLocaleString('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }) : ''}
+          {mounted ? row.original.commission.toLocaleString('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }) : ''}
         </div>
       )
     },
     {
-      key: 'status',
-      title: 'Status',
-      render: (_value: unknown, record: SPGAssignment) => {
-        const status = record.status as keyof typeof statusColors
+      id: 'status',
+      header: 'Status',
+      accessorKey: 'status',
+      cell: ({ row }) => {
+        const status = row.original.status as keyof typeof statusColors
         return (
           <Badge className={statusColors[status]}>
             {status.replace('-', ' ').charAt(0).toUpperCase() + status.replace('-', ' ').slice(1)}
@@ -360,10 +410,11 @@ export default function SPGStoresPage() {
       }
     },
     {
-      key: 'contractType',
-      title: 'Contract',
-      render: (_value: unknown, record: SPGAssignment) => {
-        const contract = record.contractType as keyof typeof contractColors
+      id: 'contract',
+      header: 'Contract',
+      accessorKey: 'contractType',
+      cell: ({ row }) => {
+        const contract = row.original.contractType as keyof typeof contractColors
         return (
           <Badge className={contractColors[contract]}>
             {contract.replace('-', ' ').charAt(0).toUpperCase() + contract.replace('-', ' ').slice(1)}
@@ -375,7 +426,7 @@ export default function SPGStoresPage() {
 
   const SPGCard = ({ spg }: { spg: SPGAssignment }) => {
     const achievement = (spg.monthlySales / spg.targetSales) * 100
-    
+
     return (
       <Card className="p-4">
         <div className="flex items-start justify-between mb-3">
@@ -383,7 +434,7 @@ export default function SPGStoresPage() {
             <h3 className="font-semibold text-gray-900">{spg.spgName}</h3>
             <p className="text-sm text-gray-500">{spg.spgId}</p>
             <p className="text-xs text-gray-400 flex items-center">
-              <Phone className="h-3 w-3 mr-1" />
+              <HugeiconsIcon icon={Call02Icon} className="h-3 w-3 mr-1" />
               {spg.phoneNumber}
             </p>
           </div>
@@ -398,69 +449,69 @@ export default function SPGStoresPage() {
             </div>
           </div>
         </div>
-        
+
         <div className="space-y-2 text-sm">
           <div className="p-2 bg-blue-50 rounded">
             <div className="font-medium text-blue-900">{spg.storeName}</div>
             <div className="text-xs text-blue-700 flex items-center">
-              <MapPin className="h-3 w-3 mr-1" />
+              <HugeiconsIcon icon={Location01Icon} className="h-3 w-3 mr-1" />
               {spg.storeLocation} • {spg.storeType.charAt(0).toUpperCase() + spg.storeType.slice(1)}
             </div>
           </div>
-          
+
           <div className="flex justify-between">
             <span className="text-gray-500">Working Hours:</span>
             <span className="flex items-center">
-              <Clock className="h-3 w-3 mr-1 text-gray-400" />
+              <HugeiconsIcon icon={Clock01Icon} className="h-3 w-3 mr-1 text-gray-400" />
               {spg.workingHours}
             </span>
           </div>
-          
+
           <div className="flex justify-between">
             <span className="text-gray-500">Monthly Sales:</span>
             <span className="font-medium">
               {mounted ? spg.monthlySales.toLocaleString('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }) : ''}
             </span>
           </div>
-          
+
           <div className="flex justify-between">
             <span className="text-gray-500">Target:</span>
             <span>
               {mounted ? spg.targetSales.toLocaleString('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }) : ''}
             </span>
           </div>
-          
+
           <div className="flex justify-between">
             <span className="text-gray-500">Achievement:</span>
             <span className={achievement >= 100 ? 'text-green-600 font-medium' : achievement >= 90 ? 'text-yellow-600' : 'text-red-600'}>
               {achievement.toFixed(1)}%
             </span>
           </div>
-          
+
           <div className="flex justify-between">
             <span className="text-gray-500">Commission:</span>
             <span className="font-medium text-green-600">
               {mounted ? spg.commission.toLocaleString('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }) : ''}
             </span>
           </div>
-          
+
           <div className="flex justify-between">
             <span className="text-gray-500">Performance:</span>
             <span className={spg.performance >= 100 ? 'text-green-600 font-bold' : spg.performance >= 90 ? 'text-yellow-600' : 'text-red-600'}>
               {spg.performance}%
             </span>
           </div>
-          
+
           <div className="flex justify-between">
             <span className="text-gray-500">Supervisor:</span>
             <span>{spg.supervisor}</span>
           </div>
-          
+
           <div className="flex justify-between">
             <span className="text-gray-500">Start Date:</span>
             <span>{mounted ? new Date(spg.startDate).toLocaleDateString('id-ID') : ''}</span>
           </div>
-          
+
           {spg.notes && (
             <div className="mt-2 p-2 bg-yellow-50 rounded text-xs">
               <span className="font-medium text-yellow-800">Notes: </span>
@@ -468,14 +519,14 @@ export default function SPGStoresPage() {
             </div>
           )}
         </div>
-        
+
         <div className="flex space-x-2 mt-4">
           <Button size="sm" variant="outline" className="flex-1">
-            <User className="h-4 w-4 mr-1" />
+            <HugeiconsIcon icon={UserIcon} className="h-4 w-4 mr-1" />
             View Profile
           </Button>
           <Button size="sm" className="flex-1">
-            <Store className="h-4 w-4 mr-1" />
+            <HugeiconsIcon icon={Store01Icon} className="h-4 w-4 mr-1" />
             Store Details
           </Button>
         </div>
@@ -485,135 +536,131 @@ export default function SPGStoresPage() {
 
   return (
     <TwoLevelLayout>
-      <div className="flex-1 space-y-6">
-        <Header 
-          title="SPG Store Management"
-          breadcrumbs={breadcrumbs}
-        />
+      <Header
+        title="SPG Store Management"
+        breadcrumbs={breadcrumbs}
+        actions={
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm">
+              <HugeiconsIcon icon={MapsIcon} className="h-4 w-4 mr-2" />
+              Store Map
+            </Button>
+            <Button size="sm">
+              <HugeiconsIcon icon={PlusSignIcon} className="h-4 w-4 mr-2" />
+              Add SPG
+            </Button>
+          </div>
+        }
+      />
 
+      <div className="flex-1 p-6 space-y-6">
         {/* Statistics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-7 gap-4">
-          <Card className="p-4">
-            <div className="flex items-center space-x-3">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <Users className="h-5 w-5 text-blue-600" />
-              </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card>
+            <CardContent className="p-4 flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Total SPG</p>
-                <p className="text-2xl font-bold text-gray-900">{totalSPG}</p>
+                <p className="text-sm font-medium text-muted-foreground">Total SPG</p>
+                <div className="flex items-baseline gap-2">
+                  <p className="text-2xl font-bold">{stats.totalSPG}</p>
+                  <span className="text-xs text-muted-foreground">
+                    {stats.activeSPG} Active
+                  </span>
+                </div>
               </div>
-            </div>
+              <div className="h-10 w-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                <HugeiconsIcon icon={UserGroupIcon} className="h-5 w-5 text-blue-600" />
+              </div>
+            </CardContent>
           </Card>
 
-          <Card className="p-4">
-            <div className="flex items-center space-x-3">
-              <div className="p-2 bg-green-100 rounded-lg">
-                <CheckCircle className="h-5 w-5 text-green-600" />
-              </div>
+          <Card>
+            <CardContent className="p-4 flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Active</p>
-                <p className="text-2xl font-bold text-green-600">{activeSPG}</p>
-              </div>
-            </div>
-          </Card>
-
-          <Card className="p-4">
-            <div className="flex items-center space-x-3">
-              <div className="p-2 bg-yellow-100 rounded-lg">
-                <WarningCircle className="h-5 w-5 text-yellow-600" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-600">On Leave</p>
-                <p className="text-2xl font-bold text-yellow-600">{onLeaveSPG}</p>
-              </div>
-            </div>
-          </Card>
-
-          <Card className="p-4">
-            <div className="flex items-center space-x-3">
-              <div className="p-2 bg-purple-100 rounded-lg">
-                <CurrencyDollar className="h-5 w-5 text-purple-600" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-600">Total Sales</p>
+                <p className="text-sm font-medium text-muted-foreground">Total Sales (Monthly)</p>
                 <p className="text-2xl font-bold text-purple-600">
-                  {mounted ? (totalSales / 1000000).toFixed(0) : ''}M
+                  {mounted ? (stats.totalSales / 1000000).toFixed(0) : ''}M
                 </p>
               </div>
-            </div>
+              <div className="h-10 w-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                <HugeiconsIcon icon={Coins01Icon} className="h-5 w-5 text-purple-600" />
+              </div>
+            </CardContent>
           </Card>
 
-          <Card className="p-4">
-            <div className="flex items-center space-x-3">
-              <div className="p-2 bg-indigo-100 rounded-lg">
-                <TrendUp className="h-5 w-5 text-indigo-600" />
-              </div>
+          <Card>
+            <CardContent className="p-4 flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Achievement</p>
+                <p className="text-sm font-medium text-muted-foreground">Achievement</p>
                 <p className="text-2xl font-bold text-indigo-600">
-                  {mounted ? achievementRate.toFixed(1) : ''}%
+                  {mounted ? stats.achievementRate.toFixed(1) : ''}%
                 </p>
               </div>
-            </div>
+              <div className="h-10 w-10 bg-indigo-100 rounded-lg flex items-center justify-center">
+                <HugeiconsIcon icon={ChartLineData01Icon} className="h-5 w-5 text-indigo-600" />
+              </div>
+            </CardContent>
           </Card>
 
-          <Card className="p-4">
-            <div className="flex items-center space-x-3">
-              <div className="p-2 bg-teal-100 rounded-lg">
-                <Award className="h-5 w-5 text-teal-600" />
-              </div>
+          <Card>
+            <CardContent className="p-4 flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Avg Performance</p>
-                <p className="text-2xl font-bold text-teal-600">
-                  {mounted ? avgPerformance.toFixed(1) : ''}%
-                </p>
+                <p className="text-sm font-medium text-muted-foreground">On Leave</p>
+                <p className="text-2xl font-bold text-yellow-600">{stats.onLeaveSPG}</p>
               </div>
-            </div>
-          </Card>
-
-          <Card className="p-4">
-            <div className="flex items-center space-x-3">
-              <div className="p-2 bg-orange-100 rounded-lg">
-                <CurrencyDollar className="h-5 w-5 text-orange-600" />
+              <div className="h-10 w-10 bg-yellow-100 rounded-lg flex items-center justify-center">
+                <HugeiconsIcon icon={AlertCircleIcon} className="h-5 w-5 text-yellow-600" />
               </div>
-              <div>
-                <p className="text-sm font-medium text-gray-600">Total Commission</p>
-                <p className="text-2xl font-bold text-orange-600">
-                  {mounted ? (totalCommission / 1000000).toFixed(1) : ''}M
-                </p>
-              </div>
-            </div>
+            </CardContent>
           </Card>
         </div>
 
-        {/* View Toggle and Actions */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <Button
-              variant={viewMode === 'cards' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setViewMode('cards')}
-            >
-              Cards
-            </Button>
-            <Button
-              variant={viewMode === 'table' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setViewMode('table')}
-            >
-              Table
-            </Button>
+        {/* Filters and Controls */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="relative w-full sm:w-72">
+            <HugeiconsIcon icon={Search01Icon} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+            <Input
+              placeholder="Search SPG, Store, or Location..."
+              className="pl-10"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
           </div>
-          
-          <div className="flex items-center space-x-2">
-            <Button variant="outline" size="sm">
-              <MapPin className="h-4 w-4 mr-2" />
-              Store Map
-            </Button>
-            <Button variant="outline" size="sm">Export</Button>
-            <Button size="sm">
-              <User className="h-4 w-4 mr-2" />
-              Add SPG
+
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <div className="flex items-center gap-1 bg-muted p-1 rounded-md">
+              <Button
+                variant={viewMode === 'cards' ? 'secondary' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('cards')}
+                className="h-8"
+              >
+                Cards
+              </Button>
+              <Button
+                variant={viewMode === 'table' ? 'secondary' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('table')}
+                className="h-8"
+              >
+                Table
+              </Button>
+            </div>
+
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-[140px] h-9">
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Status</SelectItem>
+                <SelectItem value="active">Active</SelectItem>
+                <SelectItem value="on-leave">On Leave</SelectItem>
+                <SelectItem value="inactive">Inactive</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Button variant="outline" size="sm" className="h-9">
+              <HugeiconsIcon icon={Download01Icon} className="h-4 w-4 mr-2" />
+              Export
             </Button>
           </div>
         </div>
@@ -621,18 +668,21 @@ export default function SPGStoresPage() {
         {/* Data Display */}
         {viewMode === 'cards' ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {mockSPGData.map((spg) => (
+            {filteredData.map((spg) => (
               <SPGCard key={spg.id} spg={spg} />
             ))}
+            {filteredData.length === 0 && (
+              <div className="col-span-full py-12 text-center text-muted-foreground">
+                No SPG assignments found matching your criteria.
+              </div>
+            )}
           </div>
         ) : (
-          <Card>
-            <AdvancedDataTable
-              data={mockSPGData}
-              columns={columns}
-              searchPlaceholder="Search SPG names, stores, or locations..."
-            />
-          </Card>
+          <TanStackDataTable
+            data={filteredData}
+            columns={columns}
+            searchPlaceholder="Search..."
+          />
         )}
       </div>
     </TwoLevelLayout>

@@ -3,10 +3,10 @@
 import { useState, useEffect } from 'react'
 import { TwoLevelLayout } from '@/components/ui/two-level-layout'
 import { Header } from '@/components/ui/header'
-import { Card } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { AdvancedDataTable } from '@/components/ui/advanced-data-table'
+import { TanStackDataTable, type TanStackColumn } from '@/components/ui/tanstack-data-table'
 import { Badge } from '@/components/ui/badge'
 import { HRService } from '@/services/hr'
 import { HugeiconsIcon } from '@hugeicons/react'
@@ -24,6 +24,8 @@ import {
   Search01Icon,
   AlertCircleIcon,
   ArrowTurnBackwardIcon,
+  PlusSignIcon,
+  Download01Icon
 } from '@hugeicons/core-free-icons'
 
 interface TrainingProgram {
@@ -50,24 +52,7 @@ interface TrainingProgram {
   updated_at: string
 }
 
-interface TrainingEnrollment {
-  id: string
-  employee_id: string
-  employee_name: string
-  department: string
-  program_id: string
-  program_title: string
-  enrollment_date: string
-  completion_date?: string
-  progress_percentage: number
-  enrollment_status: 'enrolled' | 'in-progress' | 'completed' | 'failed' | 'dropped'
-  final_score?: number
-  certificate_issued: boolean
-  created_at: string
-  updated_at: string
-}
-
-// Mock training programs data updated to match new interface
+// Mock training programs data
 const mockTrainingPrograms: TrainingProgram[] = [
   {
     id: '1',
@@ -272,6 +257,7 @@ export default function TrainingPage() {
   const [trainingData, setTrainingData] = useState<TrainingProgram[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [searchTerm, setSearchTerm] = useState('')
 
   useEffect(() => {
     setMounted(true)
@@ -282,17 +268,11 @@ export default function TrainingPage() {
     try {
       setLoading(true)
       setError(null)
-      
-      // TODO: Replace with actual API call when backend endpoint is ready
-      // const response = await HRService.getTrainingPrograms()
-      // setTrainingData(response.data)
-      
-      // Use mock data for now
       setTrainingData(mockTrainingPrograms)
     } catch (error) {
       console.error('Error fetching training data:', error)
       setError('Failed to load training programs')
-      setTrainingData(mockTrainingPrograms) // Fallback to mock data
+      setTrainingData(mockTrainingPrograms)
     } finally {
       setLoading(false)
     }
@@ -315,29 +295,25 @@ export default function TrainingPage() {
   const totalEnrolled = trainingData.reduce((sum, program) => sum + program.enrolled_count, 0)
   const totalCompleted = trainingData.reduce((sum, program) => sum + program.completed_count, 0)
   const completionRate = totalEnrolled > 0 ? ((totalCompleted / totalEnrolled) * 100) : 0
-  const avgCost = totalPrograms > 0 ? trainingData.reduce((sum, program) => sum + program.cost_per_participant, 0) / totalPrograms : 0
 
-  // Use correct column structure following integration guidelines
-  const columns: Array<{
-    key: keyof TrainingProgram;
-    title: string;
-    render?: (value: unknown, record: TrainingProgram) => React.ReactNode;
-  }> = [
+  const columns: TanStackColumn<TrainingProgram>[] = [
     {
-      key: 'program_title' as keyof TrainingProgram,
-      title: 'Program Title',
-      render: (value: unknown, record: TrainingProgram) => (
+      id: 'title',
+      header: 'Program Title',
+      accessorKey: 'program_title',
+      cell: ({ row }) => (
         <div>
-          <div className="font-medium">{record.program_title}</div>
-          <div className="text-xs text-muted-foreground max-w-60 truncate">{record.description}</div>
+          <div className="font-medium">{row.original.program_title}</div>
+          <div className="text-xs text-muted-foreground max-w-60 truncate">{row.original.description}</div>
         </div>
       )
     },
     {
-      key: 'category' as keyof TrainingProgram,
-      title: 'Category',
-      render: (value: unknown, record: TrainingProgram) => {
-        const category = record.category as keyof typeof categoryColors
+      id: 'category',
+      header: 'Category',
+      accessorKey: 'category',
+      cell: ({ row }) => {
+        const category = row.original.category as keyof typeof categoryColors
         return (
           <Badge className={categoryColors[category]}>
             {category.replace('-', ' ').charAt(0).toUpperCase() + category.replace('-', ' ').slice(1)}
@@ -346,10 +322,11 @@ export default function TrainingPage() {
       }
     },
     {
-      key: 'training_type' as keyof TrainingProgram,
-      title: 'Type',
-      render: (value: unknown, record: TrainingProgram) => {
-        const type = record.training_type as keyof typeof typeColors
+      id: 'type',
+      header: 'Type',
+      accessorKey: 'training_type',
+      cell: ({ row }) => {
+        const type = row.original.training_type as keyof typeof typeColors
         return (
           <Badge className={typeColors[type]}>
             {type.charAt(0).toUpperCase() + type.slice(1)}
@@ -358,45 +335,49 @@ export default function TrainingPage() {
       }
     },
     {
-      key: 'duration_hours' as keyof TrainingProgram,
-      title: 'Duration',
-      render: (value: unknown, record: TrainingProgram) => (
+      id: 'duration',
+      header: 'Duration',
+      accessorKey: 'duration_hours',
+      cell: ({ row }) => (
         <div className="flex items-center text-xs">
           <HugeiconsIcon icon={Clock01Icon} className="h-3 w-3 mr-1 text-muted-foreground" />
-          {record.duration_hours}h
+          {row.original.duration_hours}h
         </div>
       )
     },
     {
-      key: 'enrolled_count' as keyof TrainingProgram,
-      title: 'Enrollment',
-      render: (value: unknown, record: TrainingProgram) => (
+      id: 'enrollment',
+      header: 'Enrollment',
+      accessorKey: 'enrolled_count',
+      cell: ({ row }) => (
         <div className="text-xs">
-          <div>{record.enrolled_count}/{record.max_participants}</div>
+          <div>{row.original.enrolled_count}/{row.original.max_participants}</div>
           <div className="text-xs text-muted-foreground">
-            {record.max_participants > 0 ? Math.round((record.enrolled_count / record.max_participants) * 100) : 0}% filled
+            {row.original.max_participants > 0 ? Math.round((row.original.enrolled_count / row.original.max_participants) * 100) : 0}% filled
           </div>
         </div>
       )
     },
     {
-      key: 'completed_count' as keyof TrainingProgram,
-      title: 'Completed',
-      render: (value: unknown, record: TrainingProgram) => {
-        const rate = record.enrolled_count > 0 ? Math.round((record.completed_count / record.enrolled_count) * 100) : 0
+      id: 'completed',
+      header: 'Completed',
+      accessorKey: 'completed_count',
+      cell: ({ row }) => {
+        const rate = row.original.enrolled_count > 0 ? Math.round((row.original.completed_count / row.original.enrolled_count) * 100) : 0
         return (
           <div className="text-xs">
-            <div>{record.completed_count}</div>
+            <div>{row.original.completed_count}</div>
             <div className="text-xs text-muted-foreground">{rate}% rate</div>
           </div>
         )
       }
     },
     {
-      key: 'program_status' as keyof TrainingProgram,
-      title: 'Status',
-      render: (value: unknown, record: TrainingProgram) => {
-        const status = record.program_status as keyof typeof statusColors
+      id: 'status',
+      header: 'Status',
+      accessorKey: 'program_status',
+      cell: ({ row }) => {
+        const status = row.original.program_status as keyof typeof statusColors
         return (
           <Badge className={statusColors[status]}>
             {status.charAt(0).toUpperCase() + status.slice(1)}
@@ -405,20 +386,22 @@ export default function TrainingPage() {
       }
     },
     {
-      key: 'start_date' as keyof TrainingProgram,
-      title: 'Start Date',
-      render: (value: unknown, record: TrainingProgram) => (
+      id: 'startDate',
+      header: 'Start Date',
+      accessorKey: 'start_date',
+      cell: ({ row }) => (
         <div className="text-xs">
-          {mounted ? new Date(record.start_date).toLocaleDateString('id-ID') : ''}
+          {mounted ? new Date(row.original.start_date).toLocaleDateString('id-ID') : ''}
         </div>
       )
     },
     {
-      key: 'cost_per_participant' as keyof TrainingProgram,
-      title: 'Cost per Participant',
-      render: (value: unknown, record: TrainingProgram) => (
+      id: 'cost',
+      header: 'Cost per Participant',
+      accessorKey: 'cost_per_participant',
+      cell: ({ row }) => (
         <div className="text-xs font-medium">
-          {mounted ? record.cost_per_participant.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' }) : ''}
+          {mounted ? row.original.cost_per_participant.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' }) : ''}
         </div>
       )
     }
@@ -427,7 +410,7 @@ export default function TrainingPage() {
   const TrainingCard = ({ program }: { program: TrainingProgram }) => {
     const enrollmentRate = program.max_participants > 0 ? (program.enrolled_count / program.max_participants) * 100 : 0
     const completionRate = program.enrolled_count > 0 ? (program.completed_count / program.enrolled_count) * 100 : 0
-    
+
     return (
       <Card className="p-4">
         <div className="flex items-start justify-between mb-3">
@@ -447,7 +430,7 @@ export default function TrainingPage() {
             {program.program_status.charAt(0).toUpperCase() + program.program_status.slice(1)}
           </Badge>
         </div>
-        
+
         <div className="space-y-2 text-sm">
           <div className="flex justify-between">
             <span className="text-gray-500">Instructor:</span>
@@ -456,7 +439,7 @@ export default function TrainingPage() {
               {program.instructor_name}
             </span>
           </div>
-          
+
           <div className="flex justify-between">
             <span className="text-gray-500">Duration:</span>
             <span className="flex items-center">
@@ -464,36 +447,36 @@ export default function TrainingPage() {
               {program.duration_hours} hours
             </span>
           </div>
-          
+
           <div className="flex justify-between">
             <span className="text-gray-500">Enrollment:</span>
             <span>{program.enrolled_count}/{program.max_participants} ({enrollmentRate.toFixed(0)}%)</span>
           </div>
-          
+
           <div className="flex justify-between">
             <span className="text-gray-500">Completion:</span>
             <span>{program.completed_count} ({completionRate.toFixed(0)}%)</span>
           </div>
-          
+
           <div className="flex justify-between">
             <span className="text-gray-500">Start Date:</span>
             <span>{mounted ? new Date(program.start_date).toLocaleDateString('id-ID') : ''}</span>
           </div>
-          
+
           <div className="flex justify-between">
             <span className="text-gray-500">Cost:</span>
             <span className="font-medium">
               {mounted ? program.cost_per_participant.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' }) : ''}
             </span>
           </div>
-          
+
           {program.training_location && (
             <div className="flex justify-between">
               <span className="text-gray-500">Location:</span>
               <span>{program.training_location}</span>
             </div>
           )}
-          
+
           {program.provides_certification && (
             <div className="mt-2 p-2 bg-blue-50 rounded text-xs">
               <span className="flex items-center text-blue-700">
@@ -503,7 +486,7 @@ export default function TrainingPage() {
             </div>
           )}
         </div>
-        
+
         <div className="flex space-x-2 mt-4">
           <Button size="sm" variant="outline" className="flex-1">
             <HugeiconsIcon icon={File01Icon} className="h-4 w-4 mr-1" />
@@ -523,7 +506,7 @@ export default function TrainingPage() {
   return (
     <TwoLevelLayout>
       <div className="flex-1 flex flex-col overflow-hidden">
-        <Header 
+        <Header
           title="Training Management"
           breadcrumbs={breadcrumbs}
         />
@@ -531,93 +514,57 @@ export default function TrainingPage() {
         {/* Main Content Area */}
         <div className="flex-1 overflow-auto p-6 space-y-6">
           {/* Statistics Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-7 gap-4">
-          <Card className="p-4">
-            <div className="flex items-center space-x-3">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <HugeiconsIcon icon={BookOpen01Icon} className="h-5 w-5 text-blue-600" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-600">Total Programs</p>
-                <p className="text-2xl font-bold text-gray-900">{totalPrograms}</p>
-              </div>
-            </div>
-          </Card>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <Card>
+              <CardContent className="p-4 flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Total Programs</p>
+                  <p className="text-2xl font-bold">{totalPrograms}</p>
+                </div>
+                <div className="h-10 w-10 bg-blue-100 dark:bg-blue-900/20 rounded-lg flex items-center justify-center">
+                  <HugeiconsIcon icon={BookOpen01Icon} className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                </div>
+              </CardContent>
+            </Card>
 
-          <Card className="p-4">
-            <div className="flex items-center space-x-3">
-              <div className="p-2 bg-green-100 rounded-lg">
-                <HugeiconsIcon icon={PlayIcon} className="h-5 w-5 text-green-600" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-600">Active</p>
-                <p className="text-2xl font-bold text-green-600">{activePrograms}</p>
-              </div>
-            </div>
-          </Card>
+            <Card>
+              <CardContent className="p-4 flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Active</p>
+                  <p className="text-2xl font-bold text-green-600">{activePrograms}</p>
+                </div>
+                <div className="h-10 w-10 bg-green-100 dark:bg-green-900/20 rounded-lg flex items-center justify-center">
+                  <HugeiconsIcon icon={PlayIcon} className="h-5 w-5 text-green-600 dark:text-green-400" />
+                </div>
+              </CardContent>
+            </Card>
 
-          <Card className="p-4">
-            <div className="flex items-center space-x-3">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <HugeiconsIcon icon={Calendar01Icon} className="h-5 w-5 text-blue-600" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-600">Upcoming</p>
-                <p className="text-2xl font-bold text-blue-600">{upcomingPrograms}</p>
-              </div>
-            </div>
-          </Card>
+            <Card>
+              <CardContent className="p-4 flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Total Enrolled</p>
+                  <p className="text-2xl font-bold text-purple-600">{totalEnrolled}</p>
+                </div>
+                <div className="h-10 w-10 bg-purple-100 dark:bg-purple-900/20 rounded-lg flex items-center justify-center">
+                  <HugeiconsIcon icon={UserGroupIcon} className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                </div>
+              </CardContent>
+            </Card>
 
-          <Card className="p-4">
-            <div className="flex items-center space-x-3">
-              <div className="p-2 bg-gray-100 rounded-lg">
-                <HugeiconsIcon icon={CheckmarkCircle01Icon} className="h-5 w-5 text-gray-600" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-600">Completed</p>
-                <p className="text-2xl font-bold text-gray-600">{completedPrograms}</p>
-              </div>
-            </div>
-          </Card>
-
-          <Card className="p-4">
-            <div className="flex items-center space-x-3">
-              <div className="p-2 bg-purple-100 rounded-lg">
-                <HugeiconsIcon icon={UserGroupIcon} className="h-5 w-5 text-purple-600" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-600">Total Enrolled</p>
-                <p className="text-2xl font-bold text-purple-600">{totalEnrolled}</p>
-              </div>
-            </div>
-          </Card>
-
-          <Card className="p-4">
-            <div className="flex items-center space-x-3">
-              <div className="p-2 bg-indigo-100 rounded-lg">
-                <HugeiconsIcon icon={Award01Icon} className="h-5 w-5 text-indigo-600" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-600">Completed</p>
-                <p className="text-2xl font-bold text-indigo-600">{totalCompleted}</p>
-              </div>
-            </div>
-          </Card>
-
-          <Card className="p-4">
-            <div className="flex items-center space-x-3">
-              <div className="p-2 bg-teal-100 rounded-lg">
-                <HugeiconsIcon icon={ChartIncreaseIcon} className="h-5 w-5 text-teal-600" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-600">Success Rate</p>
-                <p className="text-2xl font-bold text-teal-600">
-                  {mounted ? completionRate.toFixed(1) : ''}%
-                </p>
-              </div>
-            </div>
-          </Card>
-        </div>
+            <Card>
+              <CardContent className="p-4 flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Success Rate</p>
+                  <p className="text-2xl font-bold text-teal-600">
+                    {mounted ? completionRate.toFixed(1) : ''}%
+                  </p>
+                </div>
+                <div className="h-10 w-10 bg-teal-100 dark:bg-teal-900/20 rounded-lg flex items-center justify-center">
+                  <HugeiconsIcon icon={ChartIncreaseIcon} className="h-5 w-5 text-teal-600 dark:text-teal-400" />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
 
           {/* Filters and Controls */}
           <div className="space-y-4">
@@ -629,7 +576,8 @@ export default function TrainingPage() {
                   <Input
                     placeholder="Search programs, instructors, or categories..."
                     className="pl-10"
-                    // Add search functionality here when needed
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
                   />
                 </div>
               </div>
@@ -639,10 +587,11 @@ export default function TrainingPage() {
                   Training Calendar
                 </Button>
                 <Button variant="outline" size="sm">
+                  <HugeiconsIcon icon={Download01Icon} className="h-4 w-4 mr-2" />
                   Export
                 </Button>
                 <Button size="sm">
-                  <HugeiconsIcon icon={BookOpen01Icon} className="h-4 w-4 mr-2" />
+                  <HugeiconsIcon icon={PlusSignIcon} className="h-4 w-4 mr-2" />
                   New Program
                 </Button>
               </div>
@@ -666,7 +615,7 @@ export default function TrainingPage() {
                   Table
                 </Button>
               </div>
-              
+
               <div className="flex items-center gap-4 text-sm text-muted-foreground">
                 <span>Showing {trainingData.length} training programs</span>
               </div>
@@ -699,7 +648,7 @@ export default function TrainingPage() {
                   <TrainingCard key={program.id} program={program} />
                 ))}
               </div>
-              
+
               {/* Empty State for Cards */}
               {trainingData.length === 0 && (
                 <Card className="p-8">
@@ -711,7 +660,7 @@ export default function TrainingPage() {
                         Get started by creating your first training program.
                       </p>
                       <Button size="sm">
-                        <HugeiconsIcon icon={BookOpen01Icon} className="h-4 w-4 mr-2" />
+                        <HugeiconsIcon icon={PlusSignIcon} className="h-4 w-4 mr-2" />
                         Create Program
                       </Button>
                     </div>
@@ -720,13 +669,11 @@ export default function TrainingPage() {
               )}
             </>
           ) : (
-            <Card>
-              <AdvancedDataTable
-                data={trainingData}
-                columns={columns}
-                searchPlaceholder="Search programs, instructors, or categories..."
-              />
-            </Card>
+            <TanStackDataTable
+              data={trainingData}
+              columns={columns}
+              searchValue={searchTerm}
+            />
           )}
         </div>
       </div>

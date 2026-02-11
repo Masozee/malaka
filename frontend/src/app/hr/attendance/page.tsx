@@ -3,9 +3,9 @@
 import { useState, useEffect } from 'react'
 import { TwoLevelLayout } from '@/components/ui/two-level-layout'
 import { Header } from '@/components/ui/header'
-import { Card } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { AdvancedDataTable } from '@/components/ui/advanced-data-table'
+import { TanStackDataTable, type TanStackColumn } from '@/components/ui/tanstack-data-table'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -50,23 +50,13 @@ interface AttendanceRecord {
 
 // Transform backend attendance data to match frontend interface
 const transformAttendanceData = (rawData: any[], employees: Employee[]): AttendanceRecord[] => {
-  console.log('Transforming attendance data:', rawData.length, 'records with', employees.length, 'employees')
-  
   return rawData.map(record => {
     // Find matching employee
     const employee = employees.find(emp => emp.id === record.employee_id)
     if (!employee) {
-      console.warn('No employee found for attendance record:', record.employee_id)
       return null
     }
-    
-    // Format times from timestamps
-    const formatTime = (timestamp: string | null): string | null => {
-      if (!timestamp) return null
-      const date = new Date(timestamp)
-      return date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
-    }
-    
+
     return {
       id: record.id,
       employee_id: record.employee_id,
@@ -122,29 +112,22 @@ export default function AttendancePage() {
 
   useEffect(() => {
     setMounted(true)
-    
+
     const fetchData = async () => {
       try {
         setLoading(true)
-        
+
         // Fetch employees first
         const employeesResponse = await HRService.getEmployees()
         setEmployees(employeesResponse.data)
-        
+
         // Fetch real attendance data from API
         try {
-          console.log('Fetching attendance records...')
           const attendanceResponse = await HRService.getAttendanceRecords()
-          console.log('Attendance API response:', attendanceResponse)
-          console.log('Number of employees for transformation:', employeesResponse.data.length)
-          
           const transformedData = transformAttendanceData(attendanceResponse.data, employeesResponse.data)
-          console.log('Transformed attendance data:', transformedData.length, 'records')
           setAttendanceData(transformedData)
         } catch (attendanceError) {
           console.error('Error fetching attendance data:', attendanceError)
-          console.error('Setting empty attendance data due to error')
-          // Show error but don't crash the page
           setAttendanceData([])
         }
       } catch (error) {
@@ -166,92 +149,72 @@ export default function AttendancePage() {
 
   // Filter data based on selected filters
   const filteredData = attendanceData.filter(record => {
-    const matchesSearch = !searchTerm || 
+    const matchesSearch = !searchTerm ||
       record.employee?.employee_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       record.employee?.employee_code?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       record.employee?.department?.toLowerCase().includes(searchTerm.toLowerCase())
-    
+
     const matchesDepartment = selectedDepartment === 'all' || record.employee?.department === selectedDepartment
     const matchesStatus = selectedStatus === 'all' || record.status?.toLowerCase() === selectedStatus.toLowerCase()
-    
+
     let matchesDate = true
     if (selectedDate === 'today') {
       const today = new Date().toISOString().split('T')[0]
       const recordDate = record.attendance_date?.split('T')[0] || ''
       matchesDate = recordDate === today
-      console.log('Today filter:', {today, recordDate, matches: matchesDate})
     } else if (selectedDate === 'week') {
       const weekAgo = new Date()
       weekAgo.setDate(weekAgo.getDate() - 7)
       const recordDate = new Date(record.attendance_date || '')
       matchesDate = recordDate >= weekAgo
-      console.log('Week filter:', {weekAgo: weekAgo.toISOString(), recordDate: recordDate.toISOString(), matches: matchesDate})
     } else if (selectedDate === 'all') {
       matchesDate = true
     }
-    
+
     // Month/Year filter
     let matchesMonth = true
     let matchesYear = true
-    
+
     if (selectedMonth !== 'all' && record.attendance_date) {
       const recordDate = new Date(record.attendance_date)
       matchesMonth = (recordDate.getMonth() + 1).toString() === selectedMonth
     }
-    
+
     if (selectedYear !== 'all' && record.attendance_date) {
       const recordDate = new Date(record.attendance_date)
       matchesYear = recordDate.getFullYear().toString() === selectedYear
     }
-    
-    const finalMatch = matchesSearch && matchesDepartment && matchesStatus && matchesDate && matchesMonth && matchesYear
-    if (!finalMatch && process.env.NODE_ENV === 'development') {
-      console.log('Record filtered out:', {
-        record: record.id,
-        employee: record.employee?.employee_name || 'Unknown',
-        matchesSearch,
-        matchesDepartment,
-        matchesStatus,
-        matchesDate
-      })
-    }
-    return finalMatch
+
+    return matchesSearch && matchesDepartment && matchesStatus && matchesDate && matchesMonth && matchesYear
   })
 
-  console.log('Final filtered data:', filteredData.length, 'records from', attendanceData.length, 'total')
-  
   // Pagination logic
   const totalItems = filteredData.length
   const totalPages = Math.max(1, Math.ceil(totalItems / pageSize))
   const startIndex = (currentPage - 1) * pageSize
   const endIndex = startIndex + pageSize
   const paginatedData = filteredData.slice(startIndex, endIndex)
-  
+
   // Reset to page 1 when filters change
   useEffect(() => {
     setCurrentPage(1)
   }, [searchTerm, selectedDepartment, selectedStatus, selectedDate, selectedMonth, selectedYear])
-  
+
   // Calculate statistics for today
   const today = new Date().toISOString().split('T')[0]
   const todayRecords = attendanceData.filter(record => record.attendance_date?.split('T')[0] === today)
-  
+
   const totalEmployees = todayRecords.length
-  const presentCount = todayRecords.filter(record => 
+  const presentCount = todayRecords.filter(record =>
     ['PRESENT', 'LATE', 'HALF_DAY', 'OVERTIME'].includes(record.status || '')
   ).length
   const absentCount = todayRecords.filter(record => record.status === 'ABSENT').length
   const lateCount = todayRecords.filter(record => record.status === 'LATE').length
   const overtimeCount = todayRecords.filter(record => record.status === 'OVERTIME').length
-  const avgWorkingHours = todayRecords
-    .filter(record => record.work_hours !== null)
-    .reduce((sum, record) => sum + (record.work_hours || 0), 0) / 
-    Math.max(1, todayRecords.filter(record => record.work_hours !== null).length)
-  const attendanceRate = totalEmployees > 0 ? ((presentCount / totalEmployees) * 100) : 0
 
   // Get unique departments
   const departments = Array.from(new Set(employees.map(emp => emp.department))).sort()
-  
+
   // Generate month and year options
   const months = [
     { value: '1', label: 'January' },
@@ -267,7 +230,7 @@ export default function AttendancePage() {
     { value: '11', label: 'November' },
     { value: '12', label: 'December' }
   ]
-  
+
   // Get unique years from attendance data
   const years = Array.from(new Set(
     attendanceData
@@ -275,27 +238,25 @@ export default function AttendancePage() {
       .map(record => new Date(record.attendance_date).getFullYear())
   )).sort((a, b) => b - a) // Sort descending (newest first)
 
-  const columns: Array<{
-    key: keyof AttendanceRecord;
-    title: string;
-    render?: (value: unknown, record: AttendanceRecord) => React.ReactNode;
-  }> = [
+  const columns: TanStackColumn<AttendanceRecord>[] = [
     {
-      key: 'employee' as keyof AttendanceRecord,
-      title: 'Employee',
-      render: (value: unknown, record: AttendanceRecord) => (
+      id: 'employee',
+      header: 'Employee',
+      accessorKey: 'employee_id',
+      cell: ({ row }) => (
         <div>
-          <div className="font-medium">{record.employee?.employee_name || 'Unknown Employee'}</div>
-          <div className="text-xs text-muted-foreground">{record.employee?.employee_code || 'N/A'} • {record.employee?.department || 'N/A'}</div>
+          <div className="font-medium">{row.original.employee?.employee_name || 'Unknown Employee'}</div>
+          <div className="text-xs text-muted-foreground">{row.original.employee?.employee_code || 'N/A'} • {row.original.employee?.department || 'N/A'}</div>
         </div>
       )
     },
     {
-      key: 'attendance_date' as keyof AttendanceRecord,
-      title: 'Date',
-      render: (value: unknown, record: AttendanceRecord) => (
+      id: 'date',
+      header: 'Date',
+      accessorKey: 'attendance_date',
+      cell: ({ row }) => (
         <div className="text-xs">
-          {mounted && record.attendance_date ? new Date(record.attendance_date).toLocaleDateString('id-ID', {
+          {mounted && row.original.attendance_date ? new Date(row.original.attendance_date).toLocaleDateString('id-ID', {
             weekday: 'short',
             year: 'numeric',
             month: 'short',
@@ -305,11 +266,12 @@ export default function AttendancePage() {
       )
     },
     {
-      key: 'actual_in' as keyof AttendanceRecord,
-      title: 'Check In',
-      render: (value: unknown, record: AttendanceRecord) => (
+      id: 'check_in',
+      header: 'Check In',
+      accessorKey: 'actual_in',
+      cell: ({ row }) => (
         <div className="text-xs font-mono">
-          {record?.actual_in ? new Date(record.actual_in).toLocaleTimeString('id-ID', {
+          {row.original?.actual_in ? new Date(row.original.actual_in).toLocaleTimeString('id-ID', {
             hour: '2-digit',
             minute: '2-digit'
           }) : '-'}
@@ -317,11 +279,12 @@ export default function AttendancePage() {
       )
     },
     {
-      key: 'actual_out' as keyof AttendanceRecord,
-      title: 'Check Out',
-      render: (value: unknown, record: AttendanceRecord) => (
+      id: 'check_out',
+      header: 'Check Out',
+      accessorKey: 'actual_out',
+      cell: ({ row }) => (
         <div className="text-xs font-mono">
-          {record?.actual_out ? new Date(record.actual_out).toLocaleTimeString('id-ID', {
+          {row.original?.actual_out ? new Date(row.original.actual_out).toLocaleTimeString('id-ID', {
             hour: '2-digit',
             minute: '2-digit'
           }) : '-'}
@@ -329,22 +292,24 @@ export default function AttendancePage() {
       )
     },
     {
-      key: 'work_hours' as keyof AttendanceRecord,
-      title: 'Working Hours',
-      render: (value: unknown, record: AttendanceRecord) => (
+      id: 'work_hours',
+      header: 'Working Hours',
+      accessorKey: 'work_hours',
+      cell: ({ row }) => (
         <div className="text-xs">
-          {record?.work_hours ? `${record.work_hours.toFixed(1)}h` : '-'}
-          {record?.overtime_hours && record.overtime_hours > 0 && (
-            <span className="text-purple-600 ml-1">+{record.overtime_hours.toFixed(1)}h</span>
-          )}
+          {row.original?.work_hours ? `${row.original.work_hours.toFixed(1)}h` : '-'}
+          {row.original?.overtime_hours && row.original.overtime_hours > 0 ? (
+            <span className="text-purple-600 ml-1">+{row.original.overtime_hours.toFixed(1)}h</span>
+          ) : null}
         </div>
       )
     },
     {
-      key: 'status' as keyof AttendanceRecord,
-      title: 'Status',
-      render: (value: unknown, record: AttendanceRecord) => {
-        const status = (record.status || 'PRESENT') as keyof typeof statusColors
+      id: 'status',
+      header: 'Status',
+      accessorKey: 'status',
+      cell: ({ row }) => {
+        const status = (row.original.status || 'PRESENT') as keyof typeof statusColors
         return (
           <Badge className={statusColors[status]}>
             {status ? status.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'Unknown'}
@@ -353,11 +318,12 @@ export default function AttendancePage() {
       }
     },
     {
-      key: 'remarks' as keyof AttendanceRecord,
-      title: 'Remarks',
-      render: (value: unknown, record: AttendanceRecord) => (
+      id: 'remarks',
+      header: 'Remarks',
+      accessorKey: 'remarks',
+      cell: ({ row }) => (
         <div className="text-xs text-muted-foreground max-w-xs truncate">
-          {record?.remarks || '-'}
+          {row.original?.remarks || '-'}
         </div>
       )
     }
@@ -376,7 +342,7 @@ export default function AttendancePage() {
             {status ? status.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'Unknown'}
           </Badge>
         </div>
-        
+
         <div className="space-y-2 text-sm">
           <div className="flex justify-between">
             <span className="text-gray-500">Date:</span>
@@ -428,7 +394,7 @@ export default function AttendancePage() {
 
   return (
     <TwoLevelLayout>
-      <Header 
+      <Header
         title="Attendance Management"
         description="Track and manage employee attendance records"
         breadcrumbs={breadcrumbs}
@@ -449,64 +415,52 @@ export default function AttendancePage() {
       <div className="flex-1 p-6 space-y-6">
         {/* Statistics Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card className="p-4">
-            <div className="flex items-center space-x-3">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <HugeiconsIcon icon={UserGroupIcon} className="h-5 w-5 text-blue-600" />
-              </div>
+          <Card>
+            <CardContent className="p-4 flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Total Employees</p>
-                <p className="text-2xl font-bold text-gray-900">{totalEmployees}</p>
+                <p className="text-sm font-medium text-muted-foreground">Total Employees</p>
+                <p className="text-2xl font-bold">{totalEmployees}</p>
               </div>
-            </div>
+              <div className="h-10 w-10 bg-blue-100 dark:bg-blue-900/20 rounded-lg flex items-center justify-center">
+                <HugeiconsIcon icon={UserGroupIcon} className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              </div>
+            </CardContent>
           </Card>
 
-          <Card className="p-4">
-            <div className="flex items-center space-x-3">
-              <div className="p-2 bg-green-100 rounded-lg">
-                <HugeiconsIcon icon={CheckmarkCircle01Icon} className="h-5 w-5 text-green-600" />
-              </div>
+          <Card>
+            <CardContent className="p-4 flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Present Today</p>
+                <p className="text-sm font-medium text-muted-foreground">Present Today</p>
                 <p className="text-2xl font-bold text-green-600">{presentCount}</p>
               </div>
-            </div>
+              <div className="h-10 w-10 bg-green-100 dark:bg-green-900/20 rounded-lg flex items-center justify-center">
+                <HugeiconsIcon icon={CheckmarkCircle01Icon} className="h-5 w-5 text-green-600 dark:text-green-400" />
+              </div>
+            </CardContent>
           </Card>
 
-          <Card className="p-4">
-            <div className="flex items-center space-x-3">
-              <div className="p-2 bg-red-100 rounded-lg">
-                <HugeiconsIcon icon={CancelIcon} className="h-5 w-5 text-red-600" />
-              </div>
+          <Card>
+            <CardContent className="p-4 flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Absent</p>
+                <p className="text-sm font-medium text-muted-foreground">Absent</p>
                 <p className="text-2xl font-bold text-red-600">{absentCount}</p>
               </div>
-            </div>
+              <div className="h-10 w-10 bg-red-100 dark:bg-red-900/20 rounded-lg flex items-center justify-center">
+                <HugeiconsIcon icon={CancelIcon} className="h-5 w-5 text-red-600 dark:text-red-400" />
+              </div>
+            </CardContent>
           </Card>
 
-          <Card className="p-4">
-            <div className="flex items-center space-x-3">
-              <div className="p-2 bg-yellow-100 rounded-lg">
-                <HugeiconsIcon icon={AlertCircleIcon} className="h-5 w-5 text-yellow-600" />
-              </div>
+          <Card>
+            <CardContent className="p-4 flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Late Arrivals</p>
+                <p className="text-sm font-medium text-muted-foreground">Late Arrivals</p>
                 <p className="text-2xl font-bold text-yellow-600">{lateCount}</p>
               </div>
-            </div>
-          </Card>
-
-          <Card className="p-4">
-            <div className="flex items-center space-x-3">
-              <div className="p-2 bg-purple-100 rounded-lg">
-                <HugeiconsIcon icon={Clock01Icon} className="h-5 w-5 text-purple-600" />
+              <div className="h-10 w-10 bg-yellow-100 dark:bg-yellow-900/20 rounded-lg flex items-center justify-center">
+                <HugeiconsIcon icon={AlertCircleIcon} className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
               </div>
-              <div>
-                <p className="text-sm font-medium text-gray-600">Overtime</p>
-                <p className="text-2xl font-bold text-purple-600">{overtimeCount}</p>
-              </div>
-            </div>
+            </CardContent>
           </Card>
 
         </div>
@@ -538,7 +492,7 @@ export default function AttendancePage() {
                 ))}
               </SelectContent>
             </Select>
-            
+
             <Select value={selectedStatus} onValueChange={setSelectedStatus}>
               <SelectTrigger className="w-32">
                 <HugeiconsIcon icon={CheckmarkCircle01Icon} className="h-4 w-4 mr-2" />
@@ -553,7 +507,7 @@ export default function AttendancePage() {
                 <SelectItem value="half_day">Half Day</SelectItem>
               </SelectContent>
             </Select>
-            
+
             <Select value={selectedDate} onValueChange={setSelectedDate}>
               <SelectTrigger className="w-32">
                 <HugeiconsIcon icon={Calendar01Icon} className="h-4 w-4 mr-2" />
@@ -565,7 +519,7 @@ export default function AttendancePage() {
                 <SelectItem value="today">Today</SelectItem>
               </SelectContent>
             </Select>
-            
+
             <Select value={selectedMonth} onValueChange={setSelectedMonth}>
               <SelectTrigger className="w-32">
                 <HugeiconsIcon icon={Calendar01Icon} className="h-4 w-4 mr-2" />
@@ -578,7 +532,7 @@ export default function AttendancePage() {
                 ))}
               </SelectContent>
             </Select>
-            
+
             <Select value={selectedYear} onValueChange={setSelectedYear}>
               <SelectTrigger className="w-24">
                 <HugeiconsIcon icon={Calendar01Icon} className="h-4 w-4 mr-2" />
@@ -598,14 +552,14 @@ export default function AttendancePage() {
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-4">
             <div className="flex space-x-1 bg-muted p-1 rounded-lg">
-              <Button 
+              <Button
                 variant={activeView === 'cards' ? 'default' : 'ghost'}
                 size="sm"
                 onClick={() => setActiveView('cards')}
               >
                 Cards
               </Button>
-              <Button 
+              <Button
                 variant={activeView === 'table' ? 'default' : 'ghost'}
                 size="sm"
                 onClick={() => setActiveView('table')}
@@ -658,7 +612,7 @@ export default function AttendancePage() {
                 <AttendanceCard key={record.id} record={record} />
               ))}
             </div>
-            
+
             {/* Pagination Controls for Cards */}
             {totalPages > 1 && (
               <div className="flex items-center justify-between mt-6">
@@ -674,7 +628,7 @@ export default function AttendancePage() {
                   >
                     Previous
                   </Button>
-                  
+
                   <div className="flex items-center space-x-1">
                     {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                       let pageNum
@@ -687,7 +641,7 @@ export default function AttendancePage() {
                       } else {
                         pageNum = currentPage - 2 + i
                       }
-                      
+
                       return (
                         <Button
                           key={pageNum}
@@ -701,7 +655,7 @@ export default function AttendancePage() {
                       )
                     })}
                   </div>
-                  
+
                   <Button
                     variant="outline"
                     size="sm"
@@ -715,18 +669,16 @@ export default function AttendancePage() {
             )}
           </>
         ) : (
-          <AdvancedDataTable
+          <TanStackDataTable
             data={paginatedData}
             columns={columns}
             searchPlaceholder="Search employees, departments, or locations..."
             pagination={{
-              current: currentPage,
+              pageIndex: currentPage - 1,
               pageSize: pageSize,
-              total: totalItems,
-              onChange: (page, size) => {
-                setCurrentPage(page)
-                setPageSize(size)
-              }
+              totalRows: totalItems,
+              onPageChange: (page) => setCurrentPage(page + 1),
+              onPageSizeChange: (size) => setPageSize(size)
             }}
           />
         )}

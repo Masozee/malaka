@@ -12,6 +12,21 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
+import { HugeiconsIcon } from '@hugeicons/react'
+import {
+  Dollar01Icon,
+  File01Icon,
+  Calendar01Icon,
+  UserGroupIcon,
+  ChartColumnIcon,
+  MortarboardIcon,
+  Settings01Icon,
+  Delete01Icon,
+  AlertCircleIcon,
+  ArrowTurnBackwardIcon,
+  FloppyDiskIcon,
+  PlusSignIcon
+} from '@hugeicons/core-free-icons'
 
 interface SettingItem {
   id: string
@@ -453,12 +468,12 @@ export default function HRGearPage() {
   })
 
   const tabs = [
-    { id: "payroll", label: "Payroll Components", icon: CurrencyDollar },
-    { id: "tax", label: "Tax Gear", icon: FileText },
-    { id: "leave", label: "Leave Approval", icon: Calendar },
-    { id: "employees", label: "Employee Management", icon: Users },
-    { id: "attendance", label: "Attendance", icon: ChartBar },
-    { id: "performance", label: "Performance", icon: GraduationCap }
+    { id: "payroll", label: "Payroll Components", icon: Dollar01Icon },
+    { id: "tax", label: "Tax Gear", icon: File01Icon },
+    { id: "leave", label: "Leave Approval", icon: Calendar01Icon },
+    { id: "employees", label: "Employee Management", icon: UserGroupIcon },
+    { id: "attendance", label: "Attendance", icon: ChartColumnIcon },
+    { id: "performance", label: "Performance", icon: MortarboardIcon }
   ]
 
   const handleSettingChange = (tabId: string, settingId: string, value: any) => {
@@ -673,7 +688,7 @@ export default function HRGearPage() {
             className="text-destructive hover:text-destructive"
             disabled={['basic_salary', 'income_tax', 'jamsostek', 'bpjs_kesehatan'].includes(component.id)}
           >
-            <Trash className="h-4 w-4" />
+            <HugeiconsIcon icon={Delete01Icon} className="h-4 w-4" />
           </Button>
         </div>
       </div>
@@ -775,11 +790,11 @@ export default function HRGearPage() {
           {/* Header with Save/Reset */}
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
-              <Gear2 className="h-5 w-5" />
+              <HugeiconsIcon icon={Settings01Icon} className="h-5 w-5" />
               <h2 className="text-lg font-semibold">HR Configuration</h2>
               {hasUnsavedChanges && (
                 <Badge variant="secondary" className="ml-2">
-                  <WarningCircle className="h-3 w-3 mr-1" />
+                  <HugeiconsIcon icon={AlertCircleIcon} className="h-3 w-3 mr-1" />
                   Unsaved Changes
                 </Badge>
               )}
@@ -792,7 +807,7 @@ export default function HRGearPage() {
                 disabled={isLoading || !hasUnsavedChanges}
                 className="flex items-center space-x-2"
               >
-                <RotateCcw className="h-4 w-4" />
+                <HugeiconsIcon icon={ArrowTurnBackwardIcon} className="h-4 w-4" />
                 <span>Reset</span>
               </Button>
               <Button
@@ -800,7 +815,7 @@ export default function HRGearPage() {
                 disabled={isLoading || !hasUnsavedChanges}
                 className="flex items-center space-x-2"
               >
-                <FloppyDisk className="h-4 w-4" />
+                <HugeiconsIcon icon={FloppyDiskIcon} className="h-4 w-4" />
                 <span>{isLoading ? 'Saving...' : 'Save Changes'}</span>
               </Button>
             </div>
@@ -809,15 +824,12 @@ export default function HRGearPage() {
           {/* Tabbed Interface */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
             <TabsList className="inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground">
-              {tabs.map(tab => {
-                const Icon = tab.icon
-                return (
+              {tabs.map(tab => (
                   <TabsTrigger key={tab.id} value={tab.id} className="flex items-center space-x-2 px-3">
-                    <Icon className="h-4 w-4" />
+                    <HugeiconsIcon icon={tab.icon} className="h-4 w-4" />
                     <span>{tab.label}</span>
                   </TabsTrigger>
-                )
-              })}
+              ))}
             </TabsList>
 
             {tabs.map(tab => (
@@ -827,7 +839,7 @@ export default function HRGearPage() {
                     <div className="flex items-center justify-between">
                       <div>
                         <div className="flex items-center space-x-2">
-                          <tab.icon className="h-5 w-5" />
+                          <HugeiconsIcon icon={tab.icon} className="h-5 w-5" />
                           <CardTitle>{tab.label}</CardTitle>
                         </div>
                         <CardDescription>
@@ -840,7 +852,7 @@ export default function HRGearPage() {
                           size="sm"
                           className="flex items-center space-x-2"
                         >
-                          <Plus className="h-4 w-4" />
+                          <HugeiconsIcon icon={PlusSignIcon} className="h-4 w-4" />
                           <span>Add Component</span>
                         </Button>
                       )}

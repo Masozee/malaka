@@ -5,17 +5,17 @@ import { TwoLevelLayout } from '@/components/ui/two-level-layout'
 import { Header } from '@/components/ui/header'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Card } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { DataTable } from '@/components/ui/data-table'
+import { TanStackDataTable, type TanStackColumn } from '@/components/ui/tanstack-data-table'
 import { EmployeeCard } from '@/components/hr/employee-card'
 
 import type { Employee, EmployeeFilters as FilterType } from '@/types/hr'
 import { HRService } from '@/services/hr'
 import Link from 'next/link'
 import { HugeiconsIcon } from '@hugeicons/react'
-import { PlusSignIcon, Search01Icon, UserGroupIcon } from '@hugeicons/core-free-icons'
+import { PlusSignIcon, Search01Icon, UserGroupIcon, CheckmarkCircle01Icon, AlertCircleIcon, CancelIcon } from '@hugeicons/core-free-icons'
 
 type ViewMode = 'grid' | 'table'
 
@@ -73,12 +73,12 @@ export default function EmployeesPage() {
       // Search filter
       if (filters.search) {
         const searchLower = filters.search.toLowerCase()
-        const matchesSearch = 
+        const matchesSearch =
           employee.employee_name.toLowerCase().includes(searchLower) ||
           employee.email.toLowerCase().includes(searchLower) ||
           employee.employee_code.toLowerCase().includes(searchLower) ||
           employee.position.toLowerCase().includes(searchLower)
-        
+
         if (!matchesSearch) return false
       }
 
@@ -140,12 +140,12 @@ export default function EmployeesPage() {
     if (!mounted) {
       return { total: 0, active: 0, inactive: 0, terminated: 0 }
     }
-    
+
     const total = employees.length
     const active = employees.filter(e => e.employment_status === 'ACTIVE').length
     const inactive = employees.filter(e => e.employment_status === 'INACTIVE').length
     const terminated = employees.filter(e => e.employment_status === 'TERMINATED').length
-    
+
     return { total, active, inactive, terminated }
   }, [employees, mounted])
 
@@ -154,72 +154,78 @@ export default function EmployeesPage() {
     setPage(1)
   }
 
-  // Table columns for DataTable
-  const columns = [
+  // Table columns for TanStackDataTable
+  const columns: TanStackColumn<Employee>[] = [
     {
-      key: 'employee_name' as keyof Employee,
-      title: 'Employee',
-      render: (value: unknown, record: Employee) => (
+      id: 'employee',
+      header: 'Employee',
+      accessorKey: 'employee_name',
+      cell: ({ row }) => (
         <div className="flex items-center space-x-3">
           <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
             <span className="text-sm font-medium">
-              {record.employee_name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2)}
+              {row.original.employee_name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2)}
             </span>
           </div>
           <div>
-            <Link 
-              href={`/hr/employees/${record.id}`}
+            <Link
+              href={`/hr/employees/${row.original.id}`}
               className="font-medium text-gray-900 hover:text-blue-600 transition-colors"
             >
-              {record.employee_name}
+              {row.original.employee_name}
             </Link>
-            <p className="text-xs text-gray-500">{record.employee_code}</p>
+            <p className="text-xs text-gray-500">{row.original.employee_code}</p>
           </div>
         </div>
       )
     },
     {
-      key: 'position' as keyof Employee,
-      title: 'Position',
-      render: (value: unknown, record: Employee) => (
+      id: 'position',
+      header: 'Position',
+      accessorKey: 'position',
+      cell: ({ row }) => (
         <div>
-          <p className="font-medium">{record.position}</p>
-          <p className="text-xs text-gray-500">{record.department}</p>
+          <p className="font-medium">{row.original.position}</p>
+          <p className="text-xs text-gray-500">{row.original.department}</p>
         </div>
       )
     },
     {
-      key: 'email' as keyof Employee,
-      title: 'Contact',
-      render: (value: unknown, record: Employee) => (
+      id: 'contact',
+      header: 'Contact',
+      accessorKey: 'email',
+      cell: ({ row }) => (
         <div>
-          <p className="text-xs">{record.email}</p>
-          <p className="text-xs text-gray-500">{record.phone}</p>
+          <p className="text-xs">{row.original.email}</p>
+          <p className="text-xs text-gray-500">{row.original.phone}</p>
         </div>
       )
     },
     {
-      key: 'hire_date' as keyof Employee,
-      title: 'Hire Date',
-      render: (value: unknown, record: Employee) => {
-        if (!mounted) return ''
-        return new Date(record.hire_date).toLocaleDateString('id-ID')
+      id: 'hire_date',
+      header: 'Hire Date',
+      accessorKey: 'hire_date',
+      cell: ({ row }) => {
+        if (!mounted) return null
+        return <span className="text-sm">{new Date(row.original.hire_date).toLocaleDateString('id-ID')}</span>
       }
     },
     {
-      key: 'total_salary' as keyof Employee,
-      title: 'Total Salary',
-      render: (value: unknown, record: Employee) => {
-        if (!mounted) return ''
-        return `Rp ${record.total_salary.toLocaleString('id-ID')}`
+      id: 'salary',
+      header: 'Total Salary',
+      accessorKey: 'total_salary',
+      cell: ({ row }) => {
+        if (!mounted) return null
+        return <span className="text-sm">Rp {row.original.total_salary.toLocaleString('id-ID')}</span>
       }
     },
     {
-      key: 'employment_status' as keyof Employee,
-      title: 'Status',
-      render: (value: unknown, record: Employee) => (
-        <Badge className={`${statusColors[record.employment_status]} text-white`}>
-          {statusLabels[record.employment_status]}
+      id: 'status',
+      header: 'Status',
+      accessorKey: 'employment_status',
+      cell: ({ row }) => (
+        <Badge className={`${statusColors[row.original.employment_status]} text-white`}>
+          {statusLabels[row.original.employment_status]}
         </Badge>
       )
     }
@@ -248,49 +254,49 @@ export default function EmployeesPage() {
       <div className="flex-1 overflow-auto p-6 space-y-6">
         {/* Statistics Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card className="p-4">
-            <div className="flex items-center space-x-3">
-              <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
-                <HugeiconsIcon icon={UserGroupIcon} className="h-5 w-5 text-foreground" />
-              </div>
+          <Card>
+            <CardContent className="p-4 flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Total Employees</p>
                 <p className="text-2xl font-bold">{stats.total}</p>
               </div>
-            </div>
-          </Card>
-          <Card className="p-4">
-            <div className="flex items-center space-x-3">
-              <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
-                <div className="h-3 w-3 bg-green-500 rounded-full"></div>
+              <div className="h-10 w-10 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
+                <HugeiconsIcon icon={UserGroupIcon} className="h-5 w-5 text-gray-600 dark:text-gray-400" />
               </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4 flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Active</p>
                 <p className="text-2xl font-bold">{stats.active}</p>
               </div>
-            </div>
-          </Card>
-          <Card className="p-4">
-            <div className="flex items-center space-x-3">
-              <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
-                <div className="h-3 w-3 bg-yellow-500 rounded-full"></div>
+              <div className="h-10 w-10 bg-green-100 dark:bg-green-900/20 rounded-lg flex items-center justify-center">
+                <HugeiconsIcon icon={CheckmarkCircle01Icon} className="h-5 w-5 text-green-600 dark:text-green-400" />
               </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4 flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Inactive</p>
                 <p className="text-2xl font-bold">{stats.inactive}</p>
               </div>
-            </div>
-          </Card>
-          <Card className="p-4">
-            <div className="flex items-center space-x-3">
-              <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
-                <div className="h-3 w-3 bg-red-500 rounded-full"></div>
+              <div className="h-10 w-10 bg-yellow-100 dark:bg-yellow-900/20 rounded-lg flex items-center justify-center">
+                <HugeiconsIcon icon={AlertCircleIcon} className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
               </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4 flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Terminated</p>
                 <p className="text-2xl font-bold">{stats.terminated}</p>
               </div>
-            </div>
+              <div className="h-10 w-10 bg-red-100 dark:bg-red-900/20 rounded-lg flex items-center justify-center">
+                <HugeiconsIcon icon={CancelIcon} className="h-5 w-5 text-red-600 dark:text-red-400" />
+              </div>
+            </CardContent>
           </Card>
         </div>
 
@@ -393,17 +399,15 @@ export default function EmployeesPage() {
             </div>
           )
         ) : (
-          <DataTable
+          <TanStackDataTable
             columns={columns}
             data={paginatedEmployees}
             pagination={{
-              current: page,
+              pageIndex: page - 1,
               pageSize: limit,
-              total: filteredEmployees.length,
-              onChange: (p, ps) => {
-                setPage(p)
-                setLimit(ps)
-              }
+              totalRows: filteredEmployees.length,
+              onPageChange: (p) => setPage(p + 1),
+              onPageSizeChange: (ps) => setLimit(ps)
             }}
           />
         )}

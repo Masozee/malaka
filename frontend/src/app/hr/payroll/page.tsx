@@ -1,12 +1,12 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Card } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { TwoLevelLayout } from '@/components/ui/two-level-layout'
 import { Header } from '@/components/ui/header'
-import { AdvancedDataTable, AdvancedColumn } from '@/components/ui/advanced-data-table'
+import { TanStackDataTable, type TanStackColumn } from '@/components/ui/tanstack-data-table'
 import { HugeiconsIcon } from '@hugeicons/react'
 import {
   UserMultiple02Icon,
@@ -117,45 +117,51 @@ export default function PayrollDashboard() {
     return statusConfig[status] || { variant: 'secondary' as const, label: status }
   }
 
-  const periodColumns: AdvancedColumn<PayrollPeriod>[] = [
+  const periodColumns: TanStackColumn<PayrollPeriod>[] = [
     {
-      key: 'month',
-      title: 'Period',
-      render: (_value: unknown, period: PayrollPeriod) => formatPeriod(period?.month, period?.year, mounted)
+      id: 'period',
+      header: 'Period',
+      accessorKey: 'month',
+      cell: ({ row }) => formatPeriod(row.original?.month, row.original?.year, mounted)
     },
     {
-      key: 'status',
-      title: 'Status',
-      render: (_value: unknown, period: PayrollPeriod) => {
-        if (!period?.status) return null
-        const { variant, label } = getStatusBadge(period.status)
+      id: 'status',
+      header: 'Status',
+      accessorKey: 'status',
+      cell: ({ row }) => {
+        if (!row.original?.status) return null
+        const { variant, label } = getStatusBadge(row.original.status)
         return <Badge variant={variant}>{label}</Badge>
       }
     },
     {
-      key: 'totalEmployees',
-      title: 'Employees',
-      render: (_value: unknown, period: PayrollPeriod) => (period.totalEmployees ?? 0).toString()
+      id: 'employees',
+      header: 'Employees',
+      accessorKey: 'totalEmployees',
+      cell: ({ row }) => (row.original.totalEmployees ?? 0).toString()
     },
     {
-      key: 'totalGrossPay',
-      title: 'Gross Pay',
-      render: (_value: unknown, period: PayrollPeriod) => formatCurrency(period?.totalGrossPay, mounted)
+      id: 'grossPay',
+      header: 'Gross Pay',
+      accessorKey: 'totalGrossPay',
+      cell: ({ row }) => formatCurrency(row.original?.totalGrossPay, mounted)
     },
     {
-      key: 'totalNetPay',
-      title: 'Net Pay',
-      render: (_value: unknown, period: PayrollPeriod) => (
+      id: 'netPay',
+      header: 'Net Pay',
+      accessorKey: 'totalNetPay',
+      cell: ({ row }) => (
         <div className="font-semibold text-green-600">
-          {formatCurrency(period?.totalNetPay, mounted)}
+          {formatCurrency(row.original?.totalNetPay, mounted)}
         </div>
       )
     },
     {
-      key: 'processedAt',
-      title: 'Processed',
-      render: (_value: unknown, period: PayrollPeriod) =>
-        formatDate(period?.processedAt, mounted) || '-'
+      id: 'processed',
+      header: 'Processed',
+      accessorKey: 'processedAt',
+      cell: ({ row }) =>
+        formatDate(row.original?.processedAt, mounted) || '-'
     }
   ]
 
@@ -202,20 +208,30 @@ export default function PayrollDashboard() {
       <div className="flex-1 p-6 space-y-6">
         {/* KPI Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {kpiCards.map((card, index) => (
-            <Card key={index} className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">{card.title}</p>
-                  <p className="text-2xl font-bold mt-1">{card.value}</p>
-                  <p className="text-sm text-green-600 mt-1">{card.change}</p>
-                </div>
-                <div className="p-3 rounded-lg bg-gray-100 dark:bg-gray-700/50">
-                  <HugeiconsIcon icon={card.icon} className="h-6 w-6 text-gray-600 dark:text-gray-300" />
-                </div>
-              </div>
-            </Card>
-          ))}
+          {kpiCards.map((card, index) => {
+            const colors = [
+              { bg: 'bg-blue-100 dark:bg-blue-900/20', text: 'text-blue-600 dark:text-blue-400' },
+              { bg: 'bg-green-100 dark:bg-green-900/20', text: 'text-green-600 dark:text-green-400' },
+              { bg: 'bg-purple-100 dark:bg-purple-900/20', text: 'text-purple-600 dark:text-purple-400' },
+              { bg: 'bg-orange-100 dark:bg-orange-900/20', text: 'text-orange-600 dark:text-orange-400' }
+            ]
+            const color = colors[index % colors.length]
+
+            return (
+              <Card key={index}>
+                <CardContent className="p-4 flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">{card.title}</p>
+                    <p className="text-2xl font-bold mt-1">{card.value}</p>
+                    <p className="text-sm text-green-600 mt-1">{card.change}</p>
+                  </div>
+                  <div className={`h-10 w-10 ${color.bg} rounded-lg flex items-center justify-center`}>
+                    <HugeiconsIcon icon={card.icon} className={`h-5 w-5 ${color.text}`} />
+                  </div>
+                </CardContent>
+              </Card>
+            )
+          })}
         </div>
 
         {/* Quick Actions */}
@@ -241,15 +257,9 @@ export default function PayrollDashboard() {
         {/* Recent Payroll Periods */}
         <div>
           <h2 className="text-xl font-semibold mb-4">Payroll Periods</h2>
-          <AdvancedDataTable
+          <TanStackDataTable
             data={payrollPeriods}
             columns={periodColumns}
-            pagination={{
-              current: 1,
-              pageSize: 10,
-              total: payrollPeriods.length,
-              onChange: () => { }
-            }}
           />
         </div>
       </div>
