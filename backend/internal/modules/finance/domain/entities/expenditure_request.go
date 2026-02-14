@@ -11,16 +11,18 @@ import (
 type ExpenditureRequest struct {
 	types.BaseModel
 	RequestNumber  string    `json:"request_number" db:"request_number"`
+	RequestorID    uuid.ID   `json:"requestor_id" db:"requestor_id"`
+	Department     string    `json:"department" db:"department"`
 	RequestDate    time.Time `json:"request_date" db:"request_date"`
-	RequestedBy    uuid.ID   `json:"requested_by" db:"requested_by"`
-	CashBankID     uuid.ID   `json:"cash_bank_id" db:"cash_bank_id"`
-	Amount         float64   `json:"amount" db:"amount"`
+	RequiredDate   time.Time `json:"required_date" db:"required_date"`
 	Purpose        string    `json:"purpose" db:"purpose"`
-	Description    string    `json:"description" db:"description"`
-	Status         string    `json:"status" db:"status"` // "pending", "approved", "rejected", "disbursed"
+	TotalAmount    float64   `json:"total_amount" db:"total_amount"`
+	ApprovedAmount float64   `json:"approved_amount" db:"approved_amount"`
+	Status         string    `json:"status" db:"status"` // "PENDING", "APPROVED", "REJECTED", "PROCESSED"
+	Priority       string    `json:"priority" db:"priority"` // "LOW", "NORMAL", "HIGH", "URGENT"
 	ApprovedBy     uuid.ID   `json:"approved_by" db:"approved_by"`
 	ApprovedAt     time.Time `json:"approved_at" db:"approved_at"`
-	DisbursedBy    uuid.ID   `json:"disbursed_by" db:"disbursed_by"`
-	DisbursedAt    time.Time `json:"disbursed_at" db:"disbursed_at"`
-	RejectedReason string    `json:"rejected_reason" db:"rejected_reason"`
+	ProcessedBy    uuid.ID   `json:"processed_by" db:"processed_by"`
+	ProcessedAt    time.Time `json:"processed_at" db:"processed_at"`
+	Remarks        string    `json:"remarks" db:"remarks"`
 }

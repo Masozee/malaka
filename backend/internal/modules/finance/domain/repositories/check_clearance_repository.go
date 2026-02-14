@@ -14,9 +14,6 @@ type CheckClearanceRepository interface {
 	GetAll(ctx context.Context) ([]*entities.CheckClearance, error)
 	GetByCheckNumber(ctx context.Context, checkNumber string) (*entities.CheckClearance, error)
 	GetByStatus(ctx context.Context, status string) ([]*entities.CheckClearance, error)
-	GetByPayeeID(ctx context.Context, payeeID string) ([]*entities.CheckClearance, error)
-	GetIncomingChecks(ctx context.Context) ([]*entities.CheckClearance, error)
-	GetOutgoingChecks(ctx context.Context) ([]*entities.CheckClearance, error)
 	Update(ctx context.Context, check *entities.CheckClearance) error
 	Delete(ctx context.Context, id uuid.ID) error
 }

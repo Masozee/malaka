@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import { TwoLevelLayout } from '@/components/ui/two-level-layout'
 import { Header } from '@/components/ui/header'
 import { Card, CardContent } from '@/components/ui/card'
@@ -28,46 +28,91 @@ import {
     Calendar02Icon,
     MoreHorizontalIcon
 } from '@hugeicons/core-free-icons'
+import { BookmarkToggle } from '@/components/ui/bookmark-toggle'
+import {
+    accountsPayableService,
+    accountsReceivableService,
+    type AccountsPayable,
+    type AccountsReceivable
+} from '@/services/finance'
 
-// --- Types ---
-type WCComponentType = 'Receivable' | 'Payable' | 'Inventory'
+// --- Combined row type for table ---
+type WCComponentType = 'Receivable' | 'Payable'
 
-interface WCComponent {
+interface WCRow {
     id: string
     name: string
     type: WCComponentType
     amount: number
-    daysOutstanding: number // DSO, DPO, DIO
-    status: 'healthy' | 'attention' | 'critical'
-    trend: 'improving' | 'stable' | 'worsening'
+    status: string
+    due_date: string
+    invoice_id: string
 }
-
-// --- Mock Data ---
-const mockComponents: WCComponent[] = [
-    { id: '1', name: 'Trade Receivables', type: 'Receivable', amount: 1200000000, daysOutstanding: 45, status: 'attention', trend: 'worsening' },
-    { id: '2', name: 'Trade Payables', type: 'Payable', amount: 800000000, daysOutstanding: 60, status: 'healthy', trend: 'stable' },
-    { id: '3', name: 'Finished Goods Inventory', type: 'Inventory', amount: 1500000000, daysOutstanding: 30, status: 'healthy', trend: 'improving' },
-    { id: '4', name: 'Raw Material Inventory', type: 'Inventory', amount: 500000000, daysOutstanding: 45, status: 'attention', trend: 'stable' },
-    { id: '5', name: 'Short-term Loans', type: 'Payable', amount: 300000000, daysOutstanding: 0, status: 'healthy', trend: 'stable' },
-]
 
 export default function WorkingCapitalPage() {
     const { addToast } = useToast()
     const [searchTerm, setSearchTerm] = useState('')
     const [typeFilter, setTypeFilter] = useState<string>('all')
+    const [apData, setApData] = useState<AccountsPayable[]>([])
+    const [arData, setArData] = useState<AccountsReceivable[]>([])
+    const [loading, setLoading] = useState(true)
+    const [mounted, setMounted] = useState(false)
+
+    useEffect(() => { setMounted(true) }, [])
+
+    useEffect(() => {
+        async function fetchData() {
+            try {
+                setLoading(true)
+                const [ap, ar] = await Promise.all([
+                    accountsPayableService.getAll(),
+                    accountsReceivableService.getAll()
+                ])
+                setApData(ap)
+                setArData(ar)
+            } catch (err) {
+                console.error('Failed to fetch working capital data:', err)
+            } finally {
+                setLoading(false)
+            }
+        }
+        fetchData()
+    }, [])
+
+    // --- Combined rows ---
+    const combinedRows: WCRow[] = useMemo(() => {
+        const arRows: WCRow[] = arData.map(r => ({
+            id: r.id,
+            name: 'AR - ' + (r.invoice_id || r.customer_id),
+            type: 'Receivable' as WCComponentType,
+            amount: r.balance,
+            status: r.status,
+            due_date: r.due_date,
+            invoice_id: r.invoice_id,
+        }))
+        const apRows: WCRow[] = apData.map(p => ({
+            id: p.id,
+            name: 'AP - ' + (p.invoice_id || p.supplier_id),
+            type: 'Payable' as WCComponentType,
+            amount: p.balance,
+            status: p.status,
+            due_date: p.due_date,
+            invoice_id: p.invoice_id,
+        }))
+        return [...arRows, ...apRows]
+    }, [apData, arData])
 
     // --- Stats ---
     const stats = useMemo(() => {
-        const receivables = mockComponents.filter(c => c.type === 'Receivable').reduce((sum, c) => sum + c.amount, 0)
-        const payables = mockComponents.filter(c => c.type === 'Payable').reduce((sum, c) => sum + c.amount, 0)
-        const inventory = mockComponents.filter(c => c.type === 'Inventory').reduce((sum, c) => sum + c.amount, 0)
-        const workingCapital = receivables + inventory - payables
-        return { receivables, payables, inventory, workingCapital }
-    }, [])
+        const receivables = arData.reduce((sum, r) => sum + r.balance, 0)
+        const payables = apData.reduce((sum, p) => sum + p.balance, 0)
+        const workingCapital = receivables - payables
+        return { receivables, payables, workingCapital, totalItems: combinedRows.length }
+    }, [apData, arData, combinedRows])
 
     // --- Filter ---
     const filteredData = useMemo(() => {
-        let data = mockComponents
+        let data = combinedRows
         if (searchTerm) {
             const lower = searchTerm.toLowerCase()
             data = data.filter(item => item.name.toLowerCase().includes(lower))
@@ -76,10 +121,10 @@ export default function WorkingCapitalPage() {
             data = data.filter(item => item.type === typeFilter)
         }
         return data
-    }, [searchTerm, typeFilter])
+    }, [searchTerm, typeFilter, combinedRows])
 
     // --- Columns ---
-    const columns: TanStackColumn<WCComponent>[] = [
+    const columns: TanStackColumn<WCRow>[] = [
         {
             id: 'name',
             header: 'Component',
@@ -93,18 +138,20 @@ export default function WorkingCapitalPage() {
         },
         {
             id: 'amount',
-            header: 'Amount',
+            header: 'Balance',
             accessorKey: 'amount',
-            cell: ({ row }) => <span className="text-sm font-medium">Rp {(row.original.amount / 1000000).toLocaleString()}M</span>
+            cell: ({ row }) => <span className="text-sm font-medium">Rp {row.original.amount.toLocaleString('id-ID')}</span>
         },
         {
-            id: 'days',
-            header: 'Days Outstanding',
-            accessorKey: 'daysOutstanding',
+            id: 'due_date',
+            header: 'Due Date',
+            accessorKey: 'due_date',
             cell: ({ row }) => (
                 <div className="flex items-center gap-2">
                     <HugeiconsIcon icon={Calendar02Icon} className="w-3 h-3 text-muted-foreground" />
-                    <span className="text-sm">{row.original.daysOutstanding} days</span>
+                    <span className="text-sm">
+                        {mounted && row.original.due_date ? new Date(row.original.due_date).toLocaleDateString() : '-'}
+                    </span>
                 </div>
             )
         },
@@ -113,27 +160,15 @@ export default function WorkingCapitalPage() {
             header: 'Status',
             accessorKey: 'status',
             cell: ({ row }) => {
-                const config = {
-                    healthy: { label: 'Healthy', color: 'bg-green-100 text-green-800' },
-                    attention: { label: 'Attention', color: 'bg-yellow-100 text-yellow-800' },
-                    critical: { label: 'Critical', color: 'bg-red-100 text-red-800' }
+                const s = row.original.status
+                const colorMap: Record<string, string> = {
+                    open: 'bg-blue-100 text-blue-800',
+                    partial: 'bg-yellow-100 text-yellow-800',
+                    paid: 'bg-green-100 text-green-800',
+                    overdue: 'bg-red-100 text-red-800',
                 }
-                const s = config[row.original.status]
-                return <Badge className={`${s.color} border-0 capitalize`}>{s.label}</Badge>
-            }
-        },
-        {
-            id: 'trend',
-            header: 'Trend',
-            accessorKey: 'trend',
-            cell: ({ row }) => {
-                const config = {
-                    improving: { label: 'Improving', color: 'text-green-600' },
-                    stable: { label: 'Stable', color: 'text-gray-600' },
-                    worsening: { label: 'Worsening', color: 'text-red-600' }
-                }
-                const s = config[row.original.trend]
-                return <span className={`text-sm font-medium ${s.color} capitalize`}>{s.label}</span>
+                const color = colorMap[s] || 'bg-gray-100 text-gray-800'
+                return <Badge className={`${color} border-0 capitalize`}>{s}</Badge>
             }
         },
         {
@@ -171,10 +206,13 @@ export default function WorkingCapitalPage() {
                     { label: 'Working Capital' }
                 ]}
                 actions={
-                    <Button variant="outline">
-                        <HugeiconsIcon icon={Download01Icon} className="w-4 h-4 mr-2" />
-                        Export Data
-                    </Button>
+                    <div className="flex items-center gap-2">
+                        <BookmarkToggle itemId="working-capital" />
+                        <Button variant="outline">
+                            <HugeiconsIcon icon={Download01Icon} className="w-4 h-4 mr-2" />
+                            Export Data
+                        </Button>
+                    </div>
                 }
             />
 
@@ -185,7 +223,7 @@ export default function WorkingCapitalPage() {
                         <CardContent className="p-4 flex items-center justify-between">
                             <div>
                                 <p className="text-sm font-medium text-muted-foreground">Net Working Capital</p>
-                                <p className="text-xl font-bold mt-1">Rp {(stats.workingCapital / 1000000000).toFixed(2)}B</p>
+                                <p className="text-xl font-bold mt-1">Rp {stats.workingCapital.toLocaleString('id-ID')}</p>
                             </div>
                             <div className="h-10 w-10 bg-blue-100 dark:bg-blue-900/20 rounded-lg flex items-center justify-center">
                                 <HugeiconsIcon icon={MoneySendSquareIcon} className="h-5 w-5 text-blue-600 dark:text-blue-400" />
@@ -196,7 +234,7 @@ export default function WorkingCapitalPage() {
                         <CardContent className="p-4 flex items-center justify-between">
                             <div>
                                 <p className="text-sm font-medium text-muted-foreground">Receivables</p>
-                                <p className="text-xl font-bold mt-1">Rp {(stats.receivables / 1000000000).toFixed(2)}B</p>
+                                <p className="text-xl font-bold mt-1">Rp {stats.receivables.toLocaleString('id-ID')}</p>
                             </div>
                             <div className="h-10 w-10 bg-green-100 dark:bg-green-900/20 rounded-lg flex items-center justify-center">
                                 <HugeiconsIcon icon={ArrowRight01Icon} className="h-5 w-5 text-green-600 dark:text-green-400 transform rotate-180" />
@@ -207,7 +245,7 @@ export default function WorkingCapitalPage() {
                         <CardContent className="p-4 flex items-center justify-between">
                             <div>
                                 <p className="text-sm font-medium text-muted-foreground">Payables</p>
-                                <p className="text-xl font-bold mt-1">Rp {(stats.payables / 1000000000).toFixed(2)}B</p>
+                                <p className="text-xl font-bold mt-1">Rp {stats.payables.toLocaleString('id-ID')}</p>
                             </div>
                             <div className="h-10 w-10 bg-red-100 dark:bg-red-900/20 rounded-lg flex items-center justify-center">
                                 <HugeiconsIcon icon={ArrowRight01Icon} className="h-5 w-5 text-red-600 dark:text-red-400" />
@@ -217,8 +255,8 @@ export default function WorkingCapitalPage() {
                     <Card>
                         <CardContent className="p-4 flex items-center justify-between">
                             <div>
-                                <p className="text-sm font-medium text-muted-foreground">Inventory Value</p>
-                                <p className="text-xl font-bold mt-1">Rp {(stats.inventory / 1000000000).toFixed(2)}B</p>
+                                <p className="text-sm font-medium text-muted-foreground">Total Items</p>
+                                <p className="text-xl font-bold mt-1">{stats.totalItems}</p>
                             </div>
                             <div className="h-10 w-10 bg-purple-100 dark:bg-purple-900/20 rounded-lg flex items-center justify-center">
                                 <HugeiconsIcon icon={ChartLineData02Icon} className="h-5 w-5 text-purple-600 dark:text-purple-400" />
@@ -247,19 +285,24 @@ export default function WorkingCapitalPage() {
                                 <SelectItem value="all">All Types</SelectItem>
                                 <SelectItem value="Receivable">Receivables</SelectItem>
                                 <SelectItem value="Payable">Payables</SelectItem>
-                                <SelectItem value="Inventory">Inventory</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
                 </div>
 
                 {/* Table */}
-                <TanStackDataTable
-                    data={filteredData}
-                    columns={columns}
-                    enableRowSelection
-                    showColumnToggle={false}
-                />
+                {loading ? (
+                    <div className="flex items-center justify-center py-12">
+                        <p className="text-muted-foreground">Loading working capital data...</p>
+                    </div>
+                ) : (
+                    <TanStackDataTable
+                        data={filteredData}
+                        columns={columns}
+                        enableRowSelection
+                        showColumnToggle={false}
+                    />
+                )}
             </div>
         </TwoLevelLayout>
     )

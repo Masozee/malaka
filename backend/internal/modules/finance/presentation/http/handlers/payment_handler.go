@@ -63,6 +63,22 @@ func (h *PaymentHandler) GetPaymentByID(c *gin.Context) {
 	response.Success(c, http.StatusOK, "Payment retrieved successfully", resp)
 }
 
+// GetAllPayments handles the retrieval of all payments.
+func (h *PaymentHandler) GetAllPayments(c *gin.Context) {
+	payments, err := h.service.GetAllPayments(c.Request.Context())
+	if err != nil {
+		response.Error(c, http.StatusInternalServerError, "Failed to retrieve payments", err)
+		return
+	}
+
+	var responses []*dto.PaymentResponse
+	for _, p := range payments {
+		responses = append(responses, dto.FromPaymentEntity(p))
+	}
+
+	response.Success(c, http.StatusOK, "Payments retrieved successfully", responses)
+}
+
 // UpdatePayment handles the update of an existing payment.
 func (h *PaymentHandler) UpdatePayment(c *gin.Context) {
 	id := c.Param("id")

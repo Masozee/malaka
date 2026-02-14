@@ -63,6 +63,22 @@ func (h *BankTransferHandler) GetBankTransferByID(c *gin.Context) {
 	response.Success(c, http.StatusOK, "Bank transfer retrieved successfully", resp)
 }
 
+// GetAllBankTransfers handles the retrieval of all bank transfers.
+func (h *BankTransferHandler) GetAllBankTransfers(c *gin.Context) {
+	items, err := h.service.GetAllBankTransfers(c.Request.Context())
+	if err != nil {
+		response.Error(c, http.StatusInternalServerError, "Failed to retrieve bank transfers", err)
+		return
+	}
+
+	var responses []*dto.BankTransferResponse
+	for _, bt := range items {
+		responses = append(responses, dto.FromBankTransferEntity(bt))
+	}
+
+	response.Success(c, http.StatusOK, "Bank transfers retrieved successfully", responses)
+}
+
 // UpdateBankTransfer handles the update of an existing bank transfer.
 func (h *BankTransferHandler) UpdateBankTransfer(c *gin.Context) {
 	id := c.Param("id")

@@ -4,9 +4,9 @@ import (
 	"context"
 	"errors"
 
+	"github.com/google/uuid"
 	"malaka/internal/modules/sales/domain/entities"
 	"malaka/internal/modules/sales/domain/repositories"
-	"malaka/internal/shared/utils"
 )
 
 type SalesRekonsiliasiService interface {
@@ -30,7 +30,7 @@ func NewSalesRekonsiliasiService(repo repositories.SalesRekonsiliasiRepository) 
 // CreateSalesRekonsiliasi creates a new sales reconciliation entry.
 func (s *salesRekonsiliasiService) CreateSalesRekonsiliasi(ctx context.Context, sr *entities.SalesRekonsiliasi) error {
 	if sr.ID == "" {
-		sr.ID = utils.RandomString(10) // Generate a random ID if not provided
+		sr.ID = uuid.New().String()
 	}
 	return s.repo.Create(ctx, sr)
 }

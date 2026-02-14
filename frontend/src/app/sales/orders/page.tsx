@@ -1,257 +1,201 @@
-import OrdersList, { SalesOrder } from './OrdersList'
+'use client'
 
-// Mock Data
-const mockSalesOrders: SalesOrder[] = [
-  {
-    id: '1',
-    order_number: 'SO-2024-001',
-    order_date: '2024-07-25',
-    customer_id: '1',
-    customer_name: 'Toko Sepatu Merdeka',
-    customer_email: 'merdeka@tokosepatu.com',
-    customer_phone: '08123456789',
-    sales_person: 'Ahmad Sales',
-    order_type: 'wholesale',
-    delivery_address: 'Jl. Merdeka No. 123, Jakarta Pusat, DKI Jakarta 10110',
-    items: [
-      {
-        id: '1',
-        product_code: 'SHOE-001',
-        product_name: 'Classic Oxford Brown',
-        size: '42',
-        color: 'Brown',
-        quantity: 50,
-        unit_price: 300000,
-        discount_percentage: 10,
-        line_total: 13500000
-      },
-      {
-        id: '2',
-        product_code: 'SHOE-002',
-        product_name: 'Sports Sneaker White',
-        size: '40',
-        color: 'White',
-        quantity: 30,
-        unit_price: 280000,
-        discount_percentage: 10,
-        line_total: 7560000
-      }
-    ],
-    subtotal: 21060000,
-    tax_amount: 2106000,
-    discount_amount: 2340000,
-    shipping_cost: 150000,
-    total_amount: 20976000,
-    status: 'production',
-    priority: 'high',
-    payment_terms: 'Net 30',
-    due_date: '2024-08-25',
-    estimated_delivery: '2024-08-05',
-    notes: 'Bulk order untuk grand opening toko baru',
-    created_at: '2024-07-25T09:00:00Z',
-    updated_at: '2024-07-25T14:30:00Z'
-  },
-  {
-    id: '2',
-    order_number: 'SO-2024-002',
-    order_date: '2024-07-25',
-    customer_id: '2',
-    customer_name: 'Fashion Store Bandung',
-    customer_email: 'bandung@fashionstore.com',
-    customer_phone: '08123456788',
-    sales_person: 'Sari Sales',
-    order_type: 'retail',
-    delivery_address: 'Jl. Braga No. 456, Bandung, Jawa Barat 40111',
-    items: [
-      {
-        id: '3',
-        product_code: 'BOOT-001',
-        product_name: 'Work Boot Black',
-        size: '43',
-        color: 'Black',
-        quantity: 25,
-        unit_price: 450000,
-        discount_percentage: 5,
-        line_total: 10687500
-      }
-    ],
-    subtotal: 10687500,
-    tax_amount: 1068750,
-    discount_amount: 562500,
-    shipping_cost: 100000,
-    total_amount: 11293750,
-    status: 'confirmed',
-    priority: 'normal',
-    payment_terms: 'Net 14',
-    due_date: '2024-08-08',
-    estimated_delivery: '2024-07-30',
-    notes: 'Pesanan khusus untuk koleksi musim ini',
-    created_at: '2024-07-25T10:15:00Z',
-    updated_at: '2024-07-25T11:00:00Z'
-  },
-  {
-    id: '3',
-    order_number: 'SO-2024-003',
-    order_date: '2024-07-24',
-    customer_id: '3',
-    customer_name: 'Distributor Surabaya',
-    customer_email: 'surabaya@distributor.com',
-    customer_phone: '08123456787',
-    sales_person: 'Budi Sales',
-    order_type: 'distributor',
-    delivery_address: 'Jl. Tunjungan No. 789, Surabaya, Jawa Timur 60261',
-    items: [
-      {
-        id: '4',
-        product_code: 'SANDAL-001',
-        product_name: 'Summer Sandal Brown',
-        size: 'Mixed',
-        color: 'Brown',
-        quantity: 100,
-        unit_price: 150000,
-        discount_percentage: 15,
-        line_total: 12750000
-      },
-      {
-        id: '5',
-        product_code: 'SHOE-003',
-        product_name: 'Formal Loafer Black',
-        size: 'Mixed',
-        color: 'Black',
-        quantity: 40,
-        unit_price: 400000,
-        discount_percentage: 15,
-        line_total: 13600000
-      }
-    ],
-    subtotal: 26350000,
-    tax_amount: 2635000,
-    discount_amount: 4650000,
-    shipping_cost: 200000,
-    total_amount: 24535000,
-    status: 'ready',
-    priority: 'normal',
-    payment_terms: 'Net 45',
-    due_date: '2024-09-08',
-    estimated_delivery: '2024-07-28',
-    created_at: '2024-07-24T13:20:00Z',
-    updated_at: '2024-07-25T09:45:00Z'
-  },
-  {
-    id: '4',
-    order_number: 'SO-2024-004',
-    order_date: '2024-07-24',
-    customer_id: '4',
-    customer_name: 'Export Partner Singapore',
-    customer_email: 'singapore@exportpartner.com',
-    customer_phone: '+65987654321',
-    sales_person: 'Rina Sales',
-    order_type: 'export',
-    delivery_address: '123 Orchard Road, Singapore 238857',
-    items: [
-      {
-        id: '6',
-        product_code: 'SHOE-004',
-        product_name: 'High Heel Red',
-        size: 'Mixed',
-        color: 'Red',
-        quantity: 200,
-        unit_price: 320000,
-        discount_percentage: 20,
-        line_total: 51200000
-      }
-    ],
-    subtotal: 51200000,
-    tax_amount: 0,
-    discount_amount: 12800000,
-    shipping_cost: 500000,
-    total_amount: 38900000,
-    status: 'shipped',
-    priority: 'urgent',
-    payment_terms: 'Prepaid',
-    due_date: '2024-07-24',
-    estimated_delivery: '2024-07-26',
-    notes: 'Export order - free tax, include all export documents',
-    created_at: '2024-07-24T08:00:00Z',
-    updated_at: '2024-07-24T16:30:00Z'
-  },
-  {
-    id: '5',
-    order_number: 'SO-2024-005',
-    order_date: '2024-07-23',
-    customer_id: '5',
-    customer_name: 'Mall Department Store',
-    customer_email: 'mall@department.com',
-    customer_phone: '08123456785',
-    sales_person: 'Dedi Sales',
-    order_type: 'wholesale',
-    delivery_address: 'Mall Central, Lt. 2, Jakarta Selatan, DKI Jakarta 12560',
-    items: [
-      {
-        id: '7',
-        product_code: 'SHOE-MIX',
-        product_name: 'Mixed Shoe Collection',
-        size: 'Mixed',
-        color: 'Mixed',
-        quantity: 150,
-        unit_price: 250000,
-        discount_percentage: 12,
-        line_total: 33000000
-      }
-    ],
-    subtotal: 33000000,
-    tax_amount: 3300000,
-    discount_amount: 4500000,
-    shipping_cost: 250000,
-    total_amount: 32050000,
-    status: 'delivered',
-    priority: 'normal',
-    payment_terms: 'Net 21',
-    due_date: '2024-08-13',
-    estimated_delivery: '2024-07-25',
-    created_at: '2024-07-23T11:30:00Z',
-    updated_at: '2024-07-25T10:00:00Z'
-  },
-  {
-    id: '6',
-    order_number: 'SO-2024-006',
-    order_date: '2024-07-23',
-    customer_id: '6',
-    customer_name: 'Startup Fashion Co',
-    customer_email: 'startup@fashion.com',
-    customer_phone: '08123456784',
-    sales_person: 'Lisa Sales',
-    order_type: 'retail',
-    delivery_address: 'Jl. Startup No. 111, Yogyakarta, DI Yogyakarta 55141',
-    items: [
-      {
-        id: '8',
-        product_code: 'SHOE-005',
-        product_name: 'Casual Sneaker Blue',
-        size: 'Mixed',
-        color: 'Blue',
-        quantity: 15,
-        unit_price: 300000,
-        discount_percentage: 0,
-        line_total: 4500000
-      }
-    ],
-    subtotal: 4500000,
-    tax_amount: 450000,
-    discount_amount: 0,
-    shipping_cost: 75000,
-    total_amount: 5025000,
-    status: 'cancelled',
-    priority: 'low',
-    payment_terms: 'Net 7',
-    due_date: '2024-07-30',
-    estimated_delivery: '2024-07-27',
-    notes: 'Cancelled by customer due to budget constraints',
-    created_at: '2024-07-23T15:45:00Z',
-    updated_at: '2024-July-23T16:00:00Z'
-  }
-]
+import React, { useState, useMemo, useEffect } from 'react'
+import { TwoLevelLayout } from '@/components/ui/two-level-layout'
+import { Header } from '@/components/ui/header'
+import { Card } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Input } from '@/components/ui/input'
+import { TanStackDataTable, TanStackColumn } from '@/components/ui/tanstack-data-table'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from '@/components/ui/dropdown-menu'
+import { HugeiconsIcon } from '@hugeicons/react'
+import { Search01Icon, MoreHorizontalIcon, PlusSignIcon, ShoppingCartIcon, Dollar01Icon, Clock01Icon, CheckmarkCircle01Icon } from '@hugeicons/core-free-icons'
+import { salesOrderService, type SalesOrder } from '@/services/sales'
+import Link from 'next/link'
 
 export default function SalesOrdersPage() {
-  return <OrdersList initialData={mockSalesOrders} />
+  const [data, setData] = useState<SalesOrder[]>([])
+  const [loading, setLoading] = useState(true)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => { setMounted(true) }, [])
+
+  useEffect(() => {
+    salesOrderService.getAll().then(setData).finally(() => setLoading(false))
+  }, [])
+
+  const filtered = useMemo(() => {
+    if (!searchTerm) return data
+    const q = searchTerm.toLowerCase()
+    return data.filter(item =>
+      item.customer_id.toLowerCase().includes(q) ||
+      item.status.toLowerCase().includes(q) ||
+      item.id.toLowerCase().includes(q)
+    )
+  }, [data, searchTerm])
+
+  const stats = useMemo(() => ({
+    total: data.length,
+    revenue: data.reduce((s, i) => s + (i.total_amount || 0), 0),
+    pending: data.filter(i => i.status === 'pending').length,
+    confirmed: data.filter(i => i.status === 'confirmed').length,
+  }), [data])
+
+  const fmt = (n: number) => `Rp ${n.toLocaleString('id-ID')}`
+  const fmtDate = (d: string) => mounted && d ? new Date(d).toLocaleDateString('id-ID') : '-'
+
+  const statusColor: Record<string, string> = {
+    pending: 'bg-yellow-100 text-yellow-800',
+    confirmed: 'bg-blue-100 text-blue-800',
+    cancelled: 'bg-red-100 text-red-800',
+    draft: 'bg-gray-100 text-gray-800',
+  }
+
+  const columns: TanStackColumn<SalesOrder>[] = [
+    {
+      id: 'id',
+      header: 'Order ID',
+      accessorKey: 'id',
+      cell: ({ row }) => (
+        <Link href={`/sales/orders/${row.original.id}`} className="font-medium text-blue-600 hover:underline">
+          {row.original.id.slice(0, 8)}...
+        </Link>
+      ),
+    },
+    {
+      id: 'customer_id',
+      header: 'Customer',
+      accessorKey: 'customer_id',
+      cell: ({ row }) => <span>{row.original.customer_id.slice(0, 8)}...</span>,
+    },
+    {
+      id: 'order_date',
+      header: 'Order Date',
+      accessorKey: 'order_date',
+      cell: ({ row }) => <span>{fmtDate(row.original.order_date)}</span>,
+    },
+    {
+      id: 'total_amount',
+      header: 'Total Amount',
+      accessorKey: 'total_amount',
+      cell: ({ row }) => <span className="font-medium">{fmt(row.original.total_amount)}</span>,
+    },
+    {
+      id: 'status',
+      header: 'Status',
+      accessorKey: 'status',
+      cell: ({ row }) => (
+        <Badge className={`${statusColor[row.original.status] || 'bg-gray-100 text-gray-800'} border-0`}>
+          {row.original.status}
+        </Badge>
+      ),
+    },
+    {
+      id: 'created_at',
+      header: 'Created',
+      accessorKey: 'created_at',
+      cell: ({ row }) => <span>{fmtDate(row.original.created_at)}</span>,
+    },
+    {
+      id: 'actions',
+      header: '',
+      enableSorting: false,
+      cell: ({ row }) => (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="sm" className="h-8 w-8 p-0">
+              <HugeiconsIcon icon={MoreHorizontalIcon} className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem asChild><Link href={`/sales/orders/${row.original.id}`}>View Details</Link></DropdownMenuItem>
+            <DropdownMenuItem onClick={() => navigator.clipboard.writeText(row.original.id)}>Copy ID</DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem className="text-red-600" onClick={() => handleDelete(row.original.id)}>Delete</DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      ),
+    },
+  ]
+
+  const handleDelete = async (id: string) => {
+    try {
+      await salesOrderService.delete(id)
+      setData(prev => prev.filter(i => i.id !== id))
+    } catch (err) {
+      console.error('Delete failed:', err)
+    }
+  }
+
+  return (
+    <TwoLevelLayout>
+      <Header
+        title="Sales Orders"
+        breadcrumbs={[{ label: 'Sales', href: '/sales' }, { label: 'Sales Orders' }]}
+        actions={<Button><HugeiconsIcon icon={PlusSignIcon} className="w-4 h-4 mr-2" />New Order</Button>}
+      />
+      <div className="flex-1 overflow-auto p-6 space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <Card className="p-4">
+            <div className="flex items-center space-x-3">
+              <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
+                <HugeiconsIcon icon={ShoppingCartIcon} className="h-5 w-5 text-foreground" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Total Orders</p>
+                <p className="text-2xl font-bold">{stats.total}</p>
+              </div>
+            </div>
+          </Card>
+          <Card className="p-4">
+            <div className="flex items-center space-x-3">
+              <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
+                <HugeiconsIcon icon={Dollar01Icon} className="h-5 w-5 text-foreground" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Total Revenue</p>
+                <p className="text-2xl font-bold">{mounted ? fmt(stats.revenue) : '-'}</p>
+              </div>
+            </div>
+          </Card>
+          <Card className="p-4">
+            <div className="flex items-center space-x-3">
+              <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
+                <HugeiconsIcon icon={Clock01Icon} className="h-5 w-5 text-foreground" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Pending</p>
+                <p className="text-2xl font-bold">{stats.pending}</p>
+              </div>
+            </div>
+          </Card>
+          <Card className="p-4">
+            <div className="flex items-center space-x-3">
+              <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
+                <HugeiconsIcon icon={CheckmarkCircle01Icon} className="h-5 w-5 text-foreground" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Confirmed</p>
+                <p className="text-2xl font-bold">{stats.confirmed}</p>
+              </div>
+            </div>
+          </Card>
+        </div>
+
+        <div className="relative w-80">
+          <HugeiconsIcon icon={Search01Icon} className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input placeholder="Search orders..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-9 bg-white text-sm" style={{ fontSize: '14px' }} />
+        </div>
+        <TanStackDataTable data={filtered} columns={columns} loading={loading} showColumnToggle={false} />
+      </div>
+    </TwoLevelLayout>
+  )
 }

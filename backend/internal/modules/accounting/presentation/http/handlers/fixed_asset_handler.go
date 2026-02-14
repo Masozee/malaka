@@ -1,7 +1,9 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -32,6 +34,21 @@ func (h *FixedAssetHandler) CreateFixedAsset(c *gin.Context) {
 
 	asset := dto.MapFixedAssetRequestToEntity(&req)
 	asset.ID = uuid.New()
+
+	// Auto-generate asset_code if not provided
+	if asset.AssetCode == "" {
+		categoryPrefix := "AST"
+		if req.Category != "" {
+			prefixMap := map[string]string{
+				"BUILDING": "BLD", "MACHINERY": "MCH", "VEHICLE": "VHC",
+				"EQUIPMENT": "EQP", "COMPUTER": "CMP", "FURNITURE": "FRN",
+			}
+			if p, ok := prefixMap[strings.ToUpper(req.Category)]; ok {
+				categoryPrefix = p
+			}
+		}
+		asset.AssetCode = fmt.Sprintf("%s-%s-%s", categoryPrefix, time.Now().Format("0601"), asset.ID.String()[:8])
+	}
 
 	if err := h.service.CreateFixedAsset(c.Request.Context(), asset); err != nil {
 		response.Error(c, http.StatusInternalServerError, err.Error(), nil)

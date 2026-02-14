@@ -146,4 +146,26 @@ export const queryKeys = {
       detail: (id: string) => ["inventory", "stock", "detail", id] as const,
     },
   },
+
+  // Messaging
+  messaging: {
+    all: ["messaging"] as const,
+
+    conversations: {
+      all: ["messaging", "conversations"] as const,
+      list: (type?: string) => ["messaging", "conversations", "list", type] as const,
+    },
+
+    messages: {
+      all: ["messaging", "messages"] as const,
+      list: (conversationId: string) => ["messaging", "messages", "list", conversationId] as const,
+    },
+
+    unreadCount: ["messaging", "unreadCount"] as const,
+
+    companyUsers: ["messaging", "companyUsers"] as const,
+
+    groupMembers: (conversationId: string) =>
+      ["messaging", "groupMembers", conversationId] as const,
+  },
 }

@@ -36,9 +36,9 @@ type GeneralLedgerUpdateRequest struct {
 
 // GeneralLedgerResponse represents the response for a general ledger entry
 type GeneralLedgerResponse struct {
-	ID               uuid.ID `json:"id"`
-	AccountID        uuid.ID `json:"account_id"`
-	JournalEntryID   uuid.ID `json:"journal_entry_id"`
+	ID               uuid.ID   `json:"id"`
+	AccountID        uuid.ID   `json:"account_id"`
+	JournalEntryID   uuid.ID   `json:"journal_entry_id"`
 	TransactionDate  time.Time `json:"transaction_date"`
 	Description      string    `json:"description"`
 	Reference        string    `json:"reference"`
@@ -56,6 +56,13 @@ type GeneralLedgerResponse struct {
 	IsDebit          bool      `json:"is_debit"`
 	IsCredit         bool      `json:"is_credit"`
 	Amount           float64   `json:"amount"`
+	// Denormalized fields
+	AccountCode string `json:"account_code"`
+	AccountName string `json:"account_name"`
+	AccountType string `json:"account_type"`
+	EntryNumber string `json:"entry_number"`
+	EntryStatus string `json:"entry_status"`
+	LineNumber  int    `json:"line_number"`
 }
 
 // AccountBalanceRequest represents a request for account balance
@@ -145,6 +152,12 @@ func FromGeneralLedgerEntity(entry *entities.GeneralLedger) *GeneralLedgerRespon
 		IsDebit:          entry.IsDebit(),
 		IsCredit:         entry.IsCredit(),
 		Amount:           entry.GetAmount(),
+		AccountCode:      entry.AccountCode,
+		AccountName:      entry.AccountName,
+		AccountType:      entry.AccountType,
+		EntryNumber:      entry.EntryNumber,
+		EntryStatus:      entry.EntryStatus,
+		LineNumber:       entry.LineNumber,
 	}
 }
 

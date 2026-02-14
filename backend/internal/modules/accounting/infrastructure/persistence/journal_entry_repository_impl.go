@@ -57,12 +57,17 @@ func (r *journalEntryRepositoryImpl) GetByID(ctx context.Context, id uuid.ID) (*
 	entry := &entities.JournalEntry{}
 	
 	query := `
-		SELECT id, entry_number, entry_date, description, reference, status,
-			   total_debit, total_credit, currency_code, exchange_rate,
-			   base_total_debit, base_total_credit, source_module, source_id,
-			   posted_by, posted_at, reversed_by, reversed_at,
-			   company_id, created_by, created_at, updated_at
-		FROM journal_entries WHERE id = $1`
+		SELECT je.id, je.entry_number, je.entry_date, je.description, je.reference, je.status,
+			   je.total_debit, je.total_credit, je.currency_code, je.exchange_rate,
+			   je.base_total_debit, je.base_total_credit, je.source_module, je.source_id,
+			   je.posted_by, je.posted_at, je.reversed_by, je.reversed_at,
+			   je.company_id, je.created_by, je.created_at, je.updated_at,
+			   COALESCE(u_created.full_name, u_created.username, '') as created_by_name,
+			   COALESCE(u_posted.full_name, u_posted.username, '') as posted_by_name
+		FROM journal_entries je
+		LEFT JOIN users u_created ON je.created_by = u_created.id::text
+		LEFT JOIN users u_posted ON je.posted_by = u_posted.id::text
+		WHERE je.id = $1`
 	
 	var postedBy, reversedBy sql.NullString
 	var reference, sourceModule, sourceID sql.NullString
@@ -74,6 +79,7 @@ func (r *journalEntryRepositoryImpl) GetByID(ctx context.Context, id uuid.ID) (*
 		&entry.BaseTotalCredit, &sourceModule, &sourceID,
 		&postedBy, &entry.PostedAt, &reversedBy, &entry.ReversedAt,
 		&entry.CompanyID, &entry.CreatedBy, &entry.CreatedAt, &entry.UpdatedAt,
+		&entry.CreatedByName, &entry.PostedByName,
 	)
 	
 	if err == nil {
@@ -101,12 +107,17 @@ func (r *journalEntryRepositoryImpl) GetByID(ctx context.Context, id uuid.ID) (*
 // GetAll retrieves all journal entries
 func (r *journalEntryRepositoryImpl) GetAll(ctx context.Context) ([]*entities.JournalEntry, error) {
 	query := `
-		SELECT id, entry_number, entry_date, description, reference, status,
-			   total_debit, total_credit, currency_code, exchange_rate,
-			   base_total_debit, base_total_credit, source_module, source_id,
-			   posted_by, posted_at, reversed_by, reversed_at,
-			   company_id, created_by, created_at, updated_at
-		FROM journal_entries ORDER BY entry_date DESC, created_at DESC`
+		SELECT je.id, je.entry_number, je.entry_date, je.description, je.reference, je.status,
+			   je.total_debit, je.total_credit, je.currency_code, je.exchange_rate,
+			   je.base_total_debit, je.base_total_credit, je.source_module, je.source_id,
+			   je.posted_by, je.posted_at, je.reversed_by, je.reversed_at,
+			   je.company_id, je.created_by, je.created_at, je.updated_at,
+			   COALESCE(u_created.full_name, u_created.username, '') as created_by_name,
+			   COALESCE(u_posted.full_name, u_posted.username, '') as posted_by_name
+		FROM journal_entries je
+		LEFT JOIN users u_created ON je.created_by = u_created.id::text
+		LEFT JOIN users u_posted ON je.posted_by = u_posted.id::text
+		ORDER BY je.entry_date DESC, je.created_at DESC`
 	
 	return r.queryEntries(ctx, query)
 }
@@ -189,17 +200,21 @@ func (r *journalEntryRepositoryImpl) CreateLine(ctx context.Context, line *entit
 // GetLinesByEntryID retrieves journal entry lines by entry ID
 func (r *journalEntryRepositoryImpl) GetLinesByEntryID(ctx context.Context, entryID uuid.ID) ([]*entities.JournalEntryLine, error) {
 	query := `
-		SELECT id, journal_entry_id, line_number, account_id, description,
-			   debit_amount, credit_amount, base_debit_amount, base_credit_amount,
-			   created_at, updated_at
-		FROM journal_entry_lines WHERE journal_entry_id = $1 ORDER BY line_number`
-	
+		SELECT jel.id, jel.journal_entry_id, jel.line_number, jel.account_id, jel.description,
+			   jel.debit_amount, jel.credit_amount, jel.base_debit_amount, jel.base_credit_amount,
+			   jel.created_at, jel.updated_at,
+			   COALESCE(coa.account_code, '') as account_code,
+			   COALESCE(coa.account_name, '') as account_name
+		FROM journal_entry_lines jel
+		LEFT JOIN chart_of_accounts coa ON jel.account_id = coa.id
+		WHERE jel.journal_entry_id = $1 ORDER BY jel.line_number`
+
 	rows, err := r.db.QueryContext(ctx, query, entryID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	
+
 	var lines []*entities.JournalEntryLine
 	for rows.Next() {
 		line := &entities.JournalEntryLine{}
@@ -207,13 +222,14 @@ func (r *journalEntryRepositoryImpl) GetLinesByEntryID(ctx context.Context, entr
 			&line.ID, &line.JournalEntryID, &line.LineNumber, &line.AccountID,
 			&line.Description, &line.DebitAmount, &line.CreditAmount,
 			&line.BaseDebitAmount, &line.BaseCreditAmount, &line.CreatedAt, &line.UpdatedAt,
+			&line.AccountCode, &line.AccountName,
 		)
 		if err != nil {
 			return nil, err
 		}
 		lines = append(lines, line)
 	}
-	
+
 	return lines, rows.Err()
 }
 
@@ -254,12 +270,16 @@ func (r *journalEntryRepositoryImpl) DeleteLinesByEntryID(ctx context.Context, e
 // GetByEntryNumber retrieves a journal entry by entry number
 func (r *journalEntryRepositoryImpl) GetByEntryNumber(ctx context.Context, entryNumber string) (*entities.JournalEntry, error) {
 	query := `
-		SELECT id, entry_number, entry_date, description, reference, status,
-			   total_debit, total_credit, currency_code, exchange_rate,
-			   base_total_debit, base_total_credit, source_module, source_id,
-			   posted_by, posted_at, reversed_by, reversed_at,
-			   company_id, created_by, created_at, updated_at
-		FROM journal_entries WHERE entry_number = $1`
+		SELECT je.id, je.entry_number, je.entry_date, je.description, je.reference, je.status,
+			   je.total_debit, je.total_credit, je.currency_code, je.exchange_rate,
+			   je.base_total_debit, je.base_total_credit, je.source_module, je.source_id,
+			   je.posted_by, je.posted_at, je.reversed_by, je.reversed_at,
+			   je.company_id, je.created_by, je.created_at, je.updated_at,
+			   COALESCE(u_created.full_name, u_created.username, '') as created_by_name,
+			   COALESCE(u_posted.full_name, u_posted.username, '') as posted_by_name
+		FROM journal_entries je
+		LEFT JOIN users u_created ON je.created_by = u_created.id::text
+		LEFT JOIN users u_posted ON je.posted_by = u_posted.id::text WHERE entry_number = $1`
 	
 	entries, err := r.queryEntries(ctx, query, entryNumber)
 	if err != nil {
@@ -276,12 +296,16 @@ func (r *journalEntryRepositoryImpl) GetByEntryNumber(ctx context.Context, entry
 // GetByStatus retrieves journal entries by status
 func (r *journalEntryRepositoryImpl) GetByStatus(ctx context.Context, status entities.JournalEntryStatus) ([]*entities.JournalEntry, error) {
 	query := `
-		SELECT id, entry_number, entry_date, description, reference, status,
-			   total_debit, total_credit, currency_code, exchange_rate,
-			   base_total_debit, base_total_credit, source_module, source_id,
-			   posted_by, posted_at, reversed_by, reversed_at,
-			   company_id, created_by, created_at, updated_at
-		FROM journal_entries WHERE status = $1 ORDER BY entry_date DESC`
+		SELECT je.id, je.entry_number, je.entry_date, je.description, je.reference, je.status,
+			   je.total_debit, je.total_credit, je.currency_code, je.exchange_rate,
+			   je.base_total_debit, je.base_total_credit, je.source_module, je.source_id,
+			   je.posted_by, je.posted_at, je.reversed_by, je.reversed_at,
+			   je.company_id, je.created_by, je.created_at, je.updated_at,
+			   COALESCE(u_created.full_name, u_created.username, '') as created_by_name,
+			   COALESCE(u_posted.full_name, u_posted.username, '') as posted_by_name
+		FROM journal_entries je
+		LEFT JOIN users u_created ON je.created_by = u_created.id::text
+		LEFT JOIN users u_posted ON je.posted_by = u_posted.id::text WHERE status = $1 ORDER BY entry_date DESC`
 	
 	return r.queryEntries(ctx, query, status)
 }
@@ -289,12 +313,16 @@ func (r *journalEntryRepositoryImpl) GetByStatus(ctx context.Context, status ent
 // GetByDateRange retrieves journal entries by date range
 func (r *journalEntryRepositoryImpl) GetByDateRange(ctx context.Context, startDate, endDate time.Time) ([]*entities.JournalEntry, error) {
 	query := `
-		SELECT id, entry_number, entry_date, description, reference, status,
-			   total_debit, total_credit, currency_code, exchange_rate,
-			   base_total_debit, base_total_credit, source_module, source_id,
-			   posted_by, posted_at, reversed_by, reversed_at,
-			   company_id, created_by, created_at, updated_at
-		FROM journal_entries WHERE entry_date BETWEEN $1 AND $2 ORDER BY entry_date, created_at`
+		SELECT je.id, je.entry_number, je.entry_date, je.description, je.reference, je.status,
+			   je.total_debit, je.total_credit, je.currency_code, je.exchange_rate,
+			   je.base_total_debit, je.base_total_credit, je.source_module, je.source_id,
+			   je.posted_by, je.posted_at, je.reversed_by, je.reversed_at,
+			   je.company_id, je.created_by, je.created_at, je.updated_at,
+			   COALESCE(u_created.full_name, u_created.username, '') as created_by_name,
+			   COALESCE(u_posted.full_name, u_posted.username, '') as posted_by_name
+		FROM journal_entries je
+		LEFT JOIN users u_created ON je.created_by = u_created.id::text
+		LEFT JOIN users u_posted ON je.posted_by = u_posted.id::text WHERE entry_date BETWEEN $1 AND $2 ORDER BY entry_date, created_at`
 	
 	return r.queryEntries(ctx, query, startDate, endDate)
 }
@@ -302,12 +330,16 @@ func (r *journalEntryRepositoryImpl) GetByDateRange(ctx context.Context, startDa
 // GetByReference retrieves journal entries by reference
 func (r *journalEntryRepositoryImpl) GetByReference(ctx context.Context, reference string) ([]*entities.JournalEntry, error) {
 	query := `
-		SELECT id, entry_number, entry_date, description, reference, status,
-			   total_debit, total_credit, currency_code, exchange_rate,
-			   base_total_debit, base_total_credit, source_module, source_id,
-			   posted_by, posted_at, reversed_by, reversed_at,
-			   company_id, created_by, created_at, updated_at
-		FROM journal_entries WHERE reference = $1 ORDER BY entry_date DESC`
+		SELECT je.id, je.entry_number, je.entry_date, je.description, je.reference, je.status,
+			   je.total_debit, je.total_credit, je.currency_code, je.exchange_rate,
+			   je.base_total_debit, je.base_total_credit, je.source_module, je.source_id,
+			   je.posted_by, je.posted_at, je.reversed_by, je.reversed_at,
+			   je.company_id, je.created_by, je.created_at, je.updated_at,
+			   COALESCE(u_created.full_name, u_created.username, '') as created_by_name,
+			   COALESCE(u_posted.full_name, u_posted.username, '') as posted_by_name
+		FROM journal_entries je
+		LEFT JOIN users u_created ON je.created_by = u_created.id::text
+		LEFT JOIN users u_posted ON je.posted_by = u_posted.id::text WHERE reference = $1 ORDER BY entry_date DESC`
 	
 	return r.queryEntries(ctx, query, reference)
 }
@@ -315,12 +347,16 @@ func (r *journalEntryRepositoryImpl) GetByReference(ctx context.Context, referen
 // GetBySourceModule retrieves journal entries by source module
 func (r *journalEntryRepositoryImpl) GetBySourceModule(ctx context.Context, sourceModule string) ([]*entities.JournalEntry, error) {
 	query := `
-		SELECT id, entry_number, entry_date, description, reference, status,
-			   total_debit, total_credit, currency_code, exchange_rate,
-			   base_total_debit, base_total_credit, source_module, source_id,
-			   posted_by, posted_at, reversed_by, reversed_at,
-			   company_id, created_by, created_at, updated_at
-		FROM journal_entries WHERE source_module = $1 ORDER BY entry_date DESC`
+		SELECT je.id, je.entry_number, je.entry_date, je.description, je.reference, je.status,
+			   je.total_debit, je.total_credit, je.currency_code, je.exchange_rate,
+			   je.base_total_debit, je.base_total_credit, je.source_module, je.source_id,
+			   je.posted_by, je.posted_at, je.reversed_by, je.reversed_at,
+			   je.company_id, je.created_by, je.created_at, je.updated_at,
+			   COALESCE(u_created.full_name, u_created.username, '') as created_by_name,
+			   COALESCE(u_posted.full_name, u_posted.username, '') as posted_by_name
+		FROM journal_entries je
+		LEFT JOIN users u_created ON je.created_by = u_created.id::text
+		LEFT JOIN users u_posted ON je.posted_by = u_posted.id::text WHERE source_module = $1 ORDER BY entry_date DESC`
 	
 	return r.queryEntries(ctx, query, sourceModule)
 }
@@ -328,12 +364,16 @@ func (r *journalEntryRepositoryImpl) GetBySourceModule(ctx context.Context, sour
 // GetBySourceID retrieves journal entry by source module and ID
 func (r *journalEntryRepositoryImpl) GetBySourceID(ctx context.Context, sourceModule, sourceID string) (*entities.JournalEntry, error) {
 	query := `
-		SELECT id, entry_number, entry_date, description, reference, status,
-			   total_debit, total_credit, currency_code, exchange_rate,
-			   base_total_debit, base_total_credit, source_module, source_id,
-			   posted_by, posted_at, reversed_by, reversed_at,
-			   company_id, created_by, created_at, updated_at
-		FROM journal_entries WHERE source_module = $1 AND source_id = $2`
+		SELECT je.id, je.entry_number, je.entry_date, je.description, je.reference, je.status,
+			   je.total_debit, je.total_credit, je.currency_code, je.exchange_rate,
+			   je.base_total_debit, je.base_total_credit, je.source_module, je.source_id,
+			   je.posted_by, je.posted_at, je.reversed_by, je.reversed_at,
+			   je.company_id, je.created_by, je.created_at, je.updated_at,
+			   COALESCE(u_created.full_name, u_created.username, '') as created_by_name,
+			   COALESCE(u_posted.full_name, u_posted.username, '') as posted_by_name
+		FROM journal_entries je
+		LEFT JOIN users u_created ON je.created_by = u_created.id::text
+		LEFT JOIN users u_posted ON je.posted_by = u_posted.id::text WHERE source_module = $1 AND source_id = $2`
 	
 	entries, err := r.queryEntries(ctx, query, sourceModule, sourceID)
 	if err != nil {
@@ -350,25 +390,35 @@ func (r *journalEntryRepositoryImpl) GetBySourceID(ctx context.Context, sourceMo
 // GetByCompanyID retrieves journal entries by company ID
 func (r *journalEntryRepositoryImpl) GetByCompanyID(ctx context.Context, companyID string) ([]*entities.JournalEntry, error) {
 	query := `
-		SELECT id, entry_number, entry_date, description, reference, status,
-			   total_debit, total_credit, currency_code, exchange_rate,
-			   base_total_debit, base_total_credit, source_module, source_id,
-			   posted_by, posted_at, reversed_by, reversed_at,
-			   company_id, created_by, created_at, updated_at
-		FROM journal_entries WHERE company_id = $1 ORDER BY entry_date DESC`
-	
+		SELECT je.id, je.entry_number, je.entry_date, je.description, je.reference, je.status,
+			   je.total_debit, je.total_credit, je.currency_code, je.exchange_rate,
+			   je.base_total_debit, je.base_total_credit, je.source_module, je.source_id,
+			   je.posted_by, je.posted_at, je.reversed_by, je.reversed_at,
+			   je.company_id, je.created_by, je.created_at, je.updated_at,
+			   COALESCE(u_created.full_name, u_created.username, '') as created_by_name,
+			   COALESCE(u_posted.full_name, u_posted.username, '') as posted_by_name
+		FROM journal_entries je
+		LEFT JOIN users u_created ON je.created_by = u_created.id::text
+		LEFT JOIN users u_posted ON je.posted_by = u_posted.id::text
+		WHERE je.company_id = $1 ORDER BY je.entry_date DESC`
+
 	return r.queryEntries(ctx, query, companyID)
 }
 
 // GetByCompanyAndStatus retrieves journal entries by company and status
 func (r *journalEntryRepositoryImpl) GetByCompanyAndStatus(ctx context.Context, companyID string, status entities.JournalEntryStatus) ([]*entities.JournalEntry, error) {
 	query := `
-		SELECT id, entry_number, entry_date, description, reference, status,
-			   total_debit, total_credit, currency_code, exchange_rate,
-			   base_total_debit, base_total_credit, source_module, source_id,
-			   posted_by, posted_at, reversed_by, reversed_at,
-			   company_id, created_by, created_at, updated_at
-		FROM journal_entries WHERE company_id = $1 AND status = $2 ORDER BY entry_date DESC`
+		SELECT je.id, je.entry_number, je.entry_date, je.description, je.reference, je.status,
+			   je.total_debit, je.total_credit, je.currency_code, je.exchange_rate,
+			   je.base_total_debit, je.base_total_credit, je.source_module, je.source_id,
+			   je.posted_by, je.posted_at, je.reversed_by, je.reversed_at,
+			   je.company_id, je.created_by, je.created_at, je.updated_at,
+			   COALESCE(u_created.full_name, u_created.username, '') as created_by_name,
+			   COALESCE(u_posted.full_name, u_posted.username, '') as posted_by_name
+		FROM journal_entries je
+		LEFT JOIN users u_created ON je.created_by = u_created.id::text
+		LEFT JOIN users u_posted ON je.posted_by = u_posted.id::text
+		WHERE je.company_id = $1 AND je.status = $2 ORDER BY je.entry_date DESC`
 	
 	return r.queryEntries(ctx, query, companyID, status)
 }
@@ -376,14 +426,18 @@ func (r *journalEntryRepositoryImpl) GetByCompanyAndStatus(ctx context.Context, 
 // GetByCompanyAndDateRange retrieves journal entries by company and date range
 func (r *journalEntryRepositoryImpl) GetByCompanyAndDateRange(ctx context.Context, companyID string, startDate, endDate time.Time) ([]*entities.JournalEntry, error) {
 	query := `
-		SELECT id, entry_number, entry_date, description, reference, status,
-			   total_debit, total_credit, currency_code, exchange_rate,
-			   base_total_debit, base_total_credit, source_module, source_id,
-			   posted_by, posted_at, reversed_by, reversed_at,
-			   company_id, created_by, created_at, updated_at
-		FROM journal_entries 
-		WHERE company_id = $1 AND entry_date BETWEEN $2 AND $3 
-		ORDER BY entry_date, created_at`
+		SELECT je.id, je.entry_number, je.entry_date, je.description, je.reference, je.status,
+			   je.total_debit, je.total_credit, je.currency_code, je.exchange_rate,
+			   je.base_total_debit, je.base_total_credit, je.source_module, je.source_id,
+			   je.posted_by, je.posted_at, je.reversed_by, je.reversed_at,
+			   je.company_id, je.created_by, je.created_at, je.updated_at,
+			   COALESCE(u_created.full_name, u_created.username, '') as created_by_name,
+			   COALESCE(u_posted.full_name, u_posted.username, '') as posted_by_name
+		FROM journal_entries je
+		LEFT JOIN users u_created ON je.created_by = u_created.id::text
+		LEFT JOIN users u_posted ON je.posted_by = u_posted.id::text
+		WHERE je.company_id = $1 AND je.entry_date BETWEEN $2 AND $3
+		ORDER BY je.entry_date, je.created_at`
 	
 	return r.queryEntries(ctx, query, companyID, startDate, endDate)
 }
@@ -550,9 +604,13 @@ func (r *journalEntryRepositoryImpl) GetEntriesByAccount(ctx context.Context, ac
 			   je.total_debit, je.total_credit, je.currency_code, je.exchange_rate,
 			   je.base_total_debit, je.base_total_credit, je.source_module, je.source_id,
 			   je.posted_by, je.posted_at, je.reversed_by, je.reversed_at,
-			   je.company_id, je.created_by, je.created_at, je.updated_at
+			   je.company_id, je.created_by, je.created_at, je.updated_at,
+			   COALESCE(u_created.full_name, u_created.username, '') as created_by_name,
+			   COALESCE(u_posted.full_name, u_posted.username, '') as posted_by_name
 		FROM journal_entries je
 		INNER JOIN journal_entry_lines jel ON je.id = jel.journal_entry_id
+		LEFT JOIN users u_created ON je.created_by = u_created.id::text
+		LEFT JOIN users u_posted ON je.posted_by = u_posted.id::text
 		WHERE jel.account_id = $1 AND je.entry_date BETWEEN $2 AND $3
 		ORDER BY je.entry_date, je.created_at`
 	
@@ -580,6 +638,7 @@ func (r *journalEntryRepositoryImpl) queryEntries(ctx context.Context, query str
 			&entry.BaseTotalCredit, &sourceModule, &sourceID,
 			&postedBy, &entry.PostedAt, &reversedBy, &entry.ReversedAt,
 			&entry.CompanyID, &entry.CreatedBy, &entry.CreatedAt, &entry.UpdatedAt,
+			&entry.CreatedByName, &entry.PostedByName,
 		)
 		if err != nil {
 			return nil, err

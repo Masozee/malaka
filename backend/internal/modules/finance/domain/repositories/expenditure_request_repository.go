@@ -12,7 +12,7 @@ type ExpenditureRequestRepository interface {
 	Create(ctx context.Context, request *entities.ExpenditureRequest) error
 	GetByID(ctx context.Context, id uuid.ID) (*entities.ExpenditureRequest, error)
 	GetAll(ctx context.Context) ([]*entities.ExpenditureRequest, error)
-	GetByRequestedBy(ctx context.Context, requestedBy string) ([]*entities.ExpenditureRequest, error)
+	GetByRequestorID(ctx context.Context, requestorID string) ([]*entities.ExpenditureRequest, error)
 	GetByStatus(ctx context.Context, status string) ([]*entities.ExpenditureRequest, error)
 	GetByRequestNumber(ctx context.Context, requestNumber string) (*entities.ExpenditureRequest, error)
 	Update(ctx context.Context, request *entities.ExpenditureRequest) error

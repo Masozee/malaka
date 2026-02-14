@@ -1,161 +1,93 @@
-import ConsignmentList, { ConsignmentDeal } from './ConsignmentList'
+'use client'
 
-// Mock Data
-const mockConsignments: ConsignmentDeal[] = [
-  {
-    id: '1',
-    consignment_number: 'CONS-2024-001',
-    partner_type: 'store',
-    partner_name: 'Fashion Plaza Boutique',
-    partner_location: 'Kemang, Jakarta Selatan',
-    contact_person: 'Sari Boutique',
-    start_date: '2024-06-01T00:00:00Z',
-    end_date: '2024-12-31T23:59:59Z',
-    status: 'active',
-    commission_rate: 25,
-    payment_terms: 'monthly',
-    total_items: 45,
-    total_quantity: 180,
-    total_value: 225000000,
-    sold_quantity: 127,
-    sold_value: 158750000,
-    commission_earned: 39687500,
-  },
-  {
-    id: '2',
-    consignment_number: 'CONS-2024-002',
-    partner_type: 'distributor',
-    partner_name: 'Java Footwear Distribution',
-    partner_location: 'Surabaya, Jawa Timur',
-    contact_person: 'Budi Distributor',
-    start_date: '2024-05-15T00:00:00Z',
-    end_date: '2024-11-15T23:59:59Z',
-    status: 'active',
-    commission_rate: 20,
-    payment_terms: 'quarterly',
-    total_items: 89,
-    total_quantity: 456,
-    total_value: 684000000,
-    sold_quantity: 234,
-    sold_value: 351000000,
-    commission_earned: 70200000,
-  },
-  {
-    id: '3',
-    consignment_number: 'CONS-2024-003',
-    partner_type: 'agent',
-    partner_name: 'Premium Shoes Agent',
-    partner_location: 'Bandung, Jawa Barat',
-    contact_person: 'Dedi Agent',
-    start_date: '2024-07-01T00:00:00Z',
-    end_date: '2024-12-31T23:59:59Z',
-    status: 'pending',
-    commission_rate: 30,
-    payment_terms: 'on_sale',
-    total_items: 25,
-    total_quantity: 75,
-    total_value: 112500000,
-    sold_quantity: 12,
-    sold_value: 18000000,
-    commission_earned: 5400000,
-  },
-  {
-    id: '4',
-    consignment_number: 'CONS-2024-004',
-    partner_type: 'individual',
-    partner_name: 'Celebrity Endorser Sarah',
-    partner_location: 'Jakarta Pusat',
-    contact_person: 'Sarah Celebrity',
-    start_date: '2024-04-01T00:00:00Z',
-    end_date: '2024-09-30T23:59:59Z',
-    status: 'completed',
-    commission_rate: 35,
-    payment_terms: 'custom',
-    total_items: 15,
-    total_quantity: 30,
-    total_value: 75000000,
-    sold_quantity: 30,
-    sold_value: 75000000,
-    commission_earned: 26250000,
-  },
-  {
-    id: '5',
-    consignment_number: 'CONS-2024-005',
-    partner_type: 'store',
-    partner_name: 'Luxury Shoes Gallery',
-    partner_location: 'Bali, Denpasar',
-    contact_person: 'Ketut Store',
-    start_date: '2024-06-15T00:00:00Z',
-    end_date: '2024-12-15T23:59:59Z',
-    status: 'active',
-    commission_rate: 28,
-    payment_terms: 'monthly',
-    total_items: 67,
-    total_quantity: 134,
-    total_value: 201000000,
-    sold_quantity: 89,
-    sold_value: 133500000,
-    commission_earned: 37380000,
-  },
-  {
-    id: '6',
-    consignment_number: 'CONS-2024-006',
-    partner_type: 'distributor',
-    partner_name: 'North Sumatra Distribution',
-    partner_location: 'Medan, Sumatera Utara',
-    contact_person: 'Andi Distributor',
-    start_date: '2024-03-01T00:00:00Z',
-    end_date: '2024-08-31T23:59:59Z',
-    status: 'expired',
-    commission_rate: 22,
-    payment_terms: 'quarterly',
-    total_items: 78,
-    total_quantity: 312,
-    total_value: 468000000,
-    sold_quantity: 298,
-    sold_value: 447000000,
-    commission_earned: 98340000,
-  },
-  {
-    id: '7',
-    consignment_number: 'CONS-2024-007',
-    partner_type: 'agent',
-    partner_name: 'Fashion Week Agent',
-    partner_location: 'Jakarta Utara',
-    contact_person: 'Rina Fashion',
-    start_date: '2024-07-10T00:00:00Z',
-    end_date: '2024-10-10T23:59:59Z',
-    status: 'active',
-    commission_rate: 32,
-    payment_terms: 'on_sale',
-    total_items: 35,
-    total_quantity: 70,
-    total_value: 140000000,
-    sold_quantity: 23,
-    sold_value: 46000000,
-    commission_earned: 14720000,
-  },
-  {
-    id: '8',
-    consignment_number: 'CONS-2024-008',
-    partner_type: 'store',
-    partner_name: 'Sport Shoes Corner',
-    partner_location: 'Yogyakarta',
-    contact_person: 'Joko Store',
-    start_date: '2024-05-01T00:00:00Z',
-    end_date: '2024-10-31T23:59:59Z',
-    status: 'cancelled',
-    commission_rate: 26,
-    payment_terms: 'monthly',
-    total_items: 23,
-    total_quantity: 46,
-    total_value: 69000000,
-    sold_quantity: 8,
-    sold_value: 12000000,
-    commission_earned: 3120000,
-  }
-]
+import React, { useState, useMemo, useEffect } from 'react'
+import { TwoLevelLayout } from '@/components/ui/two-level-layout'
+import { Header } from '@/components/ui/header'
+import { Card } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Input } from '@/components/ui/input'
+import { TanStackDataTable, TanStackColumn } from '@/components/ui/tanstack-data-table'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from '@/components/ui/dropdown-menu'
+import { HugeiconsIcon } from '@hugeicons/react'
+import { Search01Icon, MoreHorizontalIcon, PlusSignIcon, Package01Icon, Dollar01Icon, CheckmarkCircle01Icon, Clock01Icon } from '@hugeicons/core-free-icons'
+import { consignmentSaleService, type ConsignmentSale } from '@/services/sales'
+import Link from 'next/link'
 
-export default function SalesConsignmentPage() {
-  return <ConsignmentList initialData={mockConsignments} />
+export default function ConsignmentPage() {
+  const [data, setData] = useState<ConsignmentSale[]>([])
+  const [loading, setLoading] = useState(true)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => { setMounted(true) }, [])
+  useEffect(() => { consignmentSaleService.getAll().then(setData).finally(() => setLoading(false)) }, [])
+
+  const filtered = useMemo(() => {
+    if (!searchTerm) return data
+    const q = searchTerm.toLowerCase()
+    return data.filter(item =>
+      item.consignee_id?.toLowerCase().includes(q) ||
+      item.status?.toLowerCase().includes(q) ||
+      item.id.toLowerCase().includes(q)
+    )
+  }, [data, searchTerm])
+
+  const stats = useMemo(() => ({
+    total: data.length,
+    revenue: data.reduce((s, i) => s + (i.total_amount || 0), 0),
+    active: data.filter(i => i.status === 'ACTIVE').length,
+    settled: data.filter(i => i.status === 'SETTLED').length,
+  }), [data])
+
+  const fmt = (n: number) => `Rp ${n.toLocaleString('id-ID')}`
+  const fmtDate = (d: string) => mounted && d ? new Date(d).toLocaleDateString('id-ID') : '-'
+  const statusColor: Record<string, string> = { ACTIVE: 'bg-green-100 text-green-800', SETTLED: 'bg-blue-100 text-blue-800', CANCELLED: 'bg-red-100 text-red-800' }
+
+  const columns: TanStackColumn<ConsignmentSale>[] = [
+    { id: 'id', header: 'Consignment ID', accessorKey: 'id', cell: ({ row }) => <Link href={`/sales/consignment/${row.original.id}`} className="font-medium text-blue-600 hover:underline">{row.original.id.slice(0, 8)}...</Link> },
+    { id: 'consignee_id', header: 'Consignee', accessorKey: 'consignee_id', cell: ({ row }) => <span>{row.original.consignee_id.slice(0, 8)}...</span> },
+    { id: 'sales_date', header: 'Sales Date', accessorKey: 'sales_date', cell: ({ row }) => <span>{fmtDate(row.original.sales_date)}</span> },
+    { id: 'total_amount', header: 'Total', accessorKey: 'total_amount', cell: ({ row }) => <span className="font-medium">{fmt(row.original.total_amount)}</span> },
+    { id: 'status', header: 'Status', accessorKey: 'status', cell: ({ row }) => <Badge className={`${statusColor[row.original.status] || 'bg-gray-100 text-gray-800'} border-0`}>{row.original.status}</Badge> },
+    { id: 'created_at', header: 'Created', accessorKey: 'created_at', cell: ({ row }) => <span>{fmtDate(row.original.created_at)}</span> },
+    { id: 'actions', header: '', enableSorting: false, cell: ({ row }) => (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild><Button variant="outline" size="sm" className="h-8 w-8 p-0"><HugeiconsIcon icon={MoreHorizontalIcon} className="h-4 w-4" /></Button></DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem asChild><Link href={`/sales/consignment/${row.original.id}`}>View Details</Link></DropdownMenuItem>
+          <DropdownMenuItem onClick={() => navigator.clipboard.writeText(row.original.id)}>Copy ID</DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem className="text-red-600" onClick={() => handleDelete(row.original.id)}>Delete</DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    )},
+  ]
+
+  const handleDelete = async (id: string) => { try { await consignmentSaleService.delete(id); setData(prev => prev.filter(i => i.id !== id)) } catch (err) { console.error('Delete failed:', err) } }
+
+  return (
+    <TwoLevelLayout>
+      <Header title="Consignment Sales" breadcrumbs={[{ label: 'Sales', href: '/sales' }, { label: 'Consignment' }]} actions={<Button><HugeiconsIcon icon={PlusSignIcon} className="w-4 h-4 mr-2" />New Consignment</Button>} />
+      <div className="flex-1 overflow-auto p-6 space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <Card className="p-4"><div className="flex items-center space-x-3"><div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center"><HugeiconsIcon icon={Package01Icon} className="h-5 w-5 text-foreground" /></div><div><p className="text-sm font-medium text-muted-foreground">Total Consignments</p><p className="text-2xl font-bold">{stats.total}</p></div></div></Card>
+          <Card className="p-4"><div className="flex items-center space-x-3"><div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center"><HugeiconsIcon icon={Dollar01Icon} className="h-5 w-5 text-foreground" /></div><div><p className="text-sm font-medium text-muted-foreground">Total Revenue</p><p className="text-2xl font-bold">{mounted ? fmt(stats.revenue) : '-'}</p></div></div></Card>
+          <Card className="p-4"><div className="flex items-center space-x-3"><div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center"><HugeiconsIcon icon={CheckmarkCircle01Icon} className="h-5 w-5 text-foreground" /></div><div><p className="text-sm font-medium text-muted-foreground">Active</p><p className="text-2xl font-bold">{stats.active}</p></div></div></Card>
+          <Card className="p-4"><div className="flex items-center space-x-3"><div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center"><HugeiconsIcon icon={Clock01Icon} className="h-5 w-5 text-foreground" /></div><div><p className="text-sm font-medium text-muted-foreground">Settled</p><p className="text-2xl font-bold">{stats.settled}</p></div></div></Card>
+        </div>
+        <div className="relative w-80">
+          <HugeiconsIcon icon={Search01Icon} className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input placeholder="Search consignments..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-9 bg-white text-sm" style={{ fontSize: '14px' }} />
+        </div>
+        <TanStackDataTable data={filtered} columns={columns} loading={loading} showColumnToggle={false} />
+      </div>
+    </TwoLevelLayout>
+  )
 }

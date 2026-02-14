@@ -26,15 +26,15 @@ func (r *purchaseVoucherRepositoryImpl) Create(ctx context.Context, voucher *ent
 
 	query := `
 		INSERT INTO purchase_vouchers (
-			id, voucher_number, voucher_date, supplier_id, invoice_id,
-			total_amount, tax_amount, grand_total, due_date, status,
-			description, approved_by, approved_at, created_at, updated_at
-		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)`
+			id, voucher_number, supplier_id, voucher_date, due_date,
+			total_amount, paid_amount, remaining_amount, discount_amount, tax_amount,
+			description, status, approved_by, approved_at, created_at, updated_at
+		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)`
 
 	_, err := r.db.ExecContext(ctx, query,
-		voucher.ID, voucher.VoucherNumber, voucher.VoucherDate, voucher.SupplierID, voucher.InvoiceID,
-		voucher.TotalAmount, voucher.TaxAmount, voucher.GrandTotal, voucher.DueDate, voucher.Status,
-		voucher.Description, voucher.ApprovedBy, voucher.ApprovedAt, voucher.CreatedAt, voucher.UpdatedAt,
+		voucher.ID, voucher.VoucherNumber, voucher.SupplierID, voucher.VoucherDate, voucher.DueDate,
+		voucher.TotalAmount, voucher.PaidAmount, voucher.RemainingAmount, voucher.DiscountAmount, voucher.TaxAmount,
+		voucher.Description, voucher.Status, voucher.ApprovedBy, voucher.ApprovedAt, voucher.CreatedAt, voucher.UpdatedAt,
 	)
 
 	return err
@@ -43,15 +43,15 @@ func (r *purchaseVoucherRepositoryImpl) Create(ctx context.Context, voucher *ent
 func (r *purchaseVoucherRepositoryImpl) GetByID(ctx context.Context, id uuid.ID) (*entities.PurchaseVoucher, error) {
 	voucher := &entities.PurchaseVoucher{}
 	query := `
-		SELECT id, voucher_number, voucher_date, supplier_id, invoice_id,
-			   total_amount, tax_amount, grand_total, due_date, status,
-			   description, approved_by, approved_at, created_at, updated_at
+		SELECT id, voucher_number, supplier_id, voucher_date, COALESCE(due_date, '0001-01-01'),
+			   total_amount, COALESCE(paid_amount, 0), remaining_amount, COALESCE(discount_amount, 0), COALESCE(tax_amount, 0),
+			   COALESCE(description, ''), COALESCE(status, ''), approved_by, approved_at, created_at, updated_at
 		FROM purchase_vouchers WHERE id = $1`
 
 	err := r.db.QueryRowContext(ctx, query, id).Scan(
-		&voucher.ID, &voucher.VoucherNumber, &voucher.VoucherDate, &voucher.SupplierID, &voucher.InvoiceID,
-		&voucher.TotalAmount, &voucher.TaxAmount, &voucher.GrandTotal, &voucher.DueDate, &voucher.Status,
-		&voucher.Description, &voucher.ApprovedBy, &voucher.ApprovedAt, &voucher.CreatedAt, &voucher.UpdatedAt,
+		&voucher.ID, &voucher.VoucherNumber, &voucher.SupplierID, &voucher.VoucherDate, &voucher.DueDate,
+		&voucher.TotalAmount, &voucher.PaidAmount, &voucher.RemainingAmount, &voucher.DiscountAmount, &voucher.TaxAmount,
+		&voucher.Description, &voucher.Status, &voucher.ApprovedBy, &voucher.ApprovedAt, &voucher.CreatedAt, &voucher.UpdatedAt,
 	)
 
 	if err != nil {
@@ -63,9 +63,9 @@ func (r *purchaseVoucherRepositoryImpl) GetByID(ctx context.Context, id uuid.ID)
 
 func (r *purchaseVoucherRepositoryImpl) GetAll(ctx context.Context) ([]*entities.PurchaseVoucher, error) {
 	query := `
-		SELECT id, voucher_number, voucher_date, supplier_id, invoice_id,
-			   total_amount, tax_amount, grand_total, due_date, status,
-			   description, approved_by, approved_at, created_at, updated_at
+		SELECT id, voucher_number, supplier_id, voucher_date, COALESCE(due_date, '0001-01-01'),
+			   total_amount, COALESCE(paid_amount, 0), remaining_amount, COALESCE(discount_amount, 0), COALESCE(tax_amount, 0),
+			   COALESCE(description, ''), COALESCE(status, ''), approved_by, approved_at, created_at, updated_at
 		FROM purchase_vouchers ORDER BY created_at DESC LIMIT 500`
 
 	rows, err := r.db.QueryContext(ctx, query)
@@ -78,9 +78,9 @@ func (r *purchaseVoucherRepositoryImpl) GetAll(ctx context.Context) ([]*entities
 	for rows.Next() {
 		voucher := &entities.PurchaseVoucher{}
 		err := rows.Scan(
-			&voucher.ID, &voucher.VoucherNumber, &voucher.VoucherDate, &voucher.SupplierID, &voucher.InvoiceID,
-			&voucher.TotalAmount, &voucher.TaxAmount, &voucher.GrandTotal, &voucher.DueDate, &voucher.Status,
-			&voucher.Description, &voucher.ApprovedBy, &voucher.ApprovedAt, &voucher.CreatedAt, &voucher.UpdatedAt,
+			&voucher.ID, &voucher.VoucherNumber, &voucher.SupplierID, &voucher.VoucherDate, &voucher.DueDate,
+			&voucher.TotalAmount, &voucher.PaidAmount, &voucher.RemainingAmount, &voucher.DiscountAmount, &voucher.TaxAmount,
+			&voucher.Description, &voucher.Status, &voucher.ApprovedBy, &voucher.ApprovedAt, &voucher.CreatedAt, &voucher.UpdatedAt,
 		)
 		if err != nil {
 			return nil, err
@@ -94,15 +94,15 @@ func (r *purchaseVoucherRepositoryImpl) GetAll(ctx context.Context) ([]*entities
 func (r *purchaseVoucherRepositoryImpl) Update(ctx context.Context, voucher *entities.PurchaseVoucher) error {
 	query := `
 		UPDATE purchase_vouchers SET
-			voucher_number = $2, voucher_date = $3, supplier_id = $4, invoice_id = $5,
-			total_amount = $6, tax_amount = $7, grand_total = $8, due_date = $9, status = $10,
-			description = $11, approved_by = $12, approved_at = $13, updated_at = $14
+			voucher_number = $2, supplier_id = $3, voucher_date = $4, due_date = $5,
+			total_amount = $6, paid_amount = $7, remaining_amount = $8, discount_amount = $9, tax_amount = $10,
+			description = $11, status = $12, approved_by = $13, approved_at = $14, updated_at = $15
 		WHERE id = $1`
 
 	_, err := r.db.ExecContext(ctx, query,
-		voucher.ID, voucher.VoucherNumber, voucher.VoucherDate, voucher.SupplierID, voucher.InvoiceID,
-		voucher.TotalAmount, voucher.TaxAmount, voucher.GrandTotal, voucher.DueDate, voucher.Status,
-		voucher.Description, voucher.ApprovedBy, voucher.ApprovedAt, voucher.UpdatedAt,
+		voucher.ID, voucher.VoucherNumber, voucher.SupplierID, voucher.VoucherDate, voucher.DueDate,
+		voucher.TotalAmount, voucher.PaidAmount, voucher.RemainingAmount, voucher.DiscountAmount, voucher.TaxAmount,
+		voucher.Description, voucher.Status, voucher.ApprovedBy, voucher.ApprovedAt, voucher.UpdatedAt,
 	)
 
 	return err
@@ -116,9 +116,9 @@ func (r *purchaseVoucherRepositoryImpl) Delete(ctx context.Context, id uuid.ID) 
 
 func (r *purchaseVoucherRepositoryImpl) GetByStatus(ctx context.Context, status string) ([]*entities.PurchaseVoucher, error) {
 	query := `
-		SELECT id, voucher_number, voucher_date, supplier_id, invoice_id,
-			   total_amount, tax_amount, grand_total, due_date, status,
-			   description, approved_by, approved_at, created_at, updated_at
+		SELECT id, voucher_number, supplier_id, voucher_date, COALESCE(due_date, '0001-01-01'),
+			   total_amount, COALESCE(paid_amount, 0), remaining_amount, COALESCE(discount_amount, 0), COALESCE(tax_amount, 0),
+			   COALESCE(description, ''), COALESCE(status, ''), approved_by, approved_at, created_at, updated_at
 		FROM purchase_vouchers WHERE status = $1 ORDER BY created_at DESC`
 
 	rows, err := r.db.QueryContext(ctx, query, status)
@@ -131,9 +131,9 @@ func (r *purchaseVoucherRepositoryImpl) GetByStatus(ctx context.Context, status 
 	for rows.Next() {
 		voucher := &entities.PurchaseVoucher{}
 		err := rows.Scan(
-			&voucher.ID, &voucher.VoucherNumber, &voucher.VoucherDate, &voucher.SupplierID, &voucher.InvoiceID,
-			&voucher.TotalAmount, &voucher.TaxAmount, &voucher.GrandTotal, &voucher.DueDate, &voucher.Status,
-			&voucher.Description, &voucher.ApprovedBy, &voucher.ApprovedAt, &voucher.CreatedAt, &voucher.UpdatedAt,
+			&voucher.ID, &voucher.VoucherNumber, &voucher.SupplierID, &voucher.VoucherDate, &voucher.DueDate,
+			&voucher.TotalAmount, &voucher.PaidAmount, &voucher.RemainingAmount, &voucher.DiscountAmount, &voucher.TaxAmount,
+			&voucher.Description, &voucher.Status, &voucher.ApprovedBy, &voucher.ApprovedAt, &voucher.CreatedAt, &voucher.UpdatedAt,
 		)
 		if err != nil {
 			return nil, err
@@ -146,9 +146,9 @@ func (r *purchaseVoucherRepositoryImpl) GetByStatus(ctx context.Context, status 
 
 func (r *purchaseVoucherRepositoryImpl) GetBySupplierID(ctx context.Context, supplierID string) ([]*entities.PurchaseVoucher, error) {
 	query := `
-		SELECT id, voucher_number, voucher_date, supplier_id, invoice_id,
-			   total_amount, tax_amount, grand_total, due_date, status,
-			   description, approved_by, approved_at, created_at, updated_at
+		SELECT id, voucher_number, supplier_id, voucher_date, COALESCE(due_date, '0001-01-01'),
+			   total_amount, COALESCE(paid_amount, 0), remaining_amount, COALESCE(discount_amount, 0), COALESCE(tax_amount, 0),
+			   COALESCE(description, ''), COALESCE(status, ''), approved_by, approved_at, created_at, updated_at
 		FROM purchase_vouchers WHERE supplier_id = $1 ORDER BY created_at DESC`
 
 	rows, err := r.db.QueryContext(ctx, query, supplierID)
@@ -161,9 +161,9 @@ func (r *purchaseVoucherRepositoryImpl) GetBySupplierID(ctx context.Context, sup
 	for rows.Next() {
 		voucher := &entities.PurchaseVoucher{}
 		err := rows.Scan(
-			&voucher.ID, &voucher.VoucherNumber, &voucher.VoucherDate, &voucher.SupplierID, &voucher.InvoiceID,
-			&voucher.TotalAmount, &voucher.TaxAmount, &voucher.GrandTotal, &voucher.DueDate, &voucher.Status,
-			&voucher.Description, &voucher.ApprovedBy, &voucher.ApprovedAt, &voucher.CreatedAt, &voucher.UpdatedAt,
+			&voucher.ID, &voucher.VoucherNumber, &voucher.SupplierID, &voucher.VoucherDate, &voucher.DueDate,
+			&voucher.TotalAmount, &voucher.PaidAmount, &voucher.RemainingAmount, &voucher.DiscountAmount, &voucher.TaxAmount,
+			&voucher.Description, &voucher.Status, &voucher.ApprovedBy, &voucher.ApprovedAt, &voucher.CreatedAt, &voucher.UpdatedAt,
 		)
 		if err != nil {
 			return nil, err
@@ -177,15 +177,15 @@ func (r *purchaseVoucherRepositoryImpl) GetBySupplierID(ctx context.Context, sup
 func (r *purchaseVoucherRepositoryImpl) GetByVoucherNumber(ctx context.Context, voucherNumber string) (*entities.PurchaseVoucher, error) {
 	voucher := &entities.PurchaseVoucher{}
 	query := `
-		SELECT id, voucher_number, voucher_date, supplier_id, invoice_id,
-			   total_amount, tax_amount, grand_total, due_date, status,
-			   description, approved_by, approved_at, created_at, updated_at
+		SELECT id, voucher_number, supplier_id, voucher_date, COALESCE(due_date, '0001-01-01'),
+			   total_amount, COALESCE(paid_amount, 0), remaining_amount, COALESCE(discount_amount, 0), COALESCE(tax_amount, 0),
+			   COALESCE(description, ''), COALESCE(status, ''), approved_by, approved_at, created_at, updated_at
 		FROM purchase_vouchers WHERE voucher_number = $1`
 
 	err := r.db.QueryRowContext(ctx, query, voucherNumber).Scan(
-		&voucher.ID, &voucher.VoucherNumber, &voucher.VoucherDate, &voucher.SupplierID, &voucher.InvoiceID,
-		&voucher.TotalAmount, &voucher.TaxAmount, &voucher.GrandTotal, &voucher.DueDate, &voucher.Status,
-		&voucher.Description, &voucher.ApprovedBy, &voucher.ApprovedAt, &voucher.CreatedAt, &voucher.UpdatedAt,
+		&voucher.ID, &voucher.VoucherNumber, &voucher.SupplierID, &voucher.VoucherDate, &voucher.DueDate,
+		&voucher.TotalAmount, &voucher.PaidAmount, &voucher.RemainingAmount, &voucher.DiscountAmount, &voucher.TaxAmount,
+		&voucher.Description, &voucher.Status, &voucher.ApprovedBy, &voucher.ApprovedAt, &voucher.CreatedAt, &voucher.UpdatedAt,
 	)
 
 	if err != nil {

@@ -63,6 +63,22 @@ func (h *CashDisbursementHandler) GetCashDisbursementByID(c *gin.Context) {
 	response.Success(c, http.StatusOK, "Cash disbursement retrieved successfully", resp)
 }
 
+// GetAllCashDisbursements handles the retrieval of all cash disbursements.
+func (h *CashDisbursementHandler) GetAllCashDisbursements(c *gin.Context) {
+	items, err := h.service.GetAllCashDisbursements(c.Request.Context())
+	if err != nil {
+		response.Error(c, http.StatusInternalServerError, "Failed to retrieve cash disbursements", err)
+		return
+	}
+
+	var responses []*dto.CashDisbursementResponse
+	for _, cd := range items {
+		responses = append(responses, dto.FromCashDisbursementEntity(cd))
+	}
+
+	response.Success(c, http.StatusOK, "Cash disbursements retrieved successfully", responses)
+}
+
 // UpdateCashDisbursement handles the update of an existing cash disbursement.
 func (h *CashDisbursementHandler) UpdateCashDisbursement(c *gin.Context) {
 	id := c.Param("id")

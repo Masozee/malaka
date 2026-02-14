@@ -34,11 +34,11 @@ func NewMonthlyClosingService(repo repositories.MonthlyClosingRepository) Monthl
 
 func (s *monthlyClosingService) CreateMonthlyClosing(ctx context.Context, closing *entities.MonthlyClosing) error {
 	if closing.Status == "" {
-		closing.Status = "open"
+		closing.Status = "OPEN"
 	}
 
 	// Calculate net income
-	closing.NetIncome = closing.TotalIncome - closing.TotalExpense
+	closing.NetIncome = closing.TotalRevenue - closing.TotalExpenses
 
 	return s.repo.Create(ctx, closing)
 }
@@ -53,7 +53,7 @@ func (s *monthlyClosingService) GetAllMonthlyClosings(ctx context.Context) ([]*e
 
 func (s *monthlyClosingService) UpdateMonthlyClosing(ctx context.Context, closing *entities.MonthlyClosing) error {
 	// Recalculate net income
-	closing.NetIncome = closing.TotalIncome - closing.TotalExpense
+	closing.NetIncome = closing.TotalRevenue - closing.TotalExpenses
 
 	return s.repo.Update(ctx, closing)
 }
@@ -72,9 +72,9 @@ func (s *monthlyClosingService) CloseMonth(ctx context.Context, id uuid.ID, clos
 		return err
 	}
 
-	closing.Status = "closed"
+	closing.Status = "CLOSED"
 	closing.ClosedBy = closedBy
-	closing.ClosingDate = time.Now()
+	closing.ClosedAt = time.Now()
 
 	return s.repo.Update(ctx, closing)
 }
@@ -85,8 +85,7 @@ func (s *monthlyClosingService) LockClosing(ctx context.Context, id uuid.ID) err
 		return err
 	}
 
-	closing.Status = "locked"
-	closing.IsLocked = true
+	closing.Status = "LOCKED"
 
 	return s.repo.Update(ctx, closing)
 }
@@ -97,12 +96,11 @@ func (s *monthlyClosingService) UnlockClosing(ctx context.Context, id uuid.ID) e
 		return err
 	}
 
-	closing.Status = "closed"
-	closing.IsLocked = false
+	closing.Status = "CLOSED"
 
 	return s.repo.Update(ctx, closing)
 }
 
 func (s *monthlyClosingService) GetOpenPeriods(ctx context.Context) ([]*entities.MonthlyClosing, error) {
-	return s.repo.GetByStatus(ctx, "open")
+	return s.repo.GetByStatus(ctx, "OPEN")
 }

@@ -43,6 +43,25 @@ func (r *AccountsReceivableRepositoryImpl) GetByID(ctx context.Context, id uuid.
 	return ar, err
 }
 
+// GetAll retrieves all accounts receivable records from the database.
+func (r *AccountsReceivableRepositoryImpl) GetAll(ctx context.Context) ([]*entities.AccountsReceivable, error) {
+	var items []*entities.AccountsReceivable
+	query := `SELECT id, invoice_id, customer_id, issue_date, due_date, amount, paid_amount, balance, status, created_at, updated_at FROM accounts_receivable ORDER BY due_date DESC`
+	rows, err := r.db.QueryContext(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		ar := &entities.AccountsReceivable{}
+		if err := rows.Scan(&ar.ID, &ar.InvoiceID, &ar.CustomerID, &ar.IssueDate, &ar.DueDate, &ar.Amount, &ar.PaidAmount, &ar.Balance, &ar.Status, &ar.CreatedAt, &ar.UpdatedAt); err != nil {
+			return nil, err
+		}
+		items = append(items, ar)
+	}
+	return items, rows.Err()
+}
+
 // Update updates an existing accounts receivable record in the database.
 func (r *AccountsReceivableRepositoryImpl) Update(ctx context.Context, ar *entities.AccountsReceivable) error {
 	query := `UPDATE accounts_receivable SET invoice_id = $1, customer_id = $2, issue_date = $3, due_date = $4, amount = $5, paid_amount = $6, balance = $7, status = $8, updated_at = $9 WHERE id = $10`

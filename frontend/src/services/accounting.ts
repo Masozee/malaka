@@ -532,107 +532,74 @@ class GeneralLedgerService extends BaseAccountingService<GeneralLedgerEntry, Gen
     super('general-ledger')
   }
 
-  // Override getAll to use real backend API with proper company_id
+  // Override getAll to use real backend API with enriched data from JOINs
   async getAll(filters?: AccountingFilters): Promise<GeneralLedgerListResponse> {
     try {
-      // Add company_id to the filters for the backend API
-      const backendFilters = {
-        ...filters,
-        company_id: '1' // Default company ID - TODO: get from user context
-      }
-      
-      const response = await apiClient.get<{success: boolean, message: string, data: any[]}>(`/api/v1/accounting/general-ledger/`, backendFilters)
-      
-      console.log('General Ledger API Response:', response) // Debug log
-      
-      // Check if response has expected structure
+      const response = await apiClient.get<{success: boolean, message: string, data: any[]}>(`/api/v1/accounting/general-ledger/`, filters)
+
       if (!response.success || !response.data) {
         throw new Error(`API Error: ${response.message || 'Invalid response structure'}`)
       }
-      
-      // Get account mapping for displaying account codes and names
-      // This mapping corresponds to chart_of_accounts.sql seed data
-      const accountMap: Record<string, {code: string, name: string}> = {
-        // Cash and Bank accounts
-        '11111111-1111-1111-1111-111111111111': { code: '1101', name: 'Kas' },
-        '22222222-2222-2222-2222-222222222222': { code: '1102', name: 'Bank BCA' },
-        '33333333-3333-3333-3333-333333333333': { code: '1103', name: 'Bank Mandiri' },
-        // Receivables
-        '12111111-1111-1111-1111-111111111111': { code: '1201', name: 'Piutang Dagang' },
-        '12222222-1111-1111-1111-111111111111': { code: '1202', name: 'Piutang Karyawan' },
-        // Inventory
-        '44444444-4444-4444-4444-444444444444': { code: '1301', name: 'Persediaan Barang Dagangan' },
-        '13111111-1111-1111-1111-111111111111': { code: '1302', name: 'Persediaan Bahan Baku' },
-        // Fixed Assets
-        '14111111-1111-1111-1111-111111111111': { code: '1401', name: 'Tanah' },
-        '14222222-1111-1111-1111-111111111111': { code: '1402', name: 'Bangunan' },
-        '14333333-1111-1111-1111-111111111111': { code: '1403', name: 'Kendaraan' },
-        '14444444-1111-1111-1111-111111111111': { code: '1404', name: 'Peralatan Kantor' },
-        // Current Liabilities
-        '55555555-5555-5555-5555-555555555555': { code: '2101', name: 'Utang Dagang' },
-        '21111111-1111-1111-1111-111111111111': { code: '2102', name: 'Utang Pajak' },
-        '22111111-1111-1111-1111-111111111111': { code: '2201', name: 'Utang Bank' },
-        '77777777-7777-7777-7777-777777777777': { code: '2301', name: 'Utang Gaji' },
-        '23111111-1111-1111-1111-111111111111': { code: '2302', name: 'Utang Lain-lain' },
-        // Capital/Equity
-        '31111111-1111-1111-1111-111111111111': { code: '3101', name: 'Modal Saham' },
-        '31222222-1111-1111-1111-111111111111': { code: '3102', name: 'Agio Saham' },
-        '32111111-1111-1111-1111-111111111111': { code: '3201', name: 'Laba Tahun Berjalan' },
-        '32222222-1111-1111-1111-111111111111': { code: '3202', name: 'Laba Tahun Lalu' },
-        // Revenue
-        '99999999-9999-9999-9999-999999999999': { code: '4101', name: 'Pendapatan Penjualan' },
-        '41111111-1111-1111-1111-111111111111': { code: '4102', name: 'Diskon Penjualan' },
-        '41222222-1111-1111-1111-111111111111': { code: '4103', name: 'Retur Penjualan' },
-        '42111111-1111-1111-1111-111111111111': { code: '4201', name: 'Pendapatan Bunga' },
-        '42222222-1111-1111-1111-111111111111': { code: '4202', name: 'Pendapatan Lain-lain' },
-        // COGS
-        '51111111-1111-1111-1111-111111111111': { code: '5101', name: 'HPP Sepatu' },
-        '51222222-1111-1111-1111-111111111111': { code: '5102', name: 'HPP Sandal' },
-        // Operating Expenses
-        '88888888-8888-8888-8888-888888888888': { code: '5201', name: 'Biaya Gaji' },
-        '52111111-1111-1111-1111-111111111111': { code: '5202', name: 'Biaya Sewa' },
-        '52222222-1111-1111-1111-111111111111': { code: '5203', name: 'Biaya Listrik' },
-        '52333333-1111-1111-1111-111111111111': { code: '5204', name: 'Biaya Transportasi' },
-        '52444444-1111-1111-1111-111111111111': { code: '5205', name: 'Biaya Telepon' },
-        // Administrative Expenses
-        '53111111-1111-1111-1111-111111111111': { code: '5301', name: 'Biaya ATK' },
-        '53222222-1111-1111-1111-111111111111': { code: '5302', name: 'Biaya Penyusutan' }
-      }
 
-      // Transform backend response to match expected frontend structure
-      const transformedData = response.data.map((entry: any) => {
-        const accountInfo = accountMap[entry.account_id] || { code: 'N/A', name: 'Unknown Account' }
-        
-        return {
-          id: entry.id,
-          account_id: entry.account_id,
-          account_code: accountInfo.code,
-          account_name: accountInfo.name,
-          journal_entry_id: entry.journal_entry_id,
-          entry_number: entry.reference || 'N/A',
-          line_number: 1,
-          entry_date: entry.transaction_date ? entry.transaction_date.split('T')[0] : '',
-          description: entry.description || '',
-          reference: entry.reference || '',
-          debit_amount: entry.debit_amount || 0,
-          credit_amount: entry.credit_amount || 0,
-          running_balance: entry.balance || 0,
-          currency_code: entry.currency_code || 'IDR',
-          exchange_rate: entry.exchange_rate || 1,
-          cost_center_id: '',
-          cost_center_name: '',
-          period: entry.transaction_date ? entry.transaction_date.substring(0, 7) : '',
-          fiscal_year: entry.transaction_date ? new Date(entry.transaction_date).getFullYear() : new Date().getFullYear(),
-          status: 'POSTED',
-          created_at: entry.created_at || new Date().toISOString(),
-          updated_at: entry.updated_at || new Date().toISOString()
-        }
+      // Transform backend response - backend now provides account_code, account_name, entry_number, account_type via JOINs
+      const transformedData = response.data.map((entry: any) => ({
+        id: entry.id,
+        account_id: entry.account_id,
+        account_code: entry.account_code || 'N/A',
+        account_name: entry.account_name || 'Unknown Account',
+        account_type: entry.account_type || '',
+        journal_entry_id: entry.journal_entry_id,
+        entry_number: entry.entry_number || entry.reference || 'N/A',
+        line_number: entry.line_number || 0,
+        entry_date: entry.transaction_date ? entry.transaction_date.split('T')[0] : '',
+        description: entry.description || '',
+        reference: entry.reference || '',
+        debit_amount: entry.debit_amount || 0,
+        credit_amount: entry.credit_amount || 0,
+        balance: entry.balance || 0,
+        running_balance: 0,
+        created_by: entry.created_by || '',
+        currency_code: entry.currency_code || 'IDR',
+        exchange_rate: entry.exchange_rate || 1,
+        cost_center_id: '',
+        cost_center_name: '',
+        period: entry.transaction_date ? entry.transaction_date.substring(0, 7) : '',
+        fiscal_year: entry.transaction_date ? new Date(entry.transaction_date).getFullYear() : new Date().getFullYear(),
+        status: entry.entry_status || 'POSTED',
+        created_at: entry.created_at || new Date().toISOString(),
+        updated_at: entry.updated_at || new Date().toISOString()
+      }))
+
+      // Sort by date ASC, then entry_number ASC, then line_number ASC
+      transformedData.sort((a: any, b: any) => {
+        const dateCompare = a.entry_date.localeCompare(b.entry_date)
+        if (dateCompare !== 0) return dateCompare
+        const entryCompare = (a.entry_number || '').localeCompare(b.entry_number || '')
+        if (entryCompare !== 0) return entryCompare
+        return (a.line_number || 0) - (b.line_number || 0)
       })
 
+      // Compute per-account running balance respecting normal balance direction
+      // Assets & Expenses: normal Debit → balance = Σ(debit - credit)
+      // Liabilities, Equity & Revenue: normal Credit → balance = Σ(credit - debit)
+      const creditNormalTypes = ['LIABILITY', 'EQUITY', 'REVENUE']
+      const accountBalances: Record<string, number> = {}
+      for (const entry of transformedData) {
+        const accId = entry.account_id
+        if (!accountBalances[accId]) accountBalances[accId] = 0
+        const isCreditNormal = creditNormalTypes.includes(entry.account_type)
+        if (isCreditNormal) {
+          accountBalances[accId] += entry.credit_amount - entry.debit_amount
+        } else {
+          accountBalances[accId] += entry.debit_amount - entry.credit_amount
+        }
+        entry.running_balance = accountBalances[accId]
+      }
+
       // Calculate summary
-      const totalDebits = transformedData.reduce((sum, entry) => sum + entry.debit_amount, 0)
-      const totalCredits = transformedData.reduce((sum, entry) => sum + entry.credit_amount, 0)
-      
+      const totalDebits = transformedData.reduce((sum: number, entry: any) => sum + entry.debit_amount, 0)
+      const totalCredits = transformedData.reduce((sum: number, entry: any) => sum + entry.credit_amount, 0)
+
       return {
         data: transformedData,
         total: transformedData.length,
@@ -726,13 +693,7 @@ class JournalEntryService extends BaseAccountingService<JournalEntry, JournalEnt
   // Override getAll to use real backend API with proper company_id
   async getAll(filters?: AccountingFilters): Promise<JournalEntryListResponse> {
     try {
-      // Add company_id to the filters for the backend API
-      const backendFilters = {
-        ...filters,
-        company_id: '1' // Default company ID - TODO: get from user context
-      }
-      
-      const response = await apiClient.get<{success: boolean, message: string, data: any[]}>(`/api/v1/accounting/journal-entries/`, backendFilters)
+      const response = await apiClient.get<{success: boolean, message: string, data: any[]}>(`/api/v1/accounting/journal-entries/`, filters)
       
       console.log('Journal Entries API Response:', response) // Debug log
       
@@ -756,7 +717,9 @@ class JournalEntryService extends BaseAccountingService<JournalEntry, JournalEnt
         total_credit: entry.total_credit || 0,
         status: entry.status || 'DRAFT',
         created_by: entry.created_by || '',
+        created_by_name: entry.created_by_name || '',
         posted_by: entry.posted_by || '',
+        posted_by_name: entry.posted_by_name || '',
         posted_at: entry.posted_at || null,
         created_at: entry.created_at || new Date().toISOString(),
         updated_at: entry.updated_at || new Date().toISOString(),
@@ -765,15 +728,20 @@ class JournalEntryService extends BaseAccountingService<JournalEntry, JournalEnt
           journal_entry_id: entry.id,
           line_number: line.line_number || 1,
           account_id: line.account_id,
+          account_code: line.account_code || '',
+          account_name: line.account_name || '',
           description: line.description || '',
           debit_amount: line.debit_amount || 0,
           credit_amount: line.credit_amount || 0,
+          base_debit_amount: line.base_debit_amount || 0,
+          base_credit_amount: line.base_credit_amount || 0,
+          is_debit: line.is_debit || false,
+          is_credit: line.is_credit || false,
+          amount: line.amount || 0,
           reference: entry.reference || '',
           cost_center_id: '',
           created_at: line.created_at || new Date().toISOString(),
           updated_at: line.updated_at || new Date().toISOString(),
-          journal_entry: {} as JournalEntry,
-          account: {} as any
         })) || []
       }))
 
@@ -792,7 +760,7 @@ class JournalEntryService extends BaseAccountingService<JournalEntry, JournalEnt
   // Override getById to use real backend API with transformation
   async getById(id: string): Promise<JournalEntry> {
     try {
-      const response = await apiClient.get<{success: boolean, message: string, data: any}>(`/api/v1/accounting/journal-entries/${id}`, { company_id: '1' })
+      const response = await apiClient.get<{success: boolean, message: string, data: any}>(`/api/v1/accounting/journal-entries/${id}`)
       
       console.log('Journal Entry Detail API Response:', response) // Debug log
       
@@ -817,40 +785,31 @@ class JournalEntryService extends BaseAccountingService<JournalEntry, JournalEnt
         total_credit: entry.total_credit || 0,
         status: entry.status || 'DRAFT',
         created_by: entry.created_by || '',
+        created_by_name: entry.created_by_name || '',
         posted_by: entry.posted_by || '',
+        posted_by_name: entry.posted_by_name || '',
         posted_at: entry.posted_at || null,
         created_at: entry.created_at || new Date().toISOString(),
         updated_at: entry.updated_at || new Date().toISOString(),
-        lines: entry.lines?.map((line: any) => ({
-          id: line.id,
-          journal_entry_id: entry.id,
-          line_number: line.line_number || 1,
-          account_id: line.account_id,
-          description: line.description || '',
-          debit_amount: line.debit_amount || 0,
-          credit_amount: line.credit_amount || 0,
-          reference: entry.reference || '',
-          cost_center_id: '',
-          created_at: line.created_at || new Date().toISOString(),
-          updated_at: line.updated_at || new Date().toISOString(),
-          journal_entry: {} as JournalEntry,
-          account: {} as any
-        })) || [],
-        // Also provide journal_entry_lines for backward compatibility
         journal_entry_lines: entry.lines?.map((line: any) => ({
           id: line.id,
           journal_entry_id: entry.id,
           line_number: line.line_number || 1,
           account_id: line.account_id,
+          account_code: line.account_code || '',
+          account_name: line.account_name || '',
           description: line.description || '',
           debit_amount: line.debit_amount || 0,
           credit_amount: line.credit_amount || 0,
+          base_debit_amount: line.base_debit_amount || 0,
+          base_credit_amount: line.base_credit_amount || 0,
+          is_debit: line.is_debit || false,
+          is_credit: line.is_credit || false,
+          amount: line.amount || 0,
           reference: entry.reference || '',
           cost_center_id: '',
           created_at: line.created_at || new Date().toISOString(),
           updated_at: line.updated_at || new Date().toISOString(),
-          journal_entry: {} as JournalEntry,
-          account: {} as any
         })) || []
       }
     } catch (error) {
@@ -1336,23 +1295,34 @@ class TrialBalanceService {
     }
   }
 
+  private getLastDayOfMonth(year: number, month: number): string {
+    const lastDay = new Date(year, month, 0).getDate()
+    return String(lastDay).padStart(2, '0')
+  }
+
   // Generate trial balance with proper backend API structure
   async generate(period: string, fiscalYear: number): Promise<TrialBalance> {
-    const startDate = `${fiscalYear}-${period.split('-')[1]}-01`
-    const endDate = `${fiscalYear}-${period.split('-')[1]}-31`
+    const month = period.split('-')[1]
+    const monthNum = parseInt(month)
+    const startDate = `${fiscalYear}-${month}-01`
+    const endDate = `${fiscalYear}-${month}-${this.getLastDayOfMonth(fiscalYear, monthNum)}`
     return this.buildTrialBalance(startDate, endDate)
   }
 
   async getLatest(): Promise<TrialBalance> {
     const now = new Date()
-    const startDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`
-    const endDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-31`
+    const month = String(now.getMonth() + 1).padStart(2, '0')
+    const monthNum = now.getMonth() + 1
+    const startDate = `${now.getFullYear()}-${month}-01`
+    const endDate = `${now.getFullYear()}-${month}-${this.getLastDayOfMonth(now.getFullYear(), monthNum)}`
     return this.buildTrialBalance(startDate, endDate)
   }
 
   async getByPeriod(period: string, fiscalYear: number): Promise<TrialBalance> {
-    const startDate = `${fiscalYear}-${period.split('-')[1]}-01`
-    const endDate = `${fiscalYear}-${period.split('-')[1]}-31`
+    const month = period.split('-')[1]
+    const monthNum = parseInt(month)
+    const startDate = `${fiscalYear}-${month}-01`
+    const endDate = `${fiscalYear}-${month}-${this.getLastDayOfMonth(fiscalYear, monthNum)}`
     return this.buildTrialBalance(startDate, endDate)
   }
 
@@ -1363,8 +1333,11 @@ class TrialBalanceService {
       this.fetchLedgerEntries()
     ])
 
-    console.log('Chart of Accounts:', chartOfAccounts.length, 'accounts')
-    console.log('Ledger Entries:', ledgerEntries.length, 'entries')
+    // Filter ledger entries by period (up to periodEnd for cumulative balance)
+    const filteredEntries = ledgerEntries.filter(entry => {
+      const txDate = (entry.transaction_date || '').split('T')[0]
+      return txDate <= periodEnd
+    })
 
     // Build account map from chart of accounts
     const accountMap: Record<string, {code: string, name: string, type: string}> = {}
@@ -1378,7 +1351,7 @@ class TrialBalanceService {
 
     // Group ledger entries by account
     const accountGroups: Record<string, any[]> = {}
-    ledgerEntries.forEach(entry => {
+    filteredEntries.forEach(entry => {
       if (!accountGroups[entry.account_id]) {
         accountGroups[entry.account_id] = []
       }
@@ -1415,6 +1388,7 @@ class TrialBalanceService {
       }
 
       return {
+        id: acc.id,
         account_id: acc.id,
         account_code: acc.account_code,
         account_name: acc.account_name,
@@ -1456,7 +1430,7 @@ class TrialBalanceService {
       period_start: periodStart,
       period_end: periodEnd,
       generated_at: new Date().toISOString(),
-      company_id: '1',
+      company_id: apiClient.getCompanyId() || '',
       created_by: 'system',
       created_at: new Date().toISOString(),
       accounts,
@@ -1468,7 +1442,7 @@ class TrialBalanceService {
   async export(period: string, fiscalYear: number): Promise<Blob> {
     try {
       const url = new URL(`/api/v1/accounting/trial-balance/export`, 'http://localhost:8084')
-      url.searchParams.set('company_id', '1')
+      url.searchParams.set('company_id', apiClient.getCompanyId() || '')
       url.searchParams.set('period', period)
       url.searchParams.set('fiscal_year', fiscalYear.toString())
       

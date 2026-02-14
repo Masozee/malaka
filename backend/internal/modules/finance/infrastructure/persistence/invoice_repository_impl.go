@@ -43,6 +43,25 @@ func (r *InvoiceRepositoryImpl) GetByID(ctx context.Context, id uuid.ID) (*entit
 	return invoice, err
 }
 
+// GetAll retrieves all invoices from the database.
+func (r *InvoiceRepositoryImpl) GetAll(ctx context.Context) ([]*entities.Invoice, error) {
+	var invoices []*entities.Invoice
+	query := `SELECT id, invoice_number, invoice_date, due_date, total_amount, tax_amount, grand_total, customer_id, supplier_id, created_at, updated_at FROM invoices ORDER BY invoice_date DESC`
+	rows, err := r.db.QueryContext(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		inv := &entities.Invoice{}
+		if err := rows.Scan(&inv.ID, &inv.InvoiceNumber, &inv.InvoiceDate, &inv.DueDate, &inv.TotalAmount, &inv.TaxAmount, &inv.GrandTotal, &inv.CustomerID, &inv.SupplierID, &inv.CreatedAt, &inv.UpdatedAt); err != nil {
+			return nil, err
+		}
+		invoices = append(invoices, inv)
+	}
+	return invoices, rows.Err()
+}
+
 // Update updates an existing invoice in the database.
 func (r *InvoiceRepositoryImpl) Update(ctx context.Context, invoice *entities.Invoice) error {
 	query := `UPDATE invoices SET invoice_number = $1, invoice_date = $2, due_date = $3, total_amount = $4, tax_amount = $5, grand_total = $6, customer_id = $7, supplier_id = $8, updated_at = $9 WHERE id = $10`

@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useMemo } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { TwoLevelLayout } from '@/components/ui/two-level-layout'
 import { Header } from '@/components/ui/header'
 import { Card, CardContent } from '@/components/ui/card'
@@ -27,97 +27,119 @@ import {
     Download01Icon,
     MoreHorizontalIcon
 } from '@hugeicons/core-free-icons'
-
-// --- Types ---
-type ReportStatus = 'draft' | 'submitted' | 'paid' | 'overdue'
-
-interface TaxReport {
-    id: string
-    period: string // e.g. "January 2024"
-    taxType: string // e.g. "SPT Masa PPN"
-    dueDate: string
-    liabilityAmount: number
-    status: ReportStatus
-    filingRef?: string
-}
-
-// --- Mock Data ---
-const mockReports: TaxReport[] = [
-    { id: '1', period: 'January 2024', taxType: 'SPT Masa PPN', dueDate: '2024-02-28', liabilityAmount: 135000000, status: 'draft' },
-    { id: '2', period: 'January 2024', taxType: 'SPT Masa PPh 21', dueDate: '2024-02-20', liabilityAmount: 15000000, status: 'submitted', filingRef: 'S-240220-001' },
-    { id: '3', period: 'January 2024', taxType: 'SPT Masa PPh 23', dueDate: '2024-02-20', liabilityAmount: 5000000, status: 'paid', filingRef: 'S-240220-002' },
-    { id: '4', period: 'Annual 2023', taxType: 'SPT Tahunan Badan', dueDate: '2024-04-30', liabilityAmount: 550000000, status: 'draft' },
-    { id: '5', period: 'December 2023', taxType: 'SPT Masa PPN', dueDate: '2024-01-31', liabilityAmount: 120000000, status: 'paid', filingRef: 'S-240131-005' },
-]
+import { taxReturnService, type TaxReturn } from '@/services/tax'
 
 export default function TaxReportingPage() {
     const [searchTerm, setSearchTerm] = useState('')
     const [statusFilter, setStatusFilter] = useState<string>('all')
+    const [taxReturns, setTaxReturns] = useState<TaxReturn[]>([])
+    const [loading, setLoading] = useState(true)
+    const [mounted, setMounted] = useState(false)
+
+    useEffect(() => {
+        setMounted(true)
+    }, [])
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                setLoading(true)
+                const data = await taxReturnService.getAll()
+                setTaxReturns(data)
+            } catch (error) {
+                console.error('Failed to fetch tax returns:', error)
+            } finally {
+                setLoading(false)
+            }
+        }
+        fetchData()
+    }, [])
 
     // --- Stats ---
     const stats = useMemo(() => {
-        const totalLiability = mockReports.reduce((sum, r) => sum + r.liabilityAmount, 0)
-        const pending = mockReports.filter(r => r.status === 'draft' || r.status === 'overdue').length
-        const completed = mockReports.filter(r => r.status === 'submitted' || r.status === 'paid').length
+        const totalLiability = taxReturns.reduce((sum, r) => sum + r.tax_payable, 0)
+        const pending = taxReturns.filter(r => r.status === 'draft' || r.status === 'overdue').length
+        const completed = taxReturns.filter(r => r.status === 'submitted' || r.status === 'paid').length
         return { totalLiability, pending, completed }
-    }, [])
+    }, [taxReturns])
+
+    // --- Helper to format period ---
+    const formatPeriod = (periodStart: string, periodEnd: string): string => {
+        if (!periodStart || !periodEnd) return '-'
+        const start = new Date(periodStart)
+        const end = new Date(periodEnd)
+        const monthName = start.toLocaleDateString('en-US', { month: 'long' })
+        const year = start.getFullYear()
+        if (start.getMonth() === end.getMonth() && start.getFullYear() === end.getFullYear()) {
+            return `${monthName} ${year}`
+        }
+        const endMonth = end.toLocaleDateString('en-US', { month: 'long' })
+        return `${monthName} - ${endMonth} ${year}`
+    }
 
     // --- Filter ---
     const filteredData = useMemo(() => {
-        let data = mockReports
+        let data = taxReturns
         if (searchTerm) {
             const lower = searchTerm.toLowerCase()
             data = data.filter(item =>
-                item.taxType.toLowerCase().includes(lower) ||
-                item.period.toLowerCase().includes(lower)
+                item.tax_type.toLowerCase().includes(lower) ||
+                item.return_number.toLowerCase().includes(lower)
             )
         }
         if (statusFilter !== 'all') {
             data = data.filter(item => item.status === statusFilter)
         }
         return data
-    }, [searchTerm, statusFilter])
+    }, [taxReturns, searchTerm, statusFilter])
 
     // --- Columns ---
-    const columns: TanStackColumn<TaxReport>[] = [
+    const columns: TanStackColumn<TaxReturn>[] = [
+        {
+            id: 'return_number',
+            header: 'Return No.',
+            accessorKey: 'return_number',
+            cell: ({ row }) => <span className="font-medium text-sm">{row.original.return_number}</span>
+        },
         {
             id: 'period',
             header: 'Tax Period',
-            accessorKey: 'period',
-            cell: ({ row }) => <span className="font-medium text-sm">{row.original.period}</span>
+            accessorKey: 'period_start',
+            cell: ({ row }) => <span className="text-sm">{formatPeriod(row.original.period_start, row.original.period_end)}</span>
         },
         {
-            id: 'taxType',
+            id: 'tax_type',
             header: 'Type',
-            accessorKey: 'taxType',
-            cell: ({ row }) => <span className="text-sm">{row.original.taxType}</span>
+            accessorKey: 'tax_type',
+            cell: ({ row }) => <span className="text-sm">{row.original.tax_type}</span>
         },
         {
-            id: 'dueDate',
+            id: 'due_date',
             header: 'Due Date',
-            accessorKey: 'dueDate',
-            cell: ({ row }) => <span className="text-sm">{new Date(row.original.dueDate).toLocaleDateString()}</span>
+            accessorKey: 'due_date',
+            cell: ({ row }) => <span className="text-sm">{mounted && row.original.due_date ? new Date(row.original.due_date).toLocaleDateString() : '-'}</span>
         },
         {
-            id: 'liabilityAmount',
+            id: 'tax_payable',
             header: 'Tax Liability',
-            accessorKey: 'liabilityAmount',
-            cell: ({ row }) => <span className="text-sm font-medium">Rp {row.original.liabilityAmount.toLocaleString()}</span>
+            accessorKey: 'tax_payable',
+            cell: ({ row }) => <span className="text-sm font-medium">Rp {row.original.tax_payable.toLocaleString()}</span>
         },
         {
             id: 'status',
             header: 'Status',
             accessorKey: 'status',
             cell: ({ row }) => {
-                const colors = {
+                const status = row.original.status as string
+                const colors: Record<string, string> = {
                     draft: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400',
                     submitted: 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400',
                     paid: 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400',
                     overdue: 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400',
                 }
                 return (
-                    <Badge className={`${colors[row.original.status]} border-0 whitespace-nowrap capitalize`}>
-                        {row.original.status}
+                    <Badge className={`${colors[status] || colors.draft} border-0 whitespace-nowrap capitalize`}>
+                        {status}
                     </Badge>
                 )
             }
@@ -137,9 +159,7 @@ export default function TaxReportingPage() {
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
                         <DropdownMenuItem>Review Report</DropdownMenuItem>
                         <DropdownMenuItem>Mark as Paid</DropdownMenuItem>
-                        {row.original.filingRef && (
-                            <DropdownMenuItem>Download Receipt</DropdownMenuItem>
-                        )}
+                        <DropdownMenuItem>Download Receipt</DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
             )
@@ -231,12 +251,18 @@ export default function TaxReportingPage() {
                 </div>
 
                 {/* Table */}
-                <TanStackDataTable
-                    data={filteredData}
-                    columns={columns}
-                    enableRowSelection
-                    showColumnToggle={false}
-                />
+                {loading ? (
+                    <div className="flex items-center justify-center py-12">
+                        <p className="text-muted-foreground">Loading tax returns...</p>
+                    </div>
+                ) : (
+                    <TanStackDataTable
+                        data={filteredData}
+                        columns={columns}
+                        enableRowSelection
+                        showColumnToggle={false}
+                    />
+                )}
             </div>
         </TwoLevelLayout>
     )

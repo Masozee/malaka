@@ -1,121 +1,93 @@
-import ReconciliationList, { SalesReconciliation } from './ReconciliationList'
+'use client'
 
-// Mock Data
-const mockReconciliations: SalesReconciliation[] = [
-  {
-    id: '1',
-    reconciliation_number: 'REC-2024-07-25',
-    reconciliation_date: '2024-07-25T00:00:00Z',
-    reconciliation_period: '2024-07-25',
-    location: 'Store Plaza Indonesia',
-    location_type: 'store',
-    reconciliation_type: 'daily',
-    total_sales_recorded: 45750000,
-    variance_amount: -75000,
-    variance_percentage: -0.16,
-    status: 'pending',
-    issues_found: 1,
-  },
-  {
-    id: '2',
-    reconciliation_number: 'REC-2024-07-24',
-    reconciliation_date: '2024-07-24T00:00:00Z',
-    reconciliation_period: '2024-07-24',
-    location: 'Store Grand Indonesia',
-    location_type: 'store',
-    reconciliation_type: 'daily',
-    total_sales_recorded: 67890000,
-    variance_amount: 0,
-    variance_percentage: 0,
-    status: 'approved',
-    issues_found: 0,
-  },
-  {
-    id: '3',
-    reconciliation_number: 'REC-2024-W30',
-    reconciliation_date: '2024-07-21T00:00:00Z',
-    reconciliation_period: 'Week 30 (July 15-21, 2024)',
-    location: 'Jakarta Region',
-    location_type: 'region',
-    reconciliation_type: 'weekly',
-    total_sales_recorded: 2450000000,
-    variance_amount: -17500000,
-    variance_percentage: -0.71,
-    status: 'in_review',
-    issues_found: 3,
-  },
-  {
-    id: '4',
-    reconciliation_number: 'REC-2024-07-23',
-    reconciliation_date: '2024-07-23T00:00:00Z',
-    reconciliation_period: '2024-07-23',
-    location: 'Online Store',
-    location_type: 'online',
-    reconciliation_type: 'daily',
-    total_sales_recorded: 123450000,
-    variance_amount: 0,
-    variance_percentage: 0,
-    status: 'completed',
-    issues_found: 0,
-  },
-  {
-    id: '5',
-    reconciliation_number: 'REC-2024-07-22',
-    reconciliation_date: '2024-07-22T00:00:00Z',
-    reconciliation_period: '2024-07-22',
-    location: 'Store Senayan City',
-    location_type: 'store',
-    reconciliation_type: 'daily',
-    total_sales_recorded: 34560000,
-    variance_amount: -565000,
-    variance_percentage: -1.61,
-    status: 'rejected',
-    issues_found: 2,
-  },
-  {
-    id: '6',
-    reconciliation_number: 'REC-2024-Q2',
-    reconciliation_date: '2024-06-30T00:00:00Z',
-    reconciliation_period: 'Q2 2024 (April-June)',
-    location: 'Company Wide',
-    location_type: 'region',
-    reconciliation_type: 'quarterly',
-    total_sales_recorded: 18500000000,
-    variance_amount: 43250000,
-    variance_percentage: 0.23,
-    status: 'completed',
-    issues_found: 12,
-  },
-  {
-    id: '7',
-    reconciliation_number: 'REC-2024-07-21',
-    reconciliation_date: '2024-07-21T00:00:00Z',
-    reconciliation_period: '2024-07-21',
-    location: 'Store Kelapa Gading',
-    location_type: 'store',
-    reconciliation_type: 'daily',
-    total_sales_recorded: 56780000,
-    variance_amount: 565000,
-    variance_percentage: 1.00,
-    status: 'in_review',
-    issues_found: 1,
-  },
-  {
-    id: '8',
-    reconciliation_number: 'REC-2024-M07',
-    reconciliation_date: '2024-07-31T00:00:00Z',
-    reconciliation_period: 'July 2024',
-    location: 'Surabaya Region',
-    location_type: 'region',
-    reconciliation_type: 'monthly',
-    total_sales_recorded: 4567890000,
-    variance_amount: -21344000,
-    variance_percentage: -0.47,
-    status: 'pending',
-    issues_found: 5,
-  }
-]
+import React, { useState, useMemo, useEffect } from 'react'
+import { TwoLevelLayout } from '@/components/ui/two-level-layout'
+import { Header } from '@/components/ui/header'
+import { Card } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Input } from '@/components/ui/input'
+import { TanStackDataTable, TanStackColumn } from '@/components/ui/tanstack-data-table'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from '@/components/ui/dropdown-menu'
+import { HugeiconsIcon } from '@hugeicons/react'
+import { Search01Icon, MoreHorizontalIcon, PlusSignIcon, File01Icon, Dollar01Icon, CheckmarkCircle01Icon, Clock01Icon } from '@hugeicons/core-free-icons'
+import { salesRekonsiliasiService, type SalesRekonsiliasi } from '@/services/sales'
+import Link from 'next/link'
 
-export default function SalesReconciliationPage() {
-  return <ReconciliationList initialData={mockReconciliations} />
+export default function ReconciliationPage() {
+  const [data, setData] = useState<SalesRekonsiliasi[]>([])
+  const [loading, setLoading] = useState(true)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => { setMounted(true) }, [])
+  useEffect(() => { salesRekonsiliasiService.getAll().then(setData).finally(() => setLoading(false)) }, [])
+
+  const filtered = useMemo(() => {
+    if (!searchTerm) return data
+    const q = searchTerm.toLowerCase()
+    return data.filter(item =>
+      item.status?.toLowerCase().includes(q) ||
+      item.notes?.toLowerCase().includes(q) ||
+      item.id.toLowerCase().includes(q)
+    )
+  }, [data, searchTerm])
+
+  const stats = useMemo(() => ({
+    total: data.length,
+    totalSales: data.reduce((s, i) => s + (i.sales_amount || 0), 0),
+    totalDiscrepancy: data.reduce((s, i) => s + Math.abs(i.discrepancy || 0), 0),
+    reconciled: data.filter(i => i.status === 'Reconciled').length,
+  }), [data])
+
+  const fmt = (n: number) => `Rp ${n.toLocaleString('id-ID')}`
+  const fmtDate = (d: string) => mounted && d ? new Date(d).toLocaleDateString('id-ID') : '-'
+  const statusColor: Record<string, string> = { PENDING_APPROVAL: 'bg-yellow-100 text-yellow-800', Pending: 'bg-yellow-100 text-yellow-800', Reconciled: 'bg-green-100 text-green-800', Disputed: 'bg-red-100 text-red-800' }
+
+  const columns: TanStackColumn<SalesRekonsiliasi>[] = [
+    { id: 'id', header: 'Reconciliation ID', accessorKey: 'id', cell: ({ row }) => <Link href={`/sales/reconciliation/${row.original.id}`} className="font-medium text-blue-600 hover:underline">{row.original.id.slice(0, 8)}...</Link> },
+    { id: 'reconciliation_date', header: 'Date', accessorKey: 'reconciliation_date', cell: ({ row }) => <span>{fmtDate(row.original.reconciliation_date)}</span> },
+    { id: 'sales_amount', header: 'Sales Amount', accessorKey: 'sales_amount', cell: ({ row }) => <span>{fmt(row.original.sales_amount)}</span> },
+    { id: 'payment_amount', header: 'Payment Amount', accessorKey: 'payment_amount', cell: ({ row }) => <span>{fmt(row.original.payment_amount)}</span> },
+    { id: 'discrepancy', header: 'Discrepancy', accessorKey: 'discrepancy', cell: ({ row }) => <span className={row.original.discrepancy !== 0 ? 'text-red-600 font-medium' : ''}>{fmt(row.original.discrepancy)}</span> },
+    { id: 'status', header: 'Status', accessorKey: 'status', cell: ({ row }) => <Badge className={`${statusColor[row.original.status] || 'bg-gray-100 text-gray-800'} border-0`}>{row.original.status}</Badge> },
+    { id: 'actions', header: '', enableSorting: false, cell: ({ row }) => (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild><Button variant="outline" size="sm" className="h-8 w-8 p-0"><HugeiconsIcon icon={MoreHorizontalIcon} className="h-4 w-4" /></Button></DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem asChild><Link href={`/sales/reconciliation/${row.original.id}`}>View Details</Link></DropdownMenuItem>
+          <DropdownMenuItem onClick={() => navigator.clipboard.writeText(row.original.id)}>Copy ID</DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem className="text-red-600" onClick={() => handleDelete(row.original.id)}>Delete</DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    )},
+  ]
+
+  const handleDelete = async (id: string) => { try { await salesRekonsiliasiService.delete(id); setData(prev => prev.filter(i => i.id !== id)) } catch (err) { console.error('Delete failed:', err) } }
+
+  return (
+    <TwoLevelLayout>
+      <Header title="Reconciliation" breadcrumbs={[{ label: 'Sales', href: '/sales' }, { label: 'Reconciliation' }]} actions={<Button><HugeiconsIcon icon={PlusSignIcon} className="w-4 h-4 mr-2" />New Reconciliation</Button>} />
+      <div className="flex-1 overflow-auto p-6 space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <Card className="p-4"><div className="flex items-center space-x-3"><div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center"><HugeiconsIcon icon={File01Icon} className="h-5 w-5 text-foreground" /></div><div><p className="text-sm font-medium text-muted-foreground">Total Records</p><p className="text-2xl font-bold">{stats.total}</p></div></div></Card>
+          <Card className="p-4"><div className="flex items-center space-x-3"><div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center"><HugeiconsIcon icon={Dollar01Icon} className="h-5 w-5 text-foreground" /></div><div><p className="text-sm font-medium text-muted-foreground">Total Sales</p><p className="text-2xl font-bold">{mounted ? fmt(stats.totalSales) : '-'}</p></div></div></Card>
+          <Card className="p-4"><div className="flex items-center space-x-3"><div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center"><HugeiconsIcon icon={Clock01Icon} className="h-5 w-5 text-foreground" /></div><div><p className="text-sm font-medium text-muted-foreground">Total Discrepancy</p><p className="text-2xl font-bold">{mounted ? fmt(stats.totalDiscrepancy) : '-'}</p></div></div></Card>
+          <Card className="p-4"><div className="flex items-center space-x-3"><div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center"><HugeiconsIcon icon={CheckmarkCircle01Icon} className="h-5 w-5 text-foreground" /></div><div><p className="text-sm font-medium text-muted-foreground">Reconciled</p><p className="text-2xl font-bold">{stats.reconciled}</p></div></div></Card>
+        </div>
+        <div className="relative w-80">
+          <HugeiconsIcon icon={Search01Icon} className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input placeholder="Search reconciliations..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-9 bg-white text-sm" style={{ fontSize: '14px' }} />
+        </div>
+        <TanStackDataTable data={filtered} columns={columns} loading={loading} showColumnToggle={false} />
+      </div>
+    </TwoLevelLayout>
+  )
 }

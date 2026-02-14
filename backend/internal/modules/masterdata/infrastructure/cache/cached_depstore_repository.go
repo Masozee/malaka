@@ -119,9 +119,9 @@ func (r *CachedDepstoreRepository) GetAll(ctx context.Context) ([]*entities.Deps
 }
 
 // GetAllWithPagination retrieves depstores with pagination (not cached due to dynamic parameters).
-func (r *CachedDepstoreRepository) GetAllWithPagination(ctx context.Context, limit, offset int, search, status string) ([]*entities.Depstore, int, error) {
+func (r *CachedDepstoreRepository) GetAllWithPagination(ctx context.Context, limit, offset int, search, status, companyID string) ([]*entities.Depstore, int, error) {
 	// For pagination with dynamic parameters, we bypass cache to ensure fresh data
-	return r.repo.GetAllWithPagination(ctx, limit, offset, search, status)
+	return r.repo.GetAllWithPagination(ctx, limit, offset, search, status, companyID)
 }
 
 // Update updates a depstore and invalidates related cache.

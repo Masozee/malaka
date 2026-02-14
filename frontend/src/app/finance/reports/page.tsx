@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import { TwoLevelLayout } from '@/components/ui/two-level-layout'
 import { Header } from '@/components/ui/header'
 import { Card, CardContent } from '@/components/ui/card'
@@ -30,67 +30,65 @@ import {
     Presentation02Icon,
     MoreHorizontalIcon
 } from '@hugeicons/core-free-icons'
-
-// --- Types ---
-type ReportType = 'Balance Sheet' | 'Income Statement' | 'Cash Flow' | 'Budget Variance' | 'Aged Receivables'
-type ReportStatus = 'ready' | 'processing' | 'failed'
-
-interface ReportFile {
-    id: string
-    reportName: string
-    type: ReportType
-    period: string
-    generatedBy: string
-    generatedAt: string
-    fileSize: string
-    status: ReportStatus
-}
-
-// --- Mock Data ---
-const mockReports: ReportFile[] = [
-    { id: '1', reportName: 'Balance Sheet - Jan 2024', type: 'Balance Sheet', period: 'Jan 2024', generatedBy: 'System', generatedAt: '2024-02-01T08:00:00Z', fileSize: '1.2 MB', status: 'ready' },
-    { id: '2', reportName: 'P&L Statement - Q4 2023', type: 'Income Statement', period: 'Q4 2023', generatedBy: 'John Doe', generatedAt: '2024-01-15T14:30:00Z', fileSize: '2.5 MB', status: 'ready' },
-    { id: '3', reportName: 'Cash Flow Analysis', type: 'Cash Flow', period: 'Jan 2024', generatedBy: 'System', generatedAt: '2024-02-01T08:15:00Z', fileSize: '0.8 MB', status: 'ready' },
-    { id: '4', reportName: 'Marketing Budget Variance', type: 'Budget Variance', period: 'Jan 2024', generatedBy: 'Jane Smith', generatedAt: '2024-02-05T11:20:00Z', fileSize: '1.5 MB', status: 'ready' },
-    { id: '5', reportName: 'Aged Receivables Detail', type: 'Aged Receivables', period: 'Current', generatedBy: 'System', generatedAt: '2024-02-10T09:00:00Z', fileSize: '-', status: 'processing' },
-]
+import { BookmarkToggle } from '@/components/ui/bookmark-toggle'
+import { financeReportService, type FinanceReport } from '@/services/finance'
 
 export default function FinanceReportsPage() {
     const { addToast } = useToast()
     const [searchTerm, setSearchTerm] = useState('')
     const [typeFilter, setTypeFilter] = useState<string>('all')
     const [isGenerateModalOpen, setIsGenerateModalOpen] = useState(false)
+    const [reports, setReports] = useState<FinanceReport[]>([])
+    const [loading, setLoading] = useState(true)
+    const [mounted, setMounted] = useState(false)
+
+    useEffect(() => { setMounted(true) }, [])
+
+    useEffect(() => {
+        async function fetchData() {
+            try {
+                setLoading(true)
+                const data = await financeReportService.getAll()
+                setReports(data)
+            } catch (err) {
+                console.error('Failed to fetch reports:', err)
+            } finally {
+                setLoading(false)
+            }
+        }
+        fetchData()
+    }, [])
 
     // --- Stats ---
     const stats = useMemo(() => {
-        const totalReports = mockReports.length
-        const readyReports = mockReports.filter(r => r.status === 'ready').length
-        const lastGenerated = mockReports.length > 0 ? new Date(mockReports[0].generatedAt).toLocaleDateString() : '-'
+        const totalReports = reports.length
+        const readyReports = reports.filter(r => r.status === 'ready').length
+        const lastGenerated = mounted && reports.length > 0 ? new Date(reports[0].created_at).toLocaleDateString() : '-'
         return { totalReports, readyReports, lastGenerated }
-    }, [])
+    }, [reports, mounted])
 
     // --- Data ---
     const filteredData = useMemo(() => {
-        let data = mockReports
+        let data = reports
         if (searchTerm) {
             const lower = searchTerm.toLowerCase()
-            data = data.filter(item => item.reportName.toLowerCase().includes(lower))
+            data = data.filter(item => item.report_name.toLowerCase().includes(lower))
         }
         if (typeFilter !== 'all') {
             data = data.filter(item => item.type === typeFilter)
         }
         return data
-    }, [searchTerm, typeFilter])
+    }, [searchTerm, typeFilter, reports])
 
     // --- Columns ---
-    const columns: TanStackColumn<ReportFile>[] = [
+    const columns: TanStackColumn<FinanceReport>[] = [
         {
             id: 'reportName',
             header: 'Report Name',
-            accessorKey: 'reportName',
+            accessorKey: 'report_name',
             cell: ({ row }) => (
                 <div className="flex flex-col">
-                    <span className="font-medium text-sm">{row.original.reportName}</span>
+                    <span className="font-medium text-sm">{row.original.report_name}</span>
                     <span className="text-xs text-muted-foreground">{row.original.type}</span>
                 </div>
             )
@@ -109,26 +107,26 @@ export default function FinanceReportsPage() {
         {
             id: 'generatedBy',
             header: 'Generated By',
-            accessorKey: 'generatedBy',
-            cell: ({ row }) => <span className="text-sm">{row.original.generatedBy}</span>
+            accessorKey: 'generated_by',
+            cell: ({ row }) => <span className="text-sm">{row.original.generated_by}</span>
         },
         {
             id: 'generatedAt',
             header: 'Date',
-            accessorKey: 'generatedAt',
-            cell: ({ row }) => <span className="text-sm text-muted-foreground">{new Date(row.original.generatedAt).toLocaleDateString()}</span>
+            accessorKey: 'created_at',
+            cell: ({ row }) => <span className="text-sm text-muted-foreground">{mounted && row.original.created_at ? new Date(row.original.created_at).toLocaleDateString() : '-'}</span>
         },
         {
             id: 'status',
             header: 'Status',
             accessorKey: 'status',
             cell: ({ row }) => {
-                const config = {
+                const config: Record<string, { label: string; color: string }> = {
                     ready: { label: 'Ready', color: 'bg-green-100 text-green-800' },
                     processing: { label: 'Processing', color: 'bg-blue-100 text-blue-800' },
                     failed: { label: 'Failed', color: 'bg-red-100 text-red-800' }
                 }
-                const s = config[row.original.status]
+                const s = config[row.original.status] || { label: row.original.status, color: 'bg-gray-100 text-gray-800' }
                 return <Badge className={`${s.color} border-0 capitalize`}>{s.label}</Badge>
             }
         },
@@ -171,10 +169,13 @@ export default function FinanceReportsPage() {
                     { label: 'Reports' }
                 ]}
                 actions={
-                    <Button onClick={() => setIsGenerateModalOpen(true)}>
-                        <HugeiconsIcon icon={PlusSignIcon} className="w-4 h-4 mr-2" />
-                        Generate Report
-                    </Button>
+                    <div className="flex items-center gap-2">
+                        <BookmarkToggle itemId="finance-reports" />
+                        <Button onClick={() => setIsGenerateModalOpen(true)}>
+                            <HugeiconsIcon icon={PlusSignIcon} className="w-4 h-4 mr-2" />
+                            Generate Report
+                        </Button>
+                    </div>
                 }
             />
 
@@ -244,12 +245,18 @@ export default function FinanceReportsPage() {
                 </div>
 
                 {/* Table */}
-                <TanStackDataTable
-                    data={filteredData}
-                    columns={columns}
-                    enableRowSelection
-                    showColumnToggle={false}
-                />
+                {loading ? (
+                    <div className="flex items-center justify-center py-12">
+                        <div className="text-muted-foreground">Loading reports...</div>
+                    </div>
+                ) : (
+                    <TanStackDataTable
+                        data={filteredData}
+                        columns={columns}
+                        enableRowSelection
+                        showColumnToggle={false}
+                    />
+                )}
             </div>
 
             {/* Generate Modal Placeholder */}

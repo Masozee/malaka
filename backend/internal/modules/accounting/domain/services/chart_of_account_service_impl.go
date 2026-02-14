@@ -21,13 +21,12 @@ func NewChartOfAccountService(repo repositories.ChartOfAccountRepository) ChartO
 
 // CreateChartOfAccount creates a new ChartOfAccount.
 func (s *chartOfAccountService) CreateChartOfAccount(ctx context.Context, coa *entities.ChartOfAccount) error {
-	// Add business logic/validation here before calling repository
 	if coa.AccountCode == "" {
 		return fmt.Errorf("account code cannot be empty")
 	}
 
-	// Check if account code already exists
-	existingCoa, err := s.repo.GetByCode(ctx, coa.AccountCode)
+	// Check if account code already exists within the same company
+	existingCoa, err := s.repo.GetByCode(ctx, coa.CompanyID, coa.AccountCode)
 	if err != nil {
 		return fmt.Errorf("failed to check for existing account code: %w", err)
 	}
@@ -43,19 +42,18 @@ func (s *chartOfAccountService) GetChartOfAccountByID(ctx context.Context, id uu
 	return s.repo.GetByID(ctx, id)
 }
 
-// GetChartOfAccountByCode retrieves a ChartOfAccount by its account code.
-func (s *chartOfAccountService) GetChartOfAccountByCode(ctx context.Context, code string) (*entities.ChartOfAccount, error) {
-	return s.repo.GetByCode(ctx, code)
+// GetChartOfAccountByCode retrieves a ChartOfAccount by its account code within a company.
+func (s *chartOfAccountService) GetChartOfAccountByCode(ctx context.Context, companyID string, code string) (*entities.ChartOfAccount, error) {
+	return s.repo.GetByCode(ctx, companyID, code)
 }
 
-// GetAllChartOfAccounts retrieves all ChartOfAccounts.
-func (s *chartOfAccountService) GetAllChartOfAccounts(ctx context.Context) ([]*entities.ChartOfAccount, error) {
-	return s.repo.GetAll(ctx)
+// GetAllChartOfAccounts retrieves all ChartOfAccounts for a company.
+func (s *chartOfAccountService) GetAllChartOfAccounts(ctx context.Context, companyID string) ([]*entities.ChartOfAccount, error) {
+	return s.repo.GetAll(ctx, companyID)
 }
 
 // UpdateChartOfAccount updates an existing ChartOfAccount.
 func (s *chartOfAccountService) UpdateChartOfAccount(ctx context.Context, coa *entities.ChartOfAccount) error {
-	// Add business logic/validation here before calling repository
 	if coa.AccountCode == "" {
 		return fmt.Errorf("account code cannot be empty")
 	}
@@ -69,9 +67,9 @@ func (s *chartOfAccountService) UpdateChartOfAccount(ctx context.Context, coa *e
 		return fmt.Errorf("account with ID %s not found", coa.ID)
 	}
 
-	// Check if updated account code conflicts with another existing account
+	// Check if updated account code conflicts with another existing account in the same company
 	if existingCoa.AccountCode != coa.AccountCode {
-		conflictCoa, err := s.repo.GetByCode(ctx, coa.AccountCode)
+		conflictCoa, err := s.repo.GetByCode(ctx, coa.CompanyID, coa.AccountCode)
 		if err != nil {
 			return fmt.Errorf("failed to check for account code conflict: %w", err)
 		}
@@ -85,7 +83,6 @@ func (s *chartOfAccountService) UpdateChartOfAccount(ctx context.Context, coa *e
 
 // DeleteChartOfAccount deletes a ChartOfAccount by its ID.
 func (s *chartOfAccountService) DeleteChartOfAccount(ctx context.Context, id uuid.ID) error {
-	// Ensure the COA exists before deleting
 	existingCoa, err := s.repo.GetByID(ctx, id)
 	if err != nil {
 		return fmt.Errorf("failed to check for existing account: %w", err)

@@ -32,6 +32,11 @@ func (s *BankTransferService) GetBankTransferByID(ctx context.Context, id uuid.I
 	return s.repo.GetByID(ctx, id)
 }
 
+// GetAllBankTransfers retrieves all bank transfers.
+func (s *BankTransferService) GetAllBankTransfers(ctx context.Context) ([]*entities.BankTransfer, error) {
+	return s.repo.GetAll(ctx)
+}
+
 // UpdateBankTransfer updates an existing bank transfer.
 func (s *BankTransferService) UpdateBankTransfer(ctx context.Context, bt *entities.BankTransfer) error {
 	// Ensure the bank transfer exists before updating

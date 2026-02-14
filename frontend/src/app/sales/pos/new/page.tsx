@@ -39,7 +39,7 @@ const getImageUrl = (objectKey: string | undefined): string => {
   const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'
   return `${baseUrl}/api/v1/media/${objectKey}`
 }
-import { salesService, CreatePosTransactionRequest } from '@/services/sales'
+import { posTransactionService } from '@/services/sales'
 import type { Article } from '@/types/masterdata'
 
 // Cart item interface
@@ -239,7 +239,7 @@ export default function NewPOSTransactionPage() {
 
     try {
       // Create POS transaction request
-      const request: CreatePosTransactionRequest = {
+      const request = {
         total_amount: totalAmount,
         payment_method: paymentMethod,
         cashier_id: DEFAULT_CASHIER_ID,
@@ -251,7 +251,7 @@ export default function NewPOSTransactionPage() {
         }))
       }
 
-      const result = await salesService.createPosTransaction(request)
+      const result = await posTransactionService.create(request as unknown as Record<string, unknown>)
 
       addToast({
         type: 'success',

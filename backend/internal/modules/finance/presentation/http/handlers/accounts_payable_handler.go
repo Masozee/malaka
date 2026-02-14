@@ -63,6 +63,22 @@ func (h *AccountsPayableHandler) GetAccountsPayableByID(c *gin.Context) {
 	response.Success(c, http.StatusOK, "Accounts payable retrieved successfully", resp)
 }
 
+// GetAllAccountsPayable handles the retrieval of all accounts payable.
+func (h *AccountsPayableHandler) GetAllAccountsPayable(c *gin.Context) {
+	items, err := h.service.GetAllAccountsPayable(c.Request.Context())
+	if err != nil {
+		response.Error(c, http.StatusInternalServerError, "Failed to retrieve accounts payable", err)
+		return
+	}
+
+	var responses []*dto.AccountsPayableResponse
+	for _, ap := range items {
+		responses = append(responses, dto.FromAccountsPayableEntity(ap))
+	}
+
+	response.Success(c, http.StatusOK, "Accounts payable retrieved successfully", responses)
+}
+
 // UpdateAccountsPayable handles the update of an existing accounts payable.
 func (h *AccountsPayableHandler) UpdateAccountsPayable(c *gin.Context) {
 	id := c.Param("id")

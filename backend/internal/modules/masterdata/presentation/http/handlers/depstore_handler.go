@@ -32,6 +32,11 @@ func (h *DepstoreHandler) CreateDepstore(c *gin.Context) {
 		return
 	}
 
+	// Override company_id from authenticated user's token
+	if companyID, exists := c.Get("company_id"); exists {
+		req.CompanyID = companyID.(string)
+	}
+
 	depstore := &entities.Depstore{
 		Code:            req.Code,
 		Name:            req.Name,
@@ -121,8 +126,14 @@ func (h *DepstoreHandler) GetAllDepstores(c *gin.Context) {
 	// Calculate offset
 	offset := (page - 1) * limit
 	
+	// Get company_id from authenticated user's token
+	companyID := ""
+	if cID, exists := c.Get("company_id"); exists {
+		companyID = cID.(string)
+	}
+
 	// Get depstores with pagination
-	depstores, total, err := h.service.GetAllDepstoresWithPagination(c.Request.Context(), limit, offset, search, status)
+	depstores, total, err := h.service.GetAllDepstoresWithPagination(c.Request.Context(), limit, offset, search, status, companyID)
 	if err != nil {
 		response.InternalServerError(c, err.Error(), nil)
 		return

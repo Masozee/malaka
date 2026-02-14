@@ -10,6 +10,7 @@ import (
 // FixedAssetRequest represents the request structure for creating/updating a FixedAsset
 type FixedAssetRequest struct {
 	CompanyID       string                  `json:"company_id" binding:"required"`
+	AssetCode       string                  `json:"asset_code"`
 	AssetName       string                  `json:"asset_name" binding:"required"`
 	Description     string                  `json:"description"`
 	Category        string                  `json:"category"`
@@ -97,6 +98,7 @@ func MapFixedAssetRequestToEntity(request *FixedAssetRequest) *entities.FixedAss
 	}
 	return &entities.FixedAsset{
 		CompanyID:       request.CompanyID,
+		AssetCode:       request.AssetCode,
 		AssetName:       request.AssetName,
 		Notes:           request.Description,     // Using Description as Notes
 		AssetCategory:   request.Category,

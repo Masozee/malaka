@@ -28,11 +28,25 @@ func (r *PosTransactionRepositoryImpl) Create(ctx context.Context, pt *entities.
 
 // GetByID retrieves a POS transaction by its ID from the database.
 func (r *PosTransactionRepositoryImpl) GetByID(ctx context.Context, id uuid.ID) (*entities.PosTransaction, error) {
-	query := `SELECT id, transaction_date, total_amount, payment_method, cashier_id, created_at, updated_at FROM pos_transactions WHERE id = $1`
+	query := `SELECT id, transaction_date, total_amount, payment_method, cashier_id,
+			  COALESCE(sales_person, '') as sales_person, COALESCE(customer_name, '') as customer_name,
+			  COALESCE(customer_phone, '') as customer_phone, COALESCE(customer_address, '') as customer_address,
+			  COALESCE(visit_type, '') as visit_type, COALESCE(location, '') as location,
+			  COALESCE(subtotal, 0) as subtotal, COALESCE(tax_amount, 0) as tax_amount, COALESCE(discount_amount, 0) as discount_amount,
+			  COALESCE(payment_status, '') as payment_status, COALESCE(delivery_method, '') as delivery_method, COALESCE(delivery_status, '') as delivery_status,
+			  COALESCE(commission_rate, 0) as commission_rate, COALESCE(commission_amount, 0) as commission_amount,
+			  COALESCE(notes, '') as notes,
+			  created_at, updated_at
+			  FROM pos_transactions WHERE id = $1`
 	row := r.db.QueryRowContext(ctx, query, id)
 
 	pt := &entities.PosTransaction{}
-	err := row.Scan(&pt.ID, &pt.TransactionDate, &pt.TotalAmount, &pt.PaymentMethod, &pt.CashierID, &pt.CreatedAt, &pt.UpdatedAt)
+	err := row.Scan(&pt.ID, &pt.TransactionDate, &pt.TotalAmount, &pt.PaymentMethod, &pt.CashierID,
+		&pt.SalesPerson, &pt.CustomerName, &pt.CustomerPhone, &pt.CustomerAddress,
+		&pt.VisitType, &pt.Location, &pt.Subtotal, &pt.TaxAmount, &pt.DiscountAmount,
+		&pt.PaymentStatus, &pt.DeliveryMethod, &pt.DeliveryStatus,
+		&pt.CommissionRate, &pt.CommissionAmount, &pt.Notes,
+		&pt.CreatedAt, &pt.UpdatedAt)
 	if err == sql.ErrNoRows {
 		return nil, nil // POS transaction not found
 	}

@@ -30,6 +30,11 @@ func (h *DivisionHandler) CreateDivision(c *gin.Context) {
 		return
 	}
 
+	// Override company_id from authenticated user's token
+	if companyID, exists := c.Get("company_id"); exists {
+		req.CompanyID = companyID.(string)
+	}
+
 	division := req.ToEntity()
 
 	if err := h.service.CreateDivision(c.Request.Context(), division); err != nil {
@@ -77,8 +82,14 @@ func (h *DivisionHandler) GetAllDivisions(c *gin.Context) {
 	// Calculate offset
 	offset := (page - 1) * limit
 	
+	// Get company_id from authenticated user's token
+	companyID := ""
+	if cID, exists := c.Get("company_id"); exists {
+		companyID = cID.(string)
+	}
+
 	// Get divisions with pagination
-	divisions, total, err := h.service.GetAllDivisionsWithPagination(c.Request.Context(), limit, offset, search, status, sortOrder)
+	divisions, total, err := h.service.GetAllDivisionsWithPagination(c.Request.Context(), limit, offset, search, status, sortOrder, companyID)
 	if err != nil {
 		response.InternalServerError(c, err.Error(), nil)
 		return

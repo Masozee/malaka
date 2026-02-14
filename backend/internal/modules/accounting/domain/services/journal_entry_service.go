@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"malaka/internal/modules/accounting/domain/entities"
@@ -48,16 +49,30 @@ type JournalEntryService interface {
 }
 
 type journalEntryService struct {
-	repo repositories.JournalEntryRepository
+	repo      repositories.JournalEntryRepository
+	glService GeneralLedgerService
 }
 
 // NewJournalEntryService creates a new journal entry service
-func NewJournalEntryService(repo repositories.JournalEntryRepository) JournalEntryService {
-	return &journalEntryService{repo: repo}
+func NewJournalEntryService(repo repositories.JournalEntryRepository, glService GeneralLedgerService) JournalEntryService {
+	return &journalEntryService{repo: repo, glService: glService}
 }
 
 // CreateJournalEntry creates a new journal entry
 func (s *journalEntryService) CreateJournalEntry(ctx context.Context, entry *entities.JournalEntry) error {
+	// Generate entry ID upfront so lines can reference it
+	if entry.ID.IsNil() {
+		entry.ID = uuid.New()
+	}
+
+	// Set JournalEntryID on all lines before validation
+	for i := range entry.Lines {
+		if entry.Lines[i].ID.IsNil() {
+			entry.Lines[i].ID = uuid.New()
+		}
+		entry.Lines[i].JournalEntryID = entry.ID
+	}
+
 	if err := s.ValidateJournalEntry(ctx, entry); err != nil {
 		return err
 	}
@@ -104,10 +119,28 @@ func (s *journalEntryService) GetAllJournalEntries(ctx context.Context) ([]*enti
 
 // UpdateJournalEntry updates a journal entry
 func (s *journalEntryService) UpdateJournalEntry(ctx context.Context, entry *entities.JournalEntry) error {
-	// Check if entry can be modified
-	if entry.Status == entities.JournalEntryStatusPosted {
+	// Check if entry can be modified - fetch current to check status
+	existing, err := s.repo.GetByID(ctx, entry.ID)
+	if err != nil {
+		return err
+	}
+	if existing.Status == entities.JournalEntryStatusPosted {
 		return &entities.ValidationError{Message: "cannot modify posted journal entry"}
 	}
+
+	// Set JournalEntryID on all lines before validation
+	for i := range entry.Lines {
+		if entry.Lines[i].ID.IsNil() {
+			entry.Lines[i].ID = uuid.New()
+		}
+		entry.Lines[i].JournalEntryID = entry.ID
+	}
+
+	// Preserve fields from existing entry
+	entry.Status = existing.Status
+	entry.CompanyID = existing.CompanyID
+	entry.CreatedBy = existing.CreatedBy
+	entry.CreatedAt = existing.CreatedAt
 
 	if err := s.ValidateJournalEntry(ctx, entry); err != nil {
 		return err
@@ -175,7 +208,7 @@ func (s *journalEntryService) DeleteLine(ctx context.Context, lineID uuid.ID) er
 	return s.repo.DeleteLine(ctx, lineID)
 }
 
-// PostJournalEntry posts a journal entry
+// PostJournalEntry posts a journal entry and creates general ledger entries
 func (s *journalEntryService) PostJournalEntry(ctx context.Context, entryID uuid.ID, userID string) error {
 	entry, err := s.repo.GetByID(ctx, entryID)
 	if err != nil {
@@ -186,7 +219,25 @@ func (s *journalEntryService) PostJournalEntry(ctx context.Context, entryID uuid
 		return &entities.ValidationError{Message: "journal entry cannot be posted"}
 	}
 
-	return s.repo.Post(ctx, entryID, userID)
+	// Update journal entry status to POSTED
+	if err := s.repo.Post(ctx, entryID, userID); err != nil {
+		return err
+	}
+
+	// Create general ledger entries from the posted journal entry
+	if s.glService != nil {
+		// Re-fetch entry after posting to get updated status
+		postedEntry, err := s.repo.GetByID(ctx, entryID)
+		if err != nil {
+			return fmt.Errorf("journal entry posted but failed to fetch for GL creation: %w", err)
+		}
+
+		if err := s.glService.CreateEntriesFromJournal(ctx, postedEntry); err != nil {
+			return fmt.Errorf("journal entry posted but failed to create GL entries: %w", err)
+		}
+	}
+
+	return nil
 }
 
 // ReverseJournalEntry reverses a journal entry

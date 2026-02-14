@@ -8,7 +8,7 @@ import (
 )
 
 // RegisterFinanceRoutes registers the finance routes.
-func RegisterFinanceRoutes(router *gin.RouterGroup, cashBankHandler *handlers.CashBankHandler, paymentHandler *handlers.PaymentHandler, invoiceHandler *handlers.InvoiceHandler, accountsPayableHandler *handlers.AccountsPayableHandler, accountsReceivableHandler *handlers.AccountsReceivableHandler, cashDisbursementHandler *handlers.CashDisbursementHandler, cashReceiptHandler *handlers.CashReceiptHandler, bankTransferHandler *handlers.BankTransferHandler, cashOpeningBalanceHandler *handlers.CashOpeningBalanceHandler, purchaseVoucherHandler *handlers.PurchaseVoucherHandler, expenditureRequestHandler *handlers.ExpenditureRequestHandler, checkClearanceHandler *handlers.CheckClearanceHandler, monthlyClosingHandler *handlers.MonthlyClosingHandler, cashBookHandler *handlers.CashBookHandler, rbacSvc *auth.RBACService) {
+func RegisterFinanceRoutes(router *gin.RouterGroup, cashBankHandler *handlers.CashBankHandler, paymentHandler *handlers.PaymentHandler, invoiceHandler *handlers.InvoiceHandler, accountsPayableHandler *handlers.AccountsPayableHandler, accountsReceivableHandler *handlers.AccountsReceivableHandler, cashDisbursementHandler *handlers.CashDisbursementHandler, cashReceiptHandler *handlers.CashReceiptHandler, bankTransferHandler *handlers.BankTransferHandler, cashOpeningBalanceHandler *handlers.CashOpeningBalanceHandler, purchaseVoucherHandler *handlers.PurchaseVoucherHandler, expenditureRequestHandler *handlers.ExpenditureRequestHandler, checkClearanceHandler *handlers.CheckClearanceHandler, monthlyClosingHandler *handlers.MonthlyClosingHandler, cashBookHandler *handlers.CashBookHandler, budgetHandler *handlers.BudgetHandler, capexProjectHandler *handlers.CapexProjectHandler, loanFacilityHandler *handlers.LoanFacilityHandler, financialForecastHandler *handlers.FinancialForecastHandler, financeReportHandler *handlers.FinanceReportHandler, rbacSvc *auth.RBACService) {
 	finance := router.Group("/finance")
 	finance.Use(auth.RequireModuleAccess(rbacSvc, "finance"))
 	{
@@ -16,6 +16,7 @@ func RegisterFinanceRoutes(router *gin.RouterGroup, cashBankHandler *handlers.Ca
 		cashBank := finance.Group("/cash-banks")
 		{
 			cashBank.POST("/", auth.RequirePermission(rbacSvc, "finance.cash-bank.create"), cashBankHandler.CreateCashBank)
+			cashBank.GET("/", auth.RequirePermission(rbacSvc, "finance.cash-bank.list"), cashBankHandler.GetAllCashBanks)
 			cashBank.GET("/:id", auth.RequirePermission(rbacSvc, "finance.cash-bank.read"), cashBankHandler.GetCashBankByID)
 			cashBank.PUT("/:id", auth.RequirePermission(rbacSvc, "finance.cash-bank.update"), cashBankHandler.UpdateCashBank)
 			cashBank.DELETE("/:id", auth.RequirePermission(rbacSvc, "finance.cash-bank.delete"), cashBankHandler.DeleteCashBank)
@@ -25,6 +26,7 @@ func RegisterFinanceRoutes(router *gin.RouterGroup, cashBankHandler *handlers.Ca
 		payment := finance.Group("/payments")
 		{
 			payment.POST("/", auth.RequirePermission(rbacSvc, "finance.payment.create"), paymentHandler.CreatePayment)
+			payment.GET("/", auth.RequirePermission(rbacSvc, "finance.payment.list"), paymentHandler.GetAllPayments)
 			payment.GET("/:id", auth.RequirePermission(rbacSvc, "finance.payment.read"), paymentHandler.GetPaymentByID)
 			payment.PUT("/:id", auth.RequirePermission(rbacSvc, "finance.payment.update"), paymentHandler.UpdatePayment)
 			payment.DELETE("/:id", auth.RequirePermission(rbacSvc, "finance.payment.delete"), paymentHandler.DeletePayment)
@@ -34,6 +36,7 @@ func RegisterFinanceRoutes(router *gin.RouterGroup, cashBankHandler *handlers.Ca
 		invoice := finance.Group("/invoices")
 		{
 			invoice.POST("/", auth.RequirePermission(rbacSvc, "finance.invoice.create"), invoiceHandler.CreateInvoice)
+			invoice.GET("/", auth.RequirePermission(rbacSvc, "finance.invoice.list"), invoiceHandler.GetAllInvoices)
 			invoice.GET("/:id", auth.RequirePermission(rbacSvc, "finance.invoice.read"), invoiceHandler.GetInvoiceByID)
 			invoice.PUT("/:id", auth.RequirePermission(rbacSvc, "finance.invoice.update"), invoiceHandler.UpdateInvoice)
 			invoice.DELETE("/:id", auth.RequirePermission(rbacSvc, "finance.invoice.delete"), invoiceHandler.DeleteInvoice)
@@ -43,6 +46,7 @@ func RegisterFinanceRoutes(router *gin.RouterGroup, cashBankHandler *handlers.Ca
 		accountsPayable := finance.Group("/accounts-payable")
 		{
 			accountsPayable.POST("/", auth.RequirePermission(rbacSvc, "finance.accounts-payable.create"), accountsPayableHandler.CreateAccountsPayable)
+			accountsPayable.GET("/", auth.RequirePermission(rbacSvc, "finance.accounts-payable.list"), accountsPayableHandler.GetAllAccountsPayable)
 			accountsPayable.GET("/:id", auth.RequirePermission(rbacSvc, "finance.accounts-payable.read"), accountsPayableHandler.GetAccountsPayableByID)
 			accountsPayable.PUT("/:id", auth.RequirePermission(rbacSvc, "finance.accounts-payable.update"), accountsPayableHandler.UpdateAccountsPayable)
 			accountsPayable.DELETE("/:id", auth.RequirePermission(rbacSvc, "finance.accounts-payable.delete"), accountsPayableHandler.DeleteAccountsPayable)
@@ -52,6 +56,7 @@ func RegisterFinanceRoutes(router *gin.RouterGroup, cashBankHandler *handlers.Ca
 		accountsReceivable := finance.Group("/accounts-receivable")
 		{
 			accountsReceivable.POST("/", auth.RequirePermission(rbacSvc, "finance.accounts-receivable.create"), accountsReceivableHandler.CreateAccountsReceivable)
+			accountsReceivable.GET("/", auth.RequirePermission(rbacSvc, "finance.accounts-receivable.list"), accountsReceivableHandler.GetAllAccountsReceivable)
 			accountsReceivable.GET("/:id", auth.RequirePermission(rbacSvc, "finance.accounts-receivable.read"), accountsReceivableHandler.GetAccountsReceivableByID)
 			accountsReceivable.PUT("/:id", auth.RequirePermission(rbacSvc, "finance.accounts-receivable.update"), accountsReceivableHandler.UpdateAccountsReceivable)
 			accountsReceivable.DELETE("/:id", auth.RequirePermission(rbacSvc, "finance.accounts-receivable.delete"), accountsReceivableHandler.DeleteAccountsReceivable)
@@ -61,6 +66,7 @@ func RegisterFinanceRoutes(router *gin.RouterGroup, cashBankHandler *handlers.Ca
 		cashDisbursement := finance.Group("/cash-disbursements")
 		{
 			cashDisbursement.POST("/", auth.RequirePermission(rbacSvc, "finance.cash-disbursement.create"), cashDisbursementHandler.CreateCashDisbursement)
+			cashDisbursement.GET("/", auth.RequirePermission(rbacSvc, "finance.cash-disbursement.list"), cashDisbursementHandler.GetAllCashDisbursements)
 			cashDisbursement.GET("/:id", auth.RequirePermission(rbacSvc, "finance.cash-disbursement.read"), cashDisbursementHandler.GetCashDisbursementByID)
 			cashDisbursement.PUT("/:id", auth.RequirePermission(rbacSvc, "finance.cash-disbursement.update"), cashDisbursementHandler.UpdateCashDisbursement)
 			cashDisbursement.DELETE("/:id", auth.RequirePermission(rbacSvc, "finance.cash-disbursement.delete"), cashDisbursementHandler.DeleteCashDisbursement)
@@ -70,6 +76,7 @@ func RegisterFinanceRoutes(router *gin.RouterGroup, cashBankHandler *handlers.Ca
 		cashReceipt := finance.Group("/cash-receipts")
 		{
 			cashReceipt.POST("/", auth.RequirePermission(rbacSvc, "finance.cash-receipt.create"), cashReceiptHandler.CreateCashReceipt)
+			cashReceipt.GET("/", auth.RequirePermission(rbacSvc, "finance.cash-receipt.list"), cashReceiptHandler.GetAllCashReceipts)
 			cashReceipt.GET("/:id", auth.RequirePermission(rbacSvc, "finance.cash-receipt.read"), cashReceiptHandler.GetCashReceiptByID)
 			cashReceipt.PUT("/:id", auth.RequirePermission(rbacSvc, "finance.cash-receipt.update"), cashReceiptHandler.UpdateCashReceipt)
 			cashReceipt.DELETE("/:id", auth.RequirePermission(rbacSvc, "finance.cash-receipt.delete"), cashReceiptHandler.DeleteCashReceipt)
@@ -79,6 +86,7 @@ func RegisterFinanceRoutes(router *gin.RouterGroup, cashBankHandler *handlers.Ca
 		bankTransfer := finance.Group("/bank-transfers")
 		{
 			bankTransfer.POST("/", auth.RequirePermission(rbacSvc, "finance.bank-transfer.create"), bankTransferHandler.CreateBankTransfer)
+			bankTransfer.GET("/", auth.RequirePermission(rbacSvc, "finance.bank-transfer.list"), bankTransferHandler.GetAllBankTransfers)
 			bankTransfer.GET("/:id", auth.RequirePermission(rbacSvc, "finance.bank-transfer.read"), bankTransferHandler.GetBankTransferByID)
 			bankTransfer.PUT("/:id", auth.RequirePermission(rbacSvc, "finance.bank-transfer.update"), bankTransferHandler.UpdateBankTransfer)
 			bankTransfer.DELETE("/:id", auth.RequirePermission(rbacSvc, "finance.bank-transfer.delete"), bankTransferHandler.DeleteBankTransfer)
@@ -129,8 +137,6 @@ func RegisterFinanceRoutes(router *gin.RouterGroup, cashBankHandler *handlers.Ca
 			checkClearance.PUT("/:id", auth.RequirePermission(rbacSvc, "finance.check-clearance.update"), checkClearanceHandler.UpdateCheckClearance)
 			checkClearance.DELETE("/:id", auth.RequirePermission(rbacSvc, "finance.check-clearance.delete"), checkClearanceHandler.DeleteCheckClearance)
 			checkClearance.GET("/status/:status", auth.RequirePermission(rbacSvc, "finance.check-clearance.list"), checkClearanceHandler.GetCheckClearancesByStatus)
-			checkClearance.GET("/incoming", auth.RequirePermission(rbacSvc, "finance.check-clearance.list"), checkClearanceHandler.GetIncomingChecks)
-			checkClearance.GET("/outgoing", auth.RequirePermission(rbacSvc, "finance.check-clearance.list"), checkClearanceHandler.GetOutgoingChecks)
 			checkClearance.POST("/:id/clear", auth.RequirePermission(rbacSvc, "finance.check-clearance.clear"), checkClearanceHandler.ClearCheck)
 			checkClearance.POST("/:id/bounce", auth.RequirePermission(rbacSvc, "finance.check-clearance.bounce"), checkClearanceHandler.BounceCheck)
 		}
@@ -153,15 +159,62 @@ func RegisterFinanceRoutes(router *gin.RouterGroup, cashBankHandler *handlers.Ca
 		// Cash Book routes
 		cashBook := finance.Group("/cash-book")
 		{
-			cashBook.POST("/", auth.RequirePermission(rbacSvc, "finance.cash-book.create"), cashBookHandler.CreateCashBookEntry)
-			cashBook.GET("/", auth.RequirePermission(rbacSvc, "finance.cash-book.list"), cashBookHandler.GetAllCashBookEntries)
-			cashBook.GET("/:id", auth.RequirePermission(rbacSvc, "finance.cash-book.read"), cashBookHandler.GetCashBookEntryByID)
-			cashBook.PUT("/:id", auth.RequirePermission(rbacSvc, "finance.cash-book.update"), cashBookHandler.UpdateCashBookEntry)
-			cashBook.DELETE("/:id", auth.RequirePermission(rbacSvc, "finance.cash-book.delete"), cashBookHandler.DeleteCashBookEntry)
-			cashBook.GET("/cash-bank/:cash_bank_id", auth.RequirePermission(rbacSvc, "finance.cash-book.list"), cashBookHandler.GetCashBookEntriesByCashBank)
-			cashBook.GET("/type/:type", auth.RequirePermission(rbacSvc, "finance.cash-book.list"), cashBookHandler.GetCashBookEntriesByType)
-			cashBook.GET("/balance/:cash_bank_id", auth.RequirePermission(rbacSvc, "finance.cash-book.read"), cashBookHandler.GetCashBalance)
-			cashBook.POST("/recalculate/:cash_bank_id", auth.RequirePermission(rbacSvc, "finance.cash-book.update"), cashBookHandler.RecalculateBalances)
+			cashBook.POST("/", auth.RequirePermission(rbacSvc, "finance.cash-book.create"), cashBookHandler.CreateCashBook)
+			cashBook.GET("/", auth.RequirePermission(rbacSvc, "finance.cash-book.list"), cashBookHandler.GetAllCashBooks)
+			cashBook.GET("/:id", auth.RequirePermission(rbacSvc, "finance.cash-book.read"), cashBookHandler.GetCashBookByID)
+			cashBook.PUT("/:id", auth.RequirePermission(rbacSvc, "finance.cash-book.update"), cashBookHandler.UpdateCashBook)
+			cashBook.DELETE("/:id", auth.RequirePermission(rbacSvc, "finance.cash-book.delete"), cashBookHandler.DeleteCashBook)
+			cashBook.GET("/type/:type", auth.RequirePermission(rbacSvc, "finance.cash-book.list"), cashBookHandler.GetCashBooksByType)
+		}
+
+		// Budget routes
+		budgets := finance.Group("/budgets")
+		{
+			budgets.POST("/", auth.RequirePermission(rbacSvc, "finance.budget.create"), budgetHandler.CreateBudget)
+			budgets.GET("/", auth.RequirePermission(rbacSvc, "finance.budget.list"), budgetHandler.GetAllBudgets)
+			budgets.GET("/:id", auth.RequirePermission(rbacSvc, "finance.budget.read"), budgetHandler.GetBudgetByID)
+			budgets.PUT("/:id", auth.RequirePermission(rbacSvc, "finance.budget.update"), budgetHandler.UpdateBudget)
+			budgets.DELETE("/:id", auth.RequirePermission(rbacSvc, "finance.budget.delete"), budgetHandler.DeleteBudget)
+		}
+
+		// CapEx Project routes
+		capexProjects := finance.Group("/capex-projects")
+		{
+			capexProjects.POST("/", auth.RequirePermission(rbacSvc, "finance.capex-project.create"), capexProjectHandler.CreateCapexProject)
+			capexProjects.GET("/", auth.RequirePermission(rbacSvc, "finance.capex-project.list"), capexProjectHandler.GetAllCapexProjects)
+			capexProjects.GET("/:id", auth.RequirePermission(rbacSvc, "finance.capex-project.read"), capexProjectHandler.GetCapexProjectByID)
+			capexProjects.PUT("/:id", auth.RequirePermission(rbacSvc, "finance.capex-project.update"), capexProjectHandler.UpdateCapexProject)
+			capexProjects.DELETE("/:id", auth.RequirePermission(rbacSvc, "finance.capex-project.delete"), capexProjectHandler.DeleteCapexProject)
+		}
+
+		// Loan Facility routes
+		loanFacilities := finance.Group("/loan-facilities")
+		{
+			loanFacilities.POST("/", auth.RequirePermission(rbacSvc, "finance.loan-facility.create"), loanFacilityHandler.CreateLoanFacility)
+			loanFacilities.GET("/", auth.RequirePermission(rbacSvc, "finance.loan-facility.list"), loanFacilityHandler.GetAllLoanFacilities)
+			loanFacilities.GET("/:id", auth.RequirePermission(rbacSvc, "finance.loan-facility.read"), loanFacilityHandler.GetLoanFacilityByID)
+			loanFacilities.PUT("/:id", auth.RequirePermission(rbacSvc, "finance.loan-facility.update"), loanFacilityHandler.UpdateLoanFacility)
+			loanFacilities.DELETE("/:id", auth.RequirePermission(rbacSvc, "finance.loan-facility.delete"), loanFacilityHandler.DeleteLoanFacility)
+		}
+
+		// Financial Forecast routes
+		financialForecasts := finance.Group("/financial-forecasts")
+		{
+			financialForecasts.POST("/", auth.RequirePermission(rbacSvc, "finance.financial-forecast.create"), financialForecastHandler.CreateFinancialForecast)
+			financialForecasts.GET("/", auth.RequirePermission(rbacSvc, "finance.financial-forecast.list"), financialForecastHandler.GetAllFinancialForecasts)
+			financialForecasts.GET("/:id", auth.RequirePermission(rbacSvc, "finance.financial-forecast.read"), financialForecastHandler.GetFinancialForecastByID)
+			financialForecasts.PUT("/:id", auth.RequirePermission(rbacSvc, "finance.financial-forecast.update"), financialForecastHandler.UpdateFinancialForecast)
+			financialForecasts.DELETE("/:id", auth.RequirePermission(rbacSvc, "finance.financial-forecast.delete"), financialForecastHandler.DeleteFinancialForecast)
+		}
+
+		// Finance Report routes
+		financeReports := finance.Group("/finance-reports")
+		{
+			financeReports.POST("/", auth.RequirePermission(rbacSvc, "finance.finance-report.create"), financeReportHandler.CreateFinanceReport)
+			financeReports.GET("/", auth.RequirePermission(rbacSvc, "finance.finance-report.list"), financeReportHandler.GetAllFinanceReports)
+			financeReports.GET("/:id", auth.RequirePermission(rbacSvc, "finance.finance-report.read"), financeReportHandler.GetFinanceReportByID)
+			financeReports.PUT("/:id", auth.RequirePermission(rbacSvc, "finance.finance-report.update"), financeReportHandler.UpdateFinanceReport)
+			financeReports.DELETE("/:id", auth.RequirePermission(rbacSvc, "finance.finance-report.delete"), financeReportHandler.DeleteFinanceReport)
 		}
 	}
 }

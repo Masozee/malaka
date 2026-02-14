@@ -4,28 +4,32 @@ import (
 	"time"
 
 	"malaka/internal/modules/finance/domain/entities"
-	"malaka/internal/shared/uuid"
 )
 
 type CreateExpenditureRequestRequest struct {
 	RequestNumber string    `json:"request_number" binding:"required"`
+	RequestorID   string    `json:"requestor_id" binding:"required"`
+	Department    string    `json:"department"`
 	RequestDate   time.Time `json:"request_date" binding:"required"`
-	RequestedBy   string    `json:"requested_by" binding:"required"`
-	CashBankID    string    `json:"cash_bank_id" binding:"required"`
-	Amount        float64   `json:"amount" binding:"required,min=0"`
+	RequiredDate  time.Time `json:"required_date"`
 	Purpose       string    `json:"purpose" binding:"required"`
-	Description   string    `json:"description"`
+	TotalAmount   float64   `json:"total_amount" binding:"required,min=0"`
+	Priority      string    `json:"priority"`
+	Remarks       string    `json:"remarks"`
 }
 
 type UpdateExpenditureRequestRequest struct {
-	RequestNumber string    `json:"request_number" binding:"required"`
-	RequestDate   time.Time `json:"request_date" binding:"required"`
-	RequestedBy   string    `json:"requested_by" binding:"required"`
-	CashBankID    string    `json:"cash_bank_id" binding:"required"`
-	Amount        float64   `json:"amount" binding:"required,min=0"`
-	Purpose       string    `json:"purpose" binding:"required"`
-	Description   string    `json:"description"`
-	Status        string    `json:"status" binding:"required,oneof=pending approved rejected disbursed"`
+	RequestNumber  string    `json:"request_number" binding:"required"`
+	RequestorID    string    `json:"requestor_id" binding:"required"`
+	Department     string    `json:"department"`
+	RequestDate    time.Time `json:"request_date" binding:"required"`
+	RequiredDate   time.Time `json:"required_date"`
+	Purpose        string    `json:"purpose" binding:"required"`
+	TotalAmount    float64   `json:"total_amount" binding:"required,min=0"`
+	ApprovedAmount float64   `json:"approved_amount" binding:"min=0"`
+	Priority       string    `json:"priority"`
+	Status         string    `json:"status" binding:"required,oneof=PENDING APPROVED REJECTED PROCESSED"`
+	Remarks        string    `json:"remarks"`
 }
 
 type ApproveExpenditureRequestRequest struct {
@@ -33,28 +37,30 @@ type ApproveExpenditureRequestRequest struct {
 }
 
 type RejectExpenditureRequestRequest struct {
-	RejectedReason string `json:"rejected_reason" binding:"required"`
+	Remarks string `json:"remarks" binding:"required"`
 }
 
-type DisburseExpenditureRequestRequest struct {
-	DisbursedBy string `json:"disbursed_by" binding:"required"`
+type ProcessExpenditureRequestRequest struct {
+	ProcessedBy string `json:"processed_by" binding:"required"`
 }
 
 type ExpenditureRequestResponse struct {
 	ID             string    `json:"id"`
 	RequestNumber  string    `json:"request_number"`
+	RequestorID    string    `json:"requestor_id"`
+	Department     string    `json:"department"`
 	RequestDate    time.Time `json:"request_date"`
-	RequestedBy    string    `json:"requested_by"`
-	CashBankID     string    `json:"cash_bank_id"`
-	Amount         float64   `json:"amount"`
+	RequiredDate   time.Time `json:"required_date"`
 	Purpose        string    `json:"purpose"`
-	Description    string    `json:"description"`
+	TotalAmount    float64   `json:"total_amount"`
+	ApprovedAmount float64   `json:"approved_amount"`
 	Status         string    `json:"status"`
+	Priority       string    `json:"priority"`
 	ApprovedBy     string    `json:"approved_by"`
 	ApprovedAt     time.Time `json:"approved_at"`
-	DisbursedBy    string    `json:"disbursed_by"`
-	DisbursedAt    time.Time `json:"disbursed_at"`
-	RejectedReason string    `json:"rejected_reason"`
+	ProcessedBy    string    `json:"processed_by"`
+	ProcessedAt    time.Time `json:"processed_at"`
+	Remarks        string    `json:"remarks"`
 	CreatedAt      time.Time `json:"created_at"`
 	UpdatedAt      time.Time `json:"updated_at"`
 }
@@ -63,18 +69,20 @@ func ToExpenditureRequestResponse(request *entities.ExpenditureRequest) *Expendi
 	return &ExpenditureRequestResponse{
 		ID:             request.ID.String(),
 		RequestNumber:  request.RequestNumber,
+		RequestorID:    request.RequestorID.String(),
+		Department:     request.Department,
 		RequestDate:    request.RequestDate,
-		RequestedBy:    request.RequestedBy.String(),
-		CashBankID:     request.CashBankID.String(),
-		Amount:         request.Amount,
+		RequiredDate:   request.RequiredDate,
 		Purpose:        request.Purpose,
-		Description:    request.Description,
+		TotalAmount:    request.TotalAmount,
+		ApprovedAmount: request.ApprovedAmount,
 		Status:         request.Status,
+		Priority:       request.Priority,
 		ApprovedBy:     request.ApprovedBy.String(),
 		ApprovedAt:     request.ApprovedAt,
-		DisbursedBy:    request.DisbursedBy.String(),
-		DisbursedAt:    request.DisbursedAt,
-		RejectedReason: request.RejectedReason,
+		ProcessedBy:    request.ProcessedBy.String(),
+		ProcessedAt:    request.ProcessedAt,
+		Remarks:        request.Remarks,
 		CreatedAt:      request.CreatedAt,
 		UpdatedAt:      request.UpdatedAt,
 	}
@@ -83,11 +91,13 @@ func ToExpenditureRequestResponse(request *entities.ExpenditureRequest) *Expendi
 func ToExpenditureRequestEntity(req *CreateExpenditureRequestRequest) *entities.ExpenditureRequest {
 	return &entities.ExpenditureRequest{
 		RequestNumber: req.RequestNumber,
+		RequestorID:   safeParseUUID(req.RequestorID),
+		Department:    req.Department,
 		RequestDate:   req.RequestDate,
-		RequestedBy:   uuid.MustParse(req.RequestedBy),
-		CashBankID:    uuid.MustParse(req.CashBankID),
-		Amount:        req.Amount,
+		RequiredDate:  req.RequiredDate,
 		Purpose:       req.Purpose,
-		Description:   req.Description,
+		TotalAmount:   req.TotalAmount,
+		Priority:      req.Priority,
+		Remarks:       req.Remarks,
 	}
 }

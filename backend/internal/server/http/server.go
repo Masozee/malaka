@@ -17,8 +17,7 @@ import (
 	shipping_handlers "malaka/internal/modules/shipping/presentation/http/handlers"
 	shipping_routes "malaka/internal/modules/shipping/presentation/http/routes"
 
-	finance_handlers "malaka/internal/modules/finance/presentation/http/handlers"
-	finance_routes "malaka/internal/modules/finance/presentation/http/routes"
+	// Finance handlers/routes now initialized in router.go
 
 	hr_handlers "malaka/internal/modules/hr/presentation/http/handlers"
 	hr_routes "malaka/internal/modules/hr/presentation/http/routes"
@@ -446,24 +445,7 @@ func (server *Server) setupRouter() {
 	// Register shipping routes (protected)
 	shipping_routes.RegisterShippingRoutes(protectedAPI, courierHandler, shipmentHandler, airwaybillHandler, manifestHandler, shippingInvoiceHandler, rbacSvc)
 
-	// Initialize finance handlers
-	cashBankHandler := finance_handlers.NewCashBankHandler(server.container.CashBankService)
-	paymentHandler := finance_handlers.NewPaymentHandler(server.container.PaymentService)
-	financeInvoiceHandler := finance_handlers.NewInvoiceHandler(server.container.InvoiceService)
-	accountsPayableHandler := finance_handlers.NewAccountsPayableHandler(server.container.AccountsPayableService)
-	accountsReceivableHandler := finance_handlers.NewAccountsReceivableHandler(server.container.AccountsReceivableService)
-	cashDisbursementHandler := finance_handlers.NewCashDisbursementHandler(server.container.CashDisbursementService)
-	cashReceiptHandler := finance_handlers.NewCashReceiptHandler(server.container.CashReceiptService)
-	bankTransferHandler := finance_handlers.NewBankTransferHandler(server.container.BankTransferService)
-	cashOpeningBalanceHandler := finance_handlers.NewCashOpeningBalanceHandler(server.container.CashOpeningBalanceService)
-	purchaseVoucherHandler := finance_handlers.NewPurchaseVoucherHandler(server.container.PurchaseVoucherService)
-	expenditureRequestHandler := finance_handlers.NewExpenditureRequestHandler(server.container.ExpenditureRequestService)
-	checkClearanceHandler := finance_handlers.NewCheckClearanceHandler(server.container.CheckClearanceService)
-	monthlyClosingHandler := finance_handlers.NewMonthlyClosingHandler(server.container.MonthlyClosingService)
-	cashBookHandler := finance_handlers.NewCashBookHandler(server.container.CashBookService)
-
-	// Register finance routes (protected)
-	finance_routes.RegisterFinanceRoutes(protectedAPI, cashBankHandler, paymentHandler, financeInvoiceHandler, accountsPayableHandler, accountsReceivableHandler, cashDisbursementHandler, cashReceiptHandler, bankTransferHandler, cashOpeningBalanceHandler, purchaseVoucherHandler, expenditureRequestHandler, checkClearanceHandler, monthlyClosingHandler, cashBookHandler, rbacSvc)
+	// Finance handlers are now initialized in router.go via SetupProtectedRoutes
 
 	// Initialize HR handlers
 	employeeHandler := hr_handlers.NewEmployeeHandler(server.container.EmployeeService)

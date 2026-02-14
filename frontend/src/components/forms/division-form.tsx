@@ -197,9 +197,9 @@ export function DivisionForm({ open, onOpenChange, division, onSuccess }: Divisi
           <SelectField
             label="Parent Division"
             name="parent_id"
-            value={formData.parent_id}
-            onChange={(value) => updateField("parent_id", value)}
-            options={[{ value: "", label: "None (Root Division)" }, ...parentDivisionOptions]}
+            value={formData.parent_id || "__none__"}
+            onChange={(value) => updateField("parent_id", value === "__none__" ? "" : value)}
+            options={[{ value: "__none__", label: "None (Root Division)" }, ...parentDivisionOptions]}
             placeholder="Select parent division"
             error={errors.parent_id}
             disabled={loading}

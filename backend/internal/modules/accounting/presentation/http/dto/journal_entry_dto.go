@@ -43,9 +43,11 @@ type JournalEntryUpdateRequest struct {
 
 // JournalEntryLineResponse represents a journal entry line in responses
 type JournalEntryLineResponse struct {
-	ID               uuid.ID `json:"id"`
+	ID               uuid.ID   `json:"id"`
 	LineNumber       int       `json:"line_number"`
-	AccountID        uuid.ID `json:"account_id"`
+	AccountID        uuid.ID   `json:"account_id"`
+	AccountCode      string    `json:"account_code"`
+	AccountName      string    `json:"account_name"`
 	Description      string    `json:"description"`
 	DebitAmount      float64   `json:"debit_amount"`
 	CreditAmount     float64   `json:"credit_amount"`
@@ -80,6 +82,8 @@ type JournalEntryResponse struct {
 	ReversedAt      *time.Time                 `json:"reversed_at"`
 	CompanyID       string                     `json:"company_id"`
 	CreatedBy       string                     `json:"created_by"`
+	CreatedByName   string                     `json:"created_by_name"`
+	PostedByName    string                     `json:"posted_by_name"`
 	CreatedAt       time.Time                  `json:"created_at"`
 	UpdatedAt       time.Time                  `json:"updated_at"`
 	IsBalanced      bool                       `json:"is_balanced"`
@@ -179,6 +183,8 @@ func FromJournalEntryEntity(entry *entities.JournalEntry) *JournalEntryResponse 
 			ID:               line.ID,
 			LineNumber:       line.LineNumber,
 			AccountID:        line.AccountID,
+			AccountCode:      line.AccountCode,
+			AccountName:      line.AccountName,
 			Description:      line.Description,
 			DebitAmount:      line.DebitAmount,
 			CreditAmount:     line.CreditAmount,
@@ -213,6 +219,8 @@ func FromJournalEntryEntity(entry *entities.JournalEntry) *JournalEntryResponse 
 		ReversedAt:      entry.ReversedAt,
 		CompanyID:       entry.CompanyID,
 		CreatedBy:       entry.CreatedBy,
+		CreatedByName:   entry.CreatedByName,
+		PostedByName:    entry.PostedByName,
 		CreatedAt:       entry.CreatedAt,
 		UpdatedAt:       entry.UpdatedAt,
 		IsBalanced:      entry.IsBalanced(),

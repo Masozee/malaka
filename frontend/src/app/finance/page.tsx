@@ -13,57 +13,8 @@ import {
   ChartIncreaseIcon,
   Clock01Icon,
 } from '@hugeicons/core-free-icons'
-
-const financeModules = [
-  {
-    title: 'Cash & Treasury',
-    description: 'Manage cash positions, bank accounts, and liquidity across all entities',
-    href: '/finance/cash-treasury',
-    stats: '12 active accounts',
-  },
-  {
-    title: 'Budgeting',
-    description: 'Create and monitor budgets, track allocations and variances by department',
-    href: '/finance/budgeting',
-    stats: 'FY 2026 budget active',
-  },
-  {
-    title: 'Cost Control',
-    description: 'Monitor expenses, enforce spending limits, and analyze cost efficiency',
-    href: '/finance/cost-control',
-    stats: '3 alerts this month',
-  },
-  {
-    title: 'Working Capital',
-    description: 'Track receivables, payables, and inventory to optimize cash conversion cycle',
-    href: '/finance/working-capital',
-    stats: 'CCC: 45 days',
-  },
-  {
-    title: 'Loan & Financing',
-    description: 'Manage loans, credit facilities, repayment schedules, and interest tracking',
-    href: '/finance/loan-financing',
-    stats: '2 active facilities',
-  },
-  {
-    title: 'CapEx & Investment',
-    description: 'Plan capital expenditures, track ROI, and manage investment portfolios',
-    href: '/finance/capex-investment',
-    stats: 'Rp 850M allocated',
-  },
-  {
-    title: 'Financial Planning',
-    description: 'Forecasting, scenario analysis, and long-term financial strategy planning',
-    href: '/finance/financial-planning',
-    stats: 'Q1 forecast ready',
-  },
-  {
-    title: 'Finance Reports',
-    description: 'Generate financial statements, cash flow reports, and management summaries',
-    href: '/finance/reports',
-    stats: '8 report templates',
-  },
-]
+import { FINANCE_GROUPS } from '@/config/finance-menu'
+import { BookmarkToggle } from '@/components/ui/bookmark-toggle'
 
 export default function FinancePage() {
   return (
@@ -182,30 +133,32 @@ export default function FinancePage() {
             </div>
           </div>
 
-          {/* Finance Modules */}
-          <div>
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1">Finance Modules</h2>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">Treasury, budgeting, capital management, and financial strategy</p>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {financeModules.map((module) => (
-                <Card key={module.title} className="p-6 hover:shadow-md transition-shadow duration-200">
-                  <div className="space-y-2">
-                    <h3 className="font-semibold text-gray-900 dark:text-gray-100">{module.title}</h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">{module.description}</p>
-                    <p className="text-xs text-gray-500">{module.stats}</p>
-                  </div>
-
-                  <div className="mt-4">
-                    <Link href={module.href}>
+          {/* All Finance Modules grouped */}
+          {FINANCE_GROUPS.map((group) => (
+            <div key={group.id}>
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1">{group.label}</h2>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">{group.description}</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {group.items.map((item) => (
+                  <Card key={item.id} className="p-5 hover:shadow-md transition-shadow duration-200">
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="h-9 w-9 bg-gray-100 dark:bg-gray-700/50 rounded-lg flex items-center justify-center">
+                        <HugeiconsIcon icon={item.icon} className="h-4 w-4 text-gray-600 dark:text-gray-300" />
+                      </div>
+                      <BookmarkToggle itemId={item.id} size="sm" />
+                    </div>
+                    <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">{item.label}</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">{item.description}</p>
+                    <Link href={item.href}>
                       <Button variant="outline" size="sm" className="w-full">
-                        View {module.title}
+                        Open {item.label}
                       </Button>
                     </Link>
-                  </div>
-                </Card>
-              ))}
+                  </Card>
+                ))}
+              </div>
             </div>
-          </div>
+          ))}
 
           {/* Alerts */}
           <div>

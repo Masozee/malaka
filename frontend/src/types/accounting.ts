@@ -41,9 +41,11 @@ export interface JournalEntry extends BaseEntity {
   total_credit: number
   status: 'DRAFT' | 'PENDING' | 'POSTED' | 'CANCELLED'
   created_by: string
+  created_by_name?: string
   posted_by?: string
+  posted_by_name?: string
   posted_at?: string
-  
+
   // Relationships
   journal_entry_lines: JournalEntryLine[]
   attachments?: JournalEntryAttachment[]
@@ -54,24 +56,33 @@ export interface JournalEntryLine extends BaseEntity {
   journal_entry_id: string
   line_number: number
   account_id: string
+  account_code?: string
+  account_name?: string
   description: string
   debit_amount: number
   credit_amount: number
+  base_debit_amount?: number
+  base_credit_amount?: number
+  is_debit?: boolean
+  is_credit?: boolean
+  amount?: number
   reference?: string
   cost_center_id?: string
   project_id?: string
   department_id?: string
-  
+
   // Relationships
-  journal_entry: JournalEntry
-  account: ChartOfAccount
+  journal_entry?: JournalEntry
+  account?: ChartOfAccount
   cost_center?: CostCenter
 }
 
 // General Ledger Entry (View)
 export interface GeneralLedgerEntry {
   id: string
+  // Backend returns transaction_date, mapped as entry_date for display
   entry_date: string
+  transaction_date?: string
   posting_date?: string
   period: string
   fiscal_year: number
@@ -86,11 +97,14 @@ export interface GeneralLedgerEntry {
   reference?: string
   debit_amount: number
   credit_amount: number
+  balance: number
   running_balance: number
   currency_code: string
   exchange_rate: number
   source_document?: string
+  // Backend returns entry_status, mapped as status for display
   status: string
+  entry_status?: string
   created_by: string
   posted_by?: string
   posted_at?: string

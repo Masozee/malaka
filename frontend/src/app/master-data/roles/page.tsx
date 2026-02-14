@@ -298,28 +298,28 @@ export default function RolesPage() {
         <div className="flex-1 overflow-auto p-6 space-y-6">
           {/* Stats */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border">
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-sm border">
               <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Roles</p>
               <p className="text-3xl font-bold text-gray-900 dark:text-gray-100">{roles.length}</p>
               <div className="mt-2">
                 <span className="text-sm text-gray-500">{roles.filter(r => r.is_system).length} system roles</span>
               </div>
             </div>
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border">
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-sm border">
               <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Active Roles</p>
               <p className="text-3xl font-bold text-gray-900 dark:text-gray-100">{roles.filter(r => r.is_active).length}</p>
               <div className="mt-2">
                 <span className="text-sm text-gray-500">{roles.filter(r => !r.is_active).length} inactive</span>
               </div>
             </div>
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border">
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-sm border">
               <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Custom Roles</p>
               <p className="text-3xl font-bold text-gray-900 dark:text-gray-100">{roles.filter(r => !r.is_system).length}</p>
               <div className="mt-2">
                 <span className="text-sm text-gray-500">User-created roles</span>
               </div>
             </div>
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border">
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-sm border">
               <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Modules</p>
               <p className="text-3xl font-bold text-gray-900 dark:text-gray-100">{MODULES.length}</p>
               <div className="mt-2">
@@ -368,7 +368,7 @@ export default function RolesPage() {
                   <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
                     {role.description || 'No description'}
                   </p>
-                  <p className="text-xs text-gray-500 mb-4">Level: {role.level}</p>
+                  <p className="text-sm text-gray-500 mb-4">Level: {role.level}</p>
 
                   <div className="flex items-center gap-2">
                     <Button
@@ -450,7 +450,7 @@ export default function RolesPage() {
                 value={formData.level}
                 onChange={e => setFormData(prev => ({ ...prev, level: parseInt(e.target.value) || 1 }))}
               />
-              <p className="text-xs text-gray-500">Higher level = more authority (1-98). Level 99 is reserved for Superadmin.</p>
+              <p className="text-sm text-gray-500">Higher level = more authority (1-98). Level 99 is reserved for Superadmin.</p>
             </div>
           </div>
           <DialogFooter>
@@ -482,7 +482,7 @@ export default function RolesPage() {
             <div className="flex-1 overflow-hidden flex flex-col gap-4">
               {/* Superadmin notice */}
               {isSuperadmin && (
-                <div className="flex items-center space-x-3 p-3 bg-green-50 border border-green-200 rounded-lg dark:bg-green-900/20 dark:border-green-800">
+                <div className="flex items-center space-x-3 p-3 bg-green-50 border border-green-200 rounded-sm dark:bg-green-900/20 dark:border-green-800">
                   <div className="flex-1">
                     <p className="font-medium text-green-800 dark:text-green-300">Superadmin Role</p>
                     <p className="text-sm text-green-700 dark:text-green-400">This role bypasses all permission checks. All permissions are implicitly granted and cannot be individually toggled.</p>
@@ -491,7 +491,7 @@ export default function RolesPage() {
               )}
 
               {/* Summary bar */}
-              <div className="flex items-center justify-between bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
+              <div className="flex items-center justify-between bg-gray-50 dark:bg-gray-800 p-3 rounded-sm">
                 <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
                   {totalGranted} of {allPermissions.length} permissions granted
                 </span>
@@ -542,7 +542,7 @@ export default function RolesPage() {
 
               {/* Grant/Revoke all in module */}
               {activeModule !== 'all' && modulePermCounts[activeModule] && (
-                <div className="flex items-center justify-between bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
+                <div className="flex items-center justify-between bg-gray-50 dark:bg-gray-800 p-3 rounded-sm">
                   <div className="flex items-center gap-3">
                     <span className="text-sm text-gray-700 dark:text-gray-300">
                       {modulePermCounts[activeModule].granted} of {modulePermCounts[activeModule].total} permissions granted
@@ -572,7 +572,7 @@ export default function RolesPage() {
               )}
 
               {/* Permissions list */}
-              <div className="flex-1 overflow-auto border rounded-lg">
+              <div className="flex-1 overflow-auto border rounded-sm">
                 <table className="w-full text-sm">
                   <thead className="bg-gray-50 dark:bg-gray-800 sticky top-0">
                     <tr>

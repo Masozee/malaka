@@ -32,6 +32,11 @@ func (s *AccountsPayableService) GetAccountsPayableByID(ctx context.Context, id 
 	return s.repo.GetByID(ctx, id)
 }
 
+// GetAllAccountsPayable retrieves all accounts payable records.
+func (s *AccountsPayableService) GetAllAccountsPayable(ctx context.Context) ([]*entities.AccountsPayable, error) {
+	return s.repo.GetAll(ctx)
+}
+
 // UpdateAccountsPayable updates an existing accounts payable record.
 func (s *AccountsPayableService) UpdateAccountsPayable(ctx context.Context, ap *entities.AccountsPayable) error {
 	// Ensure the accounts payable record exists before updating

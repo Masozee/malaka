@@ -141,7 +141,7 @@ export default function ProductModelsPage() {
       cell: ({ row }) => (
         <div>
           <div className="font-medium">{row.original?.name}</div>
-          <div className="text-sm text-muted-foreground">{row.original?.description || '-'}</div>
+          <div className="text-xs text-muted-foreground">{row.original?.description || '-'}</div>
         </div>
       )
     },

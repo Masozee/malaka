@@ -26,15 +26,17 @@ func (r *expenditureRequestRepositoryImpl) Create(ctx context.Context, request *
 
 	query := `
 		INSERT INTO expenditure_requests (
-			id, request_number, request_date, requested_by, cash_bank_id,
-			amount, purpose, description, status, approved_by, approved_at,
-			disbursed_by, disbursed_at, rejected_reason, created_at, updated_at
-		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)`
+			id, request_number, requestor_id, department, request_date, required_date,
+			purpose, total_amount, approved_amount, status, priority,
+			approved_by, approved_at, processed_by, processed_at, remarks,
+			created_at, updated_at
+		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)`
 
 	_, err := r.db.ExecContext(ctx, query,
-		request.ID, request.RequestNumber, request.RequestDate, request.RequestedBy, request.CashBankID,
-		request.Amount, request.Purpose, request.Description, request.Status, request.ApprovedBy, request.ApprovedAt,
-		request.DisbursedBy, request.DisbursedAt, request.RejectedReason, request.CreatedAt, request.UpdatedAt,
+		request.ID, request.RequestNumber, request.RequestorID, request.Department, request.RequestDate, request.RequiredDate,
+		request.Purpose, request.TotalAmount, request.ApprovedAmount, request.Status, request.Priority,
+		request.ApprovedBy, request.ApprovedAt, request.ProcessedBy, request.ProcessedAt, request.Remarks,
+		request.CreatedAt, request.UpdatedAt,
 	)
 
 	return err
@@ -43,15 +45,17 @@ func (r *expenditureRequestRepositoryImpl) Create(ctx context.Context, request *
 func (r *expenditureRequestRepositoryImpl) GetByID(ctx context.Context, id uuid.ID) (*entities.ExpenditureRequest, error) {
 	request := &entities.ExpenditureRequest{}
 	query := `
-		SELECT id, request_number, request_date, requested_by, cash_bank_id,
-			   amount, purpose, description, status, approved_by, approved_at,
-			   disbursed_by, disbursed_at, rejected_reason, created_at, updated_at
+		SELECT id, request_number, requestor_id, COALESCE(department, ''), request_date, COALESCE(required_date, '0001-01-01'),
+			   purpose, total_amount, COALESCE(approved_amount, 0), COALESCE(status, ''), COALESCE(priority, ''),
+			   approved_by, approved_at, processed_by, processed_at, COALESCE(remarks, ''),
+			   created_at, updated_at
 		FROM expenditure_requests WHERE id = $1`
 
 	err := r.db.QueryRowContext(ctx, query, id).Scan(
-		&request.ID, &request.RequestNumber, &request.RequestDate, &request.RequestedBy, &request.CashBankID,
-		&request.Amount, &request.Purpose, &request.Description, &request.Status, &request.ApprovedBy, &request.ApprovedAt,
-		&request.DisbursedBy, &request.DisbursedAt, &request.RejectedReason, &request.CreatedAt, &request.UpdatedAt,
+		&request.ID, &request.RequestNumber, &request.RequestorID, &request.Department, &request.RequestDate, &request.RequiredDate,
+		&request.Purpose, &request.TotalAmount, &request.ApprovedAmount, &request.Status, &request.Priority,
+		&request.ApprovedBy, &request.ApprovedAt, &request.ProcessedBy, &request.ProcessedAt, &request.Remarks,
+		&request.CreatedAt, &request.UpdatedAt,
 	)
 
 	if err != nil {
@@ -63,9 +67,10 @@ func (r *expenditureRequestRepositoryImpl) GetByID(ctx context.Context, id uuid.
 
 func (r *expenditureRequestRepositoryImpl) GetAll(ctx context.Context) ([]*entities.ExpenditureRequest, error) {
 	query := `
-		SELECT id, request_number, request_date, requested_by, cash_bank_id,
-			   amount, purpose, description, status, approved_by, approved_at,
-			   disbursed_by, disbursed_at, rejected_reason, created_at, updated_at
+		SELECT id, request_number, requestor_id, COALESCE(department, ''), request_date, COALESCE(required_date, '0001-01-01'),
+			   purpose, total_amount, COALESCE(approved_amount, 0), COALESCE(status, ''), COALESCE(priority, ''),
+			   approved_by, approved_at, processed_by, processed_at, COALESCE(remarks, ''),
+			   created_at, updated_at
 		FROM expenditure_requests ORDER BY created_at DESC LIMIT 500`
 
 	rows, err := r.db.QueryContext(ctx, query)
@@ -78,9 +83,10 @@ func (r *expenditureRequestRepositoryImpl) GetAll(ctx context.Context) ([]*entit
 	for rows.Next() {
 		request := &entities.ExpenditureRequest{}
 		err := rows.Scan(
-			&request.ID, &request.RequestNumber, &request.RequestDate, &request.RequestedBy, &request.CashBankID,
-			&request.Amount, &request.Purpose, &request.Description, &request.Status, &request.ApprovedBy, &request.ApprovedAt,
-			&request.DisbursedBy, &request.DisbursedAt, &request.RejectedReason, &request.CreatedAt, &request.UpdatedAt,
+			&request.ID, &request.RequestNumber, &request.RequestorID, &request.Department, &request.RequestDate, &request.RequiredDate,
+			&request.Purpose, &request.TotalAmount, &request.ApprovedAmount, &request.Status, &request.Priority,
+			&request.ApprovedBy, &request.ApprovedAt, &request.ProcessedBy, &request.ProcessedAt, &request.Remarks,
+			&request.CreatedAt, &request.UpdatedAt,
 		)
 		if err != nil {
 			return nil, err
@@ -94,15 +100,17 @@ func (r *expenditureRequestRepositoryImpl) GetAll(ctx context.Context) ([]*entit
 func (r *expenditureRequestRepositoryImpl) Update(ctx context.Context, request *entities.ExpenditureRequest) error {
 	query := `
 		UPDATE expenditure_requests SET
-			request_number = $2, request_date = $3, requested_by = $4, cash_bank_id = $5,
-			amount = $6, purpose = $7, description = $8, status = $9, approved_by = $10, approved_at = $11,
-			disbursed_by = $12, disbursed_at = $13, rejected_reason = $14, updated_at = $15
+			request_number = $2, requestor_id = $3, department = $4, request_date = $5, required_date = $6,
+			purpose = $7, total_amount = $8, approved_amount = $9, status = $10, priority = $11,
+			approved_by = $12, approved_at = $13, processed_by = $14, processed_at = $15, remarks = $16,
+			updated_at = $17
 		WHERE id = $1`
 
 	_, err := r.db.ExecContext(ctx, query,
-		request.ID, request.RequestNumber, request.RequestDate, request.RequestedBy, request.CashBankID,
-		request.Amount, request.Purpose, request.Description, request.Status, request.ApprovedBy, request.ApprovedAt,
-		request.DisbursedBy, request.DisbursedAt, request.RejectedReason, request.UpdatedAt,
+		request.ID, request.RequestNumber, request.RequestorID, request.Department, request.RequestDate, request.RequiredDate,
+		request.Purpose, request.TotalAmount, request.ApprovedAmount, request.Status, request.Priority,
+		request.ApprovedBy, request.ApprovedAt, request.ProcessedBy, request.ProcessedAt, request.Remarks,
+		request.UpdatedAt,
 	)
 
 	return err
@@ -116,9 +124,10 @@ func (r *expenditureRequestRepositoryImpl) Delete(ctx context.Context, id uuid.I
 
 func (r *expenditureRequestRepositoryImpl) GetByStatus(ctx context.Context, status string) ([]*entities.ExpenditureRequest, error) {
 	query := `
-		SELECT id, request_number, request_date, requested_by, cash_bank_id,
-			   amount, purpose, description, status, approved_by, approved_at,
-			   disbursed_by, disbursed_at, rejected_reason, created_at, updated_at
+		SELECT id, request_number, requestor_id, COALESCE(department, ''), request_date, COALESCE(required_date, '0001-01-01'),
+			   purpose, total_amount, COALESCE(approved_amount, 0), COALESCE(status, ''), COALESCE(priority, ''),
+			   approved_by, approved_at, processed_by, processed_at, COALESCE(remarks, ''),
+			   created_at, updated_at
 		FROM expenditure_requests WHERE status = $1 ORDER BY created_at DESC`
 
 	rows, err := r.db.QueryContext(ctx, query, status)
@@ -131,9 +140,10 @@ func (r *expenditureRequestRepositoryImpl) GetByStatus(ctx context.Context, stat
 	for rows.Next() {
 		request := &entities.ExpenditureRequest{}
 		err := rows.Scan(
-			&request.ID, &request.RequestNumber, &request.RequestDate, &request.RequestedBy, &request.CashBankID,
-			&request.Amount, &request.Purpose, &request.Description, &request.Status, &request.ApprovedBy, &request.ApprovedAt,
-			&request.DisbursedBy, &request.DisbursedAt, &request.RejectedReason, &request.CreatedAt, &request.UpdatedAt,
+			&request.ID, &request.RequestNumber, &request.RequestorID, &request.Department, &request.RequestDate, &request.RequiredDate,
+			&request.Purpose, &request.TotalAmount, &request.ApprovedAmount, &request.Status, &request.Priority,
+			&request.ApprovedBy, &request.ApprovedAt, &request.ProcessedBy, &request.ProcessedAt, &request.Remarks,
+			&request.CreatedAt, &request.UpdatedAt,
 		)
 		if err != nil {
 			return nil, err
@@ -144,14 +154,15 @@ func (r *expenditureRequestRepositoryImpl) GetByStatus(ctx context.Context, stat
 	return requests, nil
 }
 
-func (r *expenditureRequestRepositoryImpl) GetByRequestedBy(ctx context.Context, requestedBy string) ([]*entities.ExpenditureRequest, error) {
+func (r *expenditureRequestRepositoryImpl) GetByRequestorID(ctx context.Context, requestorID string) ([]*entities.ExpenditureRequest, error) {
 	query := `
-		SELECT id, request_number, request_date, requested_by, cash_bank_id,
-			   amount, purpose, description, status, approved_by, approved_at,
-			   disbursed_by, disbursed_at, rejected_reason, created_at, updated_at
-		FROM expenditure_requests WHERE requested_by = $1 ORDER BY created_at DESC`
+		SELECT id, request_number, requestor_id, COALESCE(department, ''), request_date, COALESCE(required_date, '0001-01-01'),
+			   purpose, total_amount, COALESCE(approved_amount, 0), COALESCE(status, ''), COALESCE(priority, ''),
+			   approved_by, approved_at, processed_by, processed_at, COALESCE(remarks, ''),
+			   created_at, updated_at
+		FROM expenditure_requests WHERE requestor_id = $1 ORDER BY created_at DESC`
 
-	rows, err := r.db.QueryContext(ctx, query, requestedBy)
+	rows, err := r.db.QueryContext(ctx, query, requestorID)
 	if err != nil {
 		return nil, err
 	}
@@ -161,9 +172,10 @@ func (r *expenditureRequestRepositoryImpl) GetByRequestedBy(ctx context.Context,
 	for rows.Next() {
 		request := &entities.ExpenditureRequest{}
 		err := rows.Scan(
-			&request.ID, &request.RequestNumber, &request.RequestDate, &request.RequestedBy, &request.CashBankID,
-			&request.Amount, &request.Purpose, &request.Description, &request.Status, &request.ApprovedBy, &request.ApprovedAt,
-			&request.DisbursedBy, &request.DisbursedAt, &request.RejectedReason, &request.CreatedAt, &request.UpdatedAt,
+			&request.ID, &request.RequestNumber, &request.RequestorID, &request.Department, &request.RequestDate, &request.RequiredDate,
+			&request.Purpose, &request.TotalAmount, &request.ApprovedAmount, &request.Status, &request.Priority,
+			&request.ApprovedBy, &request.ApprovedAt, &request.ProcessedBy, &request.ProcessedAt, &request.Remarks,
+			&request.CreatedAt, &request.UpdatedAt,
 		)
 		if err != nil {
 			return nil, err
@@ -177,15 +189,17 @@ func (r *expenditureRequestRepositoryImpl) GetByRequestedBy(ctx context.Context,
 func (r *expenditureRequestRepositoryImpl) GetByRequestNumber(ctx context.Context, requestNumber string) (*entities.ExpenditureRequest, error) {
 	request := &entities.ExpenditureRequest{}
 	query := `
-		SELECT id, request_number, request_date, requested_by, cash_bank_id,
-			   amount, purpose, description, status, approved_by, approved_at,
-			   disbursed_by, disbursed_at, rejected_reason, created_at, updated_at
+		SELECT id, request_number, requestor_id, COALESCE(department, ''), request_date, COALESCE(required_date, '0001-01-01'),
+			   purpose, total_amount, COALESCE(approved_amount, 0), COALESCE(status, ''), COALESCE(priority, ''),
+			   approved_by, approved_at, processed_by, processed_at, COALESCE(remarks, ''),
+			   created_at, updated_at
 		FROM expenditure_requests WHERE request_number = $1`
 
 	err := r.db.QueryRowContext(ctx, query, requestNumber).Scan(
-		&request.ID, &request.RequestNumber, &request.RequestDate, &request.RequestedBy, &request.CashBankID,
-		&request.Amount, &request.Purpose, &request.Description, &request.Status, &request.ApprovedBy, &request.ApprovedAt,
-		&request.DisbursedBy, &request.DisbursedAt, &request.RejectedReason, &request.CreatedAt, &request.UpdatedAt,
+		&request.ID, &request.RequestNumber, &request.RequestorID, &request.Department, &request.RequestDate, &request.RequiredDate,
+		&request.Purpose, &request.TotalAmount, &request.ApprovedAmount, &request.Status, &request.Priority,
+		&request.ApprovedBy, &request.ApprovedAt, &request.ProcessedBy, &request.ProcessedAt, &request.Remarks,
+		&request.CreatedAt, &request.UpdatedAt,
 	)
 
 	if err != nil {

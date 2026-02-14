@@ -1,0 +1,75 @@
+{
+  "expo": {
+    "name": "Karajo Companion",
+    "slug": "karajo-companion",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "karajo",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/images/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#00979D"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.karajo.companion",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Camera is used for attendance clock-in, barcode scanning, and photo attachments.",
+        "NSLocationWhenInUseUsageDescription": "Location is used for attendance clock-in verification.",
+        "NSFaceIDUsageDescription": "Face ID is used for biometric authentication and high-value approvals."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "backgroundColor": "#00979D"
+      },
+      "package": "com.karajo.companion",
+      "permissions": [
+        "CAMERA",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "USE_BIOMETRIC",
+        "VIBRATE",
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.USE_BIOMETRIC",
+        "android.permission.USE_FINGERPRINT"
+      ]
+    },
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      "expo-secure-store",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow Karajo to access your camera for attendance and scanning."
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Allow Karajo to access your location for attendance verification."
+        }
+      ],
+      "expo-local-authentication",
+      "expo-asset"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "b90d981d-c4f1-4256-b4eb-96e71e0d40af"
+      }
+    },
+    "owner": "nrjlkmnsyh"
+  }
+}

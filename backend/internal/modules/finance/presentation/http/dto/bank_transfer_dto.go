@@ -5,7 +5,6 @@ import (
 
 	"malaka/internal/modules/finance/domain/entities"
 	"malaka/internal/shared/types"
-	"malaka/internal/shared/uuid"
 )
 
 // BankTransferCreateRequest represents the request to create bank transfer.
@@ -43,8 +42,8 @@ func (req *BankTransferCreateRequest) ToBankTransferEntity() *entities.BankTrans
 	return &entities.BankTransfer{
 		BaseModel:      types.BaseModel{},
 		TransferDate:   req.TransferDate,
-		FromCashBankID: uuid.MustParse(req.FromCashBankID),
-		ToCashBankID:   uuid.MustParse(req.ToCashBankID),
+		FromCashBankID: safeParseUUID(req.FromCashBankID),
+		ToCashBankID:   safeParseUUID(req.ToCashBankID),
 		Amount:         req.Amount,
 		Description:    req.Description,
 	}
@@ -55,8 +54,8 @@ func (req *BankTransferUpdateRequest) ToBankTransferEntity() *entities.BankTrans
 	return &entities.BankTransfer{
 		BaseModel:      types.BaseModel{},
 		TransferDate:   req.TransferDate,
-		FromCashBankID: uuid.MustParse(req.FromCashBankID),
-		ToCashBankID:   uuid.MustParse(req.ToCashBankID),
+		FromCashBankID: safeParseUUID(req.FromCashBankID),
+		ToCashBankID:   safeParseUUID(req.ToCashBankID),
 		Amount:         req.Amount,
 		Description:    req.Description,
 	}

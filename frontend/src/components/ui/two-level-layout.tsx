@@ -108,8 +108,13 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { useAuth } from "@/contexts/auth-context"
 import { useWebSocket } from "@/contexts/websocket-context"
+import { useQueryClient } from "@tanstack/react-query"
 import { useSessionActivity } from "@/hooks/useSessionActivity"
 import { useActionItems } from "@/hooks/useActionItems"
+import { useUnreadCount } from "@/hooks/queries/useMessagingQuery"
+import { queryKeys } from "@/lib/query-client"
+import { useFinanceBookmarks } from "@/hooks/useFinanceBookmarks"
+import { getFinanceItemById, getFinanceGroupById, FINANCE_GROUPS } from "@/config/finance-menu"
 
 interface LayoutProps {
   children: React.ReactNode
@@ -171,8 +176,10 @@ const menuData: MenuItem[] = [
       { id: "companies", label: "Companies", icon: Building01Icon, href: "/master-data/companies", count: 24 },
       { id: "users", label: "Users", icon: UserCheck01Icon, href: "/master-data/users", count: 156 },
       { id: "customers", label: "Customers", icon: UserGroupIcon, href: "/master-data/customers", count: 3289 },
+      { id: "suppliers", label: "Suppliers", icon: TruckIcon, href: "/procurement/suppliers", count: 67 },
       { id: "divisions", label: "Divisions", icon: HierarchyIcon, href: "/master-data/divisions", count: 6 },
-      { id: "depstores", label: "Dept Stores", icon: StoreIcon, href: "/master-data/depstores", count: 12 },
+      { id: "branches", label: "Branches", icon: StoreIcon, href: "/master-data/depstores", count: 12 },
+      { id: "warehouses", label: "Warehouses", icon: WarehouseIcon, href: "/production/warehouses", count: 8 },
       { id: "roles", label: "Roles & Permissions", icon: UserShield01Icon, href: "/master-data/roles" },
       { id: "master-data-settings", label: "Settings", icon: SettingsIcon, href: "/master-data/settings" }
     ]
@@ -183,14 +190,14 @@ const menuData: MenuItem[] = [
     icon: Shirt01Icon,
     href: "/products",
     items: [
-      { id: "articles", label: "Articles", icon: Shirt01Icon, href: "/master-data/articles", count: 2847 },
+      { id: "articles", label: "Articles", icon: Shirt01Icon, href: "/products/articles", count: 2847 },
       { id: "classifications", label: "Classifications", icon: HierarchyIcon, href: "/products/classifications", count: 18 },
-      { id: "colors", label: "Colors", icon: ColorsIcon, href: "/master-data/colors", count: 42 },
+      { id: "colors", label: "Colors", icon: ColorsIcon, href: "/products/colors", count: 42 },
       { id: "models", label: "Models", icon: CubeIcon, href: "/products/models", count: 89 },
       { id: "sizes", label: "Sizes", icon: RulerIcon, href: "/products/sizes", count: 28 },
-      { id: "barcodes", label: "Barcodes", icon: BarcodeScanIcon, href: "/master-data/barcodes" },
-      { id: "prices", label: "Prices", icon: Dollar01Icon, href: "/master-data/prices", count: 1543 },
-      { id: "gallery", label: "Gallery", icon: Image01Icon, href: "/master-data/gallery-images", count: 456 },
+      { id: "barcodes", label: "Barcodes", icon: BarcodeScanIcon, href: "/products/barcodes" },
+      { id: "prices", label: "Prices", icon: Dollar01Icon, href: "/products/prices", count: 1543 },
+      { id: "gallery", label: "Gallery", icon: Image01Icon, href: "/products/gallery", count: 456 },
       { id: "products-settings", label: "Settings", icon: SettingsIcon, href: "/products/settings" }
     ]
   },
@@ -238,9 +245,6 @@ const menuData: MenuItem[] = [
     icon: ThreeDViewIcon,
     href: "/production",
     items: [
-      { id: "suppliers", label: "Suppliers", icon: TruckIcon, href: "/production/suppliers", count: 67 },
-      { id: "warehouses", label: "Warehouses", icon: WarehouseIcon, href: "/production/warehouses", count: 8 },
-      { id: "purchase-orders", label: "Purchase Orders", icon: FileIcon, href: "/production/purchase-orders", count: 89 },
       { id: "bill-of-materials", label: "Bill of Materials", icon: HierarchyIcon, href: "/production/bill-of-materials" },
       { id: "work-orders", label: "Work Orders", icon: SettingsIcon, href: "/production/work-orders", count: 45 },
       { id: "quality-control", label: "Quality Control", icon: CheckmarkCircle01Icon, href: "/production/quality-control", count: 12 },
@@ -255,7 +259,6 @@ const menuData: MenuItem[] = [
     icon: Upload05Icon,
     href: "/procurement",
     items: [
-      { id: "suppliers", label: "Suppliers", icon: TruckIcon, href: "/procurement/suppliers", count: 45 },
       { id: "purchase-requests", label: "Purchase Requests", icon: FileUploadIcon, href: "/procurement/purchase-requests", count: 23 },
       { id: "purchase-orders", label: "Purchase Orders", icon: SealIcon, href: "/procurement/purchase-orders", count: 67 },
       { id: "rfq", label: "RFQ (Quotations)", icon: Chat01Icon, href: "/procurement/rfq", count: 12 },
@@ -290,8 +293,6 @@ const menuData: MenuItem[] = [
       { id: "general-ledger", label: "General Ledger", icon: BookOpen01Icon, href: "/accounting/general-ledger" },
       { id: "journal-entries", label: "Journal Entries", icon: FileIcon, href: "/accounting/journal" },
       { id: "trial-balance", label: "Trial Balance", icon: ChartColumnIcon, href: "/accounting/trial-balance" },
-      { id: "cash-bank", label: "Cash & Bank", icon: PiggyBankIcon, href: "/accounting/cash-bank" },
-      { id: "invoices", label: "Invoices", icon: ReceiptDollarIcon, href: "/accounting/invoices" },
       { id: "cost-centers", label: "Cost Centers", icon: TargetIcon, href: "/accounting/cost-centers" },
       { id: "fixed-assets", label: "Fixed Assets", icon: Building02Icon, href: "/accounting/fixed-assets" },
       { id: "currency", label: "Currency", icon: Dollar01Icon, href: "/accounting/currency" },
@@ -305,14 +306,10 @@ const menuData: MenuItem[] = [
     href: "/finance",
     items: [
       { id: "finance-dashboard", label: "Dashboard", icon: Analytics01Icon, href: "/finance" },
-      { id: "cash-treasury", label: "Cash & Treasury", icon: BankIcon, href: "/finance/cash-treasury" },
-      { id: "budgeting", label: "Budgeting", icon: ClipboardIcon, href: "/finance/budgeting" },
-      { id: "cost-control", label: "Cost Control", icon: TargetIcon, href: "/finance/cost-control" },
-      { id: "working-capital", label: "Working Capital", icon: CoinsIcon, href: "/finance/working-capital" },
-      { id: "loan-financing", label: "Loan & Financing", icon: CreditCardValidationIcon, href: "/finance/loan-financing" },
-      { id: "capex-investment", label: "CapEx & Investment", icon: ChartBreakoutSquareIcon, href: "/finance/capex-investment" },
-      { id: "financial-planning", label: "Financial Planning", icon: ChartLineData01Icon, href: "/finance/financial-planning" },
-      { id: "finance-reports", label: "Finance Reports", icon: PieChart01Icon, href: "/finance/reports" },
+      { id: "receivables-payables", label: "Receivables & Payables", icon: Invoice01Icon, href: "/finance/receivables-payables", group: "Modules" },
+      { id: "cash-management", label: "Cash Management", icon: BankIcon, href: "/finance/cash-management" },
+      { id: "planning-analysis", label: "Planning & Analysis", icon: ChartLineData01Icon, href: "/finance/planning-analysis" },
+      { id: "closing-reports", label: "Closing & Reports", icon: PieChart01Icon, href: "/finance/closing-reports" },
     ]
   },
   {
@@ -342,7 +339,7 @@ const menuData: MenuItem[] = [
       { id: "leave", label: "Leave Management", icon: Calendar01Icon, href: "/hr/leave" },
       { id: "performance", label: "Performance", icon: Medal01Icon, href: "/hr/performance" },
       { id: "training", label: "Training", icon: GraduationScrollIcon, href: "/hr/training" },
-      { id: "spg-stores", label: "SPG Stores", icon: StoreIcon, href: "/hr/spg-stores" },
+      { id: "staff-assignments", label: "Staff Assignments", icon: StoreIcon, href: "/hr/staff-assignments" },
       { id: "hr-settings", label: "Settings", icon: SettingsIcon, href: "/hr/settings" }
     ]
   },
@@ -362,9 +359,21 @@ function TwoLevelLayoutInner({ children }: LayoutProps) {
   const { subscribe, unsubscribe } = useWebSocket()
   const [activeMenu, setActiveMenu] = React.useState<string | null>(null)
   const [isSecondSidebarCollapsed, setIsSecondSidebarCollapsed] = React.useState(false)
-  const { slotContent } = useSecondarySidebarSlot()
+  const [expandedFinanceGroups, setExpandedFinanceGroups] = React.useState<Set<string>>(new Set())
+  const { slotContent, setSlotContent } = useSecondarySidebarSlot()
   const { getModuleTotal, getItemCount } = useActionItems()
-  const [msgUnreadCount, setMsgUnreadCount] = React.useState(0)
+  const queryClient = useQueryClient()
+  const { data: msgUnreadCount = 0 } = useUnreadCount()
+  const { bookmarks: financeBookmarks } = useFinanceBookmarks()
+
+  // Clear sidebar slot immediately on route change (prevents stale chat list lingering)
+  const prevPathnameRef = React.useRef(pathname)
+  React.useEffect(() => {
+    if (prevPathnameRef.current !== pathname && slotContent) {
+      setSlotContent(null)
+    }
+    prevPathnameRef.current = pathname
+  }, [pathname, slotContent, setSlotContent])
 
   // Initialize session activity tracking
   useSessionActivity({
@@ -372,28 +381,10 @@ function TwoLevelLayoutInner({ children }: LayoutProps) {
     sessionWarningTime: 5 * 60 * 1000   // 5 minutes
   })
 
-  // Fetch unread message count on mount, on route change, and on WebSocket events
-  // Also play notification sound for incoming chat messages (centralized here since this layout is always mounted)
+  // Play notification sound for incoming chat messages and invalidate unread count cache
   React.useEffect(() => {
-    const fetchUnread = async () => {
-      try {
-        const token = typeof window !== 'undefined' ? localStorage.getItem('malaka_auth_token') : null
-        if (!token) return
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'}/api/v1/messaging/unread-count`, {
-          headers: { Authorization: `Bearer ${token}` },
-        })
-        if (res.ok) {
-          const json = await res.json()
-          setMsgUnreadCount(json.data?.count ?? json.count ?? 0)
-        }
-      } catch { /* ignore */ }
-    }
-    fetchUnread()
-    // Poll every 60s as a fallback
-    const interval = setInterval(fetchUnread, 60000)
-
     const handleChatMessage = (payload: unknown) => {
-      fetchUnread()
+      queryClient.invalidateQueries({ queryKey: queryKeys.messaging.unreadCount })
       // Play sound for messages from others
       const data = payload as { sender_id?: string }
       if (data.sender_id && data.sender_id !== user?.id) {
@@ -407,10 +398,9 @@ function TwoLevelLayoutInner({ children }: LayoutProps) {
     subscribe('chat_message', handleChatMessage)
 
     return () => {
-      clearInterval(interval)
       unsubscribe('chat_message', handleChatMessage)
     }
-  }, [subscribe, unsubscribe, pathname, user?.id])
+  }, [subscribe, unsubscribe, user?.id, queryClient])
 
   // Auto-set active menu based on pathname
   React.useEffect(() => {
@@ -435,6 +425,20 @@ function TwoLevelLayoutInner({ children }: LayoutProps) {
     }
   }, [pathname])
 
+  // Auto-expand finance group when navigating to a child page
+  React.useEffect(() => {
+    if (activeMenu !== 'finance') return
+    for (const group of FINANCE_GROUPS) {
+      if (group.items.some(sub => pathname === sub.href || pathname.startsWith(sub.href + '/'))) {
+        setExpandedFinanceGroups(prev => {
+          if (prev.has(group.id)) return prev
+          return new Set(prev).add(group.id)
+        })
+        break
+      }
+    }
+  }, [pathname, activeMenu])
+
   const handleMenuClick = (menuId: string) => {
     if (activeMenu === menuId) {
       // Don't toggle off if it's a main nav item like messages
@@ -449,15 +453,34 @@ function TwoLevelLayoutInner({ children }: LayoutProps) {
   // Get data for active menu, with fallbacks for standalone items
   const activeMenuData = React.useMemo(() => {
     const found = menuData.find(menu => menu.id === activeMenu)
-    if (found) return found
+    if (!found) {
+      // Fallbacks for items that aren't in the main loop but need sidebar headers
+      if (activeMenu === 'messages') return { id: 'messages', label: 'Messages', icon: Chat01Icon }
+      if (activeMenu === 'calendar') return { id: 'calendar', label: 'Calendar', icon: Calendar01Icon }
+      if (activeMenu === 'settings') return { id: 'settings', label: 'Settings', icon: SettingsIcon }
+      return undefined
+    }
 
-    // Fallbacks for items that aren't in the main loop but need sidebar headers
-    if (activeMenu === 'messages') return { id: 'messages', label: 'Messages', icon: Chat01Icon }
-    if (activeMenu === 'calendar') return { id: 'calendar', label: 'Calendar', icon: Calendar01Icon }
-    if (activeMenu === 'settings') return { id: 'settings', label: 'Settings', icon: SettingsIcon }
+    // Append bookmarked items to finance sidebar
+    if (found.id === 'finance' && found.items && financeBookmarks.length > 0) {
+      const bookmarkItems: SubMenuItem[] = financeBookmarks
+        .map(id => getFinanceItemById(id))
+        .filter((item): item is NonNullable<typeof item> => !!item)
+        .map((item, idx) => ({
+          id: item.id,
+          label: item.label,
+          icon: item.icon,
+          href: item.href,
+          ...(idx === 0 ? { group: 'Bookmarks' } : {}),
+        }))
 
-    return undefined
-  }, [activeMenu])
+      if (bookmarkItems.length > 0) {
+        return { ...found, items: [...found.items, ...bookmarkItems] }
+      }
+    }
+
+    return found
+  }, [activeMenu, financeBookmarks])
 
   // Function to format count for display
   const formatCount = (count: number) => {
@@ -496,7 +519,7 @@ function TwoLevelLayoutInner({ children }: LayoutProps) {
                         setActiveMenu(menu.id)
                         setIsSecondSidebarCollapsed(false)
                       }}
-                      className={`relative flex items-center justify-center p-2 rounded-md transition-colors ${isActive
+                      className={`relative flex items-center justify-center p-2 rounded-sm transition-colors ${isActive
                         ? 'bg-blue-600 dark:bg-blue-400'
                         : 'hover:bg-gray-200 dark:hover:bg-gray-700'
                         }`}
@@ -510,7 +533,7 @@ function TwoLevelLayoutInner({ children }: LayoutProps) {
                   ) : (
                     <button
                       onClick={() => handleMenuClick(menu.id)}
-                      className={`relative w-full flex items-center justify-center p-2 rounded-md transition-colors ${isActive
+                      className={`relative w-full flex items-center justify-center p-2 rounded-sm transition-colors ${isActive
                         ? 'bg-blue-600 dark:bg-blue-400'
                         : 'hover:bg-gray-200 dark:hover:bg-gray-700'
                         }`}
@@ -534,7 +557,7 @@ function TwoLevelLayoutInner({ children }: LayoutProps) {
             {/* Calendar */}
             <Link
               href="/calendar"
-              className={`w-full flex items-center justify-center p-2 rounded-md transition-colors ${pathname === '/calendar'
+              className={`w-full flex items-center justify-center p-2 rounded-sm transition-colors ${pathname === '/calendar'
                 ? 'bg-blue-600 dark:bg-blue-400'
                 : 'hover:bg-gray-200 dark:hover:bg-gray-700'
                 }`}
@@ -546,7 +569,7 @@ function TwoLevelLayoutInner({ children }: LayoutProps) {
             {/* Messages */}
             <Link
               href="/messages"
-              className={`w-full flex items-center justify-center p-2 rounded-md transition-colors relative ${pathname.startsWith('/messages')
+              className={`w-full flex items-center justify-center p-2 rounded-sm transition-colors relative ${pathname.startsWith('/messages')
                 ? 'bg-blue-600 dark:bg-blue-400'
                 : 'hover:bg-gray-200 dark:hover:bg-gray-700'
                 }`}
@@ -568,7 +591,7 @@ function TwoLevelLayoutInner({ children }: LayoutProps) {
             {/* Settings */}
             <Link
               href="/settings"
-              className={`w-full flex items-center justify-center p-2 rounded-md transition-colors ${pathname === '/settings'
+              className={`w-full flex items-center justify-center p-2 rounded-sm transition-colors ${pathname === '/settings'
                 ? 'bg-blue-600 dark:bg-blue-400'
                 : 'hover:bg-gray-200 dark:hover:bg-gray-700'
                 }`}
@@ -645,38 +668,98 @@ function TwoLevelLayoutInner({ children }: LayoutProps) {
                 {activeMenuData.items.map((item) => {
                   const isActive = pathname === item.href
                   const badgeCount = activeMenu ? getItemCount(activeMenu, item.id) : 0
+                  const financeGroup = activeMenu === 'finance' ? getFinanceGroupById(item.id) : undefined
+                  const isGroupExpanded = expandedFinanceGroups.has(item.id)
+                  const hasActiveChild = financeGroup?.items.some(sub => pathname === sub.href || pathname.startsWith(sub.href + '/'))
 
                   return (
                     <li key={item.id}>
                       {item.group && !isSecondSidebarCollapsed && (
                         <p className="px-3 pt-3 pb-1 text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">{item.group}</p>
                       )}
-                      <Link
-                        href={item.href}
-                        className={`flex items-center ${isSecondSidebarCollapsed ? 'justify-center p-3' : 'justify-between px-3 py-2'
-                          } rounded-lg transition-colors ${isActive
-                            ? 'bg-blue-600 dark:bg-blue-400 text-white dark:text-gray-950'
-                            : 'hover:bg-white dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
-                          }`}
-                        title={isSecondSidebarCollapsed ? item.label : undefined}
-                      >
-                        <div className="flex items-center space-x-3">
-                          <Icon icon={item.icon} className={`h-4 w-4 flex-shrink-0 ${isActive ? 'text-white dark:text-gray-950' : ''}`} />
-                          {!isSecondSidebarCollapsed && (
-                            <span className="text-sm font-medium">{item.label}</span>
+
+                      {/* Finance group item with expandable dropdown */}
+                      {financeGroup && !isSecondSidebarCollapsed ? (
+                        <>
+                          <div
+                            className={`flex items-center rounded-sm transition-colors ${
+                              isActive || hasActiveChild
+                                ? 'bg-blue-600 dark:bg-blue-400 text-white dark:text-gray-950'
+                                : 'hover:bg-white dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
+                            }`}
+                          >
+                            <Link href={item.href} className="flex-1 flex items-center px-3 py-2 space-x-3 min-w-0">
+                              <Icon icon={item.icon} className={`h-4 w-4 flex-shrink-0 ${isActive || hasActiveChild ? 'text-white dark:text-gray-950' : ''}`} />
+                              <span className="text-sm font-medium truncate">{item.label}</span>
+                            </Link>
+                            <button
+                              onClick={(e) => {
+                                e.preventDefault()
+                                setExpandedFinanceGroups(prev => {
+                                  const next = new Set(prev)
+                                  if (next.has(item.id)) next.delete(item.id)
+                                  else next.add(item.id)
+                                  return next
+                                })
+                              }}
+                              className={`px-2 py-2 flex-shrink-0 rounded-sm transition-colors ${
+                                isActive || hasActiveChild ? 'hover:bg-blue-500 dark:hover:bg-blue-300' : 'hover:bg-gray-200 dark:hover:bg-gray-600'
+                              }`}
+                            >
+                              <Icon icon={ArrowRightIcon} className={`h-3 w-3 transition-transform duration-200 ${isGroupExpanded ? 'rotate-90' : ''}`} />
+                            </button>
+                          </div>
+                          {isGroupExpanded && (
+                            <ul className="mt-0.5 space-y-0.5">
+                              {financeGroup.items.map(sub => {
+                                const isSubActive = pathname === sub.href || pathname.startsWith(sub.href + '/')
+                                return (
+                                  <li key={sub.id}>
+                                    <Link
+                                      href={sub.href}
+                                      className={`flex items-center pl-10 pr-3 py-1.5 rounded-sm transition-colors text-sm ${
+                                        isSubActive
+                                          ? 'bg-blue-600 dark:bg-blue-400 text-white dark:text-gray-950'
+                                          : 'hover:bg-white dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400'
+                                      }`}
+                                    >
+                                      {sub.label}
+                                    </Link>
+                                  </li>
+                                )
+                              })}
+                            </ul>
                           )}
-                        </div>
-                        {!isSecondSidebarCollapsed && badgeCount > 0 ? (
-                          <span className={`flex items-center justify-center min-w-[18px] h-[18px] text-[10px] font-bold rounded-full px-1 ${isActive ? 'bg-white text-blue-600' : 'bg-red-500 text-white'
-                            }`}>
-                            {badgeCount}
-                          </span>
-                        ) : !isSecondSidebarCollapsed && item.count ? (
-                          <span className="text-xs text-gray-500 dark:text-gray-400 font-normal">
-                            {formatCount(item.count)}
-                          </span>
-                        ) : null}
-                      </Link>
+                        </>
+                      ) : (
+                        /* Regular sidebar item */
+                        <Link
+                          href={item.href}
+                          className={`flex items-center ${isSecondSidebarCollapsed ? 'justify-center p-3' : 'justify-between px-3 py-2'
+                            } rounded-sm transition-colors ${isActive
+                              ? 'bg-blue-600 dark:bg-blue-400 text-white dark:text-gray-950'
+                              : 'hover:bg-white dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
+                            }`}
+                          title={isSecondSidebarCollapsed ? item.label : undefined}
+                        >
+                          <div className="flex items-center space-x-3">
+                            <Icon icon={item.icon} className={`h-4 w-4 flex-shrink-0 ${isActive ? 'text-white dark:text-gray-950' : ''}`} />
+                            {!isSecondSidebarCollapsed && (
+                              <span className="text-sm font-medium">{item.label}</span>
+                            )}
+                          </div>
+                          {!isSecondSidebarCollapsed && badgeCount > 0 ? (
+                            <span className={`flex items-center justify-center min-w-[18px] h-[18px] text-[10px] font-bold rounded-full px-1 ${isActive ? 'bg-white text-blue-600' : 'bg-red-500 text-white'
+                              }`}>
+                              {badgeCount}
+                            </span>
+                          ) : !isSecondSidebarCollapsed && item.count ? (
+                            <span className="text-xs text-gray-500 dark:text-gray-400 font-normal">
+                              {formatCount(item.count)}
+                            </span>
+                          ) : null}
+                        </Link>
+                      )}
                     </li>
                   )
                 })}
@@ -694,7 +777,7 @@ function TwoLevelLayoutInner({ children }: LayoutProps) {
           {/* Help Card - Bottom section */}
           {!isSecondSidebarCollapsed && activeMenuData && (
             <div className="p-3 border-t border-gray-300 dark:border-gray-600">
-              <div className="bg-white dark:bg-gray-700 rounded-lg p-4 ">
+              <div className="bg-white dark:bg-gray-700 rounded-sm p-4 ">
                 <div className="flex items-center space-x-2 mb-2">
                   <Icon icon={HelpCircleIcon} className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                   <span className="text-sm font-medium text-gray-900 dark:text-gray-100">Need Help?</span>
@@ -703,11 +786,11 @@ function TwoLevelLayoutInner({ children }: LayoutProps) {
                   Get support, tutorials, and documentation for {activeMenuData.label.toLowerCase()}.
                 </p>
                 <div className="space-y-2">
-                  <button className="w-full flex items-center justify-between px-2 py-1.5 text-xs bg-gray-50 dark:bg-gray-600 hover:bg-gray-100 dark:hover:bg-gray-500 rounded-md transition-colors">
+                  <button className="w-full flex items-center justify-between px-2 py-1.5 text-xs bg-gray-50 dark:bg-gray-600 hover:bg-gray-100 dark:hover:bg-gray-500 rounded-sm transition-colors">
                     <span className="text-gray-700 dark:text-gray-300">View Guide</span>
                     <Icon icon={Share01Icon} className="h-3 w-3 text-gray-500 dark:text-gray-400" />
                   </button>
-                  <button className="w-full flex items-center justify-between px-2 py-1.5 text-xs bg-gray-50 dark:bg-gray-600 hover:bg-gray-100 dark:hover:bg-gray-500 rounded-md transition-colors">
+                  <button className="w-full flex items-center justify-between px-2 py-1.5 text-xs bg-gray-50 dark:bg-gray-600 hover:bg-gray-100 dark:hover:bg-gray-500 rounded-sm transition-colors">
                     <span className="text-gray-700 dark:text-gray-300">Contact Support</span>
                     <Icon icon={Share01Icon} className="h-3 w-3 text-gray-500 dark:text-gray-400" />
                   </button>

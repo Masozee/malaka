@@ -4,9 +4,9 @@ import (
 	"context"
 	"errors"
 
+	"github.com/google/uuid"
 	"malaka/internal/modules/sales/domain/entities"
 	"malaka/internal/modules/sales/domain/repositories"
-	"malaka/internal/shared/utils"
 )
 
 type ProsesMarginService interface {
@@ -30,7 +30,7 @@ func NewProsesMarginService(repo repositories.ProsesMarginRepository) ProsesMarg
 // CreateProsesMargin creates a new proses margin entry.
 func (s *prosesMarginService) CreateProsesMargin(ctx context.Context, pm *entities.ProsesMargin) error {
 	if pm.ID == "" {
-		pm.ID = utils.RandomString(10) // Generate a random ID if not provided
+		pm.ID = uuid.New().String()
 	}
 	return s.repo.Create(ctx, pm)
 }

@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { HugeiconsIcon } from "@hugeicons/react"
-import { ChartIncreaseIcon, ChartDecreaseIcon, Calendar01Icon, Dollar01Icon } from "@hugeicons/core-free-icons"
+import { SquareArrowUp02Icon, SquareArrowDown02Icon, PanelLeftOpenIcon, PanelRightCloseIcon, DownloadSquare02Icon } from "@hugeicons/core-free-icons"
 import { TwoLevelLayout } from "@/components/ui/two-level-layout"
 import { Header } from "@/components/ui/header"
 import { AdvancedDataTable } from "@/components/ui/advanced-data-table"
@@ -22,35 +22,69 @@ import {
   ChartOfAccount,
   CostCenter,
   FinancialPeriod,
-  AccountingFilters
 } from "@/types/accounting"
 
 export default function GeneralLedgerPage() {
-  const [entries, setEntries] = React.useState<GeneralLedgerEntry[]>([])
+  const [allEntries, setAllEntries] = React.useState<GeneralLedgerEntry[]>([])
   const [accounts, setAccounts] = React.useState<ChartOfAccount[]>([])
   const [costCenters, setCostCenters] = React.useState<CostCenter[]>([])
   const [periods, setPeriods] = React.useState<FinancialPeriod[]>([])
   const [loading, setLoading] = React.useState(true)
-  const [summary, setSummary] = React.useState({
-    total_debits: 0,
-    total_credits: 0,
-    opening_balance: 0,
-    closing_balance: 0
-  })
-  const [pagination, setPagination] = React.useState({
-    current: 1,
-    pageSize: 25,
-    total: 0
-  })
   const { addToast } = useToast()
 
-  // Define table columns with financial formatting
+  // Filter state
+  const [searchQuery, setSearchQuery] = React.useState("")
+  const [selectedAccount, setSelectedAccount] = React.useState<string>("all")
+  const [selectedPeriod, setSelectedPeriod] = React.useState<string>("all")
+
+  // Client-side filtered entries
+  const filteredEntries = React.useMemo(() => {
+    let result = allEntries
+
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase()
+      result = result.filter(entry =>
+        entry.description?.toLowerCase().includes(q) ||
+        entry.entry_number?.toLowerCase().includes(q) ||
+        entry.account_code?.toLowerCase().includes(q) ||
+        entry.account_name?.toLowerCase().includes(q) ||
+        entry.reference?.toLowerCase().includes(q)
+      )
+    }
+
+    if (selectedAccount && selectedAccount !== "all") {
+      result = result.filter(entry => entry.account_id === selectedAccount)
+    }
+
+    if (selectedPeriod && selectedPeriod !== "all") {
+      result = result.filter(entry => entry.period === selectedPeriod)
+    }
+
+    return result
+  }, [allEntries, searchQuery, selectedAccount, selectedPeriod])
+
+  // Summary computed from filtered entries
+  const summary = React.useMemo(() => {
+    const totalDebits = filteredEntries.reduce((sum, e) => sum + (e.debit_amount || 0), 0)
+    const totalCredits = filteredEntries.reduce((sum, e) => sum + (e.credit_amount || 0), 0)
+    return {
+      total_debits: totalDebits,
+      total_credits: totalCredits,
+      opening_balance: 0,
+      closing_balance: totalDebits - totalCredits
+    }
+  }, [filteredEntries])
+
+  // Define table columns
   const columns = [
     {
       key: 'entry_date' as keyof GeneralLedgerEntry,
       title: 'Date',
       sortable: true,
-      render: (date: unknown) => new Date(date as string).toLocaleDateString(),
+      render: (date: unknown) => {
+        const d = new Date(date as string)
+        return <span className="whitespace-nowrap">{d.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
+      },
       width: '100px'
     },
     {
@@ -59,12 +93,24 @@ export default function GeneralLedgerPage() {
       sortable: true,
       searchable: true,
       render: (entryNumber: unknown, entry: GeneralLedgerEntry) => (
-        <div className="flex flex-col">
-          <span className="font-medium text-blue-600 dark:text-blue-400">
-            {entryNumber as string}
-          </span>
-          <span className="text-xs text-gray-500">
-            Line {entry.line_number}
+        <div className="flex flex-col gap-1">
+          {entry.journal_entry_id ? (
+            <a
+              href={`/accounting/journal/${entry.journal_entry_id}`}
+              className="font-medium text-blue-600 dark:text-blue-400 hover:underline"
+            >
+              {entryNumber as string}
+            </a>
+          ) : (
+            <span className="font-medium text-gray-900 dark:text-gray-100">
+              {entryNumber as string}
+            </span>
+          )}
+          <span className="text-[10px] text-gray-500">
+            <Badge variant={entry.status === 'POSTED' ? 'default' : entry.status === 'CANCELLED' ? 'destructive' : 'secondary'} className="text-[10px] px-1.5 py-0 h-4 rounded-sm">
+              {entry.status?.toLowerCase()}
+            </Badge>
+            {' | Line '}{entry.line_number}
           </span>
         </div>
       ),
@@ -85,11 +131,6 @@ export default function GeneralLedgerPage() {
           </span>
         </div>
       ),
-      filterType: 'select' as const,
-      filterOptions: accounts.map(account => ({
-        value: account.id,
-        label: `${account.account_code} - ${account.account_name}`
-      })),
       width: '180px'
     },
     {
@@ -116,14 +157,14 @@ export default function GeneralLedgerPage() {
       render: (amount: unknown) => {
         const debitAmount = amount as number
         return debitAmount > 0 ? (
-          <span className="font-medium text-green-600 dark:text-green-400">
+          <span className="font-medium text-green-600 dark:text-green-400 whitespace-nowrap">
             Rp {debitAmount.toLocaleString('id-ID')}
           </span>
         ) : (
           <span className="text-gray-400">-</span>
         )
       },
-      width: '120px'
+      width: '130px'
     },
     {
       key: 'credit_amount' as keyof GeneralLedgerEntry,
@@ -132,14 +173,14 @@ export default function GeneralLedgerPage() {
       render: (amount: unknown) => {
         const creditAmount = amount as number
         return creditAmount > 0 ? (
-          <span className="font-medium text-red-600 dark:text-red-400">
+          <span className="font-medium text-red-600 dark:text-red-400 whitespace-nowrap">
             Rp {creditAmount.toLocaleString('id-ID')}
           </span>
         ) : (
           <span className="text-gray-400">-</span>
         )
       },
-      width: '120px'
+      width: '130px'
     },
     {
       key: 'running_balance' as keyof GeneralLedgerEntry,
@@ -149,7 +190,7 @@ export default function GeneralLedgerPage() {
         const runningBalance = balance as number
         const isNegative = runningBalance < 0
         return (
-          <span className={`font-medium ${isNegative
+          <span className={`font-medium whitespace-nowrap ${isNegative
             ? 'text-red-600 dark:text-red-400'
             : 'text-green-600 dark:text-green-400'
             }`}>
@@ -158,166 +199,50 @@ export default function GeneralLedgerPage() {
           </span>
         )
       },
-      width: '120px'
+      width: '130px'
     },
-    {
-      key: 'cost_center_name' as keyof GeneralLedgerEntry,
-      title: 'Cost Center',
-      render: (costCenter: unknown) => costCenter ? (
-        <Badge variant="outline" className="text-xs">
-          {costCenter as string}
-        </Badge>
-      ) : '-',
-      filterType: 'select' as const,
-      filterOptions: costCenters.map(cc => ({
-        value: cc.id,
-        label: `${cc.code} - ${cc.name}`
-      })),
-      width: '120px'
-    },
-    {
-      key: 'status' as keyof GeneralLedgerEntry,
-      title: 'Status',
-      render: (status: unknown) => {
-        const statusStr = status as string
-        let variant: 'default' | 'secondary' | 'destructive' = 'default'
-        if (statusStr === 'DRAFT') variant = 'secondary'
-        if (statusStr === 'CANCELLED') variant = 'destructive'
-
-        return (
-          <Badge variant={variant}>
-            {statusStr}
-          </Badge>
-        )
-      },
-      filterType: 'select' as const,
-      filterOptions: [
-        { value: 'DRAFT', label: 'Draft' },
-        { value: 'PENDING', label: 'Pending' },
-        { value: 'POSTED', label: 'Posted' },
-        { value: 'CANCELLED', label: 'Cancelled' }
-      ],
-      width: '100px'
-    },
-    {
-      key: 'period' as keyof GeneralLedgerEntry,
-      title: 'Period',
-      render: (period: unknown, entry: GeneralLedgerEntry) => (
-        <div className="flex flex-col">
-          <span className="text-xs font-medium">{period as string}</span>
-          <span className="text-xs text-gray-500">FY {entry.fiscal_year}</span>
-        </div>
-      ),
-      filterType: 'select' as const,
-      filterOptions: periods.map(period => ({
-        value: period.period_name,
-        label: `${period.period_name} ${period.fiscal_year}`
-      })),
-      width: '100px'
-    },
-    {
-      key: 'journal_entry_id' as keyof GeneralLedgerEntry,
-      title: 'Actions',
-      render: (journalEntryId: unknown, entry: GeneralLedgerEntry) => (
-        <div className="flex space-x-2">
-          {entry.journal_entry_id && (
-            <Button
-              variant="link"
-              size="sm"
-              onClick={() => handleViewJournalEntry(entry)}
-              className="text-blue-600 hover:text-blue-800 text-xs font-medium p-0 h-auto"
-            >
-              View Journal Entry
-            </Button>
-          )}
-        </div>
-      ),
-      width: '150px'
-    }
   ]
 
-  // Fetch general ledger entries with filters
-  const fetchEntries = React.useCallback(async (filters?: AccountingFilters) => {
+  // Fetch all data once on mount
+  const fetchData = React.useCallback(async () => {
     try {
       setLoading(true)
-      const response = await generalLedgerService.getAll(filters)
-      setEntries(response.data)
-      setPagination(prev => ({
-        ...prev,
-        total: response.total
-      }))
-
-      // Update summary if available
-      if (response.summary) {
-        setSummary(response.summary)
-      }
-    } catch (error) {
-      console.error('Error fetching general ledger entries:', error)
-      addToast(toast.error("Failed to fetch ledger entries", "Please try again later."))
-    } finally {
-      setLoading(false)
-    }
-  }, [addToast])
-
-  // Fetch reference data
-  const fetchReferenceData = React.useCallback(async () => {
-    try {
-      const [accountsResponse, costCentersResponse, periodsResponse] = await Promise.all([
+      const [glResponse, accountsResponse, costCentersResponse, periodsResponse] = await Promise.allSettled([
+        generalLedgerService.getAll(),
         chartOfAccountsService.getAll(),
         costCenterService.getAll(),
         financialPeriodService.getAll()
       ])
 
-      setAccounts(accountsResponse.data)
-      setCostCenters(costCentersResponse.data)
-      setPeriods(periodsResponse.data || [])
+      if (glResponse.status === 'fulfilled') {
+        setAllEntries(glResponse.value.data)
+      } else {
+        addToast(toast.error("Failed to fetch ledger entries", "Please try again later."))
+      }
+
+      if (accountsResponse.status === 'fulfilled') {
+        setAccounts(accountsResponse.value.data)
+      }
+      if (costCentersResponse.status === 'fulfilled') {
+        setCostCenters(costCentersResponse.value.data)
+      }
+      if (periodsResponse.status === 'fulfilled') {
+        setPeriods(periodsResponse.value.data || [])
+      }
     } catch (error) {
-      console.error('Error fetching reference data:', error)
+      console.error('Error fetching data:', error)
+    } finally {
+      setLoading(false)
     }
-  }, [])
-
-  // Load initial data
-  React.useEffect(() => {
-    fetchReferenceData()
-  }, [fetchReferenceData])
+  }, [addToast])
 
   React.useEffect(() => {
-    fetchEntries({
-      page: pagination.current,
-      limit: pagination.pageSize,
-      sortBy: 'entry_date',
-      sortOrder: 'desc'
-    })
-  }, [pagination.current, pagination.pageSize, fetchEntries])
-
-  // Event handlers
-  const handleSearch = React.useCallback((filters: AccountingFilters) => {
-    fetchEntries({
-      ...filters,
-      page: 1,
-      limit: pagination.pageSize,
-      sortBy: 'entry_date',
-      sortOrder: 'desc'
-    })
-    setPagination(prev => ({ ...prev, current: 1 }))
-  }, [pagination.pageSize, fetchEntries])
-
-  const handlePageChange = React.useCallback((page: number, pageSize: number) => {
-    setPagination(prev => ({ ...prev, current: page, pageSize }))
-  }, [])
-
-  const handleViewJournalEntry = (entry: GeneralLedgerEntry) => {
-    // Navigate to the source journal entry for editing
-    if (entry.journal_entry_id) {
-      window.open(`/accounting/journal/${entry.journal_entry_id}`, '_blank')
-    }
-  }
+    fetchData()
+  }, [fetchData])
 
   const handleExport = async () => {
     try {
-      const blob = await generalLedgerService.exportLedger({
-        // Current filters would be applied here
-      })
+      const blob = await generalLedgerService.exportLedger({})
 
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
@@ -353,7 +278,8 @@ export default function GeneralLedgerPage() {
           ]}
           actions={
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" onClick={handleExport}>
+              <Button size="sm" className="rounded-sm px-6" onClick={handleExport}>
+                <HugeiconsIcon icon={DownloadSquare02Icon} className="h-4 w-4 mr-1.5" />
                 Export
               </Button>
             </div>
@@ -363,10 +289,10 @@ export default function GeneralLedgerPage() {
         <div className="flex-1 overflow-auto p-6 space-y-6">
           {/* Summary Cards */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="p-4 bg-white dark:bg-zinc-900 rounded-lg">
+            <div className="p-4 bg-white dark:bg-zinc-900 rounded-sm border">
               <div className="flex items-center space-x-3">
-                <div className="h-10 w-10 bg-zinc-100 dark:bg-zinc-800 rounded-lg flex items-center justify-center">
-                  <HugeiconsIcon icon={ChartIncreaseIcon} className="h-5 w-5 text-foreground" />
+                <div className="h-10 w-10 bg-zinc-100 dark:bg-zinc-800 rounded-sm flex items-center justify-center">
+                  <HugeiconsIcon icon={SquareArrowUp02Icon} className="h-5 w-5 text-foreground" />
                 </div>
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Total Debits</p>
@@ -375,10 +301,10 @@ export default function GeneralLedgerPage() {
               </div>
             </div>
 
-            <div className="p-4 bg-white dark:bg-zinc-900 rounded-lg">
+            <div className="p-4 bg-white dark:bg-zinc-900 rounded-sm border">
               <div className="flex items-center space-x-3">
-                <div className="h-10 w-10 bg-zinc-100 dark:bg-zinc-800 rounded-lg flex items-center justify-center">
-                  <HugeiconsIcon icon={ChartDecreaseIcon} className="h-5 w-5 text-foreground" />
+                <div className="h-10 w-10 bg-zinc-100 dark:bg-zinc-800 rounded-sm flex items-center justify-center">
+                  <HugeiconsIcon icon={SquareArrowDown02Icon} className="h-5 w-5 text-foreground" />
                 </div>
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Total Credits</p>
@@ -387,10 +313,10 @@ export default function GeneralLedgerPage() {
               </div>
             </div>
 
-            <div className="p-4 bg-white dark:bg-zinc-900 rounded-lg">
+            <div className="p-4 bg-white dark:bg-zinc-900 rounded-sm border">
               <div className="flex items-center space-x-3">
-                <div className="h-10 w-10 bg-zinc-100 dark:bg-zinc-800 rounded-lg flex items-center justify-center">
-                  <HugeiconsIcon icon={Calendar01Icon} className="h-5 w-5 text-foreground" />
+                <div className="h-10 w-10 bg-zinc-100 dark:bg-zinc-800 rounded-sm flex items-center justify-center">
+                  <HugeiconsIcon icon={PanelLeftOpenIcon} className="h-5 w-5 text-foreground" />
                 </div>
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Opening Balance</p>
@@ -399,10 +325,10 @@ export default function GeneralLedgerPage() {
               </div>
             </div>
 
-            <div className="p-4 bg-white dark:bg-zinc-900 rounded-lg">
+            <div className="p-4 bg-white dark:bg-zinc-900 rounded-sm border">
               <div className="flex items-center space-x-3">
-                <div className="h-10 w-10 bg-zinc-100 dark:bg-zinc-800 rounded-lg flex items-center justify-center">
-                  <HugeiconsIcon icon={Dollar01Icon} className="h-5 w-5 text-foreground" />
+                <div className="h-10 w-10 bg-zinc-100 dark:bg-zinc-800 rounded-sm flex items-center justify-center">
+                  <HugeiconsIcon icon={PanelRightCloseIcon} className="h-5 w-5 text-foreground" />
                 </div>
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Closing Balance</p>
@@ -417,17 +343,18 @@ export default function GeneralLedgerPage() {
             <div className="relative">
               <Input
                 placeholder="Search entries..."
-                className="pl-3 w-64 bg-white dark:bg-zinc-900"
-                onChange={(e) => handleSearch({ search: e.target.value })}
+                className="pl-3 w-64 bg-white dark:bg-zinc-900 rounded-sm"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
 
             <div className="flex items-center gap-2">
-              <Select onValueChange={(value) => handleSearch({ account_id: value === 'all' ? undefined : value })}>
-                <SelectTrigger className="w-[180px] bg-white dark:bg-zinc-900">
+              <Select value={selectedAccount} onValueChange={setSelectedAccount}>
+                <SelectTrigger className="w-[180px] bg-white dark:bg-zinc-900 rounded-sm">
                   <SelectValue placeholder="All Accounts" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="rounded-sm">
                   <SelectItem value="all">All Accounts</SelectItem>
                   {accounts.map(account => (
                     <SelectItem key={account.id} value={account.id}>
@@ -437,15 +364,15 @@ export default function GeneralLedgerPage() {
                 </SelectContent>
               </Select>
 
-              <Select onValueChange={(value) => handleSearch({ period: value === 'all' ? undefined : value })}>
-                <SelectTrigger className="w-[150px] bg-white dark:bg-zinc-900">
+              <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
+                <SelectTrigger className="w-[180px] bg-white dark:bg-zinc-900 rounded-sm">
                   <SelectValue placeholder="All Periods" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="rounded-sm">
                   <SelectItem value="all">All Periods</SelectItem>
                   {periods.map(period => (
-                    <SelectItem key={period.id} value={period.period_name}>
-                      {period.period_name} {period.fiscal_year}
+                    <SelectItem key={period.id} value={period.start_date?.substring(0, 7) || period.period_name}>
+                      {period.period_name}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -455,7 +382,7 @@ export default function GeneralLedgerPage() {
 
           {/* Data Table */}
           <AdvancedDataTable
-            data={entries}
+            data={filteredEntries}
             columns={columns}
             loading={loading}
             pageSize={25}

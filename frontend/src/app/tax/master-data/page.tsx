@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { TwoLevelLayout } from '@/components/ui/two-level-layout'
 import { Header } from '@/components/ui/header'
 import { Button } from '@/components/ui/button'
@@ -22,49 +22,61 @@ import {
     Search01Icon,
     MoreHorizontalIcon
 } from '@hugeicons/core-free-icons'
-
-// --- Types ---
-interface TaxCode {
-    id: string
-    code: string
-    name: string
-    rate: number
-    description: string
-    type: 'vat' | 'wht'
-    status: 'active' | 'inactive'
-}
-
-// --- Mock Data ---
-const mockTaxCodes: TaxCode[] = [
-    { id: '1', code: 'T01', name: 'VAT 11%', rate: 11, description: 'Standard VAT Rate', type: 'vat', status: 'active' },
-    { id: '2', code: 'T02', name: 'VAT 0%', rate: 0, description: 'Zero Rated / Export', type: 'vat', status: 'active' },
-    { id: '3', code: 'W21', name: 'PPh 21', rate: 0, description: 'Progressive Rate Employee', type: 'wht', status: 'active' },
-    { id: '4', code: 'W23', name: 'PPh 23 2%', rate: 2, description: 'Services / Rental', type: 'wht', status: 'active' },
-    { id: '5', code: 'W42', name: 'PPh 4(2) 10%', rate: 10, description: 'Final Tax / Building', type: 'wht', status: 'active' },
-]
+import { taxMasterService, type Tax } from '@/services/tax'
 
 export default function TaxMasterDataPage() {
     const [searchTerm, setSearchTerm] = useState('')
+    const [taxes, setTaxes] = useState<Tax[]>([])
+    const [loading, setLoading] = useState(true)
+    const [mounted, setMounted] = useState(false)
+
+    useEffect(() => {
+        setMounted(true)
+    }, [])
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                setLoading(true)
+                const data = await taxMasterService.getAll()
+                setTaxes(data)
+            } catch (error) {
+                console.error('Failed to fetch tax master data:', error)
+            } finally {
+                setLoading(false)
+            }
+        }
+        fetchData()
+    }, [])
+
+    const filteredData = useMemo(() => {
+        if (!searchTerm) return taxes
+        const lower = searchTerm.toLowerCase()
+        return taxes.filter(item =>
+            item.tax_code.toLowerCase().includes(lower) ||
+            item.tax_name.toLowerCase().includes(lower)
+        )
+    }, [taxes, searchTerm])
 
     // --- Columns ---
-    const columns: TanStackColumn<TaxCode>[] = [
+    const columns: TanStackColumn<Tax>[] = [
         {
-            id: 'code',
+            id: 'tax_code',
             header: 'Tax Code',
-            accessorKey: 'code',
-            cell: ({ row }) => <span className="font-bold text-sm">{row.original.code}</span>
+            accessorKey: 'tax_code',
+            cell: ({ row }) => <span className="font-bold text-sm">{row.original.tax_code}</span>
         },
         {
-            id: 'name',
+            id: 'tax_name',
             header: 'Name',
-            accessorKey: 'name',
-            cell: ({ row }) => <span className="font-medium text-sm">{row.original.name}</span>
+            accessorKey: 'tax_name',
+            cell: ({ row }) => <span className="font-medium text-sm">{row.original.tax_name}</span>
         },
         {
-            id: 'rate',
+            id: 'tax_rate',
             header: 'Rate (%)',
-            accessorKey: 'rate',
-            cell: ({ row }) => <span className="text-sm">{row.original.rate > 0 ? `${row.original.rate}%` : 'Progressive'}</span>
+            accessorKey: 'tax_rate',
+            cell: ({ row }) => <span className="text-sm">{row.original.tax_rate > 0 ? `${row.original.tax_rate}%` : 'Progressive'}</span>
         },
         {
             id: 'description',
@@ -73,12 +85,22 @@ export default function TaxMasterDataPage() {
             cell: ({ row }) => <span className="text-sm text-gray-500">{row.original.description}</span>
         },
         {
-            id: 'status',
-            header: 'Status',
-            accessorKey: 'status',
+            id: 'tax_type',
+            header: 'Type',
+            accessorKey: 'tax_type',
             cell: ({ row }) => (
-                <Badge variant={row.original.status === 'active' ? 'default' : 'secondary'} className="capitalize">
-                    {row.original.status}
+                <Badge variant="outline" className="capitalize">
+                    {row.original.tax_type}
+                </Badge>
+            )
+        },
+        {
+            id: 'is_active',
+            header: 'Status',
+            accessorKey: 'is_active',
+            cell: ({ row }) => (
+                <Badge variant={row.original.is_active ? 'default' : 'secondary'} className="capitalize">
+                    {row.original.is_active ? 'active' : 'inactive'}
                 </Badge>
             )
         },
@@ -132,10 +154,16 @@ export default function TaxMasterDataPage() {
                     </div>
                 </div>
 
-                <TanStackDataTable
-                    data={mockTaxCodes}
-                    columns={columns}
-                />
+                {loading ? (
+                    <div className="flex items-center justify-center py-12">
+                        <p className="text-muted-foreground">Loading tax data...</p>
+                    </div>
+                ) : (
+                    <TanStackDataTable
+                        data={filteredData}
+                        columns={columns}
+                    />
+                )}
             </div>
         </TwoLevelLayout>
     )

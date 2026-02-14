@@ -23,9 +23,13 @@ func NewDivisionRepository(db *sqlx.DB) *DivisionRepositoryImpl {
 func (r *DivisionRepositoryImpl) Create(ctx context.Context, division *entities.Division) error {
 	query := `INSERT INTO divisions (id, code, name, description, parent_id, level, sort_order, company_id, status, created_at, updated_at)
 			  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW(), NOW())`
+	var companyID interface{} = nil
+	if division.CompanyID != "" {
+		companyID = division.CompanyID
+	}
 	_, err := r.db.ExecContext(ctx, query,
 		division.ID, division.Code, division.Name, division.Description,
-		division.ParentID, division.Level, division.SortOrder, division.CompanyID, division.Status)
+		division.ParentID, division.Level, division.SortOrder, companyID, division.Status)
 	return err
 }
 
@@ -51,23 +55,24 @@ func (r *DivisionRepositoryImpl) GetAll(ctx context.Context) ([]*entities.Divisi
 }
 
 // GetAllWithPagination retrieves divisions with pagination and filtering.
-func (r *DivisionRepositoryImpl) GetAllWithPagination(ctx context.Context, limit, offset int, search, status, sortOrder string) ([]*entities.Division, int, error) {
+func (r *DivisionRepositoryImpl) GetAllWithPagination(ctx context.Context, limit, offset int, search, status, sortOrder, companyID string) ([]*entities.Division, int, error) {
 	// Build WHERE clause for filtering
 	whereClause := "WHERE 1=1"
 	args := []interface{}{}
-	
-	if search != "" {
-		whereClause += " AND (code ILIKE $1 OR name ILIKE $1 OR description ILIKE $1)"
-		args = append(args, "%"+search+"%")
+
+	if companyID != "" {
+		args = append(args, companyID)
+		whereClause += fmt.Sprintf(" AND company_id = $%d", len(args))
 	}
-	
+
+	if search != "" {
+		args = append(args, "%"+search+"%")
+		whereClause += fmt.Sprintf(" AND (code ILIKE $%d OR name ILIKE $%d OR description ILIKE $%d)", len(args), len(args), len(args))
+	}
+
 	if status != "" && status != "all" {
-		if len(args) == 0 {
-			whereClause += " AND status = $1"
-		} else {
-			whereClause += " AND status = $2"
-		}
 		args = append(args, status)
+		whereClause += fmt.Sprintf(" AND status = $%d", len(args))
 	}
 	
 	// Build ORDER BY clause
@@ -141,9 +146,13 @@ func (r *DivisionRepositoryImpl) Update(ctx context.Context, division *entities.
 			  SET code = $1, name = $2, description = $3, parent_id = $4, level = $5,
 				  sort_order = $6, company_id = $7, status = $8, updated_at = NOW()
 			  WHERE id = $9`
+	var companyID interface{} = nil
+	if division.CompanyID != "" {
+		companyID = division.CompanyID
+	}
 	_, err := r.db.ExecContext(ctx, query,
 		division.Code, division.Name, division.Description, division.ParentID,
-		division.Level, division.SortOrder, division.CompanyID, division.Status, division.ID)
+		division.Level, division.SortOrder, companyID, division.Status, division.ID)
 	return err
 }
 

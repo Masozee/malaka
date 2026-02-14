@@ -13,7 +13,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
-import { DataTable } from '@/components/ui/data-table'
+import { AdvancedDataTable, type AdvancedColumn } from '@/components/ui/advanced-data-table'
+import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import { JournalEntryFilters } from '@/components/accounting/journal-entry-filters'
 import { JournalEntryForm } from '@/components/accounting/journal-entry-form'
 
@@ -27,12 +28,11 @@ import { journalEntryService } from '@/services/accounting'
 import Link from 'next/link'
 import { HugeiconsIcon } from '@hugeicons/react'
 import {
-  Calendar01Icon,
   Dollar01Icon,
   FileScriptIcon,
   CheckmarkCircle01Icon,
   Edit01Icon,
-  Search01Icon
+  PlusSignIcon,
 } from '@hugeicons/core-free-icons'
 
 const statusColors = {
@@ -61,6 +61,23 @@ export default function AccountingJournalPage() {
     limit: 10
   })
 
+  // Confirmation dialog state
+  const [confirmDialog, setConfirmDialog] = useState<{
+    open: boolean
+    title: string
+    description: string
+    confirmLabel: string
+    variant: 'default' | 'destructive'
+    onConfirm: () => Promise<void>
+  }>({
+    open: false,
+    title: '',
+    description: '',
+    confirmLabel: 'Confirm',
+    variant: 'default',
+    onConfirm: async () => {},
+  })
+
   useEffect(() => {
     setMounted(true)
     fetchJournalEntries()
@@ -73,7 +90,6 @@ export default function AccountingJournalPage() {
       setJournalEntries(response.data)
     } catch (error) {
       console.error('Error fetching journal entries:', error)
-      // Set empty array on error
       setJournalEntries([])
     } finally {
       setLoading(false)
@@ -101,7 +117,6 @@ export default function AccountingJournalPage() {
       await fetchJournalEntries()
     } catch (error) {
       console.error('Error creating journal entry:', error)
-      alert('Failed to create journal entry. Please try again.')
     }
   }
 
@@ -115,36 +130,37 @@ export default function AccountingJournalPage() {
       await fetchJournalEntries()
     } catch (error) {
       console.error('Error updating journal entry:', error)
-      alert('Failed to update journal entry. Please try again.')
     }
   }
 
-  const handleDeleteEntry = async (id: string) => {
-    if (!window.confirm('Are you sure you want to delete this journal entry? This action cannot be undone.')) {
-      return
-    }
-
-    try {
-      await journalEntryService.delete(id)
-      await fetchJournalEntries()
-    } catch (error) {
-      console.error('Error deleting journal entry:', error)
-      alert('Failed to delete journal entry. Please try again.')
-    }
+  const handleDeleteEntry = (entry: JournalEntry) => {
+    setConfirmDialog({
+      open: true,
+      title: 'Delete Journal Entry',
+      description: `Are you sure you want to delete entry "${entry.entry_number}"? This action cannot be undone.`,
+      confirmLabel: 'Delete',
+      variant: 'destructive',
+      onConfirm: async () => {
+        await journalEntryService.delete(entry.id)
+        setConfirmDialog(prev => ({ ...prev, open: false }))
+        await fetchJournalEntries()
+      },
+    })
   }
 
-  const handlePostEntry = async (id: string) => {
-    if (!window.confirm('Are you sure you want to post this journal entry? Posted entries cannot be modified.')) {
-      return
-    }
-
-    try {
-      await journalEntryService.post(id)
-      await fetchJournalEntries()
-    } catch (error) {
-      console.error('Error posting journal entry:', error)
-      alert('Failed to post journal entry. Please try again.')
-    }
+  const handlePostEntry = (entry: JournalEntry) => {
+    setConfirmDialog({
+      open: true,
+      title: 'Post Journal Entry',
+      description: `Are you sure you want to post entry "${entry.entry_number}"? Posted entries cannot be modified.`,
+      confirmLabel: 'Post Entry',
+      variant: 'default',
+      onConfirm: async () => {
+        await journalEntryService.post(entry.id)
+        setConfirmDialog(prev => ({ ...prev, open: false }))
+        await fetchJournalEntries()
+      },
+    })
   }
 
   const openEditDialog = (entry: JournalEntry) => {
@@ -154,130 +170,80 @@ export default function AccountingJournalPage() {
 
   const breadcrumbs = [
     { label: 'Accounting', href: '/accounting' },
-    { label: 'Journal Entries', href: '/accounting/journal' }
+    { label: 'Journal Entries' }
   ]
 
-  const columns = [
+  const columns: AdvancedColumn<JournalEntry>[] = [
     {
-      key: 'entry_number' as keyof JournalEntry,
+      key: 'entry_number',
       title: 'Entry Number',
-      render: (value: unknown, record: JournalEntry) => (
+      sortable: true,
+      render: (_, record) => (
         <Link
           href={`/accounting/journal/${record.id}`}
-          className="font-medium text-blue-600 hover:text-blue-800"
+          className="font-medium text-blue-600 hover:text-blue-800 hover:underline text-sm"
         >
           {record.entry_number}
         </Link>
       )
     },
     {
-      key: 'entry_date' as keyof JournalEntry,
+      key: 'entry_date',
       title: 'Date',
-      render: (value: unknown, record: JournalEntry) => (
-        <div className="flex items-center space-x-2">
-          <HugeiconsIcon icon={Calendar01Icon} className="h-4 w-4 text-gray-400" />
-          <span>
-            {mounted ? new Date(record.entry_date).toLocaleDateString('id-ID') : record.entry_date}
-          </span>
-        </div>
+      sortable: true,
+      render: (_, record) => (
+        <span className="text-sm">
+          {mounted ? new Date(record.entry_date).toLocaleDateString('id-ID') : record.entry_date}
+        </span>
       )
     },
     {
-      key: 'reference' as keyof JournalEntry,
+      key: 'reference',
       title: 'Reference',
-      render: (value: unknown, record: JournalEntry) => (
-        <span className="font-mono text-xs">{record.reference}</span>
+      render: (_, record) => (
+        <span className="font-mono text-sm">{record.reference || '-'}</span>
       )
     },
     {
-      key: 'description' as keyof JournalEntry,
+      key: 'description',
       title: 'Description',
-      render: (value: unknown, record: JournalEntry) => (
-        <div className="max-w-xs truncate" title={record.description}>
+      render: (_, record) => (
+        <div className="max-w-xs truncate text-sm" title={record.description}>
           {record.description}
         </div>
       )
     },
     {
-      key: 'total_debit' as keyof JournalEntry,
+      key: 'total_debit',
       title: 'Amount',
-      render: (value: unknown, record: JournalEntry) => (
-        <div className="flex items-center space-x-1">
-          <HugeiconsIcon icon={Dollar01Icon} className="h-4 w-4 text-gray-400" />
-          <span className="font-medium">
-            {mounted ? new Intl.NumberFormat('id-ID', {
-              style: 'currency',
-              currency: 'IDR',
-              minimumFractionDigits: 0
-            }).format(record.total_debit) : `Rp ${record.total_debit.toLocaleString()}`}
-          </span>
-        </div>
+      sortable: true,
+      render: (_, record) => (
+        <span className="font-medium text-sm">
+          {mounted ? new Intl.NumberFormat('id-ID', {
+            style: 'currency',
+            currency: 'IDR',
+            minimumFractionDigits: 0
+          }).format(record.total_debit) : `Rp ${record.total_debit.toLocaleString()}`}
+        </span>
       )
     },
     {
-      key: 'status' as keyof JournalEntry,
+      key: 'source_document',
+      title: 'Source',
+      render: (_, record) => (
+        <span className="text-sm">{record.source_document || '-'}</span>
+      )
+    },
+    {
+      key: 'status',
       title: 'Status',
-      render: (value: unknown, record: JournalEntry) => (
+      sortable: true,
+      render: (_, record) => (
         <Badge className={`${statusColors[record.status as keyof typeof statusColors]} text-white`}>
           {statusLabels[record.status as keyof typeof statusLabels]}
         </Badge>
       )
     },
-    {
-      key: 'source_document' as keyof JournalEntry,
-      title: 'Source',
-      render: (value: unknown, record: JournalEntry) => (
-        record.source_document && (
-          <div className="flex items-center space-x-1">
-            <span className="text-xs">{record.source_document}</span>
-          </div>
-        )
-      )
-    },
-    {
-      key: 'id' as keyof JournalEntry,
-      title: 'Actions',
-      render: (value: unknown, record: JournalEntry) => (
-        <div className="flex items-center space-x-2">
-          <Link href={`/accounting/journal/${record.id}`}>
-            <Button variant="outline" size="sm">
-              View
-            </Button>
-          </Link>
-
-          {record.status === 'DRAFT' && (
-            <>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => openEditDialog(record)}
-              >
-                Edit
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handlePostEntry(record.id)}
-                className="text-green-600 border-green-200 hover:bg-green-50"
-              >
-                Post
-              </Button>
-            </>
-          )}
-
-          {(record.status === 'DRAFT' || record.status === 'CANCELLED') && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => handleDeleteEntry(record.id)}
-              className="text-red-600 border-red-200 hover:bg-red-50"
-            >
-              Delete
-            </Button>
-          )}
-        </div>
-      )
-    }
   ]
 
   // Calculate summary statistics
@@ -288,108 +254,133 @@ export default function AccountingJournalPage() {
     postedEntries: journalEntries.filter(entry => entry.status === 'POSTED').length
   }
 
+  if (!mounted) return null
+
   return (
     <TwoLevelLayout>
-      <Header
-        title="Journal Entries"
-        description="Manage and track all accounting journal entries"
-        breadcrumbs={breadcrumbs}
-        actions={
-          <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                New Journal Entry
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>Create New Journal Entry</DialogTitle>
-              </DialogHeader>
-              <JournalEntryForm
-                onSubmit={handleCreateEntry}
-                onCancel={() => setIsCreateDialogOpen(false)}
-              />
-            </DialogContent>
-          </Dialog>
-        }
-      />
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <Header
+          title="Journal Entries"
+          description="Manage and track all accounting journal entries"
+          breadcrumbs={breadcrumbs}
+          actions={
+            <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+              <DialogTrigger asChild>
+                <Button size="sm">
+                  <HugeiconsIcon icon={PlusSignIcon} className="h-4 w-4 mr-2" />
+                  New Journal Entry
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>Create New Journal Entry</DialogTitle>
+                </DialogHeader>
+                <JournalEntryForm
+                  onSubmit={handleCreateEntry}
+                  onCancel={() => setIsCreateDialogOpen(false)}
+                />
+              </DialogContent>
+            </Dialog>
+          }
+        />
 
-      <div className="flex-1 p-6 space-y-6">
-        {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card className="p-4">
-            <div className="flex items-center space-x-3">
-              <div className="h-10 w-10 bg-zinc-100 dark:bg-zinc-800 rounded-lg flex items-center justify-center">
-                <HugeiconsIcon icon={FileScriptIcon} className="h-5 w-5 text-foreground" aria-hidden="true" />
+        <div className="flex-1 overflow-auto p-6 space-y-6 text-sm">
+          {/* Summary Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <Card className="p-4">
+              <div className="flex items-center space-x-3">
+                <div className="h-10 w-10 bg-zinc-100 dark:bg-zinc-800 rounded-lg flex items-center justify-center">
+                  <HugeiconsIcon icon={FileScriptIcon} className="h-5 w-5 text-foreground" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Total Entries</p>
+                  <p className="text-2xl font-bold">{summaryStats.totalEntries}</p>
+                </div>
               </div>
-              <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Entries</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{summaryStats.totalEntries}</p>
-              </div>
-            </div>
-          </Card>
+            </Card>
 
-          <Card className="p-4">
-            <div className="flex items-center space-x-3">
-              <div className="h-10 w-10 bg-zinc-100 dark:bg-zinc-800 rounded-lg flex items-center justify-center">
-                <HugeiconsIcon icon={Dollar01Icon} className="h-5 w-5 text-foreground" aria-hidden="true" />
+            <Card className="p-4">
+              <div className="flex items-center space-x-3">
+                <div className="h-10 w-10 bg-zinc-100 dark:bg-zinc-800 rounded-lg flex items-center justify-center">
+                  <HugeiconsIcon icon={Dollar01Icon} className="h-5 w-5 text-foreground" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Total Amount</p>
+                  <p className="text-2xl font-bold">
+                    {new Intl.NumberFormat('id-ID', {
+                      notation: 'compact',
+                      compactDisplay: 'short'
+                    }).format(summaryStats.totalAmount)}
+                  </p>
+                </div>
               </div>
-              <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Amount</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                  {mounted ? new Intl.NumberFormat('id-ID', {
-                    notation: 'compact',
-                    compactDisplay: 'short'
-                  }).format(summaryStats.totalAmount) : summaryStats.totalAmount.toLocaleString()}
-                </p>
-              </div>
-            </div>
-          </Card>
+            </Card>
 
-          <Card className="p-4">
-            <div className="flex items-center space-x-3">
-              <div className="h-10 w-10 bg-zinc-100 dark:bg-zinc-800 rounded-lg flex items-center justify-center">
-                <HugeiconsIcon icon={Edit01Icon} className="h-5 w-5 text-foreground" aria-hidden="true" />
+            <Card className="p-4">
+              <div className="flex items-center space-x-3">
+                <div className="h-10 w-10 bg-zinc-100 dark:bg-zinc-800 rounded-lg flex items-center justify-center">
+                  <HugeiconsIcon icon={Edit01Icon} className="h-5 w-5 text-foreground" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Draft Entries</p>
+                  <p className="text-2xl font-bold">{summaryStats.draftEntries}</p>
+                </div>
               </div>
-              <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Draft Entries</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{summaryStats.draftEntries}</p>
-              </div>
-            </div>
-          </Card>
+            </Card>
 
-          <Card className="p-4">
-            <div className="flex items-center space-x-3">
-              <div className="h-10 w-10 bg-zinc-100 dark:bg-zinc-800 rounded-lg flex items-center justify-center">
-                <HugeiconsIcon icon={CheckmarkCircle01Icon} className="h-5 w-5 text-foreground" aria-hidden="true" />
+            <Card className="p-4">
+              <div className="flex items-center space-x-3">
+                <div className="h-10 w-10 bg-zinc-100 dark:bg-zinc-800 rounded-lg flex items-center justify-center">
+                  <HugeiconsIcon icon={CheckmarkCircle01Icon} className="h-5 w-5 text-foreground" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Posted Entries</p>
+                  <p className="text-2xl font-bold">{summaryStats.postedEntries}</p>
+                </div>
               </div>
-              <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Posted Entries</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{summaryStats.postedEntries}</p>
-              </div>
-            </div>
-          </Card>
+            </Card>
+          </div>
+
+          {/* Filters */}
+          <JournalEntryFilters
+            filters={filters}
+            onFiltersChange={handleFiltersChange}
+            onClearFilters={handleClearFilters}
+          />
+
+          {/* Data Table */}
+          <AdvancedDataTable
+            columns={columns}
+            data={journalEntries}
+            loading={loading}
+            pageSize={10}
+            rowActions={[
+              {
+                label: 'View Detail',
+                onClick: (r) => { window.location.href = `/accounting/journal/${r.id}` },
+              },
+              {
+                label: 'Edit',
+                onClick: (r) => openEditDialog(r),
+                hidden: (r) => r.status !== 'DRAFT',
+              },
+              {
+                label: 'Post',
+                onClick: (r) => handlePostEntry(r),
+                separator: true,
+                disabled: (r) => r.status === 'POSTED' || r.status === 'CANCELLED',
+                hidden: (r) => r.status === 'POSTED' || r.status === 'CANCELLED',
+              },
+              {
+                label: 'Delete',
+                onClick: (r) => handleDeleteEntry(r),
+                className: 'text-red-600',
+                separator: true,
+                hidden: (r) => r.status === 'POSTED',
+              },
+            ]}
+          />
         </div>
-
-        {/* Filters */}
-        <JournalEntryFilters
-          filters={filters}
-          onFiltersChange={handleFiltersChange}
-          onClearFilters={handleClearFilters}
-        />
-
-        {/* Data Table */}
-        <DataTable
-          columns={columns}
-          data={journalEntries}
-          loading={loading}
-          pagination={{
-            current: filters.page || 1,
-            pageSize: filters.limit || 10,
-            total: journalEntries.length,
-            onChange: (page, pageSize) => setFilters(prev => ({ ...prev, page, limit: pageSize }))
-          }}
-        />
       </div>
 
       {/* Edit Dialog */}
@@ -407,6 +398,17 @@ export default function AccountingJournalPage() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Confirmation Dialog */}
+      <ConfirmDialog
+        open={confirmDialog.open}
+        onOpenChange={(open) => setConfirmDialog(prev => ({ ...prev, open }))}
+        title={confirmDialog.title}
+        description={confirmDialog.description}
+        confirmLabel={confirmDialog.confirmLabel}
+        variant={confirmDialog.variant}
+        onConfirm={confirmDialog.onConfirm}
+      />
     </TwoLevelLayout>
   )
 }

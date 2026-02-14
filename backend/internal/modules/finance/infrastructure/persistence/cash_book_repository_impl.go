@@ -3,7 +3,6 @@ package persistence
 import (
 	"context"
 	"database/sql"
-	"time"
 
 	"malaka/internal/modules/finance/domain/entities"
 	"malaka/internal/modules/finance/domain/repositories"
@@ -27,15 +26,13 @@ func (r *cashBookRepositoryImpl) Create(ctx context.Context, entry *entities.Cas
 
 	query := `
 		INSERT INTO cash_books (
-			id, cash_bank_id, transaction_date, reference_number, description,
-			debit_amount, credit_amount, balance, transaction_type, source_module,
-			source_id, created_by, created_at, updated_at
-		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)`
+			id, book_code, book_name, book_type, account_number, bank_name,
+			opening_balance, current_balance, is_active, created_at, updated_at
+		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`
 
 	_, err := r.db.ExecContext(ctx, query,
-		entry.ID, entry.CashBankID, entry.TransactionDate, entry.ReferenceNumber, entry.Description,
-		entry.DebitAmount, entry.CreditAmount, entry.Balance, entry.TransactionType, entry.SourceModule,
-		entry.SourceID, entry.CreatedBy, entry.CreatedAt, entry.UpdatedAt,
+		entry.ID, entry.BookCode, entry.BookName, entry.BookType, entry.AccountNumber, entry.BankName,
+		entry.OpeningBalance, entry.CurrentBalance, entry.IsActive, entry.CreatedAt, entry.UpdatedAt,
 	)
 
 	return err
@@ -44,15 +41,13 @@ func (r *cashBookRepositoryImpl) Create(ctx context.Context, entry *entities.Cas
 func (r *cashBookRepositoryImpl) GetByID(ctx context.Context, id uuid.ID) (*entities.CashBook, error) {
 	entry := &entities.CashBook{}
 	query := `
-		SELECT id, cash_bank_id, transaction_date, reference_number, description,
-			   debit_amount, credit_amount, balance, transaction_type, source_module,
-			   source_id, created_by, created_at, updated_at
+		SELECT id, book_code, book_name, book_type, COALESCE(account_number, ''), COALESCE(bank_name, ''),
+			   COALESCE(opening_balance, 0), COALESCE(current_balance, 0), COALESCE(is_active, true), created_at, updated_at
 		FROM cash_books WHERE id = $1`
 
 	err := r.db.QueryRowContext(ctx, query, id).Scan(
-		&entry.ID, &entry.CashBankID, &entry.TransactionDate, &entry.ReferenceNumber, &entry.Description,
-		&entry.DebitAmount, &entry.CreditAmount, &entry.Balance, &entry.TransactionType, &entry.SourceModule,
-		&entry.SourceID, &entry.CreatedBy, &entry.CreatedAt, &entry.UpdatedAt,
+		&entry.ID, &entry.BookCode, &entry.BookName, &entry.BookType, &entry.AccountNumber, &entry.BankName,
+		&entry.OpeningBalance, &entry.CurrentBalance, &entry.IsActive, &entry.CreatedAt, &entry.UpdatedAt,
 	)
 
 	if err != nil {
@@ -64,10 +59,9 @@ func (r *cashBookRepositoryImpl) GetByID(ctx context.Context, id uuid.ID) (*enti
 
 func (r *cashBookRepositoryImpl) GetAll(ctx context.Context) ([]*entities.CashBook, error) {
 	query := `
-		SELECT id, cash_bank_id, transaction_date, reference_number, description,
-			   debit_amount, credit_amount, balance, transaction_type, source_module,
-			   source_id, created_by, created_at, updated_at
-		FROM cash_books ORDER BY transaction_date DESC, created_at DESC LIMIT 500`
+		SELECT id, book_code, book_name, book_type, COALESCE(account_number, ''), COALESCE(bank_name, ''),
+			   COALESCE(opening_balance, 0), COALESCE(current_balance, 0), COALESCE(is_active, true), created_at, updated_at
+		FROM cash_books ORDER BY book_code ASC LIMIT 500`
 
 	rows, err := r.db.QueryContext(ctx, query)
 	if err != nil {
@@ -79,9 +73,8 @@ func (r *cashBookRepositoryImpl) GetAll(ctx context.Context) ([]*entities.CashBo
 	for rows.Next() {
 		entry := &entities.CashBook{}
 		err := rows.Scan(
-			&entry.ID, &entry.CashBankID, &entry.TransactionDate, &entry.ReferenceNumber, &entry.Description,
-			&entry.DebitAmount, &entry.CreditAmount, &entry.Balance, &entry.TransactionType, &entry.SourceModule,
-			&entry.SourceID, &entry.CreatedBy, &entry.CreatedAt, &entry.UpdatedAt,
+			&entry.ID, &entry.BookCode, &entry.BookName, &entry.BookType, &entry.AccountNumber, &entry.BankName,
+			&entry.OpeningBalance, &entry.CurrentBalance, &entry.IsActive, &entry.CreatedAt, &entry.UpdatedAt,
 		)
 		if err != nil {
 			return nil, err
@@ -95,15 +88,13 @@ func (r *cashBookRepositoryImpl) GetAll(ctx context.Context) ([]*entities.CashBo
 func (r *cashBookRepositoryImpl) Update(ctx context.Context, entry *entities.CashBook) error {
 	query := `
 		UPDATE cash_books SET
-			cash_bank_id = $2, transaction_date = $3, reference_number = $4, description = $5,
-			debit_amount = $6, credit_amount = $7, balance = $8, transaction_type = $9, source_module = $10,
-			source_id = $11, created_by = $12, updated_at = $13
+			book_code = $2, book_name = $3, book_type = $4, account_number = $5, bank_name = $6,
+			opening_balance = $7, current_balance = $8, is_active = $9, updated_at = $10
 		WHERE id = $1`
 
 	_, err := r.db.ExecContext(ctx, query,
-		entry.ID, entry.CashBankID, entry.TransactionDate, entry.ReferenceNumber, entry.Description,
-		entry.DebitAmount, entry.CreditAmount, entry.Balance, entry.TransactionType, entry.SourceModule,
-		entry.SourceID, entry.CreatedBy, entry.UpdatedAt,
+		entry.ID, entry.BookCode, entry.BookName, entry.BookType, entry.AccountNumber, entry.BankName,
+		entry.OpeningBalance, entry.CurrentBalance, entry.IsActive, entry.UpdatedAt,
 	)
 
 	return err
@@ -115,110 +106,16 @@ func (r *cashBookRepositoryImpl) Delete(ctx context.Context, id uuid.ID) error {
 	return err
 }
 
-func (r *cashBookRepositoryImpl) GetByCashBankID(ctx context.Context, cashBankID uuid.ID) ([]*entities.CashBook, error) {
-	query := `
-		SELECT id, cash_bank_id, transaction_date, reference_number, description,
-			   debit_amount, credit_amount, balance, transaction_type, source_module,
-			   source_id, created_by, created_at, updated_at
-		FROM cash_books WHERE cash_bank_id = $1 ORDER BY transaction_date ASC, created_at ASC`
-
-	rows, err := r.db.QueryContext(ctx, query, cashBankID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	var entries []*entities.CashBook
-	for rows.Next() {
-		entry := &entities.CashBook{}
-		err := rows.Scan(
-			&entry.ID, &entry.CashBankID, &entry.TransactionDate, &entry.ReferenceNumber, &entry.Description,
-			&entry.DebitAmount, &entry.CreditAmount, &entry.Balance, &entry.TransactionType, &entry.SourceModule,
-			&entry.SourceID, &entry.CreatedBy, &entry.CreatedAt, &entry.UpdatedAt,
-		)
-		if err != nil {
-			return nil, err
-		}
-		entries = append(entries, entry)
-	}
-
-	return entries, nil
-}
-
-func (r *cashBookRepositoryImpl) GetByDateRange(ctx context.Context, cashBankID uuid.ID, startDate, endDate time.Time) ([]*entities.CashBook, error) {
-	query := `
-		SELECT id, cash_bank_id, transaction_date, reference_number, description,
-			   debit_amount, credit_amount, balance, transaction_type, source_module,
-			   source_id, created_by, created_at, updated_at
-		FROM cash_books
-		WHERE cash_bank_id = $1 AND transaction_date >= $2 AND transaction_date <= $3
-		ORDER BY transaction_date ASC, created_at ASC`
-
-	rows, err := r.db.QueryContext(ctx, query, cashBankID, startDate, endDate)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	var entries []*entities.CashBook
-	for rows.Next() {
-		entry := &entities.CashBook{}
-		err := rows.Scan(
-			&entry.ID, &entry.CashBankID, &entry.TransactionDate, &entry.ReferenceNumber, &entry.Description,
-			&entry.DebitAmount, &entry.CreditAmount, &entry.Balance, &entry.TransactionType, &entry.SourceModule,
-			&entry.SourceID, &entry.CreatedBy, &entry.CreatedAt, &entry.UpdatedAt,
-		)
-		if err != nil {
-			return nil, err
-		}
-		entries = append(entries, entry)
-	}
-
-	return entries, nil
-}
-
-func (r *cashBookRepositoryImpl) GetByTransactionType(ctx context.Context, transactionType string) ([]*entities.CashBook, error) {
-	query := `
-		SELECT id, cash_bank_id, transaction_date, reference_number, description,
-			   debit_amount, credit_amount, balance, transaction_type, source_module,
-			   source_id, created_by, created_at, updated_at
-		FROM cash_books WHERE transaction_type = $1 ORDER BY transaction_date ASC, created_at ASC`
-
-	rows, err := r.db.QueryContext(ctx, query, transactionType)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	var entries []*entities.CashBook
-	for rows.Next() {
-		entry := &entities.CashBook{}
-		err := rows.Scan(
-			&entry.ID, &entry.CashBankID, &entry.TransactionDate, &entry.ReferenceNumber, &entry.Description,
-			&entry.DebitAmount, &entry.CreditAmount, &entry.Balance, &entry.TransactionType, &entry.SourceModule,
-			&entry.SourceID, &entry.CreatedBy, &entry.CreatedAt, &entry.UpdatedAt,
-		)
-		if err != nil {
-			return nil, err
-		}
-		entries = append(entries, entry)
-	}
-
-	return entries, nil
-}
-
-func (r *cashBookRepositoryImpl) GetByReferenceNumber(ctx context.Context, referenceNumber string) (*entities.CashBook, error) {
+func (r *cashBookRepositoryImpl) GetByBookCode(ctx context.Context, bookCode string) (*entities.CashBook, error) {
 	entry := &entities.CashBook{}
 	query := `
-		SELECT id, cash_bank_id, transaction_date, reference_number, description,
-			   debit_amount, credit_amount, balance, transaction_type, source_module,
-			   source_id, created_by, created_at, updated_at
-		FROM cash_books WHERE reference_number = $1`
+		SELECT id, book_code, book_name, book_type, COALESCE(account_number, ''), COALESCE(bank_name, ''),
+			   COALESCE(opening_balance, 0), COALESCE(current_balance, 0), COALESCE(is_active, true), created_at, updated_at
+		FROM cash_books WHERE book_code = $1`
 
-	err := r.db.QueryRowContext(ctx, query, referenceNumber).Scan(
-		&entry.ID, &entry.CashBankID, &entry.TransactionDate, &entry.ReferenceNumber, &entry.Description,
-		&entry.DebitAmount, &entry.CreditAmount, &entry.Balance, &entry.TransactionType, &entry.SourceModule,
-		&entry.SourceID, &entry.CreatedBy, &entry.CreatedAt, &entry.UpdatedAt,
+	err := r.db.QueryRowContext(ctx, query, bookCode).Scan(
+		&entry.ID, &entry.BookCode, &entry.BookName, &entry.BookType, &entry.AccountNumber, &entry.BankName,
+		&entry.OpeningBalance, &entry.CurrentBalance, &entry.IsActive, &entry.CreatedAt, &entry.UpdatedAt,
 	)
 
 	if err != nil {
@@ -226,4 +123,32 @@ func (r *cashBookRepositoryImpl) GetByReferenceNumber(ctx context.Context, refer
 	}
 
 	return entry, nil
+}
+
+func (r *cashBookRepositoryImpl) GetByBookType(ctx context.Context, bookType string) ([]*entities.CashBook, error) {
+	query := `
+		SELECT id, book_code, book_name, book_type, COALESCE(account_number, ''), COALESCE(bank_name, ''),
+			   COALESCE(opening_balance, 0), COALESCE(current_balance, 0), COALESCE(is_active, true), created_at, updated_at
+		FROM cash_books WHERE book_type = $1 ORDER BY book_code ASC`
+
+	rows, err := r.db.QueryContext(ctx, query, bookType)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var entries []*entities.CashBook
+	for rows.Next() {
+		entry := &entities.CashBook{}
+		err := rows.Scan(
+			&entry.ID, &entry.BookCode, &entry.BookName, &entry.BookType, &entry.AccountNumber, &entry.BankName,
+			&entry.OpeningBalance, &entry.CurrentBalance, &entry.IsActive, &entry.CreatedAt, &entry.UpdatedAt,
+		)
+		if err != nil {
+			return nil, err
+		}
+		entries = append(entries, entry)
+	}
+
+	return entries, nil
 }

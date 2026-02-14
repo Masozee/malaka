@@ -43,6 +43,25 @@ func (r *PaymentRepositoryImpl) GetByID(ctx context.Context, id uuid.ID) (*entit
 	return payment, err
 }
 
+// GetAll retrieves all payments from the database.
+func (r *PaymentRepositoryImpl) GetAll(ctx context.Context) ([]*entities.Payment, error) {
+	var payments []*entities.Payment
+	query := `SELECT id, invoice_id, payment_date, amount, payment_method, cash_bank_id, created_at, updated_at FROM payments ORDER BY payment_date DESC`
+	rows, err := r.db.QueryContext(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		p := &entities.Payment{}
+		if err := rows.Scan(&p.ID, &p.InvoiceID, &p.PaymentDate, &p.Amount, &p.PaymentMethod, &p.CashBankID, &p.CreatedAt, &p.UpdatedAt); err != nil {
+			return nil, err
+		}
+		payments = append(payments, p)
+	}
+	return payments, rows.Err()
+}
+
 // Update updates an existing payment in the database.
 func (r *PaymentRepositoryImpl) Update(ctx context.Context, payment *entities.Payment) error {
 	query := `UPDATE payments SET invoice_id = $1, payment_date = $2, amount = $3, payment_method = $4, cash_bank_id = $5, updated_at = $6 WHERE id = $7`

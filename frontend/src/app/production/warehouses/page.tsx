@@ -101,11 +101,11 @@ export default function WarehousesPage() {
         <div className="flex flex-col">
           <Link
             href={`/production/warehouses/${row.original.id}`}
-            className="font-bold text-xs text-foreground hover:underline"
+            className="font-bold text-sm text-foreground hover:underline"
           >
             {row.original.name}
           </Link>
-          <span className="text-[10px] text-muted-foreground">{row.original.code}</span>
+          <span className="text-sm text-muted-foreground">{row.original.code}</span>
         </div>
       )
     },
@@ -128,8 +128,8 @@ export default function WarehousesPage() {
       accessorKey: 'city',
       cell: ({ row }) => (
         <div className="flex flex-col">
-          <span className="text-xs font-medium text-foreground">{row.original.city}</span>
-          <span className="text-[10px] text-muted-foreground truncate max-w-[150px]" title={row.original.address}>
+          <span className="text-sm font-medium text-foreground">{row.original.city}</span>
+          <span className="text-sm text-muted-foreground truncate max-w-[150px]" title={row.original.address}>
             {row.original.address}
           </span>
         </div>
@@ -143,11 +143,11 @@ export default function WarehousesPage() {
         const util = row.original.capacity > 0 ? (row.original.current_stock / row.original.capacity) * 100 : 0
         return (
           <div className="w-full min-w-[100px] flex flex-col gap-1">
-            <div className="flex justify-between text-[10px] text-muted-foreground">
+            <div className="flex justify-between text-sm text-muted-foreground">
               <span>{row.original.current_stock} / {row.original.capacity}</span>
             </div>
             <Progress value={util} className="h-1.5" />
-            <div className="text-[10px] text-muted-foreground">{util.toFixed(1)}%</div>
+            <div className="text-sm text-muted-foreground">{util.toFixed(1)}%</div>
           </div>
         )
       }
@@ -158,11 +158,11 @@ export default function WarehousesPage() {
       accessorKey: 'manager',
       cell: ({ row }) => (
         <div className="flex flex-col gap-0.5">
-          <div className="flex items-center gap-1.5 text-xs text-foreground">
+          <div className="flex items-center gap-1.5 text-sm text-foreground">
             <HugeiconsIcon icon={UserCircleIcon} className="h-3 w-3 text-muted-foreground" />
             <span>{row.original.manager}</span>
           </div>
-          <span className="text-[10px] text-muted-foreground ml-4.5">{row.original.phone}</span>
+          <span className="text-sm text-muted-foreground ml-4.5">{row.original.phone}</span>
         </div>
       )
     },

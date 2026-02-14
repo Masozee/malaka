@@ -140,7 +140,7 @@ export function DataTable<T extends { id: string }>({
   if (loading) {
     return (
       <div className="w-full" role="status" aria-label="Loading data" aria-busy="true">
-        <div className="rounded-md border">
+        <div className="rounded-sm border">
           <div className="p-4">
             <div className="space-y-3">
               {[...Array(5)].map((_, i) => (
@@ -232,7 +232,7 @@ export function DataTable<T extends { id: string }>({
       </div>
 
       {/* Table */}
-      <div className="rounded-lg border bg-white dark:bg-gray-900 overflow-hidden" role="region" aria-label="Data table">
+      <div className="rounded-sm border bg-white dark:bg-gray-900 overflow-hidden" role="region" aria-label="Data table">
         <div className="overflow-x-auto">
           <table className="w-full">
             <caption className="sr-only">Data table with row selection and actions</caption>

@@ -32,6 +32,11 @@ func (s *CashReceiptService) GetCashReceiptByID(ctx context.Context, id uuid.ID)
 	return s.repo.GetByID(ctx, id)
 }
 
+// GetAllCashReceipts retrieves all cash receipts.
+func (s *CashReceiptService) GetAllCashReceipts(ctx context.Context) ([]*entities.CashReceipt, error) {
+	return s.repo.GetAll(ctx)
+}
+
 // UpdateCashReceipt updates an existing cash receipt.
 func (s *CashReceiptService) UpdateCashReceipt(ctx context.Context, cr *entities.CashReceipt) error {
 	// Ensure the cash receipt exists before updating

@@ -1,6 +1,28 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { HugeiconsIcon } from '@hugeicons/react'
+import {
+  Search01Icon,
+  Building01Icon,
+  Dollar01Icon,
+  Calendar01Icon,
+  MoreHorizontalIcon,
+  Package01Icon,
+  ChartDecreaseIcon,
+  AlertCircleIcon,
+  Location01Icon,
+  UserIcon,
+  Settings01Icon,
+  Tag01Icon,
+  PackageSearchIcon,
+  PackageAddIcon,
+  MoneyExchange03Icon,
+  StackStarIcon,
+  Download01Icon,
+  PlusSignIcon,
+  Clock01Icon,
+} from '@hugeicons/core-free-icons'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -10,10 +32,25 @@ import { AdvancedDataTable, type AdvancedColumn } from '@/components/ui/advanced
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
 import { Progress } from '@/components/ui/progress'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu'
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+} from '@/components/ui/sheet'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog'
 import { fixedAssetService, type FixedAsset as APIFixedAsset } from '@/services/accounting'
-
-import Link from 'next/link'
+import { apiClient } from '@/lib/api'
 
 // Fixed Asset types and interfaces (extended for UI)
 interface FixedAsset {
@@ -115,6 +152,49 @@ export default function FixedAssetsPage() {
   const [categoryFilter, setCategoryFilter] = useState<string>('all')
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [conditionFilter, setConditionFilter] = useState<string>('all')
+  const [selectedAsset, setSelectedAsset] = useState<FixedAsset | null>(null)
+  const [drawerOpen, setDrawerOpen] = useState(false)
+  const [addDialogOpen, setAddDialogOpen] = useState(false)
+  const [maintenanceOpen, setMaintenanceOpen] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+  const [depSchedule, setDepSchedule] = useState<Record<string, any[]>>({})
+  const [depLoading, setDepLoading] = useState(false)
+
+  // Add asset form state
+  const [formData, setFormData] = useState({
+    asset_name: '',
+    description: '',
+    category: 'EQUIPMENT',
+    acquisition_date: '',
+    cost: '',
+    salvage_value: '',
+    useful_life: '',
+    depreciation_method: 'STRAIGHT_LINE',
+    current_location: '',
+    serial_number: '',
+    status: 'ACTIVE',
+  })
+
+  const resetForm = () => {
+    setFormData({
+      asset_name: '',
+      description: '',
+      category: 'EQUIPMENT',
+      acquisition_date: '',
+      cost: '',
+      salvage_value: '',
+      useful_life: '',
+      depreciation_method: 'STRAIGHT_LINE',
+      current_location: '',
+      serial_number: '',
+      status: 'ACTIVE',
+    })
+  }
+
+  const openDrawer = (asset: FixedAsset) => {
+    setSelectedAsset(asset)
+    setDrawerOpen(true)
+  }
 
   useEffect(() => {
     setMounted(true)
@@ -135,6 +215,89 @@ export default function FixedAssetsPage() {
       setError('Failed to load fixed assets. Please try again.')
     } finally {
       setLoading(false)
+    }
+  }
+
+  async function handleCreateAsset() {
+    try {
+      setSubmitting(true)
+      const payload = {
+        company_id: apiClient.getCompanyId() || '',
+        asset_name: formData.asset_name,
+        description: formData.description,
+        category: formData.category,
+        acquisition_date: formData.acquisition_date
+          ? new Date(formData.acquisition_date + 'T00:00:00Z').toISOString()
+          : undefined,
+        cost: parseFloat(formData.cost) || 0,
+        salvage_value: parseFloat(formData.salvage_value) || 0,
+        useful_life: parseInt(formData.useful_life) || 1,
+        depreciation_method: formData.depreciation_method,
+        current_location: formData.current_location,
+        serial_number: formData.serial_number,
+        status: formData.status,
+      }
+      await fixedAssetService.create(payload)
+      setAddDialogOpen(false)
+      resetForm()
+      loadAssets()
+    } catch (err) {
+      console.error('Failed to create asset:', err)
+      alert('Failed to create asset. Please try again.')
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  function handleExport() {
+    const headers = ['Asset Code', 'Asset Name', 'Category', 'Location', 'Status', 'Condition', 'Purchase Date', 'Purchase Cost', 'Book Value', 'Accumulated Depreciation', 'Salvage Value', 'Useful Life (Years)', 'Depreciation Method', 'Serial Number']
+    const rows = filteredAssets.map(a => [
+      a.asset_code,
+      a.asset_name,
+      getCategoryLabel(a.category),
+      a.location,
+      a.status,
+      a.condition,
+      a.purchase_date,
+      a.purchase_cost,
+      a.current_book_value,
+      a.accumulated_depreciation,
+      a.salvage_value,
+      a.useful_life_years,
+      a.depreciation_method.replace(/_/g, ' '),
+      a.serial_number || '',
+    ])
+    const csvContent = [headers.join(','), ...rows.map(r => r.map(v => `"${v}"`).join(','))].join('\n')
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `fixed-assets-${new Date().toISOString().split('T')[0]}.csv`
+    link.click()
+    URL.revokeObjectURL(url)
+  }
+
+  async function openMaintenanceSchedule() {
+    setMaintenanceOpen(true)
+    setDepLoading(true)
+    try {
+      const schedules: Record<string, any[]> = {}
+      const activeAssets = assets.filter(a => a.status === 'active')
+      for (const asset of activeAssets.slice(0, 20)) {
+        try {
+          const schedule = await fixedAssetService.getDepreciationSchedule(asset.id)
+          if (schedule && schedule.length > 0) {
+            schedules[asset.id] = schedule
+          }
+        } catch {
+          // Skip assets with no schedule
+        }
+      }
+      setDepSchedule(schedules)
+    } catch (err) {
+      console.error('Failed to load depreciation schedules:', err)
+    } finally {
+      setDepLoading(false)
     }
   }
 
@@ -223,16 +386,32 @@ export default function FixedAssetsPage() {
     {
       key: 'asset_code',
       title: 'Asset Code',
-      render: (_: unknown, asset: FixedAsset) => (
-        <div className="font-mono text-xs font-medium">{asset.asset_code}</div>
-      )
+      render: (_: unknown, asset: FixedAsset) => {
+        const { variant, label } = getStatusBadge(asset.status)
+        return (
+          <div className="space-y-1">
+            <Badge variant={variant} className="text-[10px] px-1.5 py-0">{label}</Badge>
+            <button
+              onClick={() => openDrawer(asset)}
+              className="font-mono text-xs font-medium text-blue-600 hover:text-blue-800 hover:underline block"
+            >
+              {asset.asset_code}
+            </button>
+          </div>
+        )
+      }
     },
     {
       key: 'asset_name',
       title: 'Asset Name',
       render: (_: unknown, asset: FixedAsset) => (
         <div>
-          <div className="font-medium">{asset.asset_name}</div>
+          <button
+            onClick={() => openDrawer(asset)}
+            className="font-medium text-blue-600 hover:text-blue-800 hover:underline text-left"
+          >
+            {asset.asset_name}
+          </button>
           <div className="text-xs text-muted-foreground">{asset.description}</div>
         </div>
       )
@@ -292,30 +471,6 @@ export default function FixedAssetsPage() {
       }
     },
     {
-      key: 'next_maintenance_date',
-      title: 'Maintenance',
-      render: (_: unknown, asset: FixedAsset) => {
-        if (!mounted) return <div className="text-xs text-gray-500">Loading...</div>
-        const maintenanceStatus = getMaintenanceStatus(asset)
-        return (
-          <div>
-            {asset.next_maintenance_date ? (
-              <div>
-                <div className="text-xs">{formatDate(asset.next_maintenance_date)}</div>
-                {maintenanceStatus && (
-                  <div className={`text-xs ${maintenanceStatus.color}`}>
-                    {maintenanceStatus.label}
-                  </div>
-                )}
-              </div>
-            ) : (
-              <span className="text-muted-foreground text-xs">No schedule</span>
-            )}
-          </div>
-        )
-      }
-    },
-    {
       key: 'condition',
       title: 'Condition',
       render: (_: unknown, asset: FixedAsset) => {
@@ -324,40 +479,19 @@ export default function FixedAssetsPage() {
       }
     },
     {
-      key: 'status',
-      title: 'Status',
-      render: (_: unknown, asset: FixedAsset) => {
-        const { variant, label } = getStatusBadge(asset.status)
-        return <Badge variant={variant}>{label}</Badge>
-      }
-    },
-    {
       key: 'id',
-      title: 'Actions',
+      title: '',
       render: (_: unknown, asset: FixedAsset) => (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="sm" aria-label={`Actions for asset ${asset.asset_name}`}>
-              ...
+            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+              <HugeiconsIcon icon={MoreHorizontalIcon} className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem asChild>
-              <Link href={`/accounting/fixed-assets/${asset.id}`} className="flex items-center">
-                View Details
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <Link href={`/accounting/fixed-assets/${asset.id}/edit`} className="flex items-center">
-                Edit Asset
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              Schedule Maintenance
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              Export Report
-            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => openDrawer(asset)}>View Details</DropdownMenuItem>
+            <DropdownMenuItem>Edit Asset</DropdownMenuItem>
+            <DropdownMenuItem>Export Report</DropdownMenuItem>
             {asset.status !== 'disposed' && (
               <>
                 <DropdownMenuSeparator />
@@ -391,16 +525,17 @@ export default function FixedAssetsPage() {
         breadcrumbs={breadcrumbs}
         actions={
           <div className="flex items-center space-x-2">
-            <Button variant="outline" size="sm">
-              Maintenance Schedule
+            <Button variant="outline" size="sm" onClick={openMaintenanceSchedule}>
+              <HugeiconsIcon icon={Clock01Icon} className="h-4 w-4 mr-1.5" />
+              Depreciation Schedule
             </Button>
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={handleExport}>
+              <HugeiconsIcon icon={Download01Icon} className="h-4 w-4 mr-1.5" />
               Export
             </Button>
-            <Button asChild>
-              <Link href="/accounting/fixed-assets/new">
-                Add Asset
-              </Link>
+            <Button onClick={() => setAddDialogOpen(true)}>
+              <HugeiconsIcon icon={PlusSignIcon} className="h-4 w-4 mr-1.5" />
+              Add Asset
             </Button>
           </div>
         }
@@ -409,72 +544,82 @@ export default function FixedAssetsPage() {
       <div className="flex-1 p-6 space-y-6">
         {/* Summary Statistics (max 4 cards) */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card className="p-4">
-            <div className="flex items-center space-x-3">
-              <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center" />
+          <Card className="p-4 border">
+            <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Total Assets</p>
+                <p className="text-sm font-medium text-muted-foreground">Total Assets</p>
                 <p className="text-2xl font-bold">{summaryStats.totalAssets}</p>
+              </div>
+              <div className="h-10 w-10 bg-muted rounded-sm flex items-center justify-center border">
+                <HugeiconsIcon icon={PackageSearchIcon} className="h-5 w-5 text-foreground" />
               </div>
             </div>
           </Card>
 
-          <Card className="p-4">
-            <div className="flex items-center space-x-3">
-              <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center" />
+          <Card className="p-4 border">
+            <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Purchase Value</p>
+                <p className="text-sm font-medium text-muted-foreground">Purchase Value</p>
                 <p className="text-2xl font-bold">
                   {mounted ? `Rp ${(summaryStats.totalValue / 1000000000).toFixed(1)}B` : ''}
                 </p>
               </div>
-            </div>
-          </Card>
-
-          <Card className="p-4">
-            <div className="flex items-center space-x-3">
-              <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center" />
-              <div>
-                <p className="text-sm font-medium text-gray-600">Book Value</p>
-                <p className="text-2xl font-bold">
-                  {mounted ? `Rp ${(summaryStats.totalBookValue / 1000000000).toFixed(1)}B` : ''}
-                </p>
+              <div className="h-10 w-10 bg-muted rounded-sm flex items-center justify-center border">
+                <HugeiconsIcon icon={PackageAddIcon} className="h-5 w-5 text-foreground" />
               </div>
             </div>
           </Card>
 
-          <Card className="p-4">
-            <div className="flex items-center space-x-3">
-              <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center" />
+          <Card className="p-4 border">
+            <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Critical Assets</p>
+                <p className="text-sm font-medium text-muted-foreground">Book Value</p>
+                <p className="text-2xl font-bold">
+                  {mounted ? `Rp ${(summaryStats.totalBookValue / 1000000000).toFixed(1)}B` : ''}
+                </p>
+              </div>
+              <div className="h-10 w-10 bg-muted rounded-sm flex items-center justify-center border">
+                <HugeiconsIcon icon={MoneyExchange03Icon} className="h-5 w-5 text-foreground" />
+              </div>
+            </div>
+          </Card>
+
+          <Card className="p-4 border">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Critical Assets</p>
                 <p className="text-2xl font-bold">{summaryStats.criticalAssets}</p>
+              </div>
+              <div className="h-10 w-10 bg-muted rounded-sm flex items-center justify-center border">
+                <HugeiconsIcon icon={StackStarIcon} className="h-5 w-5 text-foreground" />
               </div>
             </div>
           </Card>
         </div>
 
-        {/* Filters (no outer border) */}
+        {/* Filters */}
         <div className="flex items-center justify-between gap-4">
           <div className="flex-1 max-w-md">
             <div className="relative">
+              <HugeiconsIcon
+                icon={Search01Icon}
+                className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground"
+              />
               <Input
                 placeholder="Search assets..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-3"
-                aria-label="Search assets"
+                className="pl-9 bg-white"
               />
             </div>
           </div>
-
           <div className="flex items-center gap-2">
             <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-              <SelectTrigger className="w-32" aria-label="Filter by category">
+              <SelectTrigger className="w-36">
                 <SelectValue placeholder="Category" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All categories</SelectItem>
+                <SelectItem value="all">All Categories</SelectItem>
                 <SelectItem value="building">Building</SelectItem>
                 <SelectItem value="machinery">Machinery</SelectItem>
                 <SelectItem value="vehicle">Vehicle</SelectItem>
@@ -485,11 +630,11 @@ export default function FixedAssetsPage() {
             </Select>
 
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-32" aria-label="Filter by status">
+              <SelectTrigger className="w-32">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All statuses</SelectItem>
+                <SelectItem value="all">All Status</SelectItem>
                 <SelectItem value="active">Active</SelectItem>
                 <SelectItem value="maintenance">Maintenance</SelectItem>
                 <SelectItem value="idle">Idle</SelectItem>
@@ -498,11 +643,11 @@ export default function FixedAssetsPage() {
             </Select>
 
             <Select value={conditionFilter} onValueChange={setConditionFilter}>
-              <SelectTrigger className="w-32" aria-label="Filter by condition">
+              <SelectTrigger className="w-32">
                 <SelectValue placeholder="Condition" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All conditions</SelectItem>
+                <SelectItem value="all">All Condition</SelectItem>
                 <SelectItem value="excellent">Excellent</SelectItem>
                 <SelectItem value="good">Good</SelectItem>
                 <SelectItem value="fair">Fair</SelectItem>
@@ -510,18 +655,10 @@ export default function FixedAssetsPage() {
                 <SelectItem value="critical">Critical</SelectItem>
               </SelectContent>
             </Select>
-          </div>
-        </div>
 
-        {/* View Toggle & Sort */}
-        <div className="flex justify-between items-center">
-          <div className="flex items-center gap-4">
             <div className="text-sm text-muted-foreground">
-              Manage all fixed assets and track depreciation
+              {filteredAssets.length} of {assets.length} items
             </div>
-          </div>
-          <div className="text-sm text-muted-foreground">
-            {filteredAssets.length} of {assets.length} items
           </div>
         </div>
 
@@ -535,12 +672,14 @@ export default function FixedAssetsPage() {
           </div>
         )}
 
-        {/* Content - Table without Card wrapper */}
-        <AdvancedDataTable
-          data={filteredAssets}
-          columns={columns}
-          loading={loading}
-        />
+        {/* Content */}
+        <div className="border rounded-sm">
+          <AdvancedDataTable
+            data={filteredAssets}
+            columns={columns}
+            loading={loading}
+          />
+        </div>
 
         {/* Critical Assets Alert */}
         {summaryStats.criticalAssets > 0 && (
@@ -560,6 +699,364 @@ export default function FixedAssetsPage() {
           </Card>
         )}
       </div>
+
+      {/* Detail Drawer */}
+      <Sheet open={drawerOpen} onOpenChange={setDrawerOpen}>
+        <SheetContent side="right" className="sm:max-w-lg w-full overflow-y-auto">
+          {selectedAsset && (() => {
+            const asset = selectedAsset
+            const depRate = asset.purchase_cost > 0 ? (asset.accumulated_depreciation / asset.purchase_cost) * 100 : 0
+            const { variant: statusVariant, label: statusLabel } = getStatusBadge(asset.status)
+            const { variant: condVariant, label: condLabel } = getConditionBadge(asset.condition)
+            const remaining = Math.max(asset.purchase_cost - asset.accumulated_depreciation - asset.salvage_value, 0)
+            const yearsRemaining = asset.annual_depreciation > 0 ? (remaining / asset.annual_depreciation).toFixed(1) : '0'
+
+            return (
+              <>
+                <SheetHeader>
+                  <SheetTitle className="text-lg">{asset.asset_name}</SheetTitle>
+                  <SheetDescription>{asset.description || 'Fixed asset details'}</SheetDescription>
+                </SheetHeader>
+
+                <div className="space-y-6 px-4 pb-6">
+                  {/* Badges */}
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Badge variant="outline" className="font-mono">{asset.asset_code}</Badge>
+                    <Badge variant={statusVariant}>{statusLabel}</Badge>
+                    <Badge variant={condVariant}>{condLabel}</Badge>
+                  </div>
+
+                  {/* Value Cards */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="bg-muted/50 rounded-sm p-3">
+                      <p className="text-sm text-muted-foreground">Purchase Cost</p>
+                      <p className="text-lg font-bold">{mounted ? formatCurrency(asset.purchase_cost) : ''}</p>
+                    </div>
+                    <div className="bg-muted/50 rounded-sm p-3">
+                      <p className="text-sm text-muted-foreground">Book Value</p>
+                      <p className="text-lg font-bold">{mounted ? formatCurrency(asset.current_book_value) : ''}</p>
+                    </div>
+                    <div className="bg-muted/50 rounded-sm p-3">
+                      <p className="text-sm text-muted-foreground">Salvage Value</p>
+                      <p className="text-lg font-bold">{mounted ? formatCurrency(asset.salvage_value) : ''}</p>
+                    </div>
+                    <div className="bg-muted/50 rounded-sm p-3">
+                      <p className="text-sm text-muted-foreground">Annual Depr.</p>
+                      <p className="text-lg font-bold">{mounted ? formatCurrency(asset.annual_depreciation) : ''}</p>
+                    </div>
+                  </div>
+
+                  {/* Depreciation Progress */}
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Depreciation Progress</span>
+                      <span className="font-medium">{mounted ? `${depRate.toFixed(1)}%` : ''}</span>
+                    </div>
+                    <Progress value={Math.min(depRate, 100)} className="h-2.5" />
+                    <p className="text-sm text-muted-foreground">
+                      {mounted ? formatCurrency(asset.accumulated_depreciation) : ''} accumulated
+                      {' · '}{yearsRemaining} years remaining
+                    </p>
+                  </div>
+
+                  {/* Details */}
+                  <div className="border rounded-sm">
+                    <div className="px-4 py-3 border-b bg-muted/30">
+                      <h4 className="text-sm font-semibold">Details</h4>
+                      <p className="text-xs text-muted-foreground mt-0.5">General information about this asset</p>
+                    </div>
+                    <div className="px-4 py-2 divide-y">
+                      <div className="flex items-center justify-between py-2.5">
+                        <span className="text-sm text-muted-foreground flex items-center gap-2">
+                          <HugeiconsIcon icon={Tag01Icon} className="h-4 w-4" />
+                          Category
+                        </span>
+                        <span className="text-sm font-medium capitalize">{getCategoryLabel(asset.category)}</span>
+                      </div>
+                      <div className="flex items-center justify-between py-2.5">
+                        <span className="text-sm text-muted-foreground flex items-center gap-2">
+                          <HugeiconsIcon icon={Location01Icon} className="h-4 w-4" />
+                          Location
+                        </span>
+                        <span className="text-sm font-medium">{asset.location || 'Not specified'}</span>
+                      </div>
+                      <div className="flex items-center justify-between py-2.5">
+                        <span className="text-sm text-muted-foreground flex items-center gap-2">
+                          <HugeiconsIcon icon={Settings01Icon} className="h-4 w-4" />
+                          Depreciation Method
+                        </span>
+                        <span className="text-sm font-medium capitalize">{asset.depreciation_method.replace(/_/g, ' ')}</span>
+                      </div>
+                      <div className="flex items-center justify-between py-2.5">
+                        <span className="text-sm text-muted-foreground flex items-center gap-2">
+                          <HugeiconsIcon icon={Calendar01Icon} className="h-4 w-4" />
+                          Useful Life
+                        </span>
+                        <span className="text-sm font-medium">{asset.useful_life_years} years</span>
+                      </div>
+                      {asset.serial_number && (
+                        <div className="flex items-center justify-between py-2.5">
+                          <span className="text-sm text-muted-foreground flex items-center gap-2">
+                            <HugeiconsIcon icon={Package01Icon} className="h-4 w-4" />
+                            Serial Number
+                          </span>
+                          <span className="text-sm font-medium font-mono">{asset.serial_number}</span>
+                        </div>
+                      )}
+                      <div className="flex items-center justify-between py-2.5">
+                        <span className="text-sm text-muted-foreground flex items-center gap-2">
+                          <HugeiconsIcon icon={Dollar01Icon} className="h-4 w-4" />
+                          Purchase Date
+                        </span>
+                        <span className="text-sm font-medium">{mounted ? formatDate(asset.purchase_date) : ''}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Activity */}
+                  <div className="border rounded-sm">
+                    <div className="px-4 py-3 border-b bg-muted/30">
+                      <h4 className="text-sm font-semibold">Activity</h4>
+                      <p className="text-xs text-muted-foreground mt-0.5">Creation and modification history</p>
+                    </div>
+                    <div className="px-4 py-2 divide-y">
+                      <div className="flex items-center justify-between py-2.5">
+                        <span className="text-sm text-muted-foreground flex items-center gap-2">
+                          <HugeiconsIcon icon={Calendar01Icon} className="h-4 w-4" />
+                          Created
+                        </span>
+                        <span className="text-sm">{mounted ? formatDate(asset.created_at) : ''}</span>
+                      </div>
+                      <div className="flex items-center justify-between py-2.5">
+                        <span className="text-sm text-muted-foreground flex items-center gap-2">
+                          <HugeiconsIcon icon={Calendar01Icon} className="h-4 w-4" />
+                          Updated
+                        </span>
+                        <span className="text-sm">{mounted ? formatDate(asset.updated_at) : ''}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </>
+            )
+          })()}
+        </SheetContent>
+      </Sheet>
+      {/* Add Asset Dialog */}
+      <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
+        <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Add Fixed Asset</DialogTitle>
+            <DialogDescription>Register a new fixed asset to the system.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-2">
+              <Label htmlFor="asset_name">Asset Name *</Label>
+              <Input
+                id="asset_name"
+                placeholder="e.g. Office Laptop Dell XPS"
+                value={formData.asset_name}
+                onChange={(e) => setFormData({ ...formData, asset_name: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="description">Description</Label>
+              <Textarea
+                id="description"
+                placeholder="Brief description of the asset"
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                rows={2}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="category">Category</Label>
+                <Select value={formData.category} onValueChange={(v) => setFormData({ ...formData, category: v })}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="BUILDING">Building</SelectItem>
+                    <SelectItem value="MACHINERY">Machinery</SelectItem>
+                    <SelectItem value="VEHICLE">Vehicle</SelectItem>
+                    <SelectItem value="EQUIPMENT">Equipment</SelectItem>
+                    <SelectItem value="COMPUTER">Computer</SelectItem>
+                    <SelectItem value="FURNITURE">Furniture</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="acquisition_date">Acquisition Date *</Label>
+                <Input
+                  id="acquisition_date"
+                  type="date"
+                  value={formData.acquisition_date}
+                  onChange={(e) => setFormData({ ...formData, acquisition_date: e.target.value })}
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="cost">Cost (Rp) *</Label>
+                <Input
+                  id="cost"
+                  type="number"
+                  placeholder="0"
+                  value={formData.cost}
+                  onChange={(e) => setFormData({ ...formData, cost: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="salvage_value">Salvage Value (Rp)</Label>
+                <Input
+                  id="salvage_value"
+                  type="number"
+                  placeholder="0"
+                  value={formData.salvage_value}
+                  onChange={(e) => setFormData({ ...formData, salvage_value: e.target.value })}
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="useful_life">Useful Life (Years) *</Label>
+                <Input
+                  id="useful_life"
+                  type="number"
+                  placeholder="5"
+                  value={formData.useful_life}
+                  onChange={(e) => setFormData({ ...formData, useful_life: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="depreciation_method">Depreciation Method</Label>
+                <Select value={formData.depreciation_method} onValueChange={(v) => setFormData({ ...formData, depreciation_method: v })}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="STRAIGHT_LINE">Straight Line</SelectItem>
+                    <SelectItem value="DECLINING_BALANCE">Declining Balance</SelectItem>
+                    <SelectItem value="UNITS_OF_PRODUCTION">Units of Production</SelectItem>
+                    <SelectItem value="SUM_OF_YEARS_DIGITS">Sum of Years Digits</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="current_location">Location</Label>
+                <Input
+                  id="current_location"
+                  placeholder="e.g. Head Office"
+                  value={formData.current_location}
+                  onChange={(e) => setFormData({ ...formData, current_location: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="serial_number">Serial Number</Label>
+                <Input
+                  id="serial_number"
+                  placeholder="e.g. SN-12345"
+                  value={formData.serial_number}
+                  onChange={(e) => setFormData({ ...formData, serial_number: e.target.value })}
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 pt-2">
+              <Button variant="outline" onClick={() => { setAddDialogOpen(false); resetForm() }}>
+                Cancel
+              </Button>
+              <Button
+                onClick={handleCreateAsset}
+                disabled={submitting || !formData.asset_name || !formData.acquisition_date || !formData.cost}
+              >
+                {submitting ? 'Creating...' : 'Create Asset'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Depreciation Schedule Sheet */}
+      <Sheet open={maintenanceOpen} onOpenChange={setMaintenanceOpen}>
+        <SheetContent side="right" className="sm:max-w-2xl w-full overflow-y-auto">
+          <SheetHeader>
+            <SheetTitle className="text-lg">Depreciation Schedule</SheetTitle>
+            <SheetDescription>Depreciation overview for active fixed assets</SheetDescription>
+          </SheetHeader>
+          <div className="space-y-4 px-4 pb-6">
+            {depLoading ? (
+              <div className="py-12 text-center text-muted-foreground">Loading depreciation data...</div>
+            ) : assets.filter(a => a.status === 'active').length === 0 ? (
+              <div className="py-12 text-center text-muted-foreground">No active assets found.</div>
+            ) : (
+              assets.filter(a => a.status === 'active').map((asset) => {
+                const depRate = asset.purchase_cost > 0 ? (asset.accumulated_depreciation / asset.purchase_cost) * 100 : 0
+                const remaining = Math.max(asset.purchase_cost - asset.accumulated_depreciation - asset.salvage_value, 0)
+                const yearsLeft = asset.annual_depreciation > 0 ? (remaining / asset.annual_depreciation).toFixed(1) : '0'
+                const schedule = depSchedule[asset.id]
+
+                return (
+                  <div key={asset.id} className="border rounded-sm">
+                    <div className="px-4 py-3 border-b bg-muted/30">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h4 className="text-sm font-semibold">{asset.asset_name}</h4>
+                          <p className="text-xs text-muted-foreground font-mono">{asset.asset_code}</p>
+                        </div>
+                        <Badge variant="outline" className="capitalize">{asset.depreciation_method.replace(/_/g, ' ')}</Badge>
+                      </div>
+                    </div>
+                    <div className="px-4 py-3 space-y-3">
+                      <div className="grid grid-cols-4 gap-3 text-sm">
+                        <div>
+                          <p className="text-muted-foreground text-xs">Cost</p>
+                          <p className="font-medium">{mounted ? formatCurrency(asset.purchase_cost) : ''}</p>
+                        </div>
+                        <div>
+                          <p className="text-muted-foreground text-xs">Accumulated</p>
+                          <p className="font-medium">{mounted ? formatCurrency(asset.accumulated_depreciation) : ''}</p>
+                        </div>
+                        <div>
+                          <p className="text-muted-foreground text-xs">Book Value</p>
+                          <p className="font-medium">{mounted ? formatCurrency(asset.current_book_value) : ''}</p>
+                        </div>
+                        <div>
+                          <p className="text-muted-foreground text-xs">Annual Depr.</p>
+                          <p className="font-medium">{mounted ? formatCurrency(asset.annual_depreciation) : ''}</p>
+                        </div>
+                      </div>
+                      <div className="space-y-1">
+                        <div className="flex justify-between text-xs">
+                          <span className="text-muted-foreground">{depRate.toFixed(1)}% depreciated</span>
+                          <span className="text-muted-foreground">{yearsLeft} years remaining</span>
+                        </div>
+                        <Progress value={Math.min(depRate, 100)} className="h-2" />
+                      </div>
+                      {schedule && schedule.length > 0 && (
+                        <div className="border-t pt-2">
+                          <p className="text-xs font-medium text-muted-foreground mb-2">Schedule History</p>
+                          <div className="space-y-1">
+                            {schedule.slice(0, 5).map((entry: any, i: number) => (
+                              <div key={i} className="flex justify-between text-xs">
+                                <span className="text-muted-foreground">{mounted ? formatDate(entry.period_start || entry.date) : ''}</span>
+                                <span>{mounted ? formatCurrency(entry.depreciation_amount || entry.amount) : ''}</span>
+                                <span className="text-muted-foreground">BV: {mounted ? formatCurrency(entry.book_value_after || entry.book_value) : ''}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )
+              })
+            )}
+          </div>
+        </SheetContent>
+      </Sheet>
     </TwoLevelLayout>
   )
 }

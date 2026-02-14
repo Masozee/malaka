@@ -119,9 +119,9 @@ func (r *CachedDivisionRepository) GetAll(ctx context.Context) ([]*entities.Divi
 }
 
 // GetAllWithPagination retrieves divisions with pagination (not cached due to dynamic parameters).
-func (r *CachedDivisionRepository) GetAllWithPagination(ctx context.Context, limit, offset int, search, status, sortOrder string) ([]*entities.Division, int, error) {
+func (r *CachedDivisionRepository) GetAllWithPagination(ctx context.Context, limit, offset int, search, status, sortOrder, companyID string) ([]*entities.Division, int, error) {
 	// For pagination with dynamic parameters, we bypass cache to ensure fresh data
-	return r.repo.GetAllWithPagination(ctx, limit, offset, search, status, sortOrder)
+	return r.repo.GetAllWithPagination(ctx, limit, offset, search, status, sortOrder, companyID)
 }
 
 // GetByParentID retrieves divisions by parent ID (not cached due to relational nature).

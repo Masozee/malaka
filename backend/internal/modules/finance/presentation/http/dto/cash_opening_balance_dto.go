@@ -5,7 +5,6 @@ import (
 
 	"malaka/internal/modules/finance/domain/entities"
 	"malaka/internal/shared/types"
-	"malaka/internal/shared/uuid"
 )
 
 // CashOpeningBalanceCreateRequest represents the request to create cash opening balance.
@@ -48,7 +47,7 @@ type CashOpeningBalanceResponse struct {
 func (req *CashOpeningBalanceCreateRequest) ToCashOpeningBalanceEntity() *entities.CashOpeningBalance {
 	return &entities.CashOpeningBalance{
 		BaseModel:      types.BaseModel{},
-		CashBankID:     uuid.MustParse(req.CashBankID),
+		CashBankID:     safeParseUUID(req.CashBankID),
 		OpeningDate:    req.OpeningDate,
 		OpeningBalance: req.OpeningBalance,
 		Currency:       req.Currency,
@@ -62,7 +61,7 @@ func (req *CashOpeningBalanceCreateRequest) ToCashOpeningBalanceEntity() *entiti
 func (req *CashOpeningBalanceUpdateRequest) ToCashOpeningBalanceEntity() *entities.CashOpeningBalance {
 	return &entities.CashOpeningBalance{
 		BaseModel:      types.BaseModel{},
-		CashBankID:     uuid.MustParse(req.CashBankID),
+		CashBankID:     safeParseUUID(req.CashBankID),
 		OpeningDate:    req.OpeningDate,
 		OpeningBalance: req.OpeningBalance,
 		Currency:       req.Currency,

@@ -189,6 +189,11 @@ type Container struct {
 	CheckClearanceService     finance_services.CheckClearanceService
 	MonthlyClosingService     finance_services.MonthlyClosingService
 	CashBookService           finance_services.CashBookService
+	FinanceBudgetService      *finance_services.BudgetService
+	CapexProjectService       *finance_services.CapexProjectService
+	LoanFacilityService       *finance_services.LoanFacilityService
+	FinancialForecastService  *finance_services.FinancialForecastService
+	FinanceReportService      *finance_services.FinanceReportService
 
 	// HR services
 	EmployeeService          *hr_services.EmployeeService
@@ -218,6 +223,7 @@ type Container struct {
 	BudgetService              accounting_services.BudgetService
 	FinancialPeriodService     accounting_services.FinancialPeriodService
 	FixedAssetService          accounting_services.FixedAssetService
+	TaxService                 *accounting_services.TaxService
 	// TrialBalanceService     accounting_services.TrialBalanceService
 
 	// Procurement services
@@ -461,6 +467,11 @@ func NewContainer(cfg *config.Config, logger *zap.Logger, db *sql.DB, gormDB *go
 	checkClearanceRepo := finance_persistence.NewCheckClearanceRepository(db)
 	monthlyClosingRepo := finance_persistence.NewMonthlyClosingRepository(db)
 	cashBookRepo := finance_persistence.NewCashBookRepository(db)
+	financeBudgetRepo := finance_persistence.NewBudgetRepositoryImpl(sqlxDB)
+	capexProjectRepo := finance_persistence.NewCapexProjectRepositoryImpl(sqlxDB)
+	loanFacilityRepo := finance_persistence.NewLoanFacilityRepositoryImpl(sqlxDB)
+	financialForecastRepo := finance_persistence.NewFinancialForecastRepositoryImpl(sqlxDB)
+	financeReportRepo := finance_persistence.NewFinanceReportRepositoryImpl(sqlxDB)
 
 	// Initialize accounting repositories
 	journalEntryRepo := accounting_persistence.NewJournalEntryRepository(db)
@@ -494,6 +505,11 @@ func NewContainer(cfg *config.Config, logger *zap.Logger, db *sql.DB, gormDB *go
 	checkClearanceService := finance_services.NewCheckClearanceService(checkClearanceRepo)
 	monthlyClosingService := finance_services.NewMonthlyClosingService(monthlyClosingRepo)
 	cashBookService := finance_services.NewCashBookService(cashBookRepo)
+	financeBudgetService := finance_services.NewBudgetService(financeBudgetRepo)
+	capexProjectService := finance_services.NewCapexProjectService(capexProjectRepo)
+	loanFacilityService := finance_services.NewLoanFacilityService(loanFacilityRepo)
+	financialForecastService := finance_services.NewFinancialForecastService(financialForecastRepo)
+	financeReportService := finance_services.NewFinanceReportService(financeReportRepo)
 
 	// Initialize HR repositories
 	employeeRepo := hr_persistence.NewPostgreSQLEmployeeRepository(sqlxDB)
@@ -532,10 +548,10 @@ func NewContainer(cfg *config.Config, logger *zap.Logger, db *sql.DB, gormDB *go
 	qualityControlService := production_services.NewQualityControlService(qualityControlRepo)
 	productionPlanService := production_services.NewProductionPlanService(productionPlanRepo)
 
-	// Initialize accounting services
-	journalEntryService := accounting_services.NewJournalEntryService(journalEntryRepo)
-	autoJournalService := accounting_services.NewAutoJournalService(journalEntryRepo, autoJournalConfigRepo, journalEntryService)
+	// Initialize accounting services (GL service first, needed by journal entry service)
 	generalLedgerService := accounting_services.NewGeneralLedgerServiceImpl(generalLedgerRepo, journalEntryRepo)
+	journalEntryService := accounting_services.NewJournalEntryService(journalEntryRepo, generalLedgerService)
+	autoJournalService := accounting_services.NewAutoJournalService(journalEntryRepo, autoJournalConfigRepo, journalEntryService)
 	costCenterService := accounting_services.NewCostCenterService(costCenterRepo)
 	chartOfAccountService := accounting_services.NewChartOfAccountService(chartOfAccountRepo)
 	// Initialize budget commitment and realization repositories
@@ -546,6 +562,10 @@ func NewContainer(cfg *config.Config, logger *zap.Logger, db *sql.DB, gormDB *go
 	// Initialize fixed asset repository and service
 	fixedAssetRepo := accounting_persistence.NewFixedAssetRepository(sqlxDB)
 	fixedAssetService := accounting_services.NewFixedAssetService(fixedAssetRepo)
+
+	// Initialize tax repository and service
+	taxRepo := accounting_persistence.NewTaxRepositoryImpl(sqlxDB)
+	taxService := accounting_services.NewTaxService(taxRepo)
 
 	// Initialize exchange rate service
 	var exchangeRateService *accounting_services.ExchangeRateService
@@ -715,6 +735,11 @@ func NewContainer(cfg *config.Config, logger *zap.Logger, db *sql.DB, gormDB *go
 		CheckClearanceService:     checkClearanceService,
 		MonthlyClosingService:     monthlyClosingService,
 		CashBookService:           cashBookService,
+		FinanceBudgetService:      financeBudgetService,
+		CapexProjectService:       capexProjectService,
+		LoanFacilityService:       loanFacilityService,
+		FinancialForecastService:  financialForecastService,
+		FinanceReportService:      financeReportService,
 
 		// HR services
 		EmployeeService:          employeeService,
@@ -744,6 +769,7 @@ func NewContainer(cfg *config.Config, logger *zap.Logger, db *sql.DB, gormDB *go
 		BudgetService:          budgetService,
 		FinancialPeriodService: financialPeriodService,
 		FixedAssetService:      fixedAssetService,
+		TaxService:             taxService,
 		// TrialBalanceService:   trialBalanceService,
 
 		// Procurement services

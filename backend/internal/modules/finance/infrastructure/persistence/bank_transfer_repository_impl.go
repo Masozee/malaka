@@ -43,6 +43,25 @@ func (r *BankTransferRepositoryImpl) GetByID(ctx context.Context, id uuid.ID) (*
 	return bt, err
 }
 
+// GetAll retrieves all bank transfers from the database.
+func (r *BankTransferRepositoryImpl) GetAll(ctx context.Context) ([]*entities.BankTransfer, error) {
+	var items []*entities.BankTransfer
+	query := `SELECT id, transfer_date, from_cash_bank_id, to_cash_bank_id, amount, description, created_at, updated_at FROM bank_transfers ORDER BY transfer_date DESC`
+	rows, err := r.db.QueryContext(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		bt := &entities.BankTransfer{}
+		if err := rows.Scan(&bt.ID, &bt.TransferDate, &bt.FromCashBankID, &bt.ToCashBankID, &bt.Amount, &bt.Description, &bt.CreatedAt, &bt.UpdatedAt); err != nil {
+			return nil, err
+		}
+		items = append(items, bt)
+	}
+	return items, rows.Err()
+}
+
 // Update updates an existing bank transfer in the database.
 func (r *BankTransferRepositoryImpl) Update(ctx context.Context, bt *entities.BankTransfer) error {
 	query := `UPDATE bank_transfers SET transfer_date = $1, from_cash_bank_id = $2, to_cash_bank_id = $3, amount = $4, description = $5, updated_at = $6 WHERE id = $7`

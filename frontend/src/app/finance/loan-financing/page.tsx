@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import { TwoLevelLayout } from '@/components/ui/two-level-layout'
 import { Header } from '@/components/ui/header'
 import { Card, CardContent } from '@/components/ui/card'
@@ -32,89 +32,50 @@ import {
     PercentIcon,
     MoreHorizontalIcon
 } from '@hugeicons/core-free-icons'
-
-// --- Types ---
-type FacilityType = 'Term Loan' | 'Working Capital Line' | 'Lease'
-type LoanStatus = 'active' | 'closed' | 'pending'
-
-interface LoanFacility {
-    id: string
-    facilityName: string
-    lender: string
-    type: FacilityType
-    principalAmount: number
-    outstandingAmount: number
-    interestRate: number
-    maturityDate: string
-    nextPaymentDate: string
-    nextPaymentAmount: number
-    status: LoanStatus
-}
-
-// --- Mock Data ---
-const mockLoans: LoanFacility[] = [
-    {
-        id: '1',
-        facilityName: 'Term Loan A - Factory Expansion',
-        lender: 'BCA',
-        type: 'Term Loan',
-        principalAmount: 5000000000,
-        outstandingAmount: 3200000000,
-        interestRate: 8.5,
-        maturityDate: '2028-12-31',
-        nextPaymentDate: '2024-03-31',
-        nextPaymentAmount: 125000000,
-        status: 'active'
-    },
-    {
-        id: '2',
-        facilityName: 'Working Capital Line',
-        lender: 'Mandiri',
-        type: 'Working Capital Line',
-        principalAmount: 2000000000,
-        outstandingAmount: 850000000,
-        interestRate: 9.25,
-        maturityDate: '2025-06-30',
-        nextPaymentDate: '2024-02-28',
-        nextPaymentAmount: 15750000, // Interest only
-        status: 'active'
-    },
-    {
-        id: '3',
-        facilityName: 'Machine Lease - Production Line 2',
-        lender: 'OTO Finance',
-        type: 'Lease',
-        principalAmount: 1500000000,
-        outstandingAmount: 1200000000,
-        interestRate: 11.0,
-        maturityDate: '2027-02-15',
-        nextPaymentDate: '2024-03-15',
-        nextPaymentAmount: 45000000,
-        status: 'active'
-    }
-]
+import { BookmarkToggle } from '@/components/ui/bookmark-toggle'
+import { loanFacilityService, type LoanFacility } from '@/services/finance'
 
 export default function LoanFinancingPage() {
     const { addToast } = useToast()
     const [searchTerm, setSearchTerm] = useState('')
     const [typeFilter, setTypeFilter] = useState<string>('all')
     const [isAddModalOpen, setIsAddModalOpen] = useState(false)
+    const [loans, setLoans] = useState<LoanFacility[]>([])
+    const [loading, setLoading] = useState(true)
+    const [mounted, setMounted] = useState(false)
+
+    useEffect(() => { setMounted(true) }, [])
+
+    useEffect(() => {
+        async function fetchData() {
+            try {
+                setLoading(true)
+                const data = await loanFacilityService.getAll()
+                setLoans(data)
+            } catch (err) {
+                console.error('Failed to fetch loans:', err)
+            } finally {
+                setLoading(false)
+            }
+        }
+        fetchData()
+    }, [])
 
     // --- Stats ---
     const stats = useMemo(() => {
-        const totalOutstanding = mockLoans.reduce((sum, l) => sum + l.outstandingAmount, 0)
-        const weightedAvgRate = mockLoans.reduce((sum, l) => sum + (l.interestRate * l.outstandingAmount), 0) / totalOutstanding
-        const nextMonthPayment = mockLoans.reduce((sum, l) => sum + l.nextPaymentAmount, 0) // Simplified
+        const totalOutstanding = loans.reduce((sum, l) => sum + l.outstanding_amount, 0)
+        const weightedAvgRate = totalOutstanding > 0 ? loans.reduce((sum, l) => sum + (l.interest_rate * l.outstanding_amount), 0) / totalOutstanding : 0
+        const nextMonthPayment = loans.reduce((sum, l) => sum + l.next_payment_amount, 0)
         return { totalOutstanding, weightedAvgRate, nextMonthPayment }
-    }, [])
+    }, [loans])
 
     // --- Filter ---
     const filteredData = useMemo(() => {
-        let data = mockLoans
+        let data = loans
         if (searchTerm) {
             const lower = searchTerm.toLowerCase()
             data = data.filter(item =>
-                item.facilityName.toLowerCase().includes(lower) ||
+                item.facility_name.toLowerCase().includes(lower) ||
                 item.lender.toLowerCase().includes(lower)
             )
         }
@@ -122,17 +83,17 @@ export default function LoanFinancingPage() {
             data = data.filter(item => item.type === typeFilter)
         }
         return data
-    }, [searchTerm, typeFilter])
+    }, [searchTerm, typeFilter, loans])
 
     // --- Columns ---
     const columns: TanStackColumn<LoanFacility>[] = [
         {
             id: 'facility',
             header: 'Facility Name',
-            accessorKey: 'facilityName',
+            accessorKey: 'facility_name',
             cell: ({ row }) => (
                 <div className="flex flex-col">
-                    <span className="font-medium text-sm">{row.original.facilityName}</span>
+                    <span className="font-medium text-sm">{row.original.facility_name}</span>
                     <span className="text-xs text-muted-foreground">{row.original.lender} - {row.original.type}</span>
                 </div>
             )
@@ -140,38 +101,38 @@ export default function LoanFinancingPage() {
         {
             id: 'outstanding',
             header: 'Outstanding Principal',
-            accessorKey: 'outstandingAmount',
+            accessorKey: 'outstanding_amount',
             cell: ({ row }) => (
                 <div className="flex flex-col">
-                    <span className="font-medium text-sm">Rp {(row.original.outstandingAmount / 1000000).toLocaleString()}M</span>
-                    <Progress value={(row.original.outstandingAmount / row.original.principalAmount) * 100} className="h-1 mt-1" />
+                    <span className="font-medium text-sm">Rp {(row.original.outstanding_amount / 1000000).toLocaleString()}M</span>
+                    <Progress value={row.original.principal_amount > 0 ? (row.original.outstanding_amount / row.original.principal_amount) * 100 : 0} className="h-1 mt-1" />
                 </div>
             )
         },
         {
             id: 'rate',
             header: 'Rate',
-            accessorKey: 'interestRate',
-            cell: ({ row }) => <span className="text-sm font-medium">{row.original.interestRate.toFixed(2)}%</span>
+            accessorKey: 'interest_rate',
+            cell: ({ row }) => <span className="text-sm font-medium">{row.original.interest_rate.toFixed(2)}%</span>
         },
         {
             id: 'nextPayment',
             header: 'Next Payment',
             cell: ({ row }) => (
                 <div className="flex flex-col text-right">
-                    <span className="font-medium text-sm">Rp {(row.original.nextPaymentAmount / 1000000).toLocaleString()}M</span>
-                    <span className="text-xs text-muted-foreground">{new Date(row.original.nextPaymentDate).toLocaleDateString()}</span>
+                    <span className="font-medium text-sm">Rp {(row.original.next_payment_amount / 1000000).toLocaleString()}M</span>
+                    <span className="text-xs text-muted-foreground">{mounted && row.original.next_payment_date ? new Date(row.original.next_payment_date).toLocaleDateString() : '-'}</span>
                 </div>
             )
         },
         {
             id: 'maturity',
             header: 'Maturity',
-            accessorKey: 'maturityDate',
+            accessorKey: 'maturity_date',
             cell: ({ row }) => (
                 <div className="flex items-center gap-2">
                     <HugeiconsIcon icon={Calendar02Icon} className="w-3 h-3 text-muted-foreground" />
-                    <span className="text-sm">{new Date(row.original.maturityDate).toLocaleDateString()}</span>
+                    <span className="text-sm">{mounted && row.original.maturity_date ? new Date(row.original.maturity_date).toLocaleDateString() : '-'}</span>
                 </div>
             )
         },
@@ -180,12 +141,12 @@ export default function LoanFinancingPage() {
             header: 'Status',
             accessorKey: 'status',
             cell: ({ row }) => {
-                const config = {
+                const config: Record<string, { label: string; color: string }> = {
                     active: { label: 'Active', color: 'bg-green-100 text-green-800' },
                     closed: { label: 'Closed', color: 'bg-gray-100 text-gray-800' },
                     pending: { label: 'Pending', color: 'bg-blue-100 text-blue-800' }
                 }
-                const s = config[row.original.status]
+                const s = config[row.original.status] || { label: row.original.status, color: 'bg-gray-100 text-gray-800' }
                 return <Badge className={`${s.color} border-0 capitalize`}>{s.label}</Badge>
             }
         },
@@ -224,10 +185,13 @@ export default function LoanFinancingPage() {
                     { label: 'Loan & Financing' }
                 ]}
                 actions={
-                    <Button onClick={() => setIsAddModalOpen(true)}>
-                        <HugeiconsIcon icon={PlusSignIcon} className="w-4 h-4 mr-2" />
-                        New Facility
-                    </Button>
+                    <div className="flex items-center gap-2">
+                        <BookmarkToggle itemId="loan-financing" />
+                        <Button onClick={() => setIsAddModalOpen(true)}>
+                            <HugeiconsIcon icon={PlusSignIcon} className="w-4 h-4 mr-2" />
+                            New Facility
+                        </Button>
+                    </div>
                 }
             />
 
@@ -300,12 +264,18 @@ export default function LoanFinancingPage() {
                 </div>
 
                 {/* Table */}
-                <TanStackDataTable
-                    data={filteredData}
-                    columns={columns}
-                    enableRowSelection
-                    showColumnToggle={false}
-                />
+                {loading ? (
+                    <div className="flex items-center justify-center py-12">
+                        <div className="text-muted-foreground">Loading loans...</div>
+                    </div>
+                ) : (
+                    <TanStackDataTable
+                        data={filteredData}
+                        columns={columns}
+                        enableRowSelection
+                        showColumnToggle={false}
+                    />
+                )}
             </div>
 
             {/* Add Modal Placeholder */}

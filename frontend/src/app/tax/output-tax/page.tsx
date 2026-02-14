@@ -1,13 +1,13 @@
 'use client'
 
-import React, { useState, useMemo } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { TwoLevelLayout } from '@/components/ui/two-level-layout'
 import { Header } from '@/components/ui/header'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+// Select removed - no longer used for status filter
 import { TanStackDataTable, TanStackColumn } from '@/components/ui/tanstack-data-table'
 import { HugeiconsIcon } from '@hugeicons/react'
 import {
@@ -26,106 +26,91 @@ import {
     Download01Icon,
     MoreHorizontalIcon
 } from '@hugeicons/core-free-icons'
-
-// --- Types ---
-type InvoiceStatus = 'draft' | 'approved' | 'paid' | 'cancelled'
-
-interface TaxInvoice {
-    id: string
-    invoiceDate: string
-    invoiceNumber: string
-    customerName: string
-    taxBase: number // DPP
-    vatAmount: number // PPN
-    status: InvoiceStatus
-}
-
-// --- Mock Data ---
-const mockInvoices: TaxInvoice[] = [
-    { id: '1', invoiceDate: '2024-02-01', invoiceNumber: 'INV/2024/001', customerName: 'PT. Maju Mundur', taxBase: 10000000, vatAmount: 1100000, status: 'approved' },
-    { id: '2', invoiceDate: '2024-02-02', invoiceNumber: 'INV/2024/002', customerName: 'CV. Sejahtera', taxBase: 5000000, vatAmount: 550000, status: 'paid' },
-    { id: '3', invoiceDate: '2024-02-03', invoiceNumber: 'INV/2024/003', customerName: 'PT. Teknologi Baru', taxBase: 25000000, vatAmount: 2750000, status: 'draft' },
-    { id: '4', invoiceDate: '2024-02-04', invoiceNumber: 'INV/2024/004', customerName: 'Toko Abadi', taxBase: 7500000, vatAmount: 825000, status: 'approved' },
-    { id: '5', invoiceDate: '2024-02-05', invoiceNumber: 'INV/2024/005', customerName: 'PT. Global Sukses', taxBase: 15000000, vatAmount: 1650000, status: 'paid' },
-]
+import { taxTransactionService, type TaxTransaction } from '@/services/tax'
 
 export default function OutputTaxPage() {
     const [searchTerm, setSearchTerm] = useState('')
-    const [statusFilter, setStatusFilter] = useState<string>('all')
+    const [transactions, setTransactions] = useState<TaxTransaction[]>([])
+    const [loading, setLoading] = useState(true)
+    const [mounted, setMounted] = useState(false)
+
+    useEffect(() => {
+        setMounted(true)
+    }, [])
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                setLoading(true)
+                const data = await taxTransactionService.getAll('output')
+                setTransactions(data)
+            } catch (error) {
+                console.error('Failed to fetch output tax transactions:', error)
+            } finally {
+                setLoading(false)
+            }
+        }
+        fetchData()
+    }, [])
 
     // --- Stats ---
     const stats = useMemo(() => {
-        const totalVAT = mockInvoices.reduce((sum, inv) => sum + inv.vatAmount, 0)
-        const totalBase = mockInvoices.reduce((sum, inv) => sum + inv.taxBase, 0)
-        const invoiceCount = mockInvoices.length
+        const totalVAT = transactions.reduce((sum, t) => sum + t.tax_amount, 0)
+        const totalBase = transactions.reduce((sum, t) => sum + t.base_amount, 0)
+        const invoiceCount = transactions.length
         return { totalVAT, totalBase, invoiceCount }
-    }, [])
+    }, [transactions])
 
     // --- Filter ---
     const filteredData = useMemo(() => {
-        let data = mockInvoices
+        let data = transactions
         if (searchTerm) {
             const lower = searchTerm.toLowerCase()
             data = data.filter(item =>
-                item.invoiceNumber.toLowerCase().includes(lower) ||
-                item.customerName.toLowerCase().includes(lower)
+                item.reference_number.toLowerCase().includes(lower) ||
+                item.reference_type.toLowerCase().includes(lower)
             )
         }
-        if (statusFilter !== 'all') {
-            data = data.filter(item => item.status === statusFilter)
-        }
         return data
-    }, [searchTerm, statusFilter])
+    }, [transactions, searchTerm])
 
     // --- Columns ---
-    const columns: TanStackColumn<TaxInvoice>[] = [
+    const columns: TanStackColumn<TaxTransaction>[] = [
         {
-            id: 'invoiceDate',
+            id: 'transaction_date',
             header: 'Date',
-            accessorKey: 'invoiceDate',
-            cell: ({ row }) => <span className="text-sm">{new Date(row.original.invoiceDate).toLocaleDateString()}</span>
+            accessorKey: 'transaction_date',
+            cell: ({ row }) => <span className="text-sm">{mounted && row.original.transaction_date ? new Date(row.original.transaction_date).toLocaleDateString() : '-'}</span>
         },
         {
-            id: 'invoiceNumber',
+            id: 'reference_number',
             header: 'Invoice No.',
-            accessorKey: 'invoiceNumber',
-            cell: ({ row }) => <span className="font-medium text-sm">{row.original.invoiceNumber}</span>
+            accessorKey: 'reference_number',
+            cell: ({ row }) => <span className="font-medium text-sm">{row.original.reference_number}</span>
         },
         {
-            id: 'customerName',
-            header: 'Customer',
-            accessorKey: 'customerName',
-            cell: ({ row }) => <span className="text-sm">{row.original.customerName}</span>
+            id: 'reference_type',
+            header: 'Reference Type',
+            accessorKey: 'reference_type',
+            cell: ({ row }) => <span className="text-sm">{row.original.reference_type}</span>
         },
         {
-            id: 'taxBase',
+            id: 'base_amount',
             header: 'Tax Base (DPP)',
-            accessorKey: 'taxBase',
-            cell: ({ row }) => <span className="text-sm">Rp {row.original.taxBase.toLocaleString()}</span>
+            accessorKey: 'base_amount',
+            cell: ({ row }) => <span className="text-sm">Rp {row.original.base_amount.toLocaleString()}</span>
         },
         {
-            id: 'vatAmount',
+            id: 'tax_amount',
             header: 'VAT (PPN)',
-            accessorKey: 'vatAmount',
-            cell: ({ row }) => <span className="text-sm font-medium">Rp {row.original.vatAmount.toLocaleString()}</span>
+            accessorKey: 'tax_amount',
+            cell: ({ row }) => <span className="text-sm font-medium">Rp {row.original.tax_amount.toLocaleString()}</span>
         },
         {
-            id: 'status',
-            header: 'Status',
-            accessorKey: 'status',
-            cell: ({ row }) => {
-                const colors = {
-                    draft: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400',
-                    approved: 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400',
-                    paid: 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400',
-                    cancelled: 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400',
-                }
-                return (
-                    <Badge className={`${colors[row.original.status]} border-0 whitespace-nowrap capitalize`}>
-                        {row.original.status}
-                    </Badge>
-                )
-            }
+            id: 'total_amount',
+            header: 'Total',
+            accessorKey: 'total_amount',
+            cell: ({ row }) => <span className="text-sm">Rp {row.original.total_amount.toLocaleString()}</span>
         },
         {
             id: 'actions',
@@ -140,7 +125,7 @@ export default function OutputTaxPage() {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem onClick={() => navigator.clipboard.writeText(row.original.invoiceNumber)}>
+                        <DropdownMenuItem onClick={() => navigator.clipboard.writeText(row.original.reference_number)}>
                             Copy Invoice No
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
@@ -212,24 +197,13 @@ export default function OutputTaxPage() {
                     <div className="relative w-64">
                         <HugeiconsIcon icon={Search01Icon} className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                         <Input
-                            placeholder="Search invoice or customer..."
+                            placeholder="Search invoice or reference..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             className="pl-9 h-9"
                         />
                     </div>
                     <div className="flex items-center gap-2">
-                        <Select value={statusFilter} onValueChange={setStatusFilter}>
-                            <SelectTrigger className="w-[150px] h-9">
-                                <SelectValue placeholder="Status" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="all">All Status</SelectItem>
-                                <SelectItem value="draft">Draft</SelectItem>
-                                <SelectItem value="approved">Approved</SelectItem>
-                                <SelectItem value="paid">Paid</SelectItem>
-                            </SelectContent>
-                        </Select>
                         <Button variant="outline" className="h-9">
                             <HugeiconsIcon icon={Download01Icon} className="h-4 w-4 mr-2" />
                             Export CSV
@@ -238,12 +212,18 @@ export default function OutputTaxPage() {
                 </div>
 
                 {/* Table */}
-                <TanStackDataTable
-                    data={filteredData}
-                    columns={columns}
-                    enableRowSelection
-                    showColumnToggle={false}
-                />
+                {loading ? (
+                    <div className="flex items-center justify-center py-12">
+                        <p className="text-muted-foreground">Loading output tax data...</p>
+                    </div>
+                ) : (
+                    <TanStackDataTable
+                        data={filteredData}
+                        columns={columns}
+                        enableRowSelection
+                        showColumnToggle={false}
+                    />
+                )}
             </div>
         </TwoLevelLayout>
     )

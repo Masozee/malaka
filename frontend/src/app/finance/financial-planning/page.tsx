@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import { TwoLevelLayout } from '@/components/ui/two-level-layout'
 import { Header } from '@/components/ui/header'
 import { Card, CardContent } from '@/components/ui/card'
@@ -31,132 +31,90 @@ import {
     ActivityIcon,
     MoreHorizontalIcon
 } from '@hugeicons/core-free-icons'
-
-// --- Types ---
-type ForecastScenario = 'Base Case' | 'Optimistic' | 'Conservative'
-type PlanStatus = 'draft' | 'review' | 'approved'
-
-interface FinancialForecast {
-    id: string
-    scenarioName: string
-    type: ForecastScenario
-    fiscalYear: string
-    projectedRevenue: number
-    projectedEbitda: number
-    growthRate: number
-    status: PlanStatus
-    lastModified: string
-}
-
-// --- Mock Data ---
-const mockForecasts: FinancialForecast[] = [
-    {
-        id: '1',
-        scenarioName: 'FY2025 Base Budget',
-        type: 'Base Case',
-        fiscalYear: '2025',
-        projectedRevenue: 45000000000,
-        projectedEbitda: 8500000000,
-        growthRate: 12.5,
-        status: 'approved',
-        lastModified: '2024-01-15'
-    },
-    {
-        id: '2',
-        scenarioName: 'FY2025 Aggressive Growth',
-        type: 'Optimistic',
-        fiscalYear: '2025',
-        projectedRevenue: 52000000000,
-        projectedEbitda: 9800000000,
-        growthRate: 25.0,
-        status: 'review',
-        lastModified: '2024-02-01'
-    },
-    {
-        id: '3',
-        scenarioName: 'FY2025 Market Downturn',
-        type: 'Conservative',
-        fiscalYear: '2025',
-        projectedRevenue: 38000000000,
-        projectedEbitda: 6000000000,
-        growthRate: 5.0,
-        status: 'draft',
-        lastModified: '2024-02-10'
-    },
-    {
-        id: '4',
-        scenarioName: 'FY2026 Long Range Plan',
-        type: 'Base Case',
-        fiscalYear: '2026',
-        projectedRevenue: 55000000000,
-        projectedEbitda: 11000000000,
-        growthRate: 15.0,
-        status: 'draft',
-        lastModified: '2024-01-20'
-    }
-]
+import { BookmarkToggle } from '@/components/ui/bookmark-toggle'
+import { financialForecastService, type FinancialForecast } from '@/services/finance'
 
 export default function FinancialPlanningPage() {
     const { addToast } = useToast()
     const [searchTerm, setSearchTerm] = useState('')
     const [scenarioFilter, setScenarioFilter] = useState<string>('all')
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
+    const [forecasts, setForecasts] = useState<FinancialForecast[]>([])
+    const [loading, setLoading] = useState(true)
+    const [mounted, setMounted] = useState(false)
+
+    useEffect(() => { setMounted(true) }, [])
+
+    useEffect(() => {
+        async function fetchData() {
+            try {
+                setLoading(true)
+                const data = await financialForecastService.getAll()
+                setForecasts(data)
+            } catch (err) {
+                console.error('Failed to fetch forecasts:', err)
+            } finally {
+                setLoading(false)
+            }
+        }
+        fetchData()
+    }, [])
 
     // --- Stats ---
     const stats = useMemo(() => {
-        const approvedPlan = mockForecasts.find(f => f.status === 'approved' && f.fiscalYear === '2025')
-        const growthTarget = approvedPlan ? approvedPlan.growthRate : 0
-        const revenueTarget = approvedPlan ? approvedPlan.projectedRevenue : 0
-        const activeScenarios = mockForecasts.filter(f => f.status !== 'approved').length
+        const approvedPlan = forecasts.find(f => f.status === 'approved' && f.fiscal_year === '2025')
+        const growthTarget = approvedPlan ? approvedPlan.growth_rate : 0
+        const revenueTarget = approvedPlan ? approvedPlan.projected_revenue : 0
+        const activeScenarios = forecasts.filter(f => f.status !== 'approved').length
         return { growthTarget, revenueTarget, activeScenarios }
-    }, [])
+    }, [forecasts])
 
     // --- Filter ---
     const filteredData = useMemo(() => {
-        let data = mockForecasts
+        let data = forecasts
         if (searchTerm) {
             const lower = searchTerm.toLowerCase()
-            data = data.filter(item => item.scenarioName.toLowerCase().includes(lower))
+            data = data.filter(item => item.scenario_name.toLowerCase().includes(lower))
         }
         if (scenarioFilter !== 'all') {
             data = data.filter(item => item.type === scenarioFilter)
         }
         return data
-    }, [searchTerm, scenarioFilter])
+    }, [searchTerm, scenarioFilter, forecasts])
 
     // --- Columns ---
     const columns: TanStackColumn<FinancialForecast>[] = [
         {
             id: 'name',
             header: 'Scenario Name',
-            accessorKey: 'scenarioName',
+            accessorKey: 'scenario_name',
             cell: ({ row }) => (
                 <div className="flex flex-col">
-                    <span className="font-medium text-sm">{row.original.scenarioName}</span>
-                    <span className="text-xs text-muted-foreground">{row.original.fiscalYear} - {row.original.type}</span>
+                    <span className="font-medium text-sm">{row.original.scenario_name}</span>
+                    <span className="text-xs text-muted-foreground">{row.original.fiscal_year} - {row.original.type}</span>
                 </div>
             )
         },
         {
             id: 'revenue',
             header: 'Proj. Revenue',
-            accessorKey: 'projectedRevenue',
-            cell: ({ row }) => <span className="text-sm font-medium">Rp {(row.original.projectedRevenue / 1000000000).toFixed(1)}B</span>
+            accessorKey: 'projected_revenue',
+            cell: ({ row }) => <span className="text-sm font-medium">Rp {(row.original.projected_revenue / 1000000000).toFixed(1)}B</span>
         },
         {
             id: 'ebitda',
             header: 'Proj. EBITDA',
-            accessorKey: 'projectedEbitda',
-            cell: ({ row }) => <span className="text-sm text-muted-foreground">Rp {(row.original.projectedEbitda / 1000000000).toFixed(1)}B</span>
+            accessorKey: 'projected_ebitda',
+            cell: ({ row }) => <span className="text-sm text-muted-foreground">Rp {(row.original.projected_ebitda / 1000000000).toFixed(1)}B</span>
         },
         {
             id: 'growth',
             header: 'Growth Rate',
-            accessorKey: 'growthRate',
+            accessorKey: 'growth_rate',
             cell: ({ row }) => (
                 <div className="flex items-center gap-1">
-                    <span className={`text-sm font-medium ${row.original.growthRate >= 10 ? 'text-green-600' : 'text-blue-600'}`}>
-                        {row.original.growthRate}%
+                    <span className={`text-sm font-medium ${row.original.growth_rate >= 10 ? 'text-green-600' : 'text-blue-600'}`}>
+                        {row.original.growth_rate}%
                     </span>
                     <HugeiconsIcon icon={ActivityIcon} className="w-3 h-3 text-muted-foreground" />
                 </div>
@@ -167,20 +125,20 @@ export default function FinancialPlanningPage() {
             header: 'Status',
             accessorKey: 'status',
             cell: ({ row }) => {
-                const config = {
+                const config: Record<string, { label: string; color: string }> = {
                     draft: { label: 'Draft', color: 'bg-gray-100 text-gray-800' },
                     review: { label: 'In Review', color: 'bg-yellow-100 text-yellow-800' },
                     approved: { label: 'Approved', color: 'bg-green-100 text-green-800' }
                 }
-                const s = config[row.original.status]
+                const s = config[row.original.status] || { label: row.original.status, color: 'bg-gray-100 text-gray-800' }
                 return <Badge className={`${s.color} border-0 capitalize`}>{s.label}</Badge>
             }
         },
         {
             id: 'lastModified',
             header: 'Last Modified',
-            accessorKey: 'lastModified',
-            cell: ({ row }) => <span className="text-sm text-muted-foreground">{row.original.lastModified}</span>
+            accessorKey: 'updated_at',
+            cell: ({ row }) => <span className="text-sm text-muted-foreground">{mounted && row.original.updated_at ? new Date(row.original.updated_at).toLocaleDateString() : '-'}</span>
         },
         {
             id: 'actions',
@@ -217,10 +175,13 @@ export default function FinancialPlanningPage() {
                     { label: 'Financial Planning' }
                 ]}
                 actions={
-                    <Button onClick={() => setIsCreateModalOpen(true)}>
-                        <HugeiconsIcon icon={PlusSignIcon} className="w-4 h-4 mr-2" />
-                        New Forecast
-                    </Button>
+                    <div className="flex items-center gap-2">
+                        <BookmarkToggle itemId="financial-planning" />
+                        <Button onClick={() => setIsCreateModalOpen(true)}>
+                            <HugeiconsIcon icon={PlusSignIcon} className="w-4 h-4 mr-2" />
+                            New Forecast
+                        </Button>
+                    </div>
                 }
             />
 
@@ -293,12 +254,18 @@ export default function FinancialPlanningPage() {
                 </div>
 
                 {/* Table */}
-                <TanStackDataTable
-                    data={filteredData}
-                    columns={columns}
-                    enableRowSelection
-                    showColumnToggle={false}
-                />
+                {loading ? (
+                    <div className="flex items-center justify-center py-12">
+                        <div className="text-muted-foreground">Loading forecasts...</div>
+                    </div>
+                ) : (
+                    <TanStackDataTable
+                        data={filteredData}
+                        columns={columns}
+                        enableRowSelection
+                        showColumnToggle={false}
+                    />
+                )}
             </div>
 
             {/* Add Modal Placeholder */}

@@ -25,6 +25,14 @@ type GeneralLedger struct {
 	CreatedBy       string    `json:"created_by" db:"created_by"`
 	CreatedAt       time.Time `json:"created_at" db:"created_at"`
 	UpdatedAt       time.Time `json:"updated_at" db:"updated_at"`
+
+	// Denormalized fields from JOINs (not stored in DB)
+	AccountCode  string `json:"account_code" db:"account_code"`
+	AccountName  string `json:"account_name" db:"account_name"`
+	AccountType  string `json:"account_type" db:"account_type"`
+	EntryNumber  string `json:"entry_number" db:"entry_number"`
+	EntryStatus  string `json:"entry_status" db:"entry_status"`
+	LineNumber   int    `json:"line_number" db:"line_number"`
 }
 
 // IsDebit returns true if this is a debit entry

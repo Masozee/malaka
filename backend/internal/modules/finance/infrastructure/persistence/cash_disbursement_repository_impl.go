@@ -43,6 +43,25 @@ func (r *CashDisbursementRepositoryImpl) GetByID(ctx context.Context, id uuid.ID
 	return cd, err
 }
 
+// GetAll retrieves all cash disbursements from the database.
+func (r *CashDisbursementRepositoryImpl) GetAll(ctx context.Context) ([]*entities.CashDisbursement, error) {
+	var items []*entities.CashDisbursement
+	query := `SELECT id, disbursement_date, amount, description, cash_bank_id, created_at, updated_at FROM cash_disbursements ORDER BY disbursement_date DESC`
+	rows, err := r.db.QueryContext(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		cd := &entities.CashDisbursement{}
+		if err := rows.Scan(&cd.ID, &cd.DisbursementDate, &cd.Amount, &cd.Description, &cd.CashBankID, &cd.CreatedAt, &cd.UpdatedAt); err != nil {
+			return nil, err
+		}
+		items = append(items, cd)
+	}
+	return items, rows.Err()
+}
+
 // Update updates an existing cash disbursement in the database.
 func (r *CashDisbursementRepositoryImpl) Update(ctx context.Context, cd *entities.CashDisbursement) error {
 	query := `UPDATE cash_disbursements SET disbursement_date = $1, amount = $2, description = $3, cash_bank_id = $4, updated_at = $5 WHERE id = $6`

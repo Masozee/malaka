@@ -43,6 +43,25 @@ func (r *CashReceiptRepositoryImpl) GetByID(ctx context.Context, id uuid.ID) (*e
 	return cr, err
 }
 
+// GetAll retrieves all cash receipts from the database.
+func (r *CashReceiptRepositoryImpl) GetAll(ctx context.Context) ([]*entities.CashReceipt, error) {
+	var items []*entities.CashReceipt
+	query := `SELECT id, receipt_date, amount, description, cash_bank_id, created_at, updated_at FROM cash_receipts ORDER BY receipt_date DESC`
+	rows, err := r.db.QueryContext(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		cr := &entities.CashReceipt{}
+		if err := rows.Scan(&cr.ID, &cr.ReceiptDate, &cr.Amount, &cr.Description, &cr.CashBankID, &cr.CreatedAt, &cr.UpdatedAt); err != nil {
+			return nil, err
+		}
+		items = append(items, cr)
+	}
+	return items, rows.Err()
+}
+
 // Update updates an existing cash receipt in the database.
 func (r *CashReceiptRepositoryImpl) Update(ctx context.Context, cr *entities.CashReceipt) error {
 	query := `UPDATE cash_receipts SET receipt_date = $1, amount = $2, description = $3, cash_bank_id = $4, updated_at = $5 WHERE id = $6`

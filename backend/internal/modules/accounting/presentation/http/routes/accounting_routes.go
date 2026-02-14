@@ -30,12 +30,21 @@ func RegisterAccountingRoutes(router *gin.RouterGroup, glHandler *handlers.Gener
 			}
 		}
 
-		// Journal Entry routes (simplified for debugging)
+		// Journal Entry routes
 		if jeHandler != nil {
 			je := accounting.Group("/journal-entries")
 			{
 				je.GET("/", auth.RequirePermission(rbacSvc, "accounting.journal-entry.list"), jeHandler.GetAllJournalEntries)
+				je.GET("/by-status", auth.RequirePermission(rbacSvc, "accounting.journal-entry.list"), jeHandler.GetJournalEntriesByStatus)
+				je.GET("/by-date-range", auth.RequirePermission(rbacSvc, "accounting.journal-entry.list"), jeHandler.GetJournalEntriesByDateRange)
+				je.GET("/register", auth.RequirePermission(rbacSvc, "accounting.journal-entry.list"), jeHandler.GetJournalRegister)
 				je.GET("/:id", auth.RequirePermission(rbacSvc, "accounting.journal-entry.read"), jeHandler.GetJournalEntryByID)
+				je.POST("/", auth.RequirePermission(rbacSvc, "accounting.journal-entry.create"), jeHandler.CreateJournalEntry)
+				je.PUT("/:id", auth.RequirePermission(rbacSvc, "accounting.journal-entry.update"), jeHandler.UpdateJournalEntry)
+				je.DELETE("/:id", auth.RequirePermission(rbacSvc, "accounting.journal-entry.delete"), jeHandler.DeleteJournalEntry)
+				je.POST("/:id/post", auth.RequirePermission(rbacSvc, "accounting.journal-entry.update"), jeHandler.PostJournalEntry)
+				je.POST("/:id/reverse", auth.RequirePermission(rbacSvc, "accounting.journal-entry.update"), jeHandler.ReverseJournalEntry)
+				je.POST("/:id/lines", auth.RequirePermission(rbacSvc, "accounting.journal-entry.update"), jeHandler.AddLineToJournalEntry)
 			}
 		}
 

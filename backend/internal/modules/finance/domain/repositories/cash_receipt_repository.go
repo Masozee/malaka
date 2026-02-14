@@ -11,6 +11,7 @@ import (
 type CashReceiptRepository interface {
 	Create(ctx context.Context, cr *entities.CashReceipt) error
 	GetByID(ctx context.Context, id uuid.ID) (*entities.CashReceipt, error)
+	GetAll(ctx context.Context) ([]*entities.CashReceipt, error)
 	Update(ctx context.Context, cr *entities.CashReceipt) error
 	Delete(ctx context.Context, id uuid.ID) error
 }

@@ -32,6 +32,11 @@ func (s *CashDisbursementService) GetCashDisbursementByID(ctx context.Context, i
 	return s.repo.GetByID(ctx, id)
 }
 
+// GetAllCashDisbursements retrieves all cash disbursements.
+func (s *CashDisbursementService) GetAllCashDisbursements(ctx context.Context) ([]*entities.CashDisbursement, error) {
+	return s.repo.GetAll(ctx)
+}
+
 // UpdateCashDisbursement updates an existing cash disbursement.
 func (s *CashDisbursementService) UpdateCashDisbursement(ctx context.Context, cd *entities.CashDisbursement) error {
 	// Ensure the cash disbursement exists before updating

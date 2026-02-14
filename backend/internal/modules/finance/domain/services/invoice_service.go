@@ -32,6 +32,11 @@ func (s *InvoiceService) GetInvoiceByID(ctx context.Context, id uuid.ID) (*entit
 	return s.repo.GetByID(ctx, id)
 }
 
+// GetAllInvoices retrieves all invoices.
+func (s *InvoiceService) GetAllInvoices(ctx context.Context) ([]*entities.Invoice, error) {
+	return s.repo.GetAll(ctx)
+}
+
 // UpdateInvoice updates an existing invoice.
 func (s *InvoiceService) UpdateInvoice(ctx context.Context, invoice *entities.Invoice) error {
 	// Ensure the invoice exists before updating

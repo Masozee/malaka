@@ -14,6 +14,10 @@ import (
 	accounting_handlers "malaka/internal/modules/accounting/presentation/http/handlers"
 	accounting_routes "malaka/internal/modules/accounting/presentation/http/routes"
 
+	// Finance imports
+	finance_handlers "malaka/internal/modules/finance/presentation/http/handlers"
+	finance_routes "malaka/internal/modules/finance/presentation/http/routes"
+
 	// Inventory imports
 	inventory_handlers "malaka/internal/modules/inventory/presentation/http/handlers"
 	inventory_routes "malaka/internal/modules/inventory/presentation/http/routes"
@@ -134,6 +138,34 @@ func SetupProtectedRoutes(protectedAPI *gin.RouterGroup, c *container.Container,
 	// Initialize fixed asset handler and register routes
 	fixedAssetHandler := accounting_handlers.NewFixedAssetHandler(c.FixedAssetService)
 	accounting_routes.RegisterFixedAssetRoutes(accountingGroup, fixedAssetHandler, rbacSvc)
+
+	// Initialize tax handler and register routes
+	taxHandler := accounting_handlers.NewTaxHandler(c.TaxService)
+	accounting_routes.RegisterTaxRoutes(accountingGroup, taxHandler, rbacSvc)
+
+	// Initialize finance handlers
+	cashBankHandler := finance_handlers.NewCashBankHandler(c.CashBankService)
+	paymentHandler := finance_handlers.NewPaymentHandler(c.PaymentService)
+	financeInvoiceHandler := finance_handlers.NewInvoiceHandler(c.InvoiceService)
+	accountsPayableHandler := finance_handlers.NewAccountsPayableHandler(c.AccountsPayableService)
+	accountsReceivableHandler := finance_handlers.NewAccountsReceivableHandler(c.AccountsReceivableService)
+	cashDisbursementHandler := finance_handlers.NewCashDisbursementHandler(c.CashDisbursementService)
+	cashReceiptHandler := finance_handlers.NewCashReceiptHandler(c.CashReceiptService)
+	bankTransferHandler := finance_handlers.NewBankTransferHandler(c.BankTransferService)
+	cashOpeningBalanceHandler := finance_handlers.NewCashOpeningBalanceHandler(c.CashOpeningBalanceService)
+	purchaseVoucherHandler := finance_handlers.NewPurchaseVoucherHandler(c.PurchaseVoucherService)
+	expenditureRequestHandler := finance_handlers.NewExpenditureRequestHandler(c.ExpenditureRequestService)
+	checkClearanceHandler := finance_handlers.NewCheckClearanceHandler(c.CheckClearanceService)
+	monthlyClosingHandler := finance_handlers.NewMonthlyClosingHandler(c.MonthlyClosingService)
+	cashBookHandler := finance_handlers.NewCashBookHandler(c.CashBookService)
+	financeBudgetHandler := finance_handlers.NewBudgetHandler(c.FinanceBudgetService)
+	capexProjectHandler := finance_handlers.NewCapexProjectHandler(c.CapexProjectService)
+	loanFacilityHandler := finance_handlers.NewLoanFacilityHandler(c.LoanFacilityService)
+	financialForecastHandler := finance_handlers.NewFinancialForecastHandler(c.FinancialForecastService)
+	financeReportHandler := finance_handlers.NewFinanceReportHandler(c.FinanceReportService)
+
+	// Register finance routes under v1 API (protected)
+	finance_routes.RegisterFinanceRoutes(protectedAPI, cashBankHandler, paymentHandler, financeInvoiceHandler, accountsPayableHandler, accountsReceivableHandler, cashDisbursementHandler, cashReceiptHandler, bankTransferHandler, cashOpeningBalanceHandler, purchaseVoucherHandler, expenditureRequestHandler, checkClearanceHandler, monthlyClosingHandler, cashBookHandler, financeBudgetHandler, capexProjectHandler, loanFacilityHandler, financialForecastHandler, financeReportHandler, rbacSvc)
 
 	// Initialize inventory handlers
 	purchaseOrderHandler := inventory_handlers.NewPurchaseOrderHandler(c.PurchaseOrderService)

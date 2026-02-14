@@ -101,19 +101,14 @@ func (h *PurchaseVoucherHandler) UpdatePurchaseVoucher(c *gin.Context) {
 		return
 	}
 
-	parsedInvoiceID, err := uuid.Parse(req.InvoiceID)
-	if err != nil {
-		response.BadRequest(c, "Invalid InvoiceID", err.Error())
-		return
-	}
-
 	voucher.VoucherNumber = req.VoucherNumber
 	voucher.VoucherDate = req.VoucherDate
 	voucher.SupplierID = parsedSupplierID
-	voucher.InvoiceID = parsedInvoiceID
 	voucher.TotalAmount = req.TotalAmount
+	voucher.PaidAmount = req.PaidAmount
+	voucher.RemainingAmount = req.RemainingAmount
+	voucher.DiscountAmount = req.DiscountAmount
 	voucher.TaxAmount = req.TaxAmount
-	voucher.GrandTotal = req.GrandTotal
 	voucher.DueDate = req.DueDate
 	voucher.Status = req.Status
 	voucher.Description = req.Description

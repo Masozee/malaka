@@ -1,108 +1,46 @@
 /**
  * Sales Service
- * Handles API communication for sales operations including direct sales, POS transactions
+ * Handles API communication for all sales operations
  */
 
 import { apiClient } from '@/lib/api'
 
-// Direct Sales / POS Transaction Types
-export interface DirectSale {
-  id: string
-  transaction_date: string
-  total_amount: number
-  payment_method: 'cash' | 'card' | 'transfer' | 'installment'
-  cashier_id: string
-  sales_person?: string
-  customer_name?: string
-  customer_phone?: string
-  customer_address?: string
-  visit_type?: 'showroom' | 'home_visit' | 'office_visit' | 'exhibition'
-  location?: string
-  items?: DirectSaleItem[]
-  subtotal?: number
-  tax_amount?: number
-  discount_amount?: number
-  payment_status?: 'pending' | 'paid' | 'partial' | 'failed'
-  delivery_method?: 'pickup' | 'delivery' | 'shipping'
-  delivery_status?: 'pending' | 'delivered' | 'cancelled'
-  commission_rate?: number
-  commission_amount?: number
-  notes?: string
-  created_at: string
-  updated_at: string
-}
-
-export interface DirectSaleItem {
-  id: string
-  product_code: string
-  product_name: string
-  size: string
-  color: string
-  quantity: number
-  unit_price: number
-  discount_percentage: number
-  line_total: number
-}
+// ============ Types ============
 
 export interface SalesOrder {
   id: string
-  order_number: string
-  order_date: string
   customer_id: string
-  customer_name: string
+  order_date: string
+  status: string
   total_amount: number
-  status: 'draft' | 'pending' | 'confirmed' | 'cancelled'
-  items: SalesOrderItem[]
   created_at: string
   updated_at: string
 }
 
 export interface SalesOrderItem {
   id: string
-  product_code: string
-  product_name: string
-  quantity: number
-  unit_price: number
-  total_price: number
-}
-
-export interface SalesInvoice {
-  id: string
-  invoice_number: string
-  invoice_date: string
-  customer_id: string
-  customer_name: string
-  total_amount: number
-  payment_status: 'pending' | 'paid' | 'overdue'
-  created_at: string
-  updated_at: string
-}
-
-export interface CreatePosItemRequest {
+  sales_order_id: string
   article_id: string
   quantity: number
   unit_price: number
   total_price: number
-}
-
-export interface CreatePosTransactionRequest {
-  total_amount: number
-  payment_method: string
-  cashier_id: string
-  items: CreatePosItemRequest[]
-}
-
-export interface PosTransaction {
-  id: string
-  transaction_date: string
-  total_amount: number
-  payment_method: string
-  cashier_id: string
   created_at: string
   updated_at: string
 }
 
-export interface CreateDirectSaleRequest {
+export interface SalesInvoice {
+  id: string
+  sales_order_id: string
+  invoice_date: string
+  total_amount: number
+  tax_amount: number
+  grand_total: number
+  created_at: string
+  updated_at: string
+}
+
+export interface PosTransaction {
+  id: string
   transaction_date: string
   total_amount: number
   payment_method: string
@@ -113,145 +51,258 @@ export interface CreateDirectSaleRequest {
   customer_address?: string
   visit_type?: string
   location?: string
+  subtotal?: number
+  tax_amount?: number
+  discount_amount?: number
+  payment_status?: string
+  delivery_method?: string
+  delivery_status?: string
+  commission_rate?: number
+  commission_amount?: number
   notes?: string
+  created_at: string
+  updated_at: string
 }
 
-export interface CreateSalesOrderRequest {
+export interface PosItem {
+  id: string
+  pos_transaction_id: string
+  article_id: string
+  quantity: number
+  unit_price: number
+  total_price: number
+  created_at: string
+  updated_at: string
+}
+
+export interface PosTransactionDetail extends PosTransaction {
+  items: PosItem[]
+}
+
+export interface OnlineOrder {
+  id: string
+  marketplace: string
+  order_id: string
   order_date: string
+  total_amount: number
+  status: string
   customer_id: string
-  customer_name: string
-  items: {
-    product_code: string
-    product_name: string
-    quantity: number
-    unit_price: number
-  }[]
+  created_at: string
+  updated_at: string
 }
 
-class SalesService {
-  private readonly baseUrl = '/api/v1/sales'
+export interface ConsignmentSale {
+  id: string
+  consignee_id: string
+  sales_date: string
+  total_amount: number
+  status: string
+  created_at: string
+  updated_at: string
+}
 
-  // Direct Sales / POS Transactions
-  async getDirectSales(): Promise<DirectSale[]> {
-    try {
-      const response = await apiClient.get<{ data: DirectSale[] }>(`${this.baseUrl}/pos-transactions/`)
-      return response.data || []
-    } catch (error) {
-      console.error('Error fetching direct sales:', error)
-      // Return mock data for now while backend is being implemented
-      return []
-    }
-  }
+export interface SalesReturn {
+  id: string
+  sales_invoice_id: string
+  return_date: string
+  reason: string
+  total_amount: number
+  created_at: string
+  updated_at: string
+}
 
-  async getDirectSaleById(id: string): Promise<DirectSale | null> {
-    try {
-      const response = await apiClient.get<{ data: DirectSale }>(`${this.baseUrl}/pos-transactions/${id}`)
-      return response.data
-    } catch (error) {
-      console.error('Error fetching direct sale:', error)
-      return null
-    }
-  }
+export interface Promotion {
+  id: string
+  name: string
+  description: string
+  start_date: string
+  end_date: string
+  discount_rate: number
+  min_purchase: number
+  created_at: string
+  updated_at: string
+}
 
-  async createDirectSale(data: CreateDirectSaleRequest): Promise<DirectSale> {
-    const response = await apiClient.post<{ data: DirectSale }>(`${this.baseUrl}/pos-transactions/`, data)
-    return response.data
-  }
+export interface SalesTarget {
+  id: string
+  user_id: string
+  period_start: string
+  period_end: string
+  target_amount: number
+  achieved_amount: number
+  created_at: string
+  updated_at: string
+}
 
-  async createPosTransaction(data: CreatePosTransactionRequest): Promise<PosTransaction> {
-    const response = await apiClient.post<{ data: PosTransaction }>(`${this.baseUrl}/pos-transactions/`, data)
-    return response.data
-  }
+export interface SalesKompetitor {
+  id: string
+  competitor_name: string
+  product_name: string
+  price: number
+  date_observed: string
+  notes: string
+  created_at: string
+  updated_at: string
+}
 
-  async updateDirectSale(id: string, data: Partial<CreateDirectSaleRequest>): Promise<DirectSale> {
-    const response = await apiClient.put<{ data: DirectSale }>(`${this.baseUrl}/pos-transactions/${id}`, data)
-    return response.data
-  }
+export interface ProsesMargin {
+  id: string
+  sales_order_id: string
+  cost_of_goods: number
+  selling_price: number
+  margin_amount: number
+  margin_percentage: number
+  calculated_at: string
+  notes: string
+  created_at: string
+  updated_at: string
+}
 
-  async deleteDirectSale(id: string): Promise<void> {
-    await apiClient.delete(`${this.baseUrl}/pos-transactions/${id}`)
-  }
+export interface SalesRekonsiliasi {
+  id: string
+  reconciliation_date: string
+  sales_amount: number
+  payment_amount: number
+  discrepancy: number
+  status: string
+  notes: string
+  created_at: string
+  updated_at: string
+}
 
-  // Sales Orders
-  async getSalesOrders(): Promise<SalesOrder[]> {
-    try {
-      const response = await apiClient.get<{ data: SalesOrder[] }>(`${this.baseUrl}/orders/`)
-      return response.data || []
-    } catch (error) {
-      console.error('Error fetching sales orders:', error)
-      return []
-    }
-  }
+// ============ Service ============
 
-  async getSalesOrderById(id: string): Promise<SalesOrder | null> {
-    try {
-      const response = await apiClient.get<{ data: SalesOrder }>(`${this.baseUrl}/orders/${id}`)
-      return response.data
-    } catch (error) {
-      console.error('Error fetching sales order:', error)
-      return null
-    }
-  }
+const BASE = '/api/v1/sales'
 
-  async createSalesOrder(data: CreateSalesOrderRequest): Promise<SalesOrder> {
-    const response = await apiClient.post<{ data: SalesOrder }>(`${this.baseUrl}/orders/`, data)
-    return response.data
-  }
-
-  async updateSalesOrder(id: string, data: Partial<CreateSalesOrderRequest>): Promise<SalesOrder> {
-    const response = await apiClient.put<{ data: SalesOrder }>(`${this.baseUrl}/orders/${id}`, data)
-    return response.data
-  }
-
-  async deleteSalesOrder(id: string): Promise<void> {
-    await apiClient.delete(`${this.baseUrl}/orders/${id}`)
-  }
-
-  // Sales Invoices
-  async getSalesInvoices(): Promise<SalesInvoice[]> {
-    try {
-      const response = await apiClient.get<{ data: SalesInvoice[] }>(`${this.baseUrl}/invoices/`)
-      return response.data || []
-    } catch (error) {
-      console.error('Error fetching sales invoices:', error)
-      return []
-    }
-  }
-
-  async getSalesInvoiceById(id: string): Promise<SalesInvoice | null> {
-    try {
-      const response = await apiClient.get<{ data: SalesInvoice }>(`${this.baseUrl}/invoices/${id}`)
-      return response.data
-    } catch (error) {
-      console.error('Error fetching sales invoice:', error)
-      return null
-    }
-  }
-
-  // Statistics
-  async getSalesStats(): Promise<{
-    totalSales: number
-    todaySales: number
-    totalRevenue: number
-    pendingSales: number
-    averageSale: number
-  }> {
-    try {
-      const response = await apiClient.get<{ data: any }>(`${this.baseUrl}/stats`)
-      return response.data
-    } catch (error) {
-      console.error('Error fetching sales stats:', error)
-      // Return mock stats for now
-      return {
-        totalSales: 0,
-        todaySales: 0,
-        totalRevenue: 0,
-        pendingSales: 0,
-        averageSale: 0
-      }
-    }
+async function fetchList<T>(endpoint: string): Promise<T[]> {
+  try {
+    const response = await apiClient.get<{ data: T[] }>(`${BASE}/${endpoint}/`)
+    return response.data || []
+  } catch (error) {
+    console.error(`Error fetching ${endpoint}:`, error)
+    return []
   }
 }
 
-export const salesService = new SalesService()
-export default salesService
+async function fetchOne<T>(endpoint: string, id: string): Promise<T | null> {
+  try {
+    const response = await apiClient.get<{ data: T }>(`${BASE}/${endpoint}/${id}`)
+    return response.data
+  } catch (error) {
+    console.error(`Error fetching ${endpoint}/${id}:`, error)
+    return null
+  }
+}
+
+async function create<T>(endpoint: string, data: Record<string, unknown>): Promise<T> {
+  const response = await apiClient.post<{ data: T }>(`${BASE}/${endpoint}/`, data)
+  return response.data
+}
+
+async function update<T>(endpoint: string, id: string, data: Record<string, unknown>): Promise<T> {
+  const response = await apiClient.put<{ data: T }>(`${BASE}/${endpoint}/${id}`, data)
+  return response.data
+}
+
+async function remove(endpoint: string, id: string): Promise<void> {
+  await apiClient.delete(`${BASE}/${endpoint}/${id}`)
+}
+
+// Sales Orders
+export const salesOrderService = {
+  getAll: () => fetchList<SalesOrder>('orders'),
+  getById: (id: string) => fetchOne<SalesOrder>('orders', id),
+  create: (data: Record<string, unknown>) => create<SalesOrder>('orders', data),
+  update: (id: string, data: Record<string, unknown>) => update<SalesOrder>('orders', id, data),
+  delete: (id: string) => remove('orders', id),
+}
+
+// Sales Invoices
+export const salesInvoiceService = {
+  getAll: () => fetchList<SalesInvoice>('invoices'),
+  getById: (id: string) => fetchOne<SalesInvoice>('invoices', id),
+  create: (data: Record<string, unknown>) => create<SalesInvoice>('invoices', data),
+  update: (id: string, data: Record<string, unknown>) => update<SalesInvoice>('invoices', id, data),
+  delete: (id: string) => remove('invoices', id),
+}
+
+// POS Transactions
+export const posTransactionService = {
+  getAll: () => fetchList<PosTransaction>('pos-transactions'),
+  getById: (id: string) => fetchOne<PosTransactionDetail>('pos-transactions', id),
+  create: (data: Record<string, unknown>) => create<PosTransaction>('pos-transactions', data),
+  update: (id: string, data: Record<string, unknown>) => update<PosTransaction>('pos-transactions', id, data),
+  delete: (id: string) => remove('pos-transactions', id),
+}
+
+// Online Orders
+export const onlineOrderService = {
+  getAll: () => fetchList<OnlineOrder>('online-orders'),
+  getById: (id: string) => fetchOne<OnlineOrder>('online-orders', id),
+  create: (data: Record<string, unknown>) => create<OnlineOrder>('online-orders', data),
+  update: (id: string, data: Record<string, unknown>) => update<OnlineOrder>('online-orders', id, data),
+  delete: (id: string) => remove('online-orders', id),
+}
+
+// Consignment Sales
+export const consignmentSaleService = {
+  getAll: () => fetchList<ConsignmentSale>('consignment-sales'),
+  getById: (id: string) => fetchOne<ConsignmentSale>('consignment-sales', id),
+  create: (data: Record<string, unknown>) => create<ConsignmentSale>('consignment-sales', data),
+  update: (id: string, data: Record<string, unknown>) => update<ConsignmentSale>('consignment-sales', id, data),
+  delete: (id: string) => remove('consignment-sales', id),
+}
+
+// Sales Returns
+export const salesReturnService = {
+  getAll: () => fetchList<SalesReturn>('returns'),
+  getById: (id: string) => fetchOne<SalesReturn>('returns', id),
+  create: (data: Record<string, unknown>) => create<SalesReturn>('returns', data),
+  update: (id: string, data: Record<string, unknown>) => update<SalesReturn>('returns', id, data),
+  delete: (id: string) => remove('returns', id),
+}
+
+// Promotions
+export const promotionService = {
+  getAll: () => fetchList<Promotion>('promotions'),
+  getById: (id: string) => fetchOne<Promotion>('promotions', id),
+  create: (data: Record<string, unknown>) => create<Promotion>('promotions', data),
+  update: (id: string, data: Record<string, unknown>) => update<Promotion>('promotions', id, data),
+  delete: (id: string) => remove('promotions', id),
+}
+
+// Sales Targets
+export const salesTargetService = {
+  getAll: () => fetchList<SalesTarget>('targets'),
+  getById: (id: string) => fetchOne<SalesTarget>('targets', id),
+  create: (data: Record<string, unknown>) => create<SalesTarget>('targets', data),
+  update: (id: string, data: Record<string, unknown>) => update<SalesTarget>('targets', id, data),
+  delete: (id: string) => remove('targets', id),
+}
+
+// Sales Kompetitor
+export const salesKompetitorService = {
+  getAll: () => fetchList<SalesKompetitor>('kompetitors'),
+  getById: (id: string) => fetchOne<SalesKompetitor>('kompetitors', id),
+  create: (data: Record<string, unknown>) => create<SalesKompetitor>('kompetitors', data),
+  update: (id: string, data: Record<string, unknown>) => update<SalesKompetitor>('kompetitors', id, data),
+  delete: (id: string) => remove('kompetitors', id),
+}
+
+// Proses Margin
+export const prosesMarginService = {
+  getAll: () => fetchList<ProsesMargin>('proses-margins'),
+  getById: (id: string) => fetchOne<ProsesMargin>('proses-margins', id),
+  create: (data: Record<string, unknown>) => create<ProsesMargin>('proses-margins', data),
+  update: (id: string, data: Record<string, unknown>) => update<ProsesMargin>('proses-margins', id, data),
+  delete: (id: string) => remove('proses-margins', id),
+}
+
+// Sales Rekonsiliasi
+export const salesRekonsiliasiService = {
+  getAll: () => fetchList<SalesRekonsiliasi>('rekonsiliasi'),
+  getById: (id: string) => fetchOne<SalesRekonsiliasi>('rekonsiliasi', id),
+  create: (data: Record<string, unknown>) => create<SalesRekonsiliasi>('rekonsiliasi', data),
+  update: (id: string, data: Record<string, unknown>) => update<SalesRekonsiliasi>('rekonsiliasi', id, data),
+  delete: (id: string) => remove('rekonsiliasi', id),
+}

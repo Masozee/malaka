@@ -23,10 +23,14 @@ func NewDepstoreRepository(db *sqlx.DB) *DepstoreRepositoryImpl {
 func (r *DepstoreRepositoryImpl) Create(ctx context.Context, depstore *entities.Depstore) error {
 	query := `INSERT INTO depstores (id, code, name, address, city, phone, contact_person, commission_rate, payment_terms, company_id, status, created_at, updated_at)
 			  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, NOW(), NOW())`
+	var companyID interface{} = nil
+	if depstore.CompanyID != "" {
+		companyID = depstore.CompanyID
+	}
 	_, err := r.db.ExecContext(ctx, query,
 		depstore.ID, depstore.Code, depstore.Name, depstore.Address, depstore.City,
 		depstore.Phone, depstore.ContactPerson, depstore.CommissionRate,
-		depstore.PaymentTerms, depstore.CompanyID, depstore.Status)
+		depstore.PaymentTerms, companyID, depstore.Status)
 	return err
 }
 
@@ -52,23 +56,24 @@ func (r *DepstoreRepositoryImpl) GetAll(ctx context.Context) ([]*entities.Depsto
 }
 
 // GetAllWithPagination retrieves department stores with pagination and filtering.
-func (r *DepstoreRepositoryImpl) GetAllWithPagination(ctx context.Context, limit, offset int, search, status string) ([]*entities.Depstore, int, error) {
+func (r *DepstoreRepositoryImpl) GetAllWithPagination(ctx context.Context, limit, offset int, search, status, companyID string) ([]*entities.Depstore, int, error) {
 	// Build WHERE clause for filtering
 	whereClause := "WHERE 1=1"
 	args := []interface{}{}
-	
-	if search != "" {
-		whereClause += " AND (code ILIKE $1 OR name ILIKE $1 OR address ILIKE $1 OR city ILIKE $1 OR contact_person ILIKE $1)"
-		args = append(args, "%"+search+"%")
+
+	if companyID != "" {
+		args = append(args, companyID)
+		whereClause += fmt.Sprintf(" AND company_id = $%d", len(args))
 	}
-	
+
+	if search != "" {
+		args = append(args, "%"+search+"%")
+		whereClause += fmt.Sprintf(" AND (code ILIKE $%d OR name ILIKE $%d OR address ILIKE $%d OR city ILIKE $%d OR contact_person ILIKE $%d)", len(args), len(args), len(args), len(args), len(args))
+	}
+
 	if status != "" && status != "all" {
-		if len(args) == 0 {
-			whereClause += " AND status = $1"
-		} else {
-			whereClause += " AND status = $2"
-		}
 		args = append(args, status)
+		whereClause += fmt.Sprintf(" AND status = $%d", len(args))
 	}
 	
 	// Get total count
@@ -119,10 +124,14 @@ func (r *DepstoreRepositoryImpl) Update(ctx context.Context, depstore *entities.
 				  contact_person = $6, commission_rate = $7, payment_terms = $8,
 				  company_id = $9, status = $10, updated_at = NOW()
 			  WHERE id = $11`
+	var companyID interface{} = nil
+	if depstore.CompanyID != "" {
+		companyID = depstore.CompanyID
+	}
 	_, err := r.db.ExecContext(ctx, query,
 		depstore.Code, depstore.Name, depstore.Address, depstore.City, depstore.Phone,
 		depstore.ContactPerson, depstore.CommissionRate, depstore.PaymentTerms,
-		depstore.CompanyID, depstore.Status, depstore.ID)
+		companyID, depstore.Status, depstore.ID)
 	return err
 }
 

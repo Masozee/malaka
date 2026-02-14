@@ -110,6 +110,7 @@
   --accent: #F1F5F9;
   --accent-foreground: #374151;
   --destructive: #B91C1C;
+  --destructive-foreground: #FFFFFF;
   --border: #E5E7EB;
   --input: #E5E7EB;
   --ring: #FFBF47;
@@ -144,6 +145,7 @@
   --accent: #252525;
   --accent-foreground: #C7C7C7;
   --destructive: #F87171;
+  --destructive-foreground: #1A1A1A;
   --border: #374151;
   --input: #374151;
   --ring: #FFBF47;
@@ -172,6 +174,61 @@
   }
   html {
     scroll-behavior: smooth;
+  }
+}
+
+/* Print styles for journal voucher */
+@media print {
+  @page {
+    size: A4;
+    margin: 10mm 8mm;
+  }
+
+  body {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    font-family: "Times New Roman", "Noto Sans", serif !important;
+  }
+
+  .journal-print-voucher {
+    display: block !important;
+    color: #000 !important;
+    background: #fff !important;
+    font-size: 11pt !important;
+    line-height: 1.4 !important;
+  }
+
+  .journal-print-voucher table {
+    border-collapse: collapse !important;
+    width: 100% !important;
+    page-break-inside: avoid !important;
+  }
+
+  .journal-print-voucher th,
+  .journal-print-voucher td {
+    border: 1px solid #333 !important;
+    padding: 6px 10px !important;
+    color: #000 !important;
+    background: #fff !important;
+    font-size: 10pt !important;
+  }
+
+  .journal-print-voucher th {
+    background: #f0f0f0 !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    font-size: 9pt !important;
+    letter-spacing: 0.5px;
+  }
+
+  .journal-print-voucher .print-total-row td {
+    background: #f5f5f5 !important;
+    font-weight: 700 !important;
+    border-top: 2px solid #333 !important;
+  }
+
+  .journal-print-voucher .print-signatures {
+    page-break-inside: avoid !important;
   }
 }
 

@@ -24,8 +24,8 @@ func NewPostgresChartOfAccountRepository(db *sql.DB) repositories.ChartOfAccount
 // Create inserts a new ChartOfAccount into the database.
 func (r *PostgresChartOfAccountRepository) Create(ctx context.Context, coa *entities.ChartOfAccount) error {
 	query := `
-		INSERT INTO chart_of_accounts (id, parent_id, account_code, account_name, account_type, normal_balance, description, is_active, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+		INSERT INTO chart_of_accounts (id, company_id, parent_id, account_code, account_name, account_type, normal_balance, description, is_active, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
 	`
 	coa.ID = uuid.New()
 	coa.CreatedAt = time.Now()
@@ -33,6 +33,7 @@ func (r *PostgresChartOfAccountRepository) Create(ctx context.Context, coa *enti
 
 	_, err := r.db.ExecContext(ctx, query,
 		coa.ID,
+		coa.CompanyID,
 		coa.ParentID,
 		coa.AccountCode,
 		coa.AccountName,
@@ -52,15 +53,19 @@ func (r *PostgresChartOfAccountRepository) Create(ctx context.Context, coa *enti
 // GetByID retrieves a ChartOfAccount by its ID.
 func (r *PostgresChartOfAccountRepository) GetByID(ctx context.Context, id uuid.ID) (*entities.ChartOfAccount, error) {
 	query := `
-		SELECT id, parent_id, account_code, account_name, account_type, normal_balance, description, is_active, created_at, updated_at
+		SELECT id, company_id, parent_id, account_code, account_name, account_type,
+		       COALESCE(normal_balance, '') as normal_balance,
+		       COALESCE(description, '') as description,
+		       is_active, created_at, updated_at
 		FROM chart_of_accounts
 		WHERE id = $1
 	`
 	row := r.db.QueryRowContext(ctx, query, id)
 	coa := &entities.ChartOfAccount{}
-	var parentID sql.NullString // Use sql.NullString for nullable UUID
+	var parentID sql.NullString
 	err := row.Scan(
 		&coa.ID,
+		&coa.CompanyID,
 		&parentID,
 		&coa.AccountCode,
 		&coa.AccountName,
@@ -91,18 +96,22 @@ func (r *PostgresChartOfAccountRepository) GetByID(ctx context.Context, id uuid.
 	return coa, nil
 }
 
-// GetByCode retrieves a ChartOfAccount by its account code.
-func (r *PostgresChartOfAccountRepository) GetByCode(ctx context.Context, code string) (*entities.ChartOfAccount, error) {
+// GetByCode retrieves a ChartOfAccount by its account code within a company.
+func (r *PostgresChartOfAccountRepository) GetByCode(ctx context.Context, companyID string, code string) (*entities.ChartOfAccount, error) {
 	query := `
-		SELECT id, parent_id, account_code, account_name, account_type, normal_balance, description, is_active, created_at, updated_at
+		SELECT id, company_id, parent_id, account_code, account_name, account_type,
+		       COALESCE(normal_balance, '') as normal_balance,
+		       COALESCE(description, '') as description,
+		       is_active, created_at, updated_at
 		FROM chart_of_accounts
-		WHERE account_code = $1
+		WHERE company_id = $1 AND account_code = $2
 	`
-	row := r.db.QueryRowContext(ctx, query, code)
+	row := r.db.QueryRowContext(ctx, query, companyID, code)
 	coa := &entities.ChartOfAccount{}
 	var parentID sql.NullString
 	err := row.Scan(
 		&coa.ID,
+		&coa.CompanyID,
 		&parentID,
 		&coa.AccountCode,
 		&coa.AccountName,
@@ -133,14 +142,33 @@ func (r *PostgresChartOfAccountRepository) GetByCode(ctx context.Context, code s
 	return coa, nil
 }
 
-// GetAll retrieves all ChartOfAccounts from the database.
-func (r *PostgresChartOfAccountRepository) GetAll(ctx context.Context) ([]*entities.ChartOfAccount, error) {
-	query := `
-		SELECT id, parent_id, account_code, account_name, account_type, normal_balance, description, is_active, created_at, updated_at
-		FROM chart_of_accounts
-		ORDER BY account_code
-	`
-	rows, err := r.db.QueryContext(ctx, query)
+// GetAll retrieves all ChartOfAccounts for a company from the database.
+func (r *PostgresChartOfAccountRepository) GetAll(ctx context.Context, companyID string) ([]*entities.ChartOfAccount, error) {
+	var rows *sql.Rows
+	var err error
+
+	if companyID != "" {
+		query := `
+			SELECT id, company_id, parent_id, account_code, account_name, account_type,
+			       COALESCE(normal_balance, '') as normal_balance,
+			       COALESCE(description, '') as description,
+			       is_active, created_at, updated_at
+			FROM chart_of_accounts
+			WHERE company_id = $1
+			ORDER BY account_code
+		`
+		rows, err = r.db.QueryContext(ctx, query, companyID)
+	} else {
+		query := `
+			SELECT id, company_id, parent_id, account_code, account_name, account_type,
+			       COALESCE(normal_balance, '') as normal_balance,
+			       COALESCE(description, '') as description,
+			       is_active, created_at, updated_at
+			FROM chart_of_accounts
+			ORDER BY account_code
+		`
+		rows, err = r.db.QueryContext(ctx, query)
+	}
 	if err != nil {
 		return nil, fmt.Errorf("failed to get all chart of accounts: %w", err)
 	}
@@ -152,6 +180,7 @@ func (r *PostgresChartOfAccountRepository) GetAll(ctx context.Context) ([]*entit
 		var parentID sql.NullString
 		err := rows.Scan(
 			&coa.ID,
+			&coa.CompanyID,
 			&parentID,
 			&coa.AccountCode,
 			&coa.AccountName,
@@ -189,13 +218,14 @@ func (r *PostgresChartOfAccountRepository) GetAll(ctx context.Context) ([]*entit
 func (r *PostgresChartOfAccountRepository) Update(ctx context.Context, coa *entities.ChartOfAccount) error {
 	query := `
 		UPDATE chart_of_accounts
-		SET parent_id = $2, account_code = $3, account_name = $4, account_type = $5, normal_balance = $6, description = $7, is_active = $8, updated_at = $9
+		SET company_id = $2, parent_id = $3, account_code = $4, account_name = $5, account_type = $6, normal_balance = $7, description = $8, is_active = $9, updated_at = $10
 		WHERE id = $1
 	`
 	coa.UpdatedAt = time.Now()
 
 	_, err := r.db.ExecContext(ctx, query,
 		coa.ID,
+		coa.CompanyID,
 		coa.ParentID,
 		coa.AccountCode,
 		coa.AccountName,

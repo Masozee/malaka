@@ -63,6 +63,22 @@ func (h *CashReceiptHandler) GetCashReceiptByID(c *gin.Context) {
 	response.Success(c, http.StatusOK, "Cash receipt retrieved successfully", resp)
 }
 
+// GetAllCashReceipts handles the retrieval of all cash receipts.
+func (h *CashReceiptHandler) GetAllCashReceipts(c *gin.Context) {
+	items, err := h.service.GetAllCashReceipts(c.Request.Context())
+	if err != nil {
+		response.Error(c, http.StatusInternalServerError, "Failed to retrieve cash receipts", err)
+		return
+	}
+
+	var responses []*dto.CashReceiptResponse
+	for _, cr := range items {
+		responses = append(responses, dto.FromCashReceiptEntity(cr))
+	}
+
+	response.Success(c, http.StatusOK, "Cash receipts retrieved successfully", responses)
+}
+
 // UpdateCashReceipt handles the update of an existing cash receipt.
 func (h *CashReceiptHandler) UpdateCashReceipt(c *gin.Context) {
 	id := c.Param("id")

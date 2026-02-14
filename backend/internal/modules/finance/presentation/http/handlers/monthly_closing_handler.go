@@ -32,7 +32,6 @@ func (h *MonthlyClosingHandler) CreateMonthlyClosing(c *gin.Context) {
 	closing := dto.ToMonthlyClosingEntity(&req)
 	closing.ID = uuid.New()
 	closing.CreatedAt = time.Now()
-	closing.UpdatedAt = time.Now()
 
 	if err := h.service.CreateMonthlyClosing(c.Request.Context(), closing); err != nil {
 		response.InternalServerError(c, "Failed to create monthly closing", err.Error())
@@ -96,15 +95,22 @@ func (h *MonthlyClosingHandler) UpdateMonthlyClosing(c *gin.Context) {
 		return
 	}
 
-	closing.ClosingMonth = req.ClosingMonth
-	closing.ClosingYear = req.ClosingYear
-	closing.OpeningBalance = req.OpeningBalance
-	closing.ClosingBalance = req.ClosingBalance
-	closing.TotalIncome = req.TotalIncome
-	closing.TotalExpense = req.TotalExpense
+	closingDate, _ := time.Parse("2006-01-02", req.ClosingDate)
+	if closingDate.IsZero() {
+		closingDate, _ = time.Parse(time.RFC3339, req.ClosingDate)
+	}
+
+	closing.PeriodYear = req.PeriodYear
+	closing.PeriodMonth = req.PeriodMonth
+	closing.ClosingDate = closingDate
+	closing.TotalRevenue = req.TotalRevenue
+	closing.TotalExpenses = req.TotalExpenses
+	closing.CashPosition = req.CashPosition
+	closing.BankPosition = req.BankPosition
+	closing.AccountsReceivable = req.AccountsReceivable
+	closing.AccountsPayable = req.AccountsPayable
+	closing.InventoryValue = req.InventoryValue
 	closing.Status = req.Status
-	closing.Description = req.Description
-	closing.UpdatedAt = time.Now()
 
 	if err := h.service.UpdateMonthlyClosing(c.Request.Context(), closing); err != nil {
 		response.InternalServerError(c, "Failed to update monthly closing", err.Error())

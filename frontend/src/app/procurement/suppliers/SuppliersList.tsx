@@ -366,7 +366,7 @@ export default function SuppliersList({ initialData }: SuppliersListProps) {
                     </div>
                 ) : (
                     <>
-                        <div className="rounded-lg border bg-card overflow-hidden">
+                        <div className="rounded-sm border bg-card overflow-hidden">
                             <table className="w-full text-sm">
                                 <thead>
                                     <tr className="border-b bg-muted/40">
@@ -376,12 +376,12 @@ export default function SuppliersList({ initialData }: SuppliersListProps) {
                                                 onCheckedChange={(checked) => handleSelectAll(!!checked)}
                                             />
                                         </th>
-                                        <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Supplier</th>
-                                        <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Category</th>
-                                        <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Type</th>
-                                        <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Location</th>
-                                        <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Phone</th>
-                                        <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Status</th>
+                                        <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground uppercase tracking-wider">Supplier</th>
+                                        <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground uppercase tracking-wider">Category</th>
+                                        <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground uppercase tracking-wider">Type</th>
+                                        <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground uppercase tracking-wider">Location</th>
+                                        <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground uppercase tracking-wider">Phone</th>
+                                        <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground uppercase tracking-wider">Status</th>
                                         <th className="px-4 py-3 w-12"></th>
                                     </tr>
                                 </thead>
@@ -398,7 +398,7 @@ export default function SuppliersList({ initialData }: SuppliersListProps) {
                                                 <Link href={`/procurement/suppliers/${supplier.id}`} className="font-medium text-foreground hover:underline">
                                                     {supplier.name}
                                                 </Link>
-                                                <div className="text-xs text-muted-foreground mt-0.5">{supplier.code}{supplier.contact_person ? ` · ${supplier.contact_person}` : ''}</div>
+                                                <div className="text-sm text-muted-foreground mt-0.5">{supplier.code}{supplier.contact_person ? ` · ${supplier.contact_person}` : ''}</div>
                                             </td>
                                             <td className="px-4 py-3">
                                                 {supplier.category ? (

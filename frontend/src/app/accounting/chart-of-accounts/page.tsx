@@ -16,11 +16,11 @@ import {
   Search01Icon,
   PlusSignIcon,
   Download01Icon,
-  Building01Icon,
-  ArrowDown01Icon,
-  ArrowUp01Icon,
+  BorderFullIcon,
+  CheckmarkSquare02Icon,
+  PackageIcon,
+  ShuffleSquareIcon,
   AlertCircleIcon,
-  CheckmarkCircle01Icon,
 } from '@hugeicons/core-free-icons'
 import { Checkbox } from '@/components/ui/checkbox'
 
@@ -58,10 +58,10 @@ export default function ChartOfAccountsPage() {
       setLoading(true)
       setError(null)
 
-      const response = await apiClient.get<{ success: boolean, message: string, data: ChartOfAccount[] }>('/api/v1/accounting/chart-of-accounts/')
+      const response = await apiClient.get<{ success: boolean, message: string, data: ChartOfAccount[] | null }>('/api/v1/accounting/chart-of-accounts/')
 
-      if (response.success && Array.isArray(response.data)) {
-        setAccounts(response.data)
+      if (response.success) {
+        setAccounts(Array.isArray(response.data) ? response.data : [])
       } else {
         throw new Error(response.message || 'Invalid response format')
       }
@@ -122,6 +122,7 @@ export default function ChartOfAccountsPage() {
     try {
       const payload = {
         ...formData,
+        company_id: apiClient.getCompanyId() || '',
         parent_account_id: formData.parent_account_id || null,
       }
 
@@ -204,12 +205,7 @@ export default function ChartOfAccountsPage() {
       title: 'Account Name',
       sortable: true,
       render: (_, record) => (
-        <div>
-          <p className="font-medium">{record.account_name}</p>
-          {record.description && (
-            <p className="text-xs text-muted-foreground truncate max-w-xs">{record.description}</p>
-          )}
-        </div>
+        <span className="font-medium">{record.account_name}</span>
       )
     },
     {
@@ -231,6 +227,13 @@ export default function ChartOfAccountsPage() {
       title: 'Normal Balance',
       sortable: true,
       render: (_, record) => getBalanceBadge(record.normal_balance)
+    },
+    {
+      key: 'description',
+      title: 'Description',
+      render: (_, record) => (
+        <span className="text-sm text-muted-foreground truncate max-w-xs block">{record.description || '-'}</span>
+      )
     },
     {
       key: 'is_active',
@@ -256,11 +259,11 @@ export default function ChartOfAccountsPage() {
           breadcrumbs={breadcrumbs}
           actions={
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" className="rounded-sm">
                 <HugeiconsIcon icon={Download01Icon} className="h-4 w-4 mr-2" aria-hidden="true" />
                 Export
               </Button>
-              <Button size="sm" onClick={handleCreate}>
+              <Button size="sm" className="rounded-sm" onClick={handleCreate}>
                 <HugeiconsIcon icon={PlusSignIcon} className="h-4 w-4 mr-2" aria-hidden="true" />
                 Add Account
               </Button>
@@ -272,10 +275,10 @@ export default function ChartOfAccountsPage() {
         <div className="flex-1 overflow-auto p-6 space-y-6">
           {/* Summary Cards */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="p-4 bg-white dark:bg-zinc-900 rounded-lg">
+            <div className="p-4 bg-white dark:bg-zinc-900 rounded-sm border">
               <div className="flex items-center space-x-3">
-                <div className="h-10 w-10 bg-zinc-100 dark:bg-zinc-800 rounded-lg flex items-center justify-center">
-                  <HugeiconsIcon icon={Building01Icon} className="h-5 w-5 text-foreground" aria-hidden="true" />
+                <div className="h-10 w-10 bg-zinc-100 dark:bg-zinc-800 rounded-sm flex items-center justify-center">
+                  <HugeiconsIcon icon={BorderFullIcon} className="h-5 w-5 text-foreground" aria-hidden="true" />
                 </div>
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Total Accounts</p>
@@ -284,10 +287,10 @@ export default function ChartOfAccountsPage() {
               </div>
             </div>
 
-            <div className="p-4 bg-white dark:bg-zinc-900 rounded-lg">
+            <div className="p-4 bg-white dark:bg-zinc-900 rounded-sm border">
               <div className="flex items-center space-x-3">
-                <div className="h-10 w-10 bg-zinc-100 dark:bg-zinc-800 rounded-lg flex items-center justify-center">
-                  <HugeiconsIcon icon={CheckmarkCircle01Icon} className="h-5 w-5 text-foreground" aria-hidden="true" />
+                <div className="h-10 w-10 bg-zinc-100 dark:bg-zinc-800 rounded-sm flex items-center justify-center">
+                  <HugeiconsIcon icon={CheckmarkSquare02Icon} className="h-5 w-5 text-foreground" aria-hidden="true" />
                 </div>
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Active Accounts</p>
@@ -296,10 +299,10 @@ export default function ChartOfAccountsPage() {
               </div>
             </div>
 
-            <div className="p-4 bg-white dark:bg-zinc-900 rounded-lg">
+            <div className="p-4 bg-white dark:bg-zinc-900 rounded-sm border">
               <div className="flex items-center space-x-3">
-                <div className="h-10 w-10 bg-zinc-100 dark:bg-zinc-800 rounded-lg flex items-center justify-center">
-                  <HugeiconsIcon icon={ArrowUp01Icon} className="h-5 w-5 text-foreground" aria-hidden="true" />
+                <div className="h-10 w-10 bg-zinc-100 dark:bg-zinc-800 rounded-sm flex items-center justify-center">
+                  <HugeiconsIcon icon={PackageIcon} className="h-5 w-5 text-foreground" aria-hidden="true" />
                 </div>
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Asset Accounts</p>
@@ -308,10 +311,10 @@ export default function ChartOfAccountsPage() {
               </div>
             </div>
 
-            <div className="p-4 bg-white dark:bg-zinc-900 rounded-lg">
+            <div className="p-4 bg-white dark:bg-zinc-900 rounded-sm border">
               <div className="flex items-center space-x-3">
-                <div className="h-10 w-10 bg-zinc-100 dark:bg-zinc-800 rounded-lg flex items-center justify-center">
-                  <HugeiconsIcon icon={ArrowDown01Icon} className="h-5 w-5 text-foreground" aria-hidden="true" />
+                <div className="h-10 w-10 bg-zinc-100 dark:bg-zinc-800 rounded-sm flex items-center justify-center">
+                  <HugeiconsIcon icon={ShuffleSquareIcon} className="h-5 w-5 text-foreground" aria-hidden="true" />
                 </div>
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Liability Accounts</p>
@@ -329,14 +332,14 @@ export default function ChartOfAccountsPage() {
                 placeholder="Search..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-9 w-64 bg-white dark:bg-zinc-900"
+                className="pl-9 w-64 bg-white dark:bg-zinc-900 rounded-sm"
                 aria-label="Search accounts"
               />
             </div>
 
             <div className="flex items-center gap-2">
               <Select value={typeFilter} onValueChange={setTypeFilter}>
-                <SelectTrigger className="w-[150px] bg-white dark:bg-zinc-900" aria-label="Filter by account type">
+                <SelectTrigger className="w-[150px] bg-white dark:bg-zinc-900 rounded-sm" aria-label="Filter by account type">
                   <SelectValue placeholder="Type" />
                 </SelectTrigger>
                 <SelectContent>
@@ -350,7 +353,7 @@ export default function ChartOfAccountsPage() {
               </Select>
 
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-[130px] bg-white dark:bg-zinc-900" aria-label="Filter by status">
+                <SelectTrigger className="w-[130px] bg-white dark:bg-zinc-900 rounded-sm" aria-label="Filter by status">
                   <SelectValue placeholder="Status" />
                 </SelectTrigger>
                 <SelectContent>
@@ -369,7 +372,7 @@ export default function ChartOfAccountsPage() {
               <span className="sr-only">Loading accounts...</span>
             </div>
           ) : error ? (
-            <div className="p-8 bg-card rounded-lg">
+            <div className="p-8 bg-card rounded-sm">
               <div className="flex flex-col items-center justify-center space-y-4 text-center">
                 <div className="flex items-center gap-2 text-red-600">
                   <HugeiconsIcon icon={AlertCircleIcon} className="h-5 w-5" aria-hidden="true" />

@@ -1,79 +1,89 @@
-import OnlineSalesList, { OnlineSale } from './OnlineSalesList'
+'use client'
 
-// Mock Data
-const mockOnlineSales: OnlineSale[] = [
-  {
-    id: '1',
-    order_number: 'ON-2024-001',
-    order_date: '2024-07-25',
-    platform: 'website',
-    platform_name: 'Official Website',
-    customer_name: 'Ahmad Rizki',
-    customer_email: 'ahmad.rizki@email.com',
-    items_count: 2,
-    total_amount: 544500,
-    payment_status: 'paid',
-    order_status: 'shipped',
-    created_at: '2024-07-25T08:30:00Z',
-  },
-  {
-    id: '2',
-    order_number: 'ON-2024-002',
-    order_date: '2024-07-25',
-    platform: 'marketplace',
-    platform_name: 'Tokopedia',
-    customer_name: 'Siti Nurhaliza',
-    customer_email: 'siti.nur@email.com',
-    items_count: 1,
-    total_amount: 518200,
-    payment_status: 'paid',
-    order_status: 'processing',
-    created_at: '2024-07-25T09:15:00Z',
-  },
-  {
-    id: '3',
-    order_number: 'ON-2024-003',
-    order_date: '2024-07-25',
-    platform: 'marketplace',
-    platform_name: 'Shopee',
-    customer_name: 'Budi Santoso',
-    customer_email: 'budi.santoso@email.com',
-    items_count: 1,
-    total_amount: 519200,
-    payment_status: 'pending',
-    order_status: 'confirmed',
-    created_at: '2024-07-25T11:00:00Z',
-  },
-  {
-    id: '4',
-    order_number: 'ON-2024-004',
-    order_date: '2024-07-24',
-    platform: 'social_media',
-    platform_name: 'Instagram',
-    customer_name: 'Rina Dewi',
-    customer_email: 'rina.dewi@email.com',
-    items_count: 2,
-    total_amount: 619800,
-    payment_status: 'paid',
-    order_status: 'delivered',
-    created_at: '2024-07-24T13:20:00Z',
-  },
-  {
-    id: '5',
-    order_number: 'ON-2024-005',
-    order_date: '2024-07-24',
-    platform: 'mobile_app',
-    platform_name: 'Mobile App',
-    customer_name: 'Dedi Susanto',
-    customer_email: 'dedi.susanto@email.com',
-    items_count: 1,
-    total_amount: 374000,
-    payment_status: 'failed',
-    order_status: 'cancelled',
-    created_at: '2024-07-24T16:10:00Z',
-  }
-]
+import React, { useState, useMemo, useEffect } from 'react'
+import { TwoLevelLayout } from '@/components/ui/two-level-layout'
+import { Header } from '@/components/ui/header'
+import { Card } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Input } from '@/components/ui/input'
+import { TanStackDataTable, TanStackColumn } from '@/components/ui/tanstack-data-table'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from '@/components/ui/dropdown-menu'
+import { HugeiconsIcon } from '@hugeicons/react'
+import { Search01Icon, MoreHorizontalIcon, PlusSignIcon, ShoppingCartIcon, Dollar01Icon, Clock01Icon, TruckIcon } from '@hugeicons/core-free-icons'
+import { onlineOrderService, type OnlineOrder } from '@/services/sales'
+import Link from 'next/link'
 
 export default function OnlineSalesPage() {
-  return <OnlineSalesList initialData={mockOnlineSales} />
+  const [data, setData] = useState<OnlineOrder[]>([])
+  const [loading, setLoading] = useState(true)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => { setMounted(true) }, [])
+  useEffect(() => { onlineOrderService.getAll().then(setData).finally(() => setLoading(false)) }, [])
+
+  const filtered = useMemo(() => {
+    if (!searchTerm) return data
+    const q = searchTerm.toLowerCase()
+    return data.filter(i => i.marketplace?.toLowerCase().includes(q) || i.order_id?.toLowerCase().includes(q) || i.status?.toLowerCase().includes(q) || i.id.toLowerCase().includes(q))
+  }, [data, searchTerm])
+
+  const stats = useMemo(() => ({
+    total: data.length,
+    revenue: data.reduce((s, i) => s + (i.total_amount || 0), 0),
+    pending: data.filter(i => i.status === 'PENDING').length,
+    delivered: data.filter(i => i.status === 'DELIVERED').length,
+  }), [data])
+
+  const fmt = (n: number) => `Rp ${n.toLocaleString('id-ID')}`
+  const fmtDate = (d: string) => mounted && d ? new Date(d).toLocaleDateString('id-ID') : '-'
+  const statusColor: Record<string, string> = { PENDING: 'bg-yellow-100 text-yellow-800', CONFIRMED: 'bg-blue-100 text-blue-800', SHIPPED: 'bg-indigo-100 text-indigo-800', DELIVERED: 'bg-green-100 text-green-800', CANCELLED: 'bg-red-100 text-red-800' }
+
+  const columns: TanStackColumn<OnlineOrder>[] = [
+    { id: 'order_id', header: 'Order ID', accessorKey: 'order_id', cell: ({ row }) => <Link href={`/sales/online/${row.original.id}`} className="font-medium text-blue-600 hover:underline">{row.original.order_id}</Link> },
+    { id: 'marketplace', header: 'Marketplace', accessorKey: 'marketplace' },
+    { id: 'order_date', header: 'Order Date', accessorKey: 'order_date', cell: ({ row }) => <span>{fmtDate(row.original.order_date)}</span> },
+    { id: 'customer_id', header: 'Customer', accessorKey: 'customer_id', cell: ({ row }) => <span>{row.original.customer_id.slice(0, 8)}...</span> },
+    { id: 'total_amount', header: 'Total', accessorKey: 'total_amount', cell: ({ row }) => <span className="font-medium">{fmt(row.original.total_amount)}</span> },
+    { id: 'status', header: 'Status', accessorKey: 'status', cell: ({ row }) => <Badge className={`${statusColor[row.original.status] || 'bg-gray-100 text-gray-800'} border-0`}>{row.original.status}</Badge> },
+    { id: 'actions', header: '', enableSorting: false, cell: ({ row }) => (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild><Button variant="outline" size="sm" className="h-8 w-8 p-0"><HugeiconsIcon icon={MoreHorizontalIcon} className="h-4 w-4" /></Button></DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem asChild><Link href={`/sales/online/${row.original.id}`}>View Details</Link></DropdownMenuItem>
+          <DropdownMenuItem onClick={() => navigator.clipboard.writeText(row.original.id)}>Copy ID</DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem className="text-red-600" onClick={() => handleDelete(row.original.id)}>Delete</DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    )},
+  ]
+
+  const handleDelete = async (id: string) => { try { await onlineOrderService.delete(id); setData(prev => prev.filter(i => i.id !== id)) } catch (err) { console.error('Delete failed:', err) } }
+
+  return (
+    <TwoLevelLayout>
+      <Header title="Online Sales" breadcrumbs={[{ label: 'Sales', href: '/sales' }, { label: 'Online Sales' }]} actions={<Button><HugeiconsIcon icon={PlusSignIcon} className="w-4 h-4 mr-2" />New Online Order</Button>} />
+      <div className="flex-1 overflow-auto p-6 space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <Card className="p-4"><div className="flex items-center space-x-3"><div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center"><HugeiconsIcon icon={ShoppingCartIcon} className="h-5 w-5 text-foreground" /></div><div><p className="text-sm font-medium text-muted-foreground">Total Orders</p><p className="text-2xl font-bold">{stats.total}</p></div></div></Card>
+          <Card className="p-4"><div className="flex items-center space-x-3"><div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center"><HugeiconsIcon icon={Dollar01Icon} className="h-5 w-5 text-foreground" /></div><div><p className="text-sm font-medium text-muted-foreground">Total Revenue</p><p className="text-2xl font-bold">{mounted ? fmt(stats.revenue) : '-'}</p></div></div></Card>
+          <Card className="p-4"><div className="flex items-center space-x-3"><div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center"><HugeiconsIcon icon={Clock01Icon} className="h-5 w-5 text-foreground" /></div><div><p className="text-sm font-medium text-muted-foreground">Pending</p><p className="text-2xl font-bold">{stats.pending}</p></div></div></Card>
+          <Card className="p-4"><div className="flex items-center space-x-3"><div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center"><HugeiconsIcon icon={TruckIcon} className="h-5 w-5 text-foreground" /></div><div><p className="text-sm font-medium text-muted-foreground">Delivered</p><p className="text-2xl font-bold">{stats.delivered}</p></div></div></Card>
+        </div>
+        <div className="relative w-80">
+          <HugeiconsIcon icon={Search01Icon} className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input placeholder="Search online orders..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-9 bg-white text-sm" style={{ fontSize: '14px' }} />
+        </div>
+        <TanStackDataTable data={filtered} columns={columns} loading={loading} showColumnToggle={false} />
+      </div>
+    </TwoLevelLayout>
+  )
 }

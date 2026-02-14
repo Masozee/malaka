@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import Link from 'next/link'
 import { TwoLevelLayout } from '@/components/ui/two-level-layout'
 import { Header } from '@/components/ui/header'
@@ -33,145 +33,71 @@ import {
     Coins01Icon,
     MoreHorizontalIcon
 } from '@hugeicons/core-free-icons'
-
-// --- Types ---
-type AccountType = 'bank' | 'cash' | 'e-wallet'
-type Currency = 'IDR' | 'USD' | 'SGD'
-type AccountStatus = 'active' | 'inactive' | 'frozen'
-
-interface CashAccount {
-    id: string
-    accountName: string
-    accountNumber: string
-    bankName: string // e.g. BCA, Mandiri, Petty Cash
-    type: AccountType
-    currency: Currency
-    balance: number
-    status: AccountStatus
-    lastUpdated: string
-}
-
-// --- Mock Data ---
-const mockAccounts: CashAccount[] = [
-    {
-        id: '1',
-        accountName: 'Operational Account',
-        accountNumber: '8273641234',
-        bankName: 'BCA',
-        type: 'bank',
-        currency: 'IDR',
-        balance: 1250000000,
-        status: 'active',
-        lastUpdated: '2024-02-10T09:30:00Z'
-    },
-    {
-        id: '2',
-        accountName: 'Payroll Account',
-        accountNumber: '1234567890',
-        bankName: 'Mandiri',
-        type: 'bank',
-        currency: 'IDR',
-        balance: 450000000,
-        status: 'active',
-        lastUpdated: '2024-02-10T08:15:00Z'
-    },
-    {
-        id: '3',
-        accountName: 'USD Treasury',
-        accountNumber: '9988776655',
-        bankName: 'DBS',
-        type: 'bank',
-        currency: 'USD',
-        balance: 25000,
-        status: 'active',
-        lastUpdated: '2024-02-09T16:45:00Z'
-    },
-    {
-        id: '4',
-        accountName: 'Petty Cash HQ',
-        accountNumber: '-',
-        bankName: 'Office Safe',
-        type: 'cash',
-        currency: 'IDR',
-        balance: 15500000,
-        status: 'active',
-        lastUpdated: '2024-02-10T11:00:00Z'
-    },
-    {
-        id: '5',
-        accountName: 'Gopay Corporate',
-        accountNumber: '08123456789',
-        bankName: 'Gopay',
-        type: 'e-wallet',
-        currency: 'IDR',
-        balance: 2500000,
-        status: 'active',
-        lastUpdated: '2024-02-10T10:20:00Z'
-    }
-]
+import { BookmarkToggle } from '@/components/ui/bookmark-toggle'
+import { cashBankService, type CashBank } from '@/services/finance'
 
 export default function CashTreasuryPage() {
     const { addToast } = useToast()
     const [searchTerm, setSearchTerm] = useState('')
     const [typeFilter, setTypeFilter] = useState<string>('all')
     const [isTransferModalOpen, setIsTransferModalOpen] = useState(false)
+    const [accounts, setAccounts] = useState<CashBank[]>([])
+    const [loading, setLoading] = useState(true)
+    const [mounted, setMounted] = useState(false)
+
+    useEffect(() => { setMounted(true) }, [])
+
+    useEffect(() => {
+        async function fetchData() {
+            try {
+                setLoading(true)
+                const data = await cashBankService.getAll()
+                setAccounts(data)
+            } catch (err) {
+                console.error('Failed to fetch cash banks:', err)
+            } finally {
+                setLoading(false)
+            }
+        }
+        fetchData()
+    }, [])
 
     // --- Stats ---
     const stats = useMemo(() => {
-        // Simple aggregation for IDR only for the demo
-        const totalIDR = mockAccounts
+        const totalIDR = accounts
             .filter(a => a.currency === 'IDR')
             .reduce((sum, a) => sum + a.balance, 0)
 
-        const totalUSD = mockAccounts
+        const totalUSD = accounts
             .filter(a => a.currency === 'USD')
             .reduce((sum, a) => sum + a.balance, 0)
 
-        const activeCount = mockAccounts.filter(a => a.status === 'active').length
-
-        return { totalIDR, totalUSD, activeCount }
-    }, [])
+        return { totalIDR, totalUSD, activeCount: accounts.length }
+    }, [accounts])
 
     // --- Filtering ---
     const filteredData = useMemo(() => {
-        let data = mockAccounts
+        let data = accounts
         if (searchTerm) {
             const lower = searchTerm.toLowerCase()
             data = data.filter(item =>
-                item.accountName.toLowerCase().includes(lower) ||
-                item.bankName.toLowerCase().includes(lower) ||
-                item.accountNumber.includes(lower)
+                item.name.toLowerCase().includes(lower) ||
+                item.account_no.includes(lower)
             )
-        }
-        if (typeFilter !== 'all') {
-            data = data.filter(item => item.type === typeFilter)
         }
         return data
-    }, [searchTerm, typeFilter])
+    }, [searchTerm, accounts])
 
     // --- Columns ---
-    const columns: TanStackColumn<CashAccount>[] = [
+    const columns: TanStackColumn<CashBank>[] = [
         {
-            id: 'accountName',
+            id: 'name',
             header: 'Account Name',
-            accessorKey: 'accountName',
+            accessorKey: 'name',
             cell: ({ row }) => (
                 <div className="flex flex-col">
-                    <span className="font-medium text-sm">{row.original.accountName}</span>
-                    <span className="text-xs text-muted-foreground">{row.original.bankName} - {row.original.accountNumber}</span>
-                </div>
-            )
-        },
-        {
-            id: 'type',
-            header: 'Type',
-            accessorKey: 'type',
-            cell: ({ row }) => (
-                <div className="flex items-center gap-2">
-                    {row.original.type === 'bank' && <HugeiconsIcon icon={BankIcon} className="w-4 h-4 text-muted-foreground" />}
-                    {row.original.type === 'cash' && <HugeiconsIcon icon={Wallet01Icon} className="w-4 h-4 text-muted-foreground" />}
-                    {row.original.type === 'e-wallet' && <HugeiconsIcon icon={Coins01Icon} className="w-4 h-4 text-muted-foreground" />}
-                    <span className="capitalize text-sm">{row.original.type}</span>
+                    <span className="font-medium text-sm">{row.original.name}</span>
+                    <span className="text-xs text-muted-foreground">{row.original.account_no || '-'}</span>
                 </div>
             )
         },
@@ -192,29 +118,12 @@ export default function CashTreasuryPage() {
             )
         },
         {
-            id: 'status',
-            header: 'Status',
-            accessorKey: 'status',
-            cell: ({ row }) => {
-                const colors = {
-                    active: 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400',
-                    inactive: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400',
-                    frozen: 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400',
-                }
-                return (
-                    <Badge className={`${colors[row.original.status]} border-0 whitespace-nowrap capitalize`}>
-                        {row.original.status}
-                    </Badge>
-                )
-            }
-        },
-        {
-            id: 'lastUpdated',
+            id: 'updated_at',
             header: 'Last Updated',
-            accessorKey: 'lastUpdated',
+            accessorKey: 'updated_at',
             cell: ({ row }) => (
                 <span className="text-xs text-muted-foreground">
-                    {new Date(row.original.lastUpdated).toLocaleDateString()}
+                    {mounted && row.original.updated_at ? new Date(row.original.updated_at).toLocaleDateString() : '-'}
                 </span>
             )
         },
@@ -253,7 +162,8 @@ export default function CashTreasuryPage() {
                     { label: 'Cash & Treasury' }
                 ]}
                 actions={
-                    <div className="flex gap-2">
+                    <div className="flex items-center gap-2">
+                        <BookmarkToggle itemId="cash-treasury" />
                         <Button variant="outline" onClick={() => setIsTransferModalOpen(true)}>
                             <HugeiconsIcon icon={ArrowRight01Icon} className="w-4 h-4 mr-2" />
                             Transfer Funds
@@ -355,7 +265,7 @@ export default function CashTreasuryPage() {
                             <Select>
                                 <SelectTrigger><SelectValue placeholder="Select Source" /></SelectTrigger>
                                 <SelectContent>
-                                    {mockAccounts.map(a => <SelectItem key={a.id} value={a.id}>{a.accountName} ({a.currency})</SelectItem>)}
+                                    {accounts.map(a => <SelectItem key={a.id} value={a.id}>{a.name} ({a.currency})</SelectItem>)}
                                 </SelectContent>
                             </Select>
                         </div>
@@ -364,7 +274,7 @@ export default function CashTreasuryPage() {
                             <Select>
                                 <SelectTrigger><SelectValue placeholder="Select Destination" /></SelectTrigger>
                                 <SelectContent>
-                                    {mockAccounts.map(a => <SelectItem key={a.id} value={a.id}>{a.accountName} ({a.currency})</SelectItem>)}
+                                    {accounts.map(a => <SelectItem key={a.id} value={a.id}>{a.name} ({a.currency})</SelectItem>)}
                                 </SelectContent>
                             </Select>
                         </div>

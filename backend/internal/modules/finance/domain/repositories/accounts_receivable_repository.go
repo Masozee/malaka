@@ -11,6 +11,7 @@ import (
 type AccountsReceivableRepository interface {
 	Create(ctx context.Context, ar *entities.AccountsReceivable) error
 	GetByID(ctx context.Context, id uuid.ID) (*entities.AccountsReceivable, error)
+	GetAll(ctx context.Context) ([]*entities.AccountsReceivable, error)
 	Update(ctx context.Context, ar *entities.AccountsReceivable) error
 	Delete(ctx context.Context, id uuid.ID) error
 }

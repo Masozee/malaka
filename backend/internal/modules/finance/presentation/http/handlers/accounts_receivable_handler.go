@@ -63,6 +63,22 @@ func (h *AccountsReceivableHandler) GetAccountsReceivableByID(c *gin.Context) {
 	response.Success(c, http.StatusOK, "Accounts receivable retrieved successfully", resp)
 }
 
+// GetAllAccountsReceivable handles the retrieval of all accounts receivable.
+func (h *AccountsReceivableHandler) GetAllAccountsReceivable(c *gin.Context) {
+	items, err := h.service.GetAllAccountsReceivable(c.Request.Context())
+	if err != nil {
+		response.Error(c, http.StatusInternalServerError, "Failed to retrieve accounts receivable", err)
+		return
+	}
+
+	var responses []*dto.AccountsReceivableResponse
+	for _, ar := range items {
+		responses = append(responses, dto.FromAccountsReceivableEntity(ar))
+	}
+
+	response.Success(c, http.StatusOK, "Accounts receivable retrieved successfully", responses)
+}
+
 // UpdateAccountsReceivable handles the update of an existing accounts receivable.
 func (h *AccountsReceivableHandler) UpdateAccountsReceivable(c *gin.Context) {
 	id := c.Param("id")

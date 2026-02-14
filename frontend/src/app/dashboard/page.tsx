@@ -23,7 +23,7 @@ import {
   Area,
   AreaChart
 } from 'recharts'
-import { salesService } from '@/services/sales'
+import { salesOrderService } from '@/services/sales'
 import { HRService } from '@/services/hr'
 import { ProductionService } from '@/services/production'
 import { procurementServices } from '@/services/procurement'
@@ -94,7 +94,7 @@ export default function HousePage() {
     async function fetchAll() {
       setLoading(true)
       const results = await Promise.allSettled([
-        salesService.getSalesOrders(),                                     // 0
+        salesOrderService.getAll(),                                          // 0
         apiClient.get<any>('/api/v1/masterdata/customers/', { limit: 1 }),// 1
         apiClient.get<any>('/api/v1/masterdata/articles/'),               // 2
         HRService.getEmployees({ limit: 1 }),                             // 3

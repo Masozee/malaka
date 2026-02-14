@@ -32,6 +32,11 @@ func (s *AccountsReceivableService) GetAccountsReceivableByID(ctx context.Contex
 	return s.repo.GetByID(ctx, id)
 }
 
+// GetAllAccountsReceivable retrieves all accounts receivable records.
+func (s *AccountsReceivableService) GetAllAccountsReceivable(ctx context.Context) ([]*entities.AccountsReceivable, error) {
+	return s.repo.GetAll(ctx)
+}
+
 // UpdateAccountsReceivable updates an existing accounts receivable record.
 func (s *AccountsReceivableService) UpdateAccountsReceivable(ctx context.Context, ar *entities.AccountsReceivable) error {
 	// Ensure the accounts receivable record exists before updating

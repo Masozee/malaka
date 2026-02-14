@@ -1,225 +1,90 @@
-import CompetitorsList, { Competitor } from './CompetitorsList'
+'use client'
 
-// Mock Data
-const mockCompetitors: Competitor[] = [
-  {
-    id: '1',
-    company_name: 'Bata Indonesia',
-    brand_name: 'Bata',
-    company_type: 'national',
-    market_position: 'leader',
-    business_model: 'hybrid',
-    headquarters: 'Jakarta, Indonesia',
-    website: 'https://www.bata.com',
-    founded_year: 1894,
-    estimated_revenue: 2500000000000,
-    market_share_percentage: 28.5,
-    employee_count: 15000,
-    store_count: 850,
-    online_presence_score: 85,
-    product_similarity_score: 92,
-    price_competitiveness: 'similar',
-    strengths: ['Brand recognition', 'Extensive store network', 'Wide product range', 'Strong distribution'],
-    weaknesses: ['Traditional image', 'Limited premium segment', 'Slow digital adoption'],
-    threat_level: 'critical',
-    monitoring_status: 'active',
-    last_analysis_date: '2024-07-20T10:30:00Z',
-    created_by: 'Market Research Team',
-    updated_by: 'Ahmad Research',
-    created_at: '2024-01-15T09:00:00Z',
-    updated_at: '2024-07-25T14:45:00Z'
-  },
-  {
-    id: '2',
-    company_name: 'Nike Indonesia',
-    brand_name: 'Nike',
-    company_type: 'international',
-    market_position: 'leader',
-    business_model: 'b2c',
-    headquarters: 'Beaverton, USA',
-    website: 'https://www.nike.com',
-    founded_year: 1964,
-    estimated_revenue: 5600000000000,
-    market_share_percentage: 22.1,
-    employee_count: 79000,
-    store_count: 156,
-    online_presence_score: 98,
-    product_similarity_score: 45,
-    price_competitiveness: 'higher',
-    strengths: ['Premium brand', 'Innovation', 'Strong marketing', 'Global presence'],
-    weaknesses: ['High prices', 'Limited formal shoes', 'Focus on sports'],
-    threat_level: 'high',
-    monitoring_status: 'active',
-    last_analysis_date: '2024-07-18T15:20:00Z',
-    created_by: 'Strategic Planning',
-    updated_by: 'Sari Strategy',
-    created_at: '2024-01-10T11:30:00Z',
-    updated_at: '2024-07-24T16:15:00Z'
-  },
-  {
-    id: '3',
-    company_name: 'Adidas Indonesia',
-    brand_name: 'Adidas',
-    company_type: 'international',
-    market_position: 'challenger',
-    business_model: 'b2c',
-    headquarters: 'Herzogenaurach, Germany',
-    website: 'https://www.adidas.com',
-    founded_year: 1949,
-    estimated_revenue: 4200000000000,
-    market_share_percentage: 18.7,
-    employee_count: 59000,
-    store_count: 134,
-    online_presence_score: 94,
-    product_similarity_score: 38,
-    price_competitiveness: 'higher',
-    strengths: ['Strong brand', 'Innovation', 'Sports partnerships', 'Style leadership'],
-    weaknesses: ['Premium pricing', 'Limited business shoes', 'Sport focus'],
-    threat_level: 'high',
-    monitoring_status: 'active',
-    last_analysis_date: '2024-07-17T12:45:00Z',
-    created_by: 'Market Research Team',
-    updated_by: 'Budi Research',
-    created_at: '2024-01-12T14:20:00Z',
-    updated_at: '2024-07-23T11:30:00Z'
-  },
-  {
-    id: '4',
-    company_name: 'Yongki Komaladi',
-    brand_name: 'Yongki Komaladi',
-    company_type: 'local',
-    market_position: 'challenger',
-    business_model: 'b2c',
-    headquarters: 'Jakarta, Indonesia',
-    website: 'https://www.yongkikomaladi.com',
-    founded_year: 1978,
-    estimated_revenue: 450000000000,
-    market_share_percentage: 8.3,
-    employee_count: 2500,
-    store_count: 180,
-    online_presence_score: 72,
-    product_similarity_score: 88,
-    price_competitiveness: 'similar',
-    strengths: ['Local brand understanding', 'Fashion focus', 'Female segment', 'Design innovation'],
-    weaknesses: ['Limited male segment', 'Smaller scale', 'Regional presence'],
-    threat_level: 'medium',
-    monitoring_status: 'active',
-    last_analysis_date: '2024-07-15T09:15:00Z',
-    created_by: 'Competitive Intelligence',
-    updated_by: 'Rina Intelligence',
-    created_at: '2024-02-01T10:45:00Z',
-    updated_at: '2024-07-22T13:20:00Z'
-  },
-  {
-    id: '5',
-    company_name: 'Everbest Indonesia',
-    brand_name: 'Everbest',
-    company_type: 'local',
-    market_position: 'follower',
-    business_model: 'hybrid',
-    headquarters: 'Surabaya, Indonesia',
-    website: 'https://www.everbest.co.id',
-    founded_year: 1985,
-    estimated_revenue: 320000000000,
-    market_share_percentage: 6.2,
-    employee_count: 1800,
-    store_count: 145,
-    online_presence_score: 58,
-    product_similarity_score: 85,
-    price_competitiveness: 'lower',
-    strengths: ['Affordable pricing', 'Wide distribution', 'Value proposition', 'Local manufacturing'],
-    weaknesses: ['Brand perception', 'Quality concerns', 'Limited innovation'],
-    threat_level: 'medium',
-    monitoring_status: 'passive',
-    last_analysis_date: '2024-07-10T16:30:00Z',
-    created_by: 'Market Research Team',
-    updated_by: 'Dedi Research',
-    created_at: '2024-02-15T12:00:00Z',
-    updated_at: '2024-07-20T14:45:00Z'
-  },
-  {
-    id: '6',
-    company_name: 'Zalora Indonesia',
-    brand_name: 'Zalora',
-    company_type: 'online_only',
-    market_position: 'challenger',
-    business_model: 'b2c',
-    headquarters: 'Singapore',
-    website: 'https://www.zalora.co.id',
-    founded_year: 2012,
-    estimated_revenue: 180000000000,
-    market_share_percentage: 3.8,
-    employee_count: 800,
-    store_count: 0,
-    online_presence_score: 96,
-    product_similarity_score: 65,
-    price_competitiveness: 'similar',
-    strengths: ['E-commerce platform', 'Wide selection', 'Convenience', 'Tech integration'],
-    weaknesses: ['No physical stores', 'Delivery dependency', 'Competition from marketplaces'],
-    threat_level: 'high',
-    monitoring_status: 'active',
-    last_analysis_date: '2024-07-12T11:20:00Z',
-    created_by: 'Digital Strategy',
-    updated_by: 'Lisa Digital',
-    created_at: '2024-03-01T15:30:00Z',
-    updated_at: '2024-07-21T09:45:00Z'
-  },
-  {
-    id: '7',
-    company_name: 'Buccheri Indonesia',
-    brand_name: 'Buccheri',
-    company_type: 'local',
-    market_position: 'niche',
-    business_model: 'b2c',
-    headquarters: 'Jakarta, Indonesia',
-    website: 'https://www.buccheri.co.id',
-    founded_year: 1990,
-    estimated_revenue: 125000000000,
-    market_share_percentage: 2.1,
-    employee_count: 650,
-    store_count: 85,
-    online_presence_score: 64,
-    product_similarity_score: 78,
-    price_competitiveness: 'higher',
-    strengths: ['Premium positioning', 'Quality focus', 'Formal shoes expertise', 'Business segment'],
-    weaknesses: ['Limited casual range', 'High prices', 'Narrow market'],
-    threat_level: 'low',
-    monitoring_status: 'passive',
-    last_analysis_date: '2024-06-28T14:15:00Z',
-    created_by: 'Product Strategy',
-    updated_by: 'Ahmad Product',
-    created_at: '2024-03-15T13:45:00Z',
-    updated_at: '2024-07-19T16:30:00Z'
-  },
-  {
-    id: '8',
-    company_name: 'Shopee Indonesia',
-    brand_name: 'Shopee',
-    company_type: 'online_only',
-    market_position: 'leader',
-    business_model: 'b2c',
-    headquarters: 'Singapore',
-    website: 'https://shopee.co.id',
-    founded_year: 2015,
-    estimated_revenue: 890000000000,
-    market_share_percentage: 15.4,
-    employee_count: 4500,
-    store_count: 0,
-    online_presence_score: 99,
-    product_similarity_score: 35,
-    price_competitiveness: 'lower',
-    strengths: ['Marketplace dominance', 'Wide reach', 'Competitive pricing', 'Mobile first'],
-    weaknesses: ['Platform dependency', 'Quality control', 'No direct customer relationship'],
-    threat_level: 'critical',
-    monitoring_status: 'active',
-    last_analysis_date: '2024-07-22T13:45:00Z',
-    created_by: 'E-commerce Strategy',
-    updated_by: 'Sari Ecommerce',
-    created_at: '2024-01-20T16:20:00Z',
-    updated_at: '2024-07-25T11:15:00Z'
-  }
-]
+import React, { useState, useMemo, useEffect } from 'react'
+import { TwoLevelLayout } from '@/components/ui/two-level-layout'
+import { Header } from '@/components/ui/header'
+import { Card } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { TanStackDataTable, TanStackColumn } from '@/components/ui/tanstack-data-table'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from '@/components/ui/dropdown-menu'
+import { HugeiconsIcon } from '@hugeicons/react'
+import { Search01Icon, MoreHorizontalIcon, PlusSignIcon, UserGroupIcon, Package01Icon, Dollar01Icon, Calendar01Icon } from '@hugeicons/core-free-icons'
+import { salesKompetitorService, type SalesKompetitor } from '@/services/sales'
+import Link from 'next/link'
 
-export default function SalesCompetitorsPage() {
-  return <CompetitorsList initialData={mockCompetitors} />
+export default function CompetitorsPage() {
+  const [data, setData] = useState<SalesKompetitor[]>([])
+  const [loading, setLoading] = useState(true)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => { setMounted(true) }, [])
+  useEffect(() => { salesKompetitorService.getAll().then(setData).finally(() => setLoading(false)) }, [])
+
+  const filtered = useMemo(() => {
+    if (!searchTerm) return data
+    const q = searchTerm.toLowerCase()
+    return data.filter(item =>
+      item.competitor_name?.toLowerCase().includes(q) ||
+      item.product_name?.toLowerCase().includes(q) ||
+      item.id.toLowerCase().includes(q)
+    )
+  }, [data, searchTerm])
+
+  const stats = useMemo(() => ({
+    total: data.length,
+    uniqueCompetitors: new Set(data.map(i => i.competitor_name).filter(Boolean)).size,
+    avgPrice: data.length > 0 ? Math.round(data.reduce((s, i) => s + (i.price || 0), 0) / data.length) : 0,
+    uniqueProducts: new Set(data.map(i => i.product_name).filter(Boolean)).size,
+  }), [data])
+
+  const fmt = (n: number) => `Rp ${n.toLocaleString('id-ID')}`
+  const fmtDate = (d: string) => mounted && d ? new Date(d).toLocaleDateString('id-ID') : '-'
+
+  const columns: TanStackColumn<SalesKompetitor>[] = [
+    { id: 'competitor_name', header: 'Competitor', accessorKey: 'competitor_name', cell: ({ row }) => <Link href={`/sales/competitors/${row.original.id}`} className="font-medium text-blue-600 hover:underline">{row.original.competitor_name}</Link> },
+    { id: 'product_name', header: 'Product', accessorKey: 'product_name' },
+    { id: 'price', header: 'Price', accessorKey: 'price', cell: ({ row }) => <span className="font-medium">{fmt(row.original.price)}</span> },
+    { id: 'date_observed', header: 'Date Observed', accessorKey: 'date_observed', cell: ({ row }) => <span>{fmtDate(row.original.date_observed)}</span> },
+    { id: 'notes', header: 'Notes', accessorKey: 'notes', cell: ({ row }) => <span className="truncate max-w-[200px] block">{row.original.notes || '-'}</span> },
+    { id: 'actions', header: '', enableSorting: false, cell: ({ row }) => (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild><Button variant="outline" size="sm" className="h-8 w-8 p-0"><HugeiconsIcon icon={MoreHorizontalIcon} className="h-4 w-4" /></Button></DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem asChild><Link href={`/sales/competitors/${row.original.id}`}>View Details</Link></DropdownMenuItem>
+          <DropdownMenuItem onClick={() => navigator.clipboard.writeText(row.original.id)}>Copy ID</DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem className="text-red-600" onClick={() => handleDelete(row.original.id)}>Delete</DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    )},
+  ]
+
+  const handleDelete = async (id: string) => { try { await salesKompetitorService.delete(id); setData(prev => prev.filter(i => i.id !== id)) } catch (err) { console.error('Delete failed:', err) } }
+
+  return (
+    <TwoLevelLayout>
+      <Header title="Competitors" breadcrumbs={[{ label: 'Sales', href: '/sales' }, { label: 'Competitors' }]} actions={<Button><HugeiconsIcon icon={PlusSignIcon} className="w-4 h-4 mr-2" />New Competitor</Button>} />
+      <div className="flex-1 overflow-auto p-6 space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <Card className="p-4"><div className="flex items-center space-x-3"><div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center"><HugeiconsIcon icon={UserGroupIcon} className="h-5 w-5 text-foreground" /></div><div><p className="text-sm font-medium text-muted-foreground">Total Entries</p><p className="text-2xl font-bold">{stats.total}</p></div></div></Card>
+          <Card className="p-4"><div className="flex items-center space-x-3"><div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center"><HugeiconsIcon icon={Package01Icon} className="h-5 w-5 text-foreground" /></div><div><p className="text-sm font-medium text-muted-foreground">Unique Competitors</p><p className="text-2xl font-bold">{stats.uniqueCompetitors}</p></div></div></Card>
+          <Card className="p-4"><div className="flex items-center space-x-3"><div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center"><HugeiconsIcon icon={Dollar01Icon} className="h-5 w-5 text-foreground" /></div><div><p className="text-sm font-medium text-muted-foreground">Avg Price</p><p className="text-2xl font-bold">{mounted ? fmt(stats.avgPrice) : '-'}</p></div></div></Card>
+          <Card className="p-4"><div className="flex items-center space-x-3"><div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center"><HugeiconsIcon icon={Calendar01Icon} className="h-5 w-5 text-foreground" /></div><div><p className="text-sm font-medium text-muted-foreground">Products Tracked</p><p className="text-2xl font-bold">{stats.uniqueProducts}</p></div></div></Card>
+        </div>
+        <div className="relative w-80">
+          <HugeiconsIcon icon={Search01Icon} className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input placeholder="Search competitors..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-9 bg-white text-sm" style={{ fontSize: '14px' }} />
+        </div>
+        <TanStackDataTable data={filtered} columns={columns} loading={loading} showColumnToggle={false} />
+      </div>
+    </TwoLevelLayout>
+  )
 }

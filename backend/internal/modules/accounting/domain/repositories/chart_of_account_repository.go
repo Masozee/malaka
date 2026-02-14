@@ -11,8 +11,8 @@ import (
 type ChartOfAccountRepository interface {
 	Create(ctx context.Context, coa *entities.ChartOfAccount) error
 	GetByID(ctx context.Context, id uuid.ID) (*entities.ChartOfAccount, error)
-	GetByCode(ctx context.Context, code string) (*entities.ChartOfAccount, error)
-	GetAll(ctx context.Context) ([]*entities.ChartOfAccount, error)
+	GetByCode(ctx context.Context, companyID string, code string) (*entities.ChartOfAccount, error)
+	GetAll(ctx context.Context, companyID string) ([]*entities.ChartOfAccount, error)
 	Update(ctx context.Context, coa *entities.ChartOfAccount) error
 	Delete(ctx context.Context, id uuid.ID) error
 }

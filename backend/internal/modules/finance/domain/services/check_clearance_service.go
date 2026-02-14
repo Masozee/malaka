@@ -16,8 +16,6 @@ type CheckClearanceService interface {
 	UpdateCheckClearance(ctx context.Context, check *entities.CheckClearance) error
 	DeleteCheckClearance(ctx context.Context, id uuid.ID) error
 	GetCheckClearancesByStatus(ctx context.Context, status string) ([]*entities.CheckClearance, error)
-	GetIncomingChecks(ctx context.Context) ([]*entities.CheckClearance, error)
-	GetOutgoingChecks(ctx context.Context) ([]*entities.CheckClearance, error)
 	ClearCheck(ctx context.Context, id uuid.ID, clearanceDate time.Time) error
 	BounceCheck(ctx context.Context, id uuid.ID) error
 }
@@ -34,7 +32,7 @@ func NewCheckClearanceService(repo repositories.CheckClearanceRepository) CheckC
 
 func (s *checkClearanceService) CreateCheckClearance(ctx context.Context, check *entities.CheckClearance) error {
 	if check.Status == "" {
-		check.Status = "issued"
+		check.Status = "ISSUED"
 	}
 	return s.repo.Create(ctx, check)
 }
@@ -59,21 +57,13 @@ func (s *checkClearanceService) GetCheckClearancesByStatus(ctx context.Context, 
 	return s.repo.GetByStatus(ctx, status)
 }
 
-func (s *checkClearanceService) GetIncomingChecks(ctx context.Context) ([]*entities.CheckClearance, error) {
-	return s.repo.GetIncomingChecks(ctx)
-}
-
-func (s *checkClearanceService) GetOutgoingChecks(ctx context.Context) ([]*entities.CheckClearance, error) {
-	return s.repo.GetOutgoingChecks(ctx)
-}
-
 func (s *checkClearanceService) ClearCheck(ctx context.Context, id uuid.ID, clearanceDate time.Time) error {
 	check, err := s.repo.GetByID(ctx, id)
 	if err != nil {
 		return err
 	}
 
-	check.Status = "cleared"
+	check.Status = "CLEARED"
 	check.ClearanceDate = clearanceDate
 
 	return s.repo.Update(ctx, check)
@@ -85,7 +75,7 @@ func (s *checkClearanceService) BounceCheck(ctx context.Context, id uuid.ID) err
 		return err
 	}
 
-	check.Status = "bounced"
+	check.Status = "BOUNCED"
 
 	return s.repo.Update(ctx, check)
 }

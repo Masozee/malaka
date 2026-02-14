@@ -43,6 +43,25 @@ func (r *AccountsPayableRepositoryImpl) GetByID(ctx context.Context, id uuid.ID)
 	return ap, err
 }
 
+// GetAll retrieves all accounts payable records from the database.
+func (r *AccountsPayableRepositoryImpl) GetAll(ctx context.Context) ([]*entities.AccountsPayable, error) {
+	var items []*entities.AccountsPayable
+	query := `SELECT id, invoice_id, supplier_id, issue_date, due_date, amount, paid_amount, balance, status, created_at, updated_at FROM accounts_payable ORDER BY due_date DESC`
+	rows, err := r.db.QueryContext(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		ap := &entities.AccountsPayable{}
+		if err := rows.Scan(&ap.ID, &ap.InvoiceID, &ap.SupplierID, &ap.IssueDate, &ap.DueDate, &ap.Amount, &ap.PaidAmount, &ap.Balance, &ap.Status, &ap.CreatedAt, &ap.UpdatedAt); err != nil {
+			return nil, err
+		}
+		items = append(items, ap)
+	}
+	return items, rows.Err()
+}
+
 // Update updates an existing accounts payable record in the database.
 func (r *AccountsPayableRepositoryImpl) Update(ctx context.Context, ap *entities.AccountsPayable) error {
 	query := `UPDATE accounts_payable SET invoice_id = $1, supplier_id = $2, issue_date = $3, due_date = $4, amount = $5, paid_amount = $6, balance = $7, status = $8, updated_at = $9 WHERE id = $10`

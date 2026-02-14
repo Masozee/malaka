@@ -11,6 +11,7 @@ import (
 type CashBankRepository interface {
 	Create(ctx context.Context, cb *entities.CashBank) error
 	GetByID(ctx context.Context, id uuid.ID) (*entities.CashBank, error)
+	GetAll(ctx context.Context) ([]*entities.CashBank, error)
 	Update(ctx context.Context, cb *entities.CashBank) error
 	Delete(ctx context.Context, id uuid.ID) error
 }

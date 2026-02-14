@@ -5,7 +5,6 @@ import (
 
 	"malaka/internal/modules/finance/domain/entities"
 	"malaka/internal/shared/types"
-	"malaka/internal/shared/uuid"
 )
 
 // PaymentCreateRequest represents the request to create a payment.
@@ -42,11 +41,11 @@ type PaymentResponse struct {
 func (req *PaymentCreateRequest) ToPaymentEntity() *entities.Payment {
 	return &entities.Payment{
 		BaseModel:     types.BaseModel{},
-		InvoiceID:     uuid.MustParse(req.InvoiceID),
+		InvoiceID:     safeParseUUID(req.InvoiceID),
 		PaymentDate:   req.PaymentDate,
 		Amount:        req.Amount,
 		PaymentMethod: req.PaymentMethod,
-		CashBankID:    uuid.MustParse(req.CashBankID),
+		CashBankID:    safeParseUUID(req.CashBankID),
 	}
 }
 
@@ -54,11 +53,11 @@ func (req *PaymentCreateRequest) ToPaymentEntity() *entities.Payment {
 func (req *PaymentUpdateRequest) ToPaymentEntity() *entities.Payment {
 	return &entities.Payment{
 		BaseModel:     types.BaseModel{},
-		InvoiceID:     uuid.MustParse(req.InvoiceID),
+		InvoiceID:     safeParseUUID(req.InvoiceID),
 		PaymentDate:   req.PaymentDate,
 		Amount:        req.Amount,
 		PaymentMethod: req.PaymentMethod,
-		CashBankID:    uuid.MustParse(req.CashBankID),
+		CashBankID:    safeParseUUID(req.CashBankID),
 	}
 }
 

@@ -32,6 +32,11 @@ func (s *CashBankService) GetCashBankByID(ctx context.Context, id uuid.ID) (*ent
 	return s.repo.GetByID(ctx, id)
 }
 
+// GetAllCashBanks retrieves all cash/bank accounts.
+func (s *CashBankService) GetAllCashBanks(ctx context.Context) ([]*entities.CashBank, error) {
+	return s.repo.GetAll(ctx)
+}
+
 // UpdateCashBank updates an existing cash/bank account.
 func (s *CashBankService) UpdateCashBank(ctx context.Context, cb *entities.CashBank) error {
 	// Ensure the cash/bank account exists before updating

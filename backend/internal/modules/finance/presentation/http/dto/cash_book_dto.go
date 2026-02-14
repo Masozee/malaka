@@ -4,88 +4,67 @@ import (
 	"time"
 
 	"malaka/internal/modules/finance/domain/entities"
-	"malaka/internal/shared/uuid"
 )
 
-type CreateCashBookEntryRequest struct {
-	CashBankID      string    `json:"cash_bank_id" binding:"required"`
-	TransactionDate time.Time `json:"transaction_date" binding:"required"`
-	ReferenceNumber string    `json:"reference_number" binding:"required"`
-	Description     string    `json:"description" binding:"required"`
-	DebitAmount     float64   `json:"debit_amount" binding:"min=0"`
-	CreditAmount    float64   `json:"credit_amount" binding:"min=0"`
-	TransactionType string    `json:"transaction_type" binding:"required,oneof=receipt disbursement transfer adjustment"`
-	SourceModule    string    `json:"source_module"`
-	SourceID        string    `json:"source_id"`
-	CreatedBy       string    `json:"created_by" binding:"required"`
+type CreateCashBookRequest struct {
+	BookCode       string  `json:"book_code" binding:"required"`
+	BookName       string  `json:"book_name" binding:"required"`
+	BookType       string  `json:"book_type" binding:"required,oneof=CASH BANK"`
+	AccountNumber  string  `json:"account_number"`
+	BankName       string  `json:"bank_name"`
+	OpeningBalance float64 `json:"opening_balance" binding:"min=0"`
 }
 
-type UpdateCashBookEntryRequest struct {
-	CashBankID      string    `json:"cash_bank_id" binding:"required"`
-	TransactionDate time.Time `json:"transaction_date" binding:"required"`
-	ReferenceNumber string    `json:"reference_number" binding:"required"`
-	Description     string    `json:"description" binding:"required"`
-	DebitAmount     float64   `json:"debit_amount" binding:"min=0"`
-	CreditAmount    float64   `json:"credit_amount" binding:"min=0"`
-	TransactionType string    `json:"transaction_type" binding:"required,oneof=receipt disbursement transfer adjustment"`
-	SourceModule    string    `json:"source_module"`
-	SourceID        string    `json:"source_id"`
-	CreatedBy       string    `json:"created_by" binding:"required"`
+type UpdateCashBookRequest struct {
+	BookCode       string  `json:"book_code" binding:"required"`
+	BookName       string  `json:"book_name" binding:"required"`
+	BookType       string  `json:"book_type" binding:"required,oneof=CASH BANK"`
+	AccountNumber  string  `json:"account_number"`
+	BankName       string  `json:"bank_name"`
+	OpeningBalance float64 `json:"opening_balance" binding:"min=0"`
+	CurrentBalance float64 `json:"current_balance" binding:"min=0"`
+	IsActive       bool    `json:"is_active"`
 }
 
-type CashBookEntryResponse struct {
-	ID              string    `json:"id"`
-	CashBankID      string    `json:"cash_bank_id"`
-	TransactionDate time.Time `json:"transaction_date"`
-	ReferenceNumber string    `json:"reference_number"`
-	Description     string    `json:"description"`
-	DebitAmount     float64   `json:"debit_amount"`
-	CreditAmount    float64   `json:"credit_amount"`
-	Balance         float64   `json:"balance"`
-	TransactionType string    `json:"transaction_type"`
-	SourceModule    string    `json:"source_module"`
-	SourceID        string    `json:"source_id"`
-	CreatedBy       string    `json:"created_by"`
-	CreatedAt       time.Time `json:"created_at"`
-	UpdatedAt       time.Time `json:"updated_at"`
+type CashBookResponse struct {
+	ID             string    `json:"id"`
+	BookCode       string    `json:"book_code"`
+	BookName       string    `json:"book_name"`
+	BookType       string    `json:"book_type"`
+	AccountNumber  string    `json:"account_number"`
+	BankName       string    `json:"bank_name"`
+	OpeningBalance float64   `json:"opening_balance"`
+	CurrentBalance float64   `json:"current_balance"`
+	IsActive       bool      `json:"is_active"`
+	CreatedAt      time.Time `json:"created_at"`
+	UpdatedAt      time.Time `json:"updated_at"`
 }
 
-type CashBalanceResponse struct {
-	CashBankID string  `json:"cash_bank_id"`
-	Balance    float64 `json:"balance"`
-	AsOfDate   string  `json:"as_of_date"`
-}
-
-func ToCashBookEntryResponse(entry *entities.CashBook) *CashBookEntryResponse {
-	return &CashBookEntryResponse{
-		ID:              entry.ID.String(),
-		CashBankID:      entry.CashBankID.String(),
-		TransactionDate: entry.TransactionDate,
-		ReferenceNumber: entry.ReferenceNumber,
-		Description:     entry.Description,
-		DebitAmount:     entry.DebitAmount,
-		CreditAmount:    entry.CreditAmount,
-		Balance:         entry.Balance,
-		TransactionType: entry.TransactionType,
-		SourceModule:    entry.SourceModule,
-		SourceID:        entry.SourceID.String(),
-		CreatedBy:       entry.CreatedBy.String(),
-		CreatedAt:       entry.CreatedAt,
-		UpdatedAt:       entry.UpdatedAt,
+func ToCashBookResponse(entry *entities.CashBook) *CashBookResponse {
+	return &CashBookResponse{
+		ID:             entry.ID.String(),
+		BookCode:       entry.BookCode,
+		BookName:       entry.BookName,
+		BookType:       entry.BookType,
+		AccountNumber:  entry.AccountNumber,
+		BankName:       entry.BankName,
+		OpeningBalance: entry.OpeningBalance,
+		CurrentBalance: entry.CurrentBalance,
+		IsActive:       entry.IsActive,
+		CreatedAt:      entry.CreatedAt,
+		UpdatedAt:      entry.UpdatedAt,
 	}
 }
 
-func ToCashBookEntity(req *CreateCashBookEntryRequest) *entities.CashBook {
+func ToCashBookEntity(req *CreateCashBookRequest) *entities.CashBook {
 	return &entities.CashBook{
-		CashBankID:      uuid.MustParse(req.CashBankID),
-		TransactionDate: req.TransactionDate,
-		ReferenceNumber: req.ReferenceNumber,
-		Description:     req.Description,
-		DebitAmount:     req.DebitAmount,
-		CreditAmount:    req.CreditAmount,
-		TransactionType: req.TransactionType,
-		SourceModule:    req.SourceModule,
-		SourceID:        uuid.MustParse(req.SourceID),
-		CreatedBy:       uuid.MustParse(req.CreatedBy),
+		BookCode:       req.BookCode,
+		BookName:       req.BookName,
+		BookType:       req.BookType,
+		AccountNumber:  req.AccountNumber,
+		BankName:       req.BankName,
+		OpeningBalance: req.OpeningBalance,
+		CurrentBalance: req.OpeningBalance, // Initially same as opening balance
+		IsActive:       true,
 	}
 }

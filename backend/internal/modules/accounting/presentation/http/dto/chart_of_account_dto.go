@@ -9,6 +9,7 @@ import (
 
 // ChartOfAccountRequest represents the request structure for creating/updating a ChartOfAccount
 type ChartOfAccountRequest struct {
+	CompanyID     string  `json:"company_id"`
 	ParentID      *string `json:"parent_id"`
 	AccountCode   string  `json:"account_code" binding:"required"`
 	AccountName   string  `json:"account_name" binding:"required"`
@@ -21,6 +22,7 @@ type ChartOfAccountRequest struct {
 // ChartOfAccountResponse represents the response structure for a ChartOfAccount
 type ChartOfAccountResponse struct {
 	ID            string    `json:"id"`
+	CompanyID     string    `json:"company_id"`
 	ParentID      *string   `json:"parent_id,omitempty"`
 	AccountCode   string    `json:"account_code"`
 	AccountName   string    `json:"account_name"`
@@ -40,6 +42,7 @@ func MapChartOfAccountEntityToResponse(entity *entities.ChartOfAccount) *ChartOf
 
 	resp := &ChartOfAccountResponse{
 		ID:            entity.ID.String(),
+		CompanyID:     entity.CompanyID,
 		AccountCode:   entity.AccountCode,
 		AccountName:   entity.AccountName,
 		AccountType:   entity.AccountType,
@@ -65,6 +68,7 @@ func MapChartOfAccountRequestToEntity(request *ChartOfAccountRequest) *entities.
 	}
 
 	entity := &entities.ChartOfAccount{
+		CompanyID:     request.CompanyID,
 		AccountCode:   request.AccountCode,
 		AccountName:   request.AccountName,
 		AccountType:   request.AccountType,

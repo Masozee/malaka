@@ -20,7 +20,12 @@ import {
   ArrowLeft01Icon,
   ArrowRight01Icon,
   MoreVerticalIcon,
+  PlusSignIcon,
+  Search01Icon,
 } from "@hugeicons/core-free-icons"
+
+import { cn } from "@/lib/utils"
+import { Input } from "@/components/ui/input"
 
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -65,6 +70,8 @@ export interface RowAction<T> {
   onClick: (record: T) => void
   className?: string
   separator?: boolean
+  disabled?: (record: T) => boolean
+  hidden?: (record: T) => boolean
 }
 
 interface AdvancedDataTableProps<T> {
@@ -78,6 +85,13 @@ interface AdvancedDataTableProps<T> {
   rowSelection?: boolean
   showToolbar?: boolean
   pagination?: PaginationProps
+  onAdd?: () => void
+  addButtonText?: string
+  onSearch?: (filters: any) => void
+  searchPlaceholder?: string
+  onBulkAction?: (action: string, ids: string[]) => void
+  bulkActions?: { value: string; label: string; variant?: string }[]
+  exportEnabled?: boolean
 }
 
 export function AdvancedDataTable<T extends { id: string }>({
@@ -91,11 +105,19 @@ export function AdvancedDataTable<T extends { id: string }>({
   rowSelection = false,
   showToolbar = false,
   pagination,
+  onAdd,
+  addButtonText = "Add New",
+  onSearch,
+  searchPlaceholder = "Search...",
+  onBulkAction,
+  bulkActions,
+  exportEnabled,
 }: AdvancedDataTableProps<T>) {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
   const [rowSelectionState, setRowSelectionState] = React.useState({})
+  const [searchValue, setSearchValue] = React.useState("")
 
   // Convert legacy columns to TanStack columns
   const columns: ColumnDef<T>[] = React.useMemo(() => {
@@ -140,10 +162,8 @@ export function AdvancedDataTable<T extends { id: string }>({
               return <span>{col.title}</span>
             }
             return (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="-ml-3 h-8"
+              <button
+                className="inline-flex items-center -ml-1 h-8 font-semibold hover:text-gray-900 dark:hover:text-gray-200"
                 onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
               >
                 {col.title}
@@ -152,7 +172,7 @@ export function AdvancedDataTable<T extends { id: string }>({
                 ) : column.getIsSorted() === "desc" ? (
                   <HugeiconsIcon icon={ArrowDown01Icon} className="ml-2 h-4 w-4" />
                 ) : null}
-              </Button>
+              </button>
             )
           },
           cell: ({ row, getValue }) => {
@@ -160,7 +180,7 @@ export function AdvancedDataTable<T extends { id: string }>({
               return col.render(getValue(), row.original)
             }
             const value = getValue()
-            return <span className="text-sm">{value != null ? String(value) : "-"}</span>
+            return <span>{value != null ? String(value) : "-"}</span>
           },
           enableSorting: col.sortable ?? false,
           size: col.width ? parseInt(col.width) : undefined,
@@ -175,7 +195,7 @@ export function AdvancedDataTable<T extends { id: string }>({
         cell: ({ row }) => (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" aria-label="Row actions">
+              <Button variant="outline" size="sm" className="h-8 w-8 p-0" aria-label="Row actions">
                 <HugeiconsIcon icon={MoreVerticalIcon} className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
@@ -185,18 +205,26 @@ export function AdvancedDataTable<T extends { id: string }>({
                   Edit
                 </DropdownMenuItem>
               )}
-              {rowActions && rowActions.map((action, idx) => (
-                <React.Fragment key={idx}>
-                  {action.separator && <DropdownMenuSeparator />}
-                  <DropdownMenuItem
-                    onClick={() => action.onClick(row.original)}
-                    className={action.className}
-                  >
-                    {action.icon}
-                    {action.label}
-                  </DropdownMenuItem>
-                </React.Fragment>
-              ))}
+              {rowActions && rowActions.map((action, idx) => {
+                if (action.hidden?.(row.original)) return null
+                const isDisabled = action.disabled?.(row.original) ?? false
+                return (
+                  <React.Fragment key={idx}>
+                    {action.separator && <DropdownMenuSeparator />}
+                    <DropdownMenuItem
+                      onClick={() => !isDisabled && action.onClick(row.original)}
+                      className={cn(
+                        action.className,
+                        isDisabled && 'opacity-50 cursor-not-allowed'
+                      )}
+                      disabled={isDisabled}
+                    >
+                      {action.icon}
+                      {action.label}
+                    </DropdownMenuItem>
+                  </React.Fragment>
+                )
+              })}
               {(onEdit || (rowActions && rowActions.length > 0)) && onDelete && <DropdownMenuSeparator />}
               {onDelete && (
                 <DropdownMenuItem
@@ -218,6 +246,11 @@ export function AdvancedDataTable<T extends { id: string }>({
     return tanstackColumns
   }, [legacyColumns, rowSelection, onEdit, onDelete, rowActions])
 
+  const [internalPagination, setInternalPagination] = React.useState({
+    pageIndex: 0,
+    pageSize,
+  })
+
   const table = useReactTable({
     data,
     columns,
@@ -231,52 +264,78 @@ export function AdvancedDataTable<T extends { id: string }>({
     getFilteredRowModel: getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelectionState,
-    onPaginationChange: (updater) => {
-      if (pagination) {
-        if (typeof updater === 'function') {
-          const newState = updater({
-            pageIndex: pagination.current - 1,
-            pageSize: pagination.pageSize,
-          })
-          pagination.onChange(newState.pageIndex + 1, newState.pageSize)
-        } else {
-          pagination.onChange(updater.pageIndex + 1, updater.pageSize)
+    onPaginationChange: pagination
+      ? (updater) => {
+          if (typeof updater === 'function') {
+            const newState = updater({
+              pageIndex: pagination.current - 1,
+              pageSize: pagination.pageSize,
+            })
+            pagination.onChange(newState.pageIndex + 1, newState.pageSize)
+          } else {
+            pagination.onChange(updater.pageIndex + 1, updater.pageSize)
+          }
         }
-      }
-    },
+      : setInternalPagination,
     state: {
       sorting,
       columnFilters,
       columnVisibility,
       rowSelection: rowSelectionState,
-      ...(pagination && {
-        pagination: {
-          pageIndex: pagination.current - 1,
-          pageSize: pagination.pageSize,
-        }
-      }),
-    },
-    initialState: {
-      pagination: {
-        pageSize,
-      },
+      pagination: pagination
+        ? { pageIndex: pagination.current - 1, pageSize: pagination.pageSize }
+        : internalPagination,
     },
   })
 
+  const handleSearchChange = React.useCallback((value: string) => {
+    setSearchValue(value)
+    if (onSearch) {
+      onSearch({ search: value })
+    }
+  }, [onSearch])
+
   return (
     <div className="space-y-4">
+      {/* Toolbar */}
+      {(onAdd || onSearch) && (
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            {onSearch && (
+              <div className="relative">
+                <HugeiconsIcon icon={Search01Icon} className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                <Input
+                  placeholder={searchPlaceholder}
+                  value={searchValue}
+                  onChange={(e) => handleSearchChange(e.target.value)}
+                  className="pl-8 w-64 bg-white dark:bg-gray-900"
+                />
+              </div>
+            )}
+          </div>
+          <div className="flex items-center space-x-2">
+            {onAdd && (
+              <Button onClick={onAdd}>
+                <HugeiconsIcon icon={PlusSignIcon} className="h-4 w-4 mr-1" />
+                {addButtonText}
+              </Button>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Table */}
-      <div className="rounded-lg bg-card overflow-hidden">
+      <div className="rounded-sm bg-card overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-zinc-200 dark:bg-zinc-900">
+            <thead className="bg-gray-200 dark:bg-gray-700">
               {table.getHeaderGroups().map((headerGroup) => (
                 <tr key={headerGroup.id}>
                   {headerGroup.headers.map((header, index) => (
                     <th
                       key={header.id}
-                      className={`px-4 py-3 text-left text-sm font-medium text-muted-foreground uppercase tracking-wider ${index === 0 ? 'rounded-tl-lg' : ''
-                        } ${index === headerGroup.headers.length - 1 ? 'rounded-tr-lg' : ''
+                      className={`px-4 py-3 text-left text-sm font-semibold text-gray-700 dark:text-white ${index === 0 ? 'rounded-tl-sm' : ''
+                        } ${index === headerGroup.headers.length - 1 ? 'rounded-tr-sm' : ''
                         }`}
                       style={{
                         width: header.getSize() !== 150 ? header.getSize() : undefined,
@@ -315,7 +374,7 @@ export function AdvancedDataTable<T extends { id: string }>({
                     data-state={row.getIsSelected() && "selected"}
                   >
                     {row.getVisibleCells().map((cell) => (
-                      <td key={cell.id} className="px-4 py-3 text-sm">
+                      <td key={cell.id} className="px-4 py-2.5 text-sm">
                         {flexRender(
                           cell.column.columnDef.cell,
                           cell.getContext()

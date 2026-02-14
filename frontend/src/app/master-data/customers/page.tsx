@@ -75,7 +75,7 @@ export default function CustomersPage() {
           <span className="font-medium text-gray-900 dark:text-gray-100">
             {contactPerson as string}
           </span>
-          <span className="text-xs text-gray-500 dark:text-gray-400">
+          <span className="text-sm text-gray-500 dark:text-gray-400">
             {customer.email}
           </span>
         </div>

@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import { TwoLevelLayout } from '@/components/ui/two-level-layout'
 import { Header } from '@/components/ui/header'
 import { Card, CardContent } from '@/components/ui/card'
@@ -32,47 +32,47 @@ import {
     PencilEdit01Icon,
     MoreHorizontalIcon
 } from '@hugeicons/core-free-icons'
-
-// --- Types ---
-type BudgetStatus = 'on_track' | 'warning' | 'exceeded'
-
-interface BudgetAttributes {
-    id: string
-    department: string
-    category: string // e.g. "Marketing - Q1", "IT - Hardware"
-    fiscalYear: string
-    allocated: number
-    spent: number
-    status: BudgetStatus
-}
-
-// --- Mock Data ---
-const mockBudgets: BudgetAttributes[] = [
-    { id: '1', department: 'Sales', category: 'Travel Expenses', fiscalYear: '2024', allocated: 500000000, spent: 125000000, status: 'on_track' },
-    { id: '2', department: 'Marketing', category: 'Digital Ads', fiscalYear: '2024', allocated: 1200000000, spent: 1150000000, status: 'warning' },
-    { id: '3', department: 'IT', category: 'Software Licenses', fiscalYear: '2024', allocated: 800000000, spent: 850000000, status: 'exceeded' },
-    { id: '4', department: 'HR', category: 'Recruitment', fiscalYear: '2024', allocated: 300000000, spent: 50000000, status: 'on_track' },
-    { id: '5', department: 'Operations', category: 'Maintenance', fiscalYear: '2024', allocated: 600000000, spent: 200000000, status: 'on_track' },
-]
+import { BookmarkToggle } from '@/components/ui/bookmark-toggle'
+import { budgetService, type Budget } from '@/services/finance'
 
 export default function BudgetingPage() {
     const { addToast } = useToast()
     const [searchTerm, setSearchTerm] = useState('')
     const [deptFilter, setDeptFilter] = useState<string>('all')
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
+    const [budgets, setBudgets] = useState<Budget[]>([])
+    const [loading, setLoading] = useState(true)
+    const [mounted, setMounted] = useState(false)
+
+    useEffect(() => { setMounted(true) }, [])
+
+    useEffect(() => {
+        async function fetchData() {
+            try {
+                setLoading(true)
+                const data = await budgetService.getAll()
+                setBudgets(data)
+            } catch (err) {
+                console.error('Failed to fetch budgets:', err)
+            } finally {
+                setLoading(false)
+            }
+        }
+        fetchData()
+    }, [])
 
     // --- Stats ---
     const stats = useMemo(() => {
-        const totalAllocated = mockBudgets.reduce((sum, b) => sum + b.allocated, 0)
-        const totalSpent = mockBudgets.reduce((sum, b) => sum + b.spent, 0)
+        const totalAllocated = budgets.reduce((sum, b) => sum + b.allocated, 0)
+        const totalSpent = budgets.reduce((sum, b) => sum + b.spent, 0)
         const utilization = totalAllocated > 0 ? (totalSpent / totalAllocated) * 100 : 0
-        const alertCount = mockBudgets.filter(b => b.status === 'warning' || b.status === 'exceeded').length
+        const alertCount = budgets.filter(b => b.status === 'warning' || b.status === 'exceeded').length
         return { totalAllocated, totalSpent, utilization, alertCount }
-    }, [])
+    }, [budgets])
 
     // --- Filter ---
     const filteredData = useMemo(() => {
-        let data = mockBudgets
+        let data = budgets
         if (searchTerm) {
             const lower = searchTerm.toLowerCase()
             data = data.filter(item =>
@@ -84,10 +84,10 @@ export default function BudgetingPage() {
             data = data.filter(item => item.department === deptFilter)
         }
         return data
-    }, [searchTerm, deptFilter])
+    }, [searchTerm, deptFilter, budgets])
 
     // --- Columns ---
-    const columns: TanStackColumn<BudgetAttributes>[] = [
+    const columns: TanStackColumn<Budget>[] = [
         {
             id: 'category',
             header: 'Budget Category',
@@ -95,7 +95,7 @@ export default function BudgetingPage() {
             cell: ({ row }) => (
                 <div className="flex flex-col">
                     <span className="font-medium text-sm">{row.original.category}</span>
-                    <span className="text-xs text-muted-foreground">{row.original.department} - FY{row.original.fiscalYear}</span>
+                    <span className="text-xs text-muted-foreground">{row.original.department} - FY{row.original.fiscal_year}</span>
                 </div>
             )
         },
@@ -144,12 +144,12 @@ export default function BudgetingPage() {
             header: 'Status',
             accessorKey: 'status',
             cell: ({ row }) => {
-                const config = {
+                const config: Record<string, { label: string; color: string }> = {
                     on_track: { label: 'On Track', color: 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400' },
                     warning: { label: 'Warning', color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400' },
                     exceeded: { label: 'Exceeded', color: 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400' }
                 }
-                const s = config[row.original.status]
+                const s = config[row.original.status] || { label: row.original.status, color: 'bg-gray-100 text-gray-800' }
                 return <Badge className={`${s.color} border-0 whitespace-nowrap`}>{s.label}</Badge>
             }
         },
@@ -188,10 +188,13 @@ export default function BudgetingPage() {
                     { label: 'Budgeting' }
                 ]}
                 actions={
-                    <Button onClick={() => setIsCreateModalOpen(true)}>
-                        <HugeiconsIcon icon={PlusSignIcon} className="w-4 h-4 mr-2" />
-                        New Budget
-                    </Button>
+                    <div className="flex items-center gap-2">
+                        <BookmarkToggle itemId="budgeting" />
+                        <Button onClick={() => setIsCreateModalOpen(true)}>
+                            <HugeiconsIcon icon={PlusSignIcon} className="w-4 h-4 mr-2" />
+                            New Budget
+                        </Button>
+                    </div>
                 }
             />
 
@@ -266,12 +269,16 @@ export default function BudgetingPage() {
                 </div>
 
                 {/* Table */}
-                <TanStackDataTable
-                    data={filteredData}
-                    columns={columns}
-                    enableRowSelection
-                    showColumnToggle={false}
-                />
+                {loading ? (
+                    <div className="text-center py-10 text-muted-foreground">Loading...</div>
+                ) : (
+                    <TanStackDataTable
+                        data={filteredData}
+                        columns={columns}
+                        enableRowSelection
+                        showColumnToggle={false}
+                    />
+                )}
             </div>
 
             {/* Create Modal Placeholder */}

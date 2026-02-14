@@ -49,9 +49,10 @@ func (s *SalesOrderService) CreateSalesOrder(ctx context.Context, so *entities.S
 			return err
 		}
 
-		// Record stock movement out of warehouse (assuming a default warehouse for now)
+		// Record stock movement out of warehouse
 		articleID, _ := uuid.Parse(item.ArticleID)
-		warehouseID := uuid.New() // TODO: Get actual warehouse ID
+		// Use default warehouse - Gudang Pusat Jakarta
+		warehouseID, _ := uuid.Parse("815eefd0-2291-44ac-9f9f-a2c932818315")
 		outMovement := &inventory_entities.StockMovement{
 			ArticleID:    articleID,
 			WarehouseID:  warehouseID,

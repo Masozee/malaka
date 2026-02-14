@@ -53,59 +53,60 @@ func (r *generalLedgerRepositoryImpl) Create(ctx context.Context, entry *entitie
 // GetByID retrieves a general ledger entry by ID
 func (r *generalLedgerRepositoryImpl) GetByID(ctx context.Context, id uuid.ID) (*entities.GeneralLedger, error) {
 	entry := &entities.GeneralLedger{}
-	
+
 	query := `
-		SELECT id, account_id, journal_entry_id, transaction_date, description, reference,
-			   debit_amount, credit_amount, balance, currency_code, exchange_rate,
-			   base_debit_amount, base_credit_amount, company_id, created_by, created_at, updated_at
-		FROM general_ledger WHERE id = $1`
-	
+		SELECT gl.id, gl.account_id, gl.journal_entry_id, gl.transaction_date, gl.description, gl.reference,
+			   gl.debit_amount, gl.credit_amount, gl.balance, gl.currency_code, gl.exchange_rate,
+			   gl.base_debit_amount, gl.base_credit_amount, gl.company_id, gl.created_by, gl.created_at, gl.updated_at,
+			   COALESCE(coa.account_code, '') as account_code,
+			   COALESCE(coa.account_name, '') as account_name,
+			   COALESCE(coa.account_type, '') as account_type,
+			   COALESCE(je.entry_number, '') as entry_number,
+			   COALESCE(je.status, '') as entry_status,
+			   COALESCE(jel.line_number, 0) as line_number
+		FROM general_ledger gl
+		LEFT JOIN chart_of_accounts coa ON gl.account_id = coa.id
+		LEFT JOIN journal_entries je ON gl.journal_entry_id = je.id
+		LEFT JOIN journal_entry_lines jel ON jel.journal_entry_id = je.id AND jel.account_id = gl.account_id
+			AND jel.debit_amount = gl.debit_amount AND jel.credit_amount = gl.credit_amount
+		WHERE gl.id = $1`
+
 	err := r.db.QueryRowContext(ctx, query, id).Scan(
 		&entry.ID, &entry.AccountID, &entry.JournalEntryID, &entry.TransactionDate,
 		&entry.Description, &entry.Reference, &entry.DebitAmount, &entry.CreditAmount,
 		&entry.Balance, &entry.CurrencyCode, &entry.ExchangeRate,
 		&entry.BaseDebitAmount, &entry.BaseCreditAmount, &entry.CompanyID,
 		&entry.CreatedBy, &entry.CreatedAt, &entry.UpdatedAt,
+		&entry.AccountCode, &entry.AccountName, &entry.AccountType, &entry.EntryNumber, &entry.EntryStatus, &entry.LineNumber,
 	)
-	
+
 	if err != nil {
 		return nil, err
 	}
-	
+
 	return entry, nil
 }
 
 // GetAll retrieves all general ledger entries
 func (r *generalLedgerRepositoryImpl) GetAll(ctx context.Context) ([]*entities.GeneralLedger, error) {
 	query := `
-		SELECT id, account_id, journal_entry_id, transaction_date, description, reference,
-			   debit_amount, credit_amount, balance, currency_code, exchange_rate,
-			   base_debit_amount, base_credit_amount, company_id, created_by, created_at, updated_at
-		FROM general_ledger ORDER BY transaction_date DESC, created_at DESC`
-	
-	rows, err := r.db.QueryContext(ctx, query)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	
-	var entries []*entities.GeneralLedger
-	for rows.Next() {
-		entry := &entities.GeneralLedger{}
-		err := rows.Scan(
-			&entry.ID, &entry.AccountID, &entry.JournalEntryID, &entry.TransactionDate,
-			&entry.Description, &entry.Reference, &entry.DebitAmount, &entry.CreditAmount,
-			&entry.Balance, &entry.CurrencyCode, &entry.ExchangeRate,
-			&entry.BaseDebitAmount, &entry.BaseCreditAmount, &entry.CompanyID,
-			&entry.CreatedBy, &entry.CreatedAt, &entry.UpdatedAt,
-		)
-		if err != nil {
-			return nil, err
-		}
-		entries = append(entries, entry)
-	}
-	
-	return entries, rows.Err()
+		SELECT gl.id, gl.account_id, gl.journal_entry_id, gl.transaction_date, gl.description, gl.reference,
+			   gl.debit_amount, gl.credit_amount, gl.balance, gl.currency_code, gl.exchange_rate,
+			   gl.base_debit_amount, gl.base_credit_amount, gl.company_id, gl.created_by, gl.created_at, gl.updated_at,
+			   COALESCE(coa.account_code, '') as account_code,
+			   COALESCE(coa.account_name, '') as account_name,
+			   COALESCE(coa.account_type, '') as account_type,
+			   COALESCE(je.entry_number, '') as entry_number,
+			   COALESCE(je.status, '') as entry_status,
+			   COALESCE(jel.line_number, 0) as line_number
+		FROM general_ledger gl
+		LEFT JOIN chart_of_accounts coa ON gl.account_id = coa.id
+		LEFT JOIN journal_entries je ON gl.journal_entry_id = je.id
+		LEFT JOIN journal_entry_lines jel ON jel.journal_entry_id = je.id AND jel.account_id = gl.account_id
+			AND jel.debit_amount = gl.debit_amount AND jel.credit_amount = gl.credit_amount
+		ORDER BY gl.transaction_date DESC, gl.created_at DESC`
+
+	return r.queryEntriesEnriched(ctx, query)
 }
 
 // Update updates a general ledger entry
@@ -141,58 +142,112 @@ func (r *generalLedgerRepositoryImpl) Delete(ctx context.Context, id uuid.ID) er
 // GetByAccountID retrieves entries by account ID
 func (r *generalLedgerRepositoryImpl) GetByAccountID(ctx context.Context, accountID uuid.ID) ([]*entities.GeneralLedger, error) {
 	query := `
-		SELECT id, account_id, journal_entry_id, transaction_date, description, reference,
-			   debit_amount, credit_amount, balance, currency_code, exchange_rate,
-			   base_debit_amount, base_credit_amount, company_id, created_by, created_at, updated_at
-		FROM general_ledger WHERE account_id = $1 ORDER BY transaction_date, created_at`
-	
-	return r.queryEntries(ctx, query, accountID)
+		SELECT gl.id, gl.account_id, gl.journal_entry_id, gl.transaction_date, gl.description, gl.reference,
+			   gl.debit_amount, gl.credit_amount, gl.balance, gl.currency_code, gl.exchange_rate,
+			   gl.base_debit_amount, gl.base_credit_amount, gl.company_id, gl.created_by, gl.created_at, gl.updated_at,
+			   COALESCE(coa.account_code, '') as account_code,
+			   COALESCE(coa.account_name, '') as account_name,
+			   COALESCE(coa.account_type, '') as account_type,
+			   COALESCE(je.entry_number, '') as entry_number,
+			   COALESCE(je.status, '') as entry_status,
+			   COALESCE(jel.line_number, 0) as line_number
+		FROM general_ledger gl
+		LEFT JOIN chart_of_accounts coa ON gl.account_id = coa.id
+		LEFT JOIN journal_entries je ON gl.journal_entry_id = je.id
+		LEFT JOIN journal_entry_lines jel ON jel.journal_entry_id = je.id AND jel.account_id = gl.account_id
+			AND jel.debit_amount = gl.debit_amount AND jel.credit_amount = gl.credit_amount
+		WHERE gl.account_id = $1 ORDER BY gl.transaction_date, gl.created_at`
+
+	return r.queryEntriesEnriched(ctx, query, accountID)
 }
 
 // GetByJournalEntryID retrieves entries by journal entry ID
 func (r *generalLedgerRepositoryImpl) GetByJournalEntryID(ctx context.Context, journalEntryID uuid.ID) ([]*entities.GeneralLedger, error) {
 	query := `
-		SELECT id, account_id, journal_entry_id, transaction_date, description, reference,
-			   debit_amount, credit_amount, balance, currency_code, exchange_rate,
-			   base_debit_amount, base_credit_amount, company_id, created_by, created_at, updated_at
-		FROM general_ledger WHERE journal_entry_id = $1 ORDER BY created_at`
-	
-	return r.queryEntries(ctx, query, journalEntryID)
+		SELECT gl.id, gl.account_id, gl.journal_entry_id, gl.transaction_date, gl.description, gl.reference,
+			   gl.debit_amount, gl.credit_amount, gl.balance, gl.currency_code, gl.exchange_rate,
+			   gl.base_debit_amount, gl.base_credit_amount, gl.company_id, gl.created_by, gl.created_at, gl.updated_at,
+			   COALESCE(coa.account_code, '') as account_code,
+			   COALESCE(coa.account_name, '') as account_name,
+			   COALESCE(coa.account_type, '') as account_type,
+			   COALESCE(je.entry_number, '') as entry_number,
+			   COALESCE(je.status, '') as entry_status,
+			   COALESCE(jel.line_number, 0) as line_number
+		FROM general_ledger gl
+		LEFT JOIN chart_of_accounts coa ON gl.account_id = coa.id
+		LEFT JOIN journal_entries je ON gl.journal_entry_id = je.id
+		LEFT JOIN journal_entry_lines jel ON jel.journal_entry_id = je.id AND jel.account_id = gl.account_id
+			AND jel.debit_amount = gl.debit_amount AND jel.credit_amount = gl.credit_amount
+		WHERE gl.journal_entry_id = $1 ORDER BY gl.created_at`
+
+	return r.queryEntriesEnriched(ctx, query, journalEntryID)
 }
 
 // GetByDateRange retrieves entries by date range
 func (r *generalLedgerRepositoryImpl) GetByDateRange(ctx context.Context, startDate, endDate time.Time) ([]*entities.GeneralLedger, error) {
 	query := `
-		SELECT id, account_id, journal_entry_id, transaction_date, description, reference,
-			   debit_amount, credit_amount, balance, currency_code, exchange_rate,
-			   base_debit_amount, base_credit_amount, company_id, created_by, created_at, updated_at
-		FROM general_ledger WHERE transaction_date BETWEEN $1 AND $2 ORDER BY transaction_date, created_at`
-	
-	return r.queryEntries(ctx, query, startDate, endDate)
+		SELECT gl.id, gl.account_id, gl.journal_entry_id, gl.transaction_date, gl.description, gl.reference,
+			   gl.debit_amount, gl.credit_amount, gl.balance, gl.currency_code, gl.exchange_rate,
+			   gl.base_debit_amount, gl.base_credit_amount, gl.company_id, gl.created_by, gl.created_at, gl.updated_at,
+			   COALESCE(coa.account_code, '') as account_code,
+			   COALESCE(coa.account_name, '') as account_name,
+			   COALESCE(coa.account_type, '') as account_type,
+			   COALESCE(je.entry_number, '') as entry_number,
+			   COALESCE(je.status, '') as entry_status,
+			   COALESCE(jel.line_number, 0) as line_number
+		FROM general_ledger gl
+		LEFT JOIN chart_of_accounts coa ON gl.account_id = coa.id
+		LEFT JOIN journal_entries je ON gl.journal_entry_id = je.id
+		LEFT JOIN journal_entry_lines jel ON jel.journal_entry_id = je.id AND jel.account_id = gl.account_id
+			AND jel.debit_amount = gl.debit_amount AND jel.credit_amount = gl.credit_amount
+		WHERE gl.transaction_date BETWEEN $1 AND $2 ORDER BY gl.transaction_date, gl.created_at`
+
+	return r.queryEntriesEnriched(ctx, query, startDate, endDate)
 }
 
 // GetByAccountAndDateRange retrieves entries by account and date range
 func (r *generalLedgerRepositoryImpl) GetByAccountAndDateRange(ctx context.Context, accountID uuid.ID, startDate, endDate time.Time) ([]*entities.GeneralLedger, error) {
 	query := `
-		SELECT id, account_id, journal_entry_id, transaction_date, description, reference,
-			   debit_amount, credit_amount, balance, currency_code, exchange_rate,
-			   base_debit_amount, base_credit_amount, company_id, created_by, created_at, updated_at
-		FROM general_ledger 
-		WHERE account_id = $1 AND transaction_date BETWEEN $2 AND $3 
-		ORDER BY transaction_date, created_at`
-	
-	return r.queryEntries(ctx, query, accountID, startDate, endDate)
+		SELECT gl.id, gl.account_id, gl.journal_entry_id, gl.transaction_date, gl.description, gl.reference,
+			   gl.debit_amount, gl.credit_amount, gl.balance, gl.currency_code, gl.exchange_rate,
+			   gl.base_debit_amount, gl.base_credit_amount, gl.company_id, gl.created_by, gl.created_at, gl.updated_at,
+			   COALESCE(coa.account_code, '') as account_code,
+			   COALESCE(coa.account_name, '') as account_name,
+			   COALESCE(coa.account_type, '') as account_type,
+			   COALESCE(je.entry_number, '') as entry_number,
+			   COALESCE(je.status, '') as entry_status,
+			   COALESCE(jel.line_number, 0) as line_number
+		FROM general_ledger gl
+		LEFT JOIN chart_of_accounts coa ON gl.account_id = coa.id
+		LEFT JOIN journal_entries je ON gl.journal_entry_id = je.id
+		LEFT JOIN journal_entry_lines jel ON jel.journal_entry_id = je.id AND jel.account_id = gl.account_id
+			AND jel.debit_amount = gl.debit_amount AND jel.credit_amount = gl.credit_amount
+		WHERE gl.account_id = $1 AND gl.transaction_date BETWEEN $2 AND $3
+		ORDER BY gl.transaction_date, gl.created_at`
+
+	return r.queryEntriesEnriched(ctx, query, accountID, startDate, endDate)
 }
 
 // GetByReference retrieves entries by reference
 func (r *generalLedgerRepositoryImpl) GetByReference(ctx context.Context, reference string) ([]*entities.GeneralLedger, error) {
 	query := `
-		SELECT id, account_id, journal_entry_id, transaction_date, description, reference,
-			   debit_amount, credit_amount, balance, currency_code, exchange_rate,
-			   base_debit_amount, base_credit_amount, company_id, created_by, created_at, updated_at
-		FROM general_ledger WHERE reference = $1 ORDER BY transaction_date, created_at`
-	
-	return r.queryEntries(ctx, query, reference)
+		SELECT gl.id, gl.account_id, gl.journal_entry_id, gl.transaction_date, gl.description, gl.reference,
+			   gl.debit_amount, gl.credit_amount, gl.balance, gl.currency_code, gl.exchange_rate,
+			   gl.base_debit_amount, gl.base_credit_amount, gl.company_id, gl.created_by, gl.created_at, gl.updated_at,
+			   COALESCE(coa.account_code, '') as account_code,
+			   COALESCE(coa.account_name, '') as account_name,
+			   COALESCE(coa.account_type, '') as account_type,
+			   COALESCE(je.entry_number, '') as entry_number,
+			   COALESCE(je.status, '') as entry_status,
+			   COALESCE(jel.line_number, 0) as line_number
+		FROM general_ledger gl
+		LEFT JOIN chart_of_accounts coa ON gl.account_id = coa.id
+		LEFT JOIN journal_entries je ON gl.journal_entry_id = je.id
+		LEFT JOIN journal_entry_lines jel ON jel.journal_entry_id = je.id AND jel.account_id = gl.account_id
+			AND jel.debit_amount = gl.debit_amount AND jel.credit_amount = gl.credit_amount
+		WHERE gl.reference = $1 ORDER BY gl.transaction_date, gl.created_at`
+
+	return r.queryEntriesEnriched(ctx, query, reference)
 }
 
 // GetAccountBalance calculates account balance as of a specific date
@@ -222,14 +277,24 @@ func (r *generalLedgerRepositoryImpl) GetAccountBalanceRange(ctx context.Context
 // GetTrialBalanceData retrieves data for trial balance
 func (r *generalLedgerRepositoryImpl) GetTrialBalanceData(ctx context.Context, companyID string, asOfDate time.Time) ([]*entities.GeneralLedger, error) {
 	query := `
-		SELECT id, account_id, journal_entry_id, transaction_date, description, reference,
-			   debit_amount, credit_amount, balance, currency_code, exchange_rate,
-			   base_debit_amount, base_credit_amount, company_id, created_by, created_at, updated_at
-		FROM general_ledger 
-		WHERE company_id = $1 AND transaction_date <= $2 
-		ORDER BY account_id, transaction_date`
-	
-	return r.queryEntries(ctx, query, companyID, asOfDate)
+		SELECT gl.id, gl.account_id, gl.journal_entry_id, gl.transaction_date, gl.description, gl.reference,
+			   gl.debit_amount, gl.credit_amount, gl.balance, gl.currency_code, gl.exchange_rate,
+			   gl.base_debit_amount, gl.base_credit_amount, gl.company_id, gl.created_by, gl.created_at, gl.updated_at,
+			   COALESCE(coa.account_code, '') as account_code,
+			   COALESCE(coa.account_name, '') as account_name,
+			   COALESCE(coa.account_type, '') as account_type,
+			   COALESCE(je.entry_number, '') as entry_number,
+			   COALESCE(je.status, '') as entry_status,
+			   COALESCE(jel.line_number, 0) as line_number
+		FROM general_ledger gl
+		LEFT JOIN chart_of_accounts coa ON gl.account_id = coa.id
+		LEFT JOIN journal_entries je ON gl.journal_entry_id = je.id
+		LEFT JOIN journal_entry_lines jel ON jel.journal_entry_id = je.id AND jel.account_id = gl.account_id
+			AND jel.debit_amount = gl.debit_amount AND jel.credit_amount = gl.credit_amount
+		WHERE gl.company_id = $1 AND gl.transaction_date <= $2
+		ORDER BY gl.account_id, gl.transaction_date`
+
+	return r.queryEntriesEnriched(ctx, query, companyID, asOfDate)
 }
 
 // GetAccountMovements retrieves account movements for a period
@@ -240,25 +305,46 @@ func (r *generalLedgerRepositoryImpl) GetAccountMovements(ctx context.Context, a
 // GetByCompanyID retrieves entries by company ID
 func (r *generalLedgerRepositoryImpl) GetByCompanyID(ctx context.Context, companyID string) ([]*entities.GeneralLedger, error) {
 	query := `
-		SELECT id, account_id, journal_entry_id, transaction_date, description, reference,
-			   debit_amount, credit_amount, balance, currency_code, exchange_rate,
-			   base_debit_amount, base_credit_amount, company_id, created_by, created_at, updated_at
-		FROM general_ledger WHERE company_id = $1 ORDER BY transaction_date DESC, created_at DESC`
-	
-	return r.queryEntries(ctx, query, companyID)
+		SELECT gl.id, gl.account_id, gl.journal_entry_id, gl.transaction_date, gl.description, gl.reference,
+			   gl.debit_amount, gl.credit_amount, gl.balance, gl.currency_code, gl.exchange_rate,
+			   gl.base_debit_amount, gl.base_credit_amount, gl.company_id, gl.created_by, gl.created_at, gl.updated_at,
+			   COALESCE(coa.account_code, '') as account_code,
+			   COALESCE(coa.account_name, '') as account_name,
+			   COALESCE(coa.account_type, '') as account_type,
+			   COALESCE(je.entry_number, '') as entry_number,
+			   COALESCE(je.status, '') as entry_status,
+			   COALESCE(jel.line_number, 0) as line_number
+		FROM general_ledger gl
+		LEFT JOIN chart_of_accounts coa ON gl.account_id = coa.id
+		LEFT JOIN journal_entries je ON gl.journal_entry_id = je.id
+		LEFT JOIN journal_entry_lines jel ON jel.journal_entry_id = je.id AND jel.account_id = gl.account_id
+			AND jel.debit_amount = gl.debit_amount AND jel.credit_amount = gl.credit_amount
+		WHERE gl.company_id = $1 ORDER BY gl.transaction_date DESC, gl.created_at DESC`
+
+	return r.queryEntriesEnriched(ctx, query, companyID)
 }
 
 // GetByCompanyAndDateRange retrieves entries by company and date range
 func (r *generalLedgerRepositoryImpl) GetByCompanyAndDateRange(ctx context.Context, companyID string, startDate, endDate time.Time) ([]*entities.GeneralLedger, error) {
 	query := `
-		SELECT id, account_id, journal_entry_id, transaction_date, description, reference,
-			   debit_amount, credit_amount, balance, currency_code, exchange_rate,
-			   base_debit_amount, base_credit_amount, company_id, created_by, created_at, updated_at
-		FROM general_ledger 
-		WHERE company_id = $1 AND transaction_date BETWEEN $2 AND $3 
-		ORDER BY transaction_date, created_at`
-	
-	return r.queryEntries(ctx, query, companyID, startDate, endDate)
+		SELECT gl.id, gl.account_id, gl.journal_entry_id, gl.transaction_date, gl.description, gl.reference,
+			   gl.debit_amount, gl.credit_amount, gl.balance, gl.currency_code, gl.exchange_rate,
+			   gl.base_debit_amount, gl.base_credit_amount, gl.company_id, gl.created_by, gl.created_at, gl.updated_at,
+			   COALESCE(coa.account_code, '') as account_code,
+			   COALESCE(coa.account_name, '') as account_name,
+			   COALESCE(coa.account_type, '') as account_type,
+			   COALESCE(je.entry_number, '') as entry_number,
+			   COALESCE(je.status, '') as entry_status,
+			   COALESCE(jel.line_number, 0) as line_number
+		FROM general_ledger gl
+		LEFT JOIN chart_of_accounts coa ON gl.account_id = coa.id
+		LEFT JOIN journal_entries je ON gl.journal_entry_id = je.id
+		LEFT JOIN journal_entry_lines jel ON jel.journal_entry_id = je.id AND jel.account_id = gl.account_id
+			AND jel.debit_amount = gl.debit_amount AND jel.credit_amount = gl.credit_amount
+		WHERE gl.company_id = $1 AND gl.transaction_date BETWEEN $2 AND $3
+		ORDER BY gl.transaction_date, gl.created_at`
+
+	return r.queryEntriesEnriched(ctx, query, companyID, startDate, endDate)
 }
 
 // CreateBatch creates multiple general ledger entries
@@ -351,14 +437,14 @@ func (r *generalLedgerRepositoryImpl) RecalculateAccountBalances(ctx context.Con
 	return tx.Commit()
 }
 
-// queryEntries is a helper method to query multiple entries
-func (r *generalLedgerRepositoryImpl) queryEntries(ctx context.Context, query string, args ...interface{}) ([]*entities.GeneralLedger, error) {
+// queryEntriesEnriched is a helper method to query entries with JOINed denormalized fields
+func (r *generalLedgerRepositoryImpl) queryEntriesEnriched(ctx context.Context, query string, args ...interface{}) ([]*entities.GeneralLedger, error) {
 	rows, err := r.db.QueryContext(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	
+
 	var entries []*entities.GeneralLedger
 	for rows.Next() {
 		entry := &entities.GeneralLedger{}
@@ -368,12 +454,13 @@ func (r *generalLedgerRepositoryImpl) queryEntries(ctx context.Context, query st
 			&entry.Balance, &entry.CurrencyCode, &entry.ExchangeRate,
 			&entry.BaseDebitAmount, &entry.BaseCreditAmount, &entry.CompanyID,
 			&entry.CreatedBy, &entry.CreatedAt, &entry.UpdatedAt,
+			&entry.AccountCode, &entry.AccountName, &entry.AccountType, &entry.EntryNumber, &entry.EntryStatus, &entry.LineNumber,
 		)
 		if err != nil {
 			return nil, err
 		}
 		entries = append(entries, entry)
 	}
-	
+
 	return entries, rows.Err()
 }

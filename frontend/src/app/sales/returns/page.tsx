@@ -1,205 +1,98 @@
-import ReturnsList, { Return } from './ReturnsList'
+'use client'
 
-// Mock Data
-const mockReturns: Return[] = [
-  {
-    id: '1',
-    return_number: 'RET-2024-001',
-    return_date: '2024-07-25',
-    original_transaction: 'POS-2024-001',
-    customer_name: 'Budi Santoso',
-    customer_phone: '08123456789',
-    customer_email: 'budi@email.com',
-    return_type: 'wrong_size',
-    return_reason: 'Ukuran terlalu kecil, ingin tukar dengan ukuran 43',
-    processed_by: 'Sari Admin',
-    items: [
-      {
-        id: '1',
-        product_code: 'SHOE-001',
-        product_name: 'Classic Oxford Brown',
-        size: '42',
-        color: 'Brown',
-        quantity: 1,
-        unit_price: 350000,
-        line_total: 350000,
-        condition: 'good'
-      }
-    ],
-    subtotal: 350000,
-    refund_amount: 0,
-    refund_method: 'exchange',
-    status: 'approved',
-    approval_date: '2024-07-25',
-    notes: 'Exchange dengan ukuran 43, selisih harga dibayar customer',
-    created_at: '2024-07-25T09:30:00Z',
-    updated_at: '2024-07-25T10:15:00Z'
-  },
-  {
-    id: '2',
-    return_number: 'RET-2024-002',
-    return_date: '2024-07-25',
-    original_transaction: 'ON-2024-001',
-    customer_name: 'Rina Dewi',
-    customer_phone: '08123456788',
-    customer_email: 'rina@email.com',
-    return_type: 'defective',
-    return_reason: 'Sol sepatu lepas setelah dipakai 2 hari',
-    processed_by: 'Ahmad Admin',
-    items: [
-      {
-        id: '2',
-        product_code: 'SHOE-002',
-        product_name: 'Sports Sneaker White',
-        size: '38',
-        color: 'White',
-        quantity: 1,
-        unit_price: 280000,
-        line_total: 280000,
-        condition: 'defective'
-      }
-    ],
-    subtotal: 280000,
-    refund_amount: 280000,
-    refund_method: 'transfer',
-    status: 'completed',
-    approval_date: '2024-07-25',
-    refund_date: '2024-07-25',
-    notes: 'Produk defect, full refund disetujui',
-    created_at: '2024-07-25T11:20:00Z',
-    updated_at: '2024-07-25T14:30:00Z'
-  },
-  {
-    id: '3',
-    return_number: 'RET-2024-003',
-    return_date: '2024-07-24',
-    original_transaction: 'DS-2024-001',
-    customer_name: 'Dedi Susanto',
-    customer_phone: '08123456787',
-    return_type: 'customer_change',
-    return_reason: 'Berubah pikiran, tidak jadi beli',
-    processed_by: 'Lisa Admin',
-    items: [
-      {
-        id: '3',
-        product_code: 'BOOT-001',
-        product_name: 'Work Boot Black',
-        size: '43',
-        color: 'Black',
-        quantity: 1,
-        unit_price: 450000,
-        line_total: 450000,
-        condition: 'good'
-      }
-    ],
-    subtotal: 450000,
-    refund_amount: 427500,
-    refund_method: 'cash',
-    status: 'pending',
-    notes: 'Dikurangi biaya restocking 5% = Rp 22,500',
-    created_at: '2024-07-24T15:45:00Z',
-    updated_at: '2024-07-24T15:45:00Z'
-  },
-  {
-    id: '4',
-    return_number: 'RET-2024-004',
-    return_date: '2024-07-24',
-    original_transaction: 'SO-2024-001',
-    customer_name: 'Siti Nurhaliza',
-    customer_phone: '08123456786',
-    customer_email: 'siti@email.com',
-    return_type: 'damaged',
-    return_reason: 'Barang rusak saat pengiriman, kardus basah',
-    processed_by: 'Budi Admin',
-    items: [
-      {
-        id: '4',
-        product_code: 'SHOE-003',
-        product_name: 'Formal Loafer Black',
-        size: '37',
-        color: 'Black',
-        quantity: 2,
-        unit_price: 400000,
-        line_total: 800000,
-        condition: 'damaged'
-      }
-    ],
-    subtotal: 800000,
-    refund_amount: 800000,
-    refund_method: 'store_credit',
-    status: 'approved',
-    approval_date: '2024-07-24',
-    notes: 'Rusak saat pengiriman, customer pilih store credit',
-    created_at: '2024-07-24T13:10:00Z',
-    updated_at: '2024-07-24T16:20:00Z'
-  },
-  {
-    id: '5',
-    return_number: 'RET-2024-005',
-    return_date: '2024-07-23',
-    original_transaction: 'POS-2024-005',
-    customer_name: 'Ahmad Putra',
-    customer_phone: '08123456785',
-    return_type: 'wrong_color',
-    return_reason: 'Salah ambil warna, ingin yang coklat',
-    processed_by: 'Rina Admin',
-    items: [
-      {
-        id: '5',
-        product_code: 'SANDAL-001',
-        product_name: 'Summer Sandal Brown',
-        size: '41',
-        color: 'Black',
-        quantity: 1,
-        unit_price: 180000,
-        line_total: 180000,
-        condition: 'good'
-      }
-    ],
-    subtotal: 180000,
-    refund_amount: 0,
-    refund_method: 'exchange',
-    status: 'completed',
-    approval_date: '2024-07-23',
-    refund_date: '2024-07-23',
-    notes: 'Exchange dengan warna coklat, no charge',
-    created_at: '2024-07-23T10:30:00Z',
-    updated_at: '2024-07-23T11:00:00Z'
-  },
-  {
-    id: '6',
-    return_number: 'RET-2024-006',
-    return_date: '2024-07-23',
-    original_transaction: 'ON-2024-003',
-    customer_name: 'Lisa Wati',
-    customer_phone: '08123456784',
-    customer_email: 'lisa@email.com',
-    return_type: 'other',
-    return_reason: 'Tidak sesuai ekspektasi dari foto online',
-    processed_by: 'Dedi Admin',
-    items: [
-      {
-        id: '6',
-        product_code: 'SHOE-004',
-        product_name: 'High Heel Red',
-        size: '38',
-        color: 'Red',
-        quantity: 1,
-        unit_price: 320000,
-        line_total: 320000,
-        condition: 'good'
-      }
-    ],
-    subtotal: 320000,
-    refund_amount: 288000,
-    refund_method: 'card',
-    status: 'rejected',
-    notes: 'Sudah lebih dari 7 hari, return ditolak',
-    created_at: '2024-07-23T08:15:00Z',
-    updated_at: '2024-07-23T09:00:00Z'
-  }
-]
+import React, { useState, useMemo, useEffect } from 'react'
+import { TwoLevelLayout } from '@/components/ui/two-level-layout'
+import { Header } from '@/components/ui/header'
+import { Card } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { TanStackDataTable, TanStackColumn } from '@/components/ui/tanstack-data-table'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from '@/components/ui/dropdown-menu'
+import { HugeiconsIcon } from '@hugeicons/react'
+import { Search01Icon, MoreHorizontalIcon, PlusSignIcon, Package01Icon, Dollar01Icon, Calendar01Icon, File01Icon } from '@hugeicons/core-free-icons'
+import { salesReturnService, type SalesReturn } from '@/services/sales'
+import Link from 'next/link'
 
 export default function ReturnsPage() {
-  return <ReturnsList initialData={mockReturns} />
+  const [data, setData] = useState<SalesReturn[]>([])
+  const [loading, setLoading] = useState(true)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => { setMounted(true) }, [])
+  useEffect(() => { salesReturnService.getAll().then(setData).finally(() => setLoading(false)) }, [])
+
+  const filtered = useMemo(() => {
+    if (!searchTerm) return data
+    const q = searchTerm.toLowerCase()
+    return data.filter(item =>
+      item.reason?.toLowerCase().includes(q) ||
+      item.sales_invoice_id?.toLowerCase().includes(q) ||
+      item.id.toLowerCase().includes(q)
+    )
+  }, [data, searchTerm])
+
+  const stats = useMemo(() => {
+    const now = new Date()
+    const thisMonth = data.filter(i => {
+      const d = new Date(i.return_date)
+      return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()
+    })
+    return {
+      total: data.length,
+      totalRefund: data.reduce((s, i) => s + (i.total_amount || 0), 0),
+      thisMonth: thisMonth.length,
+      uniqueInvoices: new Set(data.map(i => i.sales_invoice_id).filter(Boolean)).size,
+    }
+  }, [data])
+
+  const fmt = (n: number) => `Rp ${n.toLocaleString('id-ID')}`
+  const fmtDate = (d: string) => mounted && d ? new Date(d).toLocaleDateString('id-ID') : '-'
+
+  const columns: TanStackColumn<SalesReturn>[] = [
+    { id: 'id', header: 'Return ID', accessorKey: 'id', cell: ({ row }) => <Link href={`/sales/returns/${row.original.id}`} className="font-medium text-blue-600 hover:underline">{row.original.id.slice(0, 8)}...</Link> },
+    { id: 'sales_invoice_id', header: 'Invoice', accessorKey: 'sales_invoice_id', cell: ({ row }) => <span>{row.original.sales_invoice_id.slice(0, 8)}...</span> },
+    { id: 'return_date', header: 'Return Date', accessorKey: 'return_date', cell: ({ row }) => <span>{fmtDate(row.original.return_date)}</span> },
+    { id: 'reason', header: 'Reason', accessorKey: 'reason', cell: ({ row }) => <span className="truncate max-w-[200px] block">{row.original.reason}</span> },
+    { id: 'total_amount', header: 'Amount', accessorKey: 'total_amount', cell: ({ row }) => <span className="font-medium">{fmt(row.original.total_amount)}</span> },
+    { id: 'created_at', header: 'Created', accessorKey: 'created_at', cell: ({ row }) => <span>{fmtDate(row.original.created_at)}</span> },
+    { id: 'actions', header: '', enableSorting: false, cell: ({ row }) => (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild><Button variant="outline" size="sm" className="h-8 w-8 p-0"><HugeiconsIcon icon={MoreHorizontalIcon} className="h-4 w-4" /></Button></DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem asChild><Link href={`/sales/returns/${row.original.id}`}>View Details</Link></DropdownMenuItem>
+          <DropdownMenuItem onClick={() => navigator.clipboard.writeText(row.original.id)}>Copy ID</DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem className="text-red-600" onClick={() => handleDelete(row.original.id)}>Delete</DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    )},
+  ]
+
+  const handleDelete = async (id: string) => { try { await salesReturnService.delete(id); setData(prev => prev.filter(i => i.id !== id)) } catch (err) { console.error('Delete failed:', err) } }
+
+  return (
+    <TwoLevelLayout>
+      <Header title="Sales Returns" breadcrumbs={[{ label: 'Sales', href: '/sales' }, { label: 'Returns' }]} actions={<Button><HugeiconsIcon icon={PlusSignIcon} className="w-4 h-4 mr-2" />New Return</Button>} />
+      <div className="flex-1 overflow-auto p-6 space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <Card className="p-4"><div className="flex items-center space-x-3"><div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center"><HugeiconsIcon icon={Package01Icon} className="h-5 w-5 text-foreground" /></div><div><p className="text-sm font-medium text-muted-foreground">Total Returns</p><p className="text-2xl font-bold">{stats.total}</p></div></div></Card>
+          <Card className="p-4"><div className="flex items-center space-x-3"><div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center"><HugeiconsIcon icon={Dollar01Icon} className="h-5 w-5 text-foreground" /></div><div><p className="text-sm font-medium text-muted-foreground">Total Refund</p><p className="text-2xl font-bold">{mounted ? fmt(stats.totalRefund) : '-'}</p></div></div></Card>
+          <Card className="p-4"><div className="flex items-center space-x-3"><div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center"><HugeiconsIcon icon={Calendar01Icon} className="h-5 w-5 text-foreground" /></div><div><p className="text-sm font-medium text-muted-foreground">This Month</p><p className="text-2xl font-bold">{stats.thisMonth}</p></div></div></Card>
+          <Card className="p-4"><div className="flex items-center space-x-3"><div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center"><HugeiconsIcon icon={File01Icon} className="h-5 w-5 text-foreground" /></div><div><p className="text-sm font-medium text-muted-foreground">Unique Invoices</p><p className="text-2xl font-bold">{stats.uniqueInvoices}</p></div></div></Card>
+        </div>
+        <div className="relative w-80">
+          <HugeiconsIcon icon={Search01Icon} className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input placeholder="Search returns..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-9 bg-white text-sm" style={{ fontSize: '14px' }} />
+        </div>
+        <TanStackDataTable data={filtered} columns={columns} loading={loading} showColumnToggle={false} />
+      </div>
+    </TwoLevelLayout>
+  )
 }

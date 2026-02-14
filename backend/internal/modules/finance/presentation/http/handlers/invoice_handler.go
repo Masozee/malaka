@@ -63,6 +63,22 @@ func (h *InvoiceHandler) GetInvoiceByID(c *gin.Context) {
 	response.Success(c, http.StatusOK, "Invoice retrieved successfully", resp)
 }
 
+// GetAllInvoices handles the retrieval of all invoices.
+func (h *InvoiceHandler) GetAllInvoices(c *gin.Context) {
+	invoices, err := h.service.GetAllInvoices(c.Request.Context())
+	if err != nil {
+		response.Error(c, http.StatusInternalServerError, "Failed to retrieve invoices", err)
+		return
+	}
+
+	var responses []*dto.InvoiceResponse
+	for _, inv := range invoices {
+		responses = append(responses, dto.FromInvoiceEntity(inv))
+	}
+
+	response.Success(c, http.StatusOK, "Invoices retrieved successfully", responses)
+}
+
 // UpdateInvoice handles the update of an existing invoice.
 func (h *InvoiceHandler) UpdateInvoice(c *gin.Context) {
 	id := c.Param("id")

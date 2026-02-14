@@ -5,7 +5,6 @@ import (
 
 	"malaka/internal/modules/finance/domain/entities"
 	"malaka/internal/shared/types"
-	"malaka/internal/shared/uuid"
 )
 
 // InvoiceCreateRequest represents the request to create an invoice.
@@ -57,8 +56,8 @@ func (req *InvoiceCreateRequest) ToInvoiceEntity() *entities.Invoice {
 		TotalAmount:   req.TotalAmount,
 		TaxAmount:     req.TaxAmount,
 		GrandTotal:    req.GrandTotal,
-		CustomerID:    uuid.MustParse(req.CustomerID),
-		SupplierID:    uuid.MustParse(req.SupplierID),
+		CustomerID:    safeParseUUID(req.CustomerID),
+		SupplierID:    safeParseUUID(req.SupplierID),
 	}
 }
 
@@ -72,8 +71,8 @@ func (req *InvoiceUpdateRequest) ToInvoiceEntity() *entities.Invoice {
 		TotalAmount:   req.TotalAmount,
 		TaxAmount:     req.TaxAmount,
 		GrandTotal:    req.GrandTotal,
-		CustomerID:    uuid.MustParse(req.CustomerID),
-		SupplierID:    uuid.MustParse(req.SupplierID),
+		CustomerID:    safeParseUUID(req.CustomerID),
+		SupplierID:    safeParseUUID(req.SupplierID),
 	}
 }
 

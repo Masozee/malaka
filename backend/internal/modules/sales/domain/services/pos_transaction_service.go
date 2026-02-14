@@ -74,9 +74,31 @@ func (s *PosTransactionService) GetAllPosTransactions(ctx context.Context) ([]*e
 	return s.repo.GetAll(ctx)
 }
 
+// PosTransactionDetail holds a transaction with its line items.
+type PosTransactionDetail struct {
+	*entities.PosTransaction
+	Items []*entities.PosItem `json:"items"`
+}
+
 // GetPosTransactionByID retrieves a POS transaction by its ID.
 func (s *PosTransactionService) GetPosTransactionByID(ctx context.Context, id uuid.ID) (*entities.PosTransaction, error) {
 	return s.repo.GetByID(ctx, id)
+}
+
+// GetPosTransactionByIDWithItems retrieves a POS transaction with its line items.
+func (s *PosTransactionService) GetPosTransactionByIDWithItems(ctx context.Context, id uuid.ID) (*PosTransactionDetail, error) {
+	pt, err := s.repo.GetByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	if pt == nil {
+		return nil, nil
+	}
+	items, err := s.itemRepo.GetByPosTransactionID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	return &PosTransactionDetail{PosTransaction: pt, Items: items}, nil
 }
 
 // UpdatePosTransaction updates an existing POS transaction.

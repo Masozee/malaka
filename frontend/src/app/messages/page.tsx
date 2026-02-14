@@ -6,12 +6,33 @@ import { Header } from '@/components/ui/header'
 import { ProtectedRoute } from '@/components/auth/protected-route'
 import { useAuth } from '@/contexts/auth-context'
 import { useSecondarySidebarSlot } from '@/contexts/sidebar-context'
-import { useMessaging } from '@/hooks/useMessaging'
-import { messagingService, type ParticipantInfo, type AttachmentMeta } from '@/services/messaging'
+import {
+  useConversations,
+  useMessages,
+  useSendMessage,
+  useDeleteMessage,
+  useClearChat,
+  useArchiveConversation,
+  useDeleteConversation,
+  useStartConversation,
+  useCreateGroup,
+  useGroupMembers,
+  useAddGroupMembers,
+  useRemoveGroupMember,
+  useLeaveGroup,
+  useUpdateGroupName,
+  useCompanyUsers,
+  useMarkConversationRead,
+  useUploadAttachment,
+} from '@/hooks/queries/useMessagingQuery'
+import { useMessagingWebSocket } from '@/hooks/useMessagingWebSocket'
+import type { ParticipantInfo, AttachmentMeta } from '@/services/messaging'
 import { MessageBubble } from '@/components/messaging/MessageBubble'
+import { VirtualizedMessageList } from '@/components/messaging/VirtualizedMessageList'
 import { AttachmentUploader } from '@/components/messaging/AttachmentUploader'
 import { useSearchParams } from 'next/navigation'
 import { MessagesSidebar } from '@/components/messaging/MessagesSidebar'
+import { messagingService } from '@/services/messaging'
 
 export default function MessagesPage() {
   return (
@@ -38,30 +59,26 @@ function MessagesContent() {
   const { user } = useAuth()
   const { setSlotContent } = useSecondarySidebarSlot()
 
-  // Single hook instance for ALL conversations (no type filter)
-  const {
-    conversations,
-    activeConversationId,
-    messages,
-    typingUsers,
-    isLoading,
-    loadMessages,
-    sendMessage,
-    sendTypingIndicator,
-    startConversation,
-    deleteMessage,
-    clearChat,
-    archiveConversation,
-    deleteConversation,
-    uploadAttachment,
-    // Group operations
-    createGroup,
-    getGroupMembers,
-    addGroupMembers,
-    removeGroupMember,
-    leaveGroup,
-    updateGroupName,
-  } = useMessaging()
+  // --- TanStack Query hooks ---
+  const [activeConversationId, setActiveConversationId] = useState<string | null>(null)
+  const { data: conversations = [], isLoading } = useConversations()
+  const { data: messages = [] } = useMessages(activeConversationId)
+
+  const sendMessageMutation = useSendMessage()
+  const deleteMessageMutation = useDeleteMessage()
+  const clearChatMutation = useClearChat()
+  const archiveConversationMutation = useArchiveConversation()
+  const deleteConversationMutation = useDeleteConversation()
+  const startConversationMutation = useStartConversation()
+  const createGroupMutation = useCreateGroup()
+  const addGroupMembersMutation = useAddGroupMembers()
+  const removeGroupMemberMutation = useRemoveGroupMember()
+  const leaveGroupMutation = useLeaveGroup()
+  const updateGroupNameMutation = useUpdateGroupName()
+  const markReadMutation = useMarkConversationRead()
+
+  // --- WebSocket bridge ---
+  const { typingUsers, sendTypingIndicator } = useMessagingWebSocket({ activeConversationId })
 
   const searchParams = useSearchParams()
   const [inputText, setInputText] = useState('')
@@ -76,20 +93,24 @@ function MessagesContent() {
   const [showRenameGroup, setShowRenameGroup] = useState(false)
   const [confirmAction, setConfirmAction] = useState<{ type: 'clear' | 'archive' | 'delete' | 'leave'; label: string } | null>(null)
   const [members, setMembers] = useState<ParticipantInfo[]>([])
-  const [contacts, setContacts] = useState<ParticipantInfo[]>([])
   const [contactSearch, setContactSearch] = useState('')
   const [selectedContacts, setSelectedContacts] = useState<string[]>([])
   const [groupName, setGroupName] = useState('')
   const [newGroupName, setNewGroupName] = useState('')
   const actionMenuRef = useRef<HTMLDivElement>(null)
-  const messagesEndRef = useRef<HTMLDivElement>(null)
   const typingTimerRef = useRef<NodeJS.Timeout | null>(null)
   const attachTriggerRef = useRef<(() => void) | null>(null)
+  const markReadRef = useRef(markReadMutation.mutate)
+  markReadRef.current = markReadMutation.mutate
 
-  // No more router.push — just load messages for any conversation type
-  const handleSelectConversation = useCallback((conv: any) => {
-    loadMessages(conv.id)
-  }, [loadMessages])
+  // Company users for contact picker (only fetched when needed)
+  const { data: contacts = [] } = useCompanyUsers(showContactPicker || showCreateGroup || showAddMembers)
+
+  // Select conversation
+  const handleSelectConversation = useCallback((conv: { id: string }) => {
+    setActiveConversationId(conv.id)
+    markReadRef.current(conv.id)
+  }, [])
 
   // Inject conversation list into the second sidebar
   useEffect(() => {
@@ -110,19 +131,15 @@ function MessagesContent() {
   useEffect(() => {
     const convId = searchParams.get('conversation')
     if (convId && convId !== activeConversationId) {
-      loadMessages(convId)
+      setActiveConversationId(convId)
+      markReadRef.current(convId)
     }
-  }, [searchParams, activeConversationId, loadMessages])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams])
 
-  // Auto-scroll to bottom when messages change
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages])
-
-  // Load contacts when picker or group creation opens
+  // Reset contact picker state when modals open
   useEffect(() => {
     if (showContactPicker || showCreateGroup || showAddMembers) {
-      messagingService.getCompanyUsers().then(setContacts)
       setSelectedContacts([])
       setContactSearch('')
       setGroupName('')
@@ -145,23 +162,24 @@ function MessagesContent() {
   const handleConfirmAction = useCallback(async () => {
     if (!confirmAction || !activeConversationId) return
     if (confirmAction.type === 'clear') {
-      await clearChat(activeConversationId)
+      clearChatMutation.mutate(activeConversationId)
     } else if (confirmAction.type === 'archive') {
-      await archiveConversation(activeConversationId)
+      archiveConversationMutation.mutate(activeConversationId)
+      setActiveConversationId(null)
     } else if (confirmAction.type === 'delete') {
-      await deleteConversation(activeConversationId)
+      deleteConversationMutation.mutate(activeConversationId)
+      setActiveConversationId(null)
     } else if (confirmAction.type === 'leave') {
-      await leaveGroup(activeConversationId)
+      leaveGroupMutation.mutate(activeConversationId)
+      setActiveConversationId(null)
     }
     setConfirmAction(null)
-  }, [confirmAction, activeConversationId, clearChat, archiveConversation, deleteConversation, leaveGroup])
+  }, [confirmAction, activeConversationId, clearChatMutation, archiveConversationMutation, deleteConversationMutation, leaveGroupMutation])
 
   const activeConversation = conversations.find(c => c.id === activeConversationId)
   const isGroup = activeConversation?.is_group
   const otherUser = activeConversation?.other_user
   const isAdmin = activeConversation?.participants?.find(p => p.user_id === user?.id)?.role === 'admin'
-
-  // Derive accent color based on conversation type
   const accentColor = isGroup ? 'purple' : 'blue'
 
   const handleSend = async () => {
@@ -175,10 +193,17 @@ function MessagesContent() {
     setUploadResetKey(k => k + 1)
 
     const recipientId = isGroup ? '' : (otherUser?.user_id || '')
-    const success = await sendMessage(activeConversationId, recipientId, text, attIds.length > 0 ? attIds : undefined, undefined, attMetas.length > 0 ? attMetas : undefined)
-    if (!success) {
-      setInputText(text)
-    }
+    sendMessageMutation.mutate({
+      conversationId: activeConversationId,
+      recipientId,
+      text,
+      attachmentIds: attIds.length > 0 ? attIds : undefined,
+      attachmentMetas: attMetas.length > 0 ? attMetas : undefined,
+    }, {
+      onError: () => {
+        setInputText(text)
+      }
+    })
   }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -191,55 +216,72 @@ function MessagesContent() {
   const handleTyping = () => {
     if (!activeConversationId) return
     sendTypingIndicator(activeConversationId, true)
-
     if (typingTimerRef.current) clearTimeout(typingTimerRef.current)
     typingTimerRef.current = setTimeout(() => {
       sendTypingIndicator(activeConversationId, false)
     }, 2000)
   }
 
+  const handleDeleteMessage = useCallback((messageId: string) => {
+    if (!activeConversationId) return
+    deleteMessageMutation.mutate({ messageId, conversationId: activeConversationId })
+  }, [activeConversationId, deleteMessageMutation])
+
   const handleStartConversation = async (contact: ParticipantInfo) => {
-    const conv = await startConversation(contact.user_id)
-    if (conv) {
-      loadMessages(conv.id)
-    }
+    startConversationMutation.mutate(contact.user_id, {
+      onSuccess: (conv) => {
+        if (conv) {
+          setActiveConversationId(conv.id)
+          markReadRef.current(conv.id)
+        }
+      }
+    })
     setShowContactPicker(false)
   }
 
   const handleCreateGroup = async () => {
     if (!groupName.trim() || selectedContacts.length === 0) return
-    const conv = await createGroup(groupName.trim(), selectedContacts)
-    if (conv) {
-      loadMessages(conv.id)
-    }
+    createGroupMutation.mutate({ name: groupName.trim(), participantIds: selectedContacts }, {
+      onSuccess: (conv) => {
+        if (conv) {
+          setActiveConversationId(conv.id)
+        }
+      }
+    })
     setShowCreateGroup(false)
   }
 
   const handleShowMembers = async () => {
     if (!activeConversationId) return
-    const m = await getGroupMembers(activeConversationId)
+    const m = await messagingService.getGroupMembers(activeConversationId)
     setMembers(m)
     setShowMembers(true)
   }
 
   const handleAddMembers = async () => {
     if (!activeConversationId || selectedContacts.length === 0) return
-    await addGroupMembers(activeConversationId, selectedContacts)
-    setShowAddMembers(false)
-    const m = await getGroupMembers(activeConversationId)
-    setMembers(m)
+    addGroupMembersMutation.mutate({ conversationId: activeConversationId, userIds: selectedContacts }, {
+      onSuccess: async () => {
+        setShowAddMembers(false)
+        const m = await messagingService.getGroupMembers(activeConversationId)
+        setMembers(m)
+      }
+    })
   }
 
   const handleRemoveMember = async (userId: string) => {
     if (!activeConversationId) return
-    await removeGroupMember(activeConversationId, userId)
-    const m = await getGroupMembers(activeConversationId)
-    setMembers(m)
+    removeGroupMemberMutation.mutate({ conversationId: activeConversationId, userId }, {
+      onSuccess: async () => {
+        const m = await messagingService.getGroupMembers(activeConversationId)
+        setMembers(m)
+      }
+    })
   }
 
   const handleRenameGroup = async () => {
     if (!activeConversationId || !newGroupName.trim()) return
-    await updateGroupName(activeConversationId, newGroupName.trim())
+    updateGroupNameMutation.mutate({ conversationId: activeConversationId, name: newGroupName.trim() })
     setShowRenameGroup(false)
   }
 
@@ -259,7 +301,6 @@ function MessagesContent() {
     ([, convId]) => convId === activeConversationId
   )
 
-  // Chat header display name / avatar
   const chatName = isGroup
     ? (activeConversation?.name || 'Unnamed Group')
     : (otherUser?.full_name || otherUser?.email || 'Unknown')
@@ -287,7 +328,7 @@ function MessagesContent() {
             </div>
           ) : (
             <>
-              {/* Chat header — adapts for personal vs group */}
+              {/* Chat header */}
               <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
                 <div
                   className={`flex items-center ${isGroup ? 'cursor-pointer' : ''}`}
@@ -388,20 +429,14 @@ function MessagesContent() {
                 </div>
               </div>
 
-              {/* Messages area */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-3">
-                {messages.map(msg => (
-                  <MessageBubble
-                    key={msg.id}
-                    msg={msg}
-                    isMine={msg.sender_id === user?.id}
-                    accentColor={accentColor}
-                    showSender={isGroup}
-                    onDelete={(messageId) => deleteMessage(messageId)}
-                  />
-                ))}
-                <div ref={messagesEndRef} />
-              </div>
+              {/* Virtualized messages area */}
+              <VirtualizedMessageList
+                messages={messages}
+                currentUserId={user?.id || ''}
+                accentColor={accentColor}
+                showSender={!!isGroup}
+                onDelete={handleDeleteMessage}
+              />
 
               {/* Input area */}
               <div className="p-4 border-t border-gray-200 dark:border-gray-700">
@@ -411,7 +446,7 @@ function MessagesContent() {
                     conversationId={activeConversationId}
                     onUploadComplete={(metas) => setPendingAttachments(prev => [...prev, ...metas])}
                     onUploading={setIsUploadingFiles}
-                    uploadAttachment={uploadAttachment}
+                    uploadAttachment={(convId, file) => messagingService.uploadAttachment(convId, file)}
                     triggerRef={attachTriggerRef}
                     accentColor={accentColor}
                   />

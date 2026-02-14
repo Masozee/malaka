@@ -95,26 +95,23 @@ func (h *ExpenditureRequestHandler) UpdateExpenditureRequest(c *gin.Context) {
 		return
 	}
 
-	parsedRequestedBy, err := uuid.Parse(req.RequestedBy)
+	parsedRequestorID, err := uuid.Parse(req.RequestorID)
 	if err != nil {
-		response.BadRequest(c, "Invalid RequestedBy", err.Error())
-		return
-	}
-
-	parsedCashBankID, err := uuid.Parse(req.CashBankID)
-	if err != nil {
-		response.BadRequest(c, "Invalid CashBankID", err.Error())
+		response.BadRequest(c, "Invalid RequestorID", err.Error())
 		return
 	}
 
 	request.RequestNumber = req.RequestNumber
+	request.RequestorID = parsedRequestorID
+	request.Department = req.Department
 	request.RequestDate = req.RequestDate
-	request.RequestedBy = parsedRequestedBy
-	request.CashBankID = parsedCashBankID
-	request.Amount = req.Amount
+	request.RequiredDate = req.RequiredDate
 	request.Purpose = req.Purpose
-	request.Description = req.Description
+	request.TotalAmount = req.TotalAmount
+	request.ApprovedAmount = req.ApprovedAmount
+	request.Priority = req.Priority
 	request.Status = req.Status
+	request.Remarks = req.Remarks
 	request.UpdatedAt = time.Now()
 
 	if err := h.service.UpdateExpenditureRequest(c.Request.Context(), request); err != nil {
@@ -204,7 +201,7 @@ func (h *ExpenditureRequestHandler) RejectExpenditureRequest(c *gin.Context) {
 		return
 	}
 
-	if err := h.service.RejectExpenditureRequest(c.Request.Context(), parsedID, req.RejectedReason); err != nil {
+	if err := h.service.RejectExpenditureRequest(c.Request.Context(), parsedID, req.Remarks); err != nil {
 		response.InternalServerError(c, "Failed to reject expenditure request", err.Error())
 		return
 	}
@@ -222,23 +219,23 @@ func (h *ExpenditureRequestHandler) DisburseExpenditureRequest(c *gin.Context) {
 		return
 	}
 
-	var req dto.DisburseExpenditureRequestRequest
+	var req dto.ProcessExpenditureRequestRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		response.BadRequest(c, "Invalid request", err.Error())
 		return
 	}
 
-	parsedDisbursedBy, err := uuid.Parse(req.DisbursedBy)
+	parsedProcessedBy, err := uuid.Parse(req.ProcessedBy)
 	if err != nil {
-		response.BadRequest(c, "Invalid DisbursedBy ID", err.Error())
+		response.BadRequest(c, "Invalid ProcessedBy ID", err.Error())
 		return
 	}
 
-	if err := h.service.DisburseExpenditureRequest(c.Request.Context(), parsedID, parsedDisbursedBy); err != nil {
-		response.InternalServerError(c, "Failed to disburse expenditure request", err.Error())
+	if err := h.service.ProcessExpenditureRequest(c.Request.Context(), parsedID, parsedProcessedBy); err != nil {
+		response.InternalServerError(c, "Failed to process expenditure request", err.Error())
 		return
 	}
 
 	request, _ := h.service.GetExpenditureRequestByID(c.Request.Context(), parsedID)
-	response.OK(c, "Expenditure request disbursed successfully", dto.ToExpenditureRequestResponse(request))
+	response.OK(c, "Expenditure request processed successfully", dto.ToExpenditureRequestResponse(request))
 }

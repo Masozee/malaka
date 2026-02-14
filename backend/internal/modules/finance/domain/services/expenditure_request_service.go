@@ -17,8 +17,8 @@ type ExpenditureRequestService interface {
 	DeleteExpenditureRequest(ctx context.Context, id uuid.ID) error
 	GetExpenditureRequestsByStatus(ctx context.Context, status string) ([]*entities.ExpenditureRequest, error)
 	ApproveExpenditureRequest(ctx context.Context, id uuid.ID, approvedBy uuid.ID) error
-	RejectExpenditureRequest(ctx context.Context, id uuid.ID, rejectedReason string) error
-	DisburseExpenditureRequest(ctx context.Context, id uuid.ID, disbursedBy uuid.ID) error
+	RejectExpenditureRequest(ctx context.Context, id uuid.ID, remarks string) error
+	ProcessExpenditureRequest(ctx context.Context, id uuid.ID, processedBy uuid.ID) error
 }
 
 type expenditureRequestService struct {
@@ -33,7 +33,10 @@ func NewExpenditureRequestService(repo repositories.ExpenditureRequestRepository
 
 func (s *expenditureRequestService) CreateExpenditureRequest(ctx context.Context, request *entities.ExpenditureRequest) error {
 	if request.Status == "" {
-		request.Status = "pending"
+		request.Status = "PENDING"
+	}
+	if request.Priority == "" {
+		request.Priority = "NORMAL"
 	}
 	return s.repo.Create(ctx, request)
 }
@@ -64,34 +67,34 @@ func (s *expenditureRequestService) ApproveExpenditureRequest(ctx context.Contex
 		return err
 	}
 
-	request.Status = "approved"
+	request.Status = "APPROVED"
 	request.ApprovedBy = approvedBy
 	request.ApprovedAt = time.Now()
 
 	return s.repo.Update(ctx, request)
 }
 
-func (s *expenditureRequestService) RejectExpenditureRequest(ctx context.Context, id uuid.ID, rejectedReason string) error {
+func (s *expenditureRequestService) RejectExpenditureRequest(ctx context.Context, id uuid.ID, remarks string) error {
 	request, err := s.repo.GetByID(ctx, id)
 	if err != nil {
 		return err
 	}
 
-	request.Status = "rejected"
-	request.RejectedReason = rejectedReason
+	request.Status = "REJECTED"
+	request.Remarks = remarks
 
 	return s.repo.Update(ctx, request)
 }
 
-func (s *expenditureRequestService) DisburseExpenditureRequest(ctx context.Context, id uuid.ID, disbursedBy uuid.ID) error {
+func (s *expenditureRequestService) ProcessExpenditureRequest(ctx context.Context, id uuid.ID, processedBy uuid.ID) error {
 	request, err := s.repo.GetByID(ctx, id)
 	if err != nil {
 		return err
 	}
 
-	request.Status = "disbursed"
-	request.DisbursedBy = disbursedBy
-	request.DisbursedAt = time.Now()
+	request.Status = "PROCESSED"
+	request.ProcessedBy = processedBy
+	request.ProcessedAt = time.Now()
 
 	return s.repo.Update(ctx, request)
 }

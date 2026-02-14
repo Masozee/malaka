@@ -63,6 +63,22 @@ func (h *CashBankHandler) GetCashBankByID(c *gin.Context) {
 	response.Success(c, http.StatusOK, "Cash/bank account retrieved successfully", resp)
 }
 
+// GetAllCashBanks handles the retrieval of all cash/bank accounts.
+func (h *CashBankHandler) GetAllCashBanks(c *gin.Context) {
+	cashBanks, err := h.service.GetAllCashBanks(c.Request.Context())
+	if err != nil {
+		response.Error(c, http.StatusInternalServerError, "Failed to retrieve cash/bank accounts", err)
+		return
+	}
+
+	var responses []*dto.CashBankResponse
+	for _, cb := range cashBanks {
+		responses = append(responses, dto.FromCashBankEntity(cb))
+	}
+
+	response.Success(c, http.StatusOK, "Cash/bank accounts retrieved successfully", responses)
+}
+
 // UpdateCashBank handles the update of an existing cash/bank account.
 func (h *CashBankHandler) UpdateCashBank(c *gin.Context) {
 	id := c.Param("id")

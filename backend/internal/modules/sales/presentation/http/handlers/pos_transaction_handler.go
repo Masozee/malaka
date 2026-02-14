@@ -76,7 +76,7 @@ func (h *PosTransactionHandler) GetAllPosTransactions(c *gin.Context) {
 	response.OK(c, "Sales orders retrieved successfully", transactions)
 }
 
-// GetPosTransactionByID handles retrieving a POS transaction by its ID.
+// GetPosTransactionByID handles retrieving a POS transaction by its ID with items.
 func (h *PosTransactionHandler) GetPosTransactionByID(c *gin.Context) {
 	id := c.Param("id")
 	parsedID, err := uuid.Parse(id)
@@ -84,17 +84,17 @@ func (h *PosTransactionHandler) GetPosTransactionByID(c *gin.Context) {
 		response.BadRequest(c, "Invalid ID format", nil)
 		return
 	}
-	pt, err := h.service.GetPosTransactionByID(c.Request.Context(), parsedID)
+	detail, err := h.service.GetPosTransactionByIDWithItems(c.Request.Context(), parsedID)
 	if err != nil {
 		response.InternalServerError(c, err.Error(), nil)
 		return
 	}
-	if pt == nil {
+	if detail == nil {
 		response.NotFound(c, "POS transaction not found", nil)
 		return
 	}
 
-	response.OK(c, "POS transaction retrieved successfully", pt)
+	response.OK(c, "POS transaction retrieved successfully", detail)
 }
 
 // UpdatePosTransaction handles updating an existing POS transaction.

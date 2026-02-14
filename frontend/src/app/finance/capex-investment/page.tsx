@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import { TwoLevelLayout } from '@/components/ui/two-level-layout'
 import { Header } from '@/components/ui/header'
 import { Card, CardContent } from '@/components/ui/card'
@@ -31,98 +31,51 @@ import {
     Settings02Icon,
     MoreHorizontalIcon
 } from '@hugeicons/core-free-icons'
-
-// --- Types ---
-type CapexStatus = 'planning' | 'approved' | 'active' | 'completed' | 'on_hold'
-type Priority = 'high' | 'medium' | 'low'
-
-interface CapexProject {
-    id: string
-    projectName: string
-    description: string
-    category: 'Equipment' | 'Infrastructure' | 'Technology' | 'Vehicle'
-    estBudget: number
-    actualSpent: number
-    expectedRoi: number
-    status: CapexStatus
-    priority: Priority
-    completionDate: string
-}
-
-// --- Mock Data ---
-const mockProjects: CapexProject[] = [
-    {
-        id: '1',
-        projectName: 'New Assembly Line Automation',
-        description: 'Automating the main shoe assembly line to increase capacity by 40%',
-        category: 'Equipment',
-        estBudget: 2500000000,
-        actualSpent: 850000000,
-        expectedRoi: 18.5,
-        status: 'active',
-        priority: 'high',
-        completionDate: '2024-08-15'
-    },
-    {
-        id: '2',
-        projectName: 'Warehouse Solar Panel Installation',
-        description: 'Green energy initiative to reduce electricity costs',
-        category: 'Infrastructure',
-        estBudget: 800000000,
-        actualSpent: 50000000,
-        expectedRoi: 12.0,
-        status: 'approved',
-        priority: 'medium',
-        completionDate: '2024-11-30'
-    },
-    {
-        id: '3',
-        projectName: 'ERP System Upgrade',
-        description: 'Migration to new server infrastructure',
-        category: 'Technology',
-        estBudget: 450000000,
-        actualSpent: 420000000,
-        expectedRoi: 15.0,
-        status: 'active',
-        priority: 'high',
-        completionDate: '2024-03-31'
-    },
-    {
-        id: '4',
-        projectName: 'New Delivery Fleet',
-        description: 'Purchase of 5 new electric vans',
-        category: 'Vehicle',
-        estBudget: 1200000000,
-        actualSpent: 0,
-        expectedRoi: 8.5,
-        status: 'planning',
-        priority: 'medium',
-        completionDate: '2024-12-31'
-    }
-]
+import { BookmarkToggle } from '@/components/ui/bookmark-toggle'
+import { capexProjectService, type CapexProject } from '@/services/finance'
 
 export default function CapexPage() {
     const { addToast } = useToast()
     const [searchTerm, setSearchTerm] = useState('')
     const [statusFilter, setStatusFilter] = useState<string>('all')
     const [isAddModalOpen, setIsAddModalOpen] = useState(false)
+    const [projects, setProjects] = useState<CapexProject[]>([])
+    const [loading, setLoading] = useState(true)
+    const [mounted, setMounted] = useState(false)
+
+    useEffect(() => { setMounted(true) }, [])
+
+    useEffect(() => {
+        async function fetchData() {
+            try {
+                setLoading(true)
+                const data = await capexProjectService.getAll()
+                setProjects(data)
+            } catch (err) {
+                console.error('Failed to fetch capex projects:', err)
+            } finally {
+                setLoading(false)
+            }
+        }
+        fetchData()
+    }, [])
 
     // --- Stats ---
     const stats = useMemo(() => {
-        const totalBudget = mockProjects.reduce((sum, p) => sum + p.estBudget, 0)
-        const totalSpent = mockProjects.reduce((sum, p) => sum + p.actualSpent, 0)
+        const totalBudget = projects.reduce((sum, p) => sum + p.est_budget, 0)
+        const totalSpent = projects.reduce((sum, p) => sum + p.actual_spent, 0)
         const utilization = totalBudget > 0 ? (totalSpent / totalBudget) * 100 : 0
-        const activeProjects = mockProjects.filter(p => p.status === 'active').length
+        const activeProjects = projects.filter(p => p.status === 'active').length
         return { totalBudget, totalSpent, utilization, activeProjects }
-    }, [])
+    }, [projects])
 
     // --- Filter ---
     const filteredData = useMemo(() => {
-        let data = mockProjects
+        let data = projects
         if (searchTerm) {
             const lower = searchTerm.toLowerCase()
             data = data.filter(item =>
-                item.projectName.toLowerCase().includes(lower) ||
+                item.project_name.toLowerCase().includes(lower) ||
                 item.description.toLowerCase().includes(lower)
             )
         }
@@ -130,17 +83,17 @@ export default function CapexPage() {
             data = data.filter(item => item.status === statusFilter)
         }
         return data
-    }, [searchTerm, statusFilter])
+    }, [searchTerm, statusFilter, projects])
 
     // --- Columns ---
     const columns: TanStackColumn<CapexProject>[] = [
         {
-            id: 'projectName',
+            id: 'project_name',
             header: 'Project Name',
-            accessorKey: 'projectName',
+            accessorKey: 'project_name',
             cell: ({ row }) => (
                 <div className="flex flex-col">
-                    <span className="font-medium text-sm">{row.original.projectName}</span>
+                    <span className="font-medium text-sm">{row.original.project_name}</span>
                     <span className="text-xs text-muted-foreground line-clamp-1">{row.original.description}</span>
                 </div>
             )
@@ -155,15 +108,15 @@ export default function CapexPage() {
             id: 'progress',
             header: 'Budget Progress',
             cell: ({ row }) => {
-                const pct = (row.original.actualSpent / row.original.estBudget) * 100
+                const pct = row.original.est_budget > 0 ? (row.original.actual_spent / row.original.est_budget) * 100 : 0
                 return (
                     <div className="w-[140px] space-y-1">
                         <div className="flex justify-between text-xs">
-                            <span className="text-muted-foreground">Spent: Rp {(row.original.actualSpent / 1000000).toFixed(0)}M</span>
+                            <span className="text-muted-foreground">Spent: Rp {(row.original.actual_spent / 1000000).toFixed(0)}M</span>
                             <span className="font-medium">{pct.toFixed(0)}%</span>
                         </div>
                         <Progress value={pct} className="h-1.5" />
-                        <div className="text-xs text-muted-foreground">Total: Rp {(row.original.estBudget / 1000000).toFixed(0)}M</div>
+                        <div className="text-xs text-muted-foreground">Total: Rp {(row.original.est_budget / 1000000).toFixed(0)}M</div>
                     </div>
                 )
             }
@@ -171,22 +124,22 @@ export default function CapexPage() {
         {
             id: 'roi',
             header: 'Req. ROI',
-            accessorKey: 'expectedRoi',
-            cell: ({ row }) => <span className="text-sm font-medium">{row.original.expectedRoi}%</span>
+            accessorKey: 'expected_roi',
+            cell: ({ row }) => <span className="text-sm font-medium">{row.original.expected_roi}%</span>
         },
         {
             id: 'status',
             header: 'Status',
             accessorKey: 'status',
             cell: ({ row }) => {
-                const config = {
+                const config: Record<string, { label: string; color: string }> = {
                     planning: { label: 'Planning', color: 'bg-gray-100 text-gray-800' },
                     approved: { label: 'Approved', color: 'bg-blue-100 text-blue-800' },
                     active: { label: 'Active', color: 'bg-purple-100 text-purple-800' },
                     completed: { label: 'Completed', color: 'bg-green-100 text-green-800' },
                     on_hold: { label: 'On Hold', color: 'bg-yellow-100 text-yellow-800' }
                 }
-                const s = config[row.original.status]
+                const s = config[row.original.status] || { label: row.original.status, color: 'bg-gray-100 text-gray-800' }
                 return <Badge className={`${s.color} border-0 capitalize`}>{s.label}</Badge>
             }
         },
@@ -195,12 +148,12 @@ export default function CapexPage() {
             header: 'Priority',
             accessorKey: 'priority',
             cell: ({ row }) => {
-                const colors = {
+                const colors: Record<string, string> = {
                     high: 'text-red-600',
                     medium: 'text-orange-600',
                     low: 'text-blue-600'
                 }
-                return <span className={`text-xs font-medium uppercase ${colors[row.original.priority]}`}>{row.original.priority}</span>
+                return <span className={`text-xs font-medium uppercase ${colors[row.original.priority] || 'text-gray-600'}`}>{row.original.priority}</span>
             }
         },
         {
@@ -238,10 +191,13 @@ export default function CapexPage() {
                     { label: 'CapEx & Investment' }
                 ]}
                 actions={
-                    <Button onClick={() => setIsAddModalOpen(true)}>
-                        <HugeiconsIcon icon={PlusSignIcon} className="w-4 h-4 mr-2" />
-                        New Project
-                    </Button>
+                    <div className="flex items-center gap-2">
+                        <BookmarkToggle itemId="capex-investment" />
+                        <Button onClick={() => setIsAddModalOpen(true)}>
+                            <HugeiconsIcon icon={PlusSignIcon} className="w-4 h-4 mr-2" />
+                            New Project
+                        </Button>
+                    </div>
                 }
             />
 
@@ -314,12 +270,16 @@ export default function CapexPage() {
                 </div>
 
                 {/* Table */}
-                <TanStackDataTable
-                    data={filteredData}
-                    columns={columns}
-                    enableRowSelection
-                    showColumnToggle={false}
-                />
+                {loading ? (
+                    <div className="text-center py-10 text-muted-foreground">Loading...</div>
+                ) : (
+                    <TanStackDataTable
+                        data={filteredData}
+                        columns={columns}
+                        enableRowSelection
+                        showColumnToggle={false}
+                    />
+                )}
             </div>
 
             {/* Add Modal Placeholder */}

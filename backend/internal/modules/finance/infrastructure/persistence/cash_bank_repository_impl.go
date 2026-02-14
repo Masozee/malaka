@@ -43,6 +43,25 @@ func (r *CashBankRepositoryImpl) GetByID(ctx context.Context, id uuid.ID) (*enti
 	return cb, err
 }
 
+// GetAll retrieves all cash/bank accounts from the database.
+func (r *CashBankRepositoryImpl) GetAll(ctx context.Context) ([]*entities.CashBank, error) {
+	var cashBanks []*entities.CashBank
+	query := `SELECT id, name, account_no, balance, currency, created_at, updated_at FROM cash_banks ORDER BY name ASC`
+	rows, err := r.db.QueryContext(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		cb := &entities.CashBank{}
+		if err := rows.Scan(&cb.ID, &cb.Name, &cb.AccountNo, &cb.Balance, &cb.Currency, &cb.CreatedAt, &cb.UpdatedAt); err != nil {
+			return nil, err
+		}
+		cashBanks = append(cashBanks, cb)
+	}
+	return cashBanks, rows.Err()
+}
+
 // Update updates an existing cash/bank account in the database.
 func (r *CashBankRepositoryImpl) Update(ctx context.Context, cb *entities.CashBank) error {
 	query := `UPDATE cash_banks SET name = $1, account_no = $2, balance = $3, currency = $4, updated_at = $5 WHERE id = $6`

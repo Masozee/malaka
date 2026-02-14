@@ -29,6 +29,7 @@ func (h *ActionItemsHandler) GetActionItems(c *gin.Context) {
 		"procurement": {},
 		"inventory":   {},
 		"hr":          {},
+		"accounting":  {},
 		"messages":    {},
 	}
 
@@ -100,6 +101,16 @@ func (h *ActionItemsHandler) GetActionItems(c *gin.Context) {
 		`SELECT COUNT(*) FROM leave_requests WHERE status = 'pending'`,
 	).Scan(&leavePending); err == nil && leavePending > 0 {
 		result["hr"]["leave"] = leavePending
+	}
+
+	// === ACCOUNTING ===
+
+	// Journal Entries: draft (not yet posted)
+	var jeDraft int
+	if err := h.db.QueryRowContext(ctx,
+		`SELECT COUNT(*) FROM journal_entries WHERE status = 'DRAFT'`,
+	).Scan(&jeDraft); err == nil && jeDraft > 0 {
+		result["accounting"]["journal-entries"] = jeDraft
 	}
 
 	// === MESSAGES ===

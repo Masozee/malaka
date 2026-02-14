@@ -37,8 +37,8 @@ func (s *DepstoreService) GetAllDepstores(ctx context.Context) ([]*entities.Deps
 }
 
 // GetAllDepstoresWithPagination retrieves department stores with pagination and filtering.
-func (s *DepstoreService) GetAllDepstoresWithPagination(ctx context.Context, limit, offset int, search, status string) ([]*entities.Depstore, int, error) {
-	return s.repo.GetAllWithPagination(ctx, limit, offset, search, status)
+func (s *DepstoreService) GetAllDepstoresWithPagination(ctx context.Context, limit, offset int, search, status, companyID string) ([]*entities.Depstore, int, error) {
+	return s.repo.GetAllWithPagination(ctx, limit, offset, search, status, companyID)
 }
 
 // GetDepstoreByCode retrieves a department store by its code.

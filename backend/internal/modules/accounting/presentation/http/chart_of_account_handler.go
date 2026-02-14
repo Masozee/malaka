@@ -37,14 +37,20 @@ func (h *ChartOfAccountHandler) CreateChartOfAccount(c *gin.Context) {
 		return
 	}
 
+	companyID := req.CompanyID
+	if companyID == "" {
+		companyID = c.DefaultQuery("company_id", "default")
+	}
+
 	coa := &entities.ChartOfAccount{
-		ParentID:    req.ParentID,
-		AccountCode: req.AccountCode,
-		AccountName: req.AccountName,
-		AccountType: req.AccountType,
+		CompanyID:     companyID,
+		ParentID:      req.ParentID,
+		AccountCode:   req.AccountCode,
+		AccountName:   req.AccountName,
+		AccountType:   req.AccountType,
 		NormalBalance: req.NormalBalance,
-		Description: req.Description,
-		IsActive:    req.IsActive,
+		Description:   req.Description,
+		IsActive:      req.IsActive,
 	}
 
 	if err := h.service.CreateChartOfAccount(c.Request.Context(), coa); err != nil {
@@ -53,16 +59,17 @@ func (h *ChartOfAccountHandler) CreateChartOfAccount(c *gin.Context) {
 	}
 
 	res := dtos.ChartOfAccountResponse{
-		ID:           coa.ID,
-		ParentID:     coa.ParentID,
-		AccountCode:  coa.AccountCode,
-		AccountName:  coa.AccountName,
-		AccountType:  coa.AccountType,
+		ID:            coa.ID,
+		CompanyID:     coa.CompanyID,
+		ParentID:      coa.ParentID,
+		AccountCode:   coa.AccountCode,
+		AccountName:   coa.AccountName,
+		AccountType:   coa.AccountType,
 		NormalBalance: coa.NormalBalance,
-		Description:  coa.Description,
-		IsActive:     coa.IsActive,
-		CreatedAt:    coa.CreatedAt,
-		UpdatedAt:    coa.UpdatedAt,
+		Description:   coa.Description,
+		IsActive:      coa.IsActive,
+		CreatedAt:     coa.CreatedAt,
+		UpdatedAt:     coa.UpdatedAt,
 	}
 
 	response.Created(c, "Chart of account created successfully", res)
@@ -99,16 +106,17 @@ func (h *ChartOfAccountHandler) GetChartOfAccountByID(c *gin.Context) {
 	}
 
 	res := dtos.ChartOfAccountResponse{
-		ID:           coa.ID,
-		ParentID:     coa.ParentID,
-		AccountCode:  coa.AccountCode,
-		AccountName:  coa.AccountName,
-		AccountType:  coa.AccountType,
+		ID:            coa.ID,
+		CompanyID:     coa.CompanyID,
+		ParentID:      coa.ParentID,
+		AccountCode:   coa.AccountCode,
+		AccountName:   coa.AccountName,
+		AccountType:   coa.AccountType,
 		NormalBalance: coa.NormalBalance,
-		Description:  coa.Description,
-		IsActive:     coa.IsActive,
-		CreatedAt:    coa.CreatedAt,
-		UpdatedAt:    coa.UpdatedAt,
+		Description:   coa.Description,
+		IsActive:      coa.IsActive,
+		CreatedAt:     coa.CreatedAt,
+		UpdatedAt:     coa.UpdatedAt,
 	}
 
 	response.OK(c, "Chart of account retrieved successfully", res)
@@ -123,7 +131,9 @@ func (h *ChartOfAccountHandler) GetChartOfAccountByID(c *gin.Context) {
 // @Failure 500 {object} response.ErrorResponse
 // @Router /accounting/chart-of-accounts [get]
 func (h *ChartOfAccountHandler) GetAllChartOfAccounts(c *gin.Context) {
-	coas, err := h.service.GetAllChartOfAccounts(c.Request.Context())
+	companyID := c.DefaultQuery("company_id", "default")
+
+	coas, err := h.service.GetAllChartOfAccounts(c.Request.Context(), companyID)
 	if err != nil {
 		response.InternalServerError(c, err.Error(), nil)
 		return
@@ -132,16 +142,17 @@ func (h *ChartOfAccountHandler) GetAllChartOfAccounts(c *gin.Context) {
 	var res []dtos.ChartOfAccountResponse
 	for _, coa := range coas {
 		res = append(res, dtos.ChartOfAccountResponse{
-			ID:           coa.ID,
-			ParentID:     coa.ParentID,
-			AccountCode:  coa.AccountCode,
-			AccountName:  coa.AccountName,
-			AccountType:  coa.AccountType,
+			ID:            coa.ID,
+			CompanyID:     coa.CompanyID,
+			ParentID:      coa.ParentID,
+			AccountCode:   coa.AccountCode,
+			AccountName:   coa.AccountName,
+			AccountType:   coa.AccountType,
 			NormalBalance: coa.NormalBalance,
-			Description:  coa.Description,
-			IsActive:     coa.IsActive,
-			CreatedAt:    coa.CreatedAt,
-			UpdatedAt:    coa.UpdatedAt,
+			Description:   coa.Description,
+			IsActive:      coa.IsActive,
+			CreatedAt:     coa.CreatedAt,
+			UpdatedAt:     coa.UpdatedAt,
 		})
 	}
 
@@ -175,15 +186,21 @@ func (h *ChartOfAccountHandler) UpdateChartOfAccount(c *gin.Context) {
 		return
 	}
 
+	companyID := req.CompanyID
+	if companyID == "" {
+		companyID = c.DefaultQuery("company_id", "default")
+	}
+
 	coa := &entities.ChartOfAccount{
-		ID:          id,
-		ParentID:    req.ParentID,
-		AccountCode: req.AccountCode,
-		AccountName: req.AccountName,
-		AccountType: req.AccountType,
+		ID:            id,
+		CompanyID:     companyID,
+		ParentID:      req.ParentID,
+		AccountCode:   req.AccountCode,
+		AccountName:   req.AccountName,
+		AccountType:   req.AccountType,
 		NormalBalance: req.NormalBalance,
-		Description: req.Description,
-		IsActive:    req.IsActive,
+		Description:   req.Description,
+		IsActive:      req.IsActive,
 	}
 
 	if err := h.service.UpdateChartOfAccount(c.Request.Context(), coa); err != nil {
@@ -192,16 +209,17 @@ func (h *ChartOfAccountHandler) UpdateChartOfAccount(c *gin.Context) {
 	}
 
 	res := dtos.ChartOfAccountResponse{
-		ID:           coa.ID,
-		ParentID:     coa.ParentID,
-		AccountCode:  coa.AccountCode,
-		AccountName:  coa.AccountName,
-		AccountType:  coa.AccountType,
+		ID:            coa.ID,
+		CompanyID:     coa.CompanyID,
+		ParentID:      coa.ParentID,
+		AccountCode:   coa.AccountCode,
+		AccountName:   coa.AccountName,
+		AccountType:   coa.AccountType,
 		NormalBalance: coa.NormalBalance,
-		Description:  coa.Description,
-		IsActive:     coa.IsActive,
-		CreatedAt:    coa.CreatedAt,
-		UpdatedAt:    coa.UpdatedAt,
+		Description:   coa.Description,
+		IsActive:      coa.IsActive,
+		CreatedAt:     coa.CreatedAt,
+		UpdatedAt:     coa.UpdatedAt,
 	}
 
 	response.OK(c, "Chart of account updated successfully", res)

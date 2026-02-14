@@ -1,13 +1,13 @@
 'use client'
 
-import React, { useState, useMemo } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { TwoLevelLayout } from '@/components/ui/two-level-layout'
 import { Header } from '@/components/ui/header'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+// Select removed - no longer used for type filter
 import { TanStackDataTable, TanStackColumn } from '@/components/ui/tanstack-data-table'
 import { HugeiconsIcon } from '@hugeicons/react'
 import {
@@ -25,109 +25,96 @@ import {
     Download01Icon,
     MoreHorizontalIcon
 } from '@hugeicons/core-free-icons'
-
-// --- Types ---
-type WithholdingType = 'PPh 21' | 'PPh 23' | 'PPh 4(2)' | 'PPh 26'
-
-interface WithholdingTax {
-    id: string
-    date: string
-    entityName: string // Employee or Vendor
-    type: WithholdingType
-    taxBase: number
-    taxAmount: number
-    proofNumber: string
-    status: 'draft' | 'finalized'
-}
-
-// --- Mock Data ---
-const mockWithholdings: WithholdingTax[] = [
-    { id: '1', date: '2024-02-01', entityName: 'Budi Santoso (Emp)', type: 'PPh 21', taxBase: 12000000, taxAmount: 350000, proofNumber: '1721-A1-001', status: 'finalized' },
-    { id: '2', date: '2024-02-05', entityName: 'PT. Jasa Konsultan', type: 'PPh 23', taxBase: 10000000, taxAmount: 200000, proofNumber: 'BUPOT-23-001', status: 'finalized' },
-    { id: '3', date: '2024-02-05', entityName: 'John Doe (Foreign Cons)', type: 'PPh 26', taxBase: 25000000, taxAmount: 5000000, proofNumber: 'BUPOT-26-001', status: 'draft' },
-    { id: '4', date: '2024-02-10', entityName: 'Office Rental Owner', type: 'PPh 4(2)', taxBase: 50000000, taxAmount: 5000000, proofNumber: 'BUPOT-42-001', status: 'finalized' },
-]
+import { taxTransactionService, type TaxTransaction } from '@/services/tax'
 
 export default function WithholdingTaxPage() {
     const [searchTerm, setSearchTerm] = useState('')
-    const [typeFilter, setTypeFilter] = useState<string>('all')
+    const [transactions, setTransactions] = useState<TaxTransaction[]>([])
+    const [loading, setLoading] = useState(true)
+    const [mounted, setMounted] = useState(false)
+
+    useEffect(() => {
+        setMounted(true)
+    }, [])
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                setLoading(true)
+                const data = await taxTransactionService.getAll('withholding')
+                setTransactions(data)
+            } catch (error) {
+                console.error('Failed to fetch withholding tax transactions:', error)
+            } finally {
+                setLoading(false)
+            }
+        }
+        fetchData()
+    }, [])
 
     // --- Stats ---
     const stats = useMemo(() => {
-        const totalTax = mockWithholdings.reduce((sum, item) => sum + item.taxAmount, 0)
-        const pph21 = mockWithholdings.filter(i => i.type === 'PPh 21').reduce((sum, i) => sum + i.taxAmount, 0)
-        const pph23 = mockWithholdings.filter(i => i.type === 'PPh 23').reduce((sum, i) => sum + i.taxAmount, 0)
-        return { totalTax, pph21, pph23 }
-    }, [])
+        const totalTax = transactions.reduce((sum, item) => sum + item.tax_amount, 0)
+        const totalBase = transactions.reduce((sum, item) => sum + item.base_amount, 0)
+        const transactionCount = transactions.length
+        return { totalTax, totalBase, transactionCount }
+    }, [transactions])
 
     // --- Filter ---
     const filteredData = useMemo(() => {
-        let data = mockWithholdings
+        let data = transactions
         if (searchTerm) {
             const lower = searchTerm.toLowerCase()
             data = data.filter(item =>
-                item.entityName.toLowerCase().includes(lower) ||
-                item.proofNumber.toLowerCase().includes(lower)
+                item.reference_number.toLowerCase().includes(lower) ||
+                item.reference_type.toLowerCase().includes(lower)
             )
         }
-        if (typeFilter !== 'all') {
-            data = data.filter(item => item.type === typeFilter)
-        }
         return data
-    }, [searchTerm, typeFilter])
+    }, [transactions, searchTerm])
 
     // --- Columns ---
-    const columns: TanStackColumn<WithholdingTax>[] = [
+    const columns: TanStackColumn<TaxTransaction>[] = [
         {
-            id: 'date',
+            id: 'transaction_date',
             header: 'Date',
-            accessorKey: 'date',
-            cell: ({ row }) => <span className="text-sm">{new Date(row.original.date).toLocaleDateString()}</span>
+            accessorKey: 'transaction_date',
+            cell: ({ row }) => <span className="text-sm">{mounted && row.original.transaction_date ? new Date(row.original.transaction_date).toLocaleDateString() : '-'}</span>
         },
         {
-            id: 'proofNumber',
+            id: 'reference_number',
             header: 'Proof No.',
-            accessorKey: 'proofNumber',
-            cell: ({ row }) => <span className="font-medium text-sm">{row.original.proofNumber}</span>
+            accessorKey: 'reference_number',
+            cell: ({ row }) => <span className="font-medium text-sm">{row.original.reference_number}</span>
         },
         {
-            id: 'entityName',
+            id: 'reference_type',
             header: 'Entity / Subject',
-            accessorKey: 'entityName',
+            accessorKey: 'reference_type',
             cell: ({ row }) => (
                 <div className="flex flex-col">
-                    <span className="text-sm">{row.original.entityName}</span>
-                    <Badge variant="outline" className="w-fit text-[10px] mt-0.5">{row.original.type}</Badge>
+                    <span className="text-sm">{row.original.reference_type}</span>
+                    <Badge variant="outline" className="w-fit text-[10px] mt-0.5">{row.original.transaction_type}</Badge>
                 </div>
             )
         },
         {
-            id: 'taxBase',
+            id: 'base_amount',
             header: 'Tax Base',
-            accessorKey: 'taxBase',
-            cell: ({ row }) => <span className="text-sm">Rp {row.original.taxBase.toLocaleString()}</span>
+            accessorKey: 'base_amount',
+            cell: ({ row }) => <span className="text-sm">Rp {row.original.base_amount.toLocaleString()}</span>
         },
         {
-            id: 'taxAmount',
+            id: 'tax_amount',
             header: 'Tax Amount',
-            accessorKey: 'taxAmount',
-            cell: ({ row }) => <span className="text-sm font-medium">Rp {row.original.taxAmount.toLocaleString()}</span>
+            accessorKey: 'tax_amount',
+            cell: ({ row }) => <span className="text-sm font-medium">Rp {row.original.tax_amount.toLocaleString()}</span>
         },
         {
-            id: 'status',
-            header: 'Status',
-            accessorKey: 'status',
-            cell: ({ row }) => {
-                const colors = {
-                    draft: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-400',
-                    finalized: 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400',
-                }
-                return (
-                    <Badge className={`${colors[row.original.status]} border-0 whitespace-nowrap capitalize`}>
-                        {row.original.status}
-                    </Badge>
-                )
-            }
+            id: 'total_amount',
+            header: 'Total',
+            accessorKey: 'total_amount',
+            cell: ({ row }) => <span className="text-sm">Rp {row.original.total_amount.toLocaleString()}</span>
         },
         {
             id: 'actions',
@@ -184,8 +171,8 @@ export default function WithholdingTaxPage() {
                     <Card>
                         <CardContent className="p-4 flex items-center justify-between">
                             <div>
-                                <p className="text-sm font-medium text-muted-foreground">PPh 21 (Employee)</p>
-                                <p className="text-2xl font-bold">Rp {(stats.pph21 / 1000000).toFixed(1)}M</p>
+                                <p className="text-sm font-medium text-muted-foreground">Total Tax Base</p>
+                                <p className="text-2xl font-bold">Rp {(stats.totalBase / 1000000).toFixed(1)}M</p>
                             </div>
                             <div className="h-10 w-10 bg-indigo-100 dark:bg-indigo-900/20 rounded-lg flex items-center justify-center">
                                 <HugeiconsIcon icon={Invoice01Icon} className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
@@ -195,8 +182,8 @@ export default function WithholdingTaxPage() {
                     <Card>
                         <CardContent className="p-4 flex items-center justify-between">
                             <div>
-                                <p className="text-sm font-medium text-muted-foreground">PPh 23 (Services)</p>
-                                <p className="text-2xl font-bold">Rp {(stats.pph23 / 1000000).toFixed(1)}M</p>
+                                <p className="text-sm font-medium text-muted-foreground">Transactions</p>
+                                <p className="text-2xl font-bold">{stats.transactionCount}</p>
                             </div>
                             <div className="h-10 w-10 bg-purple-100 dark:bg-purple-900/20 rounded-lg flex items-center justify-center">
                                 <HugeiconsIcon icon={Invoice01Icon} className="h-5 w-5 text-purple-600 dark:text-purple-400" />
@@ -217,18 +204,6 @@ export default function WithholdingTaxPage() {
                         />
                     </div>
                     <div className="flex items-center gap-2">
-                        <Select value={typeFilter} onValueChange={setTypeFilter}>
-                            <SelectTrigger className="w-[150px] h-9">
-                                <SelectValue placeholder="Tax Type" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="all">All Types</SelectItem>
-                                <SelectItem value="PPh 21">PPh 21</SelectItem>
-                                <SelectItem value="PPh 23">PPh 23</SelectItem>
-                                <SelectItem value="PPh 4(2)">PPh 4(2)</SelectItem>
-                                <SelectItem value="PPh 26">PPh 26</SelectItem>
-                            </SelectContent>
-                        </Select>
                         <Button variant="outline" className="h-9">
                             <HugeiconsIcon icon={Download01Icon} className="h-4 w-4 mr-2" />
                             Export
@@ -237,12 +212,18 @@ export default function WithholdingTaxPage() {
                 </div>
 
                 {/* Table */}
-                <TanStackDataTable
-                    data={filteredData}
-                    columns={columns}
-                    enableRowSelection
-                    showColumnToggle={false}
-                />
+                {loading ? (
+                    <div className="flex items-center justify-center py-12">
+                        <p className="text-muted-foreground">Loading withholding tax data...</p>
+                    </div>
+                ) : (
+                    <TanStackDataTable
+                        data={filteredData}
+                        columns={columns}
+                        enableRowSelection
+                        showColumnToggle={false}
+                    />
+                )}
             </div>
         </TwoLevelLayout>
     )

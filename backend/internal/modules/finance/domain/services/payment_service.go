@@ -32,6 +32,11 @@ func (s *PaymentService) GetPaymentByID(ctx context.Context, id uuid.ID) (*entit
 	return s.repo.GetByID(ctx, id)
 }
 
+// GetAllPayments retrieves all payments.
+func (s *PaymentService) GetAllPayments(ctx context.Context) ([]*entities.Payment, error) {
+	return s.repo.GetAll(ctx)
+}
+
 // UpdatePayment updates an existing payment.
 func (s *PaymentService) UpdatePayment(ctx context.Context, payment *entities.Payment) error {
 	// Ensure the payment exists before updating

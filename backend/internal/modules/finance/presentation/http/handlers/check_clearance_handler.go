@@ -95,29 +95,15 @@ func (h *CheckClearanceHandler) UpdateCheckClearance(c *gin.Context) {
 		return
 	}
 
-	parsedPayeeID, err := uuid.Parse(req.PayeeID)
-	if err != nil {
-		response.BadRequest(c, "Invalid PayeeID", err.Error())
-		return
-	}
-
-	parsedCashBankID, err := uuid.Parse(req.CashBankID)
-	if err != nil {
-		response.BadRequest(c, "Invalid CashBankID", err.Error())
-		return
-	}
-
 	check.CheckNumber = req.CheckNumber
 	check.CheckDate = req.CheckDate
 	check.BankName = req.BankName
+	check.AccountNumber = req.AccountNumber
 	check.Amount = req.Amount
-	check.PayeeID = parsedPayeeID
 	check.PayeeName = req.PayeeName
-	check.CashBankID = parsedCashBankID
 	check.ClearanceDate = req.ClearanceDate
 	check.Status = req.Status
-	check.Description = req.Description
-	check.IsIncoming = req.IsIncoming
+	check.Memo = req.Memo
 	check.UpdatedAt = time.Now()
 
 	if err := h.service.UpdateCheckClearance(c.Request.Context(), check); err != nil {
@@ -160,36 +146,6 @@ func (h *CheckClearanceHandler) GetCheckClearancesByStatus(c *gin.Context) {
 	}
 
 	response.OK(c, "Check clearances retrieved successfully", responses)
-}
-
-func (h *CheckClearanceHandler) GetIncomingChecks(c *gin.Context) {
-	checks, err := h.service.GetIncomingChecks(c.Request.Context())
-	if err != nil {
-		response.InternalServerError(c, "Failed to retrieve incoming checks", err.Error())
-		return
-	}
-
-	var responses []*dto.CheckClearanceResponse
-	for _, check := range checks {
-		responses = append(responses, dto.ToCheckClearanceResponse(check))
-	}
-
-	response.OK(c, "Incoming checks retrieved successfully", responses)
-}
-
-func (h *CheckClearanceHandler) GetOutgoingChecks(c *gin.Context) {
-	checks, err := h.service.GetOutgoingChecks(c.Request.Context())
-	if err != nil {
-		response.InternalServerError(c, "Failed to retrieve outgoing checks", err.Error())
-		return
-	}
-
-	var responses []*dto.CheckClearanceResponse
-	for _, check := range checks {
-		responses = append(responses, dto.ToCheckClearanceResponse(check))
-	}
-
-	response.OK(c, "Outgoing checks retrieved successfully", responses)
 }
 
 func (h *CheckClearanceHandler) ClearCheck(c *gin.Context) {

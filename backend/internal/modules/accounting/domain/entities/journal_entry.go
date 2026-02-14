@@ -39,7 +39,11 @@ type JournalEntry struct {
 	CreatedBy       string             `json:"created_by" db:"created_by"`
 	CreatedAt       time.Time          `json:"created_at" db:"created_at"`
 	UpdatedAt       time.Time          `json:"updated_at" db:"updated_at"`
-	
+
+	// Denormalized fields (populated via JOIN, not stored in journal_entries table)
+	CreatedByName string `json:"created_by_name" db:"created_by_name"`
+	PostedByName  string `json:"posted_by_name" db:"posted_by_name"`
+
 	// Associated journal entry lines (not stored in DB, loaded separately)
 	Lines []*JournalEntryLine `json:"lines,omitempty" db:"-"`
 }
@@ -57,6 +61,10 @@ type JournalEntryLine struct {
 	BaseCreditAmount float64   `json:"base_credit_amount" db:"base_credit_amount"`
 	CreatedAt        time.Time `json:"created_at" db:"created_at"`
 	UpdatedAt        time.Time `json:"updated_at" db:"updated_at"`
+
+	// Denormalized fields (populated via JOIN, not stored in journal_entry_lines table)
+	AccountCode string `json:"account_code" db:"account_code"`
+	AccountName string `json:"account_name" db:"account_name"`
 }
 
 // IsBalanced returns true if total debits equal total credits
@@ -81,7 +89,14 @@ func (je *JournalEntry) CalculateTotals() {
 
 // CanBePosted returns true if the journal entry can be posted
 func (je *JournalEntry) CanBePosted() bool {
-	return je.Status == JournalEntryStatusDraft && je.IsBalanced() && len(je.Lines) > 0
+	if je.Status != JournalEntryStatusDraft {
+		return false
+	}
+	// Allow posting if lines exist and are balanced, or if totals are already balanced (auto-generated entries)
+	if len(je.Lines) > 0 {
+		return je.IsBalanced()
+	}
+	return je.TotalDebit > 0 && je.TotalDebit == je.TotalCredit
 }
 
 // CanBeReversed returns true if the journal entry can be reversed

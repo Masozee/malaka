@@ -1,229 +1,96 @@
-import PromotionsList, { SalesPromotion } from './PromotionsList'
+'use client'
 
-// Mock Data
-const mockPromotions: SalesPromotion[] = [
-  {
-    id: '1',
-    promotion_code: 'SUMMER2024',
-    promotion_name: 'Summer Sale Collection',
-    promotion_type: 'percentage',
-    discount_value: 25,
-    minimum_purchase: 500000,
-    maximum_discount: 200000,
-    target_audience: 'all_customers',
-    target_products: 'specific_categories',
-    start_date: '2024-06-01T00:00:00Z',
-    end_date: '2024-08-31T23:59:59Z',
-    status: 'active',
-    usage_limit: 1000,
-    usage_count: 678,
-    total_sales: 845600000,
-    total_discount_given: 127400000,
-    conversion_rate: 18.5,
-    created_by: 'Marketing Manager',
-    updated_by: 'Ahmad Marketing',
-    created_at: '2024-05-20T10:00:00Z',
-    updated_at: '2024-07-25T14:30:00Z'
-  },
-  {
-    id: '2',
-    promotion_code: 'NEWBIE50',
-    promotion_name: 'New Customer Welcome',
-    promotion_type: 'fixed_amount',
-    discount_value: 50000,
-    minimum_purchase: 200000,
-    target_audience: 'new_customers',
-    target_products: 'all_products',
-    start_date: '2024-01-01T00:00:00Z',
-    end_date: '2024-12-31T23:59:59Z',
-    status: 'active',
-    usage_count: 1234,
-    total_sales: 456700000,
-    total_discount_given: 61700000,
-    conversion_rate: 24.8,
-    created_by: 'Sales Manager',
-    updated_by: 'Sari Sales',
-    created_at: '2023-12-15T09:30:00Z',
-    updated_at: '2024-07-24T16:20:00Z'
-  },
-  {
-    id: '3',
-    promotion_code: 'BOGO-SPECIAL',
-    promotion_name: 'Buy One Get One Free',
-    promotion_type: 'buy_one_get_one',
-    discount_value: 50,
-    target_audience: 'all_customers',
-    target_products: 'specific_items',
-    start_date: '2024-07-15T00:00:00Z',
-    end_date: '2024-07-31T23:59:59Z',
-    status: 'active',
-    usage_limit: 500,
-    usage_count: 289,
-    total_sales: 234500000,
-    total_discount_given: 98600000,
-    conversion_rate: 31.2,
-    created_by: 'Product Manager',
-    updated_by: 'Budi Product',
-    created_at: '2024-07-10T11:45:00Z',
-    updated_at: '2024-07-25T12:15:00Z'
-  },
-  {
-    id: '4',
-    promotion_code: 'VIP2024',
-    promotion_name: 'VIP Member Exclusive',
-    promotion_type: 'percentage',
-    discount_value: 35,
-    minimum_purchase: 1000000,
-    maximum_discount: 500000,
-    target_audience: 'vip_customers',
-    target_products: 'all_products',
-    start_date: '2024-03-01T00:00:00Z',
-    end_date: '2024-12-31T23:59:59Z',
-    status: 'active',
-    usage_count: 145,
-    total_sales: 567800000,
-    total_discount_given: 145600000,
-    conversion_rate: 42.7,
-    created_by: 'CRM Manager',
-    updated_by: 'Rina CRM',
-    created_at: '2024-02-20T14:00:00Z',
-    updated_at: '2024-07-23T10:45:00Z'
-  },
-  {
-    id: '5',
-    promotion_code: 'FREESHIP100',
-    promotion_name: 'Free Shipping Campaign',
-    promotion_type: 'free_shipping',
-    discount_value: 0,
-    minimum_purchase: 300000,
-    target_audience: 'all_customers',
-    target_products: 'all_products',
-    start_date: '2024-05-01T00:00:00Z',
-    end_date: '2024-09-30T23:59:59Z',
-    status: 'active',
-    usage_count: 2156,
-    total_sales: 1234500000,
-    total_discount_given: 43120000,
-    conversion_rate: 15.3,
-    created_by: 'E-commerce Manager',
-    updated_by: 'Dedi Ecommerce',
-    created_at: '2024-04-25T08:30:00Z',
-    updated_at: '2024-07-25T11:00:00Z'
-  },
-  {
-    id: '6',
-    promotion_code: 'BUNDLE2024',
-    promotion_name: 'Product Bundle Deal',
-    promotion_type: 'bundle',
-    discount_value: 20,
-    minimum_purchase: 800000,
-    target_audience: 'all_customers',
-    target_products: 'specific_categories',
-    start_date: '2024-06-15T00:00:00Z',
-    end_date: '2024-08-15T23:59:59Z',
-    status: 'paused',
-    usage_limit: 200,
-    usage_count: 67,
-    total_sales: 89600000,
-    total_discount_given: 15400000,
-    conversion_rate: 12.8,
-    created_by: 'Sales Manager',
-    updated_by: 'Lisa Sales',
-    created_at: '2024-06-10T13:20:00Z',
-    updated_at: '2024-07-20T09:15:00Z'
-  },
-  {
-    id: '7',
-    promotion_code: 'CASHBACK10',
-    promotion_name: 'Cashback Rewards',
-    promotion_type: 'cashback',
-    discount_value: 10,
-    minimum_purchase: 1500000,
-    maximum_discount: 150000,
-    target_audience: 'vip_customers',
-    target_products: 'all_products',
-    start_date: '2024-04-01T00:00:00Z',
-    end_date: '2024-07-31T23:59:59Z',
-    status: 'completed',
-    usage_limit: 300,
-    usage_count: 298,
-    total_sales: 678900000,
-    total_discount_given: 44200000,
-    conversion_rate: 28.9,
-    created_by: 'Finance Manager',
-    updated_by: 'Ahmad Finance',
-    created_at: '2024-03-25T15:45:00Z',
-    updated_at: '2024-07-31T23:59:59Z'
-  },
-  {
-    id: '8',
-    promotion_code: 'FLASH24H',
-    promotion_name: '24 Hour Flash Sale',
-    promotion_type: 'percentage',
-    discount_value: 40,
-    minimum_purchase: 250000,
-    maximum_discount: 300000,
-    target_audience: 'all_customers',
-    target_products: 'specific_items',
-    start_date: '2024-07-25T00:00:00Z',
-    end_date: '2024-07-26T23:59:59Z',
-    status: 'active',
-    usage_limit: 100,
-    usage_count: 89,
-    total_sales: 67800000,
-    total_discount_given: 23400000,
-    conversion_rate: 45.6,
-    created_by: 'Marketing Manager',
-    updated_by: 'Sari Marketing',
-    created_at: '2024-07-24T20:00:00Z',
-    updated_at: '2024-07-25T18:30:00Z'
-  },
-  {
-    id: '9',
-    promotion_code: 'BIRTHDAY20',
-    promotion_name: 'Birthday Special Discount',
-    promotion_type: 'percentage',
-    discount_value: 20,
-    minimum_purchase: 300000,
-    maximum_discount: 100000,
-    target_audience: 'specific_group',
-    target_products: 'all_products',
-    start_date: '2024-01-01T00:00:00Z',
-    end_date: '2024-12-31T23:59:59Z',
-    status: 'active',
-    usage_count: 567,
-    total_sales: 234600000,
-    total_discount_given: 45600000,
-    conversion_rate: 22.1,
-    created_by: 'CRM Manager',
-    updated_by: 'Budi CRM',
-    created_at: '2023-12-28T12:00:00Z',
-    updated_at: '2024-07-22T14:20:00Z'
-  },
-  {
-    id: '10',
-    promotion_code: 'STUDENT15',
-    promotion_name: 'Student Discount Program',
-    promotion_type: 'percentage',
-    discount_value: 15,
-    minimum_purchase: 150000,
-    maximum_discount: 75000,
-    target_audience: 'specific_group',
-    target_products: 'specific_categories',
-    start_date: '2024-02-01T00:00:00Z',
-    end_date: '2024-11-30T23:59:59Z',
-    status: 'cancelled',
-    usage_count: 123,
-    total_sales: 45600000,
-    total_discount_given: 6800000,
-    conversion_rate: 8.7,
-    created_by: 'Marketing Manager',
-    updated_by: 'Rina Marketing',
-    created_at: '2024-01-25T16:30:00Z',
-    updated_at: '2024-06-15T10:00:00Z'
-  }
-]
+import React, { useState, useMemo, useEffect } from 'react'
+import { TwoLevelLayout } from '@/components/ui/two-level-layout'
+import { Header } from '@/components/ui/header'
+import { Card } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { TanStackDataTable, TanStackColumn } from '@/components/ui/tanstack-data-table'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from '@/components/ui/dropdown-menu'
+import { HugeiconsIcon } from '@hugeicons/react'
+import { Search01Icon, MoreHorizontalIcon, PlusSignIcon, StarIcon, CheckmarkCircle01Icon, Dollar01Icon, Calendar01Icon } from '@hugeicons/core-free-icons'
+import { promotionService, type Promotion } from '@/services/sales'
+import Link from 'next/link'
 
 export default function PromotionsPage() {
-  return <PromotionsList initialData={mockPromotions} />
+  const [data, setData] = useState<Promotion[]>([])
+  const [loading, setLoading] = useState(true)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => { setMounted(true) }, [])
+  useEffect(() => { promotionService.getAll().then(setData).finally(() => setLoading(false)) }, [])
+
+  const filtered = useMemo(() => {
+    if (!searchTerm) return data
+    const q = searchTerm.toLowerCase()
+    return data.filter(item =>
+      item.name?.toLowerCase().includes(q) ||
+      item.description?.toLowerCase().includes(q) ||
+      item.id.toLowerCase().includes(q)
+    )
+  }, [data, searchTerm])
+
+  const stats = useMemo(() => {
+    const now = new Date()
+    const active = data.filter(i => new Date(i.start_date) <= now && new Date(i.end_date) >= now)
+    const avgDiscount = data.length > 0 ? data.reduce((s, i) => s + (i.discount_rate || 0), 0) / data.length : 0
+    return {
+      total: data.length,
+      active: active.length,
+      avgDiscount: (avgDiscount * 100).toFixed(1),
+      totalMinPurchase: data.reduce((s, i) => s + (i.min_purchase || 0), 0),
+    }
+  }, [data])
+
+  const fmt = (n: number) => `Rp ${n.toLocaleString('id-ID')}`
+  const fmtDate = (d: string) => mounted && d ? new Date(d).toLocaleDateString('id-ID') : '-'
+
+  const columns: TanStackColumn<Promotion>[] = [
+    { id: 'name', header: 'Name', accessorKey: 'name', cell: ({ row }) => <Link href={`/sales/promotions/${row.original.id}`} className="font-medium text-blue-600 hover:underline">{row.original.name}</Link> },
+    { id: 'description', header: 'Description', accessorKey: 'description', cell: ({ row }) => <span className="truncate max-w-[200px] block">{row.original.description || '-'}</span> },
+    { id: 'start_date', header: 'Start Date', accessorKey: 'start_date', cell: ({ row }) => <span>{fmtDate(row.original.start_date)}</span> },
+    { id: 'end_date', header: 'End Date', accessorKey: 'end_date', cell: ({ row }) => <span>{fmtDate(row.original.end_date)}</span> },
+    { id: 'discount_rate', header: 'Discount', accessorKey: 'discount_rate', cell: ({ row }) => <span>{(row.original.discount_rate * 100).toFixed(1)}%</span> },
+    { id: 'min_purchase', header: 'Min Purchase', accessorKey: 'min_purchase', cell: ({ row }) => <span>{fmt(row.original.min_purchase)}</span> },
+    { id: 'actions', header: '', enableSorting: false, cell: ({ row }) => (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild><Button variant="outline" size="sm" className="h-8 w-8 p-0"><HugeiconsIcon icon={MoreHorizontalIcon} className="h-4 w-4" /></Button></DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem asChild><Link href={`/sales/promotions/${row.original.id}`}>View Details</Link></DropdownMenuItem>
+          <DropdownMenuItem onClick={() => navigator.clipboard.writeText(row.original.id)}>Copy ID</DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem className="text-red-600" onClick={() => handleDelete(row.original.id)}>Delete</DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    )},
+  ]
+
+  const handleDelete = async (id: string) => { try { await promotionService.delete(id); setData(prev => prev.filter(i => i.id !== id)) } catch (err) { console.error('Delete failed:', err) } }
+
+  return (
+    <TwoLevelLayout>
+      <Header title="Promotions" breadcrumbs={[{ label: 'Sales', href: '/sales' }, { label: 'Promotions' }]} actions={<Button><HugeiconsIcon icon={PlusSignIcon} className="w-4 h-4 mr-2" />New Promotion</Button>} />
+      <div className="flex-1 overflow-auto p-6 space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <Card className="p-4"><div className="flex items-center space-x-3"><div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center"><HugeiconsIcon icon={StarIcon} className="h-5 w-5 text-foreground" /></div><div><p className="text-sm font-medium text-muted-foreground">Total Promotions</p><p className="text-2xl font-bold">{stats.total}</p></div></div></Card>
+          <Card className="p-4"><div className="flex items-center space-x-3"><div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center"><HugeiconsIcon icon={CheckmarkCircle01Icon} className="h-5 w-5 text-foreground" /></div><div><p className="text-sm font-medium text-muted-foreground">Active Now</p><p className="text-2xl font-bold">{stats.active}</p></div></div></Card>
+          <Card className="p-4"><div className="flex items-center space-x-3"><div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center"><HugeiconsIcon icon={Calendar01Icon} className="h-5 w-5 text-foreground" /></div><div><p className="text-sm font-medium text-muted-foreground">Avg Discount</p><p className="text-2xl font-bold">{stats.avgDiscount}%</p></div></div></Card>
+          <Card className="p-4"><div className="flex items-center space-x-3"><div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center"><HugeiconsIcon icon={Dollar01Icon} className="h-5 w-5 text-foreground" /></div><div><p className="text-sm font-medium text-muted-foreground">Total Min Purchase</p><p className="text-2xl font-bold">{mounted ? fmt(stats.totalMinPurchase) : '-'}</p></div></div></Card>
+        </div>
+        <div className="relative w-80">
+          <HugeiconsIcon icon={Search01Icon} className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input placeholder="Search promotions..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-9 bg-white text-sm" style={{ fontSize: '14px' }} />
+        </div>
+        <TanStackDataTable data={filtered} columns={columns} loading={loading} showColumnToggle={false} />
+      </div>
+    </TwoLevelLayout>
+  )
 }
